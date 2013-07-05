@@ -19,6 +19,11 @@ var topPanel = null;
 var mainPanel = null;
 
 var _COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
+var _COMPETITOR_LIST_CONTAINER_ID_SELECTOR = "#" + _COMPETITOR_LIST_CONTAINER_ID;
+
+var _ALL_OR_NONE_BUTTONS_PANEL_ID = "allOrNoneButtonsPanel";
+var _ALL_OR_NONE_BUTTONS_PANEL_ID_SELECTOR = "#" + _ALL_OR_NONE_BUTTONS_PANEL_ID;
+
 
 /**
 * Construct the UI inside the HTML body.
@@ -30,7 +35,8 @@ function buildUi() {
     var competitorListContainer = mainPanel.append("div")
                                            .attr("id", _COMPETITOR_LIST_CONTAINER_ID);
                                            
-    var buttonsContainer = competitorListContainer.append("div");
+    var buttonsContainer = competitorListContainer.append("div")
+                                                  .attr("id", _ALL_OR_NONE_BUTTONS_PANEL_ID);
                                      
     buttonsContainer.append("button")
                     .text("All")
@@ -103,7 +109,7 @@ function drawChart() {
     selection.register(selectionChangeHandler);
 
     $("body").height(windowHeight - 19);
-    $("#competitorListContainer").height(windowHeight - 19 - $("#allOrNoneButtonsPanel").height());
+    $(_COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(_ALL_OR_NONE_BUTTONS_PANEL_ID_SELECTOR).height());
 }
 
 /**
