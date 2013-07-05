@@ -1,0 +1,40 @@
+
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+#competitorList
+{
+    overflow-y: scroll;
+    height: 100%;
+}
+
+#competitorListContainer
+{
+    float: left;
+    height: 100%;
+}
+
+#chart
+{
+    float: left;
+}
+
+div.competitor
+{
+    font: 12px sans-serif;
+    padding: 2px;
+}
+
+div.competitor.selected 
+{
+    background-color: #286880;
+    color: white;
+}
