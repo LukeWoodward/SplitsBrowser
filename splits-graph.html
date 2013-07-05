@@ -35,7 +35,6 @@
     var currentResizeTimeout = null;
     var currentResult = null;
 
-    // Controls.
     var selection = null;
     var competitorListBox = null;
     var chart = null;
@@ -47,8 +46,8 @@
     * Initialise the chart.
     */
     function initChart() {
-        competitorListBox = new SplitsBrowser.Charts.CompetitorListBox(d3.select("#competitorListContainer").node());
-        chart = new SplitsBrowser.Charts.Chart(d3.select("body").node());
+        competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(d3.select("#competitorListContainer").node());
+        chart = new SplitsBrowser.Controls.Chart(d3.select("body").node());
     }
 
     function selectAll() {
@@ -114,7 +113,7 @@
         if (status == "success") {
             var result = SplitsBrowser.Input.CSV.parseEventData(data);
             currentResult = result[0];
-            selection = new SplitsBrowser.Charts.CompetitorSelection(currentResult.competitorData.length);
+            selection = new SplitsBrowser.Model.CompetitorSelection(currentResult.competitorData.length);
             competitorListBox.setSelection(selection);
             drawChart();
         } else {

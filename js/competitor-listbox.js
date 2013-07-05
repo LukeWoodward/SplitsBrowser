@@ -6,7 +6,7 @@ var _COMPETITOR_LIST_ID_SELECTOR = "#" + _COMPETITOR_LIST_ID;
 /**
 * Object that controls a list of competitors from which the user can select.
 */
-SplitsBrowser.Charts.CompetitorListBox = function (parent) {
+SplitsBrowser.Controls.CompetitorListBox = function (parent) {
     this.parent = parent;
     this.handler = null;
 
@@ -18,7 +18,7 @@ SplitsBrowser.Charts.CompetitorListBox = function (parent) {
 * Returns the width of the listbox, in pixels.
 * @returns {Number} Width of the listbox.
 */
-SplitsBrowser.Charts.CompetitorListBox.prototype.width = function () {
+SplitsBrowser.Controls.CompetitorListBox.prototype.width = function () {
     return $(_COMPETITOR_LIST_ID_SELECTOR).width();
 };
 
@@ -28,7 +28,7 @@ SplitsBrowser.Charts.CompetitorListBox.prototype.width = function () {
 * @param {Array} indexes - Array of indexes corresponding to selected
 *                          competitors.
 */
-SplitsBrowser.Charts.CompetitorListBox.prototype.selectionChanged = function (indexes) {
+SplitsBrowser.Controls.CompetitorListBox.prototype.selectionChanged = function (indexes) {
     var competitors = this.listDiv.selectAll("div.competitor")[0];
     for (var i = 0; i < competitors.length; ++i) {
         if (this.competitorSelection.isSelected(i) && !$(competitors[i]).hasClass("selected")) {
@@ -42,7 +42,7 @@ SplitsBrowser.Charts.CompetitorListBox.prototype.selectionChanged = function (in
 /**
 * Toggle the selectedness of a competitor.
 */
-SplitsBrowser.Charts.CompetitorListBox.prototype.toggleCompetitor = function (index) {
+SplitsBrowser.Controls.CompetitorListBox.prototype.toggleCompetitor = function (index) {
     this.competitorSelection.toggle(index);
 };
 
@@ -50,7 +50,7 @@ SplitsBrowser.Charts.CompetitorListBox.prototype.toggleCompetitor = function (in
 * Sets the list of competitors.
 * @param {Array} competitorData - Array of competitor data.
 */
-SplitsBrowser.Charts.CompetitorListBox.prototype.setCompetitorList = function (competitorData, selection) {
+SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitorData, selection) {
 
     var competitors = this.listDiv.selectAll("div.competitor").data(competitorData);
     var outerThis = this;
@@ -66,9 +66,9 @@ SplitsBrowser.Charts.CompetitorListBox.prototype.setCompetitorList = function (c
 
 /**
 * Sets the competitor selection object.
-* @param {SplitsBrowser.Charts.CompetitorSelection} selection - Competitor selection.
+* @param {SplitsBrowser.Controls.CompetitorSelection} selection - Competitor selection.
 */
-SplitsBrowser.Charts.CompetitorListBox.prototype.setSelection = function (selection) {
+SplitsBrowser.Controls.CompetitorListBox.prototype.setSelection = function (selection) {
     if (this.competitorSelection != null) {
         this.competitorSelection.deregister(this.handler);
     }

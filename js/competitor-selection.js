@@ -2,7 +2,7 @@
 
 /*
 * An object that keeps track of the current selection of competitors, and
-* provides a notification mechanism for changes to the selecti0on.
+* provides a notification mechanism for changes to the selection.
 */
 
 var _NUMBER_TYPE = typeof 0;
@@ -13,7 +13,7 @@ var _NUMBER_TYPE = typeof 0;
 * @constructor
 * @param {Number} count - The number of competitors that can be chosen.
 */
-SplitsBrowser.Charts.CompetitorSelection = function (count) {
+SplitsBrowser.Model.CompetitorSelection = function (count) {
     if (typeof (count) != _NUMBER_TYPE) {
         throwInvalidData("Competitor count must be a number");
     } else if (count <= 0) {
@@ -30,14 +30,14 @@ SplitsBrowser.Charts.CompetitorSelection = function (count) {
 * @param {Number} index - The index of the competitor.
 * @returns {boolean} True if the competitor is selected, false if not.
 */
-SplitsBrowser.Charts.CompetitorSelection.prototype.isSelected = function (index) {
+SplitsBrowser.Model.CompetitorSelection.prototype.isSelected = function (index) {
     return this.currentIndexes.indexOf(index) > -1;
 };
 
 /**
 * Fires all of the change handlers currently registered.
 */
-SplitsBrowser.Charts.CompetitorSelection.prototype.fireChangeHandlers = function () {
+SplitsBrowser.Model.CompetitorSelection.prototype.fireChangeHandlers = function () {
     var outerThis = this;
     // Call slice(0) to return a copy of the list.
     this.changeHandlers.forEach(function (handler) { handler(outerThis.currentIndexes.slice(0)); });
@@ -46,7 +46,7 @@ SplitsBrowser.Charts.CompetitorSelection.prototype.fireChangeHandlers = function
 /**
 * Select all of the competitors.
 */
-SplitsBrowser.Charts.CompetitorSelection.prototype.selectAll = function () {
+SplitsBrowser.Model.CompetitorSelection.prototype.selectAll = function () {
     this.currentIndexes = d3.range(this.count);
     this.fireChangeHandlers();
 };
@@ -54,7 +54,7 @@ SplitsBrowser.Charts.CompetitorSelection.prototype.selectAll = function () {
 /**
 * Select none of the competitors.
 */
-SplitsBrowser.Charts.CompetitorSelection.prototype.selectNone = function () {
+SplitsBrowser.Model.CompetitorSelection.prototype.selectNone = function () {
     this.currentIndexes = [];
     this.fireChangeHandlers();
 };
@@ -71,7 +71,7 @@ SplitsBrowser.Charts.CompetitorSelection.prototype.selectNone = function () {
 *
 * @param {function} handler - The handler to register.
 */
-SplitsBrowser.Charts.CompetitorSelection.prototype.register = function (handler) {
+SplitsBrowser.Model.CompetitorSelection.prototype.register = function (handler) {
     if (this.changeHandlers.indexOf(handler) == -1) {
         this.changeHandlers.push(handler);
     }
@@ -84,7 +84,7 @@ SplitsBrowser.Charts.CompetitorSelection.prototype.register = function (handler)
 *
 * @param {function} handler - The handler to register.
 */
-SplitsBrowser.Charts.CompetitorSelection.prototype.deregister = function (handler) {
+SplitsBrowser.Model.CompetitorSelection.prototype.deregister = function (handler) {
     var index = this.changeHandlers.indexOf(handler);
     if (index > -1) {
         this.changeHandlers.splice(index, 1);
@@ -95,7 +95,7 @@ SplitsBrowser.Charts.CompetitorSelection.prototype.deregister = function (handle
 * Toggles whether the competitor at the given index is selected.
 * @param {Number} index - The index of the competitor.
 */
-SplitsBrowser.Charts.CompetitorSelection.prototype.toggle = function (index) {
+SplitsBrowser.Model.CompetitorSelection.prototype.toggle = function (index) {
     if (typeof (index) == _NUMBER_TYPE) {
         if (0 <= index && index < this.count) {
             var position = this.currentIndexes.indexOf(index);

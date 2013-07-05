@@ -24,7 +24,7 @@ var backgroundColour2 = '#DDDDDD';
 * @constructor
 * @param {HTMLElement} parent - The parent object to create the element within.
 */
-SplitsBrowser.Charts.Chart = function (parent) {
+SplitsBrowser.Controls.Chart = function (parent) {
     this.parent = parent;
 
     this.xScale = null;
@@ -57,7 +57,7 @@ SplitsBrowser.Charts.Chart = function (parent) {
 *
 * @returns {function} Tick-formatting function.
 */
-SplitsBrowser.Charts.Chart.prototype.getTickFormatter = function () {
+SplitsBrowser.Controls.Chart.prototype.getTickFormatter = function () {
     var outerThis = this;
     return function (value, idx) {
         return (idx == 0) ? "S" : ((idx == outerThis.numControls + 1) ? "F" : idx.toString());
@@ -69,7 +69,7 @@ SplitsBrowser.Charts.Chart.prototype.getTickFormatter = function () {
 * @param {string} text - The piece of text to measure the width of.
 * @returns {Number} The width of the piece of text, in pixels. 
 */
-SplitsBrowser.Charts.Chart.prototype.getTextWidth = function (text) {
+SplitsBrowser.Controls.Chart.prototype.getTextWidth = function (text) {
     return d3.select(_TEXT_SIZE_SHIM_ID_SELECTOR).text(text).node().getBBox().width;
 };
 
@@ -79,7 +79,7 @@ SplitsBrowser.Charts.Chart.prototype.getTextWidth = function (text) {
 * @param {string} text - The piece of text to measure the height of.
 * @returns {Number} The height of the piece of text, in pixels.
 */
-SplitsBrowser.Charts.Chart.prototype.getTextHeight = function (text) {
+SplitsBrowser.Controls.Chart.prototype.getTextHeight = function (text) {
     return d3.select(_TEXT_SIZE_SHIM_ID_SELECTOR).text(text).node().getBBox().height;
 };
 
@@ -90,7 +90,7 @@ SplitsBrowser.Charts.Chart.prototype.getTextHeight = function (text) {
 * list given.  This method returns zero if the list is empty.
 * @returns {Number} Maximum width of text, in pixels.
 */
-SplitsBrowser.Charts.Chart.prototype.getMaxGraphEndTextWidth = function () {
+SplitsBrowser.Controls.Chart.prototype.getMaxGraphEndTextWidth = function () {
     if (this.selectedIndexes.length == 0 || this.names.length == 0) {
         // No competitors selected or no names yet.  Avoid problems caused
         // by trying to find the maximum of an empty array.
@@ -106,7 +106,7 @@ SplitsBrowser.Charts.Chart.prototype.getMaxGraphEndTextWidth = function () {
 * Creates the X and Y scales necessary for the chart and its axes.
 * @param {object} chartData - Chart data object.
 */
-SplitsBrowser.Charts.Chart.prototype.createScales = function (chartData) {
+SplitsBrowser.Controls.Chart.prototype.createScales = function (chartData) {
     this.xScale = d3.scale.linear().domain(chartData.xExtent).range([0, this.contentWidth]);
     this.yScale = d3.scale.linear().domain(chartData.yExtent).range([0, this.contentHeight]);
     this.yScaleMinutes = d3.scale.linear().domain([chartData.yExtent[0] / 60, chartData.yExtent[1] / 60]).range([0, this.contentHeight]);
@@ -118,7 +118,7 @@ SplitsBrowser.Charts.Chart.prototype.createScales = function (chartData) {
 * @param {Array} cumTimes - List of cumulative times of the 'reference'
 *                           competitor, in seconds.
 */
-SplitsBrowser.Charts.Chart.prototype.drawBackgroundRectangles = function (cumTimes) {
+SplitsBrowser.Controls.Chart.prototype.drawBackgroundRectangles = function (cumTimes) {
     var rects = this.svg.selectAll("rect")
                         .data(d3.range(this.numControls + 1))
 
@@ -139,7 +139,7 @@ SplitsBrowser.Charts.Chart.prototype.drawBackgroundRectangles = function (cumTim
 * Draw the chart axes.
 * @param {Array} cumTimes - Array of cumulative times of the 'reference' competitor, in seconds.
 */
-SplitsBrowser.Charts.Chart.prototype.drawAxes = function (cumTimes) {
+SplitsBrowser.Controls.Chart.prototype.drawAxes = function (cumTimes) {
     var xAxis = d3.svg.axis()
                     .scale(this.xScale)
                     .orient("top")
@@ -170,7 +170,7 @@ SplitsBrowser.Charts.Chart.prototype.drawAxes = function (cumTimes) {
 * Draw the lines on the chart.
 * @param {Array} chartData - Array of chart data.
 */
-SplitsBrowser.Charts.Chart.prototype.drawChartLines = function (chartData) {
+SplitsBrowser.Controls.Chart.prototype.drawChartLines = function (chartData) {
     var outerThis = this;
     var lineFunctionGenerator = function (index) {
         return d3.svg.line()
@@ -198,7 +198,7 @@ SplitsBrowser.Charts.Chart.prototype.drawChartLines = function (chartData) {
 * Draw legend labels to the right of the chart.
 * @param {object} chartData - The chart data that contains the final time offsets.
 */
-SplitsBrowser.Charts.Chart.prototype.drawCompetitorLegendLabels = function (chartData) {
+SplitsBrowser.Controls.Chart.prototype.drawCompetitorLegendLabels = function (chartData) {
     var finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
     var outerThis = this;
 
@@ -255,7 +255,7 @@ SplitsBrowser.Charts.Chart.prototype.drawCompetitorLegendLabels = function (char
 * If you find part of the chart is missing sometimes, chances are you've
 * omitted a necessary call to this method.
 */
-SplitsBrowser.Charts.Chart.prototype.adjustContentSize = function () {
+SplitsBrowser.Controls.Chart.prototype.adjustContentSize = function () {
     var maxTextWidth = this.getMaxGraphEndTextWidth();
     this.contentWidth = Math.max(this.overallWidth - margin.left - margin.right - maxTextWidth - (legendLineWidth + 2), 100);
     this.contentHeight = Math.max(this.overallHeight - margin.top - margin.bottom, 100);
@@ -266,7 +266,7 @@ SplitsBrowser.Charts.Chart.prototype.adjustContentSize = function () {
 * @param {Number} overallWidth - Overall width
 * @param {Number} overallHeight - Overall height
 */
-SplitsBrowser.Charts.Chart.prototype.setSize = function (overallWidth, overallHeight) {
+SplitsBrowser.Controls.Chart.prototype.setSize = function (overallWidth, overallHeight) {
     this.overallWidth = overallWidth;
     this.overallHeight = overallHeight;
     $(_CHART_SVG_ID_SELECTOR).width(overallWidth).height(overallHeight);
@@ -282,7 +282,7 @@ SplitsBrowser.Charts.Chart.prototype.setSize = function (overallWidth, overallHe
 *                (0 in this array means the first competitor is selected, 1
 *                means the second is selected, and so on.)
 */
-SplitsBrowser.Charts.Chart.prototype.drawChart = function (chartData, cumTimes, selectedIndexes) {
+SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, cumTimes, selectedIndexes) {
     this.numControls = chartData.numControls;
     this.names = chartData.competitorNames;
     this.numLines = this.names.length;

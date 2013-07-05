@@ -2,7 +2,7 @@
 
 module("Competitor Selection");
 
-var CompetitorSelection = SplitsBrowser.Charts.CompetitorSelection;
+var CompetitorSelection = SplitsBrowser.Model.CompetitorSelection;
 
 // Test code for handling notifications 
 var lastIndexes = null;

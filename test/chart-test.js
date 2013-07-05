@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-var Chart = SplitsBrowser.Charts.Chart;
+var Chart = SplitsBrowser.Controls.Chart;
 var CompetitorData = SplitsBrowser.Model.CompetitorData;
 var CourseData = SplitsBrowser.Model.CourseData;
 
