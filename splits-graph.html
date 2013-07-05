@@ -14,6 +14,7 @@
  <script type="text/javascript" src="js/csv-reader.js"></script>
  <script type="text/javascript" src="js/competitor-selection.js"></script>
  <script type="text/javascript" src="js/competitor-listbox.js"></script>
+ <script type="text/javascript" src="js/splitsbrowser.js"></script>
 </head>
 <body>
  <div id="competitorListContainer">
@@ -22,121 +23,6 @@
     <button type="button" onclick="selectNone();">None</button>
   </div>
  </div>
-
-<script type="text/javascript">
-    "use strict";
-    // Delay in milliseconds between a resize event being triggered and the
-    // page responding to it.
-    // (Resize events tend to come more than one at a time; if a resize event
-    // comes in while a previous event is waiting, the previous event is
-    // cancelled.)
-    var RESIZE_DELAY_MS = 100;
-
-    var currentResizeTimeout = null;
-    var currentResult = null;
-
-    var selection = null;
-    var competitorListBox = null;
-    var chart = null;
-    var selection = null;
-    var currentIndexes = [];
-    var selectionChangeHandler = null;
-
-    /**
-    * Initialise the chart.
-    */
-    function initChart() {
-        competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(d3.select("#competitorListContainer").node());
-        chart = new SplitsBrowser.Controls.Chart(d3.select("body").node());
-    }
-
-    function selectAll() {
-        selection.selectAll();
-    }
-
-    function selectNone() {
-        selection.selectNone();
-    }
-
-    /**
-     * Handle a resize of the window.
-     */
-    function handleWindowResize() {
-        if (currentResizeTimeout != null) {
-            clearTimeout(currentResizeTimeout);
-        }
-
-        currentResizeTimeout = setTimeout(function () { currentResizeTimeout = null; drawChart(); }, RESIZE_DELAY_MS);
-    }
-
-    /**
-    * Draw the chart using the current data.
-    */
-    function drawChart() {
-
-        var fastestTime = currentResult.getFastestTime();
-        var chartData = currentResult.getChartData(fastestTime, currentIndexes);
-        var cumTimes = fastestTime.getCumulativeTimes();
-
-        var windowWidth = $(window).width();
-        var windowHeight = $(window).height();
-
-        competitorListBox.setCompetitorList(currentResult.competitorData);
-
-        // Subtract some values to avoid scrollbars appearing.
-        var chartWidth = windowWidth - 18 - competitorListBox.width() - 40;
-        var chartHeight = windowHeight - 19;
-
-        chart.setSize(chartWidth, chartHeight);
-        chart.drawChart(chartData, cumTimes, currentIndexes);
-
-        if (selectionChangeHandler != null) {
-            selection.deregister(selectionChangeHandler);
-        }
-
-        selectionChangeHandler = function (indexes) {
-            currentIndexes = indexes;
-            chartData = currentResult.getChartData(fastestTime, indexes);
-            chart.drawChart(chartData, cumTimes, indexes);
-        };
-
-        selection.register(selectionChangeHandler);
-
-        $("body").height(windowHeight - 19);
-        $("#competitorListContainer").height(windowHeight - 19 - $("#allOrNoneButtonsPanel").height());
-    }
-
-    /**
-    * JQuery AJAX callback to handle the request to get some data and parse it.
-    */
-    function readEventData(data, status, jqXHR) {
-        if (status == "success") {
-            var result = SplitsBrowser.Input.CSV.parseEventData(data);
-            currentResult = result[0];
-            selection = new SplitsBrowser.Model.CompetitorSelection(currentResult.competitorData.length);
-            competitorListBox.setSelection(selection);
-            drawChart();
-        } else {
-            alert("Got status " + status + ". :(");
-        }
-    }
-
-
-    function testReadSplits(events_url) {
-        $.ajax({
-            url: events_url,
-            data: "",
-            success: readEventData,
-            dataType: "text",
-        });
-    }
-
-    $(document).ready(initChart);
-    $(document).ready(testReadSplits('data/eventdata'));
-
-    $(window).resize(handleWindowResize);
-
-</script>
 </body>
 </html>
 
