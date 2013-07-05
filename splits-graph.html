@@ -25,40 +25,6 @@
 
 <script type="text/javascript">
     "use strict";
-
-    /* TODO:
-
-    Names at the end of each chart line. (width of text?)  [DONE]
-    Selectable stats at the end of each line, when hovered over.
-    Selectable list of names, plus All and None buttons. [DONE]
-    Adjust Y-scale depending on who is competing. [DONE]
-    Parsing other file formats
-    Y-axis to show minutes rather than seconds. [DONE]
-    Lower x-axis for time.
-    Implementation of left-click popup?  Implementation of right-click popup??
-    Ability to choose comparisons against winner, fastest time, anyone.
-    Ability to choose course.
-    Ability to choose type of graph.
-    Ability to show splits table.
-    Ability to use all browser space rather than fixed size.  [DONE, including resizing]
-    More colours + remove bad ones (e.g. yellow)?
-    Ensure competitors are sorted into correct order by total split time (re Gary Newell)  [DONE]
-    I18n (create with dummy language?)
-    noscript element.
-
-    Introduce into version control (Git, perhaps?)
-    Licence (GPL) and file headers.
-
-    Manual testing required:
-
-    Testing with browser-based zooming
-    Testing with DPI scaling in Windows 7 set to 125% and 150% (and with browser zooming too?)
-    Testing with mispunchees.
-    Testing with non-ASCII characters. [probably nothing to do here, as this was an issue with the gzip decompression]
-    Testing on IE9.
-    Testing + support for IE8 (Aight?).
-    */
-
     // Delay in milliseconds between a resize event being triggered and the
     // page responding to it.
     // (Resize events tend to come more than one at a time; if a resize event
