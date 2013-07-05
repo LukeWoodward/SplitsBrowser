@@ -5,6 +5,8 @@ var _COMPETITOR_LIST_ID_SELECTOR = "#" + _COMPETITOR_LIST_ID;
 
 /**
 * Object that controls a list of competitors from which the user can select.
+* @constructor
+* @param {HTMLElement} parent - Parent element to add this listbox to.
 */
 SplitsBrowser.Controls.CompetitorListBox = function (parent) {
     this.parent = parent;
