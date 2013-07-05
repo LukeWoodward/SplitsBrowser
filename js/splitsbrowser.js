@@ -8,26 +8,52 @@ var RESIZE_DELAY_MS = 100;
 
 var currentResizeTimeout = null;
 var currentResult = null;
-
-var selection = null;
-var competitorListBox = null;
-var chart = null;
 var selection = null;
 var currentIndexes = [];
 var selectionChangeHandler = null;
 
+var selection = null;
+var competitorListBox = null;
+var chart = null;
+var topPanel = null;
+var mainPanel = null;
+
+var _COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
+
 /**
-* Initialise the chart.
+* Construct the UI inside the HTML body.
 */
-function initChart() {
-    competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(d3.select("#competitorListContainer").node());
-    chart = new SplitsBrowser.Controls.Chart(d3.select("body").node());
+function buildUi() {
+    var body = d3.select("body");
+    var mainPanel = body.append("div");
+    
+    var competitorListContainer = mainPanel.append("div")
+                                           .attr("id", _COMPETITOR_LIST_CONTAINER_ID);
+                                           
+    var buttonsContainer = competitorListContainer.append("div");
+                                     
+    buttonsContainer.append("button")
+                    .text("All")
+                    .on("click", selectAll);
+                    
+    buttonsContainer.append("button")
+                    .text("None")
+                    .on("click", selectNone);
+                                                       
+    competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(competitorListContainer.node());
+    chart = new SplitsBrowser.Controls.Chart(mainPanel.node());
 }
 
+/**
+* Select all of the competitors.
+*/
 function selectAll() {
     selection.selectAll();
 }
 
+/**
+* Select none of the competitors.
+*/
 function selectNone() {
     selection.selectNone();
 }
@@ -105,7 +131,7 @@ function testReadSplits(events_url) {
     });
 }
 
-$(document).ready(initChart);
+$(document).ready(buildUi);
 $(document).ready(testReadSplits('data/eventdata'));
 
 $(window).resize(handleWindowResize);
