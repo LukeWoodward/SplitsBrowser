@@ -8,7 +8,7 @@ Y-axis to show minutes rather than seconds. [DONE]
 Lower x-axis for time.
 Implementation of left-click popup?  Implementation of right-click popup??
 Ability to choose comparisons against winner, fastest time, anyone.
-Ability to choose course.
+Ability to choose course. [DONE]
 Ability to choose type of graph.
 Ability to show splits table.
 Ability to use all browser space rather than fixed size.  [DONE, including resizing]
