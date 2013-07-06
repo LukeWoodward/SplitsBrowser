@@ -10,6 +10,12 @@ body {
   shape-rendering: crispEdges;
 }
 
+line.controlLine {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
 #competitorList
 {
     overflow-y: scroll;
