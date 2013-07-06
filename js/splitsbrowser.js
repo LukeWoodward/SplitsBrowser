@@ -7,16 +7,22 @@
 var RESIZE_DELAY_MS = 100;
 
 var currentResizeTimeout = null;
+
+var courses = null;
 var currentResult = null;
 var selection = null;
-var currentIndexes = [];
+var currentIndexes = null;
 var selectionChangeHandler = null;
 
 var selection = null;
+var courseSelector = null;
 var competitorListBox = null;
 var chart = null;
 var topPanel = null;
 var mainPanel = null;
+
+var _TOP_PANEL_ID = "topPanel";
+var _TOP_PANEL_ID_SELECTOR = "#" + _TOP_PANEL_ID;
 
 var _COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
 var _COMPETITOR_LIST_CONTAINER_ID_SELECTOR = "#" + _COMPETITOR_LIST_CONTAINER_ID;
@@ -30,6 +36,13 @@ var _ALL_OR_NONE_BUTTONS_PANEL_ID_SELECTOR = "#" + _ALL_OR_NONE_BUTTONS_PANEL_ID
 */
 function buildUi() {
     var body = d3.select("body");
+    
+    var topPanel = body.append("div")
+                       .attr("id", _TOP_PANEL_ID);
+                       
+    courseSelector = new SplitsBrowser.Controls.CourseSelector(topPanel.node());
+    courseSelector.onCourseChanged(selectCourse);
+    
     var mainPanel = body.append("div");
     
     var competitorListContainer = mainPanel.append("div")
@@ -89,9 +102,11 @@ function drawChart() {
 
     competitorListBox.setCompetitorList(currentResult.competitorData);
 
+    var topPanelHeight = $(_TOP_PANEL_ID_SELECTOR).height();
+    
     // Subtract some values to avoid scrollbars appearing.
     var chartWidth = windowWidth - 18 - competitorListBox.width() - 40;
-    var chartHeight = windowHeight - 19;
+    var chartHeight = windowHeight - 19 - topPanelHeight;
 
     chart.setSize(chartWidth, chartHeight);
     chart.drawChart(chartData, cumTimes, currentIndexes);
@@ -108,8 +123,26 @@ function drawChart() {
 
     selection.register(selectionChangeHandler);
 
-    $("body").height(windowHeight - 19);
-    $(_COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(_ALL_OR_NONE_BUTTONS_PANEL_ID_SELECTOR).height());
+    $("body").height(windowHeight - 19 - topPanelHeight);
+    $(_COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(_ALL_OR_NONE_BUTTONS_PANEL_ID_SELECTOR).height() - topPanelHeight);
+}
+
+/**
+* Change the graph to show the course with the given index.
+* @param {Number} index - The (zero-based) index of the course.
+*/
+function selectCourse(index) {
+    if (0 <= index && index < courses.length) {
+        if (selection != null) {
+            selection.selectNone();
+        }
+        currentIndexes = [];
+        currentResult = courses[index];
+        courseSelector.setCourses(courses);
+        selection = new SplitsBrowser.Model.CompetitorSelection(currentResult.competitorData.length);
+        competitorListBox.setSelection(selection);
+        drawChart();
+    }
 }
 
 /**
@@ -117,11 +150,8 @@ function drawChart() {
 */
 function readEventData(data, status, jqXHR) {
     if (status == "success") {
-        var result = SplitsBrowser.Input.CSV.parseEventData(data);
-        currentResult = result[0];
-        selection = new SplitsBrowser.Model.CompetitorSelection(currentResult.competitorData.length);
-        competitorListBox.setSelection(selection);
-        drawChart();
+        courses = SplitsBrowser.Input.CSV.parseEventData(data);
+        selectCourse(0);
     } else {
         alert("Got status " + status + ". :(");
     }
