@@ -16,6 +16,8 @@ More colours + remove bad ones (e.g. yellow)?
 Ensure competitors are sorted into correct order by total split time (re Gary Newell)  [DONE]
 I18n (create with dummy language?)
 noscript element.
+Make CompetitorData objects able to return split time to control and cumulative time per control.
+  (Probably necessary as part of other file format changes; some formats contain splits only, some contain cumulative only)
 
 Introduce into version control (Git, perhaps?) [DONE]
 Licence (GPL) and file headers.
