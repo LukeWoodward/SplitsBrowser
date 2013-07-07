@@ -10,6 +10,8 @@ var margin = { top: 20, right: 20, bottom: 30, left: 50 };
 
 var legendLineWidth = 10;
 
+var SPACER = "\xa0\xa0\xa0\xa0";
+
 var colours = [
     "red", "blue", "green", "black", "#CC0066", "#000099", "#FFCC00", "#996600",
     "#9900FF", "#CCCC00", "#FFFF66",  "#CC6699", "#99FF33", "#3399FF",
@@ -27,9 +29,8 @@ var backgroundColour2 = '#DDDDDD';
 * @returns Time and rank formatted as a string.
 */
 function formatTimeAndRank(time, rank) {
-    return "  " + formatTime(time) + " (" + rank + ")";
+    return SPACER + formatTime(time) + " (" + rank + ")";
 }
-
 
 /**
 * A chart object in a window.
@@ -168,19 +169,25 @@ SplitsBrowser.Controls.Chart.prototype.removeControlLine = function() {
 */
 SplitsBrowser.Controls.Chart.prototype.updateCompetitorStatistics = function() {
         
-    var labels = d3.selectAll("text.competitorLabel");
-    if (this.currentControlIndex === null || this.currentControlIndex == 0) {
-        // Not over a control, or over the start.  Delete the text.
-        labels.data(this.names)
-              .text(function (name) { return name; });
-    } else {
+    var labelTexts = this.names;
+    if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
+        var cumTimes = this.splitInfo.getCumulativeTimes(this.currentControlIndex, this.selectedIndexes);
+        var cumRanks = this.splitInfo.getCumulativeRanks(this.currentControlIndex, this.selectedIndexes);
+        labelTexts = d3.zip(labelTexts, cumTimes, cumRanks)
+                       .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
+                       
         var splitTimes = this.splitInfo.getSplits(this.currentControlIndex, this.selectedIndexes);
         var splitRanks = this.splitInfo.getSplitRanks(this.currentControlIndex, this.selectedIndexes);
-        
-        var dataTriples = d3.zip(this.names, splitTimes, splitRanks);
-        labels.data(dataTriples)
-              .text(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
+        labelTexts = d3.zip(labelTexts, splitTimes, splitRanks)
+                       .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
+                       
+        var timesBehind = this.splitInfo.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexes);
+        labelTexts = d3.zip(labelTexts, timesBehind)
+                       .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
     }
+       
+    d3.selectAll("text.competitorLabel").data(labelTexts)
+                                        .text(function (labelText) { return labelText; });
 };
 
 /**
@@ -238,35 +245,73 @@ SplitsBrowser.Controls.Chart.prototype.getMaxGraphEndTextWidth = function () {
     }
 };
 
-
 /**
-* Return the maximum width of the split-time and rank text shown to the right
+* Return the maximum width of a piece of time and rank text shown to the right
 * of each competitor 
-* @returns Maximum width of split-time and rank text, in pixels.
+* @param {string} timeFuncName - Name of the function to call to get the time
+                                 data.
+* @param {string} rankFuncName - Name of the function to call to get the rank
+                                 data.
+* @returns {Number} Maximum width of split-time and rank text, in pixels.
 */
-SplitsBrowser.Controls.Chart.prototype.getMaxSplitTimeAndRankTextWidth = function() {
-    var maxSplitTime = 0;
+SplitsBrowser.Controls.Chart.prototype.getMaxTimeAndRankTextWidth = function(timeFuncName, rankFuncName) {
+    var maxTime = 0;
     var maxRank = 0;
     
     // Split times and ranks.
     for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
-        var splitTimes = this.splitInfo.getSplits(controlIndex, this.selectedIndexes);
-        maxSplitTime = Math.max(maxSplitTime, d3.max(splitTimes.filter(isNotNull)));
+        var times = this.splitInfo[timeFuncName](controlIndex, this.selectedIndexes);
+        maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
         
-        var splitRanks = this.splitInfo.getSplitRanks(controlIndex, this.selectedIndexes);
-        maxRank = Math.max(maxRank, d3.max(splitRanks.filter(isNotNull)));
+        var ranks = this.splitInfo[rankFuncName](controlIndex, this.selectedIndexes);
+        maxRank = Math.max(maxRank, d3.max(ranks.filter(isNotNull)));
     }
     
-    var text = formatTimeAndRank(maxSplitTime, maxRank);
+    var text = formatTimeAndRank(maxTime, maxRank);
     return this.getTextWidth(text);
+};
+
+/**
+* Return the maximum width of the split-time and rank text shown to the right
+* of each competitor 
+* @returns {Number} Maximum width of split-time and rank text, in pixels.
+*/
+SplitsBrowser.Controls.Chart.prototype.getMaxSplitTimeAndRankTextWidth = function() {
+    return this.getMaxTimeAndRankTextWidth("getSplits", "getSplitRanks");
 }
 
 /**
+* Return the maximum width of the cumulative time and cumulative-time rank text
+* shown to the right of each competitor 
+* @returns {Number} Maximum width of cumulative time and cumulative-time rank text, in
+*                   pixels.
+*/
+SplitsBrowser.Controls.Chart.prototype.getMaxCumulativeTimeAndRankTextWidth = function() {
+    return this.getMaxTimeAndRankTextWidth("getCumulativeTimes", "getCumulativeRanks");
+}
+
+/**
+* Return the maximum width of the behind-fastest time shown to the right of
+* each competitor 
+* @returns {Number} Maximum width of behind-fastest time rank text, in pixels.
+*/
+SplitsBrowser.Controls.Chart.prototype.getMaxTimeBehindFastestWidth = function() {
+    var maxTime = 0;
+    
+    for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
+        var times = this.splitInfo.getTimesBehindFastest(controlIndex, this.selectedIndexes);
+        maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+    }
+    
+    return this.getTextWidth(SPACER + formatTime(maxTime));
+};
+
+/**
 * Determines the maximum width of the statistics text at the end of the competitor.
-* @returns Maximum width of the statistics text, in pixels.
+* @returns {Number} Maximum width of the statistics text, in pixels.
 */
 SplitsBrowser.Controls.Chart.prototype.determineMaxStatisticTextWidth = function() {
-    return this.getMaxSplitTimeAndRankTextWidth();
+    return this.getMaxCumulativeTimeAndRankTextWidth() + this.getMaxSplitTimeAndRankTextWidth() + this.getMaxTimeBehindFastestWidth();
 };
 
 /**

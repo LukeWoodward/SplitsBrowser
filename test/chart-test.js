@@ -8,7 +8,9 @@ var SplitInfo = SplitsBrowser.Model.CompetitorSplitInfo;
 var TEXT_WIDTHS = {
     "Fred Brown": 85,
     "John Smith": 100,
-    "  03:41 (2)": 77
+    "00:28": 58,
+    "03:41 (2)": 77,
+    "09:56 (2)": 77
 };
 
 var TEXT_HEIGHTS = {
@@ -18,6 +20,10 @@ var TEXT_HEIGHTS = {
 
 // Dummy functions for returning the width/height of pieces of text.
 function getTextWidth(text) {
+    while (text.startsWith("\xa0")) {
+        text = text.substring(1);
+    }
+    
     if (text in TEXT_WIDTHS) {
         return TEXT_WIDTHS[text];
     } else {
