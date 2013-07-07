@@ -3,10 +3,12 @@
 var Chart = SplitsBrowser.Controls.Chart;
 var CompetitorData = SplitsBrowser.Model.CompetitorData;
 var CourseData = SplitsBrowser.Model.CourseData;
+var SplitInfo = SplitsBrowser.Model.CompetitorSplitInfo;
 
 var TEXT_WIDTHS = {
     "Fred Brown": 85,
-    "John Smith": 100
+    "John Smith": 100,
+    "  03:41 (2)": 77
 };
 
 var TEXT_HEIGHTS = {
@@ -47,12 +49,13 @@ QUnit.test("Can create a chart", function (assert) {
     var competitor1 = new CompetitorData(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
     var competitor2 = new CompetitorData(2, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
     var courseData = new CourseData("Test", 3, [competitor1, competitor2]);
+    var splitInfo = new SplitInfo(courseData);
     var fastestTime = courseData.getFastestTime();
     var chartData = courseData.getChartData(fastestTime, [0, 1]);
 
     var chart = createTestChart();
     chart.setSize(1000, 1000);
-    chart.drawChart(chartData, fastestTime.getCumulativeTimes(), [0, 1]);
+    chart.drawChart(chartData, splitInfo, fastestTime.getCumulativeTimes(), [0, 1]);
 
     // Most of the testing of the chart functionality is visual, so it isn't
     // realistic to perform any automated tests for this.  However, it is

@@ -96,6 +96,7 @@ function drawChart() {
     var fastestTime = currentResult.getFastestTime();
     var chartData = currentResult.getChartData(fastestTime, currentIndexes);
     var cumTimes = fastestTime.getCumulativeTimes();
+    var splitInfo = new SplitsBrowser.Model.CompetitorSplitInfo(currentResult);
 
     var windowWidth = $(window).width();
     var windowHeight = $(window).height();
@@ -109,7 +110,7 @@ function drawChart() {
     var chartHeight = windowHeight - 19 - topPanelHeight;
 
     chart.setSize(chartWidth, chartHeight);
-    chart.drawChart(chartData, cumTimes, currentIndexes);
+    chart.drawChart(chartData, splitInfo, cumTimes, currentIndexes);
 
     if (selectionChangeHandler != null) {
         selection.deregister(selectionChangeHandler);
@@ -118,7 +119,7 @@ function drawChart() {
     selectionChangeHandler = function (indexes) {
         currentIndexes = indexes;
         chartData = currentResult.getChartData(fastestTime, indexes);
-        chart.drawChart(chartData, cumTimes, indexes);
+        chart.drawChart(chartData, splitInfo, cumTimes, indexes);
     };
 
     selection.register(selectionChangeHandler);
