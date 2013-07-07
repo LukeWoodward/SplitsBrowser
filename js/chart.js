@@ -320,26 +320,26 @@ SplitsBrowser.Controls.Chart.prototype.drawCompetitorLegendLabels = function (ch
 
     var legendLines = this.svgGroup.selectAll("line.competitorLegendLine").data(currCompData);
     legendLines.enter()
-                .append("line")
-                .attr("class", "competitorLegendLine")
-                .attr("stroke-width", 2);
+               .append("line")
+               .attr("class", "competitorLegendLine")
+               .attr("stroke-width", 2);
 
     legendLines.attr("x1", this.contentWidth + 1)
-                .attr("y1", function (data) { return data.y; })
-                .attr("x2", this.contentWidth + legendLineWidth + 1)
-                .attr("y2", function (data) { return data.y; })
-                .attr("stroke", function (data) { return data.colour; });
+               .attr("y1", function (data) { return data.y; })
+               .attr("x2", this.contentWidth + legendLineWidth + 1)
+               .attr("y2", function (data) { return data.y; })
+               .attr("stroke", function (data) { return data.colour; });
 
     legendLines.exit().remove();
 
     var labels = this.svgGroup.selectAll("text.competitorLabel").data(currCompData);
     labels.enter()
-            .append("text")
-            .attr("class", "competitorLabel");
+          .append("text")
+          .attr("class", "competitorLabel");
 
     labels.text(function (data) { return data.name; })
-            .attr("x", this.contentWidth + legendLineWidth + 2)
-            .attr("y", function (data) { return data.y + data.textHeight / 4; });
+          .attr("x", this.contentWidth + legendLineWidth + 2)
+          .attr("y", function (data) { return data.y + data.textHeight / 4; });
 
     labels.exit().remove();
 };
