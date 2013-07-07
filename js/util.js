@@ -7,13 +7,20 @@
  */
 function isTrue(x) { return x; }
 
+/**
+* Exception object raised if invalid data is passed.
+* @constructor.
+* @param {string} message - The exception detail message.
+*/
 function InvalidData(message) {
     this.name = "InvalidData";
     this.message = message;
 };
 
-//InvalidData.prototype = new Error;
-
+/**
+* Returns a string representation of this exception.
+* @returns {String} String representation.
+*/
 InvalidData.prototype.toString = function () {
     return this.name + ": " + this.message;
 }
