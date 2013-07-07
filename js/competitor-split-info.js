@@ -34,6 +34,10 @@ function getRanks(sourceData) {
 * @returns Array of values indexed by the given values.
 */
 function selectByIndexes(data, indexes) {
+    if (typeof data == "undefined") {
+        throw new TypeError("data is undefined");
+    }
+    
     return indexes.map(function(index) { return data[index]; });
 }
 
@@ -66,7 +70,7 @@ SplitsBrowser.Model.CompetitorSplitInfo.prototype.computeTimesAndRanks = functio
         workingTotalTimesByCompetitor[i] = 0;
     }
     
-    for (var controlIndex = 1; controlIndex <= this.courseData.numControls; controlIndex += 1) {
+    for (var controlIndex = 1; controlIndex <= this.courseData.numControls + 1; controlIndex += 1) {
         var splitsByCompetitor = this.courseData.competitorData.map(function(comp) { return comp.times[controlIndex - 1]; });
         this.splitsPerControl.push(splitsByCompetitor);
         

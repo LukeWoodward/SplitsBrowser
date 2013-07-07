@@ -78,6 +78,11 @@ QUnit.test("Gets nonempty array of splits for partial list of competitors not in
     assert.deepEqual(splitInfo.getSplits(2, [2, 1]), [249, 221]);
 });
 
+QUnit.test("Gets array of splits for last control", function(assert) {
+    var splitInfo = new SplitInfo(getTestCourseData());
+    assert.deepEqual(splitInfo.getSplits(4, [0, 1, 2]), [106, 100, 106]);
+});
+
 module("Competitor Split Info - split-time ranks");
 
 QUnit.test("Gets null array of split-time ranks for control zero", function(assert) {
@@ -103,6 +108,11 @@ QUnit.test("Gets nonempty array of split-time ranks for full list of competitors
 QUnit.test("Gets nonempty array of split-time ranks for partial list of competitors not in order", function(assert) {
     var splitInfo = new SplitInfo(getTestCourseData());
     assert.deepEqual(splitInfo.getSplitRanks(2, [2, 1]), [3, 2]);
+});
+
+QUnit.test("Gets array of split-time ranks for last control", function(assert) {
+    var splitInfo = new SplitInfo(getTestCourseData());
+    assert.deepEqual(splitInfo.getSplitRanks(4, [0, 1, 2]), [2, 1, 2]);
 });
 
 module("Competitor Split Info - cumulative times");
@@ -132,6 +142,11 @@ QUnit.test("Gets nonempty array of cumulative times for partial list of competit
     assert.deepEqual(splitInfo.getCumulativeTimes(2, [2, 1]), [74 + 249, 65 + 221]);
 });
 
+QUnit.test("Gets array of cumulative times for last control", function(assert) {
+    var splitInfo = new SplitInfo(getTestCourseData());
+    assert.deepEqual(splitInfo.getCumulativeTimes(4, [0, 1, 2]), [81 + 197 + 212 + 106, 65 + 221 + 184 + 100, 74 + 249 + 184 + 106]);
+});
+
 module("Competitor Split Info - cumulative-time ranks");
 
 QUnit.test("Gets null array of cumulative-time ranks for control zero", function(assert) {
@@ -159,6 +174,11 @@ QUnit.test("Gets nonempty array of cumulative-time ranks for partial list of com
     assert.deepEqual(splitInfo.getCumulativeRanks(2, [2, 1]), [3, 2]);
 });
 
+QUnit.test("Gets array of cumulative-time ranks for last control", function(assert) {
+    var splitInfo = new SplitInfo(getTestCourseData());
+    assert.deepEqual(splitInfo.getCumulativeRanks(4, [0, 1, 2]), [2, 1, 3]);
+});
+
 module("Competitor Split Info - times behind fastest");
 
 QUnit.test("Gets null array of times behind fastest for control zero", function(assert) {
@@ -184,4 +204,9 @@ QUnit.test("Gets nonempty array of times behind fastest for full list of competi
 QUnit.test("Gets nonempty array of times behind fastest for partial list of competitors not in order", function(assert) {
     var splitInfo = new SplitInfo(getTestCourseData());
     assert.deepEqual(splitInfo.getTimesBehindFastest(2, [2, 1]), [249 - 197, 221 - 197]);
+});
+
+QUnit.test("Gets array of times behind fastest for last control", function(assert) {
+    var splitInfo = new SplitInfo(getTestCourseData());
+    assert.deepEqual(splitInfo.getTimesBehindFastest(4, [0, 1, 2]), [106 - 100, 100 - 100, 106 - 100]);
 });
