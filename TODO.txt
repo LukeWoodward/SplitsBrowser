@@ -1,6 +1,6 @@
 
 Names at the end of each chart line. (width of text?)  [DONE]
-Selectable stats at the end of each line, when hovered over.
+Selectable stats at the end of each line, when hovered over. [DONE]
 Selectable list of names, plus All and None buttons. [DONE]
 Adjust Y-scale depending on who is competing. [DONE]
 Parsing other file formats
