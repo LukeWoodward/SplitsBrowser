@@ -101,7 +101,7 @@ SplitsBrowser.Model.CompetitorSelection.prototype.toggle = function (index) {
             var position = this.currentIndexes.indexOf(index);
             if (position == -1) {
                 this.currentIndexes.push(index);
-                this.currentIndexes.sort(compareNumbers);
+                this.currentIndexes.sort(d3.ascending);
             } else {
                 this.currentIndexes.splice(position, 1);
             }

@@ -26,14 +26,3 @@ InvalidData.prototype.toString = function () {
 function throwInvalidData(message) {
     throw new InvalidData(message);
 }
-
-/**
-* Utility function used when sorting numbers.
-* @param {Number} x - One number to compare.
-* @param {Number} y - Another number to compare.
-* @returns {Number} A positive number if x > y, a negative number if x < y and
-*                   zero if x == y.
-*/
-function compareNumbers(x, y) {
-    return x - y;
-}

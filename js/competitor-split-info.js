@@ -9,7 +9,7 @@
 function getRanks(sourceData) {
     // First, sort the source data, removing nulls.
     var sortedData = sourceData.filter(function (x) { return x !== null; });
-    sortedData.sort(compareNumbers);
+    sortedData.sort(d3.ascending);
     
     // Now construct a map that maps from source value to rank.
     var rankMap = new d3.map();
