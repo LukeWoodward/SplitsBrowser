@@ -72,12 +72,12 @@ SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function 
 */
 SplitsBrowser.Controls.CompetitorListBox.prototype.setSelection = function (selection) {
     if (this.competitorSelection != null) {
-        this.competitorSelection.deregister(this.handler);
+        this.competitorSelection.deregisterChangeHandler(this.handler);
     }
 
     var outerThis = this;
     this.competitorSelection = selection;
     this.handler = function (indexes) { outerThis.selectionChanged(indexes); };
-    this.competitorSelection.register(this.handler);
+    this.competitorSelection.registerChangeHandler(this.handler);
 };
 

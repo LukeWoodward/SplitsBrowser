@@ -123,7 +123,7 @@ QUnit.test("Selecting all competitors makes all competitors selected, and select
 QUnit.test("Can register handler and have it called when competitor toggled", function (assert) {
     reset();
     var selection = new CompetitorSelection(3);
-    selection.register(testHandler);
+    selection.registerChangeHandler(testHandler);
     selection.toggle(2);
     assert.deepEqual(lastIndexes, [2], "Only competitor 2 should be selected");
     assert.equal(callCount, 1, "Handler should only have been called once");
@@ -131,7 +131,7 @@ QUnit.test("Can register handler and have it called when competitor toggled", fu
 
 QUnit.test("Modifying the returned list from a handler has no effect on the the selection", function (assert) {
     var selection = new CompetitorSelection(3);
-    selection.register(testHandler);
+    selection.registerChangeHandler(testHandler);
     selection.toggle(0);
     assert.deepEqual(lastIndexes, [0], "Only competitor 0 should be selected");
     lastIndexes.push(2);
@@ -141,7 +141,7 @@ QUnit.test("Modifying the returned list from a handler has no effect on the the 
 QUnit.test("Can register handler and have it called multiple times when multiple competitors toggled", function (assert) {
     reset();
     var selection = new CompetitorSelection(3);
-    selection.register(testHandler);
+    selection.registerChangeHandler(testHandler);
     selection.toggle(2);
     selection.toggle(0);
     assert.deepEqual(lastIndexes, [0, 2], "Only competitors 0 and 2 should be selected");
@@ -151,7 +151,7 @@ QUnit.test("Can register handler and have it called multiple times when multiple
 QUnit.test("Can register handler and have it called when all competitors selected", function (assert) {
     reset();
     var selection = new CompetitorSelection(3);
-    selection.register(testHandler);
+    selection.registerChangeHandler(testHandler);
     selection.selectAll();
     assert.deepEqual(lastIndexes, [0, 1, 2], "All competitors should be selected");
     assert.equal(callCount, 1, "Handler should only have been called once");
@@ -161,7 +161,7 @@ QUnit.test("Can register handler and have it called when all competitors deselec
     reset();
     var selection = new CompetitorSelection(3);
     selection.selectAll();
-    selection.register(testHandler);
+    selection.registerChangeHandler(testHandler);
     selection.selectNone();
     assert.deepEqual(lastIndexes, [], "No competitors should be selected");
     assert.equal(callCount, 1, "Handler should only have been called once");
@@ -178,8 +178,8 @@ QUnit.test("Can register multiple handlers and have them all called when competi
         callCount2 += 1;
     };
 
-    selection.register(testHandler);
-    selection.register(handler2);
+    selection.registerChangeHandler(testHandler);
+    selection.registerChangeHandler(handler2);
 
     selection.toggle(2);
 
@@ -192,8 +192,8 @@ QUnit.test("Can register multiple handlers and have them all called when competi
 QUnit.test("Handler only called once even if registered miltiple times", function (assert) {
     reset();
     var selection = new CompetitorSelection(3);
-    selection.register(testHandler);
-    selection.register(testHandler);
+    selection.registerChangeHandler(testHandler);
+    selection.registerChangeHandler(testHandler);
     selection.toggle(2);
     assert.deepEqual(lastIndexes, [2], "Only competitor 2 should have been selected");
     assert.equal(callCount, 1, "Handler should only have been called once");
@@ -202,12 +202,12 @@ QUnit.test("Handler only called once even if registered miltiple times", functio
 QUnit.test("Can deregister previously-registered handler", function (assert) {
     reset();
     var selection = new CompetitorSelection(3);
-    selection.register(testHandler);
+    selection.registerChangeHandler(testHandler);
     selection.toggle(2);
     assert.deepEqual(lastIndexes, [2], "Only competitor 2 should have been selected");
     assert.equal(callCount, 1, "Handler should only have been called once");
 
-    selection.deregister(testHandler);
+    selection.deregisterChangeHandler(testHandler);
     selection.toggle(2);
     assert.deepEqual(lastIndexes, [2], "Only competitor 2 should have been selected");
     assert.equal(callCount, 1, "Handler should still only have been called once");
@@ -216,13 +216,13 @@ QUnit.test("Can deregister previously-registered handler", function (assert) {
 QUnit.test("Can deregister previously-registered handler multiple times without error", function (assert) {
     reset();
     var selection = new CompetitorSelection(3);
-    selection.register(testHandler);
+    selection.registerChangeHandler(testHandler);
     selection.toggle(2);
     assert.deepEqual(lastIndexes, [2], "Only competitor 2 should have been selected");
     assert.equal(callCount, 1, "Handler should only have been called once");
 
-    selection.deregister(testHandler);
-    selection.deregister(testHandler);
+    selection.deregisterChangeHandler(testHandler);
+    selection.deregisterChangeHandler(testHandler);
     selection.toggle(2);
     assert.deepEqual(lastIndexes, [2], "Only competitor 2 should have been selected");
     assert.equal(callCount, 1, "Handler should still only have been called once");
@@ -231,6 +231,6 @@ QUnit.test("Can deregister previously-registered handler multiple times without 
 QUnit.test("Can deregister handler that was never registered without error", function (assert) {
     reset();
     var selection = new CompetitorSelection(3);
-    selection.deregister(testHandler);
+    selection.deregisterChangeHandler(testHandler);
     expect(0); // No assertions here, but there should also have been no errors.
 });

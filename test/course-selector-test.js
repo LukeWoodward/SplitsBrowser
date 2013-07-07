@@ -79,7 +79,7 @@ QUnit.test("Setting the selector back to an empty list of courses disables the s
 QUnit.test("Registering a handler and changing a value in the selector triggers a call to change callback", function(assert) {
     resetLastCourse();
     var selector = new CourseSelector(d3.select("#qunit-fixture").node());
-    selector.onCourseChanged(handleCourseChanged);
+    selector.registerChangeHandler(handleCourseChanged);
     
     selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])])
     var htmlSelectSelection = d3.select("#qunit-fixture select");
@@ -102,8 +102,8 @@ QUnit.test("Registering two handlers and changing a value in the selector trigge
     };
     
     var selector = new CourseSelector(d3.select("#qunit-fixture").node());
-    selector.onCourseChanged(handleCourseChanged);
-    selector.onCourseChanged(secondHandler);
+    selector.registerChangeHandler(handleCourseChanged);
+    selector.registerChangeHandler(secondHandler);
     
     selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])])
     var htmlSelectSelection = d3.select("#qunit-fixture select");
@@ -121,8 +121,8 @@ QUnit.test("Registering two handlers and changing a value in the selector trigge
 QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", function(assert) {
     resetLastCourse();
     var selector = new CourseSelector(d3.select("#qunit-fixture").node());
-    selector.onCourseChanged(handleCourseChanged);
-    selector.onCourseChanged(handleCourseChanged);
+    selector.registerChangeHandler(handleCourseChanged);
+    selector.registerChangeHandler(handleCourseChanged);
     
     selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])])
     var htmlSelectSelection = d3.select("#qunit-fixture select");

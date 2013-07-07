@@ -71,7 +71,7 @@ SplitsBrowser.Model.CompetitorSelection.prototype.selectNone = function () {
 *
 * @param {function} handler - The handler to register.
 */
-SplitsBrowser.Model.CompetitorSelection.prototype.register = function (handler) {
+SplitsBrowser.Model.CompetitorSelection.prototype.registerChangeHandler = function (handler) {
     if (this.changeHandlers.indexOf(handler) == -1) {
         this.changeHandlers.push(handler);
     }
@@ -84,7 +84,7 @@ SplitsBrowser.Model.CompetitorSelection.prototype.register = function (handler) 
 *
 * @param {function} handler - The handler to register.
 */
-SplitsBrowser.Model.CompetitorSelection.prototype.deregister = function (handler) {
+SplitsBrowser.Model.CompetitorSelection.prototype.deregisterChangeHandler = function (handler) {
     var index = this.changeHandlers.indexOf(handler);
     if (index > -1) {
         this.changeHandlers.splice(index, 1);

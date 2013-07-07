@@ -41,7 +41,7 @@ function buildUi() {
                        .attr("id", _TOP_PANEL_ID);
                        
     courseSelector = new SplitsBrowser.Controls.CourseSelector(topPanel.node());
-    courseSelector.onCourseChanged(selectCourse);
+    courseSelector.registerChangeHandler(selectCourse);
     
     statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(topPanel.node());
     
@@ -120,7 +120,7 @@ function drawChart() {
     chart.drawChart(chartData, splitInfo, cumTimes, currentIndexes, currentVisibleStatistics);
 
     if (selectionChangeHandler != null) {
-        selection.deregister(selectionChangeHandler);
+        selection.deregisterChangeHandler(selectionChangeHandler);
     }
     
     if (statisticsChangeHandler != null) {
@@ -138,7 +138,7 @@ function drawChart() {
         redraw();
     };
 
-    selection.register(selectionChangeHandler);
+    selection.registerChangeHandler(selectionChangeHandler);
     
     statisticsChangeHandler = function (visibleStatistics) {
         currentVisibleStatistics = visibleStatistics;

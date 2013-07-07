@@ -47,14 +47,13 @@ SplitsBrowser.Controls.CourseSelector.prototype.setCourses = function(courses) {
 
 /**
 * Add a change handler to be called whenever the selected course is changed.
-* changes.
 *
 * The index of the newly-selected item is passed to each handler function.
 *
 * @param {Function} handler - Handler function to be called whenever the course
 *                   changes.
 */
-SplitsBrowser.Controls.CourseSelector.prototype.onCourseChanged = function(handler) {
+SplitsBrowser.Controls.CourseSelector.prototype.registerChangeHandler = function(handler) {
     if (this.changeHandlers.indexOf(handler) == -1) {
         this.changeHandlers.push(handler);
     }    
