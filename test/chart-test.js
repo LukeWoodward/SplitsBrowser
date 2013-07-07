@@ -61,7 +61,7 @@ QUnit.test("Can create a chart", function (assert) {
 
     var chart = createTestChart();
     chart.setSize(1000, 1000);
-    chart.drawChart(chartData, splitInfo, fastestTime.getCumulativeTimes(), [0, 1]);
+    chart.drawChart(chartData, splitInfo, fastestTime.getCumulativeTimes(), [0, 1], [true, true, true]);
 
     // Most of the testing of the chart functionality is visual, so it isn't
     // realistic to perform any automated tests for this.  However, it is

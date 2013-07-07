@@ -43,3 +43,20 @@ div.competitor.selected
     background-color: #286880;
     color: white;
 }
+
+#statisticSelector
+{
+    float: right;
+}
+
+#statisticSelector label
+{
+    vertical-align: middle;
+    margin-left: 3px;
+    margin-right: 10px;
+}
+
+#statisticSelector input
+{
+    vertical-align: middle;
+}

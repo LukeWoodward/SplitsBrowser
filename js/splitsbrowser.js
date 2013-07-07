@@ -12,10 +12,10 @@ var courses = null;
 var currentResult = null;
 var selection = null;
 var currentIndexes = null;
-var selectionChangeHandler = null;
 
 var selection = null;
 var courseSelector = null;
+var statisticsSelector = null;
 var competitorListBox = null;
 var chart = null;
 var topPanel = null;
@@ -42,6 +42,8 @@ function buildUi() {
                        
     courseSelector = new SplitsBrowser.Controls.CourseSelector(topPanel.node());
     courseSelector.onCourseChanged(selectCourse);
+    
+    statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(topPanel.node());
     
     var mainPanel = body.append("div");
     
@@ -98,8 +100,13 @@ function drawChart() {
     var cumTimes = fastestTime.getCumulativeTimes();
     var splitInfo = new SplitsBrowser.Model.CompetitorSplitInfo(currentResult);
 
+    var selectionChangeHandler = null;
+    var statisticsChangeHandler = null;
+    
     var windowWidth = $(window).width();
     var windowHeight = $(window).height();
+    
+    var currentVisibleStatistics = statisticsSelector.getVisibleStatistics();
 
     competitorListBox.setCompetitorList(currentResult.competitorData);
 
@@ -110,19 +117,35 @@ function drawChart() {
     var chartHeight = windowHeight - 19 - topPanelHeight;
 
     chart.setSize(chartWidth, chartHeight);
-    chart.drawChart(chartData, splitInfo, cumTimes, currentIndexes);
+    chart.drawChart(chartData, splitInfo, cumTimes, currentIndexes, currentVisibleStatistics);
 
     if (selectionChangeHandler != null) {
         selection.deregister(selectionChangeHandler);
     }
+    
+    if (statisticsChangeHandler != null) {
+        statisticsSelector.deregisterChangeHandler(statisticsChangeHandler);
+    }
 
+    
+    var redraw = function() {
+        chartData = currentResult.getChartData(fastestTime, currentIndexes);
+        chart.drawChart(chartData, splitInfo, cumTimes, currentIndexes, currentVisibleStatistics);
+    };
+    
     selectionChangeHandler = function (indexes) {
         currentIndexes = indexes;
-        chartData = currentResult.getChartData(fastestTime, indexes);
-        chart.drawChart(chartData, splitInfo, cumTimes, indexes);
+        redraw();
     };
 
     selection.register(selectionChangeHandler);
+    
+    statisticsChangeHandler = function (visibleStatistics) {
+        currentVisibleStatistics = visibleStatistics;
+        redraw();
+    };
+    
+    statisticsSelector.registerChangeHandler(statisticsChangeHandler);
 
     $("body").height(windowHeight - 19 - topPanelHeight);
     $(_COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(_ALL_OR_NONE_BUTTONS_PANEL_ID_SELECTOR).height() - topPanelHeight);

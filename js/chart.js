@@ -171,19 +171,25 @@ SplitsBrowser.Controls.Chart.prototype.updateCompetitorStatistics = function() {
         
     var labelTexts = this.names;
     if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
-        var cumTimes = this.splitInfo.getCumulativeTimes(this.currentControlIndex, this.selectedIndexes);
-        var cumRanks = this.splitInfo.getCumulativeRanks(this.currentControlIndex, this.selectedIndexes);
-        labelTexts = d3.zip(labelTexts, cumTimes, cumRanks)
-                       .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
+        if (this.visibleStatistics[0]) {
+            var cumTimes = this.splitInfo.getCumulativeTimes(this.currentControlIndex, this.selectedIndexes);
+            var cumRanks = this.splitInfo.getCumulativeRanks(this.currentControlIndex, this.selectedIndexes);
+            labelTexts = d3.zip(labelTexts, cumTimes, cumRanks)
+                           .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
+        }
                        
-        var splitTimes = this.splitInfo.getSplits(this.currentControlIndex, this.selectedIndexes);
-        var splitRanks = this.splitInfo.getSplitRanks(this.currentControlIndex, this.selectedIndexes);
-        labelTexts = d3.zip(labelTexts, splitTimes, splitRanks)
-                       .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
-                       
-        var timesBehind = this.splitInfo.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexes);
-        labelTexts = d3.zip(labelTexts, timesBehind)
-                       .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
+        if (this.visibleStatistics[1]) {
+            var splitTimes = this.splitInfo.getSplits(this.currentControlIndex, this.selectedIndexes);
+            var splitRanks = this.splitInfo.getSplitRanks(this.currentControlIndex, this.selectedIndexes);
+            labelTexts = d3.zip(labelTexts, splitTimes, splitRanks)
+                           .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
+        }
+         
+        if (this.visibleStatistics[2]) {
+            var timesBehind = this.splitInfo.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexes);
+            labelTexts = d3.zip(labelTexts, timesBehind)
+                           .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
+        }
     }
        
     d3.selectAll("text.competitorLabel").data(labelTexts)
@@ -311,7 +317,18 @@ SplitsBrowser.Controls.Chart.prototype.getMaxTimeBehindFastestWidth = function()
 * @returns {Number} Maximum width of the statistics text, in pixels.
 */
 SplitsBrowser.Controls.Chart.prototype.determineMaxStatisticTextWidth = function() {
-    return this.getMaxCumulativeTimeAndRankTextWidth() + this.getMaxSplitTimeAndRankTextWidth() + this.getMaxTimeBehindFastestWidth();
+    var maxWidth = 0;
+    if (this.visibleStatistics[0]) {
+        maxWidth += this.getMaxCumulativeTimeAndRankTextWidth();
+    }
+    if (this.visibleStatistics[1]) {
+        maxWidth += this.getMaxSplitTimeAndRankTextWidth();
+    }
+    if (this.visibleStatistics[2]) {
+        maxWidth += this.getMaxTimeBehindFastestWidth();
+    }
+    
+    return maxWidth;
 };
 
 /**
@@ -492,14 +509,17 @@ SplitsBrowser.Controls.Chart.prototype.setSize = function (overallWidth, overall
 * @param {Array} selectedIndexes - Array of indexes of selected competitors
 *                (0 in this array means the first competitor is selected, 1
 *                means the second is selected, and so on.)
+* @param {Array} visibleStatistics - Array of boolean flags indicating whether
+                                     certain statistics are visible.
 */
-SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, splitInfo, cumTimes, selectedIndexes) {
+SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, splitInfo, cumTimes, selectedIndexes, visibleStatistics) {
     this.numControls = chartData.numControls;
     this.names = chartData.competitorNames;
     this.numLines = this.names.length;
     this.selectedIndexes = selectedIndexes;
     this.cumTimes = cumTimes;
     this.splitInfo = splitInfo;
+    this.visibleStatistics = visibleStatistics;
     this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
     this.adjustContentSize();
     this.createScales(chartData);
