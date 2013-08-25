@@ -9,7 +9,7 @@ module.exports = function(grunt) {
       dist: {
         src: ['js/core.js', 'js/util.js', 'js/competitor-listbox.js', 'js/competitor-selection.js',
              'js/competitor-split-info.js', 'js/course-selector.js', 'js/csv-reader.js', 'js/model.js',
-             'js/statistics-selector.js', 'js/chart.js', 'js/splitsbrowser.js'],
+             'js/statistics-selector.js', 'js/chart.js', 'js/viewer.js'],
         dest: '<%= pkg.name %>.js',
         nonull: true
       }
