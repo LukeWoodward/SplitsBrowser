@@ -42,7 +42,7 @@
                        
             optionsList.exit().remove();
         } else {
-            throwInvalidData("CourseSelector.setCourses: options is not an array");
+            SplitsBrowser.throwInvalidData("CourseSelector.setCourses: options is not an array");
         }
     };
 

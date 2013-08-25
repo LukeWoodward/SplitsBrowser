@@ -32,7 +32,7 @@
     * @returns Time and rank formatted as a string.
     */
     function formatTimeAndRank(time, rank) {
-        return SPACER + formatTime(time) + " (" + rank + ")";
+        return SPACER + SplitsBrowser.formatTime(time) + " (" + rank + ")";
     }
 
     /**
@@ -191,7 +191,7 @@
             if (this.visibleStatistics[2]) {
                 var timesBehind = this.splitInfo.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexes);
                 labelTexts = d3.zip(labelTexts, timesBehind)
-                               .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
+                               .map(function(pair) { return pair[0] + SPACER + SplitsBrowser.formatTime(pair[1]); });
             }
         }
            
@@ -270,10 +270,10 @@
         // Split times and ranks.
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
             var times = this.splitInfo[timeFuncName](controlIndex, this.selectedIndexes);
-            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+            maxTime = Math.max(maxTime, d3.max(times.filter(SplitsBrowser.isNotNull)));
             
             var ranks = this.splitInfo[rankFuncName](controlIndex, this.selectedIndexes);
-            maxRank = Math.max(maxRank, d3.max(ranks.filter(isNotNull)));
+            maxRank = Math.max(maxRank, d3.max(ranks.filter(SplitsBrowser.isNotNull)));
         }
         
         var text = formatTimeAndRank(maxTime, maxRank);
@@ -309,10 +309,10 @@
         
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
             var times = this.splitInfo.getTimesBehindFastest(controlIndex, this.selectedIndexes);
-            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+            maxTime = Math.max(maxTime, d3.max(times.filter(SplitsBrowser.isNotNull)));
         }
         
-        return this.getTextWidth(SPACER + formatTime(maxTime));
+        return this.getTextWidth(SPACER + SplitsBrowser.formatTime(maxTime));
     };
 
     /**

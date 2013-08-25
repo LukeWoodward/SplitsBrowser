@@ -41,7 +41,7 @@
                 var times = parts.map(SplitsBrowser.Input.CSV.parseCompetitorTime);
                 return new SplitsBrowser.Model.CompetitorData(index + 1, forename, surname, club, startTime, times);
             } else {
-                throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor on course with " + controlCount + " controls, got " + (parts.length) + " instead.");
+                SplitsBrowser.throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor on course with " + controlCount + " controls, got " + (parts.length) + " instead.");
             }
         },
 
@@ -51,9 +51,9 @@
         * @return {SplitsBrowser.Model.CourseData} Parsed course data.
         */
         parseCourseData: function (courseData) {
-            var lines = courseData.split("\r\n").filter(isTrue);
+            var lines = courseData.split("\r\n").filter(SplitsBrowser.isTrue);
             if (lines.length === 0) {
-                throwInvalidData("parseCourseData got an empty list of lines");
+                SplitsBrowser.throwInvalidData("parseCourseData got an empty list of lines");
             }
 
             var firstLineParts = lines.shift().split(",");
@@ -62,16 +62,16 @@
                 var controlCountStr = firstLineParts.shift();
                 var controlCount = parseInt(controlCountStr, 10);
                 if (isNaN(controlCount)) {
-                    throwInvalidData("Could not read control count: '" + controlCountStr + "'");
+                    SplitsBrowser.throwInvalidData("Could not read control count: '" + controlCountStr + "'");
                 } else if (controlCount < 0) {
-                    throwInvalidData("Expected a positive control count, got " + controlCount + " instead");
+                    SplitsBrowser.throwInvalidData("Expected a positive control count, got " + controlCount + " instead");
                 } else {
                     var competitorData = lines.map(function (line, index) { return SplitsBrowser.Input.CSV.parseCompetitorData(index, line, controlCount); });
                     competitorData.sort(SplitsBrowser.Model.compareCompetitors);
                     return new SplitsBrowser.Model.CourseData(courseName, controlCount, competitorData);
                 }
             } else {
-                throwInvalidData("Expected first line to have two parts (course name and number of controls), got " + firstLineParts.length + " part(s) instead");
+                SplitsBrowser.throwInvalidData("Expected first line to have two parts (course name and number of controls), got " + firstLineParts.length + " part(s) instead");
             }
         },
 
@@ -81,7 +81,7 @@
         * @return {Array} Array of CourseData objects.
         */
         parseEventData: function (eventData) {
-            var courseDatas = eventData.split("\r\n\r\n").map($.trim).filter(isTrue);
+            var courseDatas = eventData.split("\r\n\r\n").map($.trim).filter(SplitsBrowser.isTrue);
             return courseDatas.map(SplitsBrowser.Input.CSV.parseCourseData);
         }
     };

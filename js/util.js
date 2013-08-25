@@ -6,30 +6,30 @@
      * @param x - Any input value
      * @returns The input value.
      */
-    function isTrue(x) { return x; }
+    SplitsBrowser.isTrue = function (x) { return x; };
 
     /**
     * Utility function that returns whether a value is null.
     * @param x - Any input value.
     * @returns True if the value is not null, false otherwise.
     */
-    function isNotNull(x) { return x !== null; }
+    SplitsBrowser.isNotNull = function (x) { return x !== null; };
 
     /**
     * Exception object raised if invalid data is passed.
     * @constructor.
     * @param {string} message - The exception detail message.
     */
-    function InvalidData(message) {
+    SplitsBrowser.InvalidData = function (message) {
         this.name = "InvalidData";
         this.message = message;
-    }
+    };
 
     /**
     * Returns a string representation of this exception.
     * @returns {String} String representation.
     */
-    InvalidData.prototype.toString = function () {
+    SplitsBrowser.InvalidData.prototype.toString = function () {
         return this.name + ": " + this.message;
     };
 
@@ -38,9 +38,9 @@
     * @param {string} message - The exception message.
     * @throws {InvalidData}
     */
-    function throwInvalidData(message) {
-        throw new InvalidData(message);
-    }
+    SplitsBrowser.throwInvalidData = function (message) {
+        throw new SplitsBrowser.InvalidData(message);
+    };
 
     /**
     * Formats a time period given as a number of seconds as a string in the form
@@ -48,7 +48,7 @@
     * @param {Number} seconds - The number of seconds.
     * @returns {string} The string formatting of the time.
     */
-    function formatTime(seconds) {
+    SplitsBrowser.formatTime = function (seconds) {
         var result = "";
         if (seconds < 0) {
             result = "-";
@@ -75,5 +75,5 @@
         result += secs;
         
         return result;
-    }
+    };
 })();

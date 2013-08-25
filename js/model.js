@@ -49,7 +49,7 @@
     SplitsBrowser.Model.CompetitorData = function (order, forename, surname, club, startTime, times) {
 
         if (typeof (order) !== _NUMBER_TYPE) {
-            throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
+            SplitsBrowser.throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
         } else if (!$.isArray(times)) {
             throw new TypeError("times must be an array - got " + typeof (times) + " instead");
         }
@@ -74,11 +74,11 @@
     */
     SplitsBrowser.Model.CompetitorData.prototype.adjustToReference = function (reference) {
         if (typeof (reference.times) === "undefined") {
-            throwInvalidData("Cannot adjust competitor times because reference object does not have times (is it a competitor object?)");
+            SplitsBrowser.throwInvalidData("Cannot adjust competitor times because reference object does not have times (is it a competitor object?)");
         } else if (reference.times.length !== this.times.length) {
-            throwInvalidData("Cannot adjust competitor times because the numbers of times are different (" + this.times.length + " and " + reference.times.length + ")");
+            SplitsBrowser.throwInvalidData("Cannot adjust competitor times because the numbers of times are different (" + this.times.length + " and " + reference.times.length + ")");
         } else if (reference.times.indexOf(null) > -1) {
-            throwInvalidData("Cannot adjust a competitor time by a competitor with missing times");
+            SplitsBrowser.throwInvalidData("Cannot adjust a competitor time by a competitor with missing times");
         }
 
         var adjustedTimes = this.times.map(function (time, idx) { return (time === null) ? null : (time - reference.times[idx]); });
@@ -212,7 +212,7 @@
     */
     SplitsBrowser.Model.CourseData.prototype.getChartData = function (referenceData, currentIndexes) {
         if (this.isEmpty()) {
-            throwInvalidData("Cannot return data as columns when there is no data");
+            SplitsBrowser.throwInvalidData("Cannot return data as columns when there is no data");
         } else if (typeof referenceData === "undefined") {
             throw new TypeError("referenceData object undefined or missing");
         }

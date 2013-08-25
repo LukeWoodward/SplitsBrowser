@@ -1,4 +1,4 @@
-﻿/* global SplitsBrowser, throwInvalidData, d3 */
+﻿/* global SplitsBrowser, d3 */
 (function (){
     "use strict";
 
@@ -17,9 +17,9 @@
     */
     SplitsBrowser.Model.CompetitorSelection = function (count) {
         if (typeof (count) != _NUMBER_TYPE) {
-            throwInvalidData("Competitor count must be a number");
+            SplitsBrowser.throwInvalidData("Competitor count must be a number");
         } else if (count <= 0) {
-            throwInvalidData("Competitor count must be a positive number");
+            SplitsBrowser.throwInvalidData("Competitor count must be a positive number");
         }
 
         this.count = count;
@@ -110,10 +110,10 @@
 
                 this.fireChangeHandlers();
             } else {
-                throwInvalidData("Index '" + index + "' is out of range");
+                SplitsBrowser.throwInvalidData("Index '" + index + "' is out of range");
             }
         } else {
-            throwInvalidData("Index is not a number");
+            SplitsBrowser.throwInvalidData("Index is not a number");
         }
     };
 })();

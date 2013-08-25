@@ -7,8 +7,11 @@ module.exports = function(grunt) {
         separator: ';'
       },
       dist: {
-        src: ['js/**/*.js'],
-        dest: '<%= pkg.name %>.js'
+        src: ['js/core.js', 'js/util.js', 'js/competitor-listbox.js', 'js/competitor-selection.js',
+             'js/competitor-split-info.js', 'js/course-selector.js', 'js/csv-reader.js', 'js/model.js',
+             'js/statistics-selector.js', 'js/chart.js', 'js/splitsbrowser.js'],
+        dest: '<%= pkg.name %>.js',
+        nonull: true
       }
     },    
     uglify: {
@@ -19,7 +22,7 @@ module.exports = function(grunt) {
       }
     },
     qunit: {
-      files: ['test/**/*.html']
+      files: ['qunit-tests.html']
     },
     jshint: {
       files: ['gruntfile.js', 'js/*.js', 'test/*-test.js'],
