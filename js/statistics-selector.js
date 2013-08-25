@@ -45,7 +45,7 @@
     *                             changes.
     */
     SplitsBrowser.Controls.StatisticsSelector.prototype.registerChangeHandler = function (handler) {
-        if (this.handlers.indexOf(handler) == -1) {
+        if (this.handlers.indexOf(handler) === -1) {
             this.handlers.push(handler);
         }
     };
@@ -59,8 +59,8 @@
     *                             changes.
     */
     SplitsBrowser.Controls.StatisticsSelector.prototype.deregisterChangeHandler = function (handler) {
-        var index = this.handlers.indexOf(handler) == -1;
-        if (index != -1) {
+        var index = this.handlers.indexOf(handler);
+        if (index !== -1) {
             this.handlers.splice(index, 1);
         }
     };
