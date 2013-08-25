@@ -1,3 +1,8 @@
+/* jslint -W097 */  // Disable grumbling about use strict not inside a function.
+/* global d3, $ */
+/* global QUnit, module, expect */
+/* global SplitsBrowser */
+
 "use strict";
 
 var Selector = SplitsBrowser.Controls.StatisticsSelector;

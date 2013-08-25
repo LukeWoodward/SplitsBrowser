@@ -1,4 +1,8 @@
-﻿"use strict";
+﻿/* global SplitsBrowser, d3, $ */
+
+(function (){
+
+"use strict";
 
 var _TEXT_SIZE_SHIM_ID = "sb-text-size-shim";
 var _TEXT_SIZE_SHIM_ID_SELECTOR = "#" + _TEXT_SIZE_SHIM_ID;
@@ -86,14 +90,14 @@ SplitsBrowser.Controls.Chart.prototype.onMouseEnter = function() {
 * @param {EventObject} event - The event object.
 */
 SplitsBrowser.Controls.Chart.prototype.onMouseMove = function(event) {
-    if (this.isMouseIn && this.xScale != null) {
+    if (this.isMouseIn && this.xScale !== null) {
         var svgNodeAsJQuery = $(this.svg.node());
         var offset = svgNodeAsJQuery.offset();
         var xOffset = event.pageX - offset.left;
         var yOffset = event.pageY - offset.top;
         
-        if (   margin.left <= xOffset && xOffset < svgNodeAsJQuery.width() - margin.right 
-            && margin.top <= yOffset && yOffset < svgNodeAsJQuery.height() - margin.bottom) {
+        if (margin.left <= xOffset && xOffset < svgNodeAsJQuery.width() - margin.right && 
+            margin.top <= yOffset && yOffset < svgNodeAsJQuery.height() - margin.bottom) {
             // In the chart.
             // Get the time offset that the mouse is currently over.
             var chartX = this.xScale.invert(xOffset - margin.left);
@@ -112,7 +116,7 @@ SplitsBrowser.Controls.Chart.prototype.onMouseMove = function(event) {
                 controlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
             }
             
-            if (this.currentControlIndex === null || this.currentControlIndex != controlIndex) {
+            if (this.currentControlIndex === null || this.currentControlIndex !== controlIndex) {
                 // The control line has appeared for ths first time or has moved, so redraw it.
                 this.removeControlLine();
                 this.drawControlLine(controlIndex);
@@ -158,7 +162,7 @@ SplitsBrowser.Controls.Chart.prototype.drawControlLine = function(controlIndex) 
 SplitsBrowser.Controls.Chart.prototype.removeControlLine = function() {
     this.currentControlIndex = null;
     this.updateCompetitorStatistics();
-    if (this.controlLine != null) {
+    if (this.controlLine !== null) {
         d3.select(this.controlLine).remove();
         this.controlLine = null;
     }
@@ -209,9 +213,9 @@ SplitsBrowser.Controls.Chart.prototype.updateCompetitorStatistics = function() {
 SplitsBrowser.Controls.Chart.prototype.getTickFormatter = function () {
     var outerThis = this;
     return function (value, idx) {
-        return (idx == 0) ? "S" : ((idx == outerThis.numControls + 1) ? "F" : idx.toString());
+        return (idx === 0) ? "S" : ((idx === outerThis.numControls + 1) ? "F" : idx.toString());
     };
-}
+};
 
 /**
 * Get the width of a piece of text.
@@ -240,7 +244,7 @@ SplitsBrowser.Controls.Chart.prototype.getTextHeight = function (text) {
 * @returns {Number} Maximum width of text, in pixels.
 */
 SplitsBrowser.Controls.Chart.prototype.getMaxGraphEndTextWidth = function () {
-    if (this.selectedIndexes.length == 0 || this.names.length == 0) {
+    if (this.selectedIndexes.length === 0 || this.names.length === 0) {
         // No competitors selected or no names yet.  Avoid problems caused
         // by trying to find the maximum of an empty array.
         return 0;
@@ -284,7 +288,7 @@ SplitsBrowser.Controls.Chart.prototype.getMaxTimeAndRankTextWidth = function(tim
 */
 SplitsBrowser.Controls.Chart.prototype.getMaxSplitTimeAndRankTextWidth = function() {
     return this.getMaxTimeAndRankTextWidth("getSplits", "getSplitRanks");
-}
+};
 
 /**
 * Return the maximum width of the cumulative time and cumulative-time rank text
@@ -294,7 +298,7 @@ SplitsBrowser.Controls.Chart.prototype.getMaxSplitTimeAndRankTextWidth = functio
 */
 SplitsBrowser.Controls.Chart.prototype.getMaxCumulativeTimeAndRankTextWidth = function() {
     return this.getMaxTimeAndRankTextWidth("getCumulativeTimes", "getCumulativeRanks");
-}
+};
 
 /**
 * Return the maximum width of the behind-fastest time shown to the right of
@@ -347,7 +351,7 @@ SplitsBrowser.Controls.Chart.prototype.createScales = function (chartData) {
 */
 SplitsBrowser.Controls.Chart.prototype.drawBackgroundRectangles = function () {
     var rects = this.svgGroup.selectAll("rect")
-                             .data(d3.range(this.numControls + 1))
+                             .data(d3.range(this.numControls + 1));
 
     var outerThis = this;
 
@@ -355,9 +359,9 @@ SplitsBrowser.Controls.Chart.prototype.drawBackgroundRectangles = function () {
 
     rects.attr("x", function (index) { return outerThis.xScale(outerThis.cumTimes[index]); })
             .attr("y", 0)
-            .attr("width", function (index) { return outerThis.xScale(outerThis.cumTimes[index + 1] - outerThis.cumTimes[index]) })
+            .attr("width", function (index) { return outerThis.xScale(outerThis.cumTimes[index + 1] - outerThis.cumTimes[index]); })
             .attr("height", this.contentHeight)
-            .attr("fill", function (index) { return (index % 2 == 0) ? backgroundColour1 : backgroundColour2; });
+            .attr("fill", function (index) { return (index % 2 === 0) ? backgroundColour1 : backgroundColour2; });
 
     rects.exit().remove();
 };
@@ -528,3 +532,5 @@ SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, splitInf
     this.drawChartLines(chartData);
     this.drawCompetitorLegendLabels(chartData);
 };
+
+})();

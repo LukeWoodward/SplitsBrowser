@@ -1,4 +1,5 @@
-﻿"use strict";
+﻿(function () {
+"use strict";
 
 var _NUMBER_TYPE = typeof 0;
 
@@ -19,12 +20,12 @@ var _NUMBER_TYPE = typeof 0;
 * @returns {Number} Result of comparing two competitors.  TH
 */
 SplitsBrowser.Model.compareCompetitors = function (a, b) {
-    if (a.totalTime == b.totalTime) {
+    if (a.totalTime === b.totalTime) {
         return a.order - b.order;
-    } else if (a.totalTime == null) {
-        return (b.totalTime == null) ? 0 : 1;
+    } else if (a.totalTime === null) {
+        return (b.totalTime === null) ? 0 : 1;
     } else {
-        return (b.totalTime == null) ? -1 : a.totalTime - b.totalTime;
+        return (b.totalTime === null) ? -1 : a.totalTime - b.totalTime;
     }
 };
 
@@ -47,7 +48,7 @@ SplitsBrowser.Model.compareCompetitors = function (a, b) {
  */
 SplitsBrowser.Model.CompetitorData = function (order, forename, surname, club, startTime, times) {
 
-    if (typeof (order) != _NUMBER_TYPE) {
+    if (typeof (order) !== _NUMBER_TYPE) {
         throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
     } else if (!$.isArray(times)) {
         throw new TypeError("times must be an array - got " + typeof (times) + " instead");
@@ -74,13 +75,13 @@ SplitsBrowser.Model.CompetitorData = function (order, forename, surname, club, s
 SplitsBrowser.Model.CompetitorData.prototype.adjustToReference = function (reference) {
     if (typeof (reference.times) === "undefined") {
         throwInvalidData("Cannot adjust competitor times because reference object does not have times (is it a competitor object?)");
-    } else if (reference.times.length != this.times.length) {
+    } else if (reference.times.length !== this.times.length) {
         throwInvalidData("Cannot adjust competitor times because the numbers of times are different (" + this.times.length + " and " + reference.times.length + ")");
     } else if (reference.times.indexOf(null) > -1) {
         throwInvalidData("Cannot adjust a competitor time by a competitor with missing times");
     }
 
-    var adjustedTimes = this.times.map(function (time, idx) { return (time == null) ? null : (time - reference.times[idx]); });
+    var adjustedTimes = this.times.map(function (time, idx) { return (time === null) ? null : (time - reference.times[idx]); });
     return new SplitsBrowser.Model.CompetitorData(this.order, this.forename, this.surname, this.club, this.startTime, adjustedTimes);
 };
 
@@ -97,7 +98,7 @@ SplitsBrowser.Model.CompetitorData.prototype.getCumulativeTimes = function() {
     var cumulativeTimes = new Array(this.times.length + 1);
     cumulativeTimes[0] = 0;
     for (var i = 0; i < this.times.length; ++i) {
-        if (this.times[i] == null) {
+        if (this.times[i] === null) {
             cumulativeTimes[i + 1] = null;
         } else {
             totalTime += this.times[i];
@@ -126,7 +127,7 @@ SplitsBrowser.Model.CourseData = function (course, numControls, competitorData) 
 * @returns {boolean} True if course empty, false if course not empty.
 */
 SplitsBrowser.Model.CourseData.prototype.isEmpty = function () {
-    return this.competitorData.length == 0;
+    return this.competitorData.length === 0;
 };
 
 /**
@@ -157,7 +158,7 @@ SplitsBrowser.Model.CourseData.prototype.adjustToReference = function (reference
 */
 SplitsBrowser.Model.CourseData.prototype.getWinner = function () {
     var completed = this.competitorData.filter(function (comp) { return comp.totalTime !== null; });
-    if (completed.length == 0) {
+    if (completed.length === 0) {
         return null;
     } else {
         var winner = completed[0];
@@ -189,7 +190,7 @@ SplitsBrowser.Model.CourseData.prototype.getFastestTime = function () {
             }
         }
 
-        if (fastestForThisControl == null) {
+        if (fastestForThisControl === null) {
             // No fastest time recorded for this control.
             return null;
         } else {
@@ -212,7 +213,7 @@ SplitsBrowser.Model.CourseData.prototype.getFastestTime = function () {
 SplitsBrowser.Model.CourseData.prototype.getChartData = function (referenceData, currentIndexes) {
     if (this.isEmpty()) {
         throwInvalidData("Cannot return data as columns when there is no data");
-    } else if (typeof referenceData == "undefined") {
+    } else if (typeof referenceData === "undefined") {
         throw new TypeError("referenceData object undefined or missing");
     }
 
@@ -224,7 +225,7 @@ SplitsBrowser.Model.CourseData.prototype.getChartData = function (referenceData,
     var xMax = d3.sum(referenceData.times);
     var yMin;
     var yMax;
-    if (currentIndexes.length == 0) {
+    if (currentIndexes.length === 0) {
         // No competitors selected.  Set yMin and yMax to the boundary
         // values of the first competitor.
         var firstCompetitorTimes = adjustedCompetitorData[0].getCumulativeTimes();
@@ -235,7 +236,7 @@ SplitsBrowser.Model.CourseData.prototype.getChartData = function (referenceData,
         yMax = d3.max(cumulativeTimesByCompetitor.map(function (values) { return d3.max(values); }));
     }
 
-    if (yMax == yMin) {
+    if (yMax === yMin) {
         // yMin and yMax will be used to scale a y-axis, so we'd better
         // make sure that they're not equal.
         yMax = yMin + 1;
@@ -251,3 +252,4 @@ SplitsBrowser.Model.CourseData.prototype.getChartData = function (referenceData,
         yExtent: [yMin, yMax]
     };
 };
+})();

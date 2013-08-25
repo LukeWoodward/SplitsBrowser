@@ -1,4 +1,6 @@
-﻿"use strict";
+﻿/* global SplitsBrowser, d3, $ */
+(function (){
+"use strict";
 
 var _COMPETITOR_LIST_ID = "competitorList";
 var _COMPETITOR_LIST_ID_SELECTOR = "#" + _COMPETITOR_LIST_ID;
@@ -58,7 +60,7 @@ SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function 
     var outerThis = this;
 
     competitors.enter().append("div")
-                        .attr("class", "competitor")
+                        .attr("class", "competitor");
 
     competitors.text(function (comp) { return comp.name; })
                 .on("click", function (comp, idx) { outerThis.toggleCompetitor(idx); });
@@ -71,7 +73,7 @@ SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function 
 * @param {SplitsBrowser.Controls.CompetitorSelection} selection - Competitor selection.
 */
 SplitsBrowser.Controls.CompetitorListBox.prototype.setSelection = function (selection) {
-    if (this.competitorSelection != null) {
+    if (this.competitorSelection !== null) {
         this.competitorSelection.deregisterChangeHandler(this.handler);
     }
 
@@ -80,4 +82,4 @@ SplitsBrowser.Controls.CompetitorListBox.prototype.setSelection = function (sele
     this.handler = function (indexes) { outerThis.selectionChanged(indexes); };
     this.competitorSelection.registerChangeHandler(this.handler);
 };
-
+})();

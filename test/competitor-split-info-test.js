@@ -1,6 +1,13 @@
+/* jslint -W097 */  // Disable grumbling about use strict not inside a function.
+/* global d3 */
+/* global QUnit, module, expect */
+/* global SplitsBrowser, getRanks, selectByIndexes */
+
 "use strict";
 
 var SplitInfo = SplitsBrowser.Model.CompetitorSplitInfo;
+var CompetitorData = SplitsBrowser.Model.CompetitorData;
+var CourseData = SplitsBrowser.Model.CourseData;
 
 module("getRanks");
 

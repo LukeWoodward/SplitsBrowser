@@ -1,3 +1,4 @@
+(function (){
 "use strict";
 
 /**
@@ -25,7 +26,7 @@ SplitsBrowser.Controls.CourseSelector = function(parent) {
 SplitsBrowser.Controls.CourseSelector.prototype.setCourses = function(courses) {
     if ($.isArray(courses)) {
         var options;
-        if (courses.length == 0) {
+        if (courses.length === 0) {
             this.dropDown.disabled = true;
             options = ["[No courses loaded]"];
         } else {
@@ -54,7 +55,7 @@ SplitsBrowser.Controls.CourseSelector.prototype.setCourses = function(courses) {
 *                   changes.
 */
 SplitsBrowser.Controls.CourseSelector.prototype.registerChangeHandler = function(handler) {
-    if (this.changeHandlers.indexOf(handler) == -1) {
+    if (this.changeHandlers.indexOf(handler) === -1) {
         this.changeHandlers.push(handler);
     }    
 };
@@ -66,3 +67,4 @@ SplitsBrowser.Controls.CourseSelector.prototype.onSelectionChanged = function() 
     var outerThis = this;
     this.changeHandlers.forEach(function(handler) { handler(outerThis.dropDown.selectedIndex); });
 };
+})();

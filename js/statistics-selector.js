@@ -1,5 +1,5 @@
+(function () {
 "use strict";
-
 
 var _STATISTIC_SELECTOR_ID = "statisticSelector";
 
@@ -24,7 +24,7 @@ SplitsBrowser.Controls.StatisticsSelector = function (parent) {
      
     childSpans.append("input")
               .attr("type", "checkbox")
-              .attr("id", function(val, index) { return _LABEL_ID_PREFIX + index; })
+              .attr("id", function(val, index) { return _LABEL_ID_PREFIX + index; });
               
     childSpans.append("label")
               .attr("for", function(val, index) { return _LABEL_ID_PREFIX + index; })
@@ -48,7 +48,7 @@ SplitsBrowser.Controls.StatisticsSelector.prototype.registerChangeHandler = func
     if (this.handlers.indexOf(handler) == -1) {
         this.handlers.push(handler);
     }
-} 
+};
    
 /**
 * Deregister a change handler from being called whenever the choice of
@@ -63,7 +63,7 @@ SplitsBrowser.Controls.StatisticsSelector.prototype.deregisterChangeHandler = fu
     if (index != -1) {
         this.handlers.splice(index, 1);
     }
-}    
+};
 
 /**
 * Return the statistics that are currently enabled.
@@ -80,4 +80,4 @@ SplitsBrowser.Controls.StatisticsSelector.prototype.onCheckboxChanged = function
     var checkedFlags = this.getVisibleStatistics();
     this.handlers.forEach(function (handler) { handler(checkedFlags); });
 };
-    
+})();

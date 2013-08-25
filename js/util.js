@@ -1,4 +1,5 @@
-﻿"use strict";
+﻿(function () {
+"use strict";
 
 /**
  * Utility function used with filters that simply returns the object given.
@@ -22,7 +23,7 @@ function isNotNull(x) { return x !== null; }
 function InvalidData(message) {
     this.name = "InvalidData";
     this.message = message;
-};
+}
 
 /**
 * Returns a string representation of this exception.
@@ -30,7 +31,7 @@ function InvalidData(message) {
 */
 InvalidData.prototype.toString = function () {
     return this.name + ": " + this.message;
-}
+};
 
 /**
 * Utility function to throw an 'InvalidData' exception object.
@@ -75,3 +76,4 @@ function formatTime(seconds) {
     
     return result;
 }
+})();

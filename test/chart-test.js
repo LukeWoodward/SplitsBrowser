@@ -1,4 +1,8 @@
-﻿"use strict";
+﻿/* jslint -W097 */  // Disable grumbling about use strict not inside a function.
+/* global d3 */
+/* global QUnit, module, expect, document */
+/* global SplitsBrowser */
+"use strict";
 
 var Chart = SplitsBrowser.Controls.Chart;
 var CompetitorData = SplitsBrowser.Model.CompetitorData;

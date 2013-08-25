@@ -1,4 +1,6 @@
-﻿"use strict";
+﻿/* global SplitsBrowser, throwInvalidData, d3 */
+(function (){
+"use strict";
 
 /*
 * An object that keeps track of the current selection of competitors, and
@@ -114,3 +116,4 @@ SplitsBrowser.Model.CompetitorSelection.prototype.toggle = function (index) {
         throwInvalidData("Index is not a number");
     }
 };
+})();

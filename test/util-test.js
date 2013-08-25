@@ -1,4 +1,8 @@
-﻿"use strict";
+﻿/* jslint -W097 */  // Disable grumbling about use strict not inside a function.
+/* global d3 */
+/* global QUnit, module, expect */
+/* global SplitsBrowser, isNotNull, formatTime, throwInvalidData */
+"use strict";
 
 module("Utilities - isNotNull");
 

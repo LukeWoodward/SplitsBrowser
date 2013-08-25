@@ -1,4 +1,8 @@
-﻿"use strict";
+﻿/* jslint -W097 */  // Disable grumbling about use strict not inside a function.
+/* global d3 */
+/* global QUnit, module, expect */
+/* global SplitsBrowser */
+"use strict";
 
 module("Competitor Selection");
 
@@ -11,12 +15,12 @@ var callCount = 0;
 function testHandler(indexes) {
     lastIndexes = indexes;
     callCount += 1;
-};
+}
 
 function reset() {
     lastIndexes = null;
     callCount = 0;
-};
+}
 
 QUnit.test("Cannot create a competitor selection if the number of competitors is not a number", function (assert) {
     try {
@@ -84,38 +88,40 @@ QUnit.test("All competitors unselected in newly-created selection", function (as
 
 QUnit.test("Toggling an unselected competitor makes them selected and vice versa", function (assert) {
     var selection = new CompetitorSelection(3);
-    for (var i = 0; i < 3; ++i) {
+    var i;
+    for (i = 0; i < 3; ++i) {
         assert.ok(!selection.isSelected(i), "Competitor " + i + " should be deselected");
     }
 
     selection.toggle(1);
 
-    for (var i = 0; i < 3; ++i) {
+    for (i = 0; i < 3; ++i) {
         assert.ok(selection.isSelected(i) == (i == 1), "Competitor " + i + " should be " + ((i == 1) ? "selected" : "deselected"));
     }
 
     selection.toggle(1);
 
-    for (var i = 0; i < 3; ++i) {
+    for (i = 0; i < 3; ++i) {
         assert.ok(!selection.isSelected(i), "Competitor " + i + " should be deselected");
     }
 });
 
 QUnit.test("Selecting all competitors makes all competitors selected, and selecting none makes all competitors unselected", function (assert) {
     var selection = new CompetitorSelection(3);
-    for (var i = 0; i < 3; ++i) {
+    var i;
+    for (i = 0; i < 3; ++i) {
         assert.ok(!selection.isSelected(i), "Competitor " + i + " should be deselected");
     }
 
     selection.selectAll();
 
-    for (var i = 0; i < 3; ++i) {
+    for (i = 0; i < 3; ++i) {
         assert.ok(selection.isSelected(i), "Competitor " + i + " should be selected");
     }
 
     selection.selectNone();
 
-    for (var i = 0; i < 3; ++i) {
+    for (i = 0; i < 3; ++i) {
         assert.ok(!selection.isSelected(i), "Competitor " + i + " should be deselected");
     }
 });

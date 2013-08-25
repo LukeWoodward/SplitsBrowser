@@ -1,3 +1,6 @@
+/* global window, document, $, SplitsBrowser, d3, setTimeout, clearTimeout */
+
+(function () {
 "use strict";
 // Delay in milliseconds between a resize event being triggered and the
 // page responding to it.
@@ -10,7 +13,6 @@ var currentResizeTimeout = null;
 
 var courses = null;
 var currentResult = null;
-var selection = null;
 var currentIndexes = null;
 
 var selection = null;
@@ -83,7 +85,7 @@ function selectNone() {
  * Handle a resize of the window.
  */
 function handleWindowResize() {
-    if (currentResizeTimeout != null) {
+    if (currentResizeTimeout !== null) {
         clearTimeout(currentResizeTimeout);
     }
 
@@ -119,11 +121,11 @@ function drawChart() {
     chart.setSize(chartWidth, chartHeight);
     chart.drawChart(chartData, splitInfo, cumTimes, currentIndexes, currentVisibleStatistics);
 
-    if (selectionChangeHandler != null) {
+    if (selectionChangeHandler !== null) {
         selection.deregisterChangeHandler(selectionChangeHandler);
     }
     
-    if (statisticsChangeHandler != null) {
+    if (statisticsChangeHandler !== null) {
         statisticsSelector.deregisterChangeHandler(statisticsChangeHandler);
     }
 
@@ -157,7 +159,7 @@ function drawChart() {
 */
 function selectCourse(index) {
     if (0 <= index && index < courses.length) {
-        if (selection != null) {
+        if (selection !== null) {
             selection.selectNone();
         }
         currentIndexes = [];
@@ -173,7 +175,7 @@ function selectCourse(index) {
 * JQuery AJAX callback to handle the request to get some data and parse it.
 */
 function readEventData(data, status, jqXHR) {
-    if (status == "success") {
+    if (status === "success") {
         courses = SplitsBrowser.Input.CSV.parseEventData(data);
         selectCourse(0);
     } else {
@@ -195,3 +197,4 @@ $(document).ready(buildUi);
 $(document).ready(testReadSplits('data/eventdata'));
 
 $(window).resize(handleWindowResize);
+})();

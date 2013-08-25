@@ -1,3 +1,8 @@
+/* jslint -W097 */  // Disable grumbling about use strict not inside a function.
+/* global d3, $ */
+/* global QUnit, module, expect */
+/* global SplitsBrowser */
+
 "use strict";
 
 var CourseSelector = SplitsBrowser.Controls.CourseSelector;
@@ -32,7 +37,7 @@ QUnit.test("Course selector created disabled and with only a dummy entry", funct
 QUnit.test("Setting a list of courses sets the selector to the list of course names", function(assert) {
     var selector = new CourseSelector(d3.select("#qunit-fixture").node());
     
-    selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])])
+    selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])]);
     
     var htmlSelectSelection = d3.select("#qunit-fixture select");
     assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
@@ -49,8 +54,8 @@ QUnit.test("Setting a list of courses sets the selector to the list of course na
 QUnit.test("Setting a shorter list of courses sets the selector to the shorter list of course names", function(assert) {
     var selector = new CourseSelector(d3.select("#qunit-fixture").node());
     
-    selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])])
-    selector.setCourses([new CourseData("Course 4", 20, [])])
+    selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])]);
+    selector.setCourses([new CourseData("Course 4", 20, [])]);
     
     var htmlSelectSelection = d3.select("#qunit-fixture select");
     assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
@@ -65,8 +70,8 @@ QUnit.test("Setting a shorter list of courses sets the selector to the shorter l
 QUnit.test("Setting the selector back to an empty list of courses disables the selector again", function(assert) {
     var selector = new CourseSelector(d3.select("#qunit-fixture").node());
     
-    selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])])
-    selector.setCourses([])
+    selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])]);
+    selector.setCourses([]);
     
     var htmlSelectSelection = d3.select("#qunit-fixture select");
     assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
@@ -81,7 +86,7 @@ QUnit.test("Registering a handler and changing a value in the selector triggers 
     var selector = new CourseSelector(d3.select("#qunit-fixture").node());
     selector.registerChangeHandler(handleCourseChanged);
     
-    selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])])
+    selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])]);
     var htmlSelectSelection = d3.select("#qunit-fixture select");
     assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
     var htmlSelect = htmlSelectSelection.node();
@@ -105,7 +110,7 @@ QUnit.test("Registering two handlers and changing a value in the selector trigge
     selector.registerChangeHandler(handleCourseChanged);
     selector.registerChangeHandler(secondHandler);
     
-    selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])])
+    selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])]);
     var htmlSelectSelection = d3.select("#qunit-fixture select");
     assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
     var htmlSelect = htmlSelectSelection.node();
@@ -124,7 +129,7 @@ QUnit.test("Registering the same handler twice and changing a value in the selec
     selector.registerChangeHandler(handleCourseChanged);
     selector.registerChangeHandler(handleCourseChanged);
     
-    selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])])
+    selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])]);
     var htmlSelectSelection = d3.select("#qunit-fixture select");
     assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
     var htmlSelect = htmlSelectSelection.node();

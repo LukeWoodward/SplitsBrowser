@@ -1,3 +1,4 @@
+(function (){
 "use strict";
 
 /**
@@ -34,7 +35,7 @@ function getRanks(sourceData) {
 * @returns Array of values indexed by the given values.
 */
 function selectByIndexes(data, indexes) {
-    if (typeof data == "undefined") {
+    if (typeof data === "undefined") {
         throw new TypeError("data is undefined");
     }
     
@@ -70,7 +71,7 @@ SplitsBrowser.Model.CompetitorSplitInfo.prototype.computeTimesAndRanks = functio
         workingTotalTimesByCompetitor[i] = 0;
     }
     
-    for (var controlIndex = 1; controlIndex <= this.courseData.numControls + 1; controlIndex += 1) {
+    d3.range(1, this.courseData.numControls + 2).forEach(function (controlIndex) {
         var splitsByCompetitor = this.courseData.competitorData.map(function(comp) { return comp.times[controlIndex - 1]; });
         this.splitsPerControl.push(splitsByCompetitor);
         
@@ -85,7 +86,7 @@ SplitsBrowser.Model.CompetitorSplitInfo.prototype.computeTimesAndRanks = functio
         
         var timesBehindFastest = splitsByCompetitor.map(function (time) { return time - fastest.times[controlIndex - 1]; });
         this.timesBehindFastestPerControl.push(timesBehindFastest);
-    }
+    });
 };
 
 /**
@@ -95,7 +96,7 @@ SplitsBrowser.Model.CompetitorSplitInfo.prototype.computeTimesAndRanks = functio
 * @returns {Array} Array of split times for the given competitors.
 */
 SplitsBrowser.Model.CompetitorSplitInfo.prototype.getSplits = function (controlIndex, indexes) {
-    return (controlIndex == 0) ? null : selectByIndexes(this.splitsPerControl[controlIndex], indexes);
+    return (controlIndex === 0) ? null : selectByIndexes(this.splitsPerControl[controlIndex], indexes);
 };
 
 /**
@@ -105,7 +106,7 @@ SplitsBrowser.Model.CompetitorSplitInfo.prototype.getSplits = function (controlI
 * @returns {Array} Array of split-time ranks for the given competitors.
 */
 SplitsBrowser.Model.CompetitorSplitInfo.prototype.getSplitRanks = function (controlIndex, indexes) {
-    return (controlIndex == 0) ? null : selectByIndexes(this.splitRanksPerControl[controlIndex], indexes);
+    return (controlIndex === 0) ? null : selectByIndexes(this.splitRanksPerControl[controlIndex], indexes);
 };
 
 /**
@@ -115,7 +116,7 @@ SplitsBrowser.Model.CompetitorSplitInfo.prototype.getSplitRanks = function (cont
 * @returns {Array} Array of cumulative times for the given competitors.
 */
 SplitsBrowser.Model.CompetitorSplitInfo.prototype.getCumulativeTimes = function (controlIndex, indexes) {
-    return (controlIndex == 0) ? null : selectByIndexes(this.cumulativeTimesPerControl[controlIndex], indexes);
+    return (controlIndex === 0) ? null : selectByIndexes(this.cumulativeTimesPerControl[controlIndex], indexes);
 };
 
 /**
@@ -125,7 +126,7 @@ SplitsBrowser.Model.CompetitorSplitInfo.prototype.getCumulativeTimes = function 
 * @returns {Array} Array of cumulative-time ranks for the given competitors.
 */
 SplitsBrowser.Model.CompetitorSplitInfo.prototype.getCumulativeRanks = function (controlIndex, indexes) {
-    return (controlIndex == 0) ? null : selectByIndexes(this.cumulativeRanksPerControl[controlIndex], indexes);
+    return (controlIndex === 0) ? null : selectByIndexes(this.cumulativeRanksPerControl[controlIndex], indexes);
 };
 
 /**
@@ -135,5 +136,6 @@ SplitsBrowser.Model.CompetitorSplitInfo.prototype.getCumulativeRanks = function 
 * @returns {Array} Array of times-behind-fastest for the given competitors.
 */
 SplitsBrowser.Model.CompetitorSplitInfo.prototype.getTimesBehindFastest = function (controlIndex, indexes) {
-    return (controlIndex == 0) ? null : selectByIndexes(this.timesBehindFastestPerControl[controlIndex], indexes);
+    return (controlIndex === 0) ? null : selectByIndexes(this.timesBehindFastestPerControl[controlIndex], indexes);
 };
+})();

@@ -1,4 +1,6 @@
-﻿"use strict";
+﻿
+(function () {
+"use strict";
 
 /*
  * Functions for reading in 'plain' CSV files.
@@ -32,7 +34,7 @@ SplitsBrowser.Input.CSV = {
     parseCompetitorData: function (index, line, controlCount) {
         // Expect forename, surname, club, start time then (controlCount + 1) times in the form MM:SS.
         var parts = line.split(",");
-        if (parts.length == controlCount + 5) {
+        if (parts.length === controlCount + 5) {
             var forename = parts.shift();
             var surname = parts.shift();
             var club = parts.shift();
@@ -51,12 +53,12 @@ SplitsBrowser.Input.CSV = {
     */
     parseCourseData: function (courseData) {
         var lines = courseData.split("\r\n").filter(isTrue);
-        if (lines.length == 0) {
+        if (lines.length === 0) {
             throwInvalidData("parseCourseData got an empty list of lines");
         }
 
         var firstLineParts = lines.shift().split(",");
-        if (firstLineParts.length == 2) {
+        if (firstLineParts.length === 2) {
             var courseName = firstLineParts.shift();
             var controlCountStr = firstLineParts.shift();
             var controlCount = parseInt(controlCountStr, 10);
@@ -84,3 +86,4 @@ SplitsBrowser.Input.CSV = {
         return courseDatas.map(SplitsBrowser.Input.CSV.parseCourseData);
     }
 };
+})();
