@@ -13,6 +13,7 @@
     SplitsBrowser.Controls.CompetitorListBox = function (parent) {
         this.parent = parent;
         this.handler = null;
+        this.competitorSelection = null;
 
         this.listDiv = d3.select(parent).append("div")
                                         .attr("id", _COMPETITOR_LIST_ID);
