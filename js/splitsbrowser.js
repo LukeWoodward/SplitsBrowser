@@ -9,20 +9,6 @@
     // cancelled.)
     var RESIZE_DELAY_MS = 100;
 
-    var currentResizeTimeout = null;
-
-    var courses = null;
-    var currentResult = null;
-    var currentIndexes = null;
-
-    var selection = null;
-    var courseSelector = null;
-    var statisticsSelector = null;
-    var competitorListBox = null;
-    var chart = null;
-    var topPanel = null;
-    var mainPanel = null;
-
     var _TOP_PANEL_ID = "topPanel";
     var _TOP_PANEL_ID_SELECTOR = "#" + _TOP_PANEL_ID;
 
@@ -31,21 +17,60 @@
 
     var _ALL_OR_NONE_BUTTONS_PANEL_ID = "allOrNoneButtonsPanel";
     var _ALL_OR_NONE_BUTTONS_PANEL_ID_SELECTOR = "#" + _ALL_OR_NONE_BUTTONS_PANEL_ID;
+    
+    /**
+    * The 'overall' viewer object responsible for viewing the splits graph.
+    * @constructor
+    */
+    SplitsBrowser.Viewer = function () {
 
+        this.courses = null;
+        this.currentResult = null;
+        this.currentIndexes = null;
+        this.fastestTime = null;
+        this.chartData = null;
+        this.splitInfo = null;
+        this.cumTimes = null;
+
+        this.selection = null;
+        this.courseSelector = null;
+        this.statisticsSelector = null;
+        this.competitorListBox = null;
+        this.chart = null;
+        this.topPanel = null;
+        this.mainPanel = null;
+        
+        this.currentResizeTimeout = null;
+    };
+    
+    /**
+    * Sets the courses that the viewer can view.
+    * @param {Array} courses - The array of courses that can be viewed.
+    */
+    SplitsBrowser.Viewer.prototype.setCourses = function (courses) {
+        this.courses = courses;
+        if (this.courseSelector !== null) {
+            this.courseSelector.setCourses(this.courses);
+        }
+    };
 
     /**
     * Construct the UI inside the HTML body.
     */
-    function buildUi() {
+    SplitsBrowser.Viewer.prototype.buildUi = function () {
         var body = d3.select("body");
         
         var topPanel = body.append("div")
                            .attr("id", _TOP_PANEL_ID);
                            
-        courseSelector = new SplitsBrowser.Controls.CourseSelector(topPanel.node());
-        courseSelector.registerChangeHandler(selectCourse);
+        var outerThis = this;
+        this.courseSelector = new SplitsBrowser.Controls.CourseSelector(topPanel.node());
+        this.courseSelector.registerChangeHandler(function (index) { outerThis.selectCourse(index); });
+        if (this.courses !== null) {
+            this.courseSelector.setCourses(this.courses);
+        }
         
-        statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(topPanel.node());
+        this.statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(topPanel.node());
         
         var mainPanel = body.append("div");
         
@@ -54,130 +79,144 @@
                                                
         var buttonsContainer = competitorListContainer.append("div")
                                                       .attr("id", _ALL_OR_NONE_BUTTONS_PANEL_ID);
-                                         
+                     
         buttonsContainer.append("button")
                         .text("All")
-                        .on("click", selectAll);
+                        .on("click", function () { outerThis.selectAll(); });
                         
         buttonsContainer.append("button")
                         .text("None")
-                        .on("click", selectNone);
+                        .on("click", function () { outerThis.selectNone(); });
                                                            
-        competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(competitorListContainer.node());
-        chart = new SplitsBrowser.Controls.Chart(mainPanel.node());
-    }
+        this.competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(competitorListContainer.node());
+        this.chart = new SplitsBrowser.Controls.Chart(mainPanel.node());
+           
+        $(window).resize(function () { outerThis.handleWindowResize(); });
+    };
 
     /**
     * Select all of the competitors.
     */
-    function selectAll() {
-        selection.selectAll();
-    }
+    SplitsBrowser.Viewer.prototype.selectAll = function () {
+        this.selection.selectAll();
+    };
 
     /**
     * Select none of the competitors.
     */
-    function selectNone() {
-        selection.selectNone();
-    }
+    SplitsBrowser.Viewer.prototype.selectNone = function () {
+        this.selection.selectNone();
+    };
 
     /**
      * Handle a resize of the window.
      */
-    function handleWindowResize() {
-        if (currentResizeTimeout !== null) {
-            clearTimeout(currentResizeTimeout);
+    SplitsBrowser.Viewer.prototype.handleWindowResize = function () {
+        if (this.currentResizeTimeout !== null) {
+            clearTimeout(this.currentResizeTimeout);
         }
 
-        currentResizeTimeout = setTimeout(function () { currentResizeTimeout = null; drawChart(); }, RESIZE_DELAY_MS);
-    }
+        var outerThis = this;
+        this.currentResizeTimeout = setTimeout(function() { outerThis.postResizeHook(); }, RESIZE_DELAY_MS);
+    };
+    
+    /**
+    * Resize the chart following a change of size of the chart.
+    */
+    SplitsBrowser.Viewer.prototype.postResizeHook = function () {
+        this.currentResizeTimeout = null;
+        this.drawChart();
+    };
 
     /**
     * Draw the chart using the current data.
     */
-    function drawChart() {
+    SplitsBrowser.Viewer.prototype.drawChart = function () {
 
-        var fastestTime = currentResult.getFastestTime();
-        var chartData = currentResult.getChartData(fastestTime, currentIndexes);
-        var cumTimes = fastestTime.getCumulativeTimes();
-        var splitInfo = new SplitsBrowser.Model.CompetitorSplitInfo(currentResult);
+        this.fastestTime = this.currentResult.getFastestTime();
+        this.chartData = this.currentResult.getChartData(this.fastestTime, this.currentIndexes);
+        this.cumTimes = this.fastestTime.getCumulativeTimes();
+        this.splitInfo = new SplitsBrowser.Model.CompetitorSplitInfo(this.currentResult);
 
-        var selectionChangeHandler = null;
-        var statisticsChangeHandler = null;
-        
         var windowWidth = $(window).width();
         var windowHeight = $(window).height();
         
-        var currentVisibleStatistics = statisticsSelector.getVisibleStatistics();
+        this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
 
-        competitorListBox.setCompetitorList(currentResult.competitorData);
+        this.competitorListBox.setCompetitorList(this.currentResult.competitorData);
 
         var topPanelHeight = $(_TOP_PANEL_ID_SELECTOR).height();
         
         // Subtract some values to avoid scrollbars appearing.
-        var chartWidth = windowWidth - 18 - competitorListBox.width() - 40;
+        var chartWidth = windowWidth - 18 - this.competitorListBox.width() - 40;
         var chartHeight = windowHeight - 19 - topPanelHeight;
 
-        chart.setSize(chartWidth, chartHeight);
-        chart.drawChart(chartData, splitInfo, cumTimes, currentIndexes, currentVisibleStatistics);
+        this.chart.setSize(chartWidth, chartHeight);
+        this.chart.drawChart(this.chartData, this.splitInfo, this.cumTimes, this.currentIndexes, this.currentVisibleStatistics);
 
-        if (selectionChangeHandler !== null) {
-            selection.deregisterChangeHandler(selectionChangeHandler);
+        var outerThis = this;
+        
+        if (this.selectionChangeHandler !== null) {
+            this.selection.deregisterChangeHandler(this.selectionChangeHandler);
         }
         
-        if (statisticsChangeHandler !== null) {
-            statisticsSelector.deregisterChangeHandler(statisticsChangeHandler);
+        if (this.statisticsChangeHandler !== null) {
+            this.statisticsSelector.deregisterChangeHandler(this.statisticsChangeHandler);
         }
-
         
-        var redraw = function() {
-            chartData = currentResult.getChartData(fastestTime, currentIndexes);
-            chart.drawChart(chartData, splitInfo, cumTimes, currentIndexes, currentVisibleStatistics);
-        };
-        
-        selectionChangeHandler = function (indexes) {
-            currentIndexes = indexes;
-            redraw();
+        this.selectionChangeHandler = function (indexes) {
+            outerThis.currentIndexes = indexes;
+            outerThis.redraw();
         };
 
-        selection.registerChangeHandler(selectionChangeHandler);
+        this.selection.registerChangeHandler(this.selectionChangeHandler);
         
-        statisticsChangeHandler = function (visibleStatistics) {
-            currentVisibleStatistics = visibleStatistics;
-            redraw();
+        this.statisticsChangeHandler = function (visibleStatistics) {
+            outerThis.currentVisibleStatistics = visibleStatistics;
+            outerThis.redraw();
         };
         
-        statisticsSelector.registerChangeHandler(statisticsChangeHandler);
+        this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
         $("body").height(windowHeight - 19 - topPanelHeight);
         $(_COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(_ALL_OR_NONE_BUTTONS_PANEL_ID_SELECTOR).height() - topPanelHeight);
-    }
+    };
 
+    /**
+    * Redraw the chart, possibly using new data.
+    */
+    SplitsBrowser.Viewer.prototype.redraw = function () {
+        this.chartData = this.currentResult.getChartData(this.fastestTime, this.currentIndexes);
+        this.chart.drawChart(this.chartData, this.splitInfo, this.cumTimes, this.currentIndexes, this.currentVisibleStatistics);
+    };
+    
     /**
     * Change the graph to show the course with the given index.
     * @param {Number} index - The (zero-based) index of the course.
     */
-    function selectCourse(index) {
-        if (0 <= index && index < courses.length) {
-            if (selection !== null) {
-                selection.selectNone();
+    SplitsBrowser.Viewer.prototype.selectCourse = function (index) {
+        if (0 <= index && index < this.courses.length) {
+            if (this.selection !== null) {
+                this.selection.selectNone();
             }
-            currentIndexes = [];
-            currentResult = courses[index];
-            courseSelector.setCourses(courses);
-            selection = new SplitsBrowser.Model.CompetitorSelection(currentResult.competitorData.length);
-            competitorListBox.setSelection(selection);
-            drawChart();
+            this.currentIndexes = [];
+            this.currentResult = this.courses[index];
+            this.selection = new SplitsBrowser.Model.CompetitorSelection(this.currentResult.competitorData.length);
+            this.competitorListBox.setSelection(this.selection);
+            this.drawChart();
         }
-    }
+    };
 
+    var viewer = new SplitsBrowser.Viewer();
+    
     /**
     * JQuery AJAX callback to handle the request to get some data and parse it.
     */
     function readEventData(data, status, jqXHR) {
         if (status === "success") {
-            courses = SplitsBrowser.Input.CSV.parseEventData(data);
-            selectCourse(0);
+            var courses = SplitsBrowser.Input.CSV.parseEventData(data);
+            viewer.setCourses(courses);
+            viewer.selectCourse(0);
         } else {
             alert("Got status " + status + ". :(");
         }
@@ -193,8 +232,5 @@
         });
     }
 
-    $(document).ready(buildUi);
-    $(document).ready(testReadSplits('data/eventdata'));
-
-    $(window).resize(handleWindowResize);
+    $(document).ready(function() { viewer.buildUi(); testReadSplits('data/eventdata'); });
 })();
