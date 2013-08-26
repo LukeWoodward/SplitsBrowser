@@ -341,6 +341,7 @@
     SplitsBrowser.Controls.Chart.prototype.createScales = function (chartData) {
         this.xScale = d3.scale.linear().domain(chartData.xExtent).range([0, this.contentWidth]);
         this.yScale = d3.scale.linear().domain(chartData.yExtent).range([0, this.contentHeight]);
+        this.xScaleMinutes = d3.scale.linear().domain([chartData.xExtent[0] / 60, chartData.xExtent[1] / 60]).range([0, this.contentWidth]);
         this.yScaleMinutes = d3.scale.linear().domain([chartData.yExtent[0] / 60, chartData.yExtent[1] / 60]).range([0, this.contentHeight]);
     };
 
@@ -375,7 +376,13 @@
                           .tickFormat(this.getTickFormatter())
                           .tickValues(this.cumTimes);
 
-        var yAxis = d3.svg.axis().scale(this.yScaleMinutes).orient("left");
+        var yAxis = d3.svg.axis()
+                          .scale(this.yScaleMinutes)
+                          .orient("left");
+                     
+        var lowerXAxis = d3.svg.axis()
+                               .scale(this.xScaleMinutes)
+                               .orient("bottom")
 
         this.svgGroup.selectAll("g.axis").remove();
 
@@ -393,6 +400,16 @@
                      .attr("dy", ".71em")
                      .style("text-anchor", "start")
                      .text("Time loss (min)");
+
+        this.svgGroup.append("g")
+                     .attr("class", "x axis")
+                     .attr("transform", "translate(0," + this.contentHeight + ")")                     
+                     .call(lowerXAxis)
+                     .append("text")
+                     .attr("x", 60)
+                     .attr("y", -5)
+                     .style("text-anchor", "start")
+                     .text("Time (min)");
     };
 
     /**
