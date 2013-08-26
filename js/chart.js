@@ -382,7 +382,7 @@
                      
         var lowerXAxis = d3.svg.axis()
                                .scale(this.xScaleMinutes)
-                               .orient("bottom")
+                               .orient("bottom");
 
         this.svgGroup.selectAll("g.axis").remove();
 
