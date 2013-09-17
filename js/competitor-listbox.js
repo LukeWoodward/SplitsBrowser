@@ -55,7 +55,7 @@
     * Sets the list of competitors.
     * @param {Array} competitorData - Array of competitor data.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitorData, selection) {
+    SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitorData) {
 
         var competitors = this.listDiv.selectAll("div.competitor").data(competitorData);
         var outerThis = this;
