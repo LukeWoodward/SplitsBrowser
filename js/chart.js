@@ -3,8 +3,8 @@
 (function (){
     "use strict";
 
-    var _TEXT_SIZE_SHIM_ID = "sb-text-size-shim";
-    var _TEXT_SIZE_SHIM_ID_SELECTOR = "#" + _TEXT_SIZE_SHIM_ID;
+    var _TEXT_SIZE_ELEMENT_ID = "sb-text-size-element";
+    var _TEXT_SIZE_ELEMENT_ID_SELECTOR = "#" + _TEXT_SIZE_ELEMENT_ID;
 
     var _CHART_SVG_ID = "chart";
     var _CHART_SVG_ID_SELECTOR = "#" + _CHART_SVG_ID;
@@ -74,7 +74,7 @@
                           .mouseleave(function(event) { outerThis.onMouseLeave(event); });
 
         // Add an invisible text element used for determining text size.
-        this.svg.append("text").attr("fill", "transparent").attr("id", _TEXT_SIZE_SHIM_ID);
+        this.svg.append("text").attr("fill", "transparent").attr("id", _TEXT_SIZE_ELEMENT_ID);
     };
 
     /**
@@ -222,7 +222,7 @@
     * @returns {Number} The width of the piece of text, in pixels. 
     */
     SplitsBrowser.Controls.Chart.prototype.getTextWidth = function (text) {
-        return d3.select(_TEXT_SIZE_SHIM_ID_SELECTOR).text(text).node().getBBox().width;
+        return d3.select(_TEXT_SIZE_ELEMENT_ID_SELECTOR).text(text).node().getBBox().width;
     };
 
     /**
@@ -232,7 +232,7 @@
     * @returns {Number} The height of the piece of text, in pixels.
     */
     SplitsBrowser.Controls.Chart.prototype.getTextHeight = function (text) {
-        return d3.select(_TEXT_SIZE_SHIM_ID_SELECTOR).text(text).node().getBBox().height;
+        return d3.select(_TEXT_SIZE_ELEMENT_ID_SELECTOR).text(text).node().getBBox().height;
     };
 
     /**
