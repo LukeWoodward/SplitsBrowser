@@ -53,6 +53,8 @@
     */
     SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitorData) {
 
+        $("div.competitor").off("click");
+        
         var competitors = this.listDiv.selectAll("div.competitor").data(competitorData);
         var outerThis = this;
 
@@ -61,12 +63,12 @@
 
         competitors.text(function (comp) { return comp.name; });
         //         .on("click", function (comp, idx) { outerThis.toggleCompetitor(idx); });
+
+        competitors.exit().remove();
         
         $("div.competitor").each(function (index, div) {
             $(div).on("click", function () { outerThis.toggleCompetitor(index); });
         });
-
-        competitors.exit().remove();
     };
 
     /**
