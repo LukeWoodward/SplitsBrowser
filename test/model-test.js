@@ -210,6 +210,14 @@
         assert.deepEqual(courseData.getFastestTime().times, [65, 197, 184, 100], "Fastest time should be made up of fastest splits");
     });
 
+    QUnit.test("Fastest time plus 75% on course should be made up of fastest times with 75%", function (assert) {
+        var competitor1 = new CompetitorData(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
+        var competitor2 = new CompetitorData(2, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
+        var courseData = new CourseData("Test", 3, [competitor1, competitor2]);
+
+        assert.deepEqual(courseData.getFastestTimePlusPercentage(75).times, [65 * 1.75, 197 * 1.75, 184 * 1.75, 100 * 1.75], "Fastest time + 75% should be made up of fastest splits with 75% added");
+    });
+
     QUnit.test("Fastest time on course should be made up of fastest times ignoring nulls.", function (assert) {
         var competitor1 = new CompetitorData(1, "Fred", "Brown", "DEF", "10:30", [81, null, 212, 106]);
         var competitor2 = new CompetitorData(2, "John", "Smith", "ABC", "10:00", [65, 221, 184, null]);

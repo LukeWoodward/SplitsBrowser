@@ -180,6 +180,19 @@
     *           fastest time, if any.
     */
     SplitsBrowser.Model.CourseData.prototype.getFastestTime = function () {
+        return this.getFastestTimePlusPercentage(0);
+    };
+
+    /**
+    * Return the imaginary competitor who recorded the fastest time on each leg
+    * of the course, with a given percentage of their time added.
+    * If at least one control has no competitors punching it, null is returned.
+    * @param {Number} percent - The percentage of time to add.
+    * @returns {SplitsBrowser.Model.Competitor|null} Imaginary competitor with
+    *           fastest time, if any.
+    */
+    SplitsBrowser.Model.CourseData.prototype.getFastestTimePlusPercentage = function (percent) {
+        var ratio = 1 + percent / 100;
         var fastestTimes = new Array(this.numControls + 1);
         for (var i = 0; i <= this.numControls; ++i) {
             var fastestForThisControl = null;
@@ -194,7 +207,7 @@
                 // No fastest time recorded for this control.
                 return null;
             } else {
-                fastestTimes[i] = fastestForThisControl;
+                fastestTimes[i] = fastestForThisControl * ratio;
             }
         }
 

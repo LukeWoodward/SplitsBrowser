@@ -2,9 +2,22 @@
     "use strict";
     
     var _ALL_COMPARISON_OPTIONS = [
-        { name: "Fastest time", selector: function (courseData) { return courseData.getFastestTime(); } },
-        { name: "Winner", selector: function (courseData) { return courseData.getWinner(); } }
+        { name: "Winner", selector: function (courseData) { return courseData.getWinner(); } },
+        { name: "Fastest time", selector: function (courseData) { return courseData.getFastestTime(); } }
     ];
+    
+    // All 'Fastest time + N %' values (not including zero, of course).
+    var _FASTEST_PLUS_PERCENTAGES = [5, 25, 50, 100];
+    
+    _FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
+        _ALL_COMPARISON_OPTIONS.push({
+            name: "Fastest time + " + percent + "%",
+            selector: function (courseData) { return courseData.getFastestTimePlusPercentage(percent); }
+        });
+    });
+    
+    // Default selected index of the comparison function.
+    var _DEFAULT_COMPARISON_INDEX = 1; // 1 = fastest time.
 
     /**
     * A control that wraps a drop-down list used to choose what to compare
@@ -27,6 +40,8 @@
                    .text(function (opt) { return opt.name; });
                    
         optionsList.exit().remove();
+        
+        this.dropDown.selectedIndex = _DEFAULT_COMPARISON_INDEX;
     };
     
     /**
