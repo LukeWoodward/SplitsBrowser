@@ -34,14 +34,10 @@
     *                          competitors.
     */
     SplitsBrowser.Controls.CompetitorListBox.prototype.selectionChanged = function (indexes) {
-        var competitors = this.listDiv.selectAll("div.competitor")[0];
-        for (var i = 0; i < competitors.length; ++i) {
-            if (this.competitorSelection.isSelected(i) && !$(competitors[i]).hasClass("selected")) {
-                $(competitors[i]).addClass("selected");
-            } else if (!this.competitorSelection.isSelected(i) && $(competitors[i]).hasClass("selected")) {
-                $(competitors[i]).removeClass("selected");
-            }
-        }
+        var outerThis = this;
+        this.listDiv.selectAll("div.competitor")
+                    .data(d3.range(this.competitorSelection.count))
+                    .classed("selected", function (comp, index) { return outerThis.competitorSelection.isSelected(index); });
     };
 
     /**
@@ -61,10 +57,14 @@
         var outerThis = this;
 
         competitors.enter().append("div")
-                            .attr("class", "competitor");
+                           .classed("competitor", true);
 
-        competitors.text(function (comp) { return comp.name; })
-                    .on("click", function (comp, idx) { outerThis.toggleCompetitor(idx); });
+        competitors.text(function (comp) { return comp.name; });
+        //         .on("click", function (comp, idx) { outerThis.toggleCompetitor(idx); });
+        
+        $("div.competitor").each(function (index, div) {
+            $(div).on("click", function () { outerThis.toggleCompetitor(index); });
+        });
 
         competitors.exit().remove();
     };
@@ -82,5 +82,6 @@
         this.competitorSelection = selection;
         this.handler = function (indexes) { outerThis.selectionChanged(indexes); };
         this.competitorSelection.registerChangeHandler(this.handler);
+        this.selectionChanged(d3.range(selection.count));
     };
 })();
