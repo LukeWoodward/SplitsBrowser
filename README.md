@@ -21,10 +21,9 @@ are a number of issues with the way this works:
 * You also need to keep Java updated.  Some browsers can refuse to run the
   applet if Java on your computer is out of date.
   
-* Browser functionality has come on a long way since 
-There is no longer the need for a Java applet or other such plugin to achieve
-  the functionality of drawing graphs on the screen.  (There was a need to use
-  such a plugin when SplitsBrowser was first released, however.)
+* Browser functionality has come on a long way since Java applets were first
+  introduced.  There is no longer the need for a Java applet or other such
+  plugin to achieve the functionality of drawing graphs on the screen.
 
 * There have been a number of security incidents involving Java, and various
   agencies have recommended that Java be disabled.  See, for example,
@@ -32,7 +31,7 @@ There is no longer the need for a Java applet or other such plugin to achieve
   http://www.forbes.com/sites/eliseackerman/2013/01/11/us-department-of-homeland-security-calls-on-computer-users-to-disable-java/
 
 * It seemed a fun thing to do, and I could learn how to use the JavaScript
-  data-visualisation tool D3 (http://d3js.org).
+  data-visualisation library D3 (http://d3js.org).
   
 
 What web browsers work with SplitsBrowser?
@@ -44,7 +43,7 @@ requires one of the following web browsers:
 
 * Mozilla Firefox (latest version)
 * Google Chrome (latest version)
-* Internet Explorer 8 or later.
+* Internet Explorer 9 or later.
 * Safari ?
 
 SplitsBrowser requires that JavaScript is enabled in your browser.
@@ -54,5 +53,3 @@ Acknowledgements:
 -----------------
 * Original SplitsBrowser developers.
 * Mike Bostock for D3.
-* Shawnbot for Aight, which makes this tool work on Internet Explorer 8.  [when added]
-
