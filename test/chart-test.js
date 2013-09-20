@@ -59,7 +59,7 @@ QUnit.test("Can create a chart", function (assert) {
     var competitor1 = new CompetitorData(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
     var competitor2 = new CompetitorData(2, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
     var courseData = new CourseData("Test", 3, [competitor1, competitor2]);
-    var splitInfo = new SplitInfo(courseData);
+    var splitInfo = new SplitInfo(courseData, courseData.getFastestTime());
     var fastestTime = courseData.getFastestTime();
     var chartData = courseData.getChartData(fastestTime, [0, 1]);
 

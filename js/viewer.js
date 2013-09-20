@@ -27,7 +27,7 @@
         this.courses = null;
         this.currentResult = null;
         this.currentIndexes = null;
-        this.fastestTime = null;
+        this.reference = null;
         this.chartData = null;
         this.splitInfo = null;
         this.cumTimes = null;
@@ -69,6 +69,12 @@
         if (this.courses !== null) {
             this.courseSelector.setCourses(this.courses);
         }
+        
+        topPanel.append("span").style("padding", "0px 30px 0px 30px");
+        
+        this.comparisonSelector = new SplitsBrowser.Controls.ComparisonSelector(topPanel.node());
+        this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
+        this.comparisonFunction = this.comparisonSelector.getComparisonFunction();
         
         this.statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(topPanel.node());
         
@@ -133,10 +139,10 @@
     */
     SplitsBrowser.Viewer.prototype.drawChart = function () {
 
-        this.fastestTime = this.currentResult.getFastestTime();
-        this.chartData = this.currentResult.getChartData(this.fastestTime, this.currentIndexes);
-        this.cumTimes = this.fastestTime.getCumulativeTimes();
-        this.splitInfo = new SplitsBrowser.Model.CompetitorSplitInfo(this.currentResult);
+        this.reference = this.comparisonFunction(this.currentResult);
+        this.chartData = this.currentResult.getChartData(this.reference, this.currentIndexes);
+        this.cumTimes = this.reference.getCumulativeTimes();
+        this.splitInfo = new SplitsBrowser.Model.CompetitorSplitInfo(this.currentResult, this.reference);
 
         var windowWidth = $(window).width();
         var windowHeight = $(window).height();
@@ -186,7 +192,7 @@
     * Redraw the chart, possibly using new data.
     */
     SplitsBrowser.Viewer.prototype.redraw = function () {
-        this.chartData = this.currentResult.getChartData(this.fastestTime, this.currentIndexes);
+        this.chartData = this.currentResult.getChartData(this.reference, this.currentIndexes);
         this.chart.drawChart(this.chartData, this.splitInfo, this.cumTimes, this.currentIndexes, this.currentVisibleStatistics);
     };
     
@@ -205,6 +211,16 @@
             this.competitorListBox.setSelection(this.selection);
             this.drawChart();
         }
+    };
+    
+    /**
+    * Change the graph to compare against a different reference.
+    * @param {Function} comparisonFunc - The function that returns the
+    *      reference course data from the course data.
+    */
+    SplitsBrowser.Viewer.prototype.selectComparison = function (comparisonFunc) {
+        this.comparisonFunction = comparisonFunc;
+        this.drawChart();
     };
 
     var viewer = new SplitsBrowser.Viewer();

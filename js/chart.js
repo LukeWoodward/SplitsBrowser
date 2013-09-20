@@ -189,7 +189,7 @@
             }
              
             if (this.visibleStatistics[2]) {
-                var timesBehind = this.splitInfo.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexes);
+                var timesBehind = this.splitInfo.getTimesBehindReference(this.currentControlIndex, this.selectedIndexes);
                 labelTexts = d3.zip(labelTexts, timesBehind)
                                .map(function(pair) { return pair[0] + SPACER + SplitsBrowser.formatTime(pair[1]); });
             }
@@ -308,7 +308,7 @@
         var maxTime = 0;
         
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
-            var times = this.splitInfo.getTimesBehindFastest(controlIndex, this.selectedIndexes);
+            var times = this.splitInfo.getTimesBehindReference(controlIndex, this.selectedIndexes);
             maxTime = Math.max(maxTime, d3.max(times.filter(SplitsBrowser.isNotNull)));
         }
         

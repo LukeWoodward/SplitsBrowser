@@ -46,16 +46,19 @@
     * Represents an object that can determine split times and ranks.
     * @constructor
     * @param {SplitsBrowser.Model.CourseData} courseData - The course data.
+    * @param {SplitsBrowser.Model.CompetitorData} reference -
+    *     Reference competitor that times are compared against.
     */
-    SplitsBrowser.Model.CompetitorSplitInfo = function(courseData) {
+    SplitsBrowser.Model.CompetitorSplitInfo = function(courseData, reference) {
         this.courseData = courseData;
+        this.reference = reference;
         
         // The null values are sentinel values for control 0 (the start).
         this.splitsPerControl = [null];
         this.splitRanksPerControl = [null];
         this.cumulativeTimesPerControl = [null];
         this.cumulativeRanksPerControl = [null];
-        this.timesBehindFastestPerControl = [null];
+        this.timesBehindReferencePerControl = [null];
         this.computeTimesAndRanks();
     };
 
@@ -63,8 +66,6 @@
     * Compute all of the split and total times and their ranks.
     */
     SplitsBrowser.Model.CompetitorSplitInfo.prototype.computeTimesAndRanks = function() {
-        
-        var fastest = this.courseData.getFastestTime();
         
         var workingTotalTimesByCompetitor = new Array(this.courseData.competitorData.length);
         for (var i = 0; i < workingTotalTimesByCompetitor.length; i += 1) {
@@ -85,8 +86,8 @@
             var totalTimeRanksByCompetitor = SplitsBrowser.getRanks(workingTotalTimesByCompetitor);
             outerThis.cumulativeRanksPerControl.push(totalTimeRanksByCompetitor);
             
-            var timesBehindFastest = splitsByCompetitor.map(function (time) { return time - fastest.times[controlIndex - 1]; });
-            outerThis.timesBehindFastestPerControl.push(timesBehindFastest);
+            var timesBehindReference = splitsByCompetitor.map(function (time) { return time - outerThis.reference.times[controlIndex - 1]; });
+            outerThis.timesBehindReferencePerControl.push(timesBehindReference);
         });
     };
 
@@ -131,12 +132,12 @@
     };
 
     /**
-    * Returns the times behind the fastest at a given control for a number of competitors.
+    * Returns the times behind the reference at a given control for a number of competitors.
     * @param {Number} controlIndex - The index of the control.
     * @param {Array} indexes - Indexes of the competitors required.
-    * @returns {Array} Array of times-behind-fastest for the given competitors.
+    * @returns {Array} Array of times-behind-reference for the given competitors.
     */
-    SplitsBrowser.Model.CompetitorSplitInfo.prototype.getTimesBehindFastest = function (controlIndex, indexes) {
-        return (controlIndex === 0) ? null : SplitsBrowser.selectByIndexes(this.timesBehindFastestPerControl[controlIndex], indexes);
+    SplitsBrowser.Model.CompetitorSplitInfo.prototype.getTimesBehindReference = function (controlIndex, indexes) {
+        return (controlIndex === 0) ? null : SplitsBrowser.selectByIndexes(this.timesBehindReferencePerControl[controlIndex], indexes);
     };
 })();
