@@ -4,12 +4,12 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
     concat: {
       options: {
-        separator: ';'
+        separator: '\n\n'
       },
       dist: {
         src: ['js/core.js', 'js/util.js', 'js/competitor-listbox.js', 'js/competitor-selection.js',
              'js/competitor-split-info.js', 'js/course-selector.js', 'js/csv-reader.js', 'js/model.js',
-             'js/statistics-selector.js', 'js/chart.js', 'js/viewer.js'],
+             'js/statistics-selector.js', 'js/comparison-selector.js', 'js/chart.js', 'js/viewer.js'],
         dest: '<%= pkg.name %>.js',
         nonull: true
       }
