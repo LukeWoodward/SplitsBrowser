@@ -49,6 +49,9 @@
     */
     SplitsBrowser.Viewer.prototype.setCourses = function (courses) {
         this.courses = courses;
+        if (this.comparisonSelector !== null) {
+            this.comparisonSelector.setCourses(courses);
+        }
         if (this.courseSelector !== null) {
             this.courseSelector.setCourses(this.courses);
         }
@@ -74,6 +77,11 @@
         
         this.comparisonSelector = new SplitsBrowser.Controls.ComparisonSelector(topPanel.node());
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
+        this.courseSelector.registerChangeHandler(function (index) { return outerThis.comparisonSelector.updateRunnerList(index); });
+        if (this.courses !== null) {
+            this.comparisonSelector.setCourses(this.courses);
+        }
+        
         this.comparisonFunction = this.comparisonSelector.getComparisonFunction();
         
         this.statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(topPanel.node());

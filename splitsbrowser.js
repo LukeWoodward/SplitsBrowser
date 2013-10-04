@@ -786,6 +786,19 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     *           fastest time, if any.
     */
     SplitsBrowser.Model.CourseData.prototype.getFastestTime = function () {
+        return this.getFastestTimePlusPercentage(0);
+    };
+
+    /**
+    * Return the imaginary competitor who recorded the fastest time on each leg
+    * of the course, with a given percentage of their time added.
+    * If at least one control has no competitors punching it, null is returned.
+    * @param {Number} percent - The percentage of time to add.
+    * @returns {SplitsBrowser.Model.Competitor|null} Imaginary competitor with
+    *           fastest time, if any.
+    */
+    SplitsBrowser.Model.CourseData.prototype.getFastestTimePlusPercentage = function (percent) {
+        var ratio = 1 + percent / 100;
         var fastestTimes = new Array(this.numControls + 1);
         for (var i = 0; i <= this.numControls; ++i) {
             var fastestForThisControl = null;
@@ -800,7 +813,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 // No fastest time recorded for this control.
                 return null;
             } else {
-                fastestTimes[i] = fastestForThisControl;
+                fastestTimes[i] = fastestForThisControl * ratio;
             }
         }
 
@@ -950,9 +963,30 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     "use strict";
     
     var _ALL_COMPARISON_OPTIONS = [
-        { name: "Fastest time", selector: function (courseData) { return courseData.getFastestTime(); } },
-        { name: "Winner", selector: function (courseData) { return courseData.getWinner(); } }
+        { name: "Winner", selector: function (courseData) { return courseData.getWinner(); } },
+        { name: "Fastest time", selector: function (courseData) { return courseData.getFastestTime(); } }
     ];
+    
+    // All 'Fastest time + N %' values (not including zero, of course).
+    var _FASTEST_PLUS_PERCENTAGES = [5, 25, 50, 100];
+    
+    _FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
+        _ALL_COMPARISON_OPTIONS.push({
+            name: "Fastest time + " + percent + "%",
+            selector: function (courseData) { return courseData.getFastestTimePlusPercentage(percent); }
+        });
+    });
+    
+    _ALL_COMPARISON_OPTIONS.push({ name: "Any runner..." });
+    
+    // Default selected index of the comparison function.
+    var _DEFAULT_COMPARISON_INDEX = 1; // 1 = fastest time.
+    
+    // The id of the comparison selector.
+    var _COMPARISON_SELECTOR_ID = "comparisonSelector";
+    
+    // The id of the runner selector
+    var _RUNNER_SELECTOR_ID = "runnerSelector";
 
     /**
     * A control that wraps a drop-down list used to choose what to compare
@@ -961,29 +995,38 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.ComparisonSelector = function(parent) {
         this.changeHandlers = [];
+        this.courses = null;
         
         var span = d3.select(parent).append("span");
         span.text("Compare with ");
         var outerThis = this;
-        this.dropDown = span.append("select").node();
+        this.dropDown = span.append("select")
+                            .attr("id", _COMPARISON_SELECTOR_ID)
+                            .node();
+                            
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
 
-        var optionsList = d3.select(this.dropDown).selectAll("option").data(_ALL_COMPARISON_OPTIONS);
+        var optionsList = d3.select(this.dropDown).selectAll("option")
+                                                  .data(_ALL_COMPARISON_OPTIONS);
         optionsList.enter().append("option");
         
         optionsList.attr("value", function (_opt, index) { return index.toString(); })
                    .text(function (opt) { return opt.name; });
                    
         optionsList.exit().remove();
-    };
-    
-    /**
-    * Returns the function that compares a competitor's splits against some
-    * reference data.
-    * @return {Function} Comparison function.
-    */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.getComparisonFunction = function () {
-        return _ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
+        
+        this.runnerSpan = d3.select(parent).append("span")
+                                           .style("display", "none")
+                                           .style("padding-left", "20px");
+        
+        this.runnerSpan.text("Runner: ");
+        
+        this.runnerDropDown = this.runnerSpan.append("select")
+                                             .attr("id", _RUNNER_SELECTOR_ID)
+                                             .node();
+        $(this.runnerDropDown).bind("change", function () { outerThis.onSelectionChanged(); });
+        
+        this.dropDown.selectedIndex = _DEFAULT_COMPARISON_INDEX;
     };
 
     /**
@@ -1001,9 +1044,74 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
 
     /**
-    * Handle a change of the selected option in the drop-down list.
+    * Returns whether the 'Any Runner...' option is selected.
+    * @return Whether the 'Any Runner...' option is selected.
+    */
+    SplitsBrowser.Controls.ComparisonSelector.prototype.isAnyRunnerSelected = function () {
+        return this.dropDown.selectedIndex === _ALL_COMPARISON_OPTIONS.length - 1;
+    };
+    
+    /**
+    * Sets the list of courses.
+    * @param {Array} courses - Array of CourseData objects.
+    */
+    SplitsBrowser.Controls.ComparisonSelector.prototype.setCourses = function (courses) {
+        var wasNull = (this.courses === null);
+        this.courses = courses;
+        
+        if (wasNull && this.courses !== null && this.courses.length > 0) {
+            this.setRunnersFromCourse(0);
+        }
+    };
+    
+    /**
+    * Handles a change of selected course, by updating the list of runners that
+    * can be chosen from.
+    * @param {Number} courseIndex - The index of the chosen course among the
+    *     list of them.
+    */
+    SplitsBrowser.Controls.ComparisonSelector.prototype.updateRunnerList = function (courseIndex) {
+        if (this.courses !== null && 0 <= courseIndex && courseIndex < this.courses.length) {
+            this.setRunnersFromCourse(courseIndex);
+        }
+    };
+
+    /**
+    * Populates the list of runners in the Runner drop-down.
+    * @param {Number} courseIndex - Index of the course among the list of all
+    *      courses.
+    */
+    SplitsBrowser.Controls.ComparisonSelector.prototype.setRunnersFromCourse = function (courseIndex) {
+        var optionsList = d3.select(this.runnerDropDown).selectAll("option")
+                                                        .data(this.courses[courseIndex].competitorData);
+        
+        optionsList.enter().append("option");
+        optionsList.attr("value", function (_comp, compIndex) { return compIndex.toString(); })
+                   .text(function (comp) { return comp.name; });
+        optionsList.exit().remove();
+        
+        this.runnerDropDown.selectedIndex = 0;
+    };
+    
+    /**
+    * Returns the function that compares a competitor's splits against some
+    * reference data.
+    * @return {Function} Comparison function.
+    */
+    SplitsBrowser.Controls.ComparisonSelector.prototype.getComparisonFunction = function () {
+        if (this.isAnyRunnerSelected()) {
+            var runnerIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
+            return function (courseData) { return courseData.competitorData[runnerIndex]; };
+        } else {
+            return _ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
+        }
+    };
+    
+    /**
+    * Handle a change of the selected option in either drop-down list.
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.onSelectionChanged = function() {
+        this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? "" : "none");
         var outerThis = this;
         this.changeHandlers.forEach(function (handler) { handler(outerThis.getComparisonFunction()); });
     };
@@ -1614,6 +1722,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Viewer.prototype.setCourses = function (courses) {
         this.courses = courses;
+        if (this.comparisonSelector !== null) {
+            this.comparisonSelector.setCourses(courses);
+        }
         if (this.courseSelector !== null) {
             this.courseSelector.setCourses(this.courses);
         }
@@ -1639,6 +1750,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         this.comparisonSelector = new SplitsBrowser.Controls.ComparisonSelector(topPanel.node());
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
+        this.courseSelector.registerChangeHandler(function (index) { return outerThis.comparisonSelector.updateRunnerList(index); });
+        if (this.courses !== null) {
+            this.comparisonSelector.setCourses(this.courses);
+        }
+        
         this.comparisonFunction = this.comparisonSelector.getComparisonFunction();
         
         this.statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(topPanel.node());
