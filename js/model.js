@@ -216,7 +216,6 @@
 
     /**
     * Return data from this course in a form suitable for plotting in a chart.
-    * This is in a form suitable for use with the chart.
     * @param {SplitsBrowser.Model.CompetitorData} referenceData - 'Reference'
     *        competitor data (such as winner, or fastest time).
     * @param {Number} currentIndexes - Array of indexes that indicate which
