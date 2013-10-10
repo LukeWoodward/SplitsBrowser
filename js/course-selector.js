@@ -21,7 +21,7 @@
     * Sets the list of courses that this selector can choose between.
     * 
     * If there are no courses, a 'dummy' entry is added
-    * @param {Array} courses - Array of CourseData objects containing course data.
+    * @param {Array} courses - Array of Course objects containing course data.
     */
     SplitsBrowser.Controls.CourseSelector.prototype.setCourses = function(courses) {
         if ($.isArray(courses)) {

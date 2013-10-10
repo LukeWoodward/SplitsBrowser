@@ -6,7 +6,7 @@
     "use strict";
 
     var CompetitorListBox = SplitsBrowser.Controls.CompetitorListBox;
-    var CompetitorData = SplitsBrowser.Model.CompetitorData;
+    var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var CompetitorSelection = SplitsBrowser.Model.CompetitorSelection;
 
     module("Competitor listbox");
@@ -21,9 +21,9 @@
         var parent = d3.select("div#qunit-fixture").node();
         
         var compList = [
-            new CompetitorData(1, "A", "B", "CDO", "10:00", [13, 86, 35]),
-            new CompetitorData(2, "E", "F", "GHO", "10:16", [15, 79, 41]),
-            new CompetitorData(3, "I", "J", "KLO", "10:33", [18, 81, 37])
+            fromSplitTimes(1, "A", "B", "CDO", "10:00", [13, 86, 35]),
+            fromSplitTimes(2, "E", "F", "GHO", "10:16", [15, 79, 41]),
+            fromSplitTimes(3, "I", "J", "KLO", "10:33", [18, 81, 37])
         ];
         
         var selection = new CompetitorSelection(compList.length);

@@ -45,12 +45,12 @@
     /**
     * Represents an object that can determine split times and ranks.
     * @constructor
-    * @param {SplitsBrowser.Model.CourseData} courseData - The course data.
-    * @param {SplitsBrowser.Model.CompetitorData} reference -
-    *     Reference competitor that times are compared against.
+    * @param {SplitsBrowser.Model.Course} course - The course.
+    * @param {Array} reference - Reference cumulative times that other
+    *     competitor's times are compared against.
     */
-    SplitsBrowser.Model.CompetitorSplitInfo = function(courseData, reference) {
-        this.courseData = courseData;
+    SplitsBrowser.Model.CompetitorSplitInfo = function(course, reference) {
+        this.course = course;
         this.reference = reference;
         
         // The null values are sentinel values for control 0 (the start).
@@ -67,14 +67,14 @@
     */
     SplitsBrowser.Model.CompetitorSplitInfo.prototype.computeTimesAndRanks = function() {
         
-        var workingTotalTimesByCompetitor = new Array(this.courseData.competitorData.length);
+        var workingTotalTimesByCompetitor = new Array(this.course.competitors.length);
         for (var i = 0; i < workingTotalTimesByCompetitor.length; i += 1) {
             workingTotalTimesByCompetitor[i] = 0;
         }
         
         var outerThis = this;
-        d3.range(1, this.courseData.numControls + 2).forEach(function (controlIndex) {
-            var splitsByCompetitor = outerThis.courseData.competitorData.map(function(comp) { return comp.times[controlIndex - 1]; });
+        d3.range(1, this.course.numControls + 2).forEach(function (controlIndex) {
+            var splitsByCompetitor = outerThis.course.competitors.map(function(comp) { return comp.getSplitTimes()[controlIndex - 1]; });
             outerThis.splitsPerControl.push(splitsByCompetitor);
             
             var splitRanksByCompetitor = SplitsBrowser.getRanks(splitsByCompetitor);
@@ -86,7 +86,8 @@
             var totalTimeRanksByCompetitor = SplitsBrowser.getRanks(workingTotalTimesByCompetitor);
             outerThis.cumulativeRanksPerControl.push(totalTimeRanksByCompetitor);
             
-            var timesBehindReference = splitsByCompetitor.map(function (time) { return time - outerThis.reference.times[controlIndex - 1]; });
+            var referenceSplit = outerThis.reference[controlIndex] - outerThis.reference[controlIndex - 1];
+            var timesBehindReference = splitsByCompetitor.map(function (splitTime) { return splitTime - referenceSplit; });
             outerThis.timesBehindReferencePerControl.push(timesBehindReference);
         });
     };

@@ -2,8 +2,8 @@
     "use strict";
     
     var _ALL_COMPARISON_OPTIONS = [
-        { name: "Winner", selector: function (courseData) { return courseData.getWinner(); } },
-        { name: "Fastest time", selector: function (courseData) { return courseData.getFastestTime(); } }
+        { name: "Winner", selector: function (course) { return course.getWinnerCumTimes(); } },
+        { name: "Fastest time", selector: function (course) { return course.getFastestCumTimes(); } }
     ];
     
     // All 'Fastest time + N %' values (not including zero, of course).
@@ -12,7 +12,7 @@
     _FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
         _ALL_COMPARISON_OPTIONS.push({
             name: "Fastest time + " + percent + "%",
-            selector: function (courseData) { return courseData.getFastestTimePlusPercentage(percent); }
+            selector: function (course) { return course.getFastestCumTimesPlusPercentage(percent); }
         });
     });
     
@@ -92,7 +92,7 @@
     
     /**
     * Sets the list of courses.
-    * @param {Array} courses - Array of CourseData objects.
+    * @param {Array} courses - Array of Course objects.
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.setCourses = function (courses) {
         var wasNull = (this.courses === null);
@@ -122,13 +122,13 @@
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.setRunnersFromCourse = function (courseIndex) {
         var optionsList = d3.select(this.runnerDropDown).selectAll("option")
-                                                        .data(this.courses[courseIndex].competitorData);
+                                                        .data(this.courses[courseIndex].competitors);
         
         optionsList.enter().append("option");
         optionsList.attr("value", function (_comp, compIndex) { return compIndex.toString(); })
                    .text(function (comp) { return comp.name; });
         optionsList.exit().remove();
-        
+       
         this.runnerDropDown.selectedIndex = 0;
     };
     
@@ -140,7 +140,7 @@
     SplitsBrowser.Controls.ComparisonSelector.prototype.getComparisonFunction = function () {
         if (this.isAnyRunnerSelected()) {
             var runnerIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
-            return function (courseData) { return courseData.competitorData[runnerIndex]; };
+            return function (course) { return course.competitors[runnerIndex].getCumulativeTimes(); };
         } else {
             return _ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
         }

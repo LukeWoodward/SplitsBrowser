@@ -49,22 +49,21 @@
 
     /**
     * Sets the list of competitors.
-    * @param {Array} competitorData - Array of competitor data.
+    * @param {Array} competitors - Array of competitor data.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitorData) {
+    SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitors) {
 
         $("div.competitor").off("click");
         
-        var competitors = this.listDiv.selectAll("div.competitor").data(competitorData);
+        var competitorDivs = this.listDiv.selectAll("div.competitor").data(competitors);
         var outerThis = this;
 
-        competitors.enter().append("div")
+        competitorDivs.enter().append("div")
                            .classed("competitor", true);
 
-        competitors.text(function (comp) { return comp.name; });
-        //         .on("click", function (comp, idx) { outerThis.toggleCompetitor(idx); });
+        competitorDivs.text(function (comp) { return comp.name; });
 
-        competitors.exit().remove();
+        competitorDivs.exit().remove();
         
         $("div.competitor").each(function (index, div) {
             $(div).on("click", function () { outerThis.toggleCompetitor(index); });

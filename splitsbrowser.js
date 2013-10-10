@@ -136,22 +136,21 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
     /**
     * Sets the list of competitors.
-    * @param {Array} competitorData - Array of competitor data.
+    * @param {Array} competitors - Array of competitor data.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitorData) {
+    SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitors) {
 
         $("div.competitor").off("click");
         
-        var competitors = this.listDiv.selectAll("div.competitor").data(competitorData);
+        var competitorDivs = this.listDiv.selectAll("div.competitor").data(competitors);
         var outerThis = this;
 
-        competitors.enter().append("div")
+        competitorDivs.enter().append("div")
                            .classed("competitor", true);
 
-        competitors.text(function (comp) { return comp.name; });
-        //         .on("click", function (comp, idx) { outerThis.toggleCompetitor(idx); });
+        competitorDivs.text(function (comp) { return comp.name; });
 
-        competitors.exit().remove();
+        competitorDivs.exit().remove();
         
         $("div.competitor").each(function (index, div) {
             $(div).on("click", function () { outerThis.toggleCompetitor(index); });
@@ -344,12 +343,12 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     /**
     * Represents an object that can determine split times and ranks.
     * @constructor
-    * @param {SplitsBrowser.Model.CourseData} courseData - The course data.
-    * @param {SplitsBrowser.Model.CompetitorData} reference -
-    *     Reference competitor that times are compared against.
+    * @param {SplitsBrowser.Model.Course} course - The course.
+    * @param {Array} reference - Reference cumulative times that other
+    *     competitor's times are compared against.
     */
-    SplitsBrowser.Model.CompetitorSplitInfo = function(courseData, reference) {
-        this.courseData = courseData;
+    SplitsBrowser.Model.CompetitorSplitInfo = function(course, reference) {
+        this.course = course;
         this.reference = reference;
         
         // The null values are sentinel values for control 0 (the start).
@@ -366,14 +365,14 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Model.CompetitorSplitInfo.prototype.computeTimesAndRanks = function() {
         
-        var workingTotalTimesByCompetitor = new Array(this.courseData.competitorData.length);
+        var workingTotalTimesByCompetitor = new Array(this.course.competitors.length);
         for (var i = 0; i < workingTotalTimesByCompetitor.length; i += 1) {
             workingTotalTimesByCompetitor[i] = 0;
         }
         
         var outerThis = this;
-        d3.range(1, this.courseData.numControls + 2).forEach(function (controlIndex) {
-            var splitsByCompetitor = outerThis.courseData.competitorData.map(function(comp) { return comp.times[controlIndex - 1]; });
+        d3.range(1, this.course.numControls + 2).forEach(function (controlIndex) {
+            var splitsByCompetitor = outerThis.course.competitors.map(function(comp) { return comp.getSplitTimes()[controlIndex - 1]; });
             outerThis.splitsPerControl.push(splitsByCompetitor);
             
             var splitRanksByCompetitor = SplitsBrowser.getRanks(splitsByCompetitor);
@@ -385,7 +384,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             var totalTimeRanksByCompetitor = SplitsBrowser.getRanks(workingTotalTimesByCompetitor);
             outerThis.cumulativeRanksPerControl.push(totalTimeRanksByCompetitor);
             
-            var timesBehindReference = splitsByCompetitor.map(function (time) { return time - outerThis.reference.times[controlIndex - 1]; });
+            var referenceSplit = outerThis.reference[controlIndex] - outerThis.reference[controlIndex - 1];
+            var timesBehindReference = splitsByCompetitor.map(function (splitTime) { return splitTime - referenceSplit; });
             outerThis.timesBehindReferencePerControl.push(timesBehindReference);
         });
     };
@@ -465,7 +465,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Sets the list of courses that this selector can choose between.
     * 
     * If there are no courses, a 'dummy' entry is added
-    * @param {Array} courses - Array of CourseData objects containing course data.
+    * @param {Array} courses - Array of Course objects containing course data.
     */
     SplitsBrowser.Controls.CourseSelector.prototype.setCourses = function(courses) {
         if ($.isArray(courses)) {
@@ -544,18 +544,18 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         * @param {Number} index - Index of the competitor line.
         * @param {string} line - The line of competitor data read from a CSV file.
         * @param {Number} controlCount - The number of controls (not including the finish).
-        * @return {SplitsBrowser.Model.CompetitorData} Object representing the competitor data read in.
+        * @return {Object} Competitor object representing the competitor data read in.
         */
-        parseCompetitorData: function (index, line, controlCount) {
-            // Expect forename, surname, club, start time then (controlCount + 1) times in the form MM:SS.
+        parseCompetitors: function (index, line, controlCount) {
+            // Expect forename, surname, club, start time then (controlCount + 1) split times in the form MM:SS.
             var parts = line.split(",");
             if (parts.length === controlCount + 5) {
                 var forename = parts.shift();
                 var surname = parts.shift();
                 var club = parts.shift();
                 var startTime = parts.shift();
-                var times = parts.map(SplitsBrowser.Input.CSV.parseCompetitorTime);
-                return new SplitsBrowser.Model.CompetitorData(index + 1, forename, surname, club, startTime, times);
+                var splitTimes = parts.map(SplitsBrowser.Input.CSV.parseCompetitorTime);
+                return SplitsBrowser.Model.Competitor.fromSplitTimes(index + 1, forename, surname, club, startTime, splitTimes);
             } else {
                 SplitsBrowser.throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor on course with " + controlCount + " controls, got " + (parts.length) + " instead.");
             }
@@ -563,13 +563,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
         /**
         * Parse CSV data for a course.
-        * @param {string} courseData - The string containing data for that course.
-        * @return {SplitsBrowser.Model.CourseData} Parsed course data.
+        * @param {string} course - The string containing data for that course.
+        * @return {SplitsBrowser.Model.Course} Parsed course data.
         */
-        parseCourseData: function (courseData) {
-            var lines = courseData.split("\r\n").filter(SplitsBrowser.isTrue);
+        parseCourse: function (course) {
+            var lines = course.split("\r\n").filter(SplitsBrowser.isTrue);
             if (lines.length === 0) {
-                SplitsBrowser.throwInvalidData("parseCourseData got an empty list of lines");
+                SplitsBrowser.throwInvalidData("parseCourse got an empty list of lines");
             }
 
             var firstLineParts = lines.shift().split(",");
@@ -582,9 +582,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 } else if (controlCount < 0) {
                     SplitsBrowser.throwInvalidData("Expected a positive control count, got " + controlCount + " instead");
                 } else {
-                    var competitorData = lines.map(function (line, index) { return SplitsBrowser.Input.CSV.parseCompetitorData(index, line, controlCount); });
-                    competitorData.sort(SplitsBrowser.Model.compareCompetitors);
-                    return new SplitsBrowser.Model.CourseData(courseName, controlCount, competitorData);
+                    var competitors = lines.map(function (line, index) { return SplitsBrowser.Input.CSV.parseCompetitors(index, line, controlCount); });
+                    competitors.sort(SplitsBrowser.Model.compareCompetitors);
+                    return new SplitsBrowser.Model.Course(courseName, controlCount, competitors);
                 }
             } else {
                 SplitsBrowser.throwInvalidData("Expected first line to have two parts (course name and number of controls), got " + firstLineParts.length + " part(s) instead");
@@ -594,15 +594,181 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         /**
         * Parse CSV data for an entire event.
         * @param {string} eventData - String containing the entire event data.
-        * @return {Array} Array of CourseData objects.
+        * @return {Array} Array of Course objects.
         */
         parseEventData: function (eventData) {
-            var courseDatas = eventData.split("\r\n\r\n").map($.trim).filter(SplitsBrowser.isTrue);
-            return courseDatas.map(SplitsBrowser.Input.CSV.parseCourseData);
+            var courses = eventData.split("\r\n\r\n").map($.trim).filter(SplitsBrowser.isTrue);
+            return courses.map(SplitsBrowser.Input.CSV.parseCourse);
         }
     };
 })();
 
+
+(function (){
+    "use strict";
+
+    /**
+     * Object that represents a collection of competitor data for a course.
+     * @constructor.
+     * @param {string} course - Name of the course.
+     * @param {Number} numControls - Number of controls.
+     * @param {Array} competitors - Array of Competitor objects.
+     */
+    SplitsBrowser.Model.Course = function (course, numControls, competitors) {
+        this.course = course;
+        this.numControls = numControls;
+        this.competitors = competitors;
+    };
+
+    /**
+    * Return whether this course is empty, i.e. has no competitors.
+    * @returns {boolean} True if course empty, false if course not empty.
+    */
+    SplitsBrowser.Model.Course.prototype.isEmpty = function () {
+        return this.competitors.length === 0;
+    };
+
+    /**
+    * Return the name of the competitor at the given index.
+    * @param {Number} index - The index of the competitor within the list of all of them.
+    * @returns {string} Name of the competitor.
+    */
+    SplitsBrowser.Model.Course.prototype.getCompetitorName = function (index) {
+        return this.competitors[index].name;
+    };
+
+    /**
+    * Return the cumulative times of the competitors after being adjusted to a
+    * 'reference' competitor's times.
+    * @param {Array} reference - Array of cumulative times reference data to adjust by.
+    * @return Array of arrays of adjusted competitor data.
+    */
+    SplitsBrowser.Model.Course.prototype.getCumTimesAdjustedToReference = function (reference) {
+        var adjustedData = this.competitors.map(function (competitor) { return competitor.getCumTimesAdjustedToReference(reference); });
+        return adjustedData;
+    };
+
+    /**
+    * Return the cumulative times of the 'winner' of this course, i.e. the
+    * competitor with the least total time.  If there are no competitors that
+    * have completed the course, null is returned. 
+    * @returns {Array|null} Array of cumulative times, or null if none.
+    */
+    SplitsBrowser.Model.Course.prototype.getWinnerCumTimes = function () {
+        var completingCompetitors = this.competitors.filter(function (comp) { return comp.completed(); });
+        if (completingCompetitors.length === 0) {
+            return null;
+        } else {
+            var winner = completingCompetitors[0];
+            for (var i = 1; i < completingCompetitors.length; i += 1) {
+                if (completingCompetitors[i].totalTime < winner.totalTime) {
+                    winner = completingCompetitors[i];
+                }
+            }
+
+            return winner.cumTimes;
+        }
+    };
+
+    /**
+    * Return the imaginary competitor who recorded the fastest time on each leg
+    * of the course.
+    * If at least one control has no competitors recording a time for it, null
+    * is returned.
+    * @returns {Array|null} Cumulative splits of the imaginary competitor with
+    *           fastest time, if any.
+    */
+    SplitsBrowser.Model.Course.prototype.getFastestCumTimes = function () {
+        return this.getFastestCumTimesPlusPercentage(0);
+    };
+
+    /**
+    * Return the imaginary competitor who recorded the fastest time on each leg
+    * of the course, with a given percentage of their time added.
+    * If at least one control has no competitors recording a time for it, null
+    * is returned.
+    * @param {Number} percent - The percentage of time to add.
+    * @returns {Array|null} Cumulative splits of the imaginary competitor with
+    *           fastest time, if any, after adding a percentage.
+    */
+    SplitsBrowser.Model.Course.prototype.getFastestCumTimesPlusPercentage = function (percent) {
+        var ratio = 1 + percent / 100;
+        var fastestCumTimes = new Array(this.numControls + 1);
+        fastestCumTimes[0] = 0;
+        for (var i = 0; i <= this.numControls; i += 1) {
+            var fastestForThisControl = null;
+            for (var j = 0; j < this.competitors.length; j += 1) {
+                var thisTime = this.competitors[j].getSplitTimes()[i];
+                if (thisTime !== null && (fastestForThisControl === null || thisTime < fastestForThisControl)) {
+                    fastestForThisControl = thisTime;
+                }
+            }
+
+            if (fastestForThisControl === null) {
+                // No fastest time recorded for this control.
+                return null;
+            } else {
+                fastestCumTimes[i + 1] = fastestCumTimes[i] + fastestForThisControl * ratio;
+            }
+        }
+
+        return fastestCumTimes;
+    };
+
+    /**
+    * Return data from this course in a form suitable for plotting in a chart.
+    * @param {Array} referenceCumTimes - 'Reference' cumulative time data, such
+    *            as that of the winner, or the fastest time.
+    * @param {Array} currentIndexes - Array of indexes that indicate which
+    *           competitors from the overall list are plotted.
+    * @returns {Array} Array of data.
+    */
+    SplitsBrowser.Model.Course.prototype.getChartData = function (referenceCumTimes, currentIndexes) {
+        if (this.isEmpty()) {
+            SplitsBrowser.throwInvalidData("Cannot return chart data when there is no data");
+        } else if (typeof referenceCumTimes === "undefined") {
+            throw new TypeError("referenceCumTimes undefined or missing");
+        } else if (typeof currentIndexes === "undefined") {
+            throw new TypeError("currentIndexes undefined or missing");
+        }
+
+        // Cumulative times adjusted by the reference, for each competitor.
+        var adjustedCompetitors = this.getCumTimesAdjustedToReference(referenceCumTimes);
+        var selectedCompetitors = currentIndexes.map(function (index) { return adjustedCompetitors[index]; });
+
+        var xMax = referenceCumTimes[referenceCumTimes.length - 1];
+        var yMin;
+        var yMax;
+        if (currentIndexes.length === 0) {
+            // No competitors selected.  Set yMin and yMax to the boundary
+            // values of the first competitor.
+            var firstCompetitorTimes = adjustedCompetitors[0];
+            yMin = d3.min(firstCompetitorTimes);
+            yMax = d3.max(firstCompetitorTimes);
+        } else {
+            yMin = d3.min(selectedCompetitors.map(function (values) { return d3.min(values); }));
+            yMax = d3.max(selectedCompetitors.map(function (values) { return d3.max(values); }));
+        }
+
+        if (yMax === yMin) {
+            // yMin and yMax will be used to scale a y-axis, so we'd better
+            // make sure that they're not equal.
+            yMax = yMin + 1;
+        }
+
+        var outerThis = this;
+        var cumulativeTimesByControl = d3.transpose(selectedCompetitors);
+        var zippedData = d3.zip(referenceCumTimes, cumulativeTimesByControl);
+        var competitorNames = currentIndexes.map(function (index) { return outerThis.getCompetitorName(index); });
+        return {
+            dataColumns: zippedData.map(function (data) { return { x: data[0], ys: data[1] }; }),
+            competitorNames: competitorNames,
+            numControls: this.numControls,
+            xExtent: [0, xMax],
+            yExtent: [yMin, yMax]
+        };
+    };
+})();
 
 (function () {
     "use strict";
@@ -621,8 +787,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * (3) zero if the order of a and b makes no difference (i.e. they have the
     *     same total time, or both mispunched.)
     * 
-    * @param {SplitsBrowser.Model.CompetitorData} a - One competitor to compare.
-    * @param {SplitsBrowser.Model.CompetitorData} b - The other competitor to compare.
+    * @param {SplitsBrowser.Model.Competitor} a - One competitor to compare.
+    * @param {SplitsBrowser.Model.Competitor} b - The other competitor to compare.
     * @returns {Number} Result of comparing two competitors.  TH
     */
     SplitsBrowser.Model.compareCompetitors = function (a, b) {
@@ -634,9 +800,77 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             return (b.totalTime === null) ? -1 : a.totalTime - b.totalTime;
         }
     };
+    
+    /**
+    * Returns the sum of two numbers, or null if either is null.
+    * @param {Number|null} a - One number, or null, to add.
+    * @param {Number|null} b - The other number, or null, to add.
+    * @return {Number|null} null if at least one of a or b is null,
+    *      otherwise a + b.
+    */
+    function addIfNotNull(a, b) {
+        return (a === null || b === null) ? null : (a + b);
+    }
+    
+    /**
+    * Returns the difference of two numbers, or null if either is null.
+    * @param {Number|null} a - One number, or null, to add.
+    * @param {Number|null} b - The other number, or null, to add.
+    * @return {Number|null} null if at least one of a or b is null,
+    *      otherwise a - b.
+    */    
+    function subtractIfNotNull(a, b) {
+        return (a === null || b === null) ? null : (a - b);
+    }
+    
+    /**
+    * Convert an array of split times into an array of cumulative times.
+    * If any null splits are given, all cumulative splits from that time
+    * onwards are null also.
+    *
+    * The returned array of cumulative split times includes a zero value for
+    * cumulative time at the start.
+    * @param {Array} splitTimes - Array of split times.
+    * @return {Array} Corresponding array of cumulative split times.
+    */
+    function cumTimesFromSplitTimes(splitTimes) {
+        if (!$.isArray(splitTimes)) {
+            throw new TypeError("Split times must be an array - got " + typeof (splitTimes) + " instead");
+        }
+        
+        var cumTimes = [0];
+        for (var i = 0; i < splitTimes.length; i += 1) {
+            cumTimes.push(addIfNotNull(cumTimes[i], splitTimes[i]));
+        }
+
+        return cumTimes;
+    }
+    
+    /**
+    * Convert an array of cumulative times into an array of split times.
+    * If any null cumulative splits are given, the split times to and from that
+    * control are null also.
+    *
+    * The input array should begin with a zero, for the cumulative time to the
+    * start.
+    * @param {Array} cumTimes - Array of cumulative split times.
+    * @return {Array} Corresponding array of split times.
+    */
+    function splitTimesFromCumTimes(cumTimes) {
+        if (!$.isArray(cumTimes)) {
+            throw new TypeError("Cumulative times must be an array - got " + typeof (cumTimes) + " instead");
+        }
+        
+        var splitTimes = [];
+        for (var i = 0; i + 1 < cumTimes.length; i += 1) {
+            splitTimes.push(subtractIfNotNull(cumTimes[i + 1], cumTimes[i]));
+        }
+        
+        return splitTimes;
+    }
 
     /**
-     * Object that represents the data for a single competitor.
+     * Private object that represents the data for a single competitor.
      *
      * The first parameter (order) merely stores the order in which the competitor
      * appears in the given list of results.  Its sole use is to stabilise sorts of
@@ -650,14 +884,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
      * @param {string} surname - The surname of the competitor.
      * @param {string} club - The name of the competitor's club.
      * @param {string} startTime - The competitor's start time.
-     * @param {Array} times - Array of split times, as numbers, with nulls for missed controls.
+     * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
+     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
      */
-    SplitsBrowser.Model.CompetitorData = function (order, forename, surname, club, startTime, times) {
+    var Competitor = function (order, forename, surname, club, startTime, splitTimes, cumTimes) {
 
         if (typeof (order) !== _NUMBER_TYPE) {
             SplitsBrowser.throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
-        } else if (!$.isArray(times)) {
-            throw new TypeError("times must be an array - got " + typeof (times) + " instead");
         }
 
         this.order = order;
@@ -665,214 +898,102 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.surname = surname;
         this.club = club;
         this.startTime = startTime;
-        this.times = times;
+        
+        this.splitTimes = splitTimes;
+        this.cumTimes = cumTimes;
+        this.splitRanks = null;
+        this.cumRanks = null;
 
         this.name = forename + " " + surname;
-        this.totalTime = (times.indexOf(null) > -1) ? null : d3.sum(times);
+        this.totalTime = (this.cumTimes.indexOf(null) > -1) ? null : this.cumTimes[this.cumTimes.length - 1];
     };
-
+    
+    SplitsBrowser.Model.Competitor = {};
+    
     /**
-    * Adjust this competitor's data to a given 'reference' competitor, such as the
-    * winner, or the imaginary 'fastest' runner who has the fastest splits on each
-    * leg.
-    * @param {SplitsBrowser.Model.CompetitorData} reference - The reference data to adjust by.
-    * @return {SplitsBrowser.Model.CompetitorData} 
-    */
-    SplitsBrowser.Model.CompetitorData.prototype.adjustToReference = function (reference) {
-        if (typeof (reference.times) === "undefined") {
-            SplitsBrowser.throwInvalidData("Cannot adjust competitor times because reference object does not have times (is it a competitor object?)");
-        } else if (reference.times.length !== this.times.length) {
-            SplitsBrowser.throwInvalidData("Cannot adjust competitor times because the numbers of times are different (" + this.times.length + " and " + reference.times.length + ")");
-        } else if (reference.times.indexOf(null) > -1) {
-            SplitsBrowser.throwInvalidData("Cannot adjust a competitor time by a competitor with missing times");
-        }
-
-        var adjustedTimes = this.times.map(function (time, idx) { return (time === null) ? null : (time - reference.times[idx]); });
-        return new SplitsBrowser.Model.CompetitorData(this.order, this.forename, this.surname, this.club, this.startTime, adjustedTimes);
-    };
-
-    /**
-    * Return cumulative times for this competitor.
+    * Create and return a Competitor object where the competitor's times are given
+    * as a list of split times.
     *
-    * If the competitor missed a control, the corresponding item in the
-    * cumulative sum is null, but the cumulative sum continues on in the next
-    * time as if the time was null.
-    * @returns {Array} Array of cumulative times, in seconds.
+    * The first parameter (order) merely stores the order in which the competitor
+    * appears in the given list of results.  Its sole use is to stabilise sorts of
+    * competitors, as JavaScript's sort() method is not guaranteed to be a stable
+    * sort.  However, it is not strictly the finishing order of the competitors,
+    * as it has been known for them to be given not in the correct order.
+    *
+    * @param {Number} order - The position of the competitor within the list of results.
+    * @param {string} forename - The forename of the competitor.
+    * @param {string} surname - The surname of the competitor.
+    * @param {string} club - The name of the competitor's club.
+    * @param {string} startTime - The competitor's start time.
+    * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
     */
-    SplitsBrowser.Model.CompetitorData.prototype.getCumulativeTimes = function() {
-        var totalTime = 0;
-        var cumulativeTimes = new Array(this.times.length + 1);
-        cumulativeTimes[0] = 0;
-        for (var i = 0; i < this.times.length; ++i) {
-            if (this.times[i] === null) {
-                cumulativeTimes[i + 1] = null;
-            } else {
-                totalTime += this.times[i];
-                cumulativeTimes[i + 1] = totalTime;
-            }
+    SplitsBrowser.Model.Competitor.fromSplitTimes = function (order, forename, surname, club, startTime, splitTimes) {
+        var cumTimes = cumTimesFromSplitTimes(splitTimes);
+        return new Competitor(order, forename, surname, club, startTime, splitTimes, cumTimes);
+    };
+    
+    /**
+    * Create and return a Competitor object where the competitor's times are given
+    * as a list of cumulative split times.
+    *
+    * The first parameter (order) merely stores the order in which the competitor
+    * appears in the given list of results.  Its sole use is to stabilise sorts of
+    * competitors, as JavaScript's sort() method is not guaranteed to be a stable
+    * sort.  However, it is not strictly the finishing order of the competitors,
+    * as it has been known for them to be given not in the correct order.
+    *
+    * @param {Number} order - The position of the competitor within the list of results.
+    * @param {string} forename - The forename of the competitor.
+    * @param {string} surname - The surname of the competitor.
+    * @param {string} club - The name of the competitor's club.
+    * @param {string} startTime - The competitor's start time.
+    * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
+    */
+    SplitsBrowser.Model.Competitor.fromCumTimes = function (order, forename, surname, club, startTime, cumTimes) {
+        var splitTimes = splitTimesFromCumTimes(cumTimes);
+        return new Competitor(order, forename, surname, club, startTime, splitTimes, cumTimes);
+    };
+    
+    /**
+    * Returns whether this competitor completed the course.
+    * @return {boolean} Whether the competitor completed the course.
+    */
+    Competitor.prototype.completed = function () {
+        return this.totalTime !== null;
+    };
+    
+    /**
+    * Returns an array of this competitor's split times.
+    * @return {Array} Array of competitor's split times.
+    */
+    Competitor.prototype.getSplitTimes = function () {
+        return this.splitTimes;
+    };
+    
+    /**
+    * Returns an array of this competitor's cumulative split times.
+    * @return {Array} Array of competitor's cumulative split times.
+    */
+    Competitor.prototype.getCumulativeTimes = function() {
+        return this.cumTimes;
+    };
+
+    /**
+    * Return this competitor's cumulative times after being adjusted by a 'reference' competitor.
+    * @param {Array} referenceCumTimes - The reference cumulative-split-time data to adjust by.
+    * @return {Array} The array of adjusted data.
+    */
+    Competitor.prototype.getCumTimesAdjustedToReference = function (referenceCumTimes) {
+        if (referenceCumTimes.length !== this.cumTimes.length) {
+            SplitsBrowser.throwInvalidData("Cannot adjust competitor times because the numbers of times are different (" + this.cumTimes.length + " and " + referenceCumTimes.length + ")");
+        } else if (referenceCumTimes.indexOf(null) > -1) {
+            SplitsBrowser.throwInvalidData("Cannot adjust competitor times because a null value is in the reference data");
         }
 
-        return cumulativeTimes;
-    };
-
-    /**
-     * Object that represents a collection of competitor data for a course.
-     * @constructor.
-     * @param {string} course - Name of the course.
-     * @param {Number} numControls - Number of controls.
-     * @param {Array} competitorData - Array of CompetitorData objects.
-     */
-    SplitsBrowser.Model.CourseData = function (course, numControls, competitorData) {
-        this.course = course;
-        this.numControls = numControls;
-        this.competitorData = competitorData;
-    };
-
-    /**
-    * Return whether this course is empty, i.e. has no competitors.
-    * @returns {boolean} True if course empty, false if course not empty.
-    */
-    SplitsBrowser.Model.CourseData.prototype.isEmpty = function () {
-        return this.competitorData.length === 0;
-    };
-
-    /**
-    * Return the name of the competitor at the given index.
-    * @param {Number} index - The index of the competitor within the list of all of them.
-    * @returns {string} Name of the competitor.
-    */
-    SplitsBrowser.Model.CourseData.prototype.getCompetitorName = function (index) {
-        return this.competitorData[index].name;
-    };
-
-    /**
-    * Adjust the data to a given 'reference' competitor, such as the winner,
-    * or the imaginary 'fastest' runner who has the fastest splits on each
-    * leg.
-    * @param {SplitsBrowser.Model.CompetitorData} reference - The reference data to adjust by.
-    */
-    SplitsBrowser.Model.CourseData.prototype.adjustToReference = function (reference) {
-        var adjustedData = this.competitorData.map(function (competitor) { return competitor.adjustToReference(reference); });
-        return new SplitsBrowser.Model.CourseData(this.course, this.numControls, adjustedData);
-    };
-
-    /**
-    * Return the 'winner' of this course, i.e. the competitor with the fastest
-    * total time.  If there are no competitors that have completed the course,
-    * null is returned. 
-    * @returns {SplitsBrowser.Model.Competitor|null} Winning competitor, if any.
-    */
-    SplitsBrowser.Model.CourseData.prototype.getWinner = function () {
-        var completed = this.competitorData.filter(function (comp) { return comp.totalTime !== null; });
-        if (completed.length === 0) {
-            return null;
-        } else {
-            var winner = completed[0];
-            for (var i = 1; i < completed.length; ++i) {
-                if (completed[i].totalTime < winner.totalTime) {
-                    winner = completed[i];
-                }
-            }
-
-            return winner;
-        }
-    };
-
-    /**
-    * Return the imaginary competitor who recorded the fastest time on each leg
-    * of the course.
-    * If at least one control has no competitors punching it, null is returned.
-    * @returns {SplitsBrowser.Model.Competitor|null} Imaginary competitor with
-    *           fastest time, if any.
-    */
-    SplitsBrowser.Model.CourseData.prototype.getFastestTime = function () {
-        return this.getFastestTimePlusPercentage(0);
-    };
-
-    /**
-    * Return the imaginary competitor who recorded the fastest time on each leg
-    * of the course, with a given percentage of their time added.
-    * If at least one control has no competitors punching it, null is returned.
-    * @param {Number} percent - The percentage of time to add.
-    * @returns {SplitsBrowser.Model.Competitor|null} Imaginary competitor with
-    *           fastest time, if any.
-    */
-    SplitsBrowser.Model.CourseData.prototype.getFastestTimePlusPercentage = function (percent) {
-        var ratio = 1 + percent / 100;
-        var fastestTimes = new Array(this.numControls + 1);
-        for (var i = 0; i <= this.numControls; ++i) {
-            var fastestForThisControl = null;
-            for (var j = 0; j < this.competitorData.length; ++j) {
-                var thisTime = this.competitorData[j].times[i];
-                if (thisTime !== null && (fastestForThisControl === null || thisTime < fastestForThisControl)) {
-                    fastestForThisControl = thisTime;
-                }
-            }
-
-            if (fastestForThisControl === null) {
-                // No fastest time recorded for this control.
-                return null;
-            } else {
-                fastestTimes[i] = fastestForThisControl * ratio;
-            }
-        }
-
-        return new SplitsBrowser.Model.CompetitorData(0, "Fastest time", "Fastest time", "", "", fastestTimes);
-    };
-
-    /**
-    * Return data from this course in a form suitable for plotting in a chart.
-    * This is in a form suitable for use with the chart.
-    * @param {SplitsBrowser.Model.CompetitorData} referenceData - 'Reference'
-    *        competitor data (such as winner, or fastest time).
-    * @param {Number} currentIndexes - Array of indexes that indicate which
-                competitors from the overall list are plotted.
-    * @returns {Array} Array of data.
-    */
-    SplitsBrowser.Model.CourseData.prototype.getChartData = function (referenceData, currentIndexes) {
-        if (this.isEmpty()) {
-            SplitsBrowser.throwInvalidData("Cannot return data as columns when there is no data");
-        } else if (typeof referenceData === "undefined") {
-            throw new TypeError("referenceData object undefined or missing");
-        }
-
-        // Cumulative times adjusted by the reference, for each competitor.
-        var adjustedCompetitorData = this.adjustToReference(referenceData).competitorData;
-        var selectedCompetitorData = currentIndexes.map(function (index) { return adjustedCompetitorData[index]; });
-        var cumulativeTimesByCompetitor = selectedCompetitorData.map(function (compData) { return compData.getCumulativeTimes(); });
-
-        var xMax = d3.sum(referenceData.times);
-        var yMin;
-        var yMax;
-        if (currentIndexes.length === 0) {
-            // No competitors selected.  Set yMin and yMax to the boundary
-            // values of the first competitor.
-            var firstCompetitorTimes = adjustedCompetitorData[0].getCumulativeTimes();
-            yMin = d3.min(firstCompetitorTimes);
-            yMax = d3.max(firstCompetitorTimes);
-        } else {
-            yMin = d3.min(cumulativeTimesByCompetitor.map(function (values) { return d3.min(values); }));
-            yMax = d3.max(cumulativeTimesByCompetitor.map(function (values) { return d3.max(values); }));
-        }
-
-        if (yMax === yMin) {
-            // yMin and yMax will be used to scale a y-axis, so we'd better
-            // make sure that they're not equal.
-            yMax = yMin + 1;
-        }
-
-        var cumulativeTimesByControl = d3.transpose(cumulativeTimesByCompetitor);
-        var zippedData = d3.zip(referenceData.getCumulativeTimes(), cumulativeTimesByControl);
-        return {
-            dataColumns: zippedData.map(function (data) { return { x: data[0], ys: data[1] }; }),
-            competitorNames: selectedCompetitorData.map(function (competitor) { return competitor.name; }),
-            numControls: this.numControls,
-            xExtent: [0, xMax],
-            yExtent: [yMin, yMax]
-        };
+        var adjustedTimes = this.cumTimes.map(function (time, idx) { return subtractIfNotNull(time, referenceCumTimes[idx]); });
+        return adjustedTimes;
     };
 })();
-
 
 (function () {
     "use strict";
@@ -963,8 +1084,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     "use strict";
     
     var _ALL_COMPARISON_OPTIONS = [
-        { name: "Winner", selector: function (courseData) { return courseData.getWinner(); } },
-        { name: "Fastest time", selector: function (courseData) { return courseData.getFastestTime(); } }
+        { name: "Winner", selector: function (course) { return course.getWinnerCumTimes(); } },
+        { name: "Fastest time", selector: function (course) { return course.getFastestCumTimes(); } }
     ];
     
     // All 'Fastest time + N %' values (not including zero, of course).
@@ -973,7 +1094,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     _FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
         _ALL_COMPARISON_OPTIONS.push({
             name: "Fastest time + " + percent + "%",
-            selector: function (courseData) { return courseData.getFastestTimePlusPercentage(percent); }
+            selector: function (course) { return course.getFastestCumTimesPlusPercentage(percent); }
         });
     });
     
@@ -996,6 +1117,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Controls.ComparisonSelector = function(parent) {
         this.changeHandlers = [];
         this.courses = null;
+        this.currentRunnerIndex = null;
         
         var span = d3.select(parent).append("span");
         span.text("Compare with ");
@@ -1053,7 +1175,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     
     /**
     * Sets the list of courses.
-    * @param {Array} courses - Array of CourseData objects.
+    * @param {Array} courses - Array of Course objects.
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.setCourses = function (courses) {
         var wasNull = (this.courses === null);
@@ -1083,14 +1205,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.setRunnersFromCourse = function (courseIndex) {
         var optionsList = d3.select(this.runnerDropDown).selectAll("option")
-                                                        .data(this.courses[courseIndex].competitorData);
+                                                        .data(this.courses[courseIndex].competitors);
         
         optionsList.enter().append("option");
         optionsList.attr("value", function (_comp, compIndex) { return compIndex.toString(); })
                    .text(function (comp) { return comp.name; });
         optionsList.exit().remove();
-        
+       
         this.runnerDropDown.selectedIndex = 0;
+        this.currentRunnerIndex = 0;
     };
     
     /**
@@ -1100,8 +1223,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.getComparisonFunction = function () {
         if (this.isAnyRunnerSelected()) {
-            var runnerIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
-            return function (courseData) { return courseData.competitorData[runnerIndex]; };
+            this.currentRunnerIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
+            var outerThis = this;
+            return function (course) { return course.competitors[outerThis.currentRunnerIndex].getCumulativeTimes(); };
         } else {
             return _ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
         }
@@ -1700,10 +1824,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.courses = null;
         this.currentResult = null;
         this.currentIndexes = null;
-        this.reference = null;
         this.chartData = null;
         this.splitInfo = null;
-        this.cumTimes = null;
+        this.referenceCumTimes = null;
 
         this.selection = null;
         this.courseSelector = null;
@@ -1820,17 +1943,16 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Viewer.prototype.drawChart = function () {
 
-        this.reference = this.comparisonFunction(this.currentResult);
-        this.chartData = this.currentResult.getChartData(this.reference, this.currentIndexes);
-        this.cumTimes = this.reference.getCumulativeTimes();
-        this.splitInfo = new SplitsBrowser.Model.CompetitorSplitInfo(this.currentResult, this.reference);
+        this.referenceCumTimes = this.comparisonFunction(this.currentResult);
+        this.chartData = this.currentResult.getChartData(this.referenceCumTimes, this.currentIndexes);
+        this.splitInfo = new SplitsBrowser.Model.CompetitorSplitInfo(this.currentResult, this.referenceCumTimes);
 
         var windowWidth = $(window).width();
         var windowHeight = $(window).height();
         
         this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
 
-        this.competitorListBox.setCompetitorList(this.currentResult.competitorData);
+        this.competitorListBox.setCompetitorList(this.currentResult.competitors);
 
         var topPanelHeight = $(_TOP_PANEL_ID_SELECTOR).height();
         
@@ -1839,7 +1961,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var chartHeight = windowHeight - 19 - topPanelHeight;
 
         this.chart.setSize(chartWidth, chartHeight);
-        this.chart.drawChart(this.chartData, this.splitInfo, this.cumTimes, this.currentIndexes, this.currentVisibleStatistics);
+        this.chart.drawChart(this.chartData, this.splitInfo, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics);
 
         var outerThis = this;
         
@@ -1873,8 +1995,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Redraw the chart, possibly using new data.
     */
     SplitsBrowser.Viewer.prototype.redraw = function () {
-        this.chartData = this.currentResult.getChartData(this.reference, this.currentIndexes);
-        this.chart.drawChart(this.chartData, this.splitInfo, this.cumTimes, this.currentIndexes, this.currentVisibleStatistics);
+        this.chartData = this.currentResult.getChartData(this.referenceCumTimes, this.currentIndexes);
+        this.chart.drawChart(this.chartData, this.splitInfo, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics);
     };
     
     /**
@@ -1888,7 +2010,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             }
             this.currentIndexes = [];
             this.currentResult = this.courses[index];
-            this.selection = new SplitsBrowser.Model.CompetitorSelection(this.currentResult.competitorData.length);
+            this.selection = new SplitsBrowser.Model.CompetitorSelection(this.currentResult.competitors.length);
             this.competitorListBox.setSelection(this.selection);
             this.drawChart();
         }

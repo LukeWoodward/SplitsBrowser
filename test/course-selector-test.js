@@ -6,7 +6,7 @@
     "use strict";
 
     var CourseSelector = SplitsBrowser.Controls.CourseSelector;
-    var CourseData = SplitsBrowser.Model.CourseData;
+    var Course = SplitsBrowser.Model.Course;
 
     module("Course Selector");
 
@@ -37,7 +37,7 @@
     QUnit.test("Setting a list of courses sets the selector to the list of course names", function(assert) {
         var selector = new CourseSelector(d3.select("#qunit-fixture").node());
         
-        selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])]);
+        selector.setCourses([new Course("Course 1", 11, []), new Course("Course 2", 17, []), new Course("Course 3", 22, [])]);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
@@ -54,8 +54,8 @@
     QUnit.test("Setting a shorter list of courses sets the selector to the shorter list of course names", function(assert) {
         var selector = new CourseSelector(d3.select("#qunit-fixture").node());
         
-        selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])]);
-        selector.setCourses([new CourseData("Course 4", 20, [])]);
+        selector.setCourses([new Course("Course 1", 11, []), new Course("Course 2", 17, []), new Course("Course 3", 22, [])]);
+        selector.setCourses([new Course("Course 4", 20, [])]);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
@@ -70,7 +70,7 @@
     QUnit.test("Setting the selector back to an empty list of courses disables the selector again", function(assert) {
         var selector = new CourseSelector(d3.select("#qunit-fixture").node());
         
-        selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])]);
+        selector.setCourses([new Course("Course 1", 11, []), new Course("Course 2", 17, []), new Course("Course 3", 22, [])]);
         selector.setCourses([]);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
@@ -86,7 +86,7 @@
         var selector = new CourseSelector(d3.select("#qunit-fixture").node());
         selector.registerChangeHandler(handleCourseChanged);
         
-        selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])]);
+        selector.setCourses([new Course("Course 1", 11, []), new Course("Course 2", 17, []), new Course("Course 3", 22, [])]);
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
@@ -110,7 +110,7 @@
         selector.registerChangeHandler(handleCourseChanged);
         selector.registerChangeHandler(secondHandler);
         
-        selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])]);
+        selector.setCourses([new Course("Course 1", 11, []), new Course("Course 2", 17, []), new Course("Course 3", 22, [])]);
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
@@ -129,7 +129,7 @@
         selector.registerChangeHandler(handleCourseChanged);
         selector.registerChangeHandler(handleCourseChanged);
         
-        selector.setCourses([new CourseData("Course 1", 11, []), new CourseData("Course 2", 17, []), new CourseData("Course 3", 22, [])]);
+        selector.setCourses([new Course("Course 1", 11, []), new Course("Course 2", 17, []), new Course("Course 3", 22, [])]);
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();

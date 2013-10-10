@@ -6,8 +6,8 @@
     "use strict";
 
     var SplitInfo = SplitsBrowser.Model.CompetitorSplitInfo;
-    var CompetitorData = SplitsBrowser.Model.CompetitorData;
-    var CourseData = SplitsBrowser.Model.CourseData;
+    var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
+    var Course = SplitsBrowser.Model.Course;
     var getRanks = SplitsBrowser.getRanks;
     var selectByIndexes = SplitsBrowser.selectByIndexes;
 
@@ -53,16 +53,16 @@
 
 
 
-    function getTestCourseData() {
-        var competitor1 = new CompetitorData(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
-        var competitor2 = new CompetitorData(2, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
-        var competitor3 = new CompetitorData(3, "Bill", "Palmer", "GHI", "11:00", [74, 249, 184, 106]);
-        return new CourseData("Test", 3, [competitor1, competitor2, competitor3]);
+    function getTestCourse() {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
+        var competitor3 = fromSplitTimes(3, "Bill", "Palmer", "GHI", "11:00", [74, 249, 184, 106]);
+        return new Course("Test", 3, [competitor1, competitor2, competitor3]);
     }
 
     function getTestSplitInfo() {
-        var courseData = getTestCourseData();
-        return new SplitInfo(courseData, courseData.getFastestTime());
+        var course = getTestCourse();
+        return new SplitInfo(course, course.getFastestCumTimes());
     }
 
     module("Competitor Split Info - split times");
@@ -196,38 +196,38 @@
     module("Competitor Split Info - times behind reference");
 
     QUnit.test("Gets null array of times behind reference for control zero", function(assert) {
-        var courseData = getTestCourseData();
-        var splitInfo = new SplitInfo(courseData, courseData.getFastestTime());
+        var course = getTestCourse();
+        var splitInfo = new SplitInfo(course, course.getFastestCumTimes());
         assert.equal(splitInfo.getTimesBehindReference(0, [0, 1, 2]), null);
     });
 
     QUnit.test("Gets empty array of times behind reference for empty list of competitors", function(assert) {
-        var courseData = getTestCourseData();
-        var splitInfo = new SplitInfo(courseData, courseData.getFastestTime());
+        var course = getTestCourse();
+        var splitInfo = new SplitInfo(course, course.getFastestCumTimes());
         assert.deepEqual(splitInfo.getTimesBehindReference(2, []), []);
     });
 
     QUnit.test("Gets nonempty array of times behind reference for full list of competitors in order", function(assert) {
-        var courseData = getTestCourseData();
-        var splitInfo = new SplitInfo(courseData, courseData.getFastestTime());
+        var course = getTestCourse();
+        var splitInfo = new SplitInfo(course, course.getFastestCumTimes());
         assert.deepEqual(splitInfo.getTimesBehindReference(2, [0, 1, 2]), [197 - 197, 221 - 197, 249 - 197]);
     });
 
     QUnit.test("Gets nonempty array of times behind reference for full list of competitors not in order", function(assert) {
-        var courseData = getTestCourseData();
-        var splitInfo = new SplitInfo(courseData, courseData.getFastestTime());
+        var course = getTestCourse();
+        var splitInfo = new SplitInfo(course, course.getFastestCumTimes());
         assert.deepEqual(splitInfo.getTimesBehindReference(2, [2, 0, 1]), [249 - 197, 197 - 197, 221 - 197]);
     });
 
     QUnit.test("Gets nonempty array of times behind reference for partial list of competitors not in order", function(assert) {
-        var courseData = getTestCourseData();
-        var splitInfo = new SplitInfo(courseData, courseData.getFastestTime());
+        var course = getTestCourse();
+        var splitInfo = new SplitInfo(course, course.getFastestCumTimes());
         assert.deepEqual(splitInfo.getTimesBehindReference(2, [2, 1]), [249 - 197, 221 - 197]);
     });
 
     QUnit.test("Gets array of times behind reference for last control", function(assert) {
-        var courseData = getTestCourseData();
-        var splitInfo = new SplitInfo(courseData, courseData.getFastestTime());
+        var course = getTestCourse();
+        var splitInfo = new SplitInfo(course, course.getFastestCumTimes());
         assert.deepEqual(splitInfo.getTimesBehindReference(4, [0, 1, 2]), [106 - 100, 100 - 100, 106 - 100]);
     });
 })();
