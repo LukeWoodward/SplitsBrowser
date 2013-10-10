@@ -67,7 +67,6 @@
                            
         var outerThis = this;
         this.courseSelector = new SplitsBrowser.Controls.CourseSelector(topPanel.node());
-        this.courseSelector.registerChangeHandler(function (index) { outerThis.selectCourse(index); });
         if (this.courses !== null) {
             this.courseSelector.setCourses(this.courses);
         }
@@ -75,8 +74,6 @@
         topPanel.append("span").style("padding", "0px 30px 0px 30px");
         
         this.comparisonSelector = new SplitsBrowser.Controls.ComparisonSelector(topPanel.node());
-        this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
-        this.courseSelector.registerChangeHandler(function (index) { return outerThis.comparisonSelector.updateRunnerList(index); });
         if (this.courses !== null) {
             this.comparisonSelector.setCourses(this.courses);
         }
@@ -103,6 +100,13 @@
                                                            
         this.competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(competitorListContainer.node());
         this.chart = new SplitsBrowser.Controls.Chart(mainPanel.node());
+        
+        this.courseSelector.registerChangeHandler(function (index) {
+            outerThis.comparisonSelector.updateRunnerList(index);
+            outerThis.selectCourse(index);
+        });
+        
+        this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
            
         $(window).resize(function () { outerThis.handleWindowResize(); });
     };

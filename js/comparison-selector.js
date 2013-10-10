@@ -35,6 +35,7 @@
     SplitsBrowser.Controls.ComparisonSelector = function(parent) {
         this.changeHandlers = [];
         this.courses = null;
+        this.currentRunnerIndex = null;
         
         var span = d3.select(parent).append("span");
         span.text("Compare with ");
@@ -130,6 +131,7 @@
         optionsList.exit().remove();
        
         this.runnerDropDown.selectedIndex = 0;
+        this.currentRunnerIndex = 0;
     };
     
     /**
@@ -139,8 +141,9 @@
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.getComparisonFunction = function () {
         if (this.isAnyRunnerSelected()) {
-            var runnerIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
-            return function (course) { return course.competitors[runnerIndex].getCumulativeTimes(); };
+            this.currentRunnerIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
+            var outerThis = this;
+            return function (course) { return course.competitors[outerThis.currentRunnerIndex].getCumulativeTimes(); };
         } else {
             return _ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
         }
