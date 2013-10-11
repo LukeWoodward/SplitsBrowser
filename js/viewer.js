@@ -25,10 +25,9 @@
     SplitsBrowser.Viewer = function () {
 
         this.courses = null;
-        this.currentResult = null;
+        this.currentCourse = null;
         this.currentIndexes = null;
         this.chartData = null;
-        this.splitInfo = null;
         this.referenceCumTimes = null;
 
         this.selection = null;
@@ -150,16 +149,15 @@
     */
     SplitsBrowser.Viewer.prototype.drawChart = function () {
 
-        this.referenceCumTimes = this.comparisonFunction(this.currentResult);
-        this.chartData = this.currentResult.getChartData(this.referenceCumTimes, this.currentIndexes);
-        this.splitInfo = new SplitsBrowser.Model.CompetitorSplitInfo(this.currentResult, this.referenceCumTimes);
+        this.referenceCumTimes = this.comparisonFunction(this.currentCourse);
+        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes);
 
         var windowWidth = $(window).width();
         var windowHeight = $(window).height();
         
         this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
 
-        this.competitorListBox.setCompetitorList(this.currentResult.competitors);
+        this.competitorListBox.setCompetitorList(this.currentCourse.competitors);
 
         var topPanelHeight = $(_TOP_PANEL_ID_SELECTOR).height();
         
@@ -168,7 +166,7 @@
         var chartHeight = windowHeight - 19 - topPanelHeight;
 
         this.chart.setSize(chartWidth, chartHeight);
-        this.chart.drawChart(this.chartData, this.splitInfo, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics);
+        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics);
 
         var outerThis = this;
         
@@ -202,8 +200,8 @@
     * Redraw the chart, possibly using new data.
     */
     SplitsBrowser.Viewer.prototype.redraw = function () {
-        this.chartData = this.currentResult.getChartData(this.referenceCumTimes, this.currentIndexes);
-        this.chart.drawChart(this.chartData, this.splitInfo, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics);
+        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes);
+        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics);
     };
     
     /**
@@ -216,8 +214,8 @@
                 this.selection.selectNone();
             }
             this.currentIndexes = [];
-            this.currentResult = this.courses[index];
-            this.selection = new SplitsBrowser.Model.CompetitorSelection(this.currentResult.competitors.length);
+            this.currentCourse = this.courses[index];
+            this.selection = new SplitsBrowser.Model.CompetitorSelection(this.currentCourse.competitors.length);
             this.competitorListBox.setSelection(this.selection);
             this.drawChart();
         }

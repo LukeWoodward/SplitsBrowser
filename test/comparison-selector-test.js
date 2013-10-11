@@ -42,9 +42,9 @@
     }
 
     var competitors =  [
-        { name: "one", getCumulativeTimes: function() { return [1, 2]; } },
-        { name: "two", getCumulativeTimes: function() { return [3, 4]; } },
-        { name: "three", getCumulativeTimes: function() { return [5, 6]; } }
+        { name: "one", getAllCumulativeTimes: function() { return [1, 2]; } },
+        { name: "two", getAllCumulativeTimes: function() { return [3, 4]; } },
+        { name: "three", getAllCumulativeTimes: function() { return [5, 6]; } }
     ];
     
     var DUMMY_COURSE = getDummyCourse(competitors);
@@ -82,7 +82,7 @@
         $(htmlSelect).val(htmlSelect.options.length - 1).change();
         
         var func = selector.getComparisonFunction();
-        assert.deepEqual(func(DUMMY_COURSE), DUMMY_COURSE.competitors[0].getCumulativeTimes());
+        assert.deepEqual(func(DUMMY_COURSE), DUMMY_COURSE.competitors[0].getAllCumulativeTimes());
         
         assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), true, "Runner selector should be shown");
     });
@@ -181,7 +181,7 @@
         $(htmlSelect).val(1).change();
 
         var func = selector.getComparisonFunction();
-        assert.deepEqual(func(DUMMY_COURSE), DUMMY_COURSE.competitors[1].getCumulativeTimes());
+        assert.deepEqual(func(DUMMY_COURSE), DUMMY_COURSE.competitors[1].getAllCumulativeTimes());
         assert.equal(callCount, 1, "One change should have been recorded");
     });
 

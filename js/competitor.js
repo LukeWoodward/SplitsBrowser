@@ -191,19 +191,70 @@
     };
     
     /**
-    * Returns an array of this competitor's split times.
-    * @return {Array} Array of competitor's split times.
+    * Returns the competitor's split to the given control.  If the control
+    * index given is zero (i.e. the start), zero is returned.  If the
+    * competitor has no time recorded for that control, null is returned.
+    * @param {Number} controlIndex - Index of the control (0 = start).
+    * @return {Number} The split time in seconds for the competitor to the
+    *      given control.
     */
-    Competitor.prototype.getSplitTimes = function () {
-        return this.splitTimes;
+    Competitor.prototype.getSplitTimeTo = function (controlIndex) {
+        return (controlIndex === 0) ? 0 : this.splitTimes[controlIndex - 1];
     };
     
     /**
-    * Returns an array of this competitor's cumulative split times.
-    * @return {Array} Array of competitor's cumulative split times.
+    * Returns the competitor's cumulative split to the given control.  If the
+    * control index given is zero (i.e. the start), zero is returned.   If the
+    * competitor has no cumulative time recorded for that control, null is
+    * returned.
+    * @param {Number} controlIndex - Index of the control (0 = start).
+    * @return {Number} The cumulative split time in seconds for the competitor
+    *      to the given control.
     */
-    Competitor.prototype.getCumulativeTimes = function() {
+    Competitor.prototype.getCumulativeTimeTo = function (controlIndex) {
+        return this.cumTimes[controlIndex];
+    };
+    
+    /**
+    * Returns the rank of the competitor's split to the given control.  If the
+    * control index given is zero (i.e. the start), or if the competitor has no
+    * time recorded for that control, null is returned.
+    * @param {Number} controlIndex - Index of the control (0 = start).
+    * @return {Number} The split time in seconds for the competitor to the
+    *      given control.
+    */
+    Competitor.prototype.getSplitRankTo = function (controlIndex) {
+       return (controlIndex === 0) ? null : this.splitRanks[controlIndex - 1];
+    };
+    
+    /**
+    * Returns the rank of the competitor's cumulative split to the given
+    * control.  If the control index given is zero (i.e. the start), or if the
+    * competitor has no time recorded for that control, null is returned.
+    * @param {Number} controlIndex - Index of the control (0 = start).
+    * @return {Number} The split time in seconds for the competitor to the
+    *      given control.
+    */
+    Competitor.prototype.getCumulativeRankTo = function (controlIndex) {
+        return (controlIndex === 0) ? null : this.cumRanks[controlIndex - 1];
+    };
+    
+    /**
+    * Returns all of the competitor's cumulative time splits.
+    * @return {Array} The cumulative split times in seconds for the competitor.
+    */
+    Competitor.prototype.getAllCumulativeTimes = function () {
         return this.cumTimes;
+    };
+    
+    /**
+    * Sets the split and cumulative-split ranks for this competitor.
+    * @param {Array} splitRanks - Array of split ranks for this competitor.
+    * @param {Array} cumRanks - Array of cumulative-split ranks for this competitor.
+    */
+    Competitor.prototype.setSplitAndCumulativeRanks = function (splitRanks, cumRanks) {
+        this.splitRanks = splitRanks;
+        this.cumRanks = cumRanks;
     };
 
     /**

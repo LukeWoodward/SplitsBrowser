@@ -2,6 +2,33 @@
     "use strict";
 
     /**
+    * Given an array of numbers, return a list of the corresponding ranks of those
+    * numbers.
+    * @param {Array} sourceData - Array of number values.
+    * @returns Array of corresponding ranks.
+    */
+    SplitsBrowser.Model.getRanks = function (sourceData) {
+        // First, sort the source data, removing nulls.
+        var sortedData = sourceData.filter(function (x) { return x !== null; });
+        sortedData.sort(d3.ascending);
+        
+        // Now construct a map that maps from source value to rank.
+        var rankMap = new d3.map();
+        sortedData.forEach(function(value, index) {
+            if (!rankMap.has(value)) {
+                rankMap.set(value, index + 1);
+            }
+        });
+        
+        // Finally, build and return the list of ranks.
+        var ranks = sourceData.map(function(value) {
+            return (value === null) ? null : rankMap.get(value);
+        });
+        
+        return ranks;
+    };
+
+    /**
      * Object that represents a collection of competitor data for a course.
      * @constructor.
      * @param {string} course - Name of the course.
@@ -12,6 +39,7 @@
         this.course = course;
         this.numControls = numControls;
         this.competitors = competitors;
+        this.computeRanks();
     };
 
     /**
@@ -89,20 +117,20 @@
         var ratio = 1 + percent / 100;
         var fastestCumTimes = new Array(this.numControls + 1);
         fastestCumTimes[0] = 0;
-        for (var i = 0; i <= this.numControls; i += 1) {
+        for (var controlIdx = 1; controlIdx <= this.numControls + 1; controlIdx += 1) {
             var fastestForThisControl = null;
-            for (var j = 0; j < this.competitors.length; j += 1) {
-                var thisTime = this.competitors[j].getSplitTimes()[i];
+            for (var competitorIdx = 0; competitorIdx < this.competitors.length; competitorIdx += 1) {
+                var thisTime = this.competitors[competitorIdx].getSplitTimeTo(controlIdx);
                 if (thisTime !== null && (fastestForThisControl === null || thisTime < fastestForThisControl)) {
                     fastestForThisControl = thisTime;
                 }
             }
-
+            
             if (fastestForThisControl === null) {
                 // No fastest time recorded for this control.
                 return null;
             } else {
-                fastestCumTimes[i + 1] = fastestCumTimes[i] + fastestForThisControl * ratio;
+                fastestCumTimes[controlIdx] = fastestCumTimes[controlIdx - 1] + fastestForThisControl * ratio;
             }
         }
 
@@ -162,4 +190,36 @@
             yExtent: [yMin, yMax]
         };
     };
+    
+    /**
+    * Compute the ranks of each competitor within their course.
+    */
+    SplitsBrowser.Model.Course.prototype.computeRanks = function () {
+        var splitRanksByCompetitor = [];
+        var cumRanksByCompetitor = [];
+        var outerThis = this;
+        
+        this.competitors.forEach(function (_comp) {
+            splitRanksByCompetitor.push([]);
+            cumRanksByCompetitor.push([]);
+        });
+        
+        d3.range(1, this.numControls + 2).forEach(function (control) {
+            var splitsByCompetitor = outerThis.competitors.map(function(comp) { return comp.getSplitTimeTo(control); });
+            var splitRanksForThisControl = SplitsBrowser.Model.getRanks(splitsByCompetitor);
+            outerThis.competitors.forEach(function (_comp, idx) { splitRanksByCompetitor[idx].push(splitRanksForThisControl[idx]); });
+        });
+        
+        d3.range(1, this.numControls + 2).forEach(function (control) {
+            var cumSplitsByCompetitor = outerThis.competitors.map(function(comp) { return comp.getCumulativeTimeTo(control); });
+            var cumRanksForThisControl = SplitsBrowser.Model.getRanks(cumSplitsByCompetitor);
+            outerThis.competitors.forEach(function (_comp, idx) { cumRanksByCompetitor[idx].push(cumRanksForThisControl[idx]); });
+        });
+        
+        this.competitors.forEach(function (comp, idx) {
+            comp.setSplitAndCumulativeRanks(splitRanksByCompetitor[idx], cumRanksByCompetitor[idx]);
+        });
+    };
+    
+    
 })();

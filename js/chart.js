@@ -53,7 +53,7 @@
         this.numControls = -1;
         this.selectedIndexes = [];
         this.names = [];
-        this.cumTimes = [];
+        this.referenceCumTimes = [];
         
         this.isMouseIn = false;
         
@@ -100,18 +100,19 @@
                 // In the chart.
                 // Get the time offset that the mouse is currently over.
                 var chartX = this.xScale.invert(xOffset - margin.left);
-                var bisectIndex = d3.bisect(this.cumTimes, chartX);
+                var bisectIndex = d3.bisect(this.referenceCumTimes, chartX);
                 
-                // bisectIndex is the index at which to insert chartX into cumTimes
-                // in order to keep the array sorted.  So if this index is N, the
-                // mouse is between N - 1 and N.  Find which is nearer.
+                // bisectIndex is the index at which to insert chartX into
+                // referenceCumTimes in order to keep the array sorted.  So if
+                // this index is N, the mouse is between N - 1 and N.  Find
+                // which is nearer.
                 var controlIndex;
-                if (bisectIndex >= this.cumTimes.length) {
+                if (bisectIndex >= this.referenceCumTimes.length) {
                     // Off the right-hand end, use the finish.
                     controlIndex = this.numControls + 1;
                 } else {
-                    var diffToNext = Math.abs(this.cumTimes[bisectIndex] - chartX);
-                    var diffToPrev = Math.abs(chartX - this.cumTimes[bisectIndex - 1]);
+                    var diffToNext = Math.abs(this.referenceCumTimes[bisectIndex] - chartX);
+                    var diffToPrev = Math.abs(chartX - this.referenceCumTimes[bisectIndex - 1]);
                     controlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
                 }
                 
@@ -144,7 +145,7 @@
     SplitsBrowser.Controls.Chart.prototype.drawControlLine = function(controlIndex) {
         this.currentControlIndex = controlIndex;
         this.updateCompetitorStatistics();    
-        var xPosn = this.xScale(this.cumTimes[controlIndex]);
+        var xPosn = this.xScale(this.referenceCumTimes[controlIndex]);
         this.controlLine = this.svgGroup.append("line")
                                         .attr("x1", xPosn)
                                         .attr("y1", 0)
@@ -168,28 +169,45 @@
     };
 
     /**
+    * Returns an array of the the times that the selected competitors are
+    * behind the reference times at the given control.
+    * @return {Array} Array of times in seconds that the given competitors are
+    *     behind the reference time.
+    */
+    SplitsBrowser.Controls.Chart.prototype.getTimesBehind = function (controlIndex) {
+        var outerThis = this;
+        var selectedCompetitors = this.selectedIndexes.map(function (index) { return outerThis.course.competitors[index]; });
+        var referenceSplit = this.referenceCumTimes[controlIndex] - this.referenceCumTimes[controlIndex - 1];
+        var timesBehind = selectedCompetitors.map(function (comp) { return comp.getSplitTimeTo(controlIndex) - referenceSplit; });
+        return timesBehind;
+    };
+    
+    /**
     * Updates the statistics text shown after the competitor.
     */
     SplitsBrowser.Controls.Chart.prototype.updateCompetitorStatistics = function() {
             
         var labelTexts = this.names;
+        var outerThis = this;
+        
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
+            var selectedCompetitors = this.selectedIndexes.map(function (index) { return outerThis.course.competitors[index]; });
             if (this.visibleStatistics[0]) {
-                var cumTimes = this.splitInfo.getCumulativeTimes(this.currentControlIndex, this.selectedIndexes);
-                var cumRanks = this.splitInfo.getCumulativeRanks(this.currentControlIndex, this.selectedIndexes);
+                var cumTimes = selectedCompetitors.map(function (comp) { return comp.getCumulativeTimeTo(outerThis.currentControlIndex); });
+                var cumRanks = selectedCompetitors.map(function (comp) { return comp.getCumulativeRankTo(outerThis.currentControlIndex); });
                 labelTexts = d3.zip(labelTexts, cumTimes, cumRanks)
                                .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
             }
                            
             if (this.visibleStatistics[1]) {
-                var splitTimes = this.splitInfo.getSplits(this.currentControlIndex, this.selectedIndexes);
-                var splitRanks = this.splitInfo.getSplitRanks(this.currentControlIndex, this.selectedIndexes);
+                var splitTimes = selectedCompetitors.map(function (comp) { return comp.getSplitTimeTo(outerThis.currentControlIndex); });
+                var splitRanks = selectedCompetitors.map(function (comp) { return comp.getSplitRankTo(outerThis.currentControlIndex); });
                 labelTexts = d3.zip(labelTexts, splitTimes, splitRanks)
                                .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
             }
              
             if (this.visibleStatistics[2]) {
-                var timesBehind = this.splitInfo.getTimesBehindReference(this.currentControlIndex, this.selectedIndexes);
+                var timesBehind = this.getTimesBehind(this.currentControlIndex);
                 labelTexts = d3.zip(labelTexts, timesBehind)
                                .map(function(pair) { return pair[0] + SPACER + SplitsBrowser.formatTime(pair[1]); });
             }
@@ -267,14 +285,16 @@
         var maxTime = 0;
         var maxRank = 0;
         
-        // Split times and ranks.
-        for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
-            var times = this.splitInfo[timeFuncName](controlIndex, this.selectedIndexes);
+        var outerThis = this;
+        var selectedCompetitors = this.selectedIndexes.map(function (index) { return outerThis.course.competitors[index]; });
+        
+        d3.range(1, this.numControls + 2).forEach(function (controlIndex) {
+            var times = selectedCompetitors.map(function (comp) { return comp[timeFuncName](controlIndex); });
             maxTime = Math.max(maxTime, d3.max(times.filter(SplitsBrowser.isNotNull)));
             
-            var ranks = this.splitInfo[rankFuncName](controlIndex, this.selectedIndexes);
+            var ranks = selectedCompetitors.map(function (comp) { return comp[rankFuncName](controlIndex); });
             maxRank = Math.max(maxRank, d3.max(ranks.filter(SplitsBrowser.isNotNull)));
-        }
+        });
         
         var text = formatTimeAndRank(maxTime, maxRank);
         return this.getTextWidth(text);
@@ -286,7 +306,7 @@
     * @returns {Number} Maximum width of split-time and rank text, in pixels.
     */
     SplitsBrowser.Controls.Chart.prototype.getMaxSplitTimeAndRankTextWidth = function() {
-        return this.getMaxTimeAndRankTextWidth("getSplits", "getSplitRanks");
+        return this.getMaxTimeAndRankTextWidth("getSplitTimeTo", "getSplitRankTo");
     };
 
     /**
@@ -296,7 +316,7 @@
     *                   pixels.
     */
     SplitsBrowser.Controls.Chart.prototype.getMaxCumulativeTimeAndRankTextWidth = function() {
-        return this.getMaxTimeAndRankTextWidth("getCumulativeTimes", "getCumulativeRanks");
+        return this.getMaxTimeAndRankTextWidth("getCumulativeTimeTo", "getCumulativeRankTo");
     };
 
     /**
@@ -308,7 +328,7 @@
         var maxTime = 0;
         
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
-            var times = this.splitInfo.getTimesBehindReference(controlIndex, this.selectedIndexes);
+            var times = this.getTimesBehind(controlIndex);
             maxTime = Math.max(maxTime, d3.max(times.filter(SplitsBrowser.isNotNull)));
         }
         
@@ -357,9 +377,9 @@
 
         rects.enter().append("rect");
 
-        rects.attr("x", function (index) { return outerThis.xScale(outerThis.cumTimes[index]); })
+        rects.attr("x", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index]); })
                 .attr("y", 0)
-                .attr("width", function (index) { return outerThis.xScale(outerThis.cumTimes[index + 1] - outerThis.cumTimes[index]); })
+                .attr("width", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index + 1] - outerThis.referenceCumTimes[index]); })
                 .attr("height", this.contentHeight)
                 .attr("fill", function (index) { return (index % 2 === 0) ? backgroundColour1 : backgroundColour2; });
 
@@ -374,7 +394,7 @@
                           .scale(this.xScale)
                           .orient("top")
                           .tickFormat(this.getTickFormatter())
-                          .tickValues(this.cumTimes);
+                          .tickValues(this.referenceCumTimes);
 
         var yAxis = d3.svg.axis()
                           .scale(this.yScaleMinutes)
@@ -523,22 +543,22 @@
     * Draws the chart.
     * @param {object} chartData - Data for all of the currently-visible
     *                 competitors.
-    * @param {object} splitInfo - Split-information object.
-    * @param {Array} cumTimes - Array of cumulative times of the 'reference', in
-    *                           units of seconds.
+    * @param {SplitsBrowser.Model.Course} course - The course data object.
+    * @param {Array} referenceCumTimes - Array of cumulative times of the
+    *                            'reference', in units of seconds.
     * @param {Array} selectedIndexes - Array of indexes of selected competitors
     *                (0 in this array means the first competitor is selected, 1
     *                means the second is selected, and so on.)
     * @param {Array} visibleStatistics - Array of boolean flags indicating whether
                                          certain statistics are visible.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, splitInfo, cumTimes, selectedIndexes, visibleStatistics) {
+    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, course, referenceCumTimes, selectedIndexes, visibleStatistics) {
         this.numControls = chartData.numControls;
         this.names = chartData.competitorNames;
         this.numLines = this.names.length;
         this.selectedIndexes = selectedIndexes;
-        this.cumTimes = cumTimes;
-        this.splitInfo = splitInfo;
+        this.referenceCumTimes = referenceCumTimes;
+        this.course = course;
         this.visibleStatistics = visibleStatistics;
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
         this.adjustContentSize();

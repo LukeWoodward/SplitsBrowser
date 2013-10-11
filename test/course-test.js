@@ -217,4 +217,105 @@
 
         assert.ok(chartData.yExtent[0] < chartData.yExtent[1], "The y-axis should have a positive extent: got values " + chartData.yExtent[0] + " and " + chartData.yExtent[1]);
     });
+    
+    function assertSplitRanks(assert, competitor, expectedSplitRanks) {
+        expectedSplitRanks.forEach(function (splitRank, index) {
+            assert.equal(competitor.getSplitRankTo(index + 1), splitRank);
+        });
+    }
+    
+    function assertCumulativeRanks(assert, competitor, expectedCumulativeRanks) {
+        expectedCumulativeRanks.forEach(function (cumulativeRank, index) {
+            assert.equal(competitor.getCumulativeRankTo(index + 1), cumulativeRank);
+        });
+    }
+    
+    QUnit.test("Can compute ranks of single competitor as all 1s", function (assert) {
+        var competitor = fromSplitTimes(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
+        var course = new Course("Test", 3, [competitor]);
+        assertSplitRanks(assert, competitor, [1, 1, 1, 1]);
+        assertCumulativeRanks(assert, competitor, [1, 1, 1, 1]);
+    });
+    
+    QUnit.test("Can compute ranks when there are two competitors with no equal times", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 221, 209, 100]);
+        var course = new Course("Test", 3, [competitor1, competitor2]);
+        
+        assertSplitRanks(assert, competitor1, [2, 1, 2, 2]);
+        assertCumulativeRanks(assert, competitor1, [2, 1, 1, 2]);
+        assertSplitRanks(assert, competitor2, [1, 2, 1, 1]);
+        assertCumulativeRanks(assert, competitor2, [1, 2, 2, 1]);
+    });
+    
+    QUnit.test("Can compute ranks when there are three competitors with no equal times", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 221, 209, 100]);
+        var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", "11:00", [78, 209, 199, 117]);
+        var course = new Course("Test", 3, [competitor1, competitor2, competitor3]);
+        
+        assertSplitRanks(assert, competitor1, [3, 1, 3, 2]);
+        assertCumulativeRanks(assert, competitor1, [3, 1, 2, 2]);
+        assertSplitRanks(assert, competitor2, [1, 3, 2, 1]);
+        assertCumulativeRanks(assert, competitor2, [1, 2, 3, 1]);
+        assertSplitRanks(assert, competitor3, [2, 2, 1, 3]);
+        assertCumulativeRanks(assert, competitor3, [2, 3, 1, 3]);
+    });
+    
+    QUnit.test("Can compute ranks when there are three competitors with one pair of equal split times", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 197, 209, 100]);
+        var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", "11:00", [78, 209, 199, 117]);
+        var course = new Course("Test", 3, [competitor1, competitor2, competitor3]);
+        
+        assertSplitRanks(assert, competitor1, [3, 1, 3, 2]);
+        assertCumulativeRanks(assert, competitor1, [3, 2, 3, 2]);
+        assertSplitRanks(assert, competitor2, [1, 1, 2, 1]);
+        assertCumulativeRanks(assert, competitor2, [1, 1, 1, 1]);
+        assertSplitRanks(assert, competitor3, [2, 3, 1, 3]);
+        assertCumulativeRanks(assert, competitor3, [2, 3, 2, 3]);
+    });
+    
+    QUnit.test("Can compute ranks when there are three competitors with one pair of equal cumulative times", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 221, 209, 100]);
+        var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", "11:00", [78, 209, 199, 109]);
+        var course = new Course("Test", 3, [competitor1, competitor2, competitor3]);
+        
+        assertSplitRanks(assert, competitor1, [3, 1, 3, 2]);
+        assertCumulativeRanks(assert, competitor1, [3, 1, 2, 3]);
+        assertSplitRanks(assert, competitor2, [1, 3, 2, 1]);
+        assertCumulativeRanks(assert, competitor2, [1, 2, 3, 1]);
+        assertSplitRanks(assert, competitor3, [2, 2, 1, 3]);
+        assertCumulativeRanks(assert, competitor3, [2, 3, 1, 1]);
+    });
+    
+    QUnit.test("Can compute ranks when there are three competitors with one missing split times", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 221, 209, 100]);
+        var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", "11:00", [78, null, 199, 117]);
+        var course = new Course("Test", 3, [competitor1, competitor2, competitor3]);
+        
+        assertSplitRanks(assert, competitor1, [3, 1, 3, 2]);
+        assertCumulativeRanks(assert, competitor1, [3, 1, 1, 2]);
+        assertSplitRanks(assert, competitor2, [1, 2, 2, 1]);
+        assertCumulativeRanks(assert, competitor2, [1, 2, 2, 1]);
+        assertSplitRanks(assert, competitor3, [2, null, 1, 3]);
+        assertCumulativeRanks(assert, competitor3, [2, null, null, null]);
+    });
+    
+    QUnit.test("Can compute ranks when there is one control that all three competitors mispunch", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, null]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 221, 209, null]);
+        var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", "11:00", [78, 209, 199, null]);
+        var course = new Course("Test", 3, [competitor1, competitor2, competitor3]);
+        
+        assertSplitRanks(assert, competitor1, [3, 1, 3, null]);
+        assertCumulativeRanks(assert, competitor1, [3, 1, 2, null]);
+        assertSplitRanks(assert, competitor2, [1, 3, 2, null]);
+        assertCumulativeRanks(assert, competitor2, [1, 2, 3, null]);
+        assertSplitRanks(assert, competitor3, [2, 2, 1, null]);
+        assertCumulativeRanks(assert, competitor3, [2, 3, 1, null]);
+    });
+    
 })();

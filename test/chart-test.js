@@ -8,7 +8,6 @@
     var Chart = SplitsBrowser.Controls.Chart;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var Course = SplitsBrowser.Model.Course;
-    var SplitInfo = SplitsBrowser.Model.CompetitorSplitInfo;
 
     var TEXT_WIDTHS = {
         "Fred Brown": 85,
@@ -61,12 +60,11 @@
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
         var course = new Course("Test", 3, [competitor1, competitor2]);
         var fastestCumTimes = course.getFastestCumTimes();
-        var splitInfo = new SplitInfo(course, fastestCumTimes);
         var chartData = course.getChartData(fastestCumTimes, [0, 1]);
 
         var chart = createTestChart();
         chart.setSize(1000, 1000);
-        chart.drawChart(chartData, splitInfo, fastestCumTimes, [0, 1], [true, true, true]);
+        chart.drawChart(chartData, course, fastestCumTimes, [0, 1], [true, true, true]);
 
         // Most of the testing of the chart functionality is visual, so it isn't
         // realistic to perform any automated tests for this.  However, it is

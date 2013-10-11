@@ -7,10 +7,10 @@ module.exports = function(grunt) {
         separator: '\n\n'
       },
       dist: {
-        src: ['js/core.js', 'js/util.js', 'js/competitor-listbox.js', 'js/competitor-selection.js',
-             'js/competitor-split-info.js', 'js/course-selector.js', 'js/csv-reader.js', 'js/course.js',
-             'js/competitor.js', 'js/statistics-selector.js', 'js/comparison-selector.js', 'js/chart.js',
-             'js/viewer.js'],
+        src: ['js/core.js', 'js/util.js', 'js/competitor.js', 'js/course.js',
+              'js/competitor-selection.js', 'js/csv-reader.js',
+              'js/competitor-listbox.js', 'js/course-selector.js', 'js/comparison-selector.js',
+              'js/statistics-selector.js', 'js/chart.js', 'js/viewer.js'],
         dest: '<%= pkg.name %>.js',
         nonull: true
       }

@@ -143,7 +143,7 @@
         if (this.isAnyRunnerSelected()) {
             this.currentRunnerIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
             var outerThis = this;
-            return function (course) { return course.competitors[outerThis.currentRunnerIndex].getCumulativeTimes(); };
+            return function (course) { return course.competitors[outerThis.currentRunnerIndex].getAllCumulativeTimes(); };
         } else {
             return _ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
         }
