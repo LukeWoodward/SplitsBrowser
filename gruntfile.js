@@ -23,7 +23,7 @@ module.exports = function(grunt) {
       }
     },
     qunit: {
-      files: ['qunit-tests.html']
+      files: ['qunit-tests.html', 'qunit-tests-min.html']
     },
     jshint: {
       files: ['gruntfile.js', 'js/*.js', 'test/*-test.js'],
@@ -46,6 +46,6 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test', ['jshint', 'qunit']);
 
-  grunt.registerTask('default', ['jshint', 'qunit', 'concat', 'uglify']);
+  grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'qunit']);
 
 };
