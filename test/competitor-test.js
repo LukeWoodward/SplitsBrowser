@@ -32,21 +32,21 @@
         assertCumulativeTimes(assert, competitor, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         assertSplitTimes(assert, competitor, [65, 221, 184, 100]);
-        assert.ok(competitor.completed());
+        assert.ok(competitor.completed(), "Competitor should be marked as completing the course");
     });
 
     QUnit.test("Can create a competitor from split times and determine cumulative times when competitor has missed a control", function (assert) {
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221,  null, 184, 100]);
         assertCumulativeTimes(assert, competitor, [0, 65, 65 + 221, null, null, null]);
         assertSplitTimes(assert, competitor, [65, 221, null, 184, 100]);
-        assert.ok(!competitor.completed());
+        assert.ok(!competitor.completed(), "Competitor should be marked as not completing the course");
     });
 
     QUnit.test("Can create a competitor from split times and determine cumulative times when competitor has missed multiple consecutive controls", function (assert) {
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, null, null, null, null, 184, 100]);
         assertCumulativeTimes(assert, competitor, [0, 65, 65 + 221, null, null, null, null, null, null]);
         assertSplitTimes(assert, competitor, [65, 221, null, null, null, null, 184, 100]);
-        assert.ok(!competitor.completed());
+        assert.ok(!competitor.completed(), "Competitor should be marked as not completing the course");
     });
 
     QUnit.test("Can create a competitor from cumulative times and determine split times", function (assert) {
@@ -55,7 +55,7 @@
         assertCumulativeTimes(assert, competitor, cumTimes);
         assert.deepEqual(competitor.getAllCumulativeTimes(), cumTimes);
         assertSplitTimes(assert, competitor, [65, 221, 184, 100]);
-        assert.ok(competitor.completed());
+        assert.ok(competitor.completed(), "Competitor should be marked as completing the course");
     });
 
     QUnit.test("Can create a competitor from cumulative times and determine split times when competitor has missed a control", function (assert) {
@@ -64,7 +64,7 @@
         assertCumulativeTimes(assert, competitor, cumTimes);
         assert.deepEqual(competitor.getAllCumulativeTimes(), cumTimes);
         assertSplitTimes(assert, competitor, [65, null, null, 184, 100]);
-        assert.ok(!competitor.completed());
+        assert.ok(!competitor.completed(), "Competitor should be marked as not completing the course");
     });
 
     QUnit.test("Can create a competitor from cumulative times and determine split times when competitor has missed multiple consecutive controls", function (assert) {
@@ -72,7 +72,7 @@
         var competitor = fromCumTimes(1, "John", "Smith", "ABC", "10:00", cumTimes);
         assertCumulativeTimes(assert, competitor, cumTimes);
         assertSplitTimes(assert, competitor, [65, null, null, null, null, 184, 100]);
-        assert.ok(!competitor.completed());
+        assert.ok(!competitor.completed(), "Competitor should be marked as not completing the course");
     });
 
     QUnit.test("Can determine total time of a competitor that punches all controls", function (assert) {
