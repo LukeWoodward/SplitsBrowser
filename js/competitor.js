@@ -272,4 +272,24 @@
         var adjustedTimes = this.cumTimes.map(function (time, idx) { return subtractIfNotNull(time, referenceCumTimes[idx]); });
         return adjustedTimes;
     };
+    
+    /**
+    * Returns an array of percentages that this competitor's splits were behind
+    * those of a reference competitor.
+    * @param {Array} referenceCumTimes - The reference cumulative split times
+    * @return {Array} The array of percentages.
+    */
+    Competitor.prototype.getSplitPercentsBehindReferenceCumTimes = function (referenceCumTimes) {
+        var percentsBehind = [0];
+        this.splitTimes.forEach(function (splitTime, index) {
+            if (splitTime === null) {
+                percentsBehind.push(null);
+            } else {
+                var referenceSplit = referenceCumTimes[index + 1] - referenceCumTimes[index];
+                percentsBehind.push(100 * (splitTime - referenceSplit) / referenceSplit);
+            }
+        });
+        
+        return percentsBehind;
+    };
 })();

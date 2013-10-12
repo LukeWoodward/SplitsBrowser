@@ -182,4 +182,20 @@
         var expectedCumTimes = [0, 4, 4 + 28, null, null];
         assert.deepEqual(competitor.getCumTimesAdjustedToReference(referenceCumTimes), expectedCumTimes);
     });
+
+    QUnit.test("Can determine the percentages a competitor is behind a reference object with all valid times and same number of controls", function (assert) {
+
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
+        var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
+        var expectedPercentagesBehind = [0, 100 * (65 - 61) / 61, 100 * (221 - 193) / 193, 100 * (184 - 176) / 176, 100 * (100 - 103) / 103];
+        assert.deepEqual(competitor.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes), expectedPercentagesBehind);
+    });
+
+    QUnit.test("Can determine the percentages a competitor with a missing time is behind a reference object with all valid times and same number of controls", function (assert) {
+
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, null, 100]);
+        var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
+        var expectedPercentagesBehind = [0, 100 * (65 - 61) / 61, 100 * (221 - 193) / 193, null, 100 * (100 - 103) / 103];
+        assert.deepEqual(competitor.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes), expectedPercentagesBehind);
+    });
 })();
