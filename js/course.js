@@ -31,12 +31,12 @@
     /**
      * Object that represents a collection of competitor data for a course.
      * @constructor.
-     * @param {string} course - Name of the course.
+     * @param {string} name - Name of the course.
      * @param {Number} numControls - Number of controls.
      * @param {Array} competitors - Array of Competitor objects.
      */
-    SplitsBrowser.Model.Course = function (course, numControls, competitors) {
-        this.course = course;
+    SplitsBrowser.Model.Course = function (name, numControls, competitors) {
+        this.name = name;
         this.numControls = numControls;
         this.competitors = competitors;
         this.computeRanks();

@@ -31,7 +31,7 @@
                 options = ["[No courses loaded]"];
             } else {
                 this.dropDown.disabled = false;
-                options = courses.map(function(course) { return course.course; });
+                options = courses.map(function(course) { return course.name; });
             }
             
             var optionsList = d3.select(this.dropDown).selectAll("option").data(options);
