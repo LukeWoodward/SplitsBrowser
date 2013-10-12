@@ -72,6 +72,12 @@
         
         topPanel.append("span").style("padding", "0px 30px 0px 30px");
         
+        this.chartTypeSelector = new SplitsBrowser.Controls.ChartTypeSelector(topPanel.node());
+        
+        this.chartType = this.chartTypeSelector.getChartType();
+        
+        topPanel.append("span").style("padding", "0px 30px 0px 30px");
+        
         this.comparisonSelector = new SplitsBrowser.Controls.ComparisonSelector(topPanel.node());
         if (this.courses !== null) {
             this.comparisonSelector.setCourses(this.courses);
@@ -104,6 +110,8 @@
             outerThis.comparisonSelector.updateRunnerList(index);
             outerThis.selectCourse(index);
         });
+        
+        this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartType(chartType); });
         
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
            
@@ -150,7 +158,7 @@
     SplitsBrowser.Viewer.prototype.drawChart = function () {
 
         this.referenceCumTimes = this.comparisonFunction(this.currentCourse);
-        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes);
+        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
 
         var windowWidth = $(window).width();
         var windowHeight = $(window).height();
@@ -166,7 +174,7 @@
         var chartHeight = windowHeight - 19 - topPanelHeight;
 
         this.chart.setSize(chartWidth, chartHeight);
-        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics);
+        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel);
 
         var outerThis = this;
         
@@ -200,8 +208,8 @@
     * Redraw the chart, possibly using new data.
     */
     SplitsBrowser.Viewer.prototype.redraw = function () {
-        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes);
-        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics);
+        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel);
     };
     
     /**
@@ -228,6 +236,15 @@
     */
     SplitsBrowser.Viewer.prototype.selectComparison = function (comparisonFunc) {
         this.comparisonFunction = comparisonFunc;
+        this.drawChart();
+    };
+    
+    /**
+    * Change the type of chart shown.
+    * @param {Object} chartType - The type of chart to draw.
+    */
+    SplitsBrowser.Viewer.prototype.selectChartType = function (chartType) {
+        this.chartType = chartType;
         this.drawChart();
     };
 

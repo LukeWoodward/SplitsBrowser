@@ -506,20 +506,22 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     *            as that of the winner, or the fastest time.
     * @param {Array} currentIndexes - Array of indexes that indicate which
     *           competitors from the overall list are plotted.
+    * @param {Object} chartType - The type of chart to draw.
     * @returns {Array} Array of data.
     */
-    SplitsBrowser.Model.Course.prototype.getChartData = function (referenceCumTimes, currentIndexes) {
+    SplitsBrowser.Model.Course.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
         if (this.isEmpty()) {
             SplitsBrowser.throwInvalidData("Cannot return chart data when there is no data");
         } else if (typeof referenceCumTimes === "undefined") {
             throw new TypeError("referenceCumTimes undefined or missing");
         } else if (typeof currentIndexes === "undefined") {
             throw new TypeError("currentIndexes undefined or missing");
+        } else if (typeof chartType === "undefined") {
+            throw new TypeError("chartType undefined or missing");
         }
 
-        // Cumulative times adjusted by the reference, for each competitor.
-        var adjustedCompetitors = this.getCumTimesAdjustedToReference(referenceCumTimes);
-        var selectedCompetitors = currentIndexes.map(function (index) { return adjustedCompetitors[index]; });
+        var competitorData = this.competitors.map(function (comp) { return chartType.dataSelector(comp, referenceCumTimes); });
+        var selectedCompetitorData = currentIndexes.map(function (index) { return competitorData[index]; });
 
         var xMax = referenceCumTimes[referenceCumTimes.length - 1];
         var yMin;
@@ -527,12 +529,12 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         if (currentIndexes.length === 0) {
             // No competitors selected.  Set yMin and yMax to the boundary
             // values of the first competitor.
-            var firstCompetitorTimes = adjustedCompetitors[0];
+            var firstCompetitorTimes = competitorData[0];
             yMin = d3.min(firstCompetitorTimes);
             yMax = d3.max(firstCompetitorTimes);
         } else {
-            yMin = d3.min(selectedCompetitors.map(function (values) { return d3.min(values); }));
-            yMax = d3.max(selectedCompetitors.map(function (values) { return d3.max(values); }));
+            yMin = d3.min(selectedCompetitorData.map(function (values) { return d3.min(values); }));
+            yMax = d3.max(selectedCompetitorData.map(function (values) { return d3.max(values); }));
         }
 
         if (yMax === yMin) {
@@ -542,8 +544,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         }
 
         var outerThis = this;
-        var cumulativeTimesByControl = d3.transpose(selectedCompetitors);
-        var zippedData = d3.zip(referenceCumTimes, cumulativeTimesByControl);
+        var cumulativeTimesByControl = d3.transpose(selectedCompetitorData);
+        var xData = (chartType.skipStart) ? referenceCumTimes.slice(1) : referenceCumTimes;
+        var zippedData = d3.zip(xData, cumulativeTimesByControl);
         var competitorNames = currentIndexes.map(function (index) { return outerThis.getCompetitorName(index); });
         return {
             dataColumns: zippedData.map(function (data) { return { x: data[0], ys: data[1] }; }),
@@ -1207,6 +1210,97 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 })();
 
 
+(function (){
+    "use strict";
+    
+    /**
+    * Converts a number of seconds into the corresponding number of minutes.
+    * This conversion is as simple as dividing by 60.
+    * @param {Number} seconds - The number of seconds to convert.
+    * @return {Number} The corresponding number of minutes.
+    */
+    function secondsToMinutes(seconds) { 
+        return seconds / 60;
+    }
+
+    var _ALL_CHART_TYPES = [
+        {
+            name: "Splits graph",
+            dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
+            skipStart: false,
+            yAxisLabel: "Time loss (min)",
+            scaleFactor: 1/60.0
+        },
+        {
+            name: "Position after leg",
+            dataSelector: function (comp) { return comp.cumRanks; },
+            skipStart: true,
+            yAxisLabel: "Position",
+            scaleFactor: 1
+        },
+        {
+            name: "Split position",
+            dataSelector: function (comp) { return comp.splitRanks; },
+            skipStart: true,
+            yAxisLabel: "Position",
+            scaleFactor: 1
+        }
+    ];
+    
+    /**
+    * A control that wraps a drop-down list used to choose the types of chart to view.
+    * @param {HTMLElement} parent - The parent element to add the control to.
+    */
+    SplitsBrowser.Controls.ChartTypeSelector = function(parent) {
+        this.changeHandlers = [];
+        
+        var span = d3.select(parent).append("span");
+        span.text("View: ");
+        var outerThis = this;
+        this.dropDown = span.append("select").node();
+        $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
+        
+        var optionsList = d3.select(this.dropDown).selectAll("option").data(_ALL_CHART_TYPES);
+        optionsList.enter().append("option");
+        
+        optionsList.attr("value", function (_value, index) { return index.toString(); })
+                   .text(function (value) { return value.name; });
+                   
+        optionsList.exit().remove();
+    };
+
+    /**
+    * Add a change handler to be called whenever the selected type of chart is changed.
+    *
+    * The selected type of chart is passed to the handler function.
+    *
+    * @param {Function} handler - Handler function to be called whenever the
+    *                             chart type changes.
+    */
+    SplitsBrowser.Controls.ChartTypeSelector.prototype.registerChangeHandler = function (handler) {
+        if (this.changeHandlers.indexOf(handler) === -1) {
+            this.changeHandlers.push(handler);
+        }    
+    };
+
+    /**
+    * Returns the currently-selected chart type.
+    * @return {Array} The currently-selected chart type.
+    */
+    SplitsBrowser.Controls.ChartTypeSelector.prototype.getChartType = function () {
+        return _ALL_CHART_TYPES[Math.max(this.dropDown.selectedIndex, 0)];
+    };
+    
+    /**
+    * Handle a change of the selected option in the drop-down list.
+    */
+    SplitsBrowser.Controls.ChartTypeSelector.prototype.onSelectionChanged = function () {
+        var outerThis = this;
+        this.changeHandlers.forEach(function(handler) { handler(_ALL_CHART_TYPES[outerThis.dropDown.selectedIndex]); });
+    };
+})();
+
+
 /* global SplitsBrowser, d3, $ */
 
 (function (){
@@ -1254,7 +1348,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
         this.xScale = null;
         this.yScale = null;
-        this.yScaleMinutes = null;
         this.overallWidth = -1;
         this.overallHeight = -1;
         this.contentWidth = -1;
@@ -1570,8 +1663,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Controls.Chart.prototype.createScales = function (chartData) {
         this.xScale = d3.scale.linear().domain(chartData.xExtent).range([0, this.contentWidth]);
         this.yScale = d3.scale.linear().domain(chartData.yExtent).range([0, this.contentHeight]);
-        this.xScaleMinutes = d3.scale.linear().domain([chartData.xExtent[0] / 60, chartData.xExtent[1] / 60]).range([0, this.contentWidth]);
-        this.yScaleMinutes = d3.scale.linear().domain([chartData.yExtent[0] / 60, chartData.yExtent[1] / 60]).range([0, this.contentHeight]);
     };
 
     /**
@@ -1597,8 +1688,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
     /**
     * Draw the chart axes.
+    * @param {String} yAxisLabel - The label to use for the Y-axis.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawAxes = function () {
+    SplitsBrowser.Controls.Chart.prototype.drawAxes = function (yAxisLabel) {
         var xAxis = d3.svg.axis()
                           .scale(this.xScale)
                           .orient("top")
@@ -1606,11 +1698,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                           .tickValues(this.referenceCumTimes);
 
         var yAxis = d3.svg.axis()
-                          .scale(this.yScaleMinutes)
+                          .scale(this.yScale)
                           .orient("left");
                      
         var lowerXAxis = d3.svg.axis()
-                               .scale(this.xScaleMinutes)
+                               .scale(this.xScale)
                                .orient("bottom");
 
         this.svgGroup.selectAll("g.axis").remove();
@@ -1628,7 +1720,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                      .attr("y", 6)
                      .attr("dy", ".71em")
                      .style("text-anchor", "start")
-                     .text("Time loss (min)");
+                     .text(yAxisLabel);
 
         this.svgGroup.append("g")
                      .attr("class", "x axis")
@@ -1759,9 +1851,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     *                (0 in this array means the first competitor is selected, 1
     *                means the second is selected, and so on.)
     * @param {Array} visibleStatistics - Array of boolean flags indicating whether
-                                         certain statistics are visible.
+    *                                    certain statistics are visible.
+    * @param {yAxisLabel} yAxisLabel - The label of the y-axis.                                    
     */
-    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, course, referenceCumTimes, selectedIndexes, visibleStatistics) {
+    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, course, referenceCumTimes, selectedIndexes, visibleStatistics, yAxisLabel) {
         this.numControls = chartData.numControls;
         this.names = chartData.competitorNames;
         this.numLines = this.names.length;
@@ -1773,7 +1866,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
-        this.drawAxes();
+        this.drawAxes(yAxisLabel);
         this.drawChartLines(chartData);
         this.drawCompetitorLegendLabels(chartData);
     };
@@ -1854,6 +1947,12 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         topPanel.append("span").style("padding", "0px 30px 0px 30px");
         
+        this.chartTypeSelector = new SplitsBrowser.Controls.ChartTypeSelector(topPanel.node());
+        
+        this.chartType = this.chartTypeSelector.getChartType();
+        
+        topPanel.append("span").style("padding", "0px 30px 0px 30px");
+        
         this.comparisonSelector = new SplitsBrowser.Controls.ComparisonSelector(topPanel.node());
         if (this.courses !== null) {
             this.comparisonSelector.setCourses(this.courses);
@@ -1887,7 +1986,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             outerThis.selectCourse(index);
         });
         
+        this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartType(chartType); });
+        
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
+        
            
         $(window).resize(function () { outerThis.handleWindowResize(); });
     };
@@ -1932,7 +2034,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Viewer.prototype.drawChart = function () {
 
         this.referenceCumTimes = this.comparisonFunction(this.currentCourse);
-        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes);
+        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
 
         var windowWidth = $(window).width();
         var windowHeight = $(window).height();
@@ -1948,7 +2050,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var chartHeight = windowHeight - 19 - topPanelHeight;
 
         this.chart.setSize(chartWidth, chartHeight);
-        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics);
+        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel);
 
         var outerThis = this;
         
@@ -1982,8 +2084,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Redraw the chart, possibly using new data.
     */
     SplitsBrowser.Viewer.prototype.redraw = function () {
-        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes);
-        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics);
+        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel);
     };
     
     /**
@@ -2010,6 +2112,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Viewer.prototype.selectComparison = function (comparisonFunc) {
         this.comparisonFunction = comparisonFunc;
+        this.drawChart();
+    };
+    
+    /**
+    * Change the type of chart shown.
+    * @param {Object} chartType - The type of chart to draw.
+    */
+    SplitsBrowser.Viewer.prototype.selectChartType = function (chartType) {
+        this.chartType = chartType;
         this.drawChart();
     };
 

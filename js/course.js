@@ -143,20 +143,22 @@
     *            as that of the winner, or the fastest time.
     * @param {Array} currentIndexes - Array of indexes that indicate which
     *           competitors from the overall list are plotted.
+    * @param {Object} chartType - The type of chart to draw.
     * @returns {Array} Array of data.
     */
-    SplitsBrowser.Model.Course.prototype.getChartData = function (referenceCumTimes, currentIndexes) {
+    SplitsBrowser.Model.Course.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
         if (this.isEmpty()) {
             SplitsBrowser.throwInvalidData("Cannot return chart data when there is no data");
         } else if (typeof referenceCumTimes === "undefined") {
             throw new TypeError("referenceCumTimes undefined or missing");
         } else if (typeof currentIndexes === "undefined") {
             throw new TypeError("currentIndexes undefined or missing");
+        } else if (typeof chartType === "undefined") {
+            throw new TypeError("chartType undefined or missing");
         }
 
-        // Cumulative times adjusted by the reference, for each competitor.
-        var adjustedCompetitors = this.getCumTimesAdjustedToReference(referenceCumTimes);
-        var selectedCompetitors = currentIndexes.map(function (index) { return adjustedCompetitors[index]; });
+        var competitorData = this.competitors.map(function (comp) { return chartType.dataSelector(comp, referenceCumTimes); });
+        var selectedCompetitorData = currentIndexes.map(function (index) { return competitorData[index]; });
 
         var xMax = referenceCumTimes[referenceCumTimes.length - 1];
         var yMin;
@@ -164,12 +166,12 @@
         if (currentIndexes.length === 0) {
             // No competitors selected.  Set yMin and yMax to the boundary
             // values of the first competitor.
-            var firstCompetitorTimes = adjustedCompetitors[0];
+            var firstCompetitorTimes = competitorData[0];
             yMin = d3.min(firstCompetitorTimes);
             yMax = d3.max(firstCompetitorTimes);
         } else {
-            yMin = d3.min(selectedCompetitors.map(function (values) { return d3.min(values); }));
-            yMax = d3.max(selectedCompetitors.map(function (values) { return d3.max(values); }));
+            yMin = d3.min(selectedCompetitorData.map(function (values) { return d3.min(values); }));
+            yMax = d3.max(selectedCompetitorData.map(function (values) { return d3.max(values); }));
         }
 
         if (yMax === yMin) {
@@ -179,8 +181,9 @@
         }
 
         var outerThis = this;
-        var cumulativeTimesByControl = d3.transpose(selectedCompetitors);
-        var zippedData = d3.zip(referenceCumTimes, cumulativeTimesByControl);
+        var cumulativeTimesByControl = d3.transpose(selectedCompetitorData);
+        var xData = (chartType.skipStart) ? referenceCumTimes.slice(1) : referenceCumTimes;
+        var zippedData = d3.zip(xData, cumulativeTimesByControl);
         var competitorNames = currentIndexes.map(function (index) { return outerThis.getCompetitorName(index); });
         return {
             dataColumns: zippedData.map(function (data) { return { x: data[0], ys: data[1] }; }),

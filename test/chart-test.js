@@ -9,6 +9,18 @@
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var Course = SplitsBrowser.Model.Course;
 
+    var _DUMMY_CHART_TYPE_NO_SKIP = {
+        name: "dummy",
+        dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
+        skipStart: false
+    };
+    
+    var _DUMMY_CHART_TYPE_SKIP = {
+        name: "dummy skip",
+        dataSelector: function (comp, referenceCumTimes) { return comp.splitRanks; },
+        skipStart: true
+    };
+
     var TEXT_WIDTHS = {
         "Fred Brown": 85,
         "John Smith": 100,
@@ -55,24 +67,38 @@
 
     module("Chart");
 
+    // Most of the testing of the chart functionality is visual, so it isn't
+    // realistic to perform any automated tests for this.  However, it is
+    // useful to have a check that the code at least runs without errors.  So
+    // we do no further testing.
+
+    // The expect(0) lines are there to tell QUnit that no assertions are
+    // expected.  If we don't do this, it will complain that the test isn't
+    // testing anything.
+
     QUnit.test("Can create a chart", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
         var course = new Course("Test", 3, [competitor1, competitor2]);
         var fastestCumTimes = course.getFastestCumTimes();
-        var chartData = course.getChartData(fastestCumTimes, [0, 1]);
+        var chartData = course.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP);
 
         var chart = createTestChart();
         chart.setSize(1000, 1000);
         chart.drawChart(chartData, course, fastestCumTimes, [0, 1], [true, true, true]);
+        expect(0);
+    });
 
-        // Most of the testing of the chart functionality is visual, so it isn't
-        // realistic to perform any automated tests for this.  However, it is
-        // useful to have a check that the code at least runs without errors.  So
-        // we do no further testing.
+    QUnit.test("Can create a chart with a chart type skipping the start", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
+        var course = new Course("Test", 3, [competitor1, competitor2]);
+        var fastestCumTimes = course.getFastestCumTimes();
+        var chartData = course.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_SKIP);
 
-        // Tell QUnit that no assertions are expected.  If we don't do this, it
-        // will complain that the test isn't testing anything.
+        var chart = createTestChart();
+        chart.setSize(1000, 1000);
+        chart.drawChart(chartData, course, fastestCumTimes, [0, 1], [true, true, true]);
         expect(0);
     });
 })();

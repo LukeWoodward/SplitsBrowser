@@ -45,7 +45,6 @@
 
         this.xScale = null;
         this.yScale = null;
-        this.yScaleMinutes = null;
         this.overallWidth = -1;
         this.overallHeight = -1;
         this.contentWidth = -1;
@@ -362,7 +361,6 @@
         this.xScale = d3.scale.linear().domain(chartData.xExtent).range([0, this.contentWidth]);
         this.yScale = d3.scale.linear().domain(chartData.yExtent).range([0, this.contentHeight]);
         this.xScaleMinutes = d3.scale.linear().domain([chartData.xExtent[0] / 60, chartData.xExtent[1] / 60]).range([0, this.contentWidth]);
-        this.yScaleMinutes = d3.scale.linear().domain([chartData.yExtent[0] / 60, chartData.yExtent[1] / 60]).range([0, this.contentHeight]);
     };
 
     /**
@@ -388,8 +386,9 @@
 
     /**
     * Draw the chart axes.
+    * @param {String} yAxisLabel - The label to use for the Y-axis.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawAxes = function () {
+    SplitsBrowser.Controls.Chart.prototype.drawAxes = function (yAxisLabel) {
         var xAxis = d3.svg.axis()
                           .scale(this.xScale)
                           .orient("top")
@@ -397,7 +396,7 @@
                           .tickValues(this.referenceCumTimes);
 
         var yAxis = d3.svg.axis()
-                          .scale(this.yScaleMinutes)
+                          .scale(this.yScale)
                           .orient("left");
                      
         var lowerXAxis = d3.svg.axis()
@@ -419,7 +418,7 @@
                      .attr("y", 6)
                      .attr("dy", ".71em")
                      .style("text-anchor", "start")
-                     .text("Time loss (min)");
+                     .text(yAxisLabel);
 
         this.svgGroup.append("g")
                      .attr("class", "x axis")
@@ -550,9 +549,10 @@
     *                (0 in this array means the first competitor is selected, 1
     *                means the second is selected, and so on.)
     * @param {Array} visibleStatistics - Array of boolean flags indicating whether
-                                         certain statistics are visible.
+    *                                    certain statistics are visible.
+    * @param {yAxisLabel} yAxisLabel - The label of the y-axis.                                    
     */
-    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, course, referenceCumTimes, selectedIndexes, visibleStatistics) {
+    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, course, referenceCumTimes, selectedIndexes, visibleStatistics, yAxisLabel) {
         this.numControls = chartData.numControls;
         this.names = chartData.competitorNames;
         this.numLines = this.names.length;
@@ -564,7 +564,7 @@
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
-        this.drawAxes();
+        this.drawAxes(yAxisLabel);
         this.drawChartLines(chartData);
         this.drawCompetitorLegendLabels(chartData);
     };

@@ -8,6 +8,12 @@
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var Course = SplitsBrowser.Model.Course;
 
+    var _DUMMY_CHART_TYPE = {
+        name: "dummy",
+        dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
+        skipStart: false
+    };
+    
     module("Course");
 
     QUnit.test("Course object with no competitors is empty", function (assert) {
@@ -82,7 +88,7 @@
     QUnit.test("Cannot return chart data when no data", function (assert) {
         var course = new Course("Test", 3, []);
         try {
-            course.getChartData([0, 87, 87 + 147, 87 + 147 + 92], [0, 2]);
+            course.getChartData([0, 87, 87 + 147, 87 + 147 + 92], [0, 2], _DUMMY_CHART_TYPE);
             assert.ok(false, "Should not get here");
         } catch (e) {
             assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
@@ -106,7 +112,7 @@
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
         var course = new Course("Test", 3, [competitor1, competitor2]);
         try {
-            course.getChartData([0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100]);
+            course.getChartData([0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100], _DUMMY_CHART_TYPE);
             assert.ok(false, "Should not get here");
         } catch (e) {
             assert.equal(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
@@ -126,7 +132,7 @@
         var course = new Course("Test", 3, [competitor1, competitor2]);
         var fastestTime = course.getFastestCumTimes();
 
-        var chartData = course.getChartData(fastestTime, [0, 1]);
+        var chartData = course.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE);
 
         var expectedChartData = {
             dataColumns: [
@@ -152,7 +158,7 @@
         var course = new Course("Test", 3, [competitor1, competitor2]);
         var fastestTime = course.getFastestCumTimes();
 
-        var chartData = course.getChartData(fastestTime, [0]);
+        var chartData = course.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE);
 
         var expectedChartData = {
             dataColumns: [
@@ -177,7 +183,7 @@
         var course = new Course("Test", 3, [competitor1, competitor2]);
         var fastestTime = course.getFastestCumTimes();
 
-        var chartData = course.getChartData(fastestTime, [1]);
+        var chartData = course.getChartData(fastestTime, [1], _DUMMY_CHART_TYPE);
 
         var expectedChartData = {
             dataColumns: [
@@ -203,7 +209,7 @@
         var course = new Course("Test", 3, [competitor1, competitor2]);
         var fastestTime = course.getFastestCumTimes();
 
-        var chartData = course.getChartData(fastestTime, []);
+        var chartData = course.getChartData(fastestTime, [], _DUMMY_CHART_TYPE);
 
         var expectedChartData = {
             dataColumns: [],
