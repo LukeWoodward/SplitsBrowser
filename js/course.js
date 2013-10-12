@@ -60,17 +60,6 @@
     };
 
     /**
-    * Return the cumulative times of the competitors after being adjusted to a
-    * 'reference' competitor's times.
-    * @param {Array} reference - Array of cumulative times reference data to adjust by.
-    * @return Array of arrays of adjusted competitor data.
-    */
-    SplitsBrowser.Model.Course.prototype.getCumTimesAdjustedToReference = function (reference) {
-        var adjustedData = this.competitors.map(function (competitor) { return competitor.getCumTimesAdjustedToReference(reference); });
-        return adjustedData;
-    };
-
-    /**
     * Return the cumulative times of the 'winner' of this course, i.e. the
     * competitor with the least total time.  If there are no competitors that
     * have completed the course, null is returned. 
