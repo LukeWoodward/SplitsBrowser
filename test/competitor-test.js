@@ -143,31 +143,7 @@
         assert.ok(signum(compareCompetitors(competitor1, competitor2)), 1);
     });
 
-    QUnit.test("Cannot adjust a Competitor object by reference data with a different number of controls", function (assert) {
-
-        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
-        var referenceCumTimes = [0, 77, 77 + 200, 77 + 200 + 159, 77 + 200 + 159 + 66, 77 + 200 + 159 + 66 + 149];
-        try {
-            competitor.getCumTimesAdjustedToReference(referenceCumTimes);
-            assert.ok(false, "This should not be reached");
-        } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
-        }
-    });
-
-    QUnit.test("Cannot adjust a Competitor object by reference data with a missing split time", function (assert) {
-
-        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
-        var referenceCumTimes = [0, 77, 77 + 200, null, 77 + 200 + 159 + 66];
-        try {
-            competitor.getCumTimesAdjustedToReference(referenceCumTimes);
-            assert.ok(false, "This should not be reached");
-        } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
-        }
-    });
-
-    QUnit.test("Can adjust a competitor's cumulative times by a reference object with all valid times and same number of controls", function (assert) {
+    QUnit.test("Can adjust a competitor's cumulative times by reference data with all valid times and same number of controls", function (assert) {
 
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
         var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
@@ -175,7 +151,7 @@
         assert.deepEqual(competitor.getCumTimesAdjustedToReference(referenceCumTimes), expectedCumTimes);
     });
 
-    QUnit.test("Can adjust a competitor's cumulative times with a missing time by a reference object with all valid times and same number of controls", function (assert) {
+    QUnit.test("Can adjust a competitor's cumulative times with a missing time by reference data with all valid times and same number of controls", function (assert) {
 
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, null, 100]);
         var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
@@ -183,7 +159,33 @@
         assert.deepEqual(competitor.getCumTimesAdjustedToReference(referenceCumTimes), expectedCumTimes);
     });
 
-    QUnit.test("Can determine the percentages a competitor is behind a reference object with all valid times and same number of controls", function (assert) {
+    QUnit.test("Cannot adjust a competitor's cumulative times by reference data with a different number of times", function (assert) {
+
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
+        var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176];
+        
+        try {
+            competitor.getCumTimesAdjustedToReference(referenceCumTimes);
+            assert.ok(false, "Should not get here");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+        }
+    });
+
+    QUnit.test("Cannot adjust a competitor's cumulative times by reference data with a null value", function (assert) {
+
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
+        var referenceCumTimes = [0, 61, 61 + 193, null, 61 + 193 + 176 + 103];
+        
+        try {
+            competitor.getCumTimesAdjustedToReference(referenceCumTimes);
+            assert.ok(false, "Should not get here");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+        }
+    });
+
+    QUnit.test("Can determine the percentages a competitor is behind reference data with all valid times and same number of controls", function (assert) {
 
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
         var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
@@ -191,11 +193,37 @@
         assert.deepEqual(competitor.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes), expectedPercentagesBehind);
     });
 
-    QUnit.test("Can determine the percentages a competitor with a missing time is behind a reference object with all valid times and same number of controls", function (assert) {
+    QUnit.test("Can determine the percentages a competitor with a missing time is behind reference data with all valid times and same number of controls", function (assert) {
 
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, null, 100]);
         var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
         var expectedPercentagesBehind = [0, 100 * (65 - 61) / 61, 100 * (221 - 193) / 193, null, 100 * (100 - 103) / 103];
         assert.deepEqual(competitor.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes), expectedPercentagesBehind);
+    });
+
+    QUnit.test("Cannot determine the percentages a competitor is behind reference data with a different number of times", function (assert) {
+
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
+        var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176];
+        
+        try {
+            competitor.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes);
+            assert.ok(false, "Should not get here");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+        }
+    });
+
+    QUnit.test("Cannot determine the percentages a competitor is behind reference data with a null value", function (assert) {
+
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
+        var referenceCumTimes = [0, 61, 61 + 193, null, 61 + 193 + 176 + 103];
+        
+        try {
+            competitor.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes);
+            assert.ok(false, "Should not get here");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+        }
     });
 })();

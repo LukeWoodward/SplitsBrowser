@@ -359,6 +359,32 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var adjustedTimes = this.cumTimes.map(function (time, idx) { return subtractIfNotNull(time, referenceCumTimes[idx]); });
         return adjustedTimes;
     };
+    
+    /**
+    * Returns an array of percentages that this competitor's splits were behind
+    * those of a reference competitor.
+    * @param {Array} referenceCumTimes - The reference cumulative split times
+    * @return {Array} The array of percentages.
+    */
+    Competitor.prototype.getSplitPercentsBehindReferenceCumTimes = function (referenceCumTimes) {
+        if (referenceCumTimes.length !== this.cumTimes.length) {
+            SplitsBrowser.throwInvalidData("Cannot determine percentages-behind because the numbers of times are different (" + this.cumTimes.length + " and " + referenceCumTimes.length + ")");
+        } else if (referenceCumTimes.indexOf(null) > -1) {
+            SplitsBrowser.throwInvalidData("Cannot determine percentages-behind because a null value is in the reference data");
+        }
+        
+        var percentsBehind = [0];
+        this.splitTimes.forEach(function (splitTime, index) {
+            if (splitTime === null) {
+                percentsBehind.push(null);
+            } else {
+                var referenceSplit = referenceCumTimes[index + 1] - referenceCumTimes[index];
+                percentsBehind.push(100 * (splitTime - referenceSplit) / referenceSplit);
+            }
+        });
+        
+        return percentsBehind;
+    };
 })();
 
 (function (){
@@ -1228,22 +1254,25 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             name: "Splits graph",
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
-            yAxisLabel: "Time loss (min)",
-            scaleFactor: 1/60.0
+            yAxisLabel: "Time loss (min)"
         },
         {
             name: "Position after leg",
             dataSelector: function (comp) { return comp.cumRanks; },
             skipStart: true,
-            yAxisLabel: "Position",
-            scaleFactor: 1
+            yAxisLabel: "Position"
         },
         {
             name: "Split position",
             dataSelector: function (comp) { return comp.splitRanks; },
             skipStart: true,
-            yAxisLabel: "Position",
-            scaleFactor: 1
+            yAxisLabel: "Position"
+        },
+        {
+            name: "Percent behind",
+            dataSelector: function (comp, referenceCumTimes) { return comp.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
+            skipStart: false,
+            yAxisLabel: "Percent behind"
         }
     ];
     

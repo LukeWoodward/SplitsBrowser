@@ -280,6 +280,12 @@
     * @return {Array} The array of percentages.
     */
     Competitor.prototype.getSplitPercentsBehindReferenceCumTimes = function (referenceCumTimes) {
+        if (referenceCumTimes.length !== this.cumTimes.length) {
+            SplitsBrowser.throwInvalidData("Cannot determine percentages-behind because the numbers of times are different (" + this.cumTimes.length + " and " + referenceCumTimes.length + ")");
+        } else if (referenceCumTimes.indexOf(null) > -1) {
+            SplitsBrowser.throwInvalidData("Cannot determine percentages-behind because a null value is in the reference data");
+        }
+        
         var percentsBehind = [0];
         this.splitTimes.forEach(function (splitTime, index) {
             if (splitTime === null) {
