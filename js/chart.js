@@ -51,6 +51,10 @@
         this.contentHeight = -1;
         this.numControls = -1;
         this.selectedIndexes = [];
+        
+        // Indexes of the currently-selected competitors, in the order that
+        // they appear in the list of labels.
+        this.selectedIndexesOrderedByLastYValue = [];
         this.names = [];
         this.referenceCumTimes = [];
         
@@ -170,12 +174,14 @@
     /**
     * Returns an array of the the times that the selected competitors are
     * behind the reference times at the given control.
+    * @param {Number} controlIndex - Index of the given control.
+    * @param {Array} indexes - Array of indexes of selected competitors.
     * @return {Array} Array of times in seconds that the given competitors are
     *     behind the reference time.
     */
-    SplitsBrowser.Controls.Chart.prototype.getTimesBehind = function (controlIndex) {
+    SplitsBrowser.Controls.Chart.prototype.getTimesBehind = function (controlIndex, indexes) {
         var outerThis = this;
-        var selectedCompetitors = this.selectedIndexes.map(function (index) { return outerThis.course.competitors[index]; });
+        var selectedCompetitors = indexes.map(function (index) { return outerThis.course.competitors[index]; });
         var referenceSplit = this.referenceCumTimes[controlIndex] - this.referenceCumTimes[controlIndex - 1];
         var timesBehind = selectedCompetitors.map(function (comp) { return comp.getSplitTimeTo(controlIndex) - referenceSplit; });
         return timesBehind;
@@ -185,12 +191,11 @@
     * Updates the statistics text shown after the competitor.
     */
     SplitsBrowser.Controls.Chart.prototype.updateCompetitorStatistics = function() {
-            
-        var labelTexts = this.names;
         var outerThis = this;
+        var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return outerThis.course.competitors[index]; });
+        var labelTexts = selectedCompetitors.map(function (comp) { return comp.name; });
         
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
-            var selectedCompetitors = this.selectedIndexes.map(function (index) { return outerThis.course.competitors[index]; });
             if (this.visibleStatistics[0]) {
                 var cumTimes = selectedCompetitors.map(function (comp) { return comp.getCumulativeTimeTo(outerThis.currentControlIndex); });
                 var cumRanks = selectedCompetitors.map(function (comp) { return comp.getCumulativeRankTo(outerThis.currentControlIndex); });
@@ -206,7 +211,7 @@
             }
              
             if (this.visibleStatistics[2]) {
-                var timesBehind = this.getTimesBehind(this.currentControlIndex);
+                var timesBehind = this.getTimesBehind(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                 labelTexts = d3.zip(labelTexts, timesBehind)
                                .map(function(pair) { return pair[0] + SPACER + SplitsBrowser.formatTime(pair[1]); });
             }
@@ -327,7 +332,7 @@
         var maxTime = 0;
         
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
-            var times = this.getTimesBehind(controlIndex);
+            var times = this.getTimesBehind(controlIndex, this.selectedIndexes);
             maxTime = Math.max(maxTime, d3.max(times.filter(SplitsBrowser.isNotNull)));
         }
         
@@ -472,9 +477,16 @@
                 name: outerThis.names[i],
                 textHeight: outerThis.getTextHeight(outerThis.names[i]),
                 y: outerThis.yScale(finishColumn.ys[i]),
-                colour: colours[outerThis.selectedIndexes[i] % colours.length]
+                colour: colours[outerThis.selectedIndexes[i] % colours.length],
+                index: outerThis.selectedIndexes[i]
             };
         });
+        
+        // Sort by the y-offset values, which doesn't always agree with the end
+        // positions of the competitors.
+        currCompData.sort(function (a, b) { return a.y - b.y; });
+        
+        this.selectedIndexesOrderedByLastYValue = currCompData.map(function (comp) { return comp.index; });
 
         // Some ys may be too close to the previous one.  Adjust them downwards
         // as necessary.
