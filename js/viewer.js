@@ -247,15 +247,19 @@
         this.chartType = chartType;
         this.drawChart();
     };
-
-    var viewer = new SplitsBrowser.Viewer();
     
     /**
-    * JQuery AJAX callback to handle the request to get some data and parse it.
+    * Handles an asynchronous callback that fetched event data, by parsing the
+    * data and starting SplitsBrowser.
+    * @param {String} data - The data returned from the AJAX request.
+    * @param {String} status - The status of the request.
+    * @param {Object} jqXHR - jQuery XmlHttpRequest object.
     */
     function readEventData(data, status, jqXHR) {
         if (status === "success") {
             var courses = SplitsBrowser.Input.CSV.parseEventData(data);
+            var viewer = new SplitsBrowser.Viewer();
+            viewer.buildUi();
             viewer.setCourses(courses);
             viewer.selectCourse(0);
         } else {
@@ -263,15 +267,16 @@
         }
     }
 
-
-    function testReadSplits(events_url) {
+    /**
+    * Loads the event data in the given URL and starts SplitsBrowser.
+    * @param {String} eventUrl - The URL that points to the event data to load.
+    */
+    SplitsBrowser.loadEvent = function (eventUrl) {
         $.ajax({
-            url: events_url,
+            url: eventUrl,
             data: "",
             success: readEventData,
             dataType: "text",
         });
-    }
-
-    $(document).ready(function() { viewer.buildUi(); testReadSplits('data/eventdata'); });
+    };
 })();
