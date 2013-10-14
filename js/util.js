@@ -69,39 +69,4 @@
     SplitsBrowser.throwWrongFileFormat = function (message) {
         throw new SplitsBrowser.WrongFileFormat(message);
     };
-
-    /**
-    * Formats a time period given as a number of seconds as a string in the form
-    *  [-][h:]mm:ss.
-    * @param {Number} seconds - The number of seconds.
-    * @returns {string} The string formatting of the time.
-    */
-    SplitsBrowser.formatTime = function (seconds) {
-        var result = "";
-        if (seconds < 0) {
-            result = "-";
-            seconds = -seconds;
-        }
-        
-        var hours = Math.floor(seconds / (60 * 60));
-        var mins = Math.floor(seconds / 60) % 60;
-        var secs = seconds % 60;
-        if (hours > 0) {
-            result += hours.toString() + ":";
-        }
-        
-        if (mins < 10) {
-            result += "0";
-        }
-        
-        result += mins + ":";
-        
-        if (secs < 10) {
-            result += "0";
-        }
-        
-        result += secs;
-        
-        return result;
-    };
 })();

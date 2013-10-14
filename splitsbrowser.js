@@ -75,6 +75,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.throwWrongFileFormat = function (message) {
         throw new SplitsBrowser.WrongFileFormat(message);
     };
+})();
+
+
+(function () {
+    "use strict";
 
     /**
     * Formats a time period given as a number of seconds as a string in the form
@@ -110,8 +115,23 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         return result;
     };
+    
+    /**  
+    * Parse a time of the form MM:SS or H:MM:SS into a number of seconds.
+    * @param {string} time - The time of the form MM:SS.
+    * @return {Number} The number of seconds.
+    */
+    SplitsBrowser.parseTime = function (time) {
+        if (time.match(/^\d+:\d\d$/)) {
+            return parseInt(time.substring(0, time.length - 3), 10) * 60 + parseInt(time.substring(time.length - 2), 10);
+        } else if (time.match(/^\d+:\d\d:\d\d$/)) {
+            return parseInt(time.substring(0, time.length - 6), 10) * 3600 + parseInt(time.substring(time.length - 5, time.length - 3), 10) * 60 + parseInt(time.substring(time.length - 2), 10);
+        } else {
+            // Assume anything unrecognised is a missed split.
+            return null;
+        }
+    };
 })();
-
 
 (function () {
     "use strict";
@@ -206,12 +226,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         var splitTimes = [];
         for (var i = 0; i + 1 < cumTimes.length; i += 1) {
-            var splitTime = subtractIfNotNull(cumTimes[i + 1], cumTimes[i]);
-            if (splitTime !== null && splitTime <= 0) {
-                SplitsBrowser.throwInvalidData("Cumulative times not strictly increasing: got " + cumTimes.join(", "));
-            }
-            
-            splitTimes.push(splitTime);
+            splitTimes.push(subtractIfNotNull(cumTimes[i + 1], cumTimes[i]));
         }
         
         return splitTimes;
@@ -768,22 +783,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
 
     SplitsBrowser.Input.CSV = {
-
-        /**  
-        * Parse a time of the form MM:SS into a number of seconds.
-        * @param {string} time - The time of the form MM:SS.
-        * @return {Number} The number of seconds.
-        */
-        parseCompetitorTime: function (time) {
-            if (time.match(/^\d\d:\d\d$/)) {
-                return parseInt(time.substring(0, 2), 10) * 60 + parseInt(time.substring(3), 10);
-            } else {
-                // TODO how are missing values represented, if at all?  At the moment,
-                // anything unrecognised is simply nulled out.
-                return null;
-            }
-        },
-
+    
         /**
         * Parse a row of competitor data.
         * @param {Number} index - Index of the competitor line.
@@ -799,7 +799,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 var surname = parts.shift();
                 var club = parts.shift();
                 var startTime = parts.shift();
-                var splitTimes = parts.map(SplitsBrowser.Input.CSV.parseCompetitorTime);
+                var splitTimes = parts.map(SplitsBrowser.parseTime);
                 return SplitsBrowser.Model.Competitor.fromSplitTimes(index + 1, forename, surname, club, startTime, splitTimes);
             } else {
                 SplitsBrowser.throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor on course with " + controlCount + " controls, got " + (parts.length) + " instead.");
@@ -854,26 +854,24 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     
     // 'City' is club name!
     var _MANDATORY_COLUMN_NAMES = ["First name", "Surname", "City", "Start", "Time", "Course", "Course controls"];
-
-    /**  
-    * Parse a time of the form MM:SS into a number of seconds.
-    * @param {string} time - The time of the form MM:SS.
-    * @return {Number} The number of seconds.
-    */
-    var parseCompetitorTime = function (time) {
-        if (time.match(/^\d+:\d\d$/)) {
-            return parseInt(time.substring(0, time.length - 3), 10) * 60 + parseInt(time.substring(time.length - 2), 10);
-        } else if (time.match(/^\d+:\d\d:\d\d$/)) {
-            return parseInt(time.substring(0, time.length - 6), 10) * 3600 + parseInt(time.substring(time.length - 5, time.length - 3), 10) * 60 + parseInt(time.substring(time.length - 2), 10);
-        } else {
-            // Assume anything unrecognised is a missed split.
-            return null;
-        }
-    };
     
     SplitsBrowser.Input.SI = {};
     
-    
+    /**
+    * Checks that two consecutive cumulative times are in strictly ascending
+    * order, and throws an exception if not.  The previous time should not be
+    * null, but the next time may, and no exception will be thrown in this
+    * case.
+    * @param {Number} prevTime - The previous cumulative time, in seconds.
+    * @param {Number} nextTime - The next cumulative time, in seconds.
+    */
+    SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder = function (prevTime, nextTime) {
+        if (nextTime !== null && nextTime <= prevTime) {
+            SplitsBrowser.throwInvalidData("Cumulative times must be strictly ascending: read " +
+                    SplitsBrowser.formatTime(prevTime) + " and " + SplitsBrowser.formatTime(nextTime) +
+                    " in that order");
+        }
+    };
     
     /**
     * Parse 'SI' data read from a semicolon-separated data string.
@@ -926,18 +924,27 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             }
             
             var cumTimes = [0];
+            var lastCumTime = 0;
             for (var i = 1; i <= numControls; i += 1) {
                 var key = "Punch" + i;
                 if (row.hasOwnProperty(key)) {
                     var cumTimeStr = row[key];
-                    var cumTime = parseCompetitorTime(cumTimeStr);
+                    var cumTime = SplitsBrowser.parseTime(cumTimeStr);
+                    SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, cumTime);
+                    
                     cumTimes.push(cumTime);
+                    if (cumTime !== null) {
+                        lastCumTime = cumTime;
+                    }
                 } else {
                     SplitsBrowser.throwInvalidData("No '" + key + "' column");
                 }
             }
             
-            cumTimes.push(parseCompetitorTime(row.Time));
+            var totalTime = SplitsBrowser.parseTime(row.Time);
+            SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, totalTime);
+            
+            cumTimes.push(totalTime);
             
             var order = courses.get(courseName).competitors.length + 1;
             var competitor = SplitsBrowser.Model.Competitor.fromCumTimes(order, forename, surname, club, startTime, cumTimes);

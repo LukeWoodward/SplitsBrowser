@@ -7,8 +7,8 @@ module.exports = function(grunt) {
         separator: '\n\n'
       },
       dist: {
-        src: ['js/core.js', 'js/util.js', 'js/competitor.js', 'js/course.js',
-              'js/competitor-selection.js',
+        src: ['js/core.js', 'js/util.js', 'js/time.js', 'js/competitor.js',
+              'js/course.js', 'js/competitor-selection.js',
               'js/csv-reader.js', 'js/si-reader.js', 'js/input.js',
               'js/competitor-listbox.js', 'js/course-selector.js',
               'js/comparison-selector.js', 'js/statistics-selector.js',

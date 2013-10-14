@@ -3,22 +3,6 @@
     
     // 'City' is club name!
     var _MANDATORY_COLUMN_NAMES = ["First name", "Surname", "City", "Start", "Time", "Course", "Course controls"];
-
-    /**  
-    * Parse a time of the form MM:SS into a number of seconds.
-    * @param {string} time - The time of the form MM:SS.
-    * @return {Number} The number of seconds.
-    */
-    var parseCompetitorTime = function (time) {
-        if (time.match(/^\d+:\d\d$/)) {
-            return parseInt(time.substring(0, time.length - 3), 10) * 60 + parseInt(time.substring(time.length - 2), 10);
-        } else if (time.match(/^\d+:\d\d:\d\d$/)) {
-            return parseInt(time.substring(0, time.length - 6), 10) * 3600 + parseInt(time.substring(time.length - 5, time.length - 3), 10) * 60 + parseInt(time.substring(time.length - 2), 10);
-        } else {
-            // Assume anything unrecognised is a missed split.
-            return null;
-        }
-    };
     
     SplitsBrowser.Input.SI = {};
     
@@ -28,7 +12,7 @@
     * null, but the next time may, and no exception will be thrown in this
     * case.
     * @param {Number} prevTime - The previous cumulative time, in seconds.
-    * @param {Number} nextTime - THe next cumulative time, in seconds.
+    * @param {Number} nextTime - The next cumulative time, in seconds.
     */
     SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder = function (prevTime, nextTime) {
         if (nextTime !== null && nextTime <= prevTime) {
@@ -94,7 +78,7 @@
                 var key = "Punch" + i;
                 if (row.hasOwnProperty(key)) {
                     var cumTimeStr = row[key];
-                    var cumTime = parseCompetitorTime(cumTimeStr);
+                    var cumTime = SplitsBrowser.parseTime(cumTimeStr);
                     SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, cumTime);
                     
                     cumTimes.push(cumTime);
@@ -106,7 +90,7 @@
                 }
             }
             
-            var totalTime = parseCompetitorTime(row.Time);
+            var totalTime = SplitsBrowser.parseTime(row.Time);
             SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, totalTime);
             
             cumTimes.push(totalTime);

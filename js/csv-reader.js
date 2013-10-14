@@ -7,22 +7,7 @@
 
 
     SplitsBrowser.Input.CSV = {
-
-        /**  
-        * Parse a time of the form MM:SS into a number of seconds.
-        * @param {string} time - The time of the form MM:SS.
-        * @return {Number} The number of seconds.
-        */
-        parseCompetitorTime: function (time) {
-            if (time.match(/^\d\d:\d\d$/)) {
-                return parseInt(time.substring(0, 2), 10) * 60 + parseInt(time.substring(3), 10);
-            } else {
-                // TODO how are missing values represented, if at all?  At the moment,
-                // anything unrecognised is simply nulled out.
-                return null;
-            }
-        },
-
+    
         /**
         * Parse a row of competitor data.
         * @param {Number} index - Index of the competitor line.
@@ -38,7 +23,7 @@
                 var surname = parts.shift();
                 var club = parts.shift();
                 var startTime = parts.shift();
-                var splitTimes = parts.map(SplitsBrowser.Input.CSV.parseCompetitorTime);
+                var splitTimes = parts.map(SplitsBrowser.parseTime);
                 return SplitsBrowser.Model.Competitor.fromSplitTimes(index + 1, forename, surname, club, startTime, splitTimes);
             } else {
                 SplitsBrowser.throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor on course with " + controlCount + " controls, got " + (parts.length) + " instead.");
