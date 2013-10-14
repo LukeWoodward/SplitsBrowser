@@ -29,7 +29,7 @@
         assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
         
         var htmlSelect = htmlSelectSelection.node();
-        assert.equal(htmlSelect.options.length, 4, "Four items should be created");
+        assert.ok(htmlSelect.options.length > 3, "At least three items should be created");
     });
 
     QUnit.test("Registering a handler and changing a value in the selector triggers a call to change callback", function(assert) {
