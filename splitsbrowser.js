@@ -816,6 +816,37 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 })();
 
 
+(function () {
+    "use strict";
+    
+    // All the parsers for parsing event data that are known about.
+    var _PARSERS = [SplitsBrowser.Input.CSV.parseEventData];
+    
+    /**
+    * Attempts to parse the given event data, which may be of any of the
+    * supported formats, or may be invalid.  This function returns the results
+    * as an array of SplitsBrowser.Model.Course objects, or null in the event
+    * of failure.
+    * @param {String} data - The data read.
+    * @return {Array} Array of courses read in, or null for failure.
+    */ 
+    SplitsBrowser.Input.parseEventData = function (data) {
+        for (var i = 0; i < _PARSERS.length; ++i) {
+            var parser = _PARSERS[i];
+            try {
+                return parser(data);
+            } catch (e) {
+                if (e.name !== "InvalidData") {
+                    throw e;
+                }
+            }
+        }
+            
+        // If we get here, none of the parsers succeeded.
+        return null;
+    };
+})();
+
 /* global SplitsBrowser, d3, $ */
 (function (){
     "use strict";
@@ -2332,13 +2363,17 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     function readEventData(data, status, jqXHR) {
         if (status === "success") {
-            var courses = SplitsBrowser.Input.CSV.parseEventData(data);
-            var viewer = new SplitsBrowser.Viewer();
-            viewer.buildUi();
-            viewer.setCourses(courses);
-            viewer.selectCourse(0);
+            var courses = SplitsBrowser.Input.parseEventData(data);
+            if (courses === null) {
+                alert("Unable to read in event data file");
+            } else {
+                var viewer = new SplitsBrowser.Viewer();
+                viewer.buildUi();
+                viewer.setCourses(courses);
+                viewer.selectCourse(0);
+            }
         } else {
-            alert("Got status " + status + ". :(");
+            alert("Unable to read event data.  Status: " + status);
         }
     }
 

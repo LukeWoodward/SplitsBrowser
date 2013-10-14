@@ -278,13 +278,17 @@
     */
     function readEventData(data, status, jqXHR) {
         if (status === "success") {
-            var courses = SplitsBrowser.Input.CSV.parseEventData(data);
-            var viewer = new SplitsBrowser.Viewer();
-            viewer.buildUi();
-            viewer.setCourses(courses);
-            viewer.selectCourse(0);
+            var courses = SplitsBrowser.Input.parseEventData(data);
+            if (courses === null) {
+                alert("Unable to read in event data file");
+            } else {
+                var viewer = new SplitsBrowser.Viewer();
+                viewer.buildUi();
+                viewer.setCourses(courses);
+                viewer.selectCourse(0);
+            }
         } else {
-            alert("Got status " + status + ". :(");
+            alert("Unable to read event data.  Status: " + status);
         }
     }
 
