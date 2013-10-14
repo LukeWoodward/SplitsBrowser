@@ -446,6 +446,7 @@
             return d3.svg.line()
                             .x(function (d) { return outerThis.xScale(d.x); })
                             .y(function (d) { return outerThis.yScale(d.ys[index]); })
+                            .defined(function (d) { return d.ys[index] !== null; })
                             .interpolate("linear");
         };
 

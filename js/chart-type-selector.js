@@ -8,7 +8,7 @@
     * @return {Number} The corresponding number of minutes.
     */
     function secondsToMinutes(seconds) { 
-        return seconds / 60;
+        return (seconds === null) ? null : seconds / 60;
     }
 
     var _ALL_CHART_TYPES = [
