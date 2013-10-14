@@ -71,7 +71,7 @@
                     return new SplitsBrowser.Model.Course(courseName, controlCount, competitors);
                 }
             } else {
-                SplitsBrowser.throwInvalidData("Expected first line to have two parts (course name and number of controls), got " + firstLineParts.length + " part(s) instead");
+                SplitsBrowser.throwWrongFileFormat("Expected first line to have two parts (course name and number of controls), got " + firstLineParts.length + " part(s) instead");
             }
         },
 

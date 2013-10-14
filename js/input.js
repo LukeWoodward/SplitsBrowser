@@ -2,7 +2,10 @@
     "use strict";
     
     // All the parsers for parsing event data that are known about.
-    var _PARSERS = [SplitsBrowser.Input.CSV.parseEventData];
+    var _PARSERS = [
+        SplitsBrowser.Input.CSV.parseEventData,
+        SplitsBrowser.Input.SI.parseEventData
+   ];
     
     /**
     * Attempts to parse the given event data, which may be of any of the
@@ -18,7 +21,7 @@
             try {
                 return parser(data);
             } catch (e) {
-                if (e.name !== "InvalidData") {
+                if (e.name !== "WrongFileFormat") {
                     throw e;
                 }
             }

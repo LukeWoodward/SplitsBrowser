@@ -53,7 +53,7 @@
             parseEventData(csvData);
             assert.ok(false, "Should not get here - wrong number of items on first line should have been reported");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
+            assert.equal(e.name, "WrongFileFormat", "Exception should have name InvalidData, exception message is " + e.message);
         }
     });
 

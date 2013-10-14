@@ -36,10 +36,38 @@
     /**
     * Utility function to throw an 'InvalidData' exception object.
     * @param {string} message - The exception message.
-    * @throws {InvalidData}
+    * @throws {InvalidData} if invoked.
     */
     SplitsBrowser.throwInvalidData = function (message) {
         throw new SplitsBrowser.InvalidData(message);
+    };
+    
+    /**
+    * Exception object raised if a data parser for a format deems that the data
+    * given is not of that format.
+    * @constructor
+    * @param {String} message - The exception message.
+    */
+    SplitsBrowser.WrongFileFormat = function (message) {
+        this.name = "WrongFileFormat";
+        this.message = message;
+    };
+    
+    /**
+    * Returns a string representation of this exception.
+    * @returns {String} String representation.
+    */
+    SplitsBrowser.WrongFileFormat.prototype.toString = function () {
+        return this.name + ": " + this.message;
+    };
+    
+    /**
+    * Utility funciton to throw a 'WrongFileFormat' exception object.
+    * @param {string} message - The exception message.
+    * @throws {WrongFileFormat} if invoked.
+    */
+    SplitsBrowser.throwWrongFileFormat = function (message) {
+        throw new SplitsBrowser.WrongFileFormat(message);
     };
 
     /**
