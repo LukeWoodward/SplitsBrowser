@@ -15,7 +15,7 @@
         assert.ok(!isNotNull(null));
     });
 
-    QUnit.test("A not-null value null is not null", function (assert) {
+    QUnit.test("A not-null value is not null", function (assert) {
         assert.ok(isNotNull("this is not null"));
     });
 
