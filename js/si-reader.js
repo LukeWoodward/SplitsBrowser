@@ -23,6 +23,22 @@
     SplitsBrowser.Input.SI = {};
     
     /**
+    * Checks that two consecutive cumulative times are in strictly ascending
+    * order, and throws an exception if not.  The previous time should not be
+    * null, but the next time may, and no exception will be thrown in this
+    * case.
+    * @param {Number} prevTime - The previous cumulative time, in seconds.
+    * @param {Number} nextTime - THe next cumulative time, in seconds.
+    */
+    SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder = function (prevTime, nextTime) {
+        if (nextTime !== null && nextTime <= prevTime) {
+            SplitsBrowser.throwInvalidData("Cumulative times must be strictly ascending: read " +
+                    SplitsBrowser.formatTime(prevTime) + " and " + SplitsBrowser.formatTime(nextTime) +
+                    " in that order");
+        }
+    };
+    
+    /**
     * Parse 'SI' data read from a semicolon-separated data string.
     * @param {String} data - The input data string read.
     * @return {Array} Array of courses.
@@ -73,18 +89,27 @@
             }
             
             var cumTimes = [0];
+            var lastCumTime = 0;
             for (var i = 1; i <= numControls; i += 1) {
                 var key = "Punch" + i;
                 if (row.hasOwnProperty(key)) {
                     var cumTimeStr = row[key];
                     var cumTime = parseCompetitorTime(cumTimeStr);
+                    SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, cumTime);
+                    
                     cumTimes.push(cumTime);
+                    if (cumTime !== null) {
+                        lastCumTime = cumTime;
+                    }
                 } else {
                     SplitsBrowser.throwInvalidData("No '" + key + "' column");
                 }
             }
             
-            cumTimes.push(parseCompetitorTime(row.Time));
+            var totalTime = parseCompetitorTime(row.Time);
+            SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, totalTime);
+            
+            cumTimes.push(totalTime);
             
             var order = courses.get(courseName).competitors.length + 1;
             var competitor = SplitsBrowser.Model.Competitor.fromCumTimes(order, forename, surname, club, startTime, cumTimes);

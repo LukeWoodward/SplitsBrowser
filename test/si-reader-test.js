@@ -148,4 +148,24 @@
         runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Course;Course controls;Punch1;Punch2 XYZ;Punch3;\r\n" + 
                            "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n", "data with no Control2 column");
     });
+    
+    QUnit.test("Cannot parse a string that contains cumulative time less than previous", function (assert) {
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;07:38;06:02;\r\n", "data with cumulative times not strictly ascending");
+    });
+    
+    QUnit.test("Cannot parse a string that contains cumulative time equal to previous", function (assert) {
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;06:02;06:02;\r\n", "data with cumulative times not strictly ascending");
+    });
+    
+    QUnit.test("Cannot parse a string that contains cumulative time less than previous before mispunch", function (assert) {
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;3;04:37;-----;04:22;\r\n", "data with cumulative times not strictly ascending with mispunch in middle");
+    });
+    
+    QUnit.test("Cannot parse a string that contains total time less than last split time", function (assert) {
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;05:33;Test course;3;01:50;03:38;06:02;\r\n", "data with cumulative times not strictly ascending");
+    });
 })();
