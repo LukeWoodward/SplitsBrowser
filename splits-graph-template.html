@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+ <link rel="stylesheet" type="text/css" href="css/styles.css">
+ <title>Page title</title>
+ <script type="text/javascript" src="modernizr-2.6.2-svg.min.js"></script>
+ <script type="text/javascript">
+  if (!Modernizr.svg) {
+    document.location = "unsupported-browser.html";
+  }
+ </script>
+ <script type="text/javascript" src="jquery-1.10.1.js"></script>
+ <script type="text/javascript" src="d3.v3.js"></script>
+ <script type="text/javascript" src="splitsbrowser.min.js"></script>
+</head>
+<body>
+ <script type="text/javascript">
+  SplitsBrowser.loadEvent('url/to/some/event/data');
+ </script>
+</body>
+</html>
