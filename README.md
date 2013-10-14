@@ -1,5 +1,5 @@
-What is SplitsBrowser.HTML5?
-----------------------------
+What is SplitsBrowser?
+----------------------
 
 This is an attempt to port the existing SplitsBrowser Java applet (available at
 http://www.splitsbrowser.org.uk/) to HTML5/JavaScript/CSS.
@@ -15,8 +15,7 @@ The main reason was to replace the existing SplitsBrowser Java applet.  There
 are a number of issues with the way this works:
 
 * You need to install Java for the SplitsBrowser Java applet to work.  No such
-  requirement is true for SplitsBrowser.HTML5 - all you need is a modern web
-  browser.
+  requirement is true for SplitsBrowser - all you need is a modern web browser.
   
 * You also need to keep Java updated.  Some browsers can refuse to run the
   applet if Java on your computer is out of date.
