@@ -60,3 +60,35 @@ div.competitor.selected
 {
     vertical-align: middle;
 }
+
+#resultsTableContainer
+{
+    padding-top: 10px;
+}
+
+.resultsTable
+{
+    border-spacing: 6px;
+}
+
+span.resultsTableHeader
+{
+    font: 14px sans-serif;
+    font-weight: bold;
+}
+
+.resultsTable thead th
+{
+    font: 12px sans-serif;
+    font-weight: bold;
+}
+
+.resultsTable tbody td
+{
+    font: 12px sans-serif;
+}
+
+.resultsTable tbody td.time
+{
+    text-align: right;
+}

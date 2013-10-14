@@ -11,6 +11,9 @@
 
     var _TOP_PANEL_ID = "topPanel";
     var _TOP_PANEL_ID_SELECTOR = "#" + _TOP_PANEL_ID;
+    
+    var _MAIN_PANEL_ID = "mainPanel";
+    var _MAIN_PANEL_ID_SELECTOR = "#" + _MAIN_PANEL_ID;
 
     var _COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
     var _COMPETITOR_LIST_CONTAINER_ID_SELECTOR = "#" + _COMPETITOR_LIST_CONTAINER_ID;
@@ -87,7 +90,8 @@
         
         this.statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(topPanel.node());
         
-        var mainPanel = body.append("div");
+        var mainPanel = body.append("div")
+                            .attr("id", _MAIN_PANEL_ID);
         
         var competitorListContainer = mainPanel.append("div")
                                                .attr("id", _COMPETITOR_LIST_CONTAINER_ID);
@@ -105,6 +109,9 @@
                                                            
         this.competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(competitorListContainer.node());
         this.chart = new SplitsBrowser.Controls.Chart(mainPanel.node());
+        
+        this.resultsTable = new SplitsBrowser.Controls.ResultsTable(body.node());
+        this.resultsTable.hide();
         
         this.courseSelector.registerChangeHandler(function (index) {
             outerThis.comparisonSelector.updateRunnerList(index);
@@ -156,6 +163,9 @@
     * Draw the chart using the current data.
     */
     SplitsBrowser.Viewer.prototype.drawChart = function () {
+        if (this.chartType.isResultsTable) {
+            return;
+        }
 
         this.referenceCumTimes = this.comparisonFunction(this.currentCourse);
         this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
@@ -208,8 +218,10 @@
     * Redraw the chart, possibly using new data.
     */
     SplitsBrowser.Viewer.prototype.redraw = function () {
-        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
-        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel);
+        if (!this.chartType.isResultsTable) {
+            this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+            this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel);
+        }
     };
     
     /**
@@ -225,6 +237,7 @@
             this.currentCourse = this.courses[index];
             this.selection = new SplitsBrowser.Model.CompetitorSelection(this.currentCourse.competitors.length);
             this.competitorListBox.setSelection(this.selection);
+            this.resultsTable.setCourse(this.currentCourse);
             this.drawChart();
         }
     };
@@ -245,6 +258,14 @@
     */
     SplitsBrowser.Viewer.prototype.selectChartType = function (chartType) {
         this.chartType = chartType;
+        if (chartType.isResultsTable) {
+            d3.select(_MAIN_PANEL_ID_SELECTOR).style("display", "none");
+            this.resultsTable.show();
+        } else {
+            this.resultsTable.hide();
+            d3.select(_MAIN_PANEL_ID_SELECTOR).style("display", "");
+        }
+        
         this.drawChart();
     };
     

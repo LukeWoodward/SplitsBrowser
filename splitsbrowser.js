@@ -1243,25 +1243,36 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             name: "Splits graph",
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
-            yAxisLabel: "Time loss (min)"
+            yAxisLabel: "Time loss (min)",
+            isResultsTable: false
         },
         {
             name: "Position after leg",
             dataSelector: function (comp) { return comp.cumRanks; },
             skipStart: true,
-            yAxisLabel: "Position"
+            yAxisLabel: "Position",
+            isResultsTable: false
         },
         {
             name: "Split position",
             dataSelector: function (comp) { return comp.splitRanks; },
             skipStart: true,
-            yAxisLabel: "Position"
+            yAxisLabel: "Position",
+            isResultsTable: false
         },
         {
             name: "Percent behind",
             dataSelector: function (comp, referenceCumTimes) { return comp.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
             skipStart: false,
-            yAxisLabel: "Percent behind"
+            yAxisLabel: "Percent behind",
+            isResultsTable: false
+        },
+        {
+            name: "Results table",
+            dataSelector: null,
+            skipStart: false,
+            yAxisLabel: null,
+            isResultsTable: true
         }
     ];
     
@@ -1904,6 +1915,143 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 })();
 
 
+(function () {
+    "use strict";
+    
+    var _DEFAULT_NULL_TIME_PLACEHOLDER = "-----";
+    
+    var _NON_BREAKING_SPACE_CHAR = "\u00a0";
+    
+    /**
+    * Formats the given time, unless the value given is null, in which case a
+    * placeholder value is given.
+    * @param {Number|null} time - The time to format.
+    * @param {String|undefined} placeholder - Optional placeholder value.
+    * @return {String} The formatted time string.
+    */
+    function nullSafeFormatTime(time, placeholder) {
+        return (time === null) ? (placeholder || _DEFAULT_NULL_TIME_PLACEHOLDER) : SplitsBrowser.formatTime(time);
+    }
+
+    /**
+    * A control that shows an entire table of results.
+    * @constructor
+    * @param {HTMLElement} parent - The parent element to add this control to.
+    */
+    SplitsBrowser.Controls.ResultsTable = function (parent) {
+        this.parent = parent;
+        this.course = null;
+        this.div = null;
+        this.headerSpan = null;
+        this.table = null;
+        this.buildTable();
+    };
+    
+    /**
+    * Build the results table.
+    */
+    SplitsBrowser.Controls.ResultsTable.prototype.buildTable = function () {
+        this.div = d3.select(this.parent).append("div")
+                                         .attr("id", "resultsTableContainer");
+                                         
+        this.headerSpan = this.div.append("div")
+                                  .append("span")
+                                  .classed("resultsTableHeader", true);
+                                  
+        this.table = this.div.append("table")
+                             .classed("resultsTable", true);
+                             
+        this.table.append("thead")
+                  .append("tr");
+                  
+        this.table.append("tbody");
+    };
+    
+    /**
+    * Populates the contents of the table with the course data.
+    */
+    SplitsBrowser.Controls.ResultsTable.prototype.populateTable = function () {
+        var resultLines = [];
+        
+        // TODO add course distance and climb, if known?
+        this.headerSpan.text(this.course.name + ", " + this.course.numControls + " control" + ((this.course.numControls === 1) ? "" : "s"));
+        
+        var headerRow = this.table.select("thead");
+        var headerCellData = ["#", "Name", "Time"].concat(d3.range(1, this.course.numControls + 1)).concat(["Finish"]);
+        var headerCells = this.table.select("thead tr")
+                                    .selectAll("th")
+                                    .data(headerCellData);
+                                                       
+        headerCells.enter().append("th");
+        headerCells.text(function (header) { return header; });
+        headerCells.exit().remove();
+        
+        var tableBody = this.table.select("tbody");
+        tableBody.selectAll("tr").remove();
+        
+        function addCell(tableRow, topLine, bottomLine, cssClass) {
+            var cell = tableRow.append("td");
+            cell.append("span").text(topLine);
+            cell.append("br");
+            cell.append("span").text(bottomLine);
+            if (cssClass) {
+                cell.classed(cssClass, true);
+            }
+        }
+        
+        var competitors = this.course.competitors.slice(0);
+        competitors.sort(SplitsBrowser.Model.compareCompetitors);
+        
+        var outerThis = this;
+        competitors.forEach(function (competitor) {
+            var tableRow = tableBody.append("tr");
+            tableRow.append("td").text(competitor.completed() ? competitor.cumRanks[competitor.cumRanks.length - 1] : "");
+            
+            addCell(tableRow, competitor.name, competitor.club);
+            addCell(tableRow, nullSafeFormatTime(competitor.totalTime, "mp"), _NON_BREAKING_SPACE_CHAR, "time");
+            
+            d3.range(1, outerThis.course.numControls + 2).forEach(function (controlNum) {
+                addCell(tableRow, nullSafeFormatTime(competitor.getCumulativeTimeTo(controlNum)), nullSafeFormatTime(competitor.getSplitTimeTo(controlNum)), "time");
+            });
+        });
+    };
+    
+    /**
+    * Sets the course whose data is displayed.
+    * @param {SplitsBrowser.Model.Course} course - The course displayed.
+    */
+    SplitsBrowser.Controls.ResultsTable.prototype.setCourse = function (course) {
+        this.course = course;
+        this.populateTable();
+        if (this.div.style("display") !== "none") {
+            this.adjustTableCellWidths();
+        }
+    };
+    
+    /**
+    * Adjust the widths of the time table cells so that they have the same width.
+    */
+    SplitsBrowser.Controls.ResultsTable.prototype.adjustTableCellWidths = function () {
+        var lastCellOnFirstRow = d3.select("tbody tr td:last-child").node();
+        $("tbody td.time").width($(lastCellOnFirstRow).width());
+    };
+    
+    /**
+    * Shows the table of results.
+    */
+    SplitsBrowser.Controls.ResultsTable.prototype.show = function () {
+        this.div.style("display", "");
+        this.adjustTableCellWidths();
+    };
+    
+    /**
+    * Hides the table of results.
+    */
+    SplitsBrowser.Controls.ResultsTable.prototype.hide = function () {
+        this.div.style("display", "none");
+    };
+})();
+
 /* global window, document, $, SplitsBrowser, d3, setTimeout, clearTimeout */
 
 (function () {
@@ -1917,6 +2065,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
     var _TOP_PANEL_ID = "topPanel";
     var _TOP_PANEL_ID_SELECTOR = "#" + _TOP_PANEL_ID;
+    
+    var _MAIN_PANEL_ID = "mainPanel";
+    var _MAIN_PANEL_ID_SELECTOR = "#" + _MAIN_PANEL_ID;
 
     var _COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
     var _COMPETITOR_LIST_CONTAINER_ID_SELECTOR = "#" + _COMPETITOR_LIST_CONTAINER_ID;
@@ -1993,7 +2144,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         this.statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(topPanel.node());
         
-        var mainPanel = body.append("div");
+        var mainPanel = body.append("div")
+                            .attr("id", _MAIN_PANEL_ID);
         
         var competitorListContainer = mainPanel.append("div")
                                                .attr("id", _COMPETITOR_LIST_CONTAINER_ID);
@@ -2011,6 +2163,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                                                            
         this.competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(competitorListContainer.node());
         this.chart = new SplitsBrowser.Controls.Chart(mainPanel.node());
+        
+        this.resultsTable = new SplitsBrowser.Controls.ResultsTable(body.node());
+        this.resultsTable.hide();
         
         this.courseSelector.registerChangeHandler(function (index) {
             outerThis.comparisonSelector.updateRunnerList(index);
@@ -2062,6 +2217,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Draw the chart using the current data.
     */
     SplitsBrowser.Viewer.prototype.drawChart = function () {
+        if (this.chartType.isResultsTable) {
+            return;
+        }
 
         this.referenceCumTimes = this.comparisonFunction(this.currentCourse);
         this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
@@ -2114,8 +2272,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Redraw the chart, possibly using new data.
     */
     SplitsBrowser.Viewer.prototype.redraw = function () {
-        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
-        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel);
+        if (!this.chartType.isResultsTable) {
+            this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+            this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel);
+        }
     };
     
     /**
@@ -2131,6 +2291,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             this.currentCourse = this.courses[index];
             this.selection = new SplitsBrowser.Model.CompetitorSelection(this.currentCourse.competitors.length);
             this.competitorListBox.setSelection(this.selection);
+            this.resultsTable.setCourse(this.currentCourse);
             this.drawChart();
         }
     };
@@ -2151,6 +2312,14 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Viewer.prototype.selectChartType = function (chartType) {
         this.chartType = chartType;
+        if (chartType.isResultsTable) {
+            d3.select(_MAIN_PANEL_ID_SELECTOR).style("display", "none");
+            this.resultsTable.show();
+        } else {
+            this.resultsTable.hide();
+            d3.select(_MAIN_PANEL_ID_SELECTOR).style("display", "");
+        }
+        
         this.drawChart();
     };
     

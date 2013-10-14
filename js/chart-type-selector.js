@@ -16,25 +16,36 @@
             name: "Splits graph",
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
-            yAxisLabel: "Time loss (min)"
+            yAxisLabel: "Time loss (min)",
+            isResultsTable: false
         },
         {
             name: "Position after leg",
             dataSelector: function (comp) { return comp.cumRanks; },
             skipStart: true,
-            yAxisLabel: "Position"
+            yAxisLabel: "Position",
+            isResultsTable: false
         },
         {
             name: "Split position",
             dataSelector: function (comp) { return comp.splitRanks; },
             skipStart: true,
-            yAxisLabel: "Position"
+            yAxisLabel: "Position",
+            isResultsTable: false
         },
         {
             name: "Percent behind",
             dataSelector: function (comp, referenceCumTimes) { return comp.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
             skipStart: false,
-            yAxisLabel: "Percent behind"
+            yAxisLabel: "Percent behind",
+            isResultsTable: false
+        },
+        {
+            name: "Results table",
+            dataSelector: null,
+            skipStart: false,
+            yAxisLabel: null,
+            isResultsTable: true
         }
     ];
     
