@@ -852,8 +852,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 (function () {
     "use strict";
     
-    // 'City' is club name!
-    var _MANDATORY_COLUMN_NAMES = ["First name", "Surname", "City", "Start", "Time", "Course", "Course controls"];
+    var _CLUB_COLUMN_NAME = "City";
+    
+    var _COURSE_COLUMN_NAME = "Short";
+    
+    var _MANDATORY_COLUMN_NAMES = ["First name", "Surname",_CLUB_COLUMN_NAME, "Start", "Time", _COURSE_COLUMN_NAME, "Course controls"];
     
     SplitsBrowser.Input.SI = {};
     
@@ -906,10 +909,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
             var forename = row["First name"];
             var surname = row.Surname;
-            var club = row.City;
+            var club = row[_CLUB_COLUMN_NAME];
             var startTime = row.Start;
             
-            var courseName = row.Course;
+            var courseName = row[_COURSE_COLUMN_NAME];
             
             var numControls;
             if (courses.has(courseName)) {
@@ -1413,7 +1416,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @return {Number} The corresponding number of minutes.
     */
     function secondsToMinutes(seconds) { 
-        return seconds / 60;
+        return (seconds === null) ? null : seconds / 60;
     }
 
     var _ALL_CHART_TYPES = [
@@ -1956,6 +1959,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             return d3.svg.line()
                             .x(function (d) { return outerThis.xScale(d.x); })
                             .y(function (d) { return outerThis.yScale(d.ys[index]); })
+                            .defined(function (d) { return d.ys[index] !== null; })
                             .interpolate("linear");
         };
 

@@ -1,8 +1,11 @@
 (function () {
     "use strict";
     
-    // 'City' is club name!
-    var _MANDATORY_COLUMN_NAMES = ["First name", "Surname", "City", "Start", "Time", "Course", "Course controls"];
+    var _CLUB_COLUMN_NAME = "City";
+    
+    var _COURSE_COLUMN_NAME = "Short";
+    
+    var _MANDATORY_COLUMN_NAMES = ["First name", "Surname",_CLUB_COLUMN_NAME, "Start", "Time", _COURSE_COLUMN_NAME, "Course controls"];
     
     SplitsBrowser.Input.SI = {};
     
@@ -55,10 +58,10 @@
         
             var forename = row["First name"];
             var surname = row.Surname;
-            var club = row.City;
+            var club = row[_CLUB_COLUMN_NAME];
             var startTime = row.Start;
             
-            var courseName = row.Course;
+            var courseName = row[_COURSE_COLUMN_NAME];
             
             var numControls;
             if (courses.has(courseName)) {
