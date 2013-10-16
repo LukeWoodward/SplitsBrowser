@@ -1,5 +1,9 @@
 
 body {
+  font: 12px sans-serif;
+}
+
+svg text {
   font: 10px sans-serif;
 }
 
@@ -73,19 +77,8 @@ div.competitor.selected
 
 span.resultsTableHeader
 {
-    font: 14px sans-serif;
+    font-size: 14px;
     font-weight: bold;
-}
-
-.resultsTable thead th
-{
-    font: 12px sans-serif;
-    font-weight: bold;
-}
-
-.resultsTable tbody td
-{
-    font: 12px sans-serif;
 }
 
 .resultsTable tbody td.time
