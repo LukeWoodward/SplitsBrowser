@@ -57,6 +57,18 @@
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
     });
     
+    QUnit.test("Can parse a string that contains a single competitor's data ignoring second blank City column", function (assert) {
+        var results = parseEventData("First name;Surname;City;Start;Time;Short;City;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course; ;3;01:50;03:38;06:02;\r\n");
+        assert.ok($.isArray(results), "Parsing output not an array");
+        assert.equal(results.length, 1, "There should be one element in the array");
+        assert.ok(results[0] instanceof Course, "Array element should be a Course object");
+        assert.equal(results[0].competitors.length, 1, "One competitor should have been read");
+        
+        var competitor = results[0].competitors[0];
+        assert.equal(competitor.club, "ABC", "Should read correct club");
+    });
+    
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control", function (assert) {
         var results = parseEventData("First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
                            "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;-----;06:02;\r\n");

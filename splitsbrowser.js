@@ -884,9 +884,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Input.SI.parseEventData = function (data) {
         
         // Work around oddity of the file format: 'City' seems to contain the
-        // club name, and it seems to be repeated later on.  Replace the
-        // second.
-        data = data.replace(/;Zip;City;/, ";Zip;City2;");
+        // club name, and it seems to be repeated later on.  Adjust the second
+        // occurrence to move it out of the way.
+        data = data.replace(/;City;(.*?);City;/, ";City;$1;City2;");
         var dsvData = d3.dsv(";").parse(data);
         
         if (!$.isArray(dsvData) || dsvData.length === 0) {
