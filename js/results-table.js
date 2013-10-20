@@ -85,7 +85,7 @@
             }
             
             addCell(tableRow, competitor.name, competitor.club);
-            addCell(tableRow, SplitsBrowser.formatTime(competitor.totalTime, "mp"), _NON_BREAKING_SPACE_CHAR, "time");
+            addCell(tableRow, (competitor.completed()) ? SplitsBrowser.formatTime(competitor.totalTime) : "mp", _NON_BREAKING_SPACE_CHAR, "time");
             
             d3.range(1, outerThis.course.numControls + 2).forEach(function (controlNum) {
                 addCell(tableRow, SplitsBrowser.formatTime(competitor.getCumulativeTimeTo(controlNum)), SplitsBrowser.formatTime(competitor.getSplitTimeTo(controlNum)), "time");
