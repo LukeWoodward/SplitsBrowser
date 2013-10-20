@@ -480,18 +480,33 @@
     * @param {object} chartData - The chart data that contains the final time offsets.
     */
     SplitsBrowser.Controls.Chart.prototype.drawCompetitorLegendLabels = function (chartData) {
-        var finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
-        var outerThis = this;
-
-        var currCompData = d3.range(this.numLines).map(function (i) {
-            return {
-                name: outerThis.names[i],
-                textHeight: outerThis.getTextHeight(outerThis.names[i]),
-                y: outerThis.yScale(finishColumn.ys[i]),
-                colour: colours[outerThis.selectedIndexes[i] % colours.length],
-                index: outerThis.selectedIndexes[i]
-            };
-        });
+        
+        var currCompData;
+        if (chartData.dataColumns.length === 0) {
+            currCompData = [];
+        } else {
+            var finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
+            var outerThis = this;
+            currCompData = d3.range(this.numLines).map(function (i) {
+                return {
+                    name: outerThis.names[i],
+                    textHeight: outerThis.getTextHeight(outerThis.names[i]),
+                    y: (finishColumn.ys[i] === null) ? null : outerThis.yScale(finishColumn.ys[i]),
+                    colour: colours[outerThis.selectedIndexes[i] % colours.length],
+                    index: outerThis.selectedIndexes[i]
+                };
+            });
+            
+            // Draw the mispunchers at the bottom of the chart, with the last
+            // one of them at the bottom.
+            var lastMispuncherY = null;
+            for (var selCompIdx = currCompData.length - 1; selCompIdx >= 0; selCompIdx -= 1) {
+                if (currCompData[selCompIdx].y === null) {
+                    currCompData[selCompIdx].y = (lastMispuncherY === null) ? this.contentHeight : lastMispuncherY - currCompData[selCompIdx].textHeight;
+                    lastMispuncherY = currCompData[selCompIdx].y;
+                }
+            }
+        }
         
         // Sort by the y-offset values, which doesn't always agree with the end
         // positions of the competitors.
