@@ -70,7 +70,7 @@
     
     QUnit.test("Rejects SI-format file as being of the wrong format", function (assert) {
         var siData = "First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n"
+                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n";
         try {
             parseEventData(siData);
             assert.ok(false, "Should not get here - wrong number of items on first line should have been reported");
