@@ -19,8 +19,8 @@
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setCourse(course);
         
-        assert.equal(d3.selectAll("#qunit-fixture table.resultsTable").size(), 1, "There should be one table");
-        var table = d3.select("table");
+        assert.equal(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
+        var table = d3.select("table.resultsTable");
         assert.equal(table.selectAll("thead").size(), 1);
         assert.equal(table.selectAll("thead tr").size(), 1);
         assert.equal(table.selectAll("thead tr th").size(), 7);
@@ -38,8 +38,8 @@
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setCourse(course);
         
-        assert.equal(d3.selectAll("#qunit-fixture table.resultsTable").size(), 1);
-        var table = d3.select("table");
+        assert.equal(d3.selectAll("table.resultsTable").size(), 1);
+        var table = d3.select("table.resultsTable");
         assert.equal(table.selectAll("tbody tr:last-child td:first-child").text(), "");
     });
 })();
