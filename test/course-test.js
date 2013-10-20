@@ -6,6 +6,7 @@
 
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
+    var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
     var Course = SplitsBrowser.Model.Course;
 
     var _DUMMY_CHART_TYPE = {
@@ -322,6 +323,24 @@
         assertCumulativeRanks(assert, competitor2, [1, 2, 3, null]);
         assertSplitRanks(assert, competitor3, [2, 2, 1, null]);
         assertCumulativeRanks(assert, competitor3, [2, 3, 1, null]);
+    });
+    
+    QUnit.test("Can compute ranks when there are three competitors specified by cumulative times with one missing split times", function (assert) {
+        var competitor1 = fromCumTimes(1, "Fred", "Brown", "DEF", "10:30", [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor2 = fromCumTimes(2, "John", "Smith", "ABC", "10:00", [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100]);
+        var competitor3 = fromCumTimes(2, "Bill", "Baker", "GHI", "11:00", [0, 78, null,     78 + 209 + 199, 78 + 209 + 199 + 117]);
+        var course = new Course("Test", 3, [competitor1, competitor2, competitor3]);
+        
+        assertSplitRanks(assert, competitor1, [3, 1, 2, 2]);
+        assertCumulativeRanks(assert, competitor1, [3, 1, 1, 2]);
+        assertSplitRanks(assert, competitor2, [1, 2, 1, 1]);
+        assertCumulativeRanks(assert, competitor2, [1, 2, 2, 1]);
+        assertSplitRanks(assert, competitor3, [2, null, null, 3]);
+        
+        // No cumulative ranks from control 2 onwards: as competitor 3
+        // mispunches they no don't have a cumulative rank from that point
+        // onwards.
+        assertCumulativeRanks(assert, competitor3, [2, null, null, null]);
     });
     
 })();

@@ -27,6 +27,24 @@
         });
     };
 
+    QUnit.test("Cannot create a competitor from split times when the split times argument isn't a array", function (assert) {
+        try {
+            fromSplitTimes(1, "John", "Smith", "ABC", "10:00", "This is not an array");
+            assert.ok(false, "Should not get here");
+        } catch (e) {
+            assert.equal(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
+        }
+    });
+
+    QUnit.test("Cannot create a competitor from an empty array of split times", function (assert) {
+        try {
+            fromSplitTimes(1, "John", "Smith", "ABC", "10:00", []);
+            assert.ok(false, "Should not get here");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+        }
+    });
+
     QUnit.test("Can create a competitor from split times and determine cumulative times", function (assert) {
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
         assertCumulativeTimes(assert, competitor, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
@@ -47,6 +65,42 @@
         assertCumulativeTimes(assert, competitor, [0, 65, 65 + 221, null, null, null, null, null, null]);
         assertSplitTimes(assert, competitor, [65, 221, null, null, null, null, 184, 100]);
         assert.ok(!competitor.completed(), "Competitor should be marked as not completing the course");
+    });
+
+    QUnit.test("Cannot create a competitor from cumulative times when the cumulative times argument isn't an array", function (assert) {
+        try {
+            fromCumTimes(1, "John", "Smith", "ABC", "10:00", "This is not an array");
+            assert.ok(false, "Should not get here");
+        } catch (e) {
+            assert.equal(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
+        }
+    });
+
+    QUnit.test("Cannot create a competitor from an empty array of cumulative times", function (assert) {
+        try {
+            fromCumTimes(1, "John", "Smith", "ABC", "10:00", []);
+            assert.ok(false, "Should not get here");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+        }
+    });
+
+    QUnit.test("Cannot create a competitor from an array of cumulative times that does not start with zero", function (assert) {
+        try {
+            fromCumTimes(1, "John", "Smith", "ABC", "10:00", [40, 60, 90]);
+            assert.ok(false, "Should not get here");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+        }
+    });
+
+    QUnit.test("Cannot create a competitor from an array of cumulative times containing only a single zero", function (assert) {
+        try {
+            fromCumTimes(1, "John", "Smith", "ABC", "10:00", [0]);
+            assert.ok(false, "Should not get here");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+        }
     });
 
     QUnit.test("Can create a competitor from cumulative times and determine split times", function (assert) {

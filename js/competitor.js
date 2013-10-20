@@ -64,6 +64,8 @@
     function cumTimesFromSplitTimes(splitTimes) {
         if (!$.isArray(splitTimes)) {
             throw new TypeError("Split times must be an array - got " + typeof (splitTimes) + " instead");
+        } else if (splitTimes.length === 0) {
+            SplitsBrowser.throwInvalidData("Array of split times must not be empty");
         }
         
         var cumTimes = [0];
@@ -87,6 +89,12 @@
     function splitTimesFromCumTimes(cumTimes) {
         if (!$.isArray(cumTimes)) {
             throw new TypeError("Cumulative times must be an array - got " + typeof (cumTimes) + " instead");
+        } else if (cumTimes.length === 0) {
+            SplitsBrowser.throwInvalidData("Array of cumulative times must not be empty");
+        } else if (cumTimes[0] !== 0) {
+            SplitsBrowser.throwInvalidData("Array of cumulative times must have zero as its first item");
+        } else if (cumTimes.length === 1) {
+            SplitsBrowser.throwInvalidData("Array of cumulative times must contain more than just a single zero");
         }
         
         var splitTimes = [];

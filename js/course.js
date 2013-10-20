@@ -203,7 +203,21 @@
         });
         
         d3.range(1, this.numControls + 2).forEach(function (control) {
-            var cumSplitsByCompetitor = outerThis.competitors.map(function(comp) { return comp.getCumulativeTimeTo(control); });
+            // We want to null out all subsequent cumulative ranks after a
+            // competitor mispunches.
+            var cumSplitsByCompetitor = outerThis.competitors.map(function (comp, idx) {
+                // -1 for previous control, another -1 because the cumulative
+                // time to control N is cumRanksByCompetitor[idx][N - 1].
+                if (control > 1 && cumRanksByCompetitor[idx][control - 1 - 1] === null) {
+                    // This competitor has no cumulative rank for the previous
+                    // control, so either they mispunched it or mispunched a
+                    // previous one.  Give them a null time here, so that they
+                    // end up with another null cumulative rank.
+                    return null;
+                } else {
+                    return comp.getCumulativeTimeTo(control);
+                }
+            });
             var cumRanksForThisControl = SplitsBrowser.Model.getRanks(cumSplitsByCompetitor);
             outerThis.competitors.forEach(function (_comp, idx) { cumRanksByCompetitor[idx].push(cumRanksForThisControl[idx]); });
         });

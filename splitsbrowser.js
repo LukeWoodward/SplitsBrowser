@@ -199,6 +199,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     function cumTimesFromSplitTimes(splitTimes) {
         if (!$.isArray(splitTimes)) {
             throw new TypeError("Split times must be an array - got " + typeof (splitTimes) + " instead");
+        } else if (splitTimes.length === 0) {
+            SplitsBrowser.throwInvalidData("Array of split times must not be empty");
         }
         
         var cumTimes = [0];
@@ -222,6 +224,12 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     function splitTimesFromCumTimes(cumTimes) {
         if (!$.isArray(cumTimes)) {
             throw new TypeError("Cumulative times must be an array - got " + typeof (cumTimes) + " instead");
+        } else if (cumTimes.length === 0) {
+            SplitsBrowser.throwInvalidData("Array of cumulative times must not be empty");
+        } else if (cumTimes[0] !== 0) {
+            SplitsBrowser.throwInvalidData("Array of cumulative times must have zero as its first item");
+        } else if (cumTimes.length === 1) {
+            SplitsBrowser.throwInvalidData("Array of cumulative times must contain more than just a single zero");
         }
         
         var splitTimes = [];
@@ -640,7 +648,21 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         });
         
         d3.range(1, this.numControls + 2).forEach(function (control) {
-            var cumSplitsByCompetitor = outerThis.competitors.map(function(comp) { return comp.getCumulativeTimeTo(control); });
+            // We want to null out all subsequent cumulative ranks after a
+            // competitor mispunches.
+            var cumSplitsByCompetitor = outerThis.competitors.map(function (comp, idx) {
+                // -1 for previous control, another -1 because the cumulative
+                // time to control N is cumRanksByCompetitor[idx][N - 1].
+                if (control > 1 && cumRanksByCompetitor[idx][control - 1 - 1] === null) {
+                    // This competitor has no cumulative rank for the previous
+                    // control, so either they mispunched it or mispunched a
+                    // previous one.  Give them a null time here, so that they
+                    // end up with another null cumulative rank.
+                    return null;
+                } else {
+                    return comp.getCumulativeTimeTo(control);
+                }
+            });
             var cumRanksForThisControl = SplitsBrowser.Model.getRanks(cumSplitsByCompetitor);
             outerThis.competitors.forEach(function (_comp, idx) { cumRanksByCompetitor[idx].push(cumRanksForThisControl[idx]); });
         });
@@ -946,6 +968,12 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             
             var totalTime = SplitsBrowser.parseTime(row.Time);
             SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, totalTime);
+            
+            // Some surnames of those who mispunch already have an 'mp' suffix.
+            // Remove it if it exists.
+            if (cumTimes.indexOf(null) >= 0) {
+                surname = surname.replace(/ mp$/, "");
+            }
             
             cumTimes.push(totalTime);
             
@@ -1948,19 +1976,29 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                      .style("text-anchor", "start")
                      .text("Time (min)");
     };
-
+    
     /**
     * Draw the lines on the chart.
     * @param {Array} chartData - Array of chart data.
     */
     SplitsBrowser.Controls.Chart.prototype.drawChartLines = function (chartData) {
         var outerThis = this;
-        var lineFunctionGenerator = function (index) {
-            return d3.svg.line()
-                            .x(function (d) { return outerThis.xScale(d.x); })
-                            .y(function (d) { return outerThis.yScale(d.ys[index]); })
-                            .defined(function (d) { return d.ys[index] !== null; })
-                            .interpolate("linear");
+        var lineFunctionGenerator = function (selCompIdx) {
+            if (chartData.dataColumns.every(function (col) { return col.ys[selCompIdx] === null; })) {
+                // This competitor's entire row is null, so there's no data to
+                // draw.  d3 will report an error ('Error parsing d=""') if no
+                // points on the line are defined, as will happen in this case,
+                // so we substitute some dummy data instead.
+                return d3.svg.line().x(function (d) { return -10000; })
+                                    .y(function (d) { return -10000; });
+            }
+            else {
+                return d3.svg.line()
+                                .x(function (d) { return outerThis.xScale(d.x); })
+                                .y(function (d) { return outerThis.yScale(d.ys[selCompIdx]); })
+                                .defined(function (d) { return d.ys[selCompIdx] !== null; })
+                                .interpolate("linear");
+            }
         };
 
         var graphLines = this.svgGroup.selectAll("path.graphLine")
@@ -1972,8 +2010,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                   .attr("stroke-width", 2)
                   .attr("fill", "none");
 
-        graphLines.attr("d", function (i) { return lineFunctionGenerator(i)(chartData.dataColumns); })
-                    .attr("stroke", function (i) { return colours[outerThis.selectedIndexes[i] % colours.length]; });
+        graphLines.attr("d", function (selCompIdx) { return lineFunctionGenerator(selCompIdx)(chartData.dataColumns); })
+                    .attr("stroke", function (selCompIdx) { return colours[outerThis.selectedIndexes[selCompIdx] % colours.length]; });
 
         graphLines.exit().remove();
     };

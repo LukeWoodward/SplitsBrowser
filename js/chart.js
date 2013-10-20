@@ -435,19 +435,29 @@
                      .style("text-anchor", "start")
                      .text("Time (min)");
     };
-
+    
     /**
     * Draw the lines on the chart.
     * @param {Array} chartData - Array of chart data.
     */
     SplitsBrowser.Controls.Chart.prototype.drawChartLines = function (chartData) {
         var outerThis = this;
-        var lineFunctionGenerator = function (index) {
-            return d3.svg.line()
-                            .x(function (d) { return outerThis.xScale(d.x); })
-                            .y(function (d) { return outerThis.yScale(d.ys[index]); })
-                            .defined(function (d) { return d.ys[index] !== null; })
-                            .interpolate("linear");
+        var lineFunctionGenerator = function (selCompIdx) {
+            if (chartData.dataColumns.every(function (col) { return col.ys[selCompIdx] === null; })) {
+                // This competitor's entire row is null, so there's no data to
+                // draw.  d3 will report an error ('Error parsing d=""') if no
+                // points on the line are defined, as will happen in this case,
+                // so we substitute some dummy data instead.
+                return d3.svg.line().x(function (d) { return -10000; })
+                                    .y(function (d) { return -10000; });
+            }
+            else {
+                return d3.svg.line()
+                                .x(function (d) { return outerThis.xScale(d.x); })
+                                .y(function (d) { return outerThis.yScale(d.ys[selCompIdx]); })
+                                .defined(function (d) { return d.ys[selCompIdx] !== null; })
+                                .interpolate("linear");
+            }
         };
 
         var graphLines = this.svgGroup.selectAll("path.graphLine")
@@ -459,8 +469,8 @@
                   .attr("stroke-width", 2)
                   .attr("fill", "none");
 
-        graphLines.attr("d", function (i) { return lineFunctionGenerator(i)(chartData.dataColumns); })
-                    .attr("stroke", function (i) { return colours[outerThis.selectedIndexes[i] % colours.length]; });
+        graphLines.attr("d", function (selCompIdx) { return lineFunctionGenerator(selCompIdx)(chartData.dataColumns); })
+                    .attr("stroke", function (selCompIdx) { return colours[outerThis.selectedIndexes[selCompIdx] % colours.length]; });
 
         graphLines.exit().remove();
     };
