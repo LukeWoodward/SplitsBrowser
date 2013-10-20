@@ -46,14 +46,36 @@
         }
     });
 
-    QUnit.test("Cannot parse single course with wrong number of items on first line", function (assert) {
+    QUnit.test("Rects single course with only one item on first line as being of the wrong format", function (assert) {
+
+        var csvData = "There is no control count here";
+        try {
+            parseEventData(csvData);
+            assert.ok(false, "Should not get here - wrong number of items on first line should have been reported");
+        } catch (e) {
+            assert.equal(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
+        }
+    });
+
+    QUnit.test("Rects single course with too many items on first line as being of the wrong format", function (assert) {
 
         var csvData = "Example, 4, 2";
         try {
             parseEventData(csvData);
             assert.ok(false, "Should not get here - wrong number of items on first line should have been reported");
         } catch (e) {
-            assert.equal(e.name, "WrongFileFormat", "Exception should have name InvalidData, exception message is " + e.message);
+            assert.equal(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
+        }
+    });
+    
+    QUnit.test("Rejects SI-format file as being of the wrong format", function (assert) {
+        var siData = "First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n"
+        try {
+            parseEventData(siData);
+            assert.ok(false, "Should not get here - wrong number of items on first line should have been reported");
+        } catch (e) {
+            assert.equal(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
         }
     });
 
