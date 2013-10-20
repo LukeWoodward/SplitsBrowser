@@ -19,8 +19,8 @@
     });
     
     QUnit.test("Can read in 'SI' semicolon-delimited data", function (assert) { 
-        var siData = "First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                     "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n";
+        var siData = "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                     "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n";
         var result = parseEventData(siData);
         assert.ok(result !== null, "There should be an array of courses returned");
         assert.ok(result.length, 1, "One course should be read in");

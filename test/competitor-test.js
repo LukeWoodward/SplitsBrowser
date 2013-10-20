@@ -51,6 +51,13 @@
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         assertSplitTimes(assert, competitor, [65, 221, 184, 100]);
         assert.ok(competitor.completed(), "Competitor should be marked as completing the course");
+        assert.ok(!competitor.isNonCompetitive, "Competitor should be competitive");
+    });
+
+    QUnit.test("Can create a non-competitive competitor from split times and determine cumulative times", function (assert) {
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
+        competitor.setNonCompetitive();
+        assert.ok(competitor.isNonCompetitive, "Competitor should not be competitive");
     });
 
     QUnit.test("Can create a competitor from split times and determine cumulative times when competitor has missed a control", function (assert) {

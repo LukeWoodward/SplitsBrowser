@@ -269,6 +269,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.surname = surname;
         this.club = club;
         this.startTime = startTime;
+        this.isNonCompetitive = false;
         
         this.splitTimes = splitTimes;
         this.cumTimes = cumTimes;
@@ -277,6 +278,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
         this.name = forename + " " + surname;
         this.totalTime = (this.cumTimes.indexOf(null) > -1) ? null : this.cumTimes[this.cumTimes.length - 1];
+    };
+    
+    /**
+    * Marks this competitor as being non-competitive.
+    */
+    Competitor.prototype.setNonCompetitive = function () {
+        this.isNonCompetitive = true;
     };
     
     SplitsBrowser.Model.Competitor = {};
@@ -875,7 +883,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     
     var _COURSE_COLUMN_NAME = "Short";
     
-    var _MANDATORY_COLUMN_NAMES = ["First name", "Surname",_CLUB_COLUMN_NAME, "Start", "Time", _COURSE_COLUMN_NAME, "Course controls"];
+    var _PLACING_COLUMN_NAME = "Pl";
+    
+    var _MANDATORY_COLUMN_NAMES = ["First name", "Surname",_CLUB_COLUMN_NAME, "Start", "Time", _COURSE_COLUMN_NAME, "Course controls", _PLACING_COLUMN_NAME];
     
     SplitsBrowser.Input.SI = {};
     
@@ -966,16 +976,18 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             var totalTime = SplitsBrowser.parseTime(row.Time);
             SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, totalTime);
             
-            // Some surnames of those who mispunch already have an 'mp' suffix.
-            // Remove it if it exists.
-            if (cumTimes.indexOf(null) >= 0) {
-                surname = surname.replace(/ mp$/, "");
-            }
+            // Some surnames have an 'mp' suffix or an 'n/c' suffix added to
+            // them.  Remove either of them if they exist.
+            surname = surname.replace(/ mp$| n\/c$/, "");
             
             cumTimes.push(totalTime);
             
             var order = courses.get(courseName).competitors.length + 1;
             var competitor = SplitsBrowser.Model.Competitor.fromCumTimes(order, forename, surname, club, startTime, cumTimes);
+            if (row[_PLACING_COLUMN_NAME] === "n/c") {
+                competitor.setNonCompetitive();
+            }
+
             courses.get(courseName).competitors.push(competitor);
         });
         
@@ -2235,9 +2247,16 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         competitors.sort(SplitsBrowser.Model.compareCompetitors);
         
         var outerThis = this;
+        var nonCompCount = 0;
         competitors.forEach(function (competitor) {
             var tableRow = tableBody.append("tr");
-            tableRow.append("td").text(competitor.completed() ? competitor.cumRanks[competitor.cumRanks.length - 1] : "");
+            var numberCell = tableRow.append("td");
+            if (competitor.isNonCompetitive) {
+                numberCell.text("n/c");
+                nonCompCount += 1;
+            } else if (competitor.completed()) {
+                numberCell.text(competitor.cumRanks[competitor.cumRanks.length - 1] - nonCompCount);
+            }
             
             addCell(tableRow, competitor.name, competitor.club);
             addCell(tableRow, nullSafeFormatTime(competitor.totalTime, "mp"), _NON_BREAKING_SPACE_CHAR, "time");

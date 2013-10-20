@@ -5,7 +5,9 @@
     
     var _COURSE_COLUMN_NAME = "Short";
     
-    var _MANDATORY_COLUMN_NAMES = ["First name", "Surname",_CLUB_COLUMN_NAME, "Start", "Time", _COURSE_COLUMN_NAME, "Course controls"];
+    var _PLACING_COLUMN_NAME = "Pl";
+    
+    var _MANDATORY_COLUMN_NAMES = ["First name", "Surname",_CLUB_COLUMN_NAME, "Start", "Time", _COURSE_COLUMN_NAME, "Course controls", _PLACING_COLUMN_NAME];
     
     SplitsBrowser.Input.SI = {};
     
@@ -96,16 +98,18 @@
             var totalTime = SplitsBrowser.parseTime(row.Time);
             SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, totalTime);
             
-            // Some surnames of those who mispunch already have an 'mp' suffix.
-            // Remove it if it exists.
-            if (cumTimes.indexOf(null) >= 0) {
-                surname = surname.replace(/ mp$/, "");
-            }
+            // Some surnames have an 'mp' suffix or an 'n/c' suffix added to
+            // them.  Remove either of them if they exist.
+            surname = surname.replace(/ mp$| n\/c$/, "");
             
             cumTimes.push(totalTime);
             
             var order = courses.get(courseName).competitors.length + 1;
             var competitor = SplitsBrowser.Model.Competitor.fromCumTimes(order, forename, surname, club, startTime, cumTimes);
+            if (row[_PLACING_COLUMN_NAME] === "n/c") {
+                competitor.setNonCompetitive();
+            }
+
             courses.get(courseName).competitors.push(competitor);
         });
         

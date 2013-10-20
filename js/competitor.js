@@ -134,6 +134,7 @@
         this.surname = surname;
         this.club = club;
         this.startTime = startTime;
+        this.isNonCompetitive = false;
         
         this.splitTimes = splitTimes;
         this.cumTimes = cumTimes;
@@ -142,6 +143,13 @@
 
         this.name = forename + " " + surname;
         this.totalTime = (this.cumTimes.indexOf(null) > -1) ? null : this.cumTimes[this.cumTimes.length - 1];
+    };
+    
+    /**
+    * Marks this competitor as being non-competitive.
+    */
+    Competitor.prototype.setNonCompetitive = function () {
+        this.isNonCompetitive = true;
     };
     
     SplitsBrowser.Model.Competitor = {};

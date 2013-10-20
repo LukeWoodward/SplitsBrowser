@@ -32,7 +32,7 @@
     });
     
     QUnit.test("Cannot parse a string that contains only the headers", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Course controls;Punch1", "data with a header row only", "WrongFileFormat");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1", "data with a header row only", "WrongFileFormat");
     });
     
     QUnit.test("Cannot parse a string that is not semicolon-delimited data", function (assert) {
@@ -40,8 +40,8 @@
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n");
+        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n");
         assert.ok($.isArray(results), "Parsing output not an array");
         assert.equal(results.length, 1, "There should be one element in the array");
         assert.ok(results[0] instanceof Course, "Array element should be a Course object");
@@ -58,8 +58,8 @@
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data ignoring second blank City column", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;City;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course; ;3;01:50;03:38;06:02;\r\n");
+        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;City;;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1; ;3;01:50;03:38;06:02;\r\n");
         assert.ok($.isArray(results), "Parsing output not an array");
         assert.equal(results.length, 1, "There should be one element in the array");
         assert.ok(results[0] instanceof Course, "Array element should be a Course object");
@@ -70,8 +70,8 @@
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;-----;06:02;\r\n");
+        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;mp;3;01:50;-----;06:02;\r\n");
         assert.ok($.isArray(results), "Parsing output not an array");
         assert.equal(results.length, 1, "There should be one element in the array");
         assert.equal(results[0].competitors.length, 1, "One competitor should have been read");
@@ -81,8 +81,8 @@
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control and remove the trailing 'mp' from the surname", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith mp;ABC;10:00:00;06:33;Test course;3;01:50;-----;06:02;\r\n");
+        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith mp;ABC;10:00:00;06:33;Test course;mp;3;01:50;-----;06:02;\r\n");
         assert.ok($.isArray(results), "Parsing output not an array");
         assert.equal(results.length, 1, "There should be one element in the array");
         assert.equal(results[0].competitors.length, 1, "One competitor should have been read");
@@ -92,10 +92,23 @@
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
     });
     
+    QUnit.test("Can parse a string that contains a single competitor's data and remove the trailing 'n/c' from the surname", function (assert) {
+        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith n/c;ABC;10:00:00;06:33;Test course;n/c;3;01:50;03:38;06:02;\r\n");
+        assert.ok($.isArray(results), "Parsing output not an array");
+        assert.equal(results.length, 1, "There should be one element in the array");
+        assert.equal(results[0].competitors.length, 1, "One competitor should have been read");
+        
+        var competitor = results[0].competitors[0];
+        assert.equal(competitor.surname, "Smith", "Should read correct surname without 'n/c' suffix");
+        assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
+        assert.ok(competitor.isNonCompetitive, "Competitor should be marked as non-competitive");
+    });
+    
     QUnit.test("Can parse a string that contains two competitors on the same course", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n" +
-                           "Fred;Baker;DEF;10:30:00;07:11;Test course;3;02:01;04:06;06:37;\r\n");
+        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;07:11;Test course;2;3;02:01;04:06;06:37;\r\n");
         assert.equal(results.length, 1, "There should be one element in the array");
         assert.ok(results[0] instanceof Course, "Array element should be a Course object");
         assert.equal(results[0].numControls, 3, "Course should have three controls");
@@ -106,9 +119,9 @@
     });
     
     QUnit.test("Can parse a string that contains two competitors on different courses", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;Punch4;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course 1;3;01:50;03:38;06:02;\r\n" +
-                           "Fred;Baker;DEF;10:30:00;09:54;Test course 2;4;02:01;04:06;06:37;09:10\r\n");
+        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;Punch4;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course 1;1;3;01:50;03:38;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;09:54;Test course 2;1;4;02:01;04:06;06:37;09:10\r\n");
         assert.equal(results.length, 2, "There should be two elements in the array");
         assert.ok(results[0] instanceof Course, "First array element should be a Course object");
         assert.ok(results[1] instanceof Course, "Second array element should be a Course object");
@@ -121,9 +134,9 @@
     });
     
     QUnit.test("Can parse a string that contains two competitors on different courses, sorting the courses into order", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;Punch4;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course 2;3;01:50;03:38;06:02;\r\n" +
-                           "Fred;Baker;DEF;10:30:00;09:54;Test course 1;4;02:01;04:06;06:37;09:10\r\n");
+        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;Punch4;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course 2;1;3;01:50;03:38;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;09:54;Test course 1;1;4;02:01;04:06;06:37;09:10\r\n");
         assert.equal(results.length, 2, "There should be two elements in the array");
         assert.ok(results[0] instanceof Course, "First array element should be a Course object");
         assert.ok(results[1] instanceof Course, "Second array element should be a Course object");
@@ -134,62 +147,67 @@
     });
     
     QUnit.test("Cannot parse a string that contains no first name column", function (assert) {
-        runInvalidDataTest(assert, "First name XYZ;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n", "data with no first-name column");
+        runInvalidDataTest(assert, "First name XYZ;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n", "data with no first-name column");
     });
     
     QUnit.test("Cannot parse a string that contains no surname column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname XYZ;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n", "data with no surname column");
+        runInvalidDataTest(assert, "First name;Surname XYZ;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n", "data with no surname column");
     });
     
     QUnit.test("Cannot parse a string that contains no club column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;Club XYZ;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n", "data with no club column");
+        runInvalidDataTest(assert, "First name;Surname;Club XYZ;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n", "data with no club column");
     });
     
     QUnit.test("Cannot parse a string that contains no start column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start XYZ;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n", "data with no start column");
+        runInvalidDataTest(assert, "First name;Surname;City;Start XYZ;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n", "data with no start column");
     });
     
     QUnit.test("Cannot parse a string that contains no time column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time XYZ;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n", "data with no time column");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time XYZ;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n", "data with no time column");
     });
     
     QUnit.test("Cannot parse a string that contains no course column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short XYZ;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n", "data with no course column");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short XYZ;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n", "data with no course column");
     });
-    
+
+    QUnit.test("Cannot parse a string that contains no placing column", function (assert) {
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl XYZ;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n", "data with no course column");
+    });
+
     QUnit.test("Cannot parse a string that contains no 'course controls' column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Course controls XYZ;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n", "data with no course-controls column");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls XYZ;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n", "data with no course-controls column");
     });
     
-    QUnit.test("Cannot parse a string that contains no Control N column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2 XYZ;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;03:38;06:02;\r\n", "data with no Control2 column");
+    QUnit.test("Cannot parse a string that contains no Punch N column", function (assert) {
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2 XYZ;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n", "data with no Control2 column");
     });
     
     QUnit.test("Cannot parse a string that contains cumulative time less than previous", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;07:38;06:02;\r\n", "data with cumulative times not strictly ascending");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;07:38;06:02;\r\n", "data with cumulative times not strictly ascending");
     });
     
     QUnit.test("Cannot parse a string that contains cumulative time equal to previous", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;01:50;06:02;06:02;\r\n", "data with cumulative times not strictly ascending");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;06:02;06:02;\r\n", "data with cumulative times not strictly ascending");
     });
     
     QUnit.test("Cannot parse a string that contains cumulative time less than previous before mispunch", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;3;04:37;-----;04:22;\r\n", "data with cumulative times not strictly ascending with mispunch in middle");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test course;mp;3;04:37;-----;04:22;\r\n", "data with cumulative times not strictly ascending with mispunch in middle");
     });
     
     QUnit.test("Cannot parse a string that contains total time less than last split time", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;05:33;Test course;3;01:50;03:38;06:02;\r\n", "data with cumulative times not strictly ascending");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;05:33;Test course;1;3;01:50;03:38;06:02;\r\n", "data with cumulative times not strictly ascending");
     });
 })();

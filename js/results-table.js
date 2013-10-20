@@ -86,9 +86,16 @@
         competitors.sort(SplitsBrowser.Model.compareCompetitors);
         
         var outerThis = this;
+        var nonCompCount = 0;
         competitors.forEach(function (competitor) {
             var tableRow = tableBody.append("tr");
-            tableRow.append("td").text(competitor.completed() ? competitor.cumRanks[competitor.cumRanks.length - 1] : "");
+            var numberCell = tableRow.append("td");
+            if (competitor.isNonCompetitive) {
+                numberCell.text("n/c");
+                nonCompCount += 1;
+            } else if (competitor.completed()) {
+                numberCell.text(competitor.cumRanks[competitor.cumRanks.length - 1] - nonCompCount);
+            }
             
             addCell(tableRow, competitor.name, competitor.club);
             addCell(tableRow, nullSafeFormatTime(competitor.totalTime, "mp"), _NON_BREAKING_SPACE_CHAR, "time");
