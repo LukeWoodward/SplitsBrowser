@@ -66,6 +66,16 @@
         assert.deepEqual(actualCourse, expectedCourse);
     });
 
+    QUnit.test("Cannot parse a single course with a single competitor with zero split", function (assert) {
+        var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,00:00,03:31,02:01,00:23";
+        try {
+            parseEventData(csvData);
+            assert.ok(false, "Should not get here - zero split time should have been reported");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
+        }
+    });
+
     QUnit.test("Can parse a single course with a single valid competitor and trailing end-of-line", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n";
         var actualCourse = parseEventData(csvData);

@@ -822,6 +822,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 var club = parts.shift();
                 var startTime = parts.shift();
                 var splitTimes = parts.map(SplitsBrowser.parseTime);
+                if (splitTimes.indexOf(0) >= 0) {
+                    SplitsBrowser.throwInvalidData("Zero split times are not permitted - found one or more zero splits for competitor '" + forename + " " + surname + "'");
+                }
                 return SplitsBrowser.Model.Competitor.fromSplitTimes(index + 1, forename, surname, club, startTime, splitTimes);
             } else {
                 SplitsBrowser.throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor on course with " + controlCount + " controls, got " + (parts.length) + " instead.");
