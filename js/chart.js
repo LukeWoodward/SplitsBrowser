@@ -51,6 +51,7 @@
         this.contentHeight = -1;
         this.numControls = -1;
         this.selectedIndexes = [];
+        this.currentCompetitorData = null;
         
         // Indexes of the currently-selected competitors, in the order that
         // they appear in the list of labels.
@@ -216,9 +217,12 @@
                                .map(function(pair) { return pair[0] + SPACER + SplitsBrowser.formatTime(pair[1]); });
             }
         }
-           
-        d3.selectAll("text.competitorLabel").data(labelTexts)
-                                            .text(function (labelText) { return labelText; });
+        
+        // Update the current competitor data.
+        this.currentCompetitorData.forEach(function (data, index) { data.label = labelTexts[index]; });
+        
+        // This data is already joined to the labels; just update the text.
+        d3.selectAll("text.competitorLabel").text(function (data) { return data.label; });
     };
 
     /**
@@ -464,15 +468,34 @@
                                       .data(d3.range(this.numLines));
 
         graphLines.enter()
-                  .append("path")
-                  .attr("class", "graphLine")
-                  .attr("stroke-width", 2)
-                  .attr("fill", "none");
+                  .append("path");
 
         graphLines.attr("d", function (selCompIdx) { return lineFunctionGenerator(selCompIdx)(chartData.dataColumns); })
-                    .attr("stroke", function (selCompIdx) { return colours[outerThis.selectedIndexes[selCompIdx] % colours.length]; });
+                  .attr("stroke", function (selCompIdx) { return colours[outerThis.selectedIndexes[selCompIdx] % colours.length]; })
+                  .attr("class", function (selCompIdx) { return "graphLine competitor" + outerThis.selectedIndexes[selCompIdx]; })
+                  .on("mouseenter", function (selCompIdx) { outerThis.highlight(outerThis.selectedIndexes[selCompIdx]); })
+                  .on("mouseleave", function () { outerThis.unhighlight(); })
 
         graphLines.exit().remove();
+    };
+
+    /**
+    * Highlights the competitor with the given index.
+    * @param {Number} competitorIdx - The index of the competitor to highlight.
+    */
+    SplitsBrowser.Controls.Chart.prototype.highlight = function (competitorIdx) {
+        this.svg.selectAll("path.graphLine.competitor" + competitorIdx).classed("selected", true);
+        this.svg.selectAll("line.competitorLegendLine.competitor" + competitorIdx).classed("selected", true);
+        this.svg.selectAll("text.competitorLabel.competitor" + competitorIdx).classed("selected", true);
+    };
+
+    /**
+    * Removes any competitor-specific higlighting.
+    */
+    SplitsBrowser.Controls.Chart.prototype.unhighlight = function () {
+        this.svg.selectAll("path.graphLine").classed("selected", false);
+        this.svg.selectAll("line.competitorLegendLine").classed("selected", false);
+        this.svg.selectAll("text.competitorLabel").classed("selected", false);
     };
 
     /**
@@ -481,15 +504,14 @@
     */
     SplitsBrowser.Controls.Chart.prototype.drawCompetitorLegendLabels = function (chartData) {
         
-        var currCompData;
         if (chartData.dataColumns.length === 0) {
-            currCompData = [];
+            this.currentCompetitorData = [];
         } else {
             var finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
             var outerThis = this;
-            currCompData = d3.range(this.numLines).map(function (i) {
+            this.currentCompetitorData = d3.range(this.numLines).map(function (i) {
                 return {
-                    name: outerThis.names[i],
+                    label: outerThis.names[i],
                     textHeight: outerThis.getTextHeight(outerThis.names[i]),
                     y: (finishColumn.ys[i] === null) ? null : outerThis.yScale(finishColumn.ys[i]),
                     colour: colours[outerThis.selectedIndexes[i] % colours.length],
@@ -500,50 +522,53 @@
             // Draw the mispunchers at the bottom of the chart, with the last
             // one of them at the bottom.
             var lastMispuncherY = null;
-            for (var selCompIdx = currCompData.length - 1; selCompIdx >= 0; selCompIdx -= 1) {
-                if (currCompData[selCompIdx].y === null) {
-                    currCompData[selCompIdx].y = (lastMispuncherY === null) ? this.contentHeight : lastMispuncherY - currCompData[selCompIdx].textHeight;
-                    lastMispuncherY = currCompData[selCompIdx].y;
+            for (var selCompIdx = this.currentCompetitorData.length - 1; selCompIdx >= 0; selCompIdx -= 1) {
+                if (this.currentCompetitorData[selCompIdx].y === null) {
+                    this.currentCompetitorData[selCompIdx].y = (lastMispuncherY === null) ? this.contentHeight : lastMispuncherY - this.currentCompetitorData[selCompIdx].textHeight;
+                    lastMispuncherY = this.currentCompetitorData[selCompIdx].y;
                 }
             }
         }
         
         // Sort by the y-offset values, which doesn't always agree with the end
         // positions of the competitors.
-        currCompData.sort(function (a, b) { return a.y - b.y; });
+        this.currentCompetitorData.sort(function (a, b) { return a.y - b.y; });
         
-        this.selectedIndexesOrderedByLastYValue = currCompData.map(function (comp) { return comp.index; });
+        this.selectedIndexesOrderedByLastYValue = this.currentCompetitorData.map(function (comp) { return comp.index; });
 
         // Some ys may be too close to the previous one.  Adjust them downwards
         // as necessary.
-        for (var i = 1; i < currCompData.length; ++i) {
-            if (currCompData[i].y < currCompData[i - 1].y + currCompData[i - 1].textHeight) {
-                currCompData[i].y = currCompData[i - 1].y + currCompData[i - 1].textHeight;
+        for (var i = 1; i < this.currentCompetitorData.length; ++i) {
+            if (this.currentCompetitorData[i].y < this.currentCompetitorData[i - 1].y + this.currentCompetitorData[i - 1].textHeight) {
+                this.currentCompetitorData[i].y = this.currentCompetitorData[i - 1].y + this.currentCompetitorData[i - 1].textHeight;
             }
         }
 
-        var legendLines = this.svgGroup.selectAll("line.competitorLegendLine").data(currCompData);
+        var legendLines = this.svgGroup.selectAll("line.competitorLegendLine").data(this.currentCompetitorData);
         legendLines.enter()
-                   .append("line")
-                   .attr("class", "competitorLegendLine")
-                   .attr("stroke-width", 2);
+                   .append("line");
 
         legendLines.attr("x1", this.contentWidth + 1)
                    .attr("y1", function (data) { return data.y; })
                    .attr("x2", this.contentWidth + legendLineWidth + 1)
                    .attr("y2", function (data) { return data.y; })
-                   .attr("stroke", function (data) { return data.colour; });
+                   .attr("stroke", function (data) { return data.colour; })
+                   .attr("class", function (data) { return "competitorLegendLine competitor" + data.index; })
+                   .on("mouseenter", function (data) { outerThis.highlight(data.index); })
+                   .on("mouseleave", function (data) { outerThis.unhighlight(); });
 
         legendLines.exit().remove();
 
-        var labels = this.svgGroup.selectAll("text.competitorLabel").data(currCompData);
+        var labels = this.svgGroup.selectAll("text.competitorLabel").data(this.currentCompetitorData);
         labels.enter()
               .append("text")
-              .attr("class", "competitorLabel");
 
-        labels.text(function (data) { return data.name; })
-              .attr("x", this.contentWidth + legendLineWidth + 2)
-              .attr("y", function (data) { return data.y + data.textHeight / 4; });
+        labels.attr("x", this.contentWidth + legendLineWidth + 2)
+              .attr("y", function (data) { return data.y + data.textHeight / 4; })
+              .attr("class", function (data) { return "competitorLabel competitor" + data.index; })
+              .on("mouseenter", function (data) { outerThis.highlight(data.index); })
+              .on("mouseleave", function (data) { outerThis.unhighlight(); })
+              .text(function (data) { return data.label; });
 
         labels.exit().remove();
     };

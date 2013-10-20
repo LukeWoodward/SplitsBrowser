@@ -1,23 +1,48 @@
 
-body {
+body
+{
   font: 12px sans-serif;
 }
 
-svg text {
+svg text
+{
   font: 10px sans-serif;
 }
 
+svg text#sb-text-size-element
+{
+    font-weight: bold;
+}
+
 .axis path,
-.axis line {
+.axis line
+{
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
 }
 
-line.controlLine {
+line.controlLine
+{
     fill: none;
     stroke: #000;
     shape-rendering: crispEdges;
+}
+
+path.graphLine, line.competitorLegendLine
+{
+    fill: none;
+    stroke-width: 2;
+}
+
+path.graphLine.selected, line.competitorLegendLine.selected
+{
+    stroke-width: 6;
+}
+
+text.competitorLabel.selected
+{
+    font-weight: bold;
 }
 
 #competitorList
