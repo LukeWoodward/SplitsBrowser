@@ -27,12 +27,12 @@
     /**
     * Format a time and a rank as a string, with the split time in mm:ss or h:mm:ss
     * as appropriate.
-    * @param {Number} time - The time, in seconds.
-    * @param {Number} rank - The rank.
+    * @param {Number|null} time - The time, in seconds, or null.
+    * @param {Number|null} rank - The rank, or null.
     * @returns Time and rank formatted as a string.
     */
     function formatTimeAndRank(time, rank) {
-        return SPACER + SplitsBrowser.formatTime(time) + " (" + rank + ")";
+        return SPACER + SplitsBrowser.formatTime(time) + " (" + ((rank === null) ? "-" : rank) + ")";
     }
 
     /**
@@ -184,7 +184,7 @@
         var outerThis = this;
         var selectedCompetitors = indexes.map(function (index) { return outerThis.course.competitors[index]; });
         var referenceSplit = this.referenceCumTimes[controlIndex] - this.referenceCumTimes[controlIndex - 1];
-        var timesBehind = selectedCompetitors.map(function (comp) { return comp.getSplitTimeTo(controlIndex) - referenceSplit; });
+        var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - referenceSplit; });
         return timesBehind;
     };
     
@@ -474,7 +474,7 @@
                   .attr("stroke", function (selCompIdx) { return colours[outerThis.selectedIndexes[selCompIdx] % colours.length]; })
                   .attr("class", function (selCompIdx) { return "graphLine competitor" + outerThis.selectedIndexes[selCompIdx]; })
                   .on("mouseenter", function (selCompIdx) { outerThis.highlight(outerThis.selectedIndexes[selCompIdx]); })
-                  .on("mouseleave", function () { outerThis.unhighlight(); })
+                  .on("mouseleave", function () { outerThis.unhighlight(); });
 
         graphLines.exit().remove();
     };
@@ -561,7 +561,7 @@
 
         var labels = this.svgGroup.selectAll("text.competitorLabel").data(this.currentCompetitorData);
         labels.enter()
-              .append("text")
+              .append("text");
 
         labels.attr("x", this.contentWidth + legendLineWidth + 2)
               .attr("y", function (data) { return data.y + data.textHeight / 4; })

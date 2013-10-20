@@ -1,20 +1,7 @@
 (function () {
     "use strict";
     
-    var _DEFAULT_NULL_TIME_PLACEHOLDER = "-----";
-    
     var _NON_BREAKING_SPACE_CHAR = "\u00a0";
-    
-    /**
-    * Formats the given time, unless the value given is null, in which case a
-    * placeholder value is given.
-    * @param {Number|null} time - The time to format.
-    * @param {String|undefined} placeholder - Optional placeholder value.
-    * @return {String} The formatted time string.
-    */
-    function nullSafeFormatTime(time, placeholder) {
-        return (time === null) ? (placeholder || _DEFAULT_NULL_TIME_PLACEHOLDER) : SplitsBrowser.formatTime(time);
-    }
 
     /**
     * A control that shows an entire table of results.
@@ -98,10 +85,10 @@
             }
             
             addCell(tableRow, competitor.name, competitor.club);
-            addCell(tableRow, nullSafeFormatTime(competitor.totalTime, "mp"), _NON_BREAKING_SPACE_CHAR, "time");
+            addCell(tableRow, SplitsBrowser.formatTime(competitor.totalTime, "mp"), _NON_BREAKING_SPACE_CHAR, "time");
             
             d3.range(1, outerThis.course.numControls + 2).forEach(function (controlNum) {
-                addCell(tableRow, nullSafeFormatTime(competitor.getCumulativeTimeTo(controlNum)), nullSafeFormatTime(competitor.getSplitTimeTo(controlNum)), "time");
+                addCell(tableRow, SplitsBrowser.formatTime(competitor.getCumulativeTimeTo(controlNum)), SplitsBrowser.formatTime(competitor.getSplitTimeTo(controlNum)), "time");
             });
         });
     };

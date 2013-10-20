@@ -81,6 +81,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 (function () {
     "use strict";
 
+    SplitsBrowser.NULL_TIME_PLACEHOLDER = "-----";
+    
     /**
     * Formats a time period given as a number of seconds as a string in the form
     *  [-][h:]mm:ss.
@@ -88,6 +90,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @returns {string} The string formatting of the time.
     */
     SplitsBrowser.formatTime = function (seconds) {
+        
+        if (seconds === null) {
+            return SplitsBrowser.NULL_TIME_PLACEHOLDER;
+        }
+    
         var result = "";
         if (seconds < 0) {
             result = "-";
@@ -1577,12 +1584,12 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     /**
     * Format a time and a rank as a string, with the split time in mm:ss or h:mm:ss
     * as appropriate.
-    * @param {Number} time - The time, in seconds.
-    * @param {Number} rank - The rank.
+    * @param {Number|null} time - The time, in seconds, or null.
+    * @param {Number|null} rank - The rank, or null.
     * @returns Time and rank formatted as a string.
     */
     function formatTimeAndRank(time, rank) {
-        return SPACER + SplitsBrowser.formatTime(time) + " (" + rank + ")";
+        return SPACER + SplitsBrowser.formatTime(time) + " (" + ((rank === null) ? "-" : rank) + ")";
     }
 
     /**
@@ -1601,6 +1608,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.contentHeight = -1;
         this.numControls = -1;
         this.selectedIndexes = [];
+        this.currentCompetitorData = null;
         
         // Indexes of the currently-selected competitors, in the order that
         // they appear in the list of labels.
@@ -1733,7 +1741,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var outerThis = this;
         var selectedCompetitors = indexes.map(function (index) { return outerThis.course.competitors[index]; });
         var referenceSplit = this.referenceCumTimes[controlIndex] - this.referenceCumTimes[controlIndex - 1];
-        var timesBehind = selectedCompetitors.map(function (comp) { return comp.getSplitTimeTo(controlIndex) - referenceSplit; });
+        var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - referenceSplit; });
         return timesBehind;
     };
     
@@ -1766,9 +1774,12 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                                .map(function(pair) { return pair[0] + SPACER + SplitsBrowser.formatTime(pair[1]); });
             }
         }
-           
-        d3.selectAll("text.competitorLabel").data(labelTexts)
-                                            .text(function (labelText) { return labelText; });
+        
+        // Update the current competitor data.
+        this.currentCompetitorData.forEach(function (data, index) { data.label = labelTexts[index]; });
+        
+        // This data is already joined to the labels; just update the text.
+        d3.selectAll("text.competitorLabel").text(function (data) { return data.label; });
     };
 
     /**
@@ -2014,15 +2025,34 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                                       .data(d3.range(this.numLines));
 
         graphLines.enter()
-                  .append("path")
-                  .attr("class", "graphLine")
-                  .attr("stroke-width", 2)
-                  .attr("fill", "none");
+                  .append("path");
 
         graphLines.attr("d", function (selCompIdx) { return lineFunctionGenerator(selCompIdx)(chartData.dataColumns); })
-                    .attr("stroke", function (selCompIdx) { return colours[outerThis.selectedIndexes[selCompIdx] % colours.length]; });
+                  .attr("stroke", function (selCompIdx) { return colours[outerThis.selectedIndexes[selCompIdx] % colours.length]; })
+                  .attr("class", function (selCompIdx) { return "graphLine competitor" + outerThis.selectedIndexes[selCompIdx]; })
+                  .on("mouseenter", function (selCompIdx) { outerThis.highlight(outerThis.selectedIndexes[selCompIdx]); })
+                  .on("mouseleave", function () { outerThis.unhighlight(); });
 
         graphLines.exit().remove();
+    };
+
+    /**
+    * Highlights the competitor with the given index.
+    * @param {Number} competitorIdx - The index of the competitor to highlight.
+    */
+    SplitsBrowser.Controls.Chart.prototype.highlight = function (competitorIdx) {
+        this.svg.selectAll("path.graphLine.competitor" + competitorIdx).classed("selected", true);
+        this.svg.selectAll("line.competitorLegendLine.competitor" + competitorIdx).classed("selected", true);
+        this.svg.selectAll("text.competitorLabel.competitor" + competitorIdx).classed("selected", true);
+    };
+
+    /**
+    * Removes any competitor-specific higlighting.
+    */
+    SplitsBrowser.Controls.Chart.prototype.unhighlight = function () {
+        this.svg.selectAll("path.graphLine").classed("selected", false);
+        this.svg.selectAll("line.competitorLegendLine").classed("selected", false);
+        this.svg.selectAll("text.competitorLabel").classed("selected", false);
     };
 
     /**
@@ -2031,15 +2061,14 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.Chart.prototype.drawCompetitorLegendLabels = function (chartData) {
         
-        var currCompData;
         if (chartData.dataColumns.length === 0) {
-            currCompData = [];
+            this.currentCompetitorData = [];
         } else {
             var finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
             var outerThis = this;
-            currCompData = d3.range(this.numLines).map(function (i) {
+            this.currentCompetitorData = d3.range(this.numLines).map(function (i) {
                 return {
-                    name: outerThis.names[i],
+                    label: outerThis.names[i],
                     textHeight: outerThis.getTextHeight(outerThis.names[i]),
                     y: (finishColumn.ys[i] === null) ? null : outerThis.yScale(finishColumn.ys[i]),
                     colour: colours[outerThis.selectedIndexes[i] % colours.length],
@@ -2050,50 +2079,53 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             // Draw the mispunchers at the bottom of the chart, with the last
             // one of them at the bottom.
             var lastMispuncherY = null;
-            for (var selCompIdx = currCompData.length - 1; selCompIdx >= 0; selCompIdx -= 1) {
-                if (currCompData[selCompIdx].y === null) {
-                    currCompData[selCompIdx].y = (lastMispuncherY === null) ? this.contentHeight : lastMispuncherY - currCompData[selCompIdx].textHeight;
-                    lastMispuncherY = currCompData[selCompIdx].y;
+            for (var selCompIdx = this.currentCompetitorData.length - 1; selCompIdx >= 0; selCompIdx -= 1) {
+                if (this.currentCompetitorData[selCompIdx].y === null) {
+                    this.currentCompetitorData[selCompIdx].y = (lastMispuncherY === null) ? this.contentHeight : lastMispuncherY - this.currentCompetitorData[selCompIdx].textHeight;
+                    lastMispuncherY = this.currentCompetitorData[selCompIdx].y;
                 }
             }
         }
         
         // Sort by the y-offset values, which doesn't always agree with the end
         // positions of the competitors.
-        currCompData.sort(function (a, b) { return a.y - b.y; });
+        this.currentCompetitorData.sort(function (a, b) { return a.y - b.y; });
         
-        this.selectedIndexesOrderedByLastYValue = currCompData.map(function (comp) { return comp.index; });
+        this.selectedIndexesOrderedByLastYValue = this.currentCompetitorData.map(function (comp) { return comp.index; });
 
         // Some ys may be too close to the previous one.  Adjust them downwards
         // as necessary.
-        for (var i = 1; i < currCompData.length; ++i) {
-            if (currCompData[i].y < currCompData[i - 1].y + currCompData[i - 1].textHeight) {
-                currCompData[i].y = currCompData[i - 1].y + currCompData[i - 1].textHeight;
+        for (var i = 1; i < this.currentCompetitorData.length; ++i) {
+            if (this.currentCompetitorData[i].y < this.currentCompetitorData[i - 1].y + this.currentCompetitorData[i - 1].textHeight) {
+                this.currentCompetitorData[i].y = this.currentCompetitorData[i - 1].y + this.currentCompetitorData[i - 1].textHeight;
             }
         }
 
-        var legendLines = this.svgGroup.selectAll("line.competitorLegendLine").data(currCompData);
+        var legendLines = this.svgGroup.selectAll("line.competitorLegendLine").data(this.currentCompetitorData);
         legendLines.enter()
-                   .append("line")
-                   .attr("class", "competitorLegendLine")
-                   .attr("stroke-width", 2);
+                   .append("line");
 
         legendLines.attr("x1", this.contentWidth + 1)
                    .attr("y1", function (data) { return data.y; })
                    .attr("x2", this.contentWidth + legendLineWidth + 1)
                    .attr("y2", function (data) { return data.y; })
-                   .attr("stroke", function (data) { return data.colour; });
+                   .attr("stroke", function (data) { return data.colour; })
+                   .attr("class", function (data) { return "competitorLegendLine competitor" + data.index; })
+                   .on("mouseenter", function (data) { outerThis.highlight(data.index); })
+                   .on("mouseleave", function (data) { outerThis.unhighlight(); });
 
         legendLines.exit().remove();
 
-        var labels = this.svgGroup.selectAll("text.competitorLabel").data(currCompData);
+        var labels = this.svgGroup.selectAll("text.competitorLabel").data(this.currentCompetitorData);
         labels.enter()
-              .append("text")
-              .attr("class", "competitorLabel");
+              .append("text");
 
-        labels.text(function (data) { return data.name; })
-              .attr("x", this.contentWidth + legendLineWidth + 2)
-              .attr("y", function (data) { return data.y + data.textHeight / 4; });
+        labels.attr("x", this.contentWidth + legendLineWidth + 2)
+              .attr("y", function (data) { return data.y + data.textHeight / 4; })
+              .attr("class", function (data) { return "competitorLabel competitor" + data.index; })
+              .on("mouseenter", function (data) { outerThis.highlight(data.index); })
+              .on("mouseleave", function (data) { outerThis.unhighlight(); })
+              .text(function (data) { return data.label; });
 
         labels.exit().remove();
     };
@@ -2162,20 +2194,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 (function () {
     "use strict";
     
-    var _DEFAULT_NULL_TIME_PLACEHOLDER = "-----";
-    
     var _NON_BREAKING_SPACE_CHAR = "\u00a0";
-    
-    /**
-    * Formats the given time, unless the value given is null, in which case a
-    * placeholder value is given.
-    * @param {Number|null} time - The time to format.
-    * @param {String|undefined} placeholder - Optional placeholder value.
-    * @return {String} The formatted time string.
-    */
-    function nullSafeFormatTime(time, placeholder) {
-        return (time === null) ? (placeholder || _DEFAULT_NULL_TIME_PLACEHOLDER) : SplitsBrowser.formatTime(time);
-    }
 
     /**
     * A control that shows an entire table of results.
@@ -2259,10 +2278,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             }
             
             addCell(tableRow, competitor.name, competitor.club);
-            addCell(tableRow, nullSafeFormatTime(competitor.totalTime, "mp"), _NON_BREAKING_SPACE_CHAR, "time");
+            addCell(tableRow, SplitsBrowser.formatTime(competitor.totalTime, "mp"), _NON_BREAKING_SPACE_CHAR, "time");
             
             d3.range(1, outerThis.course.numControls + 2).forEach(function (controlNum) {
-                addCell(tableRow, nullSafeFormatTime(competitor.getCumulativeTimeTo(controlNum)), nullSafeFormatTime(competitor.getSplitTimeTo(controlNum)), "time");
+                addCell(tableRow, SplitsBrowser.formatTime(competitor.getCumulativeTimeTo(controlNum)), SplitsBrowser.formatTime(competitor.getSplitTimeTo(controlNum)), "time");
             });
         });
     };

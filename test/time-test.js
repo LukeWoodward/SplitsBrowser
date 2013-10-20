@@ -5,6 +5,10 @@
 
     module("Time");
 
+    QUnit.test("Can format a null number of seconds ", function(assert) {
+        assert.equal(formatTime(null), SplitsBrowser.NULL_TIME_PLACEHOLDER);
+    });
+
     QUnit.test("Can format zero seconds as a string ", function(assert) {
         assert.equal(formatTime(0), "00:00");
     });
@@ -91,5 +95,9 @@
    
     QUnit.test("Can parse large time in hours, minutes and seconds correctly", function (assert) {
         assert.equal(parseTime("781:49:18"), 781 * 3600 + 49 * 60 + 18);
+    });
+   
+    QUnit.test("Can parse null value placeholder back to null", function (assert) {
+        assert.strictEqual(parseTime(SplitsBrowser.NULL_TIME_PLACEHOLDER), null);
     });
 })();

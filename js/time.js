@@ -1,6 +1,8 @@
 (function () {
     "use strict";
 
+    SplitsBrowser.NULL_TIME_PLACEHOLDER = "-----";
+    
     /**
     * Formats a time period given as a number of seconds as a string in the form
     *  [-][h:]mm:ss.
@@ -8,6 +10,11 @@
     * @returns {string} The string formatting of the time.
     */
     SplitsBrowser.formatTime = function (seconds) {
+        
+        if (seconds === null) {
+            return SplitsBrowser.NULL_TIME_PLACEHOLDER;
+        }
+    
         var result = "";
         if (seconds < 0) {
             result = "-";
