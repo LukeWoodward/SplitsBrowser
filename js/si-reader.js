@@ -96,6 +96,12 @@
             var totalTime = SplitsBrowser.parseTime(row.Time);
             SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, totalTime);
             
+            // Some surnames of those who mispunch already have an 'mp' suffix.
+            // Remove it if it exists.
+            if (cumTimes.indexOf(null) >= 0) {
+                surname = surname.replace(/ mp$/, "");
+            }
+            
             cumTimes.push(totalTime);
             
             var order = courses.get(courseName).competitors.length + 1;
