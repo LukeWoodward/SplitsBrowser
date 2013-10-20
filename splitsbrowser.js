@@ -1327,11 +1327,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     *      courses.
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.setRunnersFromCourse = function (courseIndex) {
+        var competitors = this.courses[courseIndex].competitors;
+        var completingCompetitorIndexes = d3.range(competitors.length).filter(function (idx) { return competitors[idx].completed(); });
+        var completingCompetitors = competitors.filter(function (comp) { return comp.completed(); });
+        
         var optionsList = d3.select(this.runnerDropDown).selectAll("option")
-                                                        .data(this.courses[courseIndex].competitors);
+                                                        .data(completingCompetitors);
         
         optionsList.enter().append("option");
-        optionsList.attr("value", function (_comp, compIndex) { return compIndex.toString(); })
+        optionsList.attr("value", function (_comp, complCompIndex) { return completingCompetitorIndexes[complCompIndex].toString(); })
                    .text(function (comp) { return comp.name; });
         optionsList.exit().remove();
        
@@ -1346,7 +1350,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.getComparisonFunction = function () {
         if (this.isAnyRunnerSelected()) {
-            this.currentRunnerIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
+            var dropdownSelectedIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
+            this.currentRunnerIndex = parseInt(this.runnerDropDown.options[dropdownSelectedIndex].value, 10);
             var outerThis = this;
             return function (course) { return course.competitors[outerThis.currentRunnerIndex].getAllCumulativeTimes(); };
         } else {
@@ -2278,7 +2283,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             }
             
             addCell(tableRow, competitor.name, competitor.club);
-            addCell(tableRow, SplitsBrowser.formatTime(competitor.totalTime, "mp"), _NON_BREAKING_SPACE_CHAR, "time");
+            addCell(tableRow, (competitor.completed()) ? SplitsBrowser.formatTime(competitor.totalTime) : "mp", _NON_BREAKING_SPACE_CHAR, "time");
             
             d3.range(1, outerThis.course.numControls + 2).forEach(function (controlNum) {
                 addCell(tableRow, SplitsBrowser.formatTime(competitor.getCumulativeTimeTo(controlNum)), SplitsBrowser.formatTime(competitor.getSplitTimeTo(controlNum)), "time");
