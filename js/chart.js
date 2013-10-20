@@ -34,6 +34,17 @@
     function formatTimeAndRank(time, rank) {
         return SPACER + SplitsBrowser.formatTime(time) + " (" + ((rank === null) ? "-" : rank) + ")";
     }
+    
+    /**
+    * Formats and returns a competitor's name and optional suffix.
+    * @param {String} name - The name of the competitor.
+    * @param {String} suffix - The optional suffix of the competitor (may be an
+    *      empty string to indicate no suffix).
+    * @return Competitor name and suffix, formatted.
+    */
+    function formatNameAndSuffix(name, suffix) {
+        return (suffix === "") ? name : name + " (" + suffix + ")";
+    }
 
     /**
     * A chart object in a window.
@@ -56,7 +67,6 @@
         // Indexes of the currently-selected competitors, in the order that
         // they appear in the list of labels.
         this.selectedIndexesOrderedByLastYValue = [];
-        this.names = [];
         this.referenceCumTimes = [];
         
         this.isMouseIn = false;
@@ -194,7 +204,7 @@
     SplitsBrowser.Controls.Chart.prototype.updateCompetitorStatistics = function() {
         var outerThis = this;
         var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return outerThis.course.competitors[index]; });
-        var labelTexts = selectedCompetitors.map(function (comp) { return comp.name; });
+        var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, comp.getSuffix()); });
         
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
             if (this.visibleStatistics[0]) {
@@ -269,13 +279,16 @@
     * @returns {Number} Maximum width of text, in pixels.
     */
     SplitsBrowser.Controls.Chart.prototype.getMaxGraphEndTextWidth = function () {
-        if (this.selectedIndexes.length === 0 || this.names.length === 0) {
-            // No competitors selected or no names yet.  Avoid problems caused
-            // by trying to find the maximum of an empty array.
+        if (this.selectedIndexes.length === 0) {
+            // No competitors selected.  Avoid problems caused by trying to
+            // find the maximum of an empty array.
             return 0;
         } else {
             var outerThis = this;
-            var nameWidths = this.names.map(function (name) { return outerThis.getTextWidth(name); });
+            var nameWidths = this.selectedIndexes.map(function (index) {
+                var comp = outerThis.course.competitors[index];
+                return outerThis.getTextWidth(formatNameAndSuffix(comp.name, comp.getSuffix()));
+            });
             return d3.max(nameWidths) + this.determineMaxStatisticTextWidth();
         }
     };
@@ -510,12 +523,14 @@
             var finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
             var outerThis = this;
             this.currentCompetitorData = d3.range(this.numLines).map(function (i) {
+                var competitorIndex = outerThis.selectedIndexes[i];
+                var name = outerThis.course.competitors[competitorIndex].name;
                 return {
-                    label: outerThis.names[i],
-                    textHeight: outerThis.getTextHeight(outerThis.names[i]),
+                    label: formatNameAndSuffix(name, outerThis.course.competitors[competitorIndex].getSuffix()),
+                    textHeight: outerThis.getTextHeight(name),
                     y: (finishColumn.ys[i] === null) ? null : outerThis.yScale(finishColumn.ys[i]),
-                    colour: colours[outerThis.selectedIndexes[i] % colours.length],
-                    index: outerThis.selectedIndexes[i]
+                    colour: colours[competitorIndex % colours.length],
+                    index: competitorIndex
                 };
             });
             
@@ -617,8 +632,7 @@
     */
     SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, course, referenceCumTimes, selectedIndexes, visibleStatistics, yAxisLabel) {
         this.numControls = chartData.numControls;
-        this.names = chartData.competitorNames;
-        this.numLines = this.names.length;
+        this.numLines = chartData.competitorNames.length;
         this.selectedIndexes = selectedIndexes;
         this.referenceCumTimes = referenceCumTimes;
         this.course = course;

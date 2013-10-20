@@ -207,6 +207,20 @@
     };
     
     /**
+    * Returns the 'suffix' to use with a competitor.
+    * The suffix indicates whether they are non-competitive or a mispuncher.  If
+    * they are neither, an empty string is returned.
+    * @return Suffix.
+    */
+    Competitor.prototype.getSuffix = function () {
+        if (this.completed()) {
+            return (this.isNonCompetitive) ? "n/c" : "";
+        } else {
+            return "mp";
+        }
+    };
+    
+    /**
     * Returns the competitor's split to the given control.  If the control
     * index given is zero (i.e. the start), zero is returned.  If the
     * competitor has no time recorded for that control, null is returned.
