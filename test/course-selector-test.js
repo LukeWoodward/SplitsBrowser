@@ -45,7 +45,7 @@
         var htmlSelect = htmlSelectSelection.node();
         assert.equal(htmlSelect.disabled, false, "Selector should not be disabled");
         assert.equal(htmlSelect.options.length, 3, "Three items should be created");
-        for (var i = 0; i < 3; ++i) {
+        for (var i = 0; i < 3; i += 1) {
             assert.equal(htmlSelect.options[i].value, i);
             assert.equal(htmlSelect.options[i].text, "Course " + (i + 1));
         }

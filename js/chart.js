@@ -538,7 +538,7 @@
 
         // Some ys may be too close to the previous one.  Adjust them downwards
         // as necessary.
-        for (var i = 1; i < this.currentCompetitorData.length; ++i) {
+        for (var i = 1; i < this.currentCompetitorData.length; i += 1) {
             if (this.currentCompetitorData[i].y < this.currentCompetitorData[i - 1].y + this.currentCompetitorData[i - 1].textHeight) {
                 this.currentCompetitorData[i].y = this.currentCompetitorData[i - 1].y + this.currentCompetitorData[i - 1].textHeight;
             }

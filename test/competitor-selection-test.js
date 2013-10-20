@@ -82,7 +82,7 @@
 
     QUnit.test("All competitors unselected in newly-created selection", function (assert) {
         var selection = new CompetitorSelection(3);
-        for (var i = 0; i < 3; ++i) {
+        for (var i = 0; i < 3; i += 1) {
             assert.ok(!selection.isSelected(i), "Competitors should all be deselected");
         }
     });
@@ -90,19 +90,19 @@
     QUnit.test("Toggling an unselected competitor makes them selected and vice versa", function (assert) {
         var selection = new CompetitorSelection(3);
         var i;
-        for (i = 0; i < 3; ++i) {
+        for (i = 0; i < 3; i += 1) {
             assert.ok(!selection.isSelected(i), "Competitor " + i + " should be deselected");
         }
 
         selection.toggle(1);
 
-        for (i = 0; i < 3; ++i) {
+        for (i = 0; i < 3; i += 1) {
             assert.ok(selection.isSelected(i) == (i == 1), "Competitor " + i + " should be " + ((i == 1) ? "selected" : "deselected"));
         }
 
         selection.toggle(1);
 
-        for (i = 0; i < 3; ++i) {
+        for (i = 0; i < 3; i += 1) {
             assert.ok(!selection.isSelected(i), "Competitor " + i + " should be deselected");
         }
     });
@@ -110,19 +110,19 @@
     QUnit.test("Selecting all competitors makes all competitors selected, and selecting none makes all competitors unselected", function (assert) {
         var selection = new CompetitorSelection(3);
         var i;
-        for (i = 0; i < 3; ++i) {
+        for (i = 0; i < 3; i += 1) {
             assert.ok(!selection.isSelected(i), "Competitor " + i + " should be deselected");
         }
 
         selection.selectAll();
 
-        for (i = 0; i < 3; ++i) {
+        for (i = 0; i < 3; i += 1) {
             assert.ok(selection.isSelected(i), "Competitor " + i + " should be selected");
         }
 
         selection.selectNone();
 
-        for (i = 0; i < 3; ++i) {
+        for (i = 0; i < 3; i += 1) {
             assert.ok(!selection.isSelected(i), "Competitor " + i + " should be deselected");
         }
     });

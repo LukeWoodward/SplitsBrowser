@@ -1025,7 +1025,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @return {Array} Array of courses read in, or null for failure.
     */ 
     SplitsBrowser.Input.parseEventData = function (data) {
-        for (var i = 0; i < _PARSERS.length; ++i) {
+        for (var i = 0; i < _PARSERS.length; i += 1) {
             var parser = _PARSERS[i];
             try {
                 return parser(data);
@@ -2095,7 +2095,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
         // Some ys may be too close to the previous one.  Adjust them downwards
         // as necessary.
-        for (var i = 1; i < this.currentCompetitorData.length; ++i) {
+        for (var i = 1; i < this.currentCompetitorData.length; i += 1) {
             if (this.currentCompetitorData[i].y < this.currentCompetitorData[i - 1].y + this.currentCompetitorData[i - 1].textHeight) {
                 this.currentCompetitorData[i].y = this.currentCompetitorData[i - 1].y + this.currentCompetitorData[i - 1].textHeight;
             }

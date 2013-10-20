@@ -16,7 +16,7 @@
     * @return {Array} Array of courses read in, or null for failure.
     */ 
     SplitsBrowser.Input.parseEventData = function (data) {
-        for (var i = 0; i < _PARSERS.length; ++i) {
+        for (var i = 0; i < _PARSERS.length; i += 1) {
             var parser = _PARSERS[i];
             try {
                 return parser(data);
