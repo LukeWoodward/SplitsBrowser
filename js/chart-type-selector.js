@@ -20,6 +20,13 @@
             isResultsTable: false
         },
         {
+            name: "Race graph",
+            dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
+            skipStart: false,
+            yAxisLabel: "Time",
+            isResultsTable: false
+        },
+        {
             name: "Position after leg",
             dataSelector: function (comp) { return comp.cumRanks; },
             skipStart: true,

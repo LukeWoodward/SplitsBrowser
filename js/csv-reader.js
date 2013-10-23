@@ -17,7 +17,7 @@
             var forename = parts.shift();
             var surname = parts.shift();
             var club = parts.shift();
-            var startTime = parts.shift();
+            var startTime = SplitsBrowser.parseTime(parts.shift()) * 60;
             var splitTimes = parts.map(SplitsBrowser.parseTime);
             if (splitTimes.indexOf(0) >= 0) {
                 SplitsBrowser.throwInvalidData("Zero split times are not permitted - found one or more zero splits for competitor '" + forename + " " + surname + "'");

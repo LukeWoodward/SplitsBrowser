@@ -310,7 +310,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {string} forename - The forename of the competitor.
     * @param {string} surname - The surname of the competitor.
     * @param {string} club - The name of the competitor's club.
-    * @param {string} startTime - The competitor's start time.
+    * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
     */
     SplitsBrowser.Model.Competitor.fromSplitTimes = function (order, forename, surname, club, startTime, splitTimes) {
@@ -332,7 +332,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {string} forename - The forename of the competitor.
     * @param {string} surname - The surname of the competitor.
     * @param {string} club - The name of the competitor's club.
-    * @param {string} startTime - The competitor's start time.
+    * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
     */
     SplitsBrowser.Model.Competitor.fromCumTimes = function (order, forename, surname, club, startTime, cumTimes) {
@@ -446,6 +446,17 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Returns the cumulative times of this competitor with the start time added on.
+    * @param {Array} referenceCumTimes - The reference cumulative-split-time data to adjust by.
+    * @return {Array} The array of adjusted data.
+    */
+    Competitor.prototype.getCumTimesAdjustedToReferenceWithStartAdded = function (referenceCumTimes) {
+        var adjustedTimes = this.getCumTimesAdjustedToReference(referenceCumTimes);
+        var startTime = this.startTime;
+        return adjustedTimes.map(function (adjTime) { return addIfNotNull(adjTime, startTime); });
+    };
+    
+    /**
     * Returns an array of percentages that this competitor's splits were behind
     * those of a reference competitor.
     * @param {Array} referenceCumTimes - The reference cumulative split times
@@ -470,6 +481,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         return percentsBehind;
     };
+    
+    
 })();
 
 (function (){
@@ -844,7 +857,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             var forename = parts.shift();
             var surname = parts.shift();
             var club = parts.shift();
-            var startTime = parts.shift();
+            var startTime = SplitsBrowser.parseTime(parts.shift()) * 60;
             var splitTimes = parts.map(SplitsBrowser.parseTime);
             if (splitTimes.indexOf(0) >= 0) {
                 SplitsBrowser.throwInvalidData("Zero split times are not permitted - found one or more zero splits for competitor '" + forename + " " + surname + "'");
@@ -960,7 +973,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             var forename = row["First name"];
             var surname = row.Surname;
             var club = row[_CLUB_COLUMN_NAME];
-            var startTime = row.Start;
+            var startTime = SplitsBrowser.parseTime(row.Start);
             
             var courseName = row[_COURSE_COLUMN_NAME];
             
@@ -1488,6 +1501,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
             yAxisLabel: "Time loss (min)",
+            isResultsTable: false
+        },
+        {
+            name: "Race graph",
+            dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
+            skipStart: false,
+            yAxisLabel: "Time",
             isResultsTable: false
         },
         {

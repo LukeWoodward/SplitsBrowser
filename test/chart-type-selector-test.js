@@ -29,7 +29,7 @@
         assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
         
         var htmlSelect = htmlSelectSelection.node();
-        assert.ok(htmlSelect.options.length > 3, "At least three items should be created");
+        assert.ok(htmlSelect.options.length > 4, "At least four items should be created");
     });
 
     QUnit.test("Registering a handler and changing a value in the selector triggers a call to change callback", function(assert) {
@@ -40,9 +40,9 @@
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
-        $(htmlSelect).val(2).change();
+        $(htmlSelect).val(3).change();
         
-        assert.equal(lastChartTypeName, "Split position", "The third chart type should have been selected");
+        assert.equal(lastChartTypeName, "Split position", "The fourth chart type should have been selected");
         assert.equal(callCount, 1, "One change should have been recorded");
     });
 
@@ -63,11 +63,11 @@
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
-        $(htmlSelect).val(2).change();
+        $(htmlSelect).val(3).change();
         
-        assert.equal(lastChartTypeName, "Split position", "The third chart type should have been selected");
+        assert.equal(lastChartTypeName, "Split position", "The fourth chart type should have been selected");
         assert.equal(callCount, 1, "One change should have been recorded");
-        assert.equal(lastChartTypeName2, "Split position", "The third chart type should have been selected");
+        assert.equal(lastChartTypeName2, "Split position", "The fourth chart type should have been selected");
         assert.equal(callCount2, 1, "One change should have been recorded");
     });
 
@@ -82,9 +82,9 @@
         assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
 
-        $(htmlSelect).val(2).change();
+        $(htmlSelect).val(3).change();
         
-        assert.equal(lastChartTypeName, "Split position", "The third chart type should have been selected");
+        assert.equal(lastChartTypeName, "Split position", "The fourth chart type should have been selected");
         assert.equal(callCount, 1, "One change should have been recorded");
     });
 })();

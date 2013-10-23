@@ -41,7 +41,7 @@
     
     QUnit.test("Can parse a string that contains a single competitor's data", function (assert) {
         var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test course;1;3;01:50;03:38;06:02;\r\n");
+                           "John;Smith;ABC;11:27:45;06:33;Test course;1;3;01:50;03:38;06:02;\r\n");
         assert.ok($.isArray(results), "Parsing output not an array");
         assert.equal(results.length, 1, "There should be one element in the array");
         assert.ok(results[0] instanceof Course, "Array element should be a Course object");
@@ -53,7 +53,7 @@
         assert.equal(competitor.forename, "John", "Should read correct forename");
         assert.equal(competitor.surname, "Smith", "Should read correct surname");
         assert.equal(competitor.club, "ABC", "Should read correct club");
-        assert.equal(competitor.startTime, "10:00:00", "Should read correct start time");
+        assert.equal(competitor.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
     });
     

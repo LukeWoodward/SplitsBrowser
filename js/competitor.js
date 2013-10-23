@@ -168,7 +168,7 @@
     * @param {string} forename - The forename of the competitor.
     * @param {string} surname - The surname of the competitor.
     * @param {string} club - The name of the competitor's club.
-    * @param {string} startTime - The competitor's start time.
+    * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
     */
     SplitsBrowser.Model.Competitor.fromSplitTimes = function (order, forename, surname, club, startTime, splitTimes) {
@@ -190,7 +190,7 @@
     * @param {string} forename - The forename of the competitor.
     * @param {string} surname - The surname of the competitor.
     * @param {string} club - The name of the competitor's club.
-    * @param {string} startTime - The competitor's start time.
+    * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
     */
     SplitsBrowser.Model.Competitor.fromCumTimes = function (order, forename, surname, club, startTime, cumTimes) {
@@ -304,6 +304,17 @@
     };
     
     /**
+    * Returns the cumulative times of this competitor with the start time added on.
+    * @param {Array} referenceCumTimes - The reference cumulative-split-time data to adjust by.
+    * @return {Array} The array of adjusted data.
+    */
+    Competitor.prototype.getCumTimesAdjustedToReferenceWithStartAdded = function (referenceCumTimes) {
+        var adjustedTimes = this.getCumTimesAdjustedToReference(referenceCumTimes);
+        var startTime = this.startTime;
+        return adjustedTimes.map(function (adjTime) { return addIfNotNull(adjTime, startTime); });
+    };
+    
+    /**
     * Returns an array of percentages that this competitor's splits were behind
     * those of a reference competitor.
     * @param {Array} referenceCumTimes - The reference cumulative split times
@@ -328,4 +339,6 @@
         
         return percentsBehind;
     };
+    
+    
 })();

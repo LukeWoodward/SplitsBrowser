@@ -83,7 +83,7 @@
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23";
         var actualCourse = parseEventData(csvData);
         var expectedCourse = [new Course("Example", 4, [
-            fromSplitTimes(1, "John", "Smith", "ABC", "10:34", [177, 99, 211, 121, 23])
+            fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23])
         ])];
         assert.deepEqual(actualCourse, expectedCourse);
     });
@@ -102,7 +102,7 @@
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n";
         var actualCourse = parseEventData(csvData);
         var expectedCourse = [new Course("Example", 4, [
-            fromSplitTimes(1, "John", "Smith", "ABC", "10:34", [177, 99, 211, 121, 23])
+            fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23])
         ])];
         assert.deepEqual(actualCourse, expectedCourse);
     });
@@ -111,7 +111,7 @@
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n\r\n\r\n";
         var actualCourse = parseEventData(csvData);
         var expectedCourse = [new Course("Example", 4, [
-            fromSplitTimes(1, "John", "Smith", "ABC", "10:34", [177, 99, 211, 121, 23])
+            fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23])
         ])];
         assert.deepEqual(actualCourse, expectedCourse);
     });
@@ -120,9 +120,9 @@
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:50,01:44,03:29,01:40,00:28\r\nFred,Baker,DEF,12:12,02:57,01:39,03:31,02:01,00:23\r\nJane,Palmer,GHI,11:22,02:42,01:51,04:00,01:31,00:30";
         var actualCourse = parseEventData(csvData);
         var expectedCourse = [new Course("Example", 4, [
-            fromSplitTimes(1, "John", "Smith", "ABC", "10:34", [170, 104, 209, 100, 28]),
-            fromSplitTimes(2, "Fred", "Baker", "DEF", "12:12", [177, 99, 211, 121, 23]),
-            fromSplitTimes(3, "Jane", "Palmer", "GHI", "11:22", [162, 111, 240, 91, 30])
+            fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [170, 104, 209, 100, 28]),
+            fromSplitTimes(2, "Fred", "Baker", "DEF", 12 * 3600 + 12 * 60, [177, 99, 211, 121, 23]),
+            fromSplitTimes(3, "Jane", "Palmer", "GHI", 11 * 3600 + 22 * 60, [162, 111, 240, 91, 30])
         ])];
         assert.deepEqual(actualCourse, expectedCourse);
     });
@@ -131,9 +131,9 @@
         var csvData = "Example, 4\r\nFred,Baker,DEF,12:12,02:57,01:39,03:31,02:01,00:23\r\nJane,Palmer,GHI,11:22,02:42,01:51,04:00,01:31,00:30\r\nJohn,Smith,ABC,10:34,02:50,01:44,03:29,01:40,00:28";
         var actualCourse = parseEventData(csvData);
         var expectedCourse = [new Course("Example", 4, [
-            fromSplitTimes(3, "John", "Smith", "ABC", "10:34", [170, 104, 209, 100, 28]),
-            fromSplitTimes(1, "Fred", "Baker", "DEF", "12:12", [177, 99, 211, 121, 23]),
-            fromSplitTimes(2, "Jane", "Palmer", "GHI", "11:22", [162, 111, 240, 91, 30])
+            fromSplitTimes(3, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [170, 104, 209, 100, 28]),
+            fromSplitTimes(1, "Fred", "Baker", "DEF", 12 * 3600 + 12 * 60, [177, 99, 211, 121, 23]),
+            fromSplitTimes(2, "Jane", "Palmer", "GHI", 11 * 3600 + 22 * 60, [162, 111, 240, 91, 30])
         ])];
         assert.deepEqual(actualCourse, expectedCourse);
     });
@@ -145,11 +145,11 @@
         var actualCourse = parseEventData(csvData);
         var expectedCourse = [
             new Course("Example", 4, [
-                fromSplitTimes(1, "John", "Smith", "ABC", "10:34", [177, 99, 211, 121, 23]),
-                fromSplitTimes(2, "Fred", "Baker", "DEF", "12:12", [162, 111, 240, 91, 30])]),
+                fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23]),
+                fromSplitTimes(2, "Fred", "Baker", "DEF", 12 * 3600 + 12 * 60, [162, 111, 240, 91, 30])]),
             new Course("Another example course", 5, [
-                fromSplitTimes(1, "Jane", "Palmer", "GHI", "11:22", [170, 104, 209, 100, 189, 28]),
-                fromSplitTimes(2, "Faye", "Claidey", "JKL", "10:58", [175, 120, 228, 109, 212, 37])])];
+                fromSplitTimes(1, "Jane", "Palmer", "GHI", 11 * 3600 + 22 * 60, [170, 104, 209, 100, 189, 28]),
+                fromSplitTimes(2, "Faye", "Claidey", "JKL", 10 * 3600 + 58 * 60, [175, 120, 228, 109, 212, 37])])];
         assert.deepEqual(actualCourse, expectedCourse);
     });
 
@@ -157,9 +157,9 @@
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:50,01:44,03:29,01:40,00:28\r\nJane,Palmer,GHI,11:22,02:57,01:39,03:31,02:01,00:23\r\nFred,Baker,DEF,12:12,02:42,01:51,-----,01:31,00:30";
         var actualCourse = parseEventData(csvData);
         var expectedCourse = [new Course("Example", 4, [
-            fromSplitTimes(1, "John", "Smith", "ABC", "10:34", [170, 104, 209, 100, 28]),
-            fromSplitTimes(2, "Jane", "Palmer", "GHI", "11:22", [177, 99, 211, 121, 23]),
-            fromSplitTimes(3, "Fred", "Baker", "DEF", "12:12", [162, 111, null, 91, 30])
+            fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [170, 104, 209, 100, 28]),
+            fromSplitTimes(2, "Jane", "Palmer", "GHI", 11 * 3600 + 22 * 60, [177, 99, 211, 121, 23]),
+            fromSplitTimes(3, "Fred", "Baker", "DEF", 12 * 3600 + 12 * 60, [162, 111, null, 91, 30])
         ])];
         assert.deepEqual(actualCourse, expectedCourse);
     });
@@ -168,9 +168,9 @@
         var csvData = "Example, 4\r\nFred,Baker,DEF,12:12,02:42,01:51,-----,01:31,00:30\r\nJohn,Smith,ABC,10:34,02:50,01:44,03:29,01:40,00:28\r\nJane,Palmer,GHI,11:22,02:57,01:39,03:31,02:01,00:23";
         var actualCourse = parseEventData(csvData);
         var expectedCourse = [new Course("Example", 4, [
-            fromSplitTimes(2, "John", "Smith", "ABC", "10:34", [170, 104, 209, 100, 28]),
-            fromSplitTimes(3, "Jane", "Palmer", "GHI", "11:22", [177, 99, 211, 121, 23]),
-            fromSplitTimes(1, "Fred", "Baker", "DEF", "12:12", [162, 111, null, 91, 30])
+            fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [170, 104, 209, 100, 28]),
+            fromSplitTimes(3, "Jane", "Palmer", "GHI", 11 * 3600 + 22 * 60, [177, 99, 211, 121, 23]),
+            fromSplitTimes(1, "Fred", "Baker", "DEF", 12 * 3600 + 12 * 60, [162, 111, null, 91, 30])
         ])];
         assert.deepEqual(actualCourse, expectedCourse);
     });
@@ -179,10 +179,10 @@
         var csvData = "Example, 4\r\nFred,Baker,DEF,12:12,02:42,01:51,-----,01:31,00:30\r\nJohn,Smith,ABC,10:34,02:50,01:44,03:29,01:40,00:28\r\nFaye,Claidey,JKL,10:37,03:51,-----,-----,08:23,00:49\r\nJane,Palmer,GHI,11:22,02:57,01:39,03:31,02:01,00:23";
         var actualCourse = parseEventData(csvData);
         var expectedCourse = [new Course("Example", 4, [
-            fromSplitTimes(2, "John", "Smith", "ABC", "10:34", [170, 104, 209, 100, 28]),
-            fromSplitTimes(4, "Jane", "Palmer", "GHI", "11:22", [177, 99, 211, 121, 23]),
-            fromSplitTimes(1, "Fred", "Baker", "DEF", "12:12", [162, 111, null, 91, 30]),
-            fromSplitTimes(3, "Faye", "Claidey", "JKL", "10:37", [231, null, null, 503, 49])
+            fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [170, 104, 209, 100, 28]),
+            fromSplitTimes(4, "Jane", "Palmer", "GHI", 11 * 3600 + 22 * 60, [177, 99, 211, 121, 23]),
+            fromSplitTimes(1, "Fred", "Baker", "DEF", 12 * 3600 + 12 * 60, [162, 111, null, 91, 30]),
+            fromSplitTimes(3, "Faye", "Claidey", "JKL", 10 * 3600 + 37 * 60, [231, null, null, 503, 49])
         ])];
         assert.deepEqual(actualCourse, expectedCourse);
     });

@@ -61,7 +61,7 @@
             var forename = row["First name"];
             var surname = row.Surname;
             var club = row[_CLUB_COLUMN_NAME];
-            var startTime = row.Start;
+            var startTime = SplitsBrowser.parseTime(row.Start);
             
             var courseName = row[_COURSE_COLUMN_NAME];
             
