@@ -66,6 +66,16 @@
     }
 
     module("Chart");
+    
+    /**
+    * Creates and returns a Course object populated with test data.
+    */
+    function getTestCourse () {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var course = new Course("Test", 3, [competitor1, competitor2]);
+        return course;
+    }
 
     // Most of the testing of the chart functionality is visual, so it isn't
     // realistic to perform any automated tests for this.  However, it is
@@ -77,9 +87,7 @@
     // testing anything.
 
     QUnit.test("Can create a chart", function (assert) {
-        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
-        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
-        var course = new Course("Test", 3, [competitor1, competitor2]);
+        var course = getTestCourse();
         var fastestCumTimes = course.getFastestCumTimes();
         var chartData = course.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP);
 
@@ -90,9 +98,7 @@
     });
 
     QUnit.test("Can create a chart with a chart type skipping the start", function (assert) {
-        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", "10:30", [81, 197, 212, 106]);
-        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", "10:00", [65, 221, 184, 100]);
-        var course = new Course("Test", 3, [competitor1, competitor2]);
+        var course = getTestCourse();
         var fastestCumTimes = course.getFastestCumTimes();
         var chartData = course.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_SKIP);
 
