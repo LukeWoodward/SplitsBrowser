@@ -1,12 +1,11 @@
-
 body
 {
-  font: 12px sans-serif;
+    font: 12px sans-serif;
 }
 
 svg text
 {
-  font: 10px sans-serif;
+    font: 10px sans-serif;
 }
 
 svg text#sb-text-size-element
@@ -24,12 +23,11 @@ svg rect.background2
     fill: #DDDDDD;
 }
 
-.axis path,
-.axis line
+path.axis, line.axis
 {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
 }
 
 line.controlLine
