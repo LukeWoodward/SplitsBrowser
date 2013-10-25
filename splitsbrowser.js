@@ -1674,7 +1674,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     var _CHART_SVG_ID = "chart";
     var _CHART_SVG_ID_SELECTOR = "#" + _CHART_SVG_ID;
 
-    var margin = { top: 20, right: 20, bottom: 30, left: 50 };
+    var MARGIN = { top: 20, right: 20, bottom: 30, left: 50 };
 
     var legendLineWidth = 10;
 
@@ -1690,9 +1690,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     var _NO_TICKS = function () {
         return "";
     };
-
-    var backgroundColour1 = '#EEEEEE';
-    var backgroundColour2 = '#DDDDDD';
 
     /**
     * Format a time and a rank as a string, with the split time in mm:ss or h:mm:ss
@@ -1751,7 +1748,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                                          .attr("id", _CHART_SVG_ID);
 
         this.svgGroup = this.svg.append("g");
-        this.setLeftMargin(margin.left);
+        this.setLeftMargin(MARGIN.left);
 
         var outerThis = this;
         $(this.svg.node()).mouseenter(function(event) { outerThis.onMouseEnter(event); })
@@ -1775,7 +1772,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.Chart.prototype.setLeftMargin = function (leftMargin) {
         this.currentLeftMargin = leftMargin;
-        this.svgGroup.attr("transform", "translate(" + this.currentLeftMargin + "," + margin.top + ")");
+        this.svgGroup.attr("transform", "translate(" + this.currentLeftMargin + "," + MARGIN.top + ")");
     };
 
     /**
@@ -1789,8 +1786,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             var xOffset = event.pageX - offset.left;
             var yOffset = event.pageY - offset.top;
             
-            if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - margin.right && 
-                margin.top <= yOffset && yOffset < svgNodeAsJQuery.height() - margin.bottom) {
+            if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - MARGIN.right && 
+                MARGIN.top <= yOffset && yOffset < svgNodeAsJQuery.height() - MARGIN.bottom) {
                 // In the chart.
                 // Get the time offset that the mouse is currently over.
                 var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
@@ -2096,10 +2093,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         rects.enter().append("rect");
 
         rects.attr("x", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index]); })
-                .attr("y", 0)
-                .attr("width", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index + 1] - outerThis.referenceCumTimes[index]); })
-                .attr("height", this.contentHeight)
-                .attr("fill", function (index) { return (index % 2 === 0) ? backgroundColour1 : backgroundColour2; });
+             .attr("y", 0)
+             .attr("width", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index + 1] - outerThis.referenceCumTimes[index]); })
+             .attr("height", this.contentHeight)
+             .attr("class", function (index) { return (index % 2 === 0) ? "background1" : "background2"; });
 
         rects.exit().remove();
     };
@@ -2206,10 +2203,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Removes any competitor-specific higlighting.
     */
     SplitsBrowser.Controls.Chart.prototype.unhighlight = function () {
-        this.svg.selectAll("path.graphLine").classed("selected", false);
-        this.svg.selectAll("line.competitorLegendLine").classed("selected", false);
-        this.svg.selectAll("text.competitorLabel").classed("selected", false);
-        this.svg.selectAll("text.startLabel").classed("selected", false);
+        this.svg.selectAll("path.graphLine.selected").classed("selected", false);
+        this.svg.selectAll("line.competitorLegendLine.selected").classed("selected", false);
+        this.svg.selectAll("text.competitorLabel.selected").classed("selected", false);
+        this.svg.selectAll("text.startLabel.selected").classed("selected", false);
     };
 
     /**
@@ -2330,9 +2327,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.Chart.prototype.adjustContentSize = function () {
         var maxTextWidth = this.getMaxGraphEndTextWidth();
-        this.setLeftMargin(this.maxStartTimeLabelWidth + margin.left);
-        this.contentWidth = Math.max(this.overallWidth - this.currentLeftMargin - margin.right - maxTextWidth - (legendLineWidth + 2), 100);
-        this.contentHeight = Math.max(this.overallHeight - margin.top - margin.bottom, 100);
+        this.setLeftMargin(this.maxStartTimeLabelWidth + MARGIN.left);
+        this.contentWidth = Math.max(this.overallWidth - this.currentLeftMargin - MARGIN.right - maxTextWidth - (legendLineWidth + 2), 100);
+        this.contentHeight = Math.max(this.overallHeight - MARGIN.top - MARGIN.bottom, 100);
     };
 
     /**
