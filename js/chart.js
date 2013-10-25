@@ -9,7 +9,7 @@
     var _CHART_SVG_ID = "chart";
     var _CHART_SVG_ID_SELECTOR = "#" + _CHART_SVG_ID;
 
-    var margin = { top: 20, right: 20, bottom: 30, left: 50 };
+    var MARGIN = { top: 20, right: 20, bottom: 30, left: 50 };
 
     var legendLineWidth = 10;
 
@@ -86,7 +86,7 @@
                                          .attr("id", _CHART_SVG_ID);
 
         this.svgGroup = this.svg.append("g");
-        this.setLeftMargin(margin.left);
+        this.setLeftMargin(MARGIN.left);
 
         var outerThis = this;
         $(this.svg.node()).mouseenter(function(event) { outerThis.onMouseEnter(event); })
@@ -110,7 +110,7 @@
     */
     SplitsBrowser.Controls.Chart.prototype.setLeftMargin = function (leftMargin) {
         this.currentLeftMargin = leftMargin;
-        this.svgGroup.attr("transform", "translate(" + this.currentLeftMargin + "," + margin.top + ")");
+        this.svgGroup.attr("transform", "translate(" + this.currentLeftMargin + "," + MARGIN.top + ")");
     };
 
     /**
@@ -124,8 +124,8 @@
             var xOffset = event.pageX - offset.left;
             var yOffset = event.pageY - offset.top;
             
-            if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - margin.right && 
-                margin.top <= yOffset && yOffset < svgNodeAsJQuery.height() - margin.bottom) {
+            if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - MARGIN.right && 
+                MARGIN.top <= yOffset && yOffset < svgNodeAsJQuery.height() - MARGIN.bottom) {
                 // In the chart.
                 // Get the time offset that the mouse is currently over.
                 var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
@@ -665,9 +665,9 @@
     */
     SplitsBrowser.Controls.Chart.prototype.adjustContentSize = function () {
         var maxTextWidth = this.getMaxGraphEndTextWidth();
-        this.setLeftMargin(this.maxStartTimeLabelWidth + margin.left);
-        this.contentWidth = Math.max(this.overallWidth - this.currentLeftMargin - margin.right - maxTextWidth - (legendLineWidth + 2), 100);
-        this.contentHeight = Math.max(this.overallHeight - margin.top - margin.bottom, 100);
+        this.setLeftMargin(this.maxStartTimeLabelWidth + MARGIN.left);
+        this.contentWidth = Math.max(this.overallWidth - this.currentLeftMargin - MARGIN.right - maxTextWidth - (legendLineWidth + 2), 100);
+        this.contentHeight = Math.max(this.overallHeight - MARGIN.top - MARGIN.bottom, 100);
     };
 
     /**
