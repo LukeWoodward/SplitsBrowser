@@ -35,6 +35,16 @@ path.graphLine, line.competitorLegendLine
     stroke-width: 2;
 }
 
+text.startLabel
+{
+    text-anchor: end;
+}
+
+text.startLabel.selected
+{
+    font-weight: bold;
+}
+
 path.graphLine.selected, line.competitorLegendLine.selected
 {
     stroke-width: 6;

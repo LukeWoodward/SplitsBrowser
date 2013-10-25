@@ -26,7 +26,9 @@
         "John Smith": 100,
         "00:28": 58,
         "03:41 (2)": 77,
-        "09:56 (2)": 77
+        "09:56 (2)": 77,
+        "00:00:00 Fred Brown": 175,
+        "00:00:00 John Smith": 190
     };
 
     var TEXT_HEIGHTS = {
@@ -93,7 +95,7 @@
 
         var chart = createTestChart();
         chart.setSize(1000, 1000);
-        chart.drawChart(chartData, course, fastestCumTimes, [0, 1], [true, true, true]);
+        chart.drawChart(chartData, course, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", false);
         expect(0);
     });
 
@@ -104,7 +106,19 @@
 
         var chart = createTestChart();
         chart.setSize(1000, 1000);
-        chart.drawChart(chartData, course, fastestCumTimes, [0, 1], [true, true, true]);
+        chart.drawChart(chartData, course, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", false);
         expect(0);
     });
+
+    QUnit.test("Can create a chart with start-time labels", function (assert) {
+        var course = getTestCourse();
+        var fastestCumTimes = course.getFastestCumTimes();
+        var chartData = course.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP);
+
+        var chart = createTestChart();
+        chart.setSize(1000, 1000);
+        chart.drawChart(chartData, course, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", true);
+        expect(0);
+    });
+    
 })();

@@ -202,7 +202,7 @@
         var chartHeight = windowHeight - 19 - topPanelHeight;
 
         this.chart.setSize(chartWidth, chartHeight);
-        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel);
+        this.redrawChart();
 
         var outerThis = this;
         
@@ -234,12 +234,19 @@
     };
 
     /**
+    * Redraws the chart using all of the current data.
+    */ 
+    SplitsBrowser.Viewer.prototype.redrawChart = function () {
+        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel, (this.chartType.showCrossingRunnersButton));
+    };
+    
+    /**
     * Redraw the chart, possibly using new data.
     */
     SplitsBrowser.Viewer.prototype.redraw = function () {
         if (!this.chartType.isResultsTable) {
             this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
-            this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel);
+            this.redrawChart();
         }
     };
     

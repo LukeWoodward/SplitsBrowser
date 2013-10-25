@@ -1685,6 +1685,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         "#9900FF", "#CCCC00", "#FFFF66",  "#CC6699", "#99FF33", "#3399FF",
         "#CC33CC", "#33FFFF", "#FF00FF"
     ];
+    
+    // Function used to indicate that no ticks should be drawn on an axis.
+    var _NO_TICKS = function () {
+        return "";
+    };
 
     var backgroundColour1 = '#EEEEEE';
     var backgroundColour2 = '#DDDDDD';
@@ -1744,9 +1749,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
         this.svg = d3.select(this.parent).append("svg")
                                          .attr("id", _CHART_SVG_ID);
-        this.svgGroup = this.svg.append("g")
-                                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-                                         
+
+        this.svgGroup = this.svg.append("g");
+        this.setLeftMargin(margin.left);
+
         var outerThis = this;
         $(this.svg.node()).mouseenter(function(event) { outerThis.onMouseEnter(event); })
                           .mousemove(function(event) { outerThis.onMouseMove(event); })
@@ -1762,6 +1768,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Controls.Chart.prototype.onMouseEnter = function() {
         this.isMouseIn = true;
     };
+    
+    /**
+    * Sets the left margin of the chart.
+    * @param {Number} leftMargin - The left margin of the chart.
+    */
+    SplitsBrowser.Controls.Chart.prototype.setLeftMargin = function (leftMargin) {
+        this.currentLeftMargin = leftMargin;
+        this.svgGroup.attr("transform", "translate(" + this.currentLeftMargin + "," + margin.top + ")");
+    };
 
     /**
     * Handle a mouse movement.
@@ -1774,11 +1789,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             var xOffset = event.pageX - offset.left;
             var yOffset = event.pageY - offset.top;
             
-            if (margin.left <= xOffset && xOffset < svgNodeAsJQuery.width() - margin.right && 
+            if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - margin.right && 
                 margin.top <= yOffset && yOffset < svgNodeAsJQuery.height() - margin.bottom) {
                 // In the chart.
                 // Get the time offset that the mouse is currently over.
-                var chartX = this.xScale.invert(xOffset - margin.left);
+                var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
                 var bisectIndex = d3.bisect(this.referenceCumTimes, chartX);
                 
                 // bisectIndex is the index at which to insert chartX into
@@ -2039,6 +2054,24 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         return maxWidth;
     };
+    
+    /**
+    * Determines the maximum width of all of the visible start time labels.
+    * If none are presently visible, zero is returned.
+    * @param {object} chartData - Object containing the chart data.
+    * @return {Number} Maximum width of a start time label.
+    */
+    SplitsBrowser.Controls.Chart.prototype.determineMaxStartTimeLabelWidth = function (chartData) {
+        var outerThis = this;
+        var maxWidth;
+        if (chartData.competitorNames.length > 0) {
+            maxWidth = d3.max(chartData.competitorNames.map(function (name) { return outerThis.getTextWidth("00:00:00 " + name); }));
+        } else {
+            maxWidth = 0;
+        }
+        
+        return maxWidth;
+    };
 
     /**
     * Creates the X and Y scales necessary for the chart and its axes.
@@ -2084,6 +2117,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
         var yAxis = d3.svg.axis()
                           .scale(this.yScale)
+                          .tickFormat((this.showStartTimes) ? _NO_TICKS : null)
                           .orient("left");
                      
         var lowerXAxis = d3.svg.axis()
@@ -2165,6 +2199,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.svg.selectAll("path.graphLine.competitor" + competitorIdx).classed("selected", true);
         this.svg.selectAll("line.competitorLegendLine.competitor" + competitorIdx).classed("selected", true);
         this.svg.selectAll("text.competitorLabel.competitor" + competitorIdx).classed("selected", true);
+        this.svg.selectAll("text.startLabel.competitor" + competitorIdx).classed("selected", true);
     };
 
     /**
@@ -2174,6 +2209,36 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.svg.selectAll("path.graphLine").classed("selected", false);
         this.svg.selectAll("line.competitorLegendLine").classed("selected", false);
         this.svg.selectAll("text.competitorLabel").classed("selected", false);
+        this.svg.selectAll("text.startLabel").classed("selected", false);
+    };
+
+    /**
+    * Draws the start-time labels for the currently-selected competitors.
+    * @param {object} chartData - The chart data that contains the start offsets.
+    */ 
+    SplitsBrowser.Controls.Chart.prototype.drawCompetitorStartTimeLabels = function (chartData) {
+        var startColumn = chartData.dataColumns[0];
+        var outerThis = this;
+        
+        var startLabels = this.svgGroup.selectAll("text.startLabel").data(this.selectedIndexes);
+        
+        startLabels.enter().append("text");
+        
+        startLabels.attr("x", -7)
+                   .attr("y", function (_compIndex, selCompIndex) { return outerThis.yScale(startColumn.ys[selCompIndex]) + outerThis.getTextHeight(chartData.competitorNames[selCompIndex]) / 4; })
+                   .attr("class", function (compIndex) { return "startLabel competitor" + compIndex; })
+                   .on("mouseenter", function (compIndex) { outerThis.highlight(compIndex); })
+                   .on("mouseleave", function () { outerThis.unhighlight(); })
+                   .text(function (_compIndex, selCompIndex) { return SplitsBrowser.formatTime(startColumn.ys[selCompIndex] * 60) + " " + chartData.competitorNames[selCompIndex]; });
+        
+        startLabels.exit().remove();
+    };
+    
+    /**
+    * Removes all of the competitor start-time labels from the chart.
+    */ 
+    SplitsBrowser.Controls.Chart.prototype.removeCompetitorStartTimeLabels = function () {
+        this.svgGroup.selectAll("text.startLabel").remove();
     };
 
     /**
@@ -2265,7 +2330,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.Chart.prototype.adjustContentSize = function () {
         var maxTextWidth = this.getMaxGraphEndTextWidth();
-        this.contentWidth = Math.max(this.overallWidth - margin.left - margin.right - maxTextWidth - (legendLineWidth + 2), 100);
+        this.setLeftMargin(this.maxStartTimeLabelWidth + margin.left);
+        this.contentWidth = Math.max(this.overallWidth - this.currentLeftMargin - margin.right - maxTextWidth - (legendLineWidth + 2), 100);
         this.contentHeight = Math.max(this.overallHeight - margin.top - margin.bottom, 100);
     };
 
@@ -2294,21 +2360,30 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {Array} visibleStatistics - Array of boolean flags indicating whether
     *                                    certain statistics are visible.
     * @param {yAxisLabel} yAxisLabel - The label of the y-axis.                                    
+    * @param {boolean} showStartTimes - Whether to show start times to the left
+    *                                   of the chart.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, course, referenceCumTimes, selectedIndexes, visibleStatistics, yAxisLabel) {
+    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, course, referenceCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, showStartTimes) {
         this.numControls = chartData.numControls;
         this.numLines = chartData.competitorNames.length;
         this.selectedIndexes = selectedIndexes;
         this.referenceCumTimes = referenceCumTimes;
         this.course = course;
+        this.showStartTimes = showStartTimes;
         this.visibleStatistics = visibleStatistics;
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
+        this.maxStartTimeLabelWidth = (showStartTimes) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
         this.drawAxes(yAxisLabel);
         this.drawChartLines(chartData);
         this.drawCompetitorLegendLabels(chartData);
+        if (showStartTimes) {
+            this.drawCompetitorStartTimeLabels(chartData);
+        } else {
+            this.removeCompetitorStartTimeLabels();
+        }
     };
 })();
 
@@ -2464,8 +2539,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     var _COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
     var _COMPETITOR_LIST_CONTAINER_ID_SELECTOR = "#" + _COMPETITOR_LIST_CONTAINER_ID;
 
-    var _ALL_OR_NONE_BUTTONS_PANEL_ID = "allOrNoneButtonsPanel";
-    var _ALL_OR_NONE_BUTTONS_PANEL_ID_SELECTOR = "#" + _ALL_OR_NONE_BUTTONS_PANEL_ID;
+    var _BUTTONS_PANEL_ID = "buttonsPanel";
+    var _BUTTONS_PANEL_ID_SELECTOR = "#" + _BUTTONS_PANEL_ID;
     
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
@@ -2543,20 +2618,23 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                                                .attr("id", _COMPETITOR_LIST_CONTAINER_ID);
                                                
         var buttonsContainer = competitorListContainer.append("div")
-                                                      .attr("id", _ALL_OR_NONE_BUTTONS_PANEL_ID);
+                                                      .attr("id", _BUTTONS_PANEL_ID);
                      
         buttonsContainer.append("button")
                         .text("All")
+                        .style("width", "50%")
                         .on("click", function () { outerThis.selectAll(); });
                         
         buttonsContainer.append("button")
                         .text("None")
+                        .style("width", "50%")
                         .on("click", function () { outerThis.selectNone(); });
                         
         buttonsContainer.append("br");
                         
         this.crossingRunnersButton = buttonsContainer.append("button")
                                                      .text("Crossing runners")
+                                                     .style("width", "100%")
                                                      .on("click", function () { outerThis.selectCrossingRunners(); })
                                                      .attr("disabled", "disabled")
                                                      .style("display", "none");
@@ -2645,7 +2723,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var chartHeight = windowHeight - 19 - topPanelHeight;
 
         this.chart.setSize(chartWidth, chartHeight);
-        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel);
+        this.redrawChart();
 
         var outerThis = this;
         
@@ -2673,16 +2751,23 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
         $("body").height(windowHeight - 19 - topPanelHeight);
-        $(_COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(_ALL_OR_NONE_BUTTONS_PANEL_ID_SELECTOR).height() - topPanelHeight);
+        $(_COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(_BUTTONS_PANEL_ID_SELECTOR).height() - topPanelHeight);
     };
 
+    /**
+    * Redraws the chart using all of the current data.
+    */ 
+    SplitsBrowser.Viewer.prototype.redrawChart = function () {
+        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel, (this.chartType.showCrossingRunnersButton));
+    };
+    
     /**
     * Redraw the chart, possibly using new data.
     */
     SplitsBrowser.Viewer.prototype.redraw = function () {
         if (!this.chartType.isResultsTable) {
             this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
-            this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel);
+            this.redrawChart();
         }
     };
     
