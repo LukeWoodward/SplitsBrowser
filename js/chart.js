@@ -26,9 +26,6 @@
         return "";
     };
 
-    var backgroundColour1 = '#EEEEEE';
-    var backgroundColour2 = '#DDDDDD';
-
     /**
     * Format a time and a rank as a string, with the split time in mm:ss or h:mm:ss
     * as appropriate.
@@ -431,10 +428,10 @@
         rects.enter().append("rect");
 
         rects.attr("x", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index]); })
-                .attr("y", 0)
-                .attr("width", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index + 1] - outerThis.referenceCumTimes[index]); })
-                .attr("height", this.contentHeight)
-                .attr("fill", function (index) { return (index % 2 === 0) ? backgroundColour1 : backgroundColour2; });
+             .attr("y", 0)
+             .attr("width", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index + 1] - outerThis.referenceCumTimes[index]); })
+             .attr("height", this.contentHeight)
+             .attr("class", function (index) { return (index % 2 === 0) ? "background1" : "background2"; });
 
         rects.exit().remove();
     };

@@ -14,6 +14,16 @@ svg text#sb-text-size-element
     font-weight: bold;
 }
 
+svg rect.background1
+{
+    fill: #EEEEEE;
+}
+
+svg rect.background2
+{
+    fill: #DDDDDD;
+}
+
 .axis path,
 .axis line
 {
