@@ -101,16 +101,19 @@
                      
         buttonsContainer.append("button")
                         .text("All")
+                        .style("width", "50%")
                         .on("click", function () { outerThis.selectAll(); });
                         
         buttonsContainer.append("button")
                         .text("None")
+                        .style("width", "50%")
                         .on("click", function () { outerThis.selectNone(); });
                         
         buttonsContainer.append("br");
                         
         this.crossingRunnersButton = buttonsContainer.append("button")
                                                      .text("Crossing runners")
+                                                     .style("width", "100%")
                                                      .on("click", function () { outerThis.selectCrossingRunners(); })
                                                      .attr("disabled", "disabled")
                                                      .style("display", "none");
