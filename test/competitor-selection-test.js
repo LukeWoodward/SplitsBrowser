@@ -41,7 +41,7 @@
         }
     });
 
-    QUnit.test("Cannot create a competitor selection if the number of competitors is not a number", function (assert) {
+    QUnit.test("Cannot create a competitor selection if the number of competitors is zero", function (assert) {
         try {
             new CompetitorSelection(0);
             assert.ok(false, "This should not be reached");
