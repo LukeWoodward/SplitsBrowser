@@ -23,7 +23,7 @@ svg rect.background2
     fill: #DDDDDD;
 }
 
-path.axis, line.axis
+.axis path, .axis line
 {
     fill: none;
     stroke: #000;
