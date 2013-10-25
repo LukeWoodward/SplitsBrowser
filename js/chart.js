@@ -541,10 +541,10 @@
     * Removes any competitor-specific higlighting.
     */
     SplitsBrowser.Controls.Chart.prototype.unhighlight = function () {
-        this.svg.selectAll("path.graphLine").classed("selected", false);
-        this.svg.selectAll("line.competitorLegendLine").classed("selected", false);
-        this.svg.selectAll("text.competitorLabel").classed("selected", false);
-        this.svg.selectAll("text.startLabel").classed("selected", false);
+        this.svg.selectAll("path.graphLine.selected").classed("selected", false);
+        this.svg.selectAll("line.competitorLegendLine.selected").classed("selected", false);
+        this.svg.selectAll("text.competitorLabel.selected").classed("selected", false);
+        this.svg.selectAll("text.startLabel.selected").classed("selected", false);
     };
 
     /**
