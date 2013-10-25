@@ -18,8 +18,8 @@
     var _COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
     var _COMPETITOR_LIST_CONTAINER_ID_SELECTOR = "#" + _COMPETITOR_LIST_CONTAINER_ID;
 
-    var _ALL_OR_NONE_BUTTONS_PANEL_ID = "allOrNoneButtonsPanel";
-    var _ALL_OR_NONE_BUTTONS_PANEL_ID_SELECTOR = "#" + _ALL_OR_NONE_BUTTONS_PANEL_ID;
+    var _BUTTONS_PANEL_ID = "buttonsPanel";
+    var _BUTTONS_PANEL_ID_SELECTOR = "#" + _BUTTONS_PANEL_ID;
     
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
@@ -97,7 +97,7 @@
                                                .attr("id", _COMPETITOR_LIST_CONTAINER_ID);
                                                
         var buttonsContainer = competitorListContainer.append("div")
-                                                      .attr("id", _ALL_OR_NONE_BUTTONS_PANEL_ID);
+                                                      .attr("id", _BUTTONS_PANEL_ID);
                      
         buttonsContainer.append("button")
                         .text("All")
@@ -227,7 +227,7 @@
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
         $("body").height(windowHeight - 19 - topPanelHeight);
-        $(_COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(_ALL_OR_NONE_BUTTONS_PANEL_ID_SELECTOR).height() - topPanelHeight);
+        $(_COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(_BUTTONS_PANEL_ID_SELECTOR).height() - topPanelHeight);
     };
 
     /**
