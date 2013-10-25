@@ -106,7 +106,15 @@
         buttonsContainer.append("button")
                         .text("None")
                         .on("click", function () { outerThis.selectNone(); });
-                                                           
+                        
+        buttonsContainer.append("br");
+                        
+        this.crossingRunnersButton = buttonsContainer.append("button")
+                                                     .text("Crossing runners")
+                                                     .on("click", function () { outerThis.selectCrossingRunners(); })
+                                                     .attr("disabled", "disabled")
+                                                     .style("display", "none");
+
         this.competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(competitorListContainer.node());
         this.chart = new SplitsBrowser.Controls.Chart(mainPanel.node());
         
@@ -137,6 +145,13 @@
     */
     SplitsBrowser.Viewer.prototype.selectNone = function () {
         this.selection.selectNone();
+    };
+
+    /**
+    * Select all of the competitors that cross the unique selected competitor.
+    */
+    SplitsBrowser.Viewer.prototype.selectCrossingRunners = function () {
+        this.selection.selectCrossingRunners(this.currentCourse.competitors);
     };
 
     /**
@@ -198,6 +213,7 @@
         
         this.selectionChangeHandler = function (indexes) {
             outerThis.currentIndexes = indexes;
+            outerThis.crossingRunnersButton.attr("disabled", (outerThis.selection.isSingleRunnerSelected()) ? null : "disabled");
             outerThis.redraw();
         };
 
@@ -265,6 +281,8 @@
             this.resultsTable.hide();
             d3.select(_MAIN_PANEL_ID_SELECTOR).style("display", "");
         }
+        
+        this.crossingRunnersButton.style("display", (chartType.showCrossingRunnersButton) ? "" : "none");
         
         this.drawChart();
     };

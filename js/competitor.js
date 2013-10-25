@@ -340,5 +340,38 @@
         return percentsBehind;
     };
     
+    /**
+    * Returns whether this competitor 'crosses' another.  Two competitors are
+    * considered to have crossed if their chart lines on the Race Graph cross.
+    * @param {Competitor} other - The competitor to compare against.
+    * @return {Boolean} true if the competitors cross, false if they don't.
+    */
+    Competitor.prototype.crosses = function (other) {
+        if (other.cumTimes.length !== this.cumTimes.length) {
+            SplitsBrowser.throwInvalidData("Two competitors with different numbers of controls cannot cross");
+        }
+        
+        // We determine whether two competitors cross by keeping track of
+        // whether this competitor is ahead of other at any point, and whether
+        // this competitor is behind the other one.  If both, the competitors
+        // cross.
+        var beforeOther = false;
+        var afterOther = false;
+        
+        for (var controlIdx = 0; controlIdx < this.cumTimes.length; controlIdx += 1) {
+            if (this.cumTimes[controlIdx] !== null && other.cumTimes[controlIdx] !== null) {
+                var thisTotalTime = this.startTime + this.cumTimes[controlIdx];
+                var otherTotalTime = other.startTime + other.cumTimes[controlIdx];
+                if (thisTotalTime < otherTotalTime) {
+                    beforeOther = true;
+                } else if (thisTotalTime > otherTotalTime) {
+                    afterOther = true;
+                }
+            }
+         }
+         
+         return beforeOther && afterOther;
+    };
+    
     
 })();

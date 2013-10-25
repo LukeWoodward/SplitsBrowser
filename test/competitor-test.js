@@ -332,4 +332,63 @@
             assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
+    
+    QUnit.test("Cannot determine that a competitor crosses another one with a different number of controls", function (assert) {
+        var competitor1 = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 421]);
+        var competitor2 = fromCumTimes(2, "Fred", "Baker", "DEF", 12 * 3600, [0, 71, 218, 379, 440, 491]);
+        
+        try {
+            competitor1.crosses(competitor2);
+            assert.ok(false, "Should not get here");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+        }
+    });
+    
+    QUnit.test("Can determine that a competitor does not cross themselves", function (assert) {
+        var competitor = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 421]);
+        assert.ok(!competitor.crosses(competitor), "Competitor should not cross themselves");
+    });
+    
+    QUnit.test("Can determine that a competitor does not cross a competitor with identical splits starting an hour later", function (assert) {
+        var competitor1 = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 421]);
+        var competitor2 = fromCumTimes(2, "Fred", "Baker", "DEF", 11 * 3600, [0, 65, 221, 384, 421]);
+        assert.ok(!competitor1.crosses(competitor2), "Competitors should not cross");
+    });
+    
+    QUnit.test("Can determine that a competitor does not cross a competitor with identical splits starting an hour earlier", function (assert) {
+        var competitor1 = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 421]);
+        var competitor2 = fromCumTimes(2, "Fred", "Baker", "DEF",  9 * 3600, [0, 65, 221, 384, 421]);
+        assert.ok(!competitor1.crosses(competitor2), "Competitors should not cross");
+    });
+    
+    QUnit.test("Can determine that two competitors cross on the way to control 1", function (assert) {
+        var competitor1 = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 421]);
+        var competitor2 = fromCumTimes(2, "Fred", "Baker", "DEF", 10 * 3600 - 60, [0, 265, 421, 584, 621]);
+        assert.ok(competitor1.crosses(competitor2), "Competitors should cross");
+    });
+    
+    QUnit.test("Can determine that two competitors cross between controls 2 and 3", function (assert) {
+        var competitor1 = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 421]);
+        var competitor2 = fromCumTimes(2, "Fred", "Baker", "DEF", 10 * 3600 - 60, [0, 65, 221, 584, 621]);
+        assert.ok(competitor1.crosses(competitor2), "Competitors should cross");
+    });
+    
+    QUnit.test("Can determine that two competitors cross between controls 1 and 2 and cross back later", function (assert) {
+        var competitor1 = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 721]);
+        var competitor2 = fromCumTimes(2, "Fred", "Baker", "DEF", 10 * 3600 - 60, [0, 65, 421, 584, 621]);
+        assert.ok(competitor1.crosses(competitor2), "Competitors should cross");
+    });
+    
+    QUnit.test("Can determine that two competitors do not cross between because the first one has a null split", function (assert) {
+        var competitor1 = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, null, 384, 521]);
+        var competitor2 = fromCumTimes(2, "Fred", "Baker", "DEF", 10 * 3600 - 60, [0, 65, 221, 384, 521]);
+        assert.ok(!competitor1.crosses(competitor2), "Competitors should not cross");
+    });
+    
+    QUnit.test("Can determine that two competitors do not cross between because the second one has a null split", function (assert) {
+        var competitor1 = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 521]);
+        var competitor2 = fromCumTimes(2, "Fred", "Baker", "DEF", 10 * 3600 - 60, [0, 65, 221, null, 521]);
+        assert.ok(!competitor1.crosses(competitor2), "Competitors should not cross");
+    });
 })();

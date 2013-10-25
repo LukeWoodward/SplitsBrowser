@@ -9,6 +9,8 @@
 
     var CompetitorSelection = SplitsBrowser.Model.CompetitorSelection;
 
+    var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
+    
     // Test code for handling notifications 
     var lastIndexes = null;
     var callCount = 0;
@@ -240,5 +242,38 @@
         var selection = new CompetitorSelection(3);
         selection.deregisterChangeHandler(testHandler);
         expect(0); // No assertions here, but there should also have been no errors.
+    });
+
+    QUnit.test("A single runner is not selected if no runners are selected", function (assert) {
+        var selection = new CompetitorSelection(3);
+        assert.ok(!selection.isSingleRunnerSelected(), "A single runner should not be selected if there are no competitors selected");
+    });
+
+    QUnit.test("A single runner is selected if one runners is selected", function (assert) {
+        var selection = new CompetitorSelection(3);
+        selection.toggle(2);
+        assert.ok(selection.isSingleRunnerSelected(), "A single runner should be selected if there one competitor is selected");
+    });
+
+    QUnit.test("A single runner is selected if one runners is selected", function (assert) {
+        var selection = new CompetitorSelection(3);
+        selection.selectAll();
+        assert.ok(!selection.isSingleRunnerSelected(), "A single runner should not be selected if all competitors are selected");
+    });
+
+    QUnit.test("If a single runner is selected, when crossing competitors are selected, then one other competitor is selected", function (assert) {
+        var selection = new CompetitorSelection(3);
+        selection.toggle(1);
+        
+        var competitors = [
+            fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301]),
+            fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561]),
+            fromCumTimes(3, "Bill", "Baker", "GHI", 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381])
+        ];
+        
+        selection.registerChangeHandler(testHandler);
+        selection.selectCrossingRunners(competitors);
+        assert.deepEqual(lastIndexes, [1, 2], "Selected indexes should be 1 and 2");
+        assert.equal(callCount, 1, "One call to the change-handler should be registered");
     });
 })();

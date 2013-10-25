@@ -35,7 +35,37 @@
     SplitsBrowser.Model.CompetitorSelection.prototype.isSelected = function (index) {
         return this.currentIndexes.indexOf(index) > -1;
     };
+    
+    /**
+    * Returns whether the selection consists of exactly one competitor.
+    * @returns {boolean} True if precisely one competitor is selected, false if
+    *     either no competitors, or two or more competitors, are selected.
+    */
+    SplitsBrowser.Model.CompetitorSelection.prototype.isSingleRunnerSelected = function () {
+        return this.currentIndexes.length === 1;
+    };
 
+    /**
+    * Given that a single runner is selected, select also all of the runners
+    * that 'cross' this runner.
+    * @param {Array} competitors - All competitors in the same course.
+    */    
+    SplitsBrowser.Model.CompetitorSelection.prototype.selectCrossingRunners = function (competitors) {
+        if (this.isSingleRunnerSelected()) {
+            var refCompetitor = competitors[this.currentIndexes[0]];
+            
+            var outerThis = this;
+            competitors.forEach(function (comp, idx) {
+                if (comp.crosses(refCompetitor)) {
+                    outerThis.currentIndexes.push(idx);
+                }
+            });
+            
+            this.currentIndexes.sort(d3.ascending);
+            this.fireChangeHandlers();
+        }
+    };
+    
     /**
     * Fires all of the change handlers currently registered.
     */

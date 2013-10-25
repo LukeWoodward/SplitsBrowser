@@ -482,6 +482,39 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         return percentsBehind;
     };
     
+    /**
+    * Returns whether this competitor 'crosses' another.  Two competitors are
+    * considered to have crossed if their chart lines on the Race Graph cross.
+    * @param {Competitor} other - The competitor to compare against.
+    * @return {Boolean} true if the competitors cross, false if they don't.
+    */
+    Competitor.prototype.crosses = function (other) {
+        if (other.cumTimes.length !== this.cumTimes.length) {
+            SplitsBrowser.throwInvalidData("Two competitors with different numbers of controls cannot cross");
+        }
+        
+        // We determine whether two competitors cross by keeping track of
+        // whether this competitor is ahead of other at any point, and whether
+        // this competitor is behind the other one.  If both, the competitors
+        // cross.
+        var beforeOther = false;
+        var afterOther = false;
+        
+        for (var controlIdx = 0; controlIdx < this.cumTimes.length; controlIdx += 1) {
+            if (this.cumTimes[controlIdx] !== null && other.cumTimes[controlIdx] !== null) {
+                var thisTotalTime = this.startTime + this.cumTimes[controlIdx];
+                var otherTotalTime = other.startTime + other.cumTimes[controlIdx];
+                if (thisTotalTime < otherTotalTime) {
+                    beforeOther = true;
+                } else if (thisTotalTime > otherTotalTime) {
+                    afterOther = true;
+                }
+            }
+         }
+         
+         return beforeOther && afterOther;
+    };
+    
     
 })();
 
@@ -754,7 +787,37 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Model.CompetitorSelection.prototype.isSelected = function (index) {
         return this.currentIndexes.indexOf(index) > -1;
     };
+    
+    /**
+    * Returns whether the selection consists of exactly one competitor.
+    * @returns {boolean} True if precisely one competitor is selected, false if
+    *     either no competitors, or two or more competitors, are selected.
+    */
+    SplitsBrowser.Model.CompetitorSelection.prototype.isSingleRunnerSelected = function () {
+        return this.currentIndexes.length === 1;
+    };
 
+    /**
+    * Given that a single runner is selected, select also all of the runners
+    * that 'cross' this runner.
+    * @param {Array} competitors - All competitors in the same course.
+    */    
+    SplitsBrowser.Model.CompetitorSelection.prototype.selectCrossingRunners = function (competitors) {
+        if (this.isSingleRunnerSelected()) {
+            var refCompetitor = competitors[this.currentIndexes[0]];
+            
+            var outerThis = this;
+            competitors.forEach(function (comp, idx) {
+                if (comp.crosses(refCompetitor)) {
+                    outerThis.currentIndexes.push(idx);
+                }
+            });
+            
+            this.currentIndexes.sort(d3.ascending);
+            this.fireChangeHandlers();
+        }
+    };
+    
     /**
     * Fires all of the change handlers currently registered.
     */
@@ -1501,6 +1564,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
             yAxisLabel: "Time loss (min)",
+            showCrossingRunnersButton: false,
             isResultsTable: false
         },
         {
@@ -1508,6 +1572,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
             yAxisLabel: "Time",
+            showCrossingRunnersButton: true,
             isResultsTable: false
         },
         {
@@ -1515,6 +1580,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             dataSelector: function (comp) { return comp.cumRanks; },
             skipStart: true,
             yAxisLabel: "Position",
+            showCrossingRunnersButton: false,
             isResultsTable: false
         },
         {
@@ -1522,6 +1588,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             dataSelector: function (comp) { return comp.splitRanks; },
             skipStart: true,
             yAxisLabel: "Position",
+            showCrossingRunnersButton: false,
             isResultsTable: false
         },
         {
@@ -1529,6 +1596,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             dataSelector: function (comp, referenceCumTimes) { return comp.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
             skipStart: false,
             yAxisLabel: "Percent behind",
+            showCrossingRunnersButton: false,
             isResultsTable: false
         },
         {
@@ -1536,6 +1604,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             dataSelector: null,
             skipStart: false,
             yAxisLabel: null,
+            showCrossingRunnersButton: false,
             isResultsTable: true
         }
     ];
@@ -2483,7 +2552,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         buttonsContainer.append("button")
                         .text("None")
                         .on("click", function () { outerThis.selectNone(); });
-                                                           
+                        
+        buttonsContainer.append("br");
+                        
+        this.crossingRunnersButton = buttonsContainer.append("button")
+                                                     .text("Crossing runners")
+                                                     .on("click", function () { outerThis.selectCrossingRunners(); })
+                                                     .attr("disabled", "disabled")
+                                                     .style("display", "none");
+
         this.competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(competitorListContainer.node());
         this.chart = new SplitsBrowser.Controls.Chart(mainPanel.node());
         
@@ -2514,6 +2591,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Viewer.prototype.selectNone = function () {
         this.selection.selectNone();
+    };
+
+    /**
+    * Select all of the competitors that cross the unique selected competitor.
+    */
+    SplitsBrowser.Viewer.prototype.selectCrossingRunners = function () {
+        this.selection.selectCrossingRunners(this.currentCourse.competitors);
     };
 
     /**
@@ -2575,6 +2659,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         this.selectionChangeHandler = function (indexes) {
             outerThis.currentIndexes = indexes;
+            outerThis.crossingRunnersButton.attr("disabled", (outerThis.selection.isSingleRunnerSelected()) ? null : "disabled");
             outerThis.redraw();
         };
 
@@ -2642,6 +2727,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             this.resultsTable.hide();
             d3.select(_MAIN_PANEL_ID_SELECTOR).style("display", "");
         }
+        
+        this.crossingRunnersButton.style("display", (chartType.showCrossingRunnersButton) ? "" : "none");
         
         this.drawChart();
     };

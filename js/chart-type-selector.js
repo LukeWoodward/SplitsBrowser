@@ -17,6 +17,7 @@
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
             yAxisLabel: "Time loss (min)",
+            showCrossingRunnersButton: false,
             isResultsTable: false
         },
         {
@@ -24,6 +25,7 @@
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
             yAxisLabel: "Time",
+            showCrossingRunnersButton: true,
             isResultsTable: false
         },
         {
@@ -31,6 +33,7 @@
             dataSelector: function (comp) { return comp.cumRanks; },
             skipStart: true,
             yAxisLabel: "Position",
+            showCrossingRunnersButton: false,
             isResultsTable: false
         },
         {
@@ -38,6 +41,7 @@
             dataSelector: function (comp) { return comp.splitRanks; },
             skipStart: true,
             yAxisLabel: "Position",
+            showCrossingRunnersButton: false,
             isResultsTable: false
         },
         {
@@ -45,6 +49,7 @@
             dataSelector: function (comp, referenceCumTimes) { return comp.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
             skipStart: false,
             yAxisLabel: "Percent behind",
+            showCrossingRunnersButton: false,
             isResultsTable: false
         },
         {
@@ -52,6 +57,7 @@
             dataSelector: null,
             skipStart: false,
             yAxisLabel: null,
+            showCrossingRunnersButton: false,
             isResultsTable: true
         }
     ];
