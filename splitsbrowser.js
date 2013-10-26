@@ -1681,9 +1681,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     var SPACER = "\xa0\xa0\xa0\xa0";
 
     var colours = [
-        "red", "blue", "green", "black", "#CC0066", "#000099", "#FFCC00", "#996600",
-        "#9900FF", "#CCCC00", "#FFFF66",  "#CC6699", "#99FF33", "#3399FF",
-        "#CC33CC", "#33FFFF", "#FF00FF"
+        "#FF0000", "#4444FF", "#00FF00", "#000000", "#CC0066", "#000099",
+        "#FFCC00", "#884400", "#9900FF", "#CCCC00", "#888800", "#CC6699",
+        "#00DD00", "#3399FF", "#BB00BB", "#00DDDD", "#FF00FF", "#0088BB",
+        "#888888", "#FF99FF", "#55BB33"
     ];
     
     // Function used to indicate that no ticks should be drawn on an axis.
