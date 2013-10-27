@@ -155,6 +155,10 @@
     */
     SplitsBrowser.Viewer.prototype.selectCrossingRunners = function () {
         this.selection.selectCrossingRunners(this.currentCourse.competitors);
+        if (this.selection.isSingleRunnerSelected()) {
+            var competitorName = this.currentCourse.competitors[this.currentIndexes[0]].name;
+            alert(competitorName + " has no crossing runners.");
+        }
     };
 
     /**
