@@ -12,6 +12,10 @@
     var MARGIN = { top: 20, right: 20, bottom: 30, left: 50 };
 
     var legendLineWidth = 10;
+    
+    // Minimum distance between a Y-axis tick label and a competitor's start
+    // time, in pixels.
+    var MIN_COMPETITOR_TICK_MARK_DISTANCE = 10;
 
     var SPACER = "\xa0\xa0\xa0\xa0";
 
@@ -21,11 +25,6 @@
         "#00DD00", "#3399FF", "#BB00BB", "#00DDDD", "#FF00FF", "#0088BB",
         "#888888", "#FF99FF", "#55BB33"
     ];
-    
-    // Function used to indicate that no ticks should be drawn on an axis.
-    var _NO_TICKS = function () {
-        return "";
-    };
 
     /**
     * Format a time and a rank as a string, with the split time in mm:ss or h:mm:ss
@@ -436,12 +435,52 @@
 
         rects.exit().remove();
     };
+    
+    /**
+    * Returns a function used to format tick labels on the Y-axis.
+    *
+    * If start times are to be shown (i.e. for the race graph), then the Y-axis
+    * values are start times.  We format these as times, as long as there isn't
+    * a competitor's start time too close to it.
+    *
+    * For other graph types, this method returns null, which tells d3 to use
+    * its default tick formatter.
+    * 
+    * @param {object} chartData - The chart data to read start times from.
+    */
+    SplitsBrowser.Controls.Chart.prototype.determineYAxisTickFormatter = function (chartData) {
+        if (this.showStartTimes) {
+            // Assume column 0 of the data is the start times.
+            // However, beware that there might not be any data.
+            var startTimes = (chartData.dataColumns.length === 0) ? [] : chartData.dataColumns[0].ys;
+            if (startTimes.length === 0) {
+                // No start times - draw all tick marks.
+                return function (time) { return SplitsBrowser.formatTime(time * 60); };
+            } else {
+                // Some start times are to be drawn - only draw tick marks if
+                // they are far enough away from competitors.
+                var yRange = chartData.yExtent[1] - chartData.yExtent[0];
+                var yScale = this.yScale;
+                return function (time) {
+                    var nearestOffset = d3.min(startTimes.map(function (startTime) { return Math.abs(yScale(startTime) - yScale(time)); }));
+                    return (nearestOffset >= MIN_COMPETITOR_TICK_MARK_DISTANCE) ? SplitsBrowser.formatTime(time * 60) : "";
+                };
+           }
+        } else {
+            // Use the default d3 tick formatter.
+            return null;
+        }
+    };
 
     /**
     * Draw the chart axes.
     * @param {String} yAxisLabel - The label to use for the Y-axis.
+    * @param {object} chartData - The chart data to use.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawAxes = function (yAxisLabel) {
+    SplitsBrowser.Controls.Chart.prototype.drawAxes = function (yAxisLabel, chartData) {
+    
+        var tickFormatter = this.determineYAxisTickFormatter(chartData);
+        
         var xAxis = d3.svg.axis()
                           .scale(this.xScale)
                           .orient("top")
@@ -450,7 +489,7 @@
 
         var yAxis = d3.svg.axis()
                           .scale(this.yScale)
-                          .tickFormat((this.showStartTimes) ? _NO_TICKS : null)
+                          .tickFormat(tickFormatter)
                           .orient("left");
                      
         var lowerXAxis = d3.svg.axis()
@@ -709,7 +748,7 @@
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
-        this.drawAxes(yAxisLabel);
+        this.drawAxes(yAxisLabel, chartData);
         this.drawChartLines(chartData);
         this.drawCompetitorLegendLabels(chartData);
         if (showStartTimes) {
