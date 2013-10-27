@@ -52,11 +52,11 @@
     * @param {Array} competitors - Array of competitor data.
     */
     SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitors) {
-
+        // Note that we use jQuery's click event handling here instead of d3's,
+        // as d3's doesn't seem to work in PhantomJS.
         $("div.competitor").off("click");
         
         var competitorDivs = this.listDiv.selectAll("div.competitor").data(competitors);
-        var outerThis = this;
 
         competitorDivs.enter().append("div")
                            .classed("competitor", true);
@@ -65,6 +65,7 @@
 
         competitorDivs.exit().remove();
         
+        var outerThis = this;
         $("div.competitor").each(function (index, div) {
             $(div).on("click", function () { outerThis.toggleCompetitor(index); });
         });
