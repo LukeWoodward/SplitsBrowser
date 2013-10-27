@@ -3,6 +3,11 @@ body
     font: 12px sans-serif;
 }
 
+div.competitor.mispunched
+{
+    font-style: italic;
+}
+
 svg text
 {
     font: 10px sans-serif;

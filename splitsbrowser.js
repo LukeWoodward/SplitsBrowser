@@ -1192,9 +1192,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var competitorDivs = this.listDiv.selectAll("div.competitor").data(competitors);
 
         competitorDivs.enter().append("div")
-                           .classed("competitor", true);
+                              .classed("competitor", true);
 
-        competitorDivs.text(function (comp) { return comp.name; });
+        competitorDivs.classed("mispunched", function (comp) { return !comp.completed(); })
+                      .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });
 
         competitorDivs.exit().remove();
         
