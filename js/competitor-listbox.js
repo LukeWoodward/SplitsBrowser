@@ -2,8 +2,9 @@
 (function (){
     "use strict";
 
+    // ID of the competitor list div.
+    // Must match that used in styles.css.
     var COMPETITOR_LIST_ID = "competitorList";
-    var COMPETITOR_LIST_ID_SELECTOR = "#" + COMPETITOR_LIST_ID;
 
     /**
     * Object that controls a list of competitors from which the user can select.
@@ -24,7 +25,7 @@
     * @returns {Number} Width of the listbox.
     */
     SplitsBrowser.Controls.CompetitorListBox.prototype.width = function () {
-        return $(COMPETITOR_LIST_ID_SELECTOR).width();
+        return $(this.listDiv.node()).width();
     };
 
     /**

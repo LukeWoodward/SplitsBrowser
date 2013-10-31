@@ -1,6 +1,8 @@
 (function () {
     "use strict";
 
+    // ID of the statistics selector control.
+    // Must match that used in styles.css.
     var STATISTIC_SELECTOR_ID = "statisticSelector";
 
     var LABEL_ID_PREFIX = "statisticCheckbox";

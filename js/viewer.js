@@ -9,17 +9,9 @@
     // cancelled.)
     var RESIZE_DELAY_MS = 100;
 
-    var TOP_PANEL_ID = "topPanel";
-    var TOP_PANEL_ID_SELECTOR = "#" + TOP_PANEL_ID;
-    
-    var MAIN_PANEL_ID = "mainPanel";
-    var MAIN_PANEL_ID_SELECTOR = "#" + MAIN_PANEL_ID;
-
+    // ID of the div that contains the competitor list.
+    // Must match that used in styles.css.
     var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
-    var COMPETITOR_LIST_CONTAINER_ID_SELECTOR = "#" + COMPETITOR_LIST_CONTAINER_ID;
-
-    var BUTTONS_PANEL_ID = "buttonsPanel";
-    var BUTTONS_PANEL_ID_SELECTOR = "#" + BUTTONS_PANEL_ID;
     
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
@@ -40,6 +32,8 @@
         this.chart = null;
         this.topPanel = null;
         this.mainPanel = null;
+        this.buttonsPanel = null;
+        this.competitorListContainer = null;
         
         this.currentResizeTimeout = null;
     };
@@ -64,62 +58,59 @@
     SplitsBrowser.Viewer.prototype.buildUi = function () {
         var body = d3.select("body");
         
-        var topPanel = body.append("div")
-                           .attr("id", TOP_PANEL_ID);
+        this.topPanel = body.append("div");
                            
         var outerThis = this;
-        this.courseSelector = new SplitsBrowser.Controls.CourseSelector(topPanel.node());
+        this.courseSelector = new SplitsBrowser.Controls.CourseSelector(this.topPanel.node());
         if (this.courses !== null) {
             this.courseSelector.setCourses(this.courses);
         }
         
-        topPanel.append("span").style("padding", "0px 30px 0px 30px");
+        this.topPanel.append("span").style("padding", "0px 30px 0px 30px");
         
-        this.chartTypeSelector = new SplitsBrowser.Controls.ChartTypeSelector(topPanel.node());
+        this.chartTypeSelector = new SplitsBrowser.Controls.ChartTypeSelector(this.topPanel.node());
         
         this.chartType = this.chartTypeSelector.getChartType();
         
-        topPanel.append("span").style("padding", "0px 30px 0px 30px");
+        this.topPanel.append("span").style("padding", "0px 30px 0px 30px");
         
-        this.comparisonSelector = new SplitsBrowser.Controls.ComparisonSelector(topPanel.node());
+        this.comparisonSelector = new SplitsBrowser.Controls.ComparisonSelector(this.topPanel.node());
         if (this.courses !== null) {
             this.comparisonSelector.setCourses(this.courses);
         }
         
         this.comparisonFunction = this.comparisonSelector.getComparisonFunction();
         
-        this.statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(topPanel.node());
+        this.statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(this.topPanel.node());
         
-        var mainPanel = body.append("div")
-                            .attr("id", MAIN_PANEL_ID);
+        this.mainPanel = body.append("div");
         
-        var competitorListContainer = mainPanel.append("div")
-                                               .attr("id", COMPETITOR_LIST_CONTAINER_ID);
+        this.competitorListContainer = this.mainPanel.append("div")
+                                                     .attr("id", COMPETITOR_LIST_CONTAINER_ID);
                                                
-        var buttonsContainer = competitorListContainer.append("div")
-                                                      .attr("id", BUTTONS_PANEL_ID);
+        this.buttonsPanel = this.competitorListContainer.append("div");
                      
-        buttonsContainer.append("button")
-                        .text("All")
-                        .style("width", "50%")
-                        .on("click", function () { outerThis.selectAll(); });
+        this.buttonsPanel.append("button")
+                         .text("All")
+                         .style("width", "50%")
+                         .on("click", function () { outerThis.selectAll(); });
                         
-        buttonsContainer.append("button")
-                        .text("None")
-                        .style("width", "50%")
-                        .on("click", function () { outerThis.selectNone(); });
+        this.buttonsPanel.append("button")
+                         .text("None")
+                         .style("width", "50%")
+                         .on("click", function () { outerThis.selectNone(); });
                         
-        buttonsContainer.append("br");
+        this.buttonsPanel.append("br");
                         
-        this.crossingRunnersButton = buttonsContainer.append("button")
-                                                     .text("Crossing runners")
-                                                     .style("width", "100%")
-                                                     .on("click", function () { outerThis.selectCrossingRunners(); })
-                                                     .attr("disabled", "disabled")
-                                                     .style("display", "none");
+        this.crossingRunnersButton = this.buttonsPanel.append("button")
+                                                      .text("Crossing runners")
+                                                      .style("width", "100%")
+                                                      .on("click", function () { outerThis.selectCrossingRunners(); })
+                                                      .attr("disabled", "disabled")
+                                                      .style("display", "none");
 
-        this.competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(competitorListContainer.node());
-        this.chart = new SplitsBrowser.Controls.Chart(mainPanel.node());
+        this.competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(this.competitorListContainer.node());
+        this.chart = new SplitsBrowser.Controls.Chart(this.mainPanel.node());
         
         this.resultsTable = new SplitsBrowser.Controls.ResultsTable(body.node());
         this.resultsTable.hide();
@@ -199,7 +190,7 @@
 
         this.competitorListBox.setCompetitorList(this.currentCourse.competitors);
 
-        var topPanelHeight = $(TOP_PANEL_ID_SELECTOR).height();
+        var topPanelHeight = $(this.topPanel.node()).height();
         
         // Subtract some values to avoid scrollbars appearing.
         var chartWidth = windowWidth - 18 - this.competitorListBox.width() - 40;
@@ -234,7 +225,7 @@
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
         $("body").height(windowHeight - 19 - topPanelHeight);
-        $(COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(BUTTONS_PANEL_ID_SELECTOR).height() - topPanelHeight);
+        $(this.competitorListContainer.node()).height(windowHeight - 19 - $(this.buttonsPanel.node()).height() - topPanelHeight);
     };
 
     /**
@@ -289,11 +280,11 @@
     SplitsBrowser.Viewer.prototype.selectChartType = function (chartType) {
         this.chartType = chartType;
         if (chartType.isResultsTable) {
-            d3.select(MAIN_PANEL_ID_SELECTOR).style("display", "none");
+            this.mainPanel.style("display", "none");
             this.resultsTable.show();
         } else {
             this.resultsTable.hide();
-            d3.select(MAIN_PANEL_ID_SELECTOR).style("display", "");
+            this.mainPanel.style("display", "");
         }
         
         this.crossingRunnersButton.style("display", (chartType.showCrossingRunnersButton) ? "" : "none");
