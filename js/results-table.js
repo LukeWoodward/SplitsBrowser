@@ -1,7 +1,7 @@
 (function () {
     "use strict";
     
-    var _NON_BREAKING_SPACE_CHAR = "\u00a0";
+    var NON_BREAKING_SPACE_CHAR = "\u00a0";
 
     /**
     * A control that shows an entire table of results.
@@ -85,7 +85,7 @@
             }
             
             addCell(tableRow, competitor.name, competitor.club);
-            addCell(tableRow, (competitor.completed()) ? SplitsBrowser.formatTime(competitor.totalTime) : "mp", _NON_BREAKING_SPACE_CHAR, "time");
+            addCell(tableRow, (competitor.completed()) ? SplitsBrowser.formatTime(competitor.totalTime) : "mp", NON_BREAKING_SPACE_CHAR, "time");
             
             d3.range(1, outerThis.course.numControls + 2).forEach(function (controlNum) {
                 addCell(tableRow, SplitsBrowser.formatTime(competitor.getCumulativeTimeTo(controlNum)), SplitsBrowser.formatTime(competitor.getSplitTimeTo(controlNum)), "time");

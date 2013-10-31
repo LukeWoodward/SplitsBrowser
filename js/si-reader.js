@@ -1,13 +1,13 @@
 (function () {
     "use strict";
     
-    var _CLUB_COLUMN_NAME = "City";
+    var CLUB_COLUMN_NAME = "City";
     
-    var _COURSE_COLUMN_NAME = "Short";
+    var COURSE_COLUMN_NAME = "Short";
     
-    var _PLACING_COLUMN_NAME = "Pl";
+    var PLACING_COLUMN_NAME = "Pl";
     
-    var _MANDATORY_COLUMN_NAMES = ["First name", "Surname",_CLUB_COLUMN_NAME, "Start", "Time", _COURSE_COLUMN_NAME, "Course controls", _PLACING_COLUMN_NAME];
+    var MANDATORY_COLUMN_NAMES = ["First name", "Surname", CLUB_COLUMN_NAME, "Start", "Time", COURSE_COLUMN_NAME, "Course controls", PLACING_COLUMN_NAME];
     
     SplitsBrowser.Input.SI = {};
     
@@ -52,7 +52,7 @@
         
         dsvData.forEach(function (row) {
             
-            _MANDATORY_COLUMN_NAMES.forEach(function (columnName) {
+            MANDATORY_COLUMN_NAMES.forEach(function (columnName) {
                 if (!row.hasOwnProperty(columnName)) {
                     SplitsBrowser.throwInvalidData("Column '" + columnName + "' missing");
                 }
@@ -60,10 +60,10 @@
         
             var forename = row["First name"];
             var surname = row.Surname;
-            var club = row[_CLUB_COLUMN_NAME];
+            var club = row[CLUB_COLUMN_NAME];
             var startTime = SplitsBrowser.parseTime(row.Start);
             
-            var courseName = row[_COURSE_COLUMN_NAME];
+            var courseName = row[COURSE_COLUMN_NAME];
             
             var numControls;
             if (courses.has(courseName)) {
@@ -106,7 +106,7 @@
             
             var order = courses.get(courseName).competitors.length + 1;
             var competitor = SplitsBrowser.Model.Competitor.fromCumTimes(order, forename, surname, club, startTime, cumTimes);
-            if (row[_PLACING_COLUMN_NAME] === "n/c") {
+            if (row[PLACING_COLUMN_NAME] === "n/c") {
                 competitor.setNonCompetitive();
             }
 

@@ -2,7 +2,7 @@
     "use strict";
     
     // All the parsers for parsing event data that are known about.
-    var _PARSERS = [
+    var PARSERS = [
         SplitsBrowser.Input.CSV.parseEventData,
         SplitsBrowser.Input.SI.parseEventData
    ];
@@ -16,8 +16,8 @@
     * @return {Array} Array of courses read in, or null for failure.
     */ 
     SplitsBrowser.Input.parseEventData = function (data) {
-        for (var i = 0; i < _PARSERS.length; i += 1) {
-            var parser = _PARSERS[i];
+        for (var i = 0; i < PARSERS.length; i += 1) {
+            var parser = PARSERS[i];
             try {
                 return parser(data);
             } catch (e) {

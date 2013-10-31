@@ -7,7 +7,7 @@
     * provides a notification mechanism for changes to the selection.
     */
 
-    var _NUMBER_TYPE = typeof 0;
+    var NUMBER_TYPE = typeof 0;
 
     /**
     * Represents the currently-selected competitors, and offers a callback
@@ -16,7 +16,7 @@
     * @param {Number} count - The number of competitors that can be chosen.
     */
     SplitsBrowser.Model.CompetitorSelection = function (count) {
-        if (typeof (count) != _NUMBER_TYPE) {
+        if (typeof (count) != NUMBER_TYPE) {
             SplitsBrowser.throwInvalidData("Competitor count must be a number");
         } else if (count <= 0) {
             SplitsBrowser.throwInvalidData("Competitor count must be a positive number");
@@ -128,7 +128,7 @@
     * @param {Number} index - The index of the competitor.
     */
     SplitsBrowser.Model.CompetitorSelection.prototype.toggle = function (index) {
-        if (typeof (index) == _NUMBER_TYPE) {
+        if (typeof (index) == NUMBER_TYPE) {
             if (0 <= index && index < this.count) {
                 var position = this.currentIndexes.indexOf(index);
                 if (position == -1) {

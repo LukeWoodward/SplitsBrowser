@@ -2,8 +2,8 @@
 (function (){
     "use strict";
 
-    var _COMPETITOR_LIST_ID = "competitorList";
-    var _COMPETITOR_LIST_ID_SELECTOR = "#" + _COMPETITOR_LIST_ID;
+    var COMPETITOR_LIST_ID = "competitorList";
+    var COMPETITOR_LIST_ID_SELECTOR = "#" + COMPETITOR_LIST_ID;
 
     /**
     * Object that controls a list of competitors from which the user can select.
@@ -16,7 +16,7 @@
         this.competitorSelection = null;
 
         this.listDiv = d3.select(parent).append("div")
-                                        .attr("id", _COMPETITOR_LIST_ID);
+                                        .attr("id", COMPETITOR_LIST_ID);
     };
 
     /**
@@ -24,7 +24,7 @@
     * @returns {Number} Width of the listbox.
     */
     SplitsBrowser.Controls.CompetitorListBox.prototype.width = function () {
-        return $(_COMPETITOR_LIST_ID_SELECTOR).width();
+        return $(COMPETITOR_LIST_ID_SELECTOR).width();
     };
 
     /**

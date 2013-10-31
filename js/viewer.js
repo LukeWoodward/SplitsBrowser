@@ -9,17 +9,17 @@
     // cancelled.)
     var RESIZE_DELAY_MS = 100;
 
-    var _TOP_PANEL_ID = "topPanel";
-    var _TOP_PANEL_ID_SELECTOR = "#" + _TOP_PANEL_ID;
+    var TOP_PANEL_ID = "topPanel";
+    var TOP_PANEL_ID_SELECTOR = "#" + TOP_PANEL_ID;
     
-    var _MAIN_PANEL_ID = "mainPanel";
-    var _MAIN_PANEL_ID_SELECTOR = "#" + _MAIN_PANEL_ID;
+    var MAIN_PANEL_ID = "mainPanel";
+    var MAIN_PANEL_ID_SELECTOR = "#" + MAIN_PANEL_ID;
 
-    var _COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
-    var _COMPETITOR_LIST_CONTAINER_ID_SELECTOR = "#" + _COMPETITOR_LIST_CONTAINER_ID;
+    var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
+    var COMPETITOR_LIST_CONTAINER_ID_SELECTOR = "#" + COMPETITOR_LIST_CONTAINER_ID;
 
-    var _BUTTONS_PANEL_ID = "buttonsPanel";
-    var _BUTTONS_PANEL_ID_SELECTOR = "#" + _BUTTONS_PANEL_ID;
+    var BUTTONS_PANEL_ID = "buttonsPanel";
+    var BUTTONS_PANEL_ID_SELECTOR = "#" + BUTTONS_PANEL_ID;
     
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
@@ -65,7 +65,7 @@
         var body = d3.select("body");
         
         var topPanel = body.append("div")
-                           .attr("id", _TOP_PANEL_ID);
+                           .attr("id", TOP_PANEL_ID);
                            
         var outerThis = this;
         this.courseSelector = new SplitsBrowser.Controls.CourseSelector(topPanel.node());
@@ -91,13 +91,13 @@
         this.statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(topPanel.node());
         
         var mainPanel = body.append("div")
-                            .attr("id", _MAIN_PANEL_ID);
+                            .attr("id", MAIN_PANEL_ID);
         
         var competitorListContainer = mainPanel.append("div")
-                                               .attr("id", _COMPETITOR_LIST_CONTAINER_ID);
+                                               .attr("id", COMPETITOR_LIST_CONTAINER_ID);
                                                
         var buttonsContainer = competitorListContainer.append("div")
-                                                      .attr("id", _BUTTONS_PANEL_ID);
+                                                      .attr("id", BUTTONS_PANEL_ID);
                      
         buttonsContainer.append("button")
                         .text("All")
@@ -199,7 +199,7 @@
 
         this.competitorListBox.setCompetitorList(this.currentCourse.competitors);
 
-        var topPanelHeight = $(_TOP_PANEL_ID_SELECTOR).height();
+        var topPanelHeight = $(TOP_PANEL_ID_SELECTOR).height();
         
         // Subtract some values to avoid scrollbars appearing.
         var chartWidth = windowWidth - 18 - this.competitorListBox.width() - 40;
@@ -234,7 +234,7 @@
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
         $("body").height(windowHeight - 19 - topPanelHeight);
-        $(_COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(_BUTTONS_PANEL_ID_SELECTOR).height() - topPanelHeight);
+        $(COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(BUTTONS_PANEL_ID_SELECTOR).height() - topPanelHeight);
     };
 
     /**
@@ -289,11 +289,11 @@
     SplitsBrowser.Viewer.prototype.selectChartType = function (chartType) {
         this.chartType = chartType;
         if (chartType.isResultsTable) {
-            d3.select(_MAIN_PANEL_ID_SELECTOR).style("display", "none");
+            d3.select(MAIN_PANEL_ID_SELECTOR).style("display", "none");
             this.resultsTable.show();
         } else {
             this.resultsTable.hide();
-            d3.select(_MAIN_PANEL_ID_SELECTOR).style("display", "");
+            d3.select(MAIN_PANEL_ID_SELECTOR).style("display", "");
         }
         
         this.crossingRunnersButton.style("display", (chartType.showCrossingRunnersButton) ? "" : "none");

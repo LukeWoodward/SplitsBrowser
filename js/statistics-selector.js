@@ -1,11 +1,11 @@
 (function () {
     "use strict";
 
-    var _STATISTIC_SELECTOR_ID = "statisticSelector";
+    var STATISTIC_SELECTOR_ID = "statisticSelector";
 
-    var _LABEL_ID_PREFIX = "statisticCheckbox";
+    var LABEL_ID_PREFIX = "statisticCheckbox";
 
-    var _STATISTIC_NAMES = ["Total time", "Split time", "Behind fastest"];
+    var STATISTIC_NAMES = ["Total time", "Split time", "Behind fastest"];
 
     /**
     * Control that contains a number of checkboxes for enabling and/or disabling
@@ -15,19 +15,19 @@
     */
     SplitsBrowser.Controls.StatisticsSelector = function (parent) {
         this.span = d3.select(parent).append("span")
-                                     .attr("id", _STATISTIC_SELECTOR_ID);   
+                                     .attr("id", STATISTIC_SELECTOR_ID);   
 
         var childSpans = this.span.selectAll("span")
-                                  .data(_STATISTIC_NAMES)
+                                  .data(STATISTIC_NAMES)
                                   .enter()
                                   .append("span");
          
         childSpans.append("input")
                   .attr("type", "checkbox")
-                  .attr("id", function(val, index) { return _LABEL_ID_PREFIX + index; });
+                  .attr("id", function(val, index) { return LABEL_ID_PREFIX + index; });
                   
         childSpans.append("label")
-                  .attr("for", function(val, index) { return _LABEL_ID_PREFIX + index; })
+                  .attr("for", function(val, index) { return LABEL_ID_PREFIX + index; })
                   .text(function(name) { return name; });
         
         var outerThis = this;

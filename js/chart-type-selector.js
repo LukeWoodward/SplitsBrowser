@@ -11,7 +11,7 @@
         return (seconds === null) ? null : seconds / 60;
     }
 
-    var _ALL_CHART_TYPES = [
+    var ALL_CHART_TYPES = [
         {
             name: "Splits graph",
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
@@ -75,7 +75,7 @@
         this.dropDown = span.append("select").node();
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
         
-        var optionsList = d3.select(this.dropDown).selectAll("option").data(_ALL_CHART_TYPES);
+        var optionsList = d3.select(this.dropDown).selectAll("option").data(ALL_CHART_TYPES);
         optionsList.enter().append("option");
         
         optionsList.attr("value", function (_value, index) { return index.toString(); })
@@ -103,7 +103,7 @@
     * @return {Array} The currently-selected chart type.
     */
     SplitsBrowser.Controls.ChartTypeSelector.prototype.getChartType = function () {
-        return _ALL_CHART_TYPES[Math.max(this.dropDown.selectedIndex, 0)];
+        return ALL_CHART_TYPES[Math.max(this.dropDown.selectedIndex, 0)];
     };
     
     /**
@@ -111,6 +111,6 @@
     */
     SplitsBrowser.Controls.ChartTypeSelector.prototype.onSelectionChanged = function () {
         var outerThis = this;
-        this.changeHandlers.forEach(function(handler) { handler(_ALL_CHART_TYPES[outerThis.dropDown.selectedIndex]); });
+        this.changeHandlers.forEach(function(handler) { handler(ALL_CHART_TYPES[outerThis.dropDown.selectedIndex]); });
     };
 })();

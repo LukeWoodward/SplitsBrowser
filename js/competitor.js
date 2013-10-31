@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    var _NUMBER_TYPE = typeof 0;
+    var NUMBER_TYPE = typeof 0;
 
     /**
     * Function used with the JavaScript sort method to sort competitors in order
@@ -125,7 +125,7 @@
      */
     var Competitor = function (order, forename, surname, club, startTime, splitTimes, cumTimes) {
 
-        if (typeof (order) !== _NUMBER_TYPE) {
+        if (typeof (order) !== NUMBER_TYPE) {
             SplitsBrowser.throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
         }
 

@@ -1,31 +1,31 @@
 (function (){
     "use strict";
     
-    var _ALL_COMPARISON_OPTIONS = [
+    var ALL_COMPARISON_OPTIONS = [
         { name: "Winner", selector: function (course) { return course.getWinnerCumTimes(); } },
         { name: "Fastest time", selector: function (course) { return course.getFastestCumTimes(); } }
     ];
     
     // All 'Fastest time + N %' values (not including zero, of course).
-    var _FASTEST_PLUS_PERCENTAGES = [5, 25, 50, 100];
+    var FASTEST_PLUS_PERCENTAGES = [5, 25, 50, 100];
     
-    _FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
-        _ALL_COMPARISON_OPTIONS.push({
+    FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
+        ALL_COMPARISON_OPTIONS.push({
             name: "Fastest time + " + percent + "%",
             selector: function (course) { return course.getFastestCumTimesPlusPercentage(percent); }
         });
     });
     
-    _ALL_COMPARISON_OPTIONS.push({ name: "Any runner..." });
+    ALL_COMPARISON_OPTIONS.push({ name: "Any runner..." });
     
     // Default selected index of the comparison function.
-    var _DEFAULT_COMPARISON_INDEX = 1; // 1 = fastest time.
+    var DEFAULT_COMPARISON_INDEX = 1; // 1 = fastest time.
     
     // The id of the comparison selector.
-    var _COMPARISON_SELECTOR_ID = "comparisonSelector";
+    var COMPARISON_SELECTOR_ID = "comparisonSelector";
     
     // The id of the runner selector
-    var _RUNNER_SELECTOR_ID = "runnerSelector";
+    var RUNNER_SELECTOR_ID = "runnerSelector";
 
     /**
     * A control that wraps a drop-down list used to choose what to compare
@@ -41,13 +41,13 @@
         span.text("Compare with ");
         var outerThis = this;
         this.dropDown = span.append("select")
-                            .attr("id", _COMPARISON_SELECTOR_ID)
+                            .attr("id", COMPARISON_SELECTOR_ID)
                             .node();
                             
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
 
         var optionsList = d3.select(this.dropDown).selectAll("option")
-                                                  .data(_ALL_COMPARISON_OPTIONS);
+                                                  .data(ALL_COMPARISON_OPTIONS);
         optionsList.enter().append("option");
         
         optionsList.attr("value", function (_opt, index) { return index.toString(); })
@@ -62,11 +62,11 @@
         this.runnerSpan.text("Runner: ");
         
         this.runnerDropDown = this.runnerSpan.append("select")
-                                             .attr("id", _RUNNER_SELECTOR_ID)
+                                             .attr("id", RUNNER_SELECTOR_ID)
                                              .node();
         $(this.runnerDropDown).bind("change", function () { outerThis.onSelectionChanged(); });
         
-        this.dropDown.selectedIndex = _DEFAULT_COMPARISON_INDEX;
+        this.dropDown.selectedIndex = DEFAULT_COMPARISON_INDEX;
     };
 
     /**
@@ -88,7 +88,7 @@
     * @return Whether the 'Any Runner...' option is selected.
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.isAnyRunnerSelected = function () {
-        return this.dropDown.selectedIndex === _ALL_COMPARISON_OPTIONS.length - 1;
+        return this.dropDown.selectedIndex === ALL_COMPARISON_OPTIONS.length - 1;
     };
     
     /**
@@ -150,7 +150,7 @@
             var outerThis = this;
             return function (course) { return course.competitors[outerThis.currentRunnerIndex].getAllCumulativeTimes(); };
         } else {
-            return _ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
+            return ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
         }
     };
     
