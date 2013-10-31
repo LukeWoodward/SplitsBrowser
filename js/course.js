@@ -227,5 +227,44 @@
         });
     };
     
+    /**
+    * Returns the best few splits to a given control.
+    *
+    * The number of splits returned may actually be fewer than that asked for,
+    * if there are fewer than that number of people on the course or who punch
+    * the control.
+    *
+    * The results are returned in an array of 2-element arrays, with each child
+    * array containing the split time and the name.  The array is returned in
+    * ascending order of split time.
+    *
+    * @param {Number} numSplits - Maximum number of split times to return.
+    * @param {Number} controlIdx - Index of the control.
+    * @return {Array} Array of the fastest splits to the given control.
+    */
+    SplitsBrowser.Model.Course.prototype.getFastestSplitsTo = function (numSplits, controlIdx) {
+        if (typeof numSplits !== "number" || numSplits <= 0) {
+            SplitsBrowser.throwInvalidData("The number of splits must be a positive integer");
+        } else if (typeof controlIdx !== "number" || controlIdx <= 0 || controlIdx > this.numControls + 1) {
+            SplitsBrowser.throwInvalidData("Control " + controlIdx + " out of range");
+        } else {
+            // Compare competitors by split time at this control, and, if those
+            // are equal, total time.
+            var comparator = function (compA, compB) {
+                var compASplit = compA.getSplitTimeTo(controlIdx);
+                var compBSplit = compB.getSplitTimeTo(controlIdx);
+                return (compASplit === compBSplit) ? d3.ascending(compA.totalTime, compB.totalTime) : d3.ascending(compASplit, compBSplit);
+            };
+            
+            var competitors = this.competitors.filter(function (comp) { return comp.getSplitTimeTo(controlIdx) !== null; });
+            competitors.sort(comparator);
+            var results = [];
+            for (var i = 0; i < competitors.length && i < numSplits; i += 1) {
+                results.push([competitors[i].getSplitTimeTo(controlIdx), competitors[i].name]);
+            }
+            
+            return results;
+        }
+    };
     
 })();

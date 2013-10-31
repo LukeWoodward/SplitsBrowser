@@ -12,8 +12,8 @@ module.exports = function(grunt) {
               'js/csv-reader.js', 'js/si-reader.js', 'js/input.js',
               'js/competitor-listbox.js', 'js/course-selector.js',
               'js/comparison-selector.js', 'js/statistics-selector.js',
-              'js/chart-type-selector.js', 'js/chart.js', 'js/results-table.js',
-              'js/viewer.js'],
+              'js/chart-type-selector.js', 'js/chart-popup.js', 'js/chart.js',
+              'js/results-table.js', 'js/viewer.js'],
         dest: '<%= pkg.name %>.js',
         nonull: true
       }

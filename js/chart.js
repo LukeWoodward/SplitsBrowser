@@ -9,6 +9,12 @@
     var _CHART_SVG_ID = "chart";
     var _CHART_SVG_ID_SELECTOR = "#" + _CHART_SVG_ID;
 
+    // X-offset in pixels between the mouse and the popup that opens.
+    var CHART_POPUP_X_OFFSET = 10;
+    
+    // The maximum number of fastest splits to show when the popup is open.
+    var MAX_FASTEST_SPLITS = 10;
+    
     var MARGIN = { top: 20, right: 20, bottom: 30, left: 50 };
 
     var legendLineWidth = 10;
@@ -16,6 +22,9 @@
     // Minimum distance between a Y-axis tick label and a competitor's start
     // time, in pixels.
     var MIN_COMPETITOR_TICK_MARK_DISTANCE = 10;
+    
+    // The number that identifies the left mouse button in a jQuery event.
+    var JQUERY_EVENT_LEFT_BUTTON = 1;
 
     var SPACER = "\xa0\xa0\xa0\xa0";
 
@@ -65,6 +74,7 @@
         this.numControls = -1;
         this.selectedIndexes = [];
         this.currentCompetitorData = null;
+        this.isPopupOpen = false;
         
         // Indexes of the currently-selected competitors, in the order that
         // they appear in the list of labels.
@@ -86,12 +96,20 @@
         this.setLeftMargin(MARGIN.left);
 
         var outerThis = this;
-        $(this.svg.node()).mouseenter(function(event) { outerThis.onMouseEnter(event); })
-                          .mousemove(function(event) { outerThis.onMouseMove(event); })
-                          .mouseleave(function(event) { outerThis.onMouseLeave(event); });
+        var mousemoveHandler = function (event) { outerThis.onMouseMove(event); };
+        var mouseupHandler = function (event) { outerThis.onMouseUp(event); };
+        var mousedownHandler = function (event) { outerThis.onMouseDown(event); };
+        $(this.svg.node()).mouseenter(function (event) { outerThis.onMouseEnter(event); })
+                          .mousemove(mousemoveHandler)
+                          .mouseleave(function (event) { outerThis.onMouseLeave(event); })
+                          .mousedown(mousedownHandler)
+                          .mouseup(mouseupHandler);
 
         // Add an invisible text element used for determining text size.
         this.svg.append("text").attr("fill", "transparent").attr("id", _TEXT_SIZE_ELEMENT_ID);
+        
+        var handlers = {"mousemove": mousemoveHandler, "mousedown": mousedownHandler, "mouseup": mouseupHandler};
+        this.popup = new SplitsBrowser.Controls.ChartPopup(parent, handlers);
     };
 
     /**
@@ -147,19 +165,68 @@
                     this.removeControlLine();
                     this.drawControlLine(controlIndex);
                 }
+                
+                if (this.popup.isShown()) {
+                    this.popup.setSelectedClasses(this.getFastestSplits());
+                    this.popup.setLocation(event.pageX + 10, event.pageY - this.popup.height() / 2);
+                }
+                
             } else {
                 // In the SVG element but outside the chart area.
                 this.removeControlLine();
+                this.popup.hide();
             }
         }
     };
 
     /**
+    * Returns the fastest splits to the current control.
+    * @return {Array} Array of fastest-split data.
+    */
+    SplitsBrowser.Controls.Chart.prototype.getFastestSplits = function () {
+        // There's no split to the start, so if the current control is the
+        // start, show the statistics for control 1 instead.
+        return this.course.getFastestSplitsTo(MAX_FASTEST_SPLITS, Math.max(this.currentControlIndex, 1));
+    };
+     
+    /**
     * Handle the mouse leaving the chart.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseLeave = function() {
-        this.isMouseIn = false;
-        this.removeControlLine();
+        var outerThis = this;
+        // Check that the mouse hasn't entered the popup.
+        // It seems that the mouseleave event for the chart is sent before the
+        // mouseenter event for the popup, so we use a timeout to check a short
+        // time later whether the mouse has left the chart and the popup.
+        // This is only necessary for IE9 and IE10; other browsers support
+        // "pointer-events: none" in CSS so the popup never gets any mouse
+        // events.
+        setTimeout(function() {
+            if (!outerThis.popup.isMouseIn()) {
+                outerThis.isMouseIn = false;
+                outerThis.removeControlLine();
+            }
+        }, 1);
+    };
+    
+    /**
+    * Handles a mouse button being pressed over the chart.
+    * @param {jQuery.Event} event - jQuery event object.
+    */
+    SplitsBrowser.Controls.Chart.prototype.onMouseDown = function (event) {
+        if (this.isMouseIn && event.which === JQUERY_EVENT_LEFT_BUTTON) {
+            // Left button pressed.
+            this.popup.setSelectedClasses(this.getFastestSplits());
+            this.popup.show(event.pageX + CHART_POPUP_X_OFFSET, event.pageY - this.popup.height() / 2);
+        }
+    };
+    
+    /**
+    * Handles a mouse button being pressed over the chart.
+    * @param {Event} event - DOM event object.
+    */
+    SplitsBrowser.Controls.Chart.prototype.onMouseUp = function (event) {
+        this.popup.hide();
     };
 
     /**

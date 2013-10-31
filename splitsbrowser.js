@@ -747,6 +747,45 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         });
     };
     
+    /**
+    * Returns the best few splits to a given control.
+    *
+    * The number of splits returned may actually be fewer than that asked for,
+    * if there are fewer than that number of people on the course or who punch
+    * the control.
+    *
+    * The results are returned in an array of 2-element arrays, with each child
+    * array containing the split time and the name.  The array is returned in
+    * ascending order of split time.
+    *
+    * @param {Number} numSplits - Maximum number of split times to return.
+    * @param {Number} controlIdx - Index of the control.
+    * @return {Array} Array of the fastest splits to the given control.
+    */
+    SplitsBrowser.Model.Course.prototype.getFastestSplitsTo = function (numSplits, controlIdx) {
+        if (typeof numSplits !== "number" || numSplits <= 0) {
+            SplitsBrowser.throwInvalidData("The number of splits must be a positive integer");
+        } else if (typeof controlIdx !== "number" || controlIdx <= 0 || controlIdx > this.numControls + 1) {
+            SplitsBrowser.throwInvalidData("Control " + controlIdx + " out of range");
+        } else {
+            // Compare competitors by split time at this control, and, if those
+            // are equal, total time.
+            var comparator = function (compA, compB) {
+                var compASplit = compA.getSplitTimeTo(controlIdx);
+                var compBSplit = compB.getSplitTimeTo(controlIdx);
+                return (compASplit === compBSplit) ? d3.ascending(compA.totalTime, compB.totalTime) : d3.ascending(compASplit, compBSplit);
+            };
+            
+            var competitors = this.competitors.filter(function (comp) { return comp.getSplitTimeTo(controlIdx) !== null; });
+            competitors.sort(comparator);
+            var results = [];
+            for (var i = 0; i < competitors.length && i < numSplits; i += 1) {
+                results.push([competitors[i].getSplitTimeTo(controlIdx), competitors[i].name]);
+            }
+            
+            return results;
+        }
+    };
     
 })();
 
@@ -1667,6 +1706,128 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
 /* global SplitsBrowser, d3, $ */
 
+(function () {
+    "use strict";
+    
+    /**
+    * Creates a ChartPopup control.
+    * @constructor
+    * @param {HTMLElement} Parent HTML element.
+    * @param {Object} handlers - Object that maps mouse event names to handlers.
+    */
+    SplitsBrowser.Controls.ChartPopup = function (parent, handlers) {
+
+        this.shown = false;
+        this.mouseIn = false;
+        this.popupDiv = d3.select(parent).append("div");
+        this.popupDiv.classed("chartPopup", true)
+                     .style("display", "none")
+                     .style("position", "absolute");
+                     
+        this.popupDivHeader = this.popupDiv.append("div")
+                                           .classed("chartPopupHeader", true)
+                                           .append("span");
+                                           
+        var popupDivTableContainer = this.popupDiv.append("div")
+                                                  .classed("chartPopupTableContainer", true);
+                                                  
+                                           
+        this.popupDivTable = popupDivTableContainer.append("table");
+
+        // At this point we need to pass through mouse events to the parent.
+        // This is solely for the benefit of IE < 11, as IE11 and other
+        // browsers support pointer-events: none, which means that this div
+        // receives no mouse events at all.
+        for (var eventName in handlers) {
+            $(this.popupDiv.node()).on(eventName, handlers[eventName]);
+        }
+        
+        var outerThis = this;
+        $(this.popupDiv.node()).mouseenter(function () { outerThis.mouseIn = true; });
+        $(this.popupDiv.node()).mouseleave(function () { outerThis.mouseIn = false; });
+    };
+    
+    /**
+    * Returns whether the popup is currently shown.
+    * @return {boolean} True if the popup is shown, false otherwise.
+    */
+    SplitsBrowser.Controls.ChartPopup.prototype.isShown = function () {
+        return this.shown;
+    };
+    
+    /**
+    * Returns whether the mouse is currently over the popup.
+    * @return {boolean} True if the mouse is over the popup, false otherwise.
+    */
+    SplitsBrowser.Controls.ChartPopup.prototype.isMouseIn = function () {
+        return this.mouseIn;
+    };
+    
+    /**
+    * Populates the chart popup with the 'Selected classes' data.
+    * @param {Array} competitorData - Array of selected-classes data to show.
+    */
+    SplitsBrowser.Controls.ChartPopup.prototype.setSelectedClasses = function (competitorData) {
+        this.popupDivHeader.text("Selected classes");
+        
+        var rows = this.popupDivTable.selectAll("tr")
+                                     .data(competitorData);
+                                     
+        rows.enter().append("tr");
+        
+        rows.selectAll("td").remove();
+        rows.append("td").text(function (row) { return SplitsBrowser.formatTime(row[0]); });
+        rows.append("td").text(function (row) { return row[1]; });
+        
+        rows.exit().remove();
+    };
+    
+    /**
+    * Adjusts the location of the chart popup.
+    *
+    * The coordinates are in units of pixels from top-left corner of the
+    * viewport.
+    * @param {Number} x - The x-coordinate of the popup.
+    * @param {Number} y - The y-coordinate of the popup.
+    */
+    SplitsBrowser.Controls.ChartPopup.prototype.setLocation = function (x, y) {
+        this.popupDiv.style("left", x + "px")
+                     .style("top", y + "px");
+    };
+    
+    /**
+    * Shows the chart popup.
+    * @param {Number} x - The x-coordinate of the popup.
+    * @param {Number} y - The y-coordinate of the popup.
+    */
+    SplitsBrowser.Controls.ChartPopup.prototype.show = function (x, y) {
+        this.popupDiv.style("display", "");
+        this.shown = true;
+        this.setLocation(x, y);
+    };
+    
+    /**
+    * Hides the chart popup.
+    */
+    SplitsBrowser.Controls.ChartPopup.prototype.hide = function () {
+        this.popupDiv.style("display", "none");
+        this.shown = false;
+    };
+    
+    /**
+    * Returns the height of the popup, in units of pixels.
+    * @return {Number} Height of the popup, in pixels.
+    */
+    SplitsBrowser.Controls.ChartPopup.prototype.height = function () {
+        return $(this.popupDiv.node()).height();
+    };
+})();
+
+
+
+
+/* global SplitsBrowser, d3, $ */
+
 (function (){
     "use strict";
 
@@ -1676,6 +1837,12 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     var _CHART_SVG_ID = "chart";
     var _CHART_SVG_ID_SELECTOR = "#" + _CHART_SVG_ID;
 
+    // X-offset in pixels between the mouse and the popup that opens.
+    var CHART_POPUP_X_OFFSET = 10;
+    
+    // The maximum number of fastest splits to show when the popup is open.
+    var MAX_FASTEST_SPLITS = 10;
+    
     var MARGIN = { top: 20, right: 20, bottom: 30, left: 50 };
 
     var legendLineWidth = 10;
@@ -1683,6 +1850,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     // Minimum distance between a Y-axis tick label and a competitor's start
     // time, in pixels.
     var MIN_COMPETITOR_TICK_MARK_DISTANCE = 10;
+    
+    // The number that identifies the left mouse button in a jQuery event.
+    var JQUERY_EVENT_LEFT_BUTTON = 1;
 
     var SPACER = "\xa0\xa0\xa0\xa0";
 
@@ -1732,6 +1902,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.numControls = -1;
         this.selectedIndexes = [];
         this.currentCompetitorData = null;
+        this.isPopupOpen = false;
         
         // Indexes of the currently-selected competitors, in the order that
         // they appear in the list of labels.
@@ -1753,12 +1924,20 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.setLeftMargin(MARGIN.left);
 
         var outerThis = this;
-        $(this.svg.node()).mouseenter(function(event) { outerThis.onMouseEnter(event); })
-                          .mousemove(function(event) { outerThis.onMouseMove(event); })
-                          .mouseleave(function(event) { outerThis.onMouseLeave(event); });
+        var mousemoveHandler = function (event) { outerThis.onMouseMove(event); };
+        var mouseupHandler = function (event) { outerThis.onMouseUp(event); };
+        var mousedownHandler = function (event) { outerThis.onMouseDown(event); };
+        $(this.svg.node()).mouseenter(function (event) { outerThis.onMouseEnter(event); })
+                          .mousemove(mousemoveHandler)
+                          .mouseleave(function (event) { outerThis.onMouseLeave(event); })
+                          .mousedown(mousedownHandler)
+                          .mouseup(mouseupHandler);
 
         // Add an invisible text element used for determining text size.
         this.svg.append("text").attr("fill", "transparent").attr("id", _TEXT_SIZE_ELEMENT_ID);
+        
+        var handlers = {"mousemove": mousemoveHandler, "mousedown": mousedownHandler, "mouseup": mouseupHandler};
+        this.popup = new SplitsBrowser.Controls.ChartPopup(parent, handlers);
     };
 
     /**
@@ -1814,19 +1993,68 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                     this.removeControlLine();
                     this.drawControlLine(controlIndex);
                 }
+                
+                if (this.popup.isShown()) {
+                    this.popup.setSelectedClasses(this.getFastestSplits());
+                    this.popup.setLocation(event.pageX + 10, event.pageY - this.popup.height() / 2);
+                }
+                
             } else {
                 // In the SVG element but outside the chart area.
                 this.removeControlLine();
+                this.popup.hide();
             }
         }
     };
 
     /**
+    * Returns the fastest splits to the current control.
+    * @return {Array} Array of fastest-split data.
+    */
+    SplitsBrowser.Controls.Chart.prototype.getFastestSplits = function () {
+        // There's no split to the start, so if the current control is the
+        // start, show the statistics for control 1 instead.
+        return this.course.getFastestSplitsTo(MAX_FASTEST_SPLITS, Math.max(this.currentControlIndex, 1));
+    };
+     
+    /**
     * Handle the mouse leaving the chart.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseLeave = function() {
-        this.isMouseIn = false;
-        this.removeControlLine();
+        var outerThis = this;
+        // Check that the mouse hasn't entered the popup.
+        // It seems that the mouseleave event for the chart is sent before the
+        // mouseenter event for the popup, so we use a timeout to check a short
+        // time later whether the mouse has left the chart and the popup.
+        // This is only necessary for IE9 and IE10; other browsers support
+        // "pointer-events: none" in CSS so the popup never gets any mouse
+        // events.
+        setTimeout(function() {
+            if (!outerThis.popup.isMouseIn()) {
+                outerThis.isMouseIn = false;
+                outerThis.removeControlLine();
+            }
+        }, 1);
+    };
+    
+    /**
+    * Handles a mouse button being pressed over the chart.
+    * @param {jQuery.Event} event - jQuery event object.
+    */
+    SplitsBrowser.Controls.Chart.prototype.onMouseDown = function (event) {
+        if (this.isMouseIn && event.which === JQUERY_EVENT_LEFT_BUTTON) {
+            // Left button pressed.
+            this.popup.setSelectedClasses(this.getFastestSplits());
+            this.popup.show(event.pageX + CHART_POPUP_X_OFFSET, event.pageY - this.popup.height() / 2);
+        }
+    };
+    
+    /**
+    * Handles a mouse button being pressed over the chart.
+    * @param {Event} event - DOM event object.
+    */
+    SplitsBrowser.Controls.Chart.prototype.onMouseUp = function (event) {
+        this.popup.hide();
     };
 
     /**
@@ -2715,6 +2943,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Viewer.prototype.selectCrossingRunners = function () {
         this.selection.selectCrossingRunners(this.currentCourse.competitors);
+        if (this.selection.isSingleRunnerSelected()) {
+            var competitorName = this.currentCourse.competitors[this.currentIndexes[0]].name;
+            alert(competitorName + " has no crossing runners.");
+        }
     };
 
     /**

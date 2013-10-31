@@ -68,6 +68,26 @@ text.competitorLabel.selected
     font-weight: bold;
 }
 
+div.chartPopup
+{
+    border: 1px solid black;
+    pointer-events: none;
+}
+
+div.chartPopupHeader
+{
+    background-color: #fff0a0;
+    padding: 2px;
+    white-space: nowrap;
+}
+
+div.chartPopupTableContainer
+{
+    background-color: #ffffe0;
+    padding: 2px;
+    white-space: nowrap;
+}
+
 #competitorList
 {
     overflow-y: scroll;
@@ -132,4 +152,15 @@ span.resultsTableHeader
 .resultsTable tbody td.time
 {
     text-align: right;
+}
+
+/*
+Disable text selection on SVG text, or on the popup, as it causes unsightly
+selection during dragging.  Non-standard CSS here, but that's all we can do.
+*/
+svg, div.chartPopup
+{
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
 }

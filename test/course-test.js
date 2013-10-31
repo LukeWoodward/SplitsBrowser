@@ -343,4 +343,86 @@
         assertCumulativeRanks(assert, competitor3, [2, null, null, null]);
     });
     
+    QUnit.test("Can get fastest two splits to control 3 from course with three competitors", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);
+        var course = new Course("Test", 3, [competitor1, competitor2, competitor3]);
+        
+        var fastestSplits = course.getFastestSplitsTo(2, 3);
+        assert.deepEqual(fastestSplits, [[199, "Bill Baker"], [209, "John Smith"]]);
+    });
+    
+    QUnit.test("Can get fastest two splits to finish from course with three competitors", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);
+        var course = new Course("Test", 3, [competitor1, competitor2, competitor3]);
+        
+        var fastestSplits = course.getFastestSplitsTo(2, 4);
+        assert.deepEqual(fastestSplits, [[100, "John Smith"], [106, "Fred Brown"]]);
+    });
+    
+    QUnit.test("When getting fastest four splits to control 3 from course with three competitors then three splits returned", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);
+        var course = new Course("Test", 3, [competitor1, competitor2, competitor3]);
+        
+        var fastestSplits = course.getFastestSplitsTo(4, 3);
+        assert.deepEqual(fastestSplits, [[199, "Bill Baker"], [209, "John Smith"], [212, "Fred Brown"]]);
+    });
+    
+    QUnit.test("When getting fastest two splits to control 3 from course with three competitors with two mispunching then one split returned", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, null, 117]);
+        var course = new Course("Test", 3, [competitor1, competitor2, competitor3]);
+        
+        var fastestSplits = course.getFastestSplitsTo(2, 3);
+        assert.deepEqual(fastestSplits, [[209, "John Smith"]]);
+    });
+
+    /**
+    * Asserts that attempting to get the fastest splits of the given competitors
+    * will fail with an InvalidData exception.
+    * @param {QUnit.assert} assert - QUnit assertion object.
+    * @param {Array} competitors - Array of competitor objects.
+    * @param {Number} numSplits - The number of fastest splits to attempt to return.
+    * @param {Number} controlIdx - The index of the control.
+    */
+    function assertCannotGetFastestSplits(assert, competitors, numSplits, controlIdx) {
+        var course = new Course("Test", 3, competitors);
+        try {
+            course.getFastestSplitsTo(numSplits, controlIdx);
+            assert.ok(false, "An InvalidData exception should have been thrown but was not");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+        }
+    }
+    
+    QUnit.test("Cannot return fastest 0 splits to a control", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
+        assertCannotGetFastestSplits(assert, [competitor1], 0, 3);
+    });
+    
+    QUnit.test("Cannot return fastest splits to a control when the number of such splits is not numeric", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
+        assertCannotGetFastestSplits(assert, [competitor1], "this is not a number", 3);
+    });
+    
+    QUnit.test("Cannot return fastest splits to control zero", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
+        assertCannotGetFastestSplits(assert, [competitor1], 1, 0);
+    });
+    
+    QUnit.test("Cannot return fastest splits to control out of range", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
+        assertCannotGetFastestSplits(assert, [competitor1], 1, 5);
+    });
+    
+    QUnit.test("Cannot return fastest splits to control that is not a number", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
+        assertCannotGetFastestSplits(assert, [competitor1], 1, "this is not a number");
+    });
 })();
