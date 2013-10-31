@@ -16,7 +16,7 @@
     * @param {Number} count - The number of competitors that can be chosen.
     */
     SplitsBrowser.Model.CompetitorSelection = function (count) {
-        if (typeof (count) != NUMBER_TYPE) {
+        if (typeof count !== NUMBER_TYPE) {
             SplitsBrowser.throwInvalidData("Competitor count must be a number");
         } else if (count <= 0) {
             SplitsBrowser.throwInvalidData("Competitor count must be a positive number");
@@ -104,7 +104,7 @@
     * @param {function} handler - The handler to register.
     */
     SplitsBrowser.Model.CompetitorSelection.prototype.registerChangeHandler = function (handler) {
-        if (this.changeHandlers.indexOf(handler) == -1) {
+        if (this.changeHandlers.indexOf(handler) === -1) {
             this.changeHandlers.push(handler);
         }
     };
@@ -128,10 +128,10 @@
     * @param {Number} index - The index of the competitor.
     */
     SplitsBrowser.Model.CompetitorSelection.prototype.toggle = function (index) {
-        if (typeof (index) == NUMBER_TYPE) {
+        if (typeof index === NUMBER_TYPE) {
             if (0 <= index && index < this.count) {
                 var position = this.currentIndexes.indexOf(index);
-                if (position == -1) {
+                if (position === -1) {
                     this.currentIndexes.push(index);
                     this.currentIndexes.sort(d3.ascending);
                 } else {

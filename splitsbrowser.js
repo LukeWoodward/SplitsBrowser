@@ -143,7 +143,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 (function () {
     "use strict";
 
-    var _NUMBER_TYPE = typeof 0;
+    var NUMBER_TYPE = typeof 0;
 
     /**
     * Function used with the JavaScript sort method to sort competitors in order
@@ -205,7 +205,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     function cumTimesFromSplitTimes(splitTimes) {
         if (!$.isArray(splitTimes)) {
-            throw new TypeError("Split times must be an array - got " + typeof (splitTimes) + " instead");
+            throw new TypeError("Split times must be an array - got " + typeof splitTimes + " instead");
         } else if (splitTimes.length === 0) {
             SplitsBrowser.throwInvalidData("Array of split times must not be empty");
         }
@@ -230,7 +230,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     function splitTimesFromCumTimes(cumTimes) {
         if (!$.isArray(cumTimes)) {
-            throw new TypeError("Cumulative times must be an array - got " + typeof (cumTimes) + " instead");
+            throw new TypeError("Cumulative times must be an array - got " + typeof cumTimes + " instead");
         } else if (cumTimes.length === 0) {
             SplitsBrowser.throwInvalidData("Array of cumulative times must not be empty");
         } else if (cumTimes[0] !== 0) {
@@ -267,7 +267,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
      */
     var Competitor = function (order, forename, surname, club, startTime, splitTimes, cumTimes) {
 
-        if (typeof (order) !== _NUMBER_TYPE) {
+        if (typeof order !== NUMBER_TYPE) {
             SplitsBrowser.throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
         }
 
@@ -798,7 +798,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * provides a notification mechanism for changes to the selection.
     */
 
-    var _NUMBER_TYPE = typeof 0;
+    var NUMBER_TYPE = typeof 0;
 
     /**
     * Represents the currently-selected competitors, and offers a callback
@@ -807,7 +807,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {Number} count - The number of competitors that can be chosen.
     */
     SplitsBrowser.Model.CompetitorSelection = function (count) {
-        if (typeof (count) != _NUMBER_TYPE) {
+        if (typeof count !== NUMBER_TYPE) {
             SplitsBrowser.throwInvalidData("Competitor count must be a number");
         } else if (count <= 0) {
             SplitsBrowser.throwInvalidData("Competitor count must be a positive number");
@@ -895,7 +895,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {function} handler - The handler to register.
     */
     SplitsBrowser.Model.CompetitorSelection.prototype.registerChangeHandler = function (handler) {
-        if (this.changeHandlers.indexOf(handler) == -1) {
+        if (this.changeHandlers.indexOf(handler) === -1) {
             this.changeHandlers.push(handler);
         }
     };
@@ -919,10 +919,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {Number} index - The index of the competitor.
     */
     SplitsBrowser.Model.CompetitorSelection.prototype.toggle = function (index) {
-        if (typeof (index) == _NUMBER_TYPE) {
+        if (typeof index === NUMBER_TYPE) {
             if (0 <= index && index < this.count) {
                 var position = this.currentIndexes.indexOf(index);
-                if (position == -1) {
+                if (position === -1) {
                     this.currentIndexes.push(index);
                     this.currentIndexes.sort(d3.ascending);
                 } else {
@@ -1015,13 +1015,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 (function () {
     "use strict";
     
-    var _CLUB_COLUMN_NAME = "City";
+    var CLUB_COLUMN_NAME = "City";
     
-    var _COURSE_COLUMN_NAME = "Short";
+    var COURSE_COLUMN_NAME = "Short";
     
-    var _PLACING_COLUMN_NAME = "Pl";
+    var PLACING_COLUMN_NAME = "Pl";
     
-    var _MANDATORY_COLUMN_NAMES = ["First name", "Surname",_CLUB_COLUMN_NAME, "Start", "Time", _COURSE_COLUMN_NAME, "Course controls", _PLACING_COLUMN_NAME];
+    var MANDATORY_COLUMN_NAMES = ["First name", "Surname", CLUB_COLUMN_NAME, "Start", "Time", COURSE_COLUMN_NAME, "Course controls", PLACING_COLUMN_NAME];
     
     SplitsBrowser.Input.SI = {};
     
@@ -1066,7 +1066,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         dsvData.forEach(function (row) {
             
-            _MANDATORY_COLUMN_NAMES.forEach(function (columnName) {
+            MANDATORY_COLUMN_NAMES.forEach(function (columnName) {
                 if (!row.hasOwnProperty(columnName)) {
                     SplitsBrowser.throwInvalidData("Column '" + columnName + "' missing");
                 }
@@ -1074,10 +1074,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
             var forename = row["First name"];
             var surname = row.Surname;
-            var club = row[_CLUB_COLUMN_NAME];
+            var club = row[CLUB_COLUMN_NAME];
             var startTime = SplitsBrowser.parseTime(row.Start);
             
-            var courseName = row[_COURSE_COLUMN_NAME];
+            var courseName = row[COURSE_COLUMN_NAME];
             
             var numControls;
             if (courses.has(courseName)) {
@@ -1120,7 +1120,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             
             var order = courses.get(courseName).competitors.length + 1;
             var competitor = SplitsBrowser.Model.Competitor.fromCumTimes(order, forename, surname, club, startTime, cumTimes);
-            if (row[_PLACING_COLUMN_NAME] === "n/c") {
+            if (row[PLACING_COLUMN_NAME] === "n/c") {
                 competitor.setNonCompetitive();
             }
 
@@ -1140,7 +1140,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     "use strict";
     
     // All the parsers for parsing event data that are known about.
-    var _PARSERS = [
+    var PARSERS = [
         SplitsBrowser.Input.CSV.parseEventData,
         SplitsBrowser.Input.SI.parseEventData
    ];
@@ -1154,8 +1154,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @return {Array} Array of courses read in, or null for failure.
     */ 
     SplitsBrowser.Input.parseEventData = function (data) {
-        for (var i = 0; i < _PARSERS.length; i += 1) {
-            var parser = _PARSERS[i];
+        for (var i = 0; i < PARSERS.length; i += 1) {
+            var parser = PARSERS[i];
             try {
                 return parser(data);
             } catch (e) {
@@ -1174,8 +1174,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 (function (){
     "use strict";
 
-    var _COMPETITOR_LIST_ID = "competitorList";
-    var _COMPETITOR_LIST_ID_SELECTOR = "#" + _COMPETITOR_LIST_ID;
+    var COMPETITOR_LIST_ID = "competitorList";
+    var COMPETITOR_LIST_ID_SELECTOR = "#" + COMPETITOR_LIST_ID;
 
     /**
     * Object that controls a list of competitors from which the user can select.
@@ -1188,7 +1188,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.competitorSelection = null;
 
         this.listDiv = d3.select(parent).append("div")
-                                        .attr("id", _COMPETITOR_LIST_ID);
+                                        .attr("id", COMPETITOR_LIST_ID);
     };
 
     /**
@@ -1196,7 +1196,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @returns {Number} Width of the listbox.
     */
     SplitsBrowser.Controls.CompetitorListBox.prototype.width = function () {
-        return $(_COMPETITOR_LIST_ID_SELECTOR).width();
+        return $(COMPETITOR_LIST_ID_SELECTOR).width();
     };
 
     /**
@@ -1337,31 +1337,31 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 (function (){
     "use strict";
     
-    var _ALL_COMPARISON_OPTIONS = [
+    var ALL_COMPARISON_OPTIONS = [
         { name: "Winner", selector: function (course) { return course.getWinnerCumTimes(); } },
         { name: "Fastest time", selector: function (course) { return course.getFastestCumTimes(); } }
     ];
     
     // All 'Fastest time + N %' values (not including zero, of course).
-    var _FASTEST_PLUS_PERCENTAGES = [5, 25, 50, 100];
+    var FASTEST_PLUS_PERCENTAGES = [5, 25, 50, 100];
     
-    _FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
-        _ALL_COMPARISON_OPTIONS.push({
+    FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
+        ALL_COMPARISON_OPTIONS.push({
             name: "Fastest time + " + percent + "%",
             selector: function (course) { return course.getFastestCumTimesPlusPercentage(percent); }
         });
     });
     
-    _ALL_COMPARISON_OPTIONS.push({ name: "Any runner..." });
+    ALL_COMPARISON_OPTIONS.push({ name: "Any runner..." });
     
     // Default selected index of the comparison function.
-    var _DEFAULT_COMPARISON_INDEX = 1; // 1 = fastest time.
+    var DEFAULT_COMPARISON_INDEX = 1; // 1 = fastest time.
     
     // The id of the comparison selector.
-    var _COMPARISON_SELECTOR_ID = "comparisonSelector";
+    var COMPARISON_SELECTOR_ID = "comparisonSelector";
     
     // The id of the runner selector
-    var _RUNNER_SELECTOR_ID = "runnerSelector";
+    var RUNNER_SELECTOR_ID = "runnerSelector";
 
     /**
     * A control that wraps a drop-down list used to choose what to compare
@@ -1377,13 +1377,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         span.text("Compare with ");
         var outerThis = this;
         this.dropDown = span.append("select")
-                            .attr("id", _COMPARISON_SELECTOR_ID)
+                            .attr("id", COMPARISON_SELECTOR_ID)
                             .node();
                             
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
 
         var optionsList = d3.select(this.dropDown).selectAll("option")
-                                                  .data(_ALL_COMPARISON_OPTIONS);
+                                                  .data(ALL_COMPARISON_OPTIONS);
         optionsList.enter().append("option");
         
         optionsList.attr("value", function (_opt, index) { return index.toString(); })
@@ -1398,11 +1398,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.runnerSpan.text("Runner: ");
         
         this.runnerDropDown = this.runnerSpan.append("select")
-                                             .attr("id", _RUNNER_SELECTOR_ID)
+                                             .attr("id", RUNNER_SELECTOR_ID)
                                              .node();
         $(this.runnerDropDown).bind("change", function () { outerThis.onSelectionChanged(); });
         
-        this.dropDown.selectedIndex = _DEFAULT_COMPARISON_INDEX;
+        this.dropDown.selectedIndex = DEFAULT_COMPARISON_INDEX;
     };
 
     /**
@@ -1424,7 +1424,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @return Whether the 'Any Runner...' option is selected.
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.isAnyRunnerSelected = function () {
-        return this.dropDown.selectedIndex === _ALL_COMPARISON_OPTIONS.length - 1;
+        return this.dropDown.selectedIndex === ALL_COMPARISON_OPTIONS.length - 1;
     };
     
     /**
@@ -1486,7 +1486,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             var outerThis = this;
             return function (course) { return course.competitors[outerThis.currentRunnerIndex].getAllCumulativeTimes(); };
         } else {
-            return _ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
+            return ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
         }
     };
     
@@ -1504,11 +1504,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 (function () {
     "use strict";
 
-    var _STATISTIC_SELECTOR_ID = "statisticSelector";
+    var STATISTIC_SELECTOR_ID = "statisticSelector";
 
-    var _LABEL_ID_PREFIX = "statisticCheckbox";
+    var LABEL_ID_PREFIX = "statisticCheckbox";
 
-    var _STATISTIC_NAMES = ["Total time", "Split time", "Behind fastest"];
+    var STATISTIC_NAMES = ["Total time", "Split time", "Behind fastest"];
 
     /**
     * Control that contains a number of checkboxes for enabling and/or disabling
@@ -1518,19 +1518,19 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.StatisticsSelector = function (parent) {
         this.span = d3.select(parent).append("span")
-                                     .attr("id", _STATISTIC_SELECTOR_ID);   
+                                     .attr("id", STATISTIC_SELECTOR_ID);   
 
         var childSpans = this.span.selectAll("span")
-                                  .data(_STATISTIC_NAMES)
+                                  .data(STATISTIC_NAMES)
                                   .enter()
                                   .append("span");
          
         childSpans.append("input")
                   .attr("type", "checkbox")
-                  .attr("id", function(val, index) { return _LABEL_ID_PREFIX + index; });
+                  .attr("id", function(val, index) { return LABEL_ID_PREFIX + index; });
                   
         childSpans.append("label")
-                  .attr("for", function(val, index) { return _LABEL_ID_PREFIX + index; })
+                  .attr("for", function(val, index) { return LABEL_ID_PREFIX + index; })
                   .text(function(name) { return name; });
         
         var outerThis = this;
@@ -1599,7 +1599,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         return (seconds === null) ? null : seconds / 60;
     }
 
-    var _ALL_CHART_TYPES = [
+    var ALL_CHART_TYPES = [
         {
             name: "Splits graph",
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
@@ -1663,7 +1663,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.dropDown = span.append("select").node();
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
         
-        var optionsList = d3.select(this.dropDown).selectAll("option").data(_ALL_CHART_TYPES);
+        var optionsList = d3.select(this.dropDown).selectAll("option").data(ALL_CHART_TYPES);
         optionsList.enter().append("option");
         
         optionsList.attr("value", function (_value, index) { return index.toString(); })
@@ -1691,7 +1691,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @return {Array} The currently-selected chart type.
     */
     SplitsBrowser.Controls.ChartTypeSelector.prototype.getChartType = function () {
-        return _ALL_CHART_TYPES[Math.max(this.dropDown.selectedIndex, 0)];
+        return ALL_CHART_TYPES[Math.max(this.dropDown.selectedIndex, 0)];
     };
     
     /**
@@ -1699,7 +1699,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.ChartTypeSelector.prototype.onSelectionChanged = function () {
         var outerThis = this;
-        this.changeHandlers.forEach(function(handler) { handler(_ALL_CHART_TYPES[outerThis.dropDown.selectedIndex]); });
+        this.changeHandlers.forEach(function(handler) { handler(ALL_CHART_TYPES[outerThis.dropDown.selectedIndex]); });
     };
 })();
 
@@ -1823,19 +1823,16 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
 })();
 
-
-
-
 /* global SplitsBrowser, d3, $ */
 
 (function (){
     "use strict";
 
-    var _TEXT_SIZE_ELEMENT_ID = "sb-text-size-element";
-    var _TEXT_SIZE_ELEMENT_ID_SELECTOR = "#" + _TEXT_SIZE_ELEMENT_ID;
+    var TEXT_SIZE_ELEMENT_ID = "sb-text-size-element";
+    var TEXT_SIZE_ELEMENT_ID_SELECTOR = "#" + TEXT_SIZE_ELEMENT_ID;
 
-    var _CHART_SVG_ID = "chart";
-    var _CHART_SVG_ID_SELECTOR = "#" + _CHART_SVG_ID;
+    var CHART_SVG_ID = "chart";
+    var CHART_SVG_ID_SELECTOR = "#" + CHART_SVG_ID;
 
     // X-offset in pixels between the mouse and the popup that opens.
     var CHART_POPUP_X_OFFSET = 10;
@@ -1918,7 +1915,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.controlLine = null;
 
         this.svg = d3.select(this.parent).append("svg")
-                                         .attr("id", _CHART_SVG_ID);
+                                         .attr("id", CHART_SVG_ID);
 
         this.svgGroup = this.svg.append("g");
         this.setLeftMargin(MARGIN.left);
@@ -1934,7 +1931,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                           .mouseup(mouseupHandler);
 
         // Add an invisible text element used for determining text size.
-        this.svg.append("text").attr("fill", "transparent").attr("id", _TEXT_SIZE_ELEMENT_ID);
+        this.svg.append("text").attr("fill", "transparent").attr("id", TEXT_SIZE_ELEMENT_ID);
         
         var handlers = {"mousemove": mousemoveHandler, "mousedown": mousedownHandler, "mouseup": mouseupHandler};
         this.popup = new SplitsBrowser.Controls.ChartPopup(parent, handlers);
@@ -2165,7 +2162,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @returns {Number} The width of the piece of text, in pixels. 
     */
     SplitsBrowser.Controls.Chart.prototype.getTextWidth = function (text) {
-        return d3.select(_TEXT_SIZE_ELEMENT_ID_SELECTOR).text(text).node().getBBox().width;
+        return d3.select(TEXT_SIZE_ELEMENT_ID_SELECTOR).text(text).node().getBBox().width;
     };
 
     /**
@@ -2175,7 +2172,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @returns {Number} The height of the piece of text, in pixels.
     */
     SplitsBrowser.Controls.Chart.prototype.getTextHeight = function (text) {
-        return d3.select(_TEXT_SIZE_ELEMENT_ID_SELECTOR).text(text).node().getBBox().height;
+        return d3.select(TEXT_SIZE_ELEMENT_ID_SELECTOR).text(text).node().getBBox().height;
     };
 
     /**
@@ -2610,7 +2607,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Controls.Chart.prototype.setSize = function (overallWidth, overallHeight) {
         this.overallWidth = overallWidth;
         this.overallHeight = overallHeight;
-        $(_CHART_SVG_ID_SELECTOR).width(overallWidth).height(overallHeight);
+        $(CHART_SVG_ID_SELECTOR).width(overallWidth).height(overallHeight);
         this.adjustContentSize();
     };
 
@@ -2658,7 +2655,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 (function () {
     "use strict";
     
-    var _NON_BREAKING_SPACE_CHAR = "\u00a0";
+    var NON_BREAKING_SPACE_CHAR = "\u00a0";
 
     /**
     * A control that shows an entire table of results.
@@ -2742,7 +2739,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             }
             
             addCell(tableRow, competitor.name, competitor.club);
-            addCell(tableRow, (competitor.completed()) ? SplitsBrowser.formatTime(competitor.totalTime) : "mp", _NON_BREAKING_SPACE_CHAR, "time");
+            addCell(tableRow, (competitor.completed()) ? SplitsBrowser.formatTime(competitor.totalTime) : "mp", NON_BREAKING_SPACE_CHAR, "time");
             
             d3.range(1, outerThis.course.numControls + 2).forEach(function (controlNum) {
                 addCell(tableRow, SplitsBrowser.formatTime(competitor.getCumulativeTimeTo(controlNum)), SplitsBrowser.formatTime(competitor.getSplitTimeTo(controlNum)), "time");
@@ -2797,17 +2794,17 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     // cancelled.)
     var RESIZE_DELAY_MS = 100;
 
-    var _TOP_PANEL_ID = "topPanel";
-    var _TOP_PANEL_ID_SELECTOR = "#" + _TOP_PANEL_ID;
+    var TOP_PANEL_ID = "topPanel";
+    var TOP_PANEL_ID_SELECTOR = "#" + TOP_PANEL_ID;
     
-    var _MAIN_PANEL_ID = "mainPanel";
-    var _MAIN_PANEL_ID_SELECTOR = "#" + _MAIN_PANEL_ID;
+    var MAIN_PANEL_ID = "mainPanel";
+    var MAIN_PANEL_ID_SELECTOR = "#" + MAIN_PANEL_ID;
 
-    var _COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
-    var _COMPETITOR_LIST_CONTAINER_ID_SELECTOR = "#" + _COMPETITOR_LIST_CONTAINER_ID;
+    var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
+    var COMPETITOR_LIST_CONTAINER_ID_SELECTOR = "#" + COMPETITOR_LIST_CONTAINER_ID;
 
-    var _BUTTONS_PANEL_ID = "buttonsPanel";
-    var _BUTTONS_PANEL_ID_SELECTOR = "#" + _BUTTONS_PANEL_ID;
+    var BUTTONS_PANEL_ID = "buttonsPanel";
+    var BUTTONS_PANEL_ID_SELECTOR = "#" + BUTTONS_PANEL_ID;
     
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
@@ -2853,7 +2850,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var body = d3.select("body");
         
         var topPanel = body.append("div")
-                           .attr("id", _TOP_PANEL_ID);
+                           .attr("id", TOP_PANEL_ID);
                            
         var outerThis = this;
         this.courseSelector = new SplitsBrowser.Controls.CourseSelector(topPanel.node());
@@ -2879,13 +2876,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(topPanel.node());
         
         var mainPanel = body.append("div")
-                            .attr("id", _MAIN_PANEL_ID);
+                            .attr("id", MAIN_PANEL_ID);
         
         var competitorListContainer = mainPanel.append("div")
-                                               .attr("id", _COMPETITOR_LIST_CONTAINER_ID);
+                                               .attr("id", COMPETITOR_LIST_CONTAINER_ID);
                                                
         var buttonsContainer = competitorListContainer.append("div")
-                                                      .attr("id", _BUTTONS_PANEL_ID);
+                                                      .attr("id", BUTTONS_PANEL_ID);
                      
         buttonsContainer.append("button")
                         .text("All")
@@ -2987,7 +2984,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
         this.competitorListBox.setCompetitorList(this.currentCourse.competitors);
 
-        var topPanelHeight = $(_TOP_PANEL_ID_SELECTOR).height();
+        var topPanelHeight = $(TOP_PANEL_ID_SELECTOR).height();
         
         // Subtract some values to avoid scrollbars appearing.
         var chartWidth = windowWidth - 18 - this.competitorListBox.width() - 40;
@@ -3022,7 +3019,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
         $("body").height(windowHeight - 19 - topPanelHeight);
-        $(_COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(_BUTTONS_PANEL_ID_SELECTOR).height() - topPanelHeight);
+        $(COMPETITOR_LIST_CONTAINER_ID_SELECTOR).height(windowHeight - 19 - $(BUTTONS_PANEL_ID_SELECTOR).height() - topPanelHeight);
     };
 
     /**
@@ -3077,11 +3074,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Viewer.prototype.selectChartType = function (chartType) {
         this.chartType = chartType;
         if (chartType.isResultsTable) {
-            d3.select(_MAIN_PANEL_ID_SELECTOR).style("display", "none");
+            d3.select(MAIN_PANEL_ID_SELECTOR).style("display", "none");
             this.resultsTable.show();
         } else {
             this.resultsTable.hide();
-            d3.select(_MAIN_PANEL_ID_SELECTOR).style("display", "");
+            d3.select(MAIN_PANEL_ID_SELECTOR).style("display", "");
         }
         
         this.crossingRunnersButton.style("display", (chartType.showCrossingRunnersButton) ? "" : "none");

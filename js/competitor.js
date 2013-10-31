@@ -63,7 +63,7 @@
     */
     function cumTimesFromSplitTimes(splitTimes) {
         if (!$.isArray(splitTimes)) {
-            throw new TypeError("Split times must be an array - got " + typeof (splitTimes) + " instead");
+            throw new TypeError("Split times must be an array - got " + typeof splitTimes + " instead");
         } else if (splitTimes.length === 0) {
             SplitsBrowser.throwInvalidData("Array of split times must not be empty");
         }
@@ -88,7 +88,7 @@
     */
     function splitTimesFromCumTimes(cumTimes) {
         if (!$.isArray(cumTimes)) {
-            throw new TypeError("Cumulative times must be an array - got " + typeof (cumTimes) + " instead");
+            throw new TypeError("Cumulative times must be an array - got " + typeof cumTimes + " instead");
         } else if (cumTimes.length === 0) {
             SplitsBrowser.throwInvalidData("Array of cumulative times must not be empty");
         } else if (cumTimes[0] !== 0) {
@@ -125,7 +125,7 @@
      */
     var Competitor = function (order, forename, surname, club, startTime, splitTimes, cumTimes) {
 
-        if (typeof (order) !== NUMBER_TYPE) {
+        if (typeof order !== NUMBER_TYPE) {
             SplitsBrowser.throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
         }
 
