@@ -373,7 +373,27 @@
         assert.deepEqual(fastestSplits, [[199, "Bill Baker"], [209, "John Smith"], [212, "Fred Brown"]]);
     });
     
-    QUnit.test("When getting fastest two splits to control 3 from course with three competitors with two mispunching then one split returned", function (assert) {
+    QUnit.test("When getting fastest two splits to control 3 from course with three competitors with one mispunching control 3 then splits for other two competitors returned", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);
+        var course = new Course("Test", 3, [competitor1, competitor2, competitor3]);
+        
+        var fastestSplits = course.getFastestSplitsTo(2, 3);
+        assert.deepEqual(fastestSplits, [[199, "Bill Baker"], [209, "John Smith"]]);
+    });
+    
+    QUnit.test("When getting fastest two splits to control 3 from course with three competitors with one mispunching a different control then splits for other two competitors returned", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, null, 199, 117]);
+        var course = new Course("Test", 3, [competitor1, competitor2, competitor3]);
+        
+        var fastestSplits = course.getFastestSplitsTo(2, 3);
+        assert.deepEqual(fastestSplits, [[209, "John Smith"], [212, "Fred Brown"]]);
+    });
+    
+    QUnit.test("When getting fastest two splits to control 3 from course with three competitors with two mispunching control 3 then one split returned", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
         var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, null, 117]);

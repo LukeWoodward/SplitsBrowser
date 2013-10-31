@@ -776,7 +776,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 return (compASplit === compBSplit) ? d3.ascending(compA.totalTime, compB.totalTime) : d3.ascending(compASplit, compBSplit);
             };
             
-            var competitors = this.competitors.filter(function (comp) { return comp.getSplitTimeTo(controlIdx) !== null; });
+            var competitors = this.competitors.filter(function (comp) { return comp.completed(); });
             competitors.sort(comparator);
             var results = [];
             for (var i = 0; i < competitors.length && i < numSplits; i += 1) {
