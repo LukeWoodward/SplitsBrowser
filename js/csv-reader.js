@@ -24,24 +24,24 @@
             }
             return SplitsBrowser.Model.Competitor.fromSplitTimes(index + 1, forename, surname, club, startTime, splitTimes);
         } else {
-            SplitsBrowser.throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor on course with " + controlCount + " controls, got " + (parts.length) + " instead.");
+            SplitsBrowser.throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor in class with " + controlCount + " controls, got " + (parts.length) + " instead.");
         }
     };
 
     /**
-    * Parse CSV data for a course.
-    * @param {string} course - The string containing data for that course.
-    * @return {SplitsBrowser.Model.Course} Parsed course data.
+    * Parse CSV data for a class.
+    * @param {string} class - The string containing data for that class.
+    * @return {SplitsBrowser.Model.AgeClass} Parsed class data.
     */
-    SplitsBrowser.Input.CSV.parseCourse = function (course) {
-        var lines = course.split("\r\n").filter(SplitsBrowser.isTrue);
+    SplitsBrowser.Input.CSV.parseAgeClass = function (ageClass) {
+        var lines = ageClass.split("\r\n").filter(SplitsBrowser.isTrue);
         if (lines.length === 0) {
-            SplitsBrowser.throwInvalidData("parseCourse got an empty list of lines");
+            SplitsBrowser.throwInvalidData("parseAgeClass got an empty list of lines");
         }
 
         var firstLineParts = lines.shift().split(",");
         if (firstLineParts.length === 2) {
-            var courseName = firstLineParts.shift();
+            var className = firstLineParts.shift();
             var controlCountStr = firstLineParts.shift();
             var controlCount = parseInt(controlCountStr, 10);
             if (isNaN(controlCount)) {
@@ -51,20 +51,20 @@
             } else {
                 var competitors = lines.map(function (line, index) { return SplitsBrowser.Input.CSV.parseCompetitors(index, line, controlCount); });
                 competitors.sort(SplitsBrowser.Model.compareCompetitors);
-                return new SplitsBrowser.Model.Course(courseName, controlCount, competitors);
+                return new SplitsBrowser.Model.AgeClass(className, controlCount, competitors);
             }
         } else {
-            SplitsBrowser.throwWrongFileFormat("Expected first line to have two parts (course name and number of controls), got " + firstLineParts.length + " part(s) instead");
+            SplitsBrowser.throwWrongFileFormat("Expected first line to have two parts (class name and number of controls), got " + firstLineParts.length + " part(s) instead");
         }
     };
 
         /**
         * Parse CSV data for an entire event.
         * @param {string} eventData - String containing the entire event data.
-        * @return {Array} Array of Course objects.
+        * @return {Array} Array of AgeClass objects.
         */
     SplitsBrowser.Input.CSV.parseEventData = function (eventData) {
-        var courses = eventData.split("\r\n\r\n").map($.trim).filter(SplitsBrowser.isTrue);
-        return courses.map(SplitsBrowser.Input.CSV.parseCourse);
+        var classes = eventData.split("\r\n\r\n").map($.trim).filter(SplitsBrowser.isTrue);
+        return classes.map(SplitsBrowser.Input.CSV.parseAgeClass);
     };
 })();

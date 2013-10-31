@@ -10,10 +10,10 @@
     /**
     * Attempts to parse the given event data, which may be of any of the
     * supported formats, or may be invalid.  This function returns the results
-    * as an array of SplitsBrowser.Model.Course objects, or null in the event
+    * as an array of SplitsBrowser.Model.AgeClass objects, or null in the event
     * of failure.
     * @param {String} data - The data read.
-    * @return {Array} Array of courses read in, or null for failure.
+    * @return {Array} Array of classes read in, or null for failure.
     */ 
     SplitsBrowser.Input.parseEventData = function (data) {
         for (var i = 0; i < PARSERS.length; i += 1) {

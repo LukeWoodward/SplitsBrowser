@@ -19,14 +19,14 @@
     */
     SplitsBrowser.Viewer = function () {
 
-        this.courses = null;
-        this.currentCourse = null;
+        this.classes = null;
+        this.currentClass = null;
         this.currentIndexes = null;
         this.chartData = null;
         this.referenceCumTimes = null;
 
         this.selection = null;
-        this.courseSelector = null;
+        this.classSelector = null;
         this.statisticsSelector = null;
         this.competitorListBox = null;
         this.chart = null;
@@ -39,16 +39,16 @@
     };
     
     /**
-    * Sets the courses that the viewer can view.
-    * @param {Array} courses - The array of courses that can be viewed.
+    * Sets the classes that the viewer can view.
+    * @param {Array} classes - The array of classes that can be viewed.
     */
-    SplitsBrowser.Viewer.prototype.setCourses = function (courses) {
-        this.courses = courses;
+    SplitsBrowser.Viewer.prototype.setClasses = function (classes) {
+        this.classes = classes;
         if (this.comparisonSelector !== null) {
-            this.comparisonSelector.setCourses(courses);
+            this.comparisonSelector.setClasses(classes);
         }
-        if (this.courseSelector !== null) {
-            this.courseSelector.setCourses(this.courses);
+        if (this.classSelector !== null) {
+            this.classSelector.setClasses(this.classes);
         }
     };
 
@@ -61,9 +61,9 @@
         this.topPanel = body.append("div");
                            
         var outerThis = this;
-        this.courseSelector = new SplitsBrowser.Controls.CourseSelector(this.topPanel.node());
-        if (this.courses !== null) {
-            this.courseSelector.setCourses(this.courses);
+        this.classSelector = new SplitsBrowser.Controls.ClassSelector(this.topPanel.node());
+        if (this.classes !== null) {
+            this.classSelector.setClasses(this.classes);
         }
         
         this.topPanel.append("span").style("padding", "0px 30px 0px 30px");
@@ -75,8 +75,8 @@
         this.topPanel.append("span").style("padding", "0px 30px 0px 30px");
         
         this.comparisonSelector = new SplitsBrowser.Controls.ComparisonSelector(this.topPanel.node());
-        if (this.courses !== null) {
-            this.comparisonSelector.setCourses(this.courses);
+        if (this.classes !== null) {
+            this.comparisonSelector.setClasses(this.classes);
         }
         
         this.comparisonFunction = this.comparisonSelector.getComparisonFunction();
@@ -115,9 +115,9 @@
         this.resultsTable = new SplitsBrowser.Controls.ResultsTable(body.node());
         this.resultsTable.hide();
         
-        this.courseSelector.registerChangeHandler(function (index) {
+        this.classSelector.registerChangeHandler(function (index) {
             outerThis.comparisonSelector.updateRunnerList(index);
-            outerThis.selectCourse(index);
+            outerThis.selectClass(index);
         });
         
         this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartType(chartType); });
@@ -145,9 +145,9 @@
     * Select all of the competitors that cross the unique selected competitor.
     */
     SplitsBrowser.Viewer.prototype.selectCrossingRunners = function () {
-        this.selection.selectCrossingRunners(this.currentCourse.competitors);
+        this.selection.selectCrossingRunners(this.currentClass.competitors);
         if (this.selection.isSingleRunnerSelected()) {
-            var competitorName = this.currentCourse.competitors[this.currentIndexes[0]].name;
+            var competitorName = this.currentClass.competitors[this.currentIndexes[0]].name;
             alert(competitorName + " has no crossing runners.");
         }
     };
@@ -180,15 +180,15 @@
             return;
         }
 
-        this.referenceCumTimes = this.comparisonFunction(this.currentCourse);
-        this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+        this.referenceCumTimes = this.comparisonFunction(this.currentClass);
+        this.chartData = this.currentClass.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
 
         var windowWidth = $(window).width();
         var windowHeight = $(window).height();
         
         this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
 
-        this.competitorListBox.setCompetitorList(this.currentCourse.competitors);
+        this.competitorListBox.setCompetitorList(this.currentClass.competitors);
 
         var topPanelHeight = $(this.topPanel.node()).height();
         
@@ -232,7 +232,7 @@
     * Redraws the chart using all of the current data.
     */ 
     SplitsBrowser.Viewer.prototype.redrawChart = function () {
-        this.chart.drawChart(this.chartData, this.currentCourse, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel, (this.chartType.showCrossingRunnersButton));
+        this.chart.drawChart(this.chartData, this.currentClass, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel, (this.chartType.showCrossingRunnersButton));
     };
     
     /**
@@ -240,25 +240,25 @@
     */
     SplitsBrowser.Viewer.prototype.redraw = function () {
         if (!this.chartType.isResultsTable) {
-            this.chartData = this.currentCourse.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+            this.chartData = this.currentClass.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
             this.redrawChart();
         }
     };
     
     /**
-    * Change the graph to show the course with the given index.
-    * @param {Number} index - The (zero-based) index of the course.
+    * Change the graph to show the class with the given index.
+    * @param {Number} index - The (zero-based) index of the class.
     */
-    SplitsBrowser.Viewer.prototype.selectCourse = function (index) {
-        if (0 <= index && index < this.courses.length) {
+    SplitsBrowser.Viewer.prototype.selectClass = function (index) {
+        if (0 <= index && index < this.classes.length) {
             if (this.selection !== null) {
                 this.selection.selectNone();
             }
             this.currentIndexes = [];
-            this.currentCourse = this.courses[index];
-            this.selection = new SplitsBrowser.Model.CompetitorSelection(this.currentCourse.competitors.length);
+            this.currentClass = this.classes[index];
+            this.selection = new SplitsBrowser.Model.CompetitorSelection(this.currentClass.competitors.length);
             this.competitorListBox.setSelection(this.selection);
-            this.resultsTable.setCourse(this.currentCourse);
+            this.resultsTable.setClass(this.currentClass);
             this.drawChart();
         }
     };
@@ -266,7 +266,7 @@
     /**
     * Change the graph to compare against a different reference.
     * @param {Function} comparisonFunc - The function that returns the
-    *      reference course data from the course data.
+    *      reference class data from the class data.
     */
     SplitsBrowser.Viewer.prototype.selectComparison = function (comparisonFunc) {
         this.comparisonFunction = comparisonFunc;
@@ -301,14 +301,14 @@
     */
     function readEventData(data, status, jqXHR) {
         if (status === "success") {
-            var courses = SplitsBrowser.Input.parseEventData(data);
-            if (courses === null) {
+            var classes = SplitsBrowser.Input.parseEventData(data);
+            if (classes === null) {
                 alert("Unable to read in event data file");
             } else {
                 var viewer = new SplitsBrowser.Viewer();
                 viewer.buildUi();
-                viewer.setCourses(courses);
-                viewer.selectCourse(0);
+                viewer.setClasses(classes);
+                viewer.selectClass(0);
             }
         } else {
             alert("Unable to read event data.  Status: " + status);

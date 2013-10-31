@@ -10,7 +10,7 @@
     */
     SplitsBrowser.Controls.ResultsTable = function (parent) {
         this.parent = parent;
-        this.course = null;
+        this.ageClass = null;
         this.div = null;
         this.headerSpan = null;
         this.table = null;
@@ -38,16 +38,16 @@
     };
     
     /**
-    * Populates the contents of the table with the course data.
+    * Populates the contents of the table with the age-class data.
     */
     SplitsBrowser.Controls.ResultsTable.prototype.populateTable = function () {
         var resultLines = [];
         
         // TODO add course distance and climb, if known?
-        this.headerSpan.text(this.course.name + ", " + this.course.numControls + " control" + ((this.course.numControls === 1) ? "" : "s"));
+        this.headerSpan.text(this.ageClass.name + ", " + this.ageClass.numControls + " control" + ((this.ageClass.numControls === 1) ? "" : "s"));
         
         var headerRow = this.table.select("thead");
-        var headerCellData = ["#", "Name", "Time"].concat(d3.range(1, this.course.numControls + 1)).concat(["Finish"]);
+        var headerCellData = ["#", "Name", "Time"].concat(d3.range(1, this.ageClass.numControls + 1)).concat(["Finish"]);
         var headerCells = this.table.select("thead tr")
                                     .selectAll("th")
                                     .data(headerCellData);
@@ -69,7 +69,7 @@
             }
         }
         
-        var competitors = this.course.competitors.slice(0);
+        var competitors = this.ageClass.competitors.slice(0);
         competitors.sort(SplitsBrowser.Model.compareCompetitors);
         
         var outerThis = this;
@@ -87,18 +87,18 @@
             addCell(tableRow, competitor.name, competitor.club);
             addCell(tableRow, (competitor.completed()) ? SplitsBrowser.formatTime(competitor.totalTime) : "mp", NON_BREAKING_SPACE_CHAR, "time");
             
-            d3.range(1, outerThis.course.numControls + 2).forEach(function (controlNum) {
+            d3.range(1, outerThis.ageClass.numControls + 2).forEach(function (controlNum) {
                 addCell(tableRow, SplitsBrowser.formatTime(competitor.getCumulativeTimeTo(controlNum)), SplitsBrowser.formatTime(competitor.getSplitTimeTo(controlNum)), "time");
             });
         });
     };
     
     /**
-    * Sets the course whose data is displayed.
-    * @param {SplitsBrowser.Model.Course} course - The course displayed.
+    * Sets the class whose data is displayed.
+    * @param {SplitsBrowser.Model.AgeClass} ageClass - The class displayed.
     */
-    SplitsBrowser.Controls.ResultsTable.prototype.setCourse = function (course) {
-        this.course = course;
+    SplitsBrowser.Controls.ResultsTable.prototype.setClass = function (ageClass) {
+        this.ageClass = ageClass;
         this.populateTable();
         if (this.div.style("display") !== "none") {
             this.adjustTableCellWidths();

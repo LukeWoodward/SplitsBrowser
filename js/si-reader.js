@@ -3,11 +3,11 @@
     
     var CLUB_COLUMN_NAME = "City";
     
-    var COURSE_COLUMN_NAME = "Short";
+    var CLASS_COLUMN_NAME = "Short";
     
     var PLACING_COLUMN_NAME = "Pl";
     
-    var MANDATORY_COLUMN_NAMES = ["First name", "Surname", CLUB_COLUMN_NAME, "Start", "Time", COURSE_COLUMN_NAME, "Course controls", PLACING_COLUMN_NAME];
+    var MANDATORY_COLUMN_NAMES = ["First name", "Surname", CLUB_COLUMN_NAME, "Start", "Time", CLASS_COLUMN_NAME, "Course controls", PLACING_COLUMN_NAME];
     
     SplitsBrowser.Input.SI = {};
     
@@ -30,7 +30,7 @@
     /**
     * Parse 'SI' data read from a semicolon-separated data string.
     * @param {String} data - The input data string read.
-    * @return {Array} Array of courses.
+    * @return {Array} Array of classes.
     */
     SplitsBrowser.Input.SI.parseEventData = function (data) {
         
@@ -46,9 +46,9 @@
             SplitsBrowser.throwWrongFileFormat("Data seems not to be in the SI semicolon-separated format");
         }
         
-        // Map that associates courses to all of the competitors running on
-        // that course.
-        var courses = d3.map();
+        // Map that associates classes to all of the competitors running on
+        // that age class.
+        var ageClasses = d3.map();
         
         dsvData.forEach(function (row) {
             
@@ -63,18 +63,18 @@
             var club = row[CLUB_COLUMN_NAME];
             var startTime = SplitsBrowser.parseTime(row.Start);
             
-            var courseName = row[COURSE_COLUMN_NAME];
+            var className = row[CLASS_COLUMN_NAME];
             
             var numControls;
-            if (courses.has(courseName)) {
-                numControls = courses.get(courseName).numControls;
+            if (ageClasses.has(className)) {
+                numControls = ageClasses.get(className).numControls;
             } else {
                 // TODO add these later?
                 // var courseDistance = row.Km;
                 // var courseClimb = row.m;
                 
                 numControls = parseInt(row["Course controls"], 10);
-                courses.set(courseName, { numControls: numControls, competitors: [] });
+                ageClasses.set(className, { numControls: numControls, competitors: [] });
             }
             
             var cumTimes = [0];
@@ -104,20 +104,20 @@
             
             cumTimes.push(totalTime);
             
-            var order = courses.get(courseName).competitors.length + 1;
+            var order = ageClasses.get(className).competitors.length + 1;
             var competitor = SplitsBrowser.Model.Competitor.fromCumTimes(order, forename, surname, club, startTime, cumTimes);
             if (row[PLACING_COLUMN_NAME] === "n/c") {
                 competitor.setNonCompetitive();
             }
 
-            courses.get(courseName).competitors.push(competitor);
+            ageClasses.get(className).competitors.push(competitor);
         });
         
-        var courseNames = courses.keys();
-        courseNames.sort();
-        return courseNames.map(function (courseName) {
-            var course = courses.get(courseName);
-            return new SplitsBrowser.Model.Course(courseName, course.numControls, course.competitors);
+        var classNames = ageClasses.keys();
+        classNames.sort();
+        return classNames.map(function (className) {
+            var ageClass = ageClasses.get(className);
+            return new SplitsBrowser.Model.AgeClass(className, ageClass.numControls, ageClass.competitors);
         });
     };
 })();

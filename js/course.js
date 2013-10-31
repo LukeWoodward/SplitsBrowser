@@ -29,13 +29,13 @@
     };
 
     /**
-     * Object that represents a collection of competitor data for a course.
+     * Object that represents a collection of competitor data for a class.
      * @constructor.
-     * @param {string} name - Name of the course.
+     * @param {string} name - Name of the age class.
      * @param {Number} numControls - Number of controls.
      * @param {Array} competitors - Array of Competitor objects.
      */
-    SplitsBrowser.Model.Course = function (name, numControls, competitors) {
+    SplitsBrowser.Model.AgeClass = function (name, numControls, competitors) {
         this.name = name;
         this.numControls = numControls;
         this.competitors = competitors;
@@ -43,10 +43,10 @@
     };
 
     /**
-    * Return whether this course is empty, i.e. has no competitors.
-    * @returns {boolean} True if course empty, false if course not empty.
+    * Return whether this class is empty, i.e. has no competitors.
+    * @returns {boolean} True if class empty, false if class not empty.
     */
-    SplitsBrowser.Model.Course.prototype.isEmpty = function () {
+    SplitsBrowser.Model.AgeClass.prototype.isEmpty = function () {
         return this.competitors.length === 0;
     };
 
@@ -55,17 +55,17 @@
     * @param {Number} index - The index of the competitor within the list of all of them.
     * @returns {string} Name of the competitor.
     */
-    SplitsBrowser.Model.Course.prototype.getCompetitorName = function (index) {
+    SplitsBrowser.Model.AgeClass.prototype.getCompetitorName = function (index) {
         return this.competitors[index].name;
     };
 
     /**
-    * Return the cumulative times of the 'winner' of this course, i.e. the
+    * Return the cumulative times of the 'winner' of this class, i.e. the
     * competitor with the least total time.  If there are no competitors that
-    * have completed the course, null is returned. 
+    * have completed the class, null is returned. 
     * @returns {Array|null} Array of cumulative times, or null if none.
     */
-    SplitsBrowser.Model.Course.prototype.getWinnerCumTimes = function () {
+    SplitsBrowser.Model.AgeClass.prototype.getWinnerCumTimes = function () {
         var completingCompetitors = this.competitors.filter(function (comp) { return comp.completed(); });
         if (completingCompetitors.length === 0) {
             return null;
@@ -83,26 +83,26 @@
 
     /**
     * Return the imaginary competitor who recorded the fastest time on each leg
-    * of the course.
+    * of the class.
     * If at least one control has no competitors recording a time for it, null
     * is returned.
     * @returns {Array|null} Cumulative splits of the imaginary competitor with
     *           fastest time, if any.
     */
-    SplitsBrowser.Model.Course.prototype.getFastestCumTimes = function () {
+    SplitsBrowser.Model.AgeClass.prototype.getFastestCumTimes = function () {
         return this.getFastestCumTimesPlusPercentage(0);
     };
 
     /**
     * Return the imaginary competitor who recorded the fastest time on each leg
-    * of the course, with a given percentage of their time added.
+    * of the class, with a given percentage of their time added.
     * If at least one control has no competitors recording a time for it, null
     * is returned.
     * @param {Number} percent - The percentage of time to add.
     * @returns {Array|null} Cumulative splits of the imaginary competitor with
     *           fastest time, if any, after adding a percentage.
     */
-    SplitsBrowser.Model.Course.prototype.getFastestCumTimesPlusPercentage = function (percent) {
+    SplitsBrowser.Model.AgeClass.prototype.getFastestCumTimesPlusPercentage = function (percent) {
         var ratio = 1 + percent / 100;
         var fastestCumTimes = new Array(this.numControls + 1);
         fastestCumTimes[0] = 0;
@@ -127,7 +127,7 @@
     };
 
     /**
-    * Return data from this course in a form suitable for plotting in a chart.
+    * Return data from this class in a form suitable for plotting in a chart.
     * @param {Array} referenceCumTimes - 'Reference' cumulative time data, such
     *            as that of the winner, or the fastest time.
     * @param {Array} currentIndexes - Array of indexes that indicate which
@@ -135,7 +135,7 @@
     * @param {Object} chartType - The type of chart to draw.
     * @returns {Array} Array of data.
     */
-    SplitsBrowser.Model.Course.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
+    SplitsBrowser.Model.AgeClass.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
         if (this.isEmpty()) {
             SplitsBrowser.throwInvalidData("Cannot return chart data when there is no data");
         } else if (typeof referenceCumTimes === "undefined") {
@@ -184,9 +184,9 @@
     };
     
     /**
-    * Compute the ranks of each competitor within their course.
+    * Compute the ranks of each competitor within their class.
     */
-    SplitsBrowser.Model.Course.prototype.computeRanks = function () {
+    SplitsBrowser.Model.AgeClass.prototype.computeRanks = function () {
         var splitRanksByCompetitor = [];
         var cumRanksByCompetitor = [];
         var outerThis = this;
@@ -231,7 +231,7 @@
     * Returns the best few splits to a given control.
     *
     * The number of splits returned may actually be fewer than that asked for,
-    * if there are fewer than that number of people on the course or who punch
+    * if there are fewer than that number of people on the class or who punch
     * the control.
     *
     * The results are returned in an array of 2-element arrays, with each child
@@ -242,7 +242,7 @@
     * @param {Number} controlIdx - Index of the control.
     * @return {Array} Array of the fastest splits to the given control.
     */
-    SplitsBrowser.Model.Course.prototype.getFastestSplitsTo = function (numSplits, controlIdx) {
+    SplitsBrowser.Model.AgeClass.prototype.getFastestSplitsTo = function (numSplits, controlIdx) {
         if (typeof numSplits !== "number" || numSplits <= 0) {
             SplitsBrowser.throwInvalidData("The number of splits must be a positive integer");
         } else if (typeof controlIdx !== "number" || controlIdx <= 0 || controlIdx > this.numControls + 1) {

@@ -7,7 +7,7 @@
 
     var Chart = SplitsBrowser.Controls.Chart;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
-    var Course = SplitsBrowser.Model.Course;
+    var AgeClass = SplitsBrowser.Model.AgeClass;
 
     var _DUMMY_CHART_TYPE_NO_SKIP = {
         name: "dummy",
@@ -70,13 +70,13 @@
     module("Chart");
     
     /**
-    * Creates and returns a Course object populated with test data.
+    * Creates and returns a AgeClass object populated with test data.
     */
-    function getTestCourse () {
+    function getTestClass () {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
-        var course = new Course("Test", 3, [competitor1, competitor2]);
-        return course;
+        var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
+        return ageClass;
     }
 
     // Most of the testing of the chart functionality is visual, so it isn't
@@ -89,35 +89,35 @@
     // testing anything.
 
     QUnit.test("Can create a chart", function (assert) {
-        var course = getTestCourse();
-        var fastestCumTimes = course.getFastestCumTimes();
-        var chartData = course.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP);
+        var ageClass = getTestClass();
+        var fastestCumTimes = ageClass.getFastestCumTimes();
+        var chartData = ageClass.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP);
 
         var chart = createTestChart();
         chart.setSize(1000, 1000);
-        chart.drawChart(chartData, course, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", false);
+        chart.drawChart(chartData, ageClass, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", false);
         expect(0);
     });
 
     QUnit.test("Can create a chart with a chart type skipping the start", function (assert) {
-        var course = getTestCourse();
-        var fastestCumTimes = course.getFastestCumTimes();
-        var chartData = course.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_SKIP);
+        var ageClass = getTestClass();
+        var fastestCumTimes = ageClass.getFastestCumTimes();
+        var chartData = ageClass.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_SKIP);
 
         var chart = createTestChart();
         chart.setSize(1000, 1000);
-        chart.drawChart(chartData, course, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", false);
+        chart.drawChart(chartData, ageClass, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", false);
         expect(0);
     });
 
     QUnit.test("Can create a chart with start-time labels", function (assert) {
-        var course = getTestCourse();
-        var fastestCumTimes = course.getFastestCumTimes();
-        var chartData = course.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP);
+        var ageClass = getTestClass();
+        var fastestCumTimes = ageClass.getFastestCumTimes();
+        var chartData = ageClass.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP);
 
         var chart = createTestChart();
         chart.setSize(1000, 1000);
-        chart.drawChart(chartData, course, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", true);
+        chart.drawChart(chartData, ageClass, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", true);
         expect(0);
     });
     

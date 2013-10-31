@@ -48,7 +48,7 @@
     /**
     * Given that a single runner is selected, select also all of the runners
     * that 'cross' this runner.
-    * @param {Array} competitors - All competitors in the same course.
+    * @param {Array} competitors - All competitors in the same class.
     */    
     SplitsBrowser.Model.CompetitorSelection.prototype.selectCrossingRunners = function (competitors) {
         if (this.isSingleRunnerSelected()) {

@@ -2,36 +2,36 @@
     "use strict";
 
     /**
-    * A control that wraps a drop-down list used to choose between course.
+    * A control that wraps a drop-down list used to choose between classes.
     * @param {HTMLElement} parent - The parent element to add the control to.
     */
-    SplitsBrowser.Controls.CourseSelector = function(parent) {
+    SplitsBrowser.Controls.ClassSelector = function(parent) {
         this.changeHandlers = [];
         
         var span = d3.select(parent).append("span");
-        span.text("Course: ");
+        span.text("Class: ");
         var outerThis = this;
         this.dropDown = span.append("select").node();
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
         
-        this.setCourses([]);
+        this.setClasses([]);
     };
 
     /**
-    * Sets the list of courses that this selector can choose between.
+    * Sets the list of classes that this selector can choose between.
     * 
-    * If there are no courses, a 'dummy' entry is added
-    * @param {Array} courses - Array of Course objects containing course data.
+    * If there are no classes, a 'dummy' entry is added
+    * @param {Array} classes - Array of AgeClass objects containing class data.
     */
-    SplitsBrowser.Controls.CourseSelector.prototype.setCourses = function(courses) {
-        if ($.isArray(courses)) {
+    SplitsBrowser.Controls.ClassSelector.prototype.setClasses = function(classes) {
+        if ($.isArray(classes)) {
             var options;
-            if (courses.length === 0) {
+            if (classes.length === 0) {
                 this.dropDown.disabled = true;
-                options = ["[No courses loaded]"];
+                options = ["[No classes loaded]"];
             } else {
                 this.dropDown.disabled = false;
-                options = courses.map(function(course) { return course.name; });
+                options = classes.map(function(ageClass) { return ageClass.name; });
             }
             
             var optionsList = d3.select(this.dropDown).selectAll("option").data(options);
@@ -42,19 +42,19 @@
                        
             optionsList.exit().remove();
         } else {
-            SplitsBrowser.throwInvalidData("CourseSelector.setCourses: courses is not an array");
+            SplitsBrowser.throwInvalidData("ClassSelector.setClasses: classes is not an array");
         }
     };
 
     /**
-    * Add a change handler to be called whenever the selected course is changed.
+    * Add a change handler to be called whenever the selected class is changed.
     *
     * The index of the newly-selected item is passed to each handler function.
     *
-    * @param {Function} handler - Handler function to be called whenever the course
+    * @param {Function} handler - Handler function to be called whenever the class
     *                   changes.
     */
-    SplitsBrowser.Controls.CourseSelector.prototype.registerChangeHandler = function(handler) {
+    SplitsBrowser.Controls.ClassSelector.prototype.registerChangeHandler = function(handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
             this.changeHandlers.push(handler);
         }    
@@ -63,7 +63,7 @@
     /**
     * Handle a change of the selected option in the drop-down list.
     */
-    SplitsBrowser.Controls.CourseSelector.prototype.onSelectionChanged = function() {
+    SplitsBrowser.Controls.ClassSelector.prototype.onSelectionChanged = function() {
         var outerThis = this;
         this.changeHandlers.forEach(function(handler) { handler(outerThis.dropDown.selectedIndex); });
     };

@@ -2,17 +2,17 @@
     "use strict";
     
     var ALL_COMPARISON_OPTIONS = [
-        { name: "Winner", selector: function (course) { return course.getWinnerCumTimes(); } },
-        { name: "Fastest time", selector: function (course) { return course.getFastestCumTimes(); } }
+        { name: "Winner", selector: function (ageClass) { return ageClass.getWinnerCumTimes(); } },
+        { name: "Fastest time", selector: function (ageClass) { return ageClass.getFastestCumTimes(); } }
     ];
     
-    // All 'Fastest time + N %' values (not including zero, of course).
+    // All 'Fastest time + N %' values (not including zero).
     var FASTEST_PLUS_PERCENTAGES = [5, 25, 50, 100];
     
     FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
         ALL_COMPARISON_OPTIONS.push({
             name: "Fastest time + " + percent + "%",
-            selector: function (course) { return course.getFastestCumTimesPlusPercentage(percent); }
+            selector: function (ageClass) { return ageClass.getFastestCumTimesPlusPercentage(percent); }
         });
     });
     
@@ -34,7 +34,7 @@
     */
     SplitsBrowser.Controls.ComparisonSelector = function(parent) {
         this.changeHandlers = [];
-        this.courses = null;
+        this.classes = null;
         this.currentRunnerIndex = null;
         
         var span = d3.select(parent).append("span");
@@ -70,11 +70,11 @@
     };
 
     /**
-    * Add a change handler to be called whenever the selected course is changed.
+    * Add a change handler to be called whenever the selected class is changed.
     *
     * The function used to return the comparison result is returned.
     *
-    * @param {Function} handler - Handler function to be called whenever the course
+    * @param {Function} handler - Handler function to be called whenever the class
     *                   changes.
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.registerChangeHandler = function(handler) {
@@ -92,37 +92,37 @@
     };
     
     /**
-    * Sets the list of courses.
-    * @param {Array} courses - Array of Course objects.
+    * Sets the list of classes.
+    * @param {Array} classes - Array of AgeClass objects.
     */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.setCourses = function (courses) {
-        var wasNull = (this.courses === null);
-        this.courses = courses;
+    SplitsBrowser.Controls.ComparisonSelector.prototype.setClasses = function (classes) {
+        var wasNull = (this.classes === null);
+        this.classes = classes;
         
-        if (wasNull && this.courses !== null && this.courses.length > 0) {
-            this.setRunnersFromCourse(0);
+        if (wasNull && this.classes !== null && this.classes.length > 0) {
+            this.setRunnersFromClass(0);
         }
     };
     
     /**
-    * Handles a change of selected course, by updating the list of runners that
+    * Handles a change of selected class, by updating the list of runners that
     * can be chosen from.
-    * @param {Number} courseIndex - The index of the chosen course among the
-    *     list of them.
+    * @param {Number} classIndex - The index of the chosen age class among the
+    *     list of all of them.
     */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.updateRunnerList = function (courseIndex) {
-        if (this.courses !== null && 0 <= courseIndex && courseIndex < this.courses.length) {
-            this.setRunnersFromCourse(courseIndex);
+    SplitsBrowser.Controls.ComparisonSelector.prototype.updateRunnerList = function (classIndex) {
+        if (this.classes !== null && 0 <= classIndex && classIndex < this.classes.length) {
+            this.setRunnersFromClass(classIndex);
         }
     };
 
     /**
-    * Populates the list of runners in the Runner drop-down.
-    * @param {Number} courseIndex - Index of the course among the list of all
-    *      courses.
+    * Populates the list of runners within a class in the Runner drop-down.
+    * @param {Number} classIndex - Index of the class among the list of all
+    *      classes.
     */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.setRunnersFromCourse = function (courseIndex) {
-        var competitors = this.courses[courseIndex].competitors;
+    SplitsBrowser.Controls.ComparisonSelector.prototype.setRunnersFromClass = function (classIndex) {
+        var competitors = this.classes[classIndex].competitors;
         var completingCompetitorIndexes = d3.range(competitors.length).filter(function (idx) { return competitors[idx].completed(); });
         var completingCompetitors = competitors.filter(function (comp) { return comp.completed(); });
         
@@ -148,7 +148,7 @@
             var dropdownSelectedIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
             this.currentRunnerIndex = parseInt(this.runnerDropDown.options[dropdownSelectedIndex].value, 10);
             var outerThis = this;
-            return function (course) { return course.competitors[outerThis.currentRunnerIndex].getAllCumulativeTimes(); };
+            return function (ageClass) { return ageClass.competitors[outerThis.currentRunnerIndex].getAllCumulativeTimes(); };
         } else {
             return ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
         }
