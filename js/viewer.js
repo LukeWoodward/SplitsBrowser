@@ -1,4 +1,4 @@
-/* global window, document, $, SplitsBrowser, d3, setTimeout, clearTimeout */
+/* global window, $, SplitsBrowser, d3, setTimeout, clearTimeout */
 
 (function () {
     "use strict";
