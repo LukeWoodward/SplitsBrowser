@@ -43,8 +43,16 @@
     SplitsBrowser.Controls.ResultsTable.prototype.populateTable = function () {
         var resultLines = [];
         
-        // TODO add course distance and climb, if known?
-        this.headerSpan.text(this.ageClass.name + ", " + this.ageClass.numControls + " control" + ((this.ageClass.numControls === 1) ? "" : "s"));
+        var headerText = this.ageClass.name + ", " + this.ageClass.numControls + " control" + ((this.ageClass.numControls === 1) ? "" : "s");
+        var course = this.ageClass.course;
+        if (course.length !== null) {
+            headerText += ", " + course.length.toFixed(1) + "km";
+        }
+        if (course.climb !== null) {
+            headerText += ", " + course.climb + "m";
+        }
+        
+        this.headerSpan.text(headerText);
         
         var headerRow = this.table.select("thead");
         var headerCellData = ["#", "Name", "Time"].concat(d3.range(1, this.ageClass.numControls + 1)).concat(["Finish"]);
