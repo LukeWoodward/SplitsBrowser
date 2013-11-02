@@ -64,6 +64,8 @@
         assert.equal(competitor.club, "ABC", "Should read correct club");
         assert.equal(competitor.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
+        
+        assert.equal(eventData.classes[0].course, course, "Class should refer to its course");
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with missing course length and climb", function (assert) {
@@ -137,6 +139,8 @@
         
         assert.equal(eventData.classes[0].competitors[0].forename, "John", "Should read correct forename for first competitor");
         assert.equal(eventData.classes[0].competitors[1].forename, "Fred", "Should read correct forename for second competitor");
+        
+        assert.equal(eventData.classes[0].course, eventData.courses[0], "Course should be set on the class");
     });
     
     QUnit.test("Can parse a string that contains two competitors in the same class but different course", function (assert) {
@@ -153,6 +157,8 @@
         
         assert.equal(eventData.courses.length, 1, "There should be one element in the courses array");
         assert.equal(eventData.courses[0].name, "Test course 1", "The course name should be the first course");
+        
+        assert.equal(eventData.classes[0].course, eventData.courses[0], "Course should be set on the class");
     });
     
     QUnit.test("Can parse a string that contains two competitors in the same course but different class", function (assert) {
@@ -169,6 +175,9 @@
         assert.equal(eventData.courses.length, 1, "There should be one element in the courses array");
         assert.equal(eventData.courses[0].name, "Test course", "The course name should be correct");
         assert.deepEqual(eventData.courses[0].classes, eventData.classes, "The course should have the two classes");
+        
+        assert.equal(eventData.classes[0].course, eventData.courses[0], "Course should be set on the first class");
+        assert.equal(eventData.classes[1].course, eventData.courses[0], "Course should be set on the second class");
     });
     
     QUnit.test("Can parse a string that contains a course with two classes where one class is used in another course into an event with a single course", function (assert) {
@@ -188,6 +197,9 @@
         assert.equal(eventData.courses.length, 1, "There should be one element in the courses array");
         assert.equal(eventData.courses[0].name, "Test course 1", "The course name should be correct");
         assert.deepEqual(eventData.courses[0].classes, eventData.classes, "The course should have the two classes");
+        
+        assert.equal(eventData.classes[0].course, eventData.courses[0], "Course should be set on the first class");
+        assert.equal(eventData.classes[1].course, eventData.courses[0], "Course should be set on the second class");
     });
     
     QUnit.test("Can parse a string that contains two competitors on different classes and courses", function (assert) {
@@ -215,6 +227,9 @@
         assert.strictEqual(eventData.courses[0].climb, 140, "First course climb should be correct");
         assert.strictEqual(eventData.courses[1].length, 5.3, "Second course length should be correct");
         assert.strictEqual(eventData.courses[1].climb, 155, "Second course climb should be correct");
+        
+        assert.equal(eventData.classes[0].course, eventData.courses[0], "First course should be set on the first class");
+        assert.equal(eventData.classes[1].course, eventData.courses[1], "Second course should be set on the second class");
     });
     
     QUnit.test("Can parse a string that contains two competitors on different classes, sorting the classes into order", function (assert) {
@@ -236,6 +251,9 @@
         assert.equal(eventData.courses[1].name, "Test course 2", "Second course should have correct name");
         assert.deepEqual(eventData.courses[0].classes, [eventData.classes[1]], "First course should use the second class only");
         assert.deepEqual(eventData.courses[1].classes, [eventData.classes[0]], "Second course should use the first class only");
+        
+        assert.equal(eventData.classes[0].course, eventData.courses[1], "Second course should be set on the first class");
+        assert.equal(eventData.classes[1].course, eventData.courses[0], "First course should be set on the second class");
     });
     
     QUnit.test("Cannot parse a string that contains no first name column", function (assert) {

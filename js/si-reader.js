@@ -138,6 +138,11 @@
                 var courseClasses = relatedClassNames.map(function (clsName) { return classesMap.get(clsName); });
                 var details = courseDetails.get(courseName);
                 var course = new SplitsBrowser.Model.Course(courseName, courseClasses, details.length, details.climb);
+                
+                courseClasses.forEach(function (ageClass) {
+                    ageClass.setCourse(course);
+                });
+                
                 courses.push(course);
             }
         });
