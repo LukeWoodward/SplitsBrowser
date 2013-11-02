@@ -820,6 +820,22 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.length = length;
         this.climb = climb;
     };
+    
+    /**
+    * Returns an array of the 'other' classes on this course.
+    * @param {SplitsBrowser.Model.AgeClass} ageClass - An age class that should
+    *     be on this course,
+    * @return {Array} Array of other age classes.
+    */
+    SplitsBrowser.Model.Course.prototype.getOtherClasses = function (ageClass) {
+        var otherClasses = this.classes.filter(function (cls) { return cls !== ageClass; });
+        if (otherClasses.length === this.classes.length) {
+            // Given class not found.
+            SplitsBrowser.throwInvalidData("Course.getOtherClasses: given class is not in this course");
+        } else {
+            return otherClasses;
+        }
+    };
 })();
 
 /* global SplitsBrowser, $, d3 */
@@ -1214,6 +1230,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 var courseClasses = relatedClassNames.map(function (clsName) { return classesMap.get(clsName); });
                 var details = courseDetails.get(courseName);
                 var course = new SplitsBrowser.Model.Course(courseName, courseClasses, details.length, details.climb);
+                
+                courseClasses.forEach(function (ageClass) {
+                    ageClass.setCourse(course);
+                });
+                
                 courses.push(course);
             }
         });
@@ -1476,7 +1497,40 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.dropDown = span.append("select").node();
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
         
+        this.otherClassesCombiningLabel = span.append("span")
+                                              .classed("otherClassCombining", true)
+                                              .text("and");
+        
+        this.otherClassesSelector = span.append("div")
+                                   .classed("otherClassSelector", true)
+                                   .style("display", "none");
+                                   
+        this.otherClassesSpan = this.otherClassesSelector.append("span");
+        
+        this.otherClassesList = d3.select(parent).append("div")
+                                                .classed("otherClassList", true)
+                                                .style("position", "absolute")
+                                                .style("display", "none");
+                                   
+        this.otherClassesSelector.on("click", function () { outerThis.showHideClassSelector(); });
+         
         this.setClasses([]);
+        
+        // Indexes of the selected 'other classes'.
+        this.selectedOtherClassIndexes = d3.set();
+        
+        // Ensure that a click outside of the drop-down list or the selector
+        // box closes it.
+        // Taken from http://stackoverflow.com/questions/1403615 and adjusted.
+        $(document).click(function (e) {
+            var listDiv = outerThis.otherClassesList.node();
+            if (listDiv.style.display !== "none") {
+                var container = $("div.otherClassList,div.otherClassSelector");
+                if (!container.is(e.target) && container.has(e.target).length === 0) { 
+                    listDiv.style.display = "none";
+                }
+            }
+        });        
     };
 
     /**
@@ -1487,6 +1541,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.ClassSelector.prototype.setClasses = function(classes) {
         if ($.isArray(classes)) {
+            this.classes = classes;
             var options;
             if (classes.length === 0) {
                 this.dropDown.disabled = true;
@@ -1503,6 +1558,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                        .text(function(value) { return value; });
                        
             optionsList.exit().remove();
+      
+            if (classes.length > 0) {
+                this.updateOtherClasses();
+            }
         } else {
             SplitsBrowser.throwInvalidData("ClassSelector.setClasses: classes is not an array");
         }
@@ -1524,11 +1583,103 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
     /**
     * Handle a change of the selected option in the drop-down list.
+    *
+    * This text contains either a list of the selected classes, or placeholder
+    * text if none are selected.
     */
     SplitsBrowser.Controls.ClassSelector.prototype.onSelectionChanged = function() {
         var outerThis = this;
         this.changeHandlers.forEach(function(handler) { handler(outerThis.dropDown.selectedIndex); });
+        this.updateOtherClasses();
     };
+    
+    /**
+    * Updates the text in the other-class box at the top.
+    */ 
+    SplitsBrowser.Controls.ClassSelector.prototype.updateOtherClassText = function () {
+        var classIdxs = this.selectedOtherClassIndexes.values();
+        classIdxs.sort(d3.ascending);
+        var text;
+        if (classIdxs.length === 0) {
+            text = "<select>";
+        } else {
+            var outerThis = this;
+            text = classIdxs.map(function (classIdx) { return outerThis.classes[classIdx].name; })
+                                 .join(", ");
+        }
+        
+        this.otherClassesSpan.text(text);
+    };
+    
+    /**
+    * Updates the other-classes selector div following a change of selected
+    * 'main' class.
+    */
+    SplitsBrowser.Controls.ClassSelector.prototype.updateOtherClasses = function () {
+        this.otherClassesList.style("display", "none");
+        this.selectedOtherClassIndexes = d3.set();
+        this.updateOtherClassText();
+            
+        $("div.otherClassItem").off("click");
+            
+        var outerThis = this;
+        var newClass = this.classes[this.dropDown.selectedIndex];
+        var otherClasses = newClass.course.getOtherClasses(newClass);
+        
+        var otherClassIndexes = otherClasses.map(function (cls) { return outerThis.classes.indexOf(cls); });
+        
+        var otherClassesSelection = this.otherClassesList.selectAll("div")
+                                                         .data(otherClassIndexes);
+        
+        otherClassesSelection.enter().append("div")
+                                     .classed("otherClassItem", true);
+        
+        otherClassesSelection.attr("id", function (classIdx) { return "ageClassIdx_" + classIdx; })
+                             .classed("selected", false)
+                             .text(function (classIdx) { return outerThis.classes[classIdx].name; });
+                             
+        otherClassesSelection.exit().remove();
+        
+        if (otherClassIndexes.length > 0) {
+            this.otherClassesSelector.style("display", "inline-block");
+            this.otherClassesCombiningLabel.style("display", "");
+        } else {
+            this.otherClassesSelector.style("display", "none");
+            this.otherClassesCombiningLabel.style("display", "none");
+        }
+        
+        var offset = $(this.otherClassesSelector.node()).offset();
+        var height = $(this.otherClassesSelector.node()).outerHeight();
+        this.otherClassesList.style("left", offset.left + "px")
+                            .style("top", offset.top + height + "px");
+                            
+        $("div.otherClassItem").each(function (index, div) {
+            $(div).on("click", function () { outerThis.toggleOtherClass(otherClassIndexes[index]); });
+        });
+    };
+    
+    /**
+    * Shows or hides the class-selector.
+    */
+    SplitsBrowser.Controls.ClassSelector.prototype.showHideClassSelector = function () {
+        this.otherClassesList.style("display", (this.otherClassesList.style("display") === "none") ? "" : "none");
+    };
+    
+    /**
+    * Toggles the selection of an other class.
+    * @param {Number} classIdx - Index of the class among the list of all classes.
+    */
+    SplitsBrowser.Controls.ClassSelector.prototype.toggleOtherClass = function (classIdx) {
+        if (this.selectedOtherClassIndexes.has(classIdx)) {
+            this.selectedOtherClassIndexes.remove(classIdx);
+        } else {
+            this.selectedOtherClassIndexes.add(classIdx);
+        }
+        
+        d3.select("div#ageClassIdx_" + classIdx).classed("selected", this.selectedOtherClassIndexes.has(classIdx));
+        this.updateOtherClassText();
+    };
+    
 })();
 
 
@@ -2900,8 +3051,16 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Controls.ResultsTable.prototype.populateTable = function () {
         var resultLines = [];
         
-        // TODO add course distance and climb, if known?
-        this.headerSpan.text(this.ageClass.name + ", " + this.ageClass.numControls + " control" + ((this.ageClass.numControls === 1) ? "" : "s"));
+        var headerText = this.ageClass.name + ", " + this.ageClass.numControls + " control" + ((this.ageClass.numControls === 1) ? "" : "s");
+        var course = this.ageClass.course;
+        if (course.length !== null) {
+            headerText += ", " + course.length.toFixed(1) + "km";
+        }
+        if (course.climb !== null) {
+            headerText += ", " + course.climb + "m";
+        }
+        
+        this.headerSpan.text(headerText);
         
         var headerRow = this.table.select("thead");
         var headerCellData = ["#", "Name", "Time"].concat(d3.range(1, this.ageClass.numControls + 1)).concat(["Finish"]);

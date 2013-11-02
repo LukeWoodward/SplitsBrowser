@@ -20,4 +20,20 @@
         this.length = length;
         this.climb = climb;
     };
+    
+    /**
+    * Returns an array of the 'other' classes on this course.
+    * @param {SplitsBrowser.Model.AgeClass} ageClass - An age class that should
+    *     be on this course,
+    * @return {Array} Array of other age classes.
+    */
+    SplitsBrowser.Model.Course.prototype.getOtherClasses = function (ageClass) {
+        var otherClasses = this.classes.filter(function (cls) { return cls !== ageClass; });
+        if (otherClasses.length === this.classes.length) {
+            // Given class not found.
+            SplitsBrowser.throwInvalidData("Course.getOtherClasses: given class is not in this course");
+        } else {
+            return otherClasses;
+        }
+    };
 })();

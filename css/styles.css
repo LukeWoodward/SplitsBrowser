@@ -3,6 +3,38 @@ body
     font: 12px sans-serif;
 }
 
+div.otherClassSelector
+{
+    min-width: 100px;
+    border: 1px solid #aaaaaa;
+    padding: 2px;
+    background-color: #eeeeee;
+}
+
+span.otherClassCombining
+{
+    padding: 0px 10px;
+}
+
+div.otherClassList
+{
+    min-width: 100px;
+    padding: 2px;
+    background-color: white;
+    border: 1px solid #aaaaaa;
+}
+
+div.otherClassItem
+{
+    padding: 2px;
+}
+
+div.otherClassItem.selected
+{
+    background-color: #286880;
+    color: white;
+}
+
 div.competitor.mispunched
 {
     font-style: italic;
