@@ -559,6 +559,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.name = name;
         this.numControls = numControls;
         this.competitors = competitors;
+        this.course = null;
         this.computeRanks();
     };
 
@@ -579,6 +580,14 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         return this.competitors[index].name;
     };
 
+    /**
+    * Sets the course that this age class belongs to.
+    * @param {SplitsBrowser.Model.Course} course - The course this class belongs to.
+    */
+    SplitsBrowser.Model.AgeClass.prototype.setCourse = function (course) {
+        this.course = course;
+    };
+    
     /**
     * Return the cumulative times of the 'winner' of this class, i.e. the
     * competitor with the least total time.  If there are no competitors that
@@ -787,6 +796,48 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         }
     };
     
+})();
+
+/* global $, SplitsBrowser, d3 */
+
+(function () {
+    "use strict";
+    
+    /**
+    * A collection of 'classes', all runners within which ran the same physical
+    * course.
+    *
+    * Course length and climb are both optional and can both be null.
+    * @constructor
+    * @param {String} name - The name of the course.
+    * @param {Array} classes - Array of AgeClass objects comprising the course.
+    * @param {Number|null} length - Length of the course, in kilometres.
+    * @param {Number|null} climb - The course climb, in metres.
+    */
+    SplitsBrowser.Model.Course = function (name, classes, length, climb) {
+        this.name = name;
+        this.classes = classes;
+        this.length = length;
+        this.climb = climb;
+    };
+})();
+
+/* global SplitsBrowser, $, d3 */
+
+(function () {
+    "use strict";
+    
+    /**
+    * Contains all of the data for an event.
+    * @param {Array} classes - Array of AgeClass objects representing all of
+    *     the classes of competitors.
+    * @param {Array} courses - Array of Course objects representing all of the
+    *     courses of the event.
+    */ 
+    SplitsBrowser.Model.Event = function (classes, courses) {
+        this.classes = classes;
+        this.courses = courses;
+    };
 })();
 
 /* global SplitsBrowser, d3 */
@@ -1003,11 +1054,22 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         /**
         * Parse CSV data for an entire event.
         * @param {string} eventData - String containing the entire event data.
-        * @return {Array} Array of AgeClass objects.
+        * @return {SplitsBrowser.Model.Event} All event data read in.
         */
     SplitsBrowser.Input.CSV.parseEventData = function (eventData) {
-        var classes = eventData.split("\r\n\r\n").map($.trim).filter(SplitsBrowser.isTrue);
-        return classes.map(SplitsBrowser.Input.CSV.parseAgeClass);
+        var classSections = eventData.split("\r\n\r\n").map($.trim).filter(SplitsBrowser.isTrue);
+       
+        var classes = classSections.map(SplitsBrowser.Input.CSV.parseAgeClass);
+        
+        // Nulls are for the course length and climb, which aren't in the
+        // source data files, so we can't do anything about them.
+        var courses = classes.map(function (cls) { return new SplitsBrowser.Model.Course(cls.name, [cls], null, null); });
+        
+        for (var i = 0; i < classes.length; i += 1) {
+            classes[i].setCourse(courses[i]);
+        }
+        
+        return new SplitsBrowser.Model.Event(classes, courses);
     };
 })();
 
@@ -1019,9 +1081,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     
     var CLASS_COLUMN_NAME = "Short";
     
+    var COURSE_COLUMN_NAME = "Course";
+    
     var PLACING_COLUMN_NAME = "Pl";
     
-    var MANDATORY_COLUMN_NAMES = ["First name", "Surname", CLUB_COLUMN_NAME, "Start", "Time", CLASS_COLUMN_NAME, "Course controls", PLACING_COLUMN_NAME];
+    var MANDATORY_COLUMN_NAMES = ["First name", "Surname", CLUB_COLUMN_NAME, "Start", "Time", CLASS_COLUMN_NAME, "Course controls", PLACING_COLUMN_NAME, COURSE_COLUMN_NAME];
     
     SplitsBrowser.Input.SI = {};
     
@@ -1042,9 +1106,125 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Sort through the data read in and create the course objects.
+    * @param {Array} classes - Array of AgeClass objects.
+    * @param {d3.map} courseDetails - Map that maps course names to lengths and
+    *      climbs.
+    * @param {Array} classCoursePairs - Array of 2-element array of
+    *      (class name, curse name) pairs.
+    * @return {Array} Array of course objects.
+    */
+    SplitsBrowser.Input.SI.determineCourses = function (classes, courseDetails, classCoursePairs) {
+        // What we have to watch out for is one class using the multiple courses.
+        // We support either:
+        // * One class made up from multiple courses, or
+        // * One course made up from multiple classes.
+        // Anything else is not supported.
+        
+        var classesToCourses = d3.map();
+        var coursesToClasses = d3.map();
+        
+        classCoursePairs.forEach(function (pair) {
+            var className = pair[0];
+            var courseName = pair[1];
+            
+            if (classesToCourses.has(className)) {
+                classesToCourses.get(className).push(courseName);
+            } else {
+                classesToCourses.set(className, [courseName]);
+            }
+            
+            if (coursesToClasses.has(courseName)) {
+                coursesToClasses.get(courseName).push(className);
+            } else {
+                coursesToClasses.set(courseName, [className]);
+            }
+        });
+        
+        
+        // As we work our way through the courses and classes, we may find one
+        // class made up from multiple courses (e.g. in BOC2013, class M21E
+        // uses course 1A and 1B).  In this set we collect up all of the
+        // courses that we have now processed, so that if we later come across
+        // one we've already dealt with, we can ignore it.
+        var doneCourses = d3.set();
+        
+        var classesMap = d3.map();
+        classes.forEach(function (ageClass) {
+            classesMap.set(ageClass.name, ageClass);
+        });
+        
+        var courses = [];
+        
+        coursesToClasses.keys().forEach(function (courseName) {
+            
+            if (!doneCourses.has(courseName)) {
+                // Find all of the courses and classes that are related.
+                // It's not always as simple as one course having multiple
+                // classes, as there can be multiple courses for one single
+                // class, and even multiple courses among multiple classes
+                // (e.g. M20E, M18E on courses 3, 3B at BOC 2013.)
+                
+                // (For the graph theorists among you, imagine the bipartite
+                // graph with classes on one side and courses on the other.  We
+                // want to find the connected subgraph that this course belongs
+                // to.)
+                
+                var courseNamesToDo = [courseName];
+                var classNamesToDo = [];
+                var relatedCourseNames = [];
+                var relatedClassNames = [];
+                
+                var crsName;
+                var clsName;
+                
+                while (courseNamesToDo.length > 0 || classNamesToDo.length > 0) {
+                    while (courseNamesToDo.length > 0) {
+                        crsName = courseNamesToDo.shift();
+                        var clsNames = coursesToClasses.get(crsName);
+                        for (var clsIdx = 0; clsIdx < clsNames.length; clsIdx += 1) {
+                            clsName = clsNames[clsIdx];
+                            if (classNamesToDo.indexOf(clsName) < 0 && relatedClassNames.indexOf(clsName) < 0) {
+                                classNamesToDo.push(clsName);
+                            }
+                        }
+                        
+                        relatedCourseNames.push(crsName);
+                    }
+                    
+                    while (classNamesToDo.length > 0) {
+                        clsName = classNamesToDo.shift();
+                        var crsNames = classesToCourses.get(clsName);
+                        for (var crsIdx = 0; crsIdx < crsNames.length; crsIdx += 1) {
+                            crsName = crsNames[crsIdx];
+                            if (courseNamesToDo.indexOf(crsName) < 0 && relatedCourseNames.indexOf(crsName) < 0) {
+                                courseNamesToDo.push(crsName);
+                            }
+                        }
+                        
+                        relatedClassNames.push(clsName);
+                    }
+                }
+                
+                // Mark all of the courses that we handled here as done.
+                relatedCourseNames.forEach(function (crsName) {
+                    doneCourses.add(crsName);
+                });
+                
+                var courseClasses = relatedClassNames.map(function (clsName) { return classesMap.get(clsName); });
+                var details = courseDetails.get(courseName);
+                var course = new SplitsBrowser.Model.Course(courseName, courseClasses, details.length, details.climb);
+                courses.push(course);
+            }
+        });
+        
+        return courses;
+    };
+    
+    /**
     * Parse 'SI' data read from a semicolon-separated data string.
     * @param {String} data - The input data string read.
-    * @return {Array} Array of classes.
+    * @return {SplitsBrowser.Model.Event} All event data read.
     */
     SplitsBrowser.Input.SI.parseEventData = function (data) {
         
@@ -1063,6 +1243,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         // Map that associates classes to all of the competitors running on
         // that age class.
         var ageClasses = d3.map();
+        
+        // Map that associates courses to length and climb objects.
+        var courseDetails = d3.map();
+        
+        // Set of all pairs of classes and courses.
+        // (While it is common that one course may have multiple classes, it
+        // seems also that one class can be made up of multiple courses, e.g.
+        // M21E at BOC 2013.)
+        var classCoursePairs = [];
         
         dsvData.forEach(function (row) {
             
@@ -1083,12 +1272,17 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             if (ageClasses.has(className)) {
                 numControls = ageClasses.get(className).numControls;
             } else {
-                // TODO add these later?
-                // var courseDistance = row.Km;
-                // var courseClimb = row.m;
-                
                 numControls = parseInt(row["Course controls"], 10);
                 ageClasses.set(className, { numControls: numControls, competitors: [] });
+            }
+            
+            var courseName = row[COURSE_COLUMN_NAME];
+            if (!courseDetails.has(courseName)) {
+                courseDetails.set(courseName, {length: parseFloat(row.Km) || null, climb: parseInt(row.m, 10) || null});
+            }
+            
+            if (!classCoursePairs.some(function (pair) { return pair[0] === className && pair[1] === courseName; })) {
+                classCoursePairs.push([className, courseName]);
             }
             
             var cumTimes = [0];
@@ -1129,10 +1323,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         var classNames = ageClasses.keys();
         classNames.sort();
-        return classNames.map(function (className) {
+        var classes = classNames.map(function (className) {
             var ageClass = ageClasses.get(className);
             return new SplitsBrowser.Model.AgeClass(className, ageClass.numControls, ageClass.competitors);
         });
+        
+        var courses = SplitsBrowser.Input.SI.determineCourses(classes, courseDetails, classCoursePairs);
+        return new SplitsBrowser.Model.Event(classes, courses);
     };
 })();
 
@@ -1151,7 +1348,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * as an array of SplitsBrowser.Model.AgeClass objects, or null in the event
     * of failure.
     * @param {String} data - The data read.
-    * @return {Array} Array of classes read in, or null for failure.
+    * @return {Event} Event data read in, or null for failure.
     */ 
     SplitsBrowser.Input.parseEventData = function (data) {
         for (var i = 0; i < PARSERS.length; i += 1) {
@@ -2789,7 +2986,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
 })();
 
-/* global window, document, $, SplitsBrowser, d3, setTimeout, clearTimeout */
+/* global window, $, SplitsBrowser, d3, setTimeout, clearTimeout */
 
 (function () {
     "use strict";
@@ -3092,13 +3289,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     function readEventData(data, status, jqXHR) {
         if (status === "success") {
-            var classes = SplitsBrowser.Input.parseEventData(data);
-            if (classes === null) {
+            var eventData = SplitsBrowser.Input.parseEventData(data);
+            if (eventData === null) {
                 alert("Unable to read in event data file");
             } else {
                 var viewer = new SplitsBrowser.Viewer();
                 viewer.buildUi();
-                viewer.setClasses(classes);
+                viewer.setClasses(eventData.classes);
                 viewer.selectClass(0);
             }
         } else {

@@ -13,7 +13,7 @@
     * as an array of SplitsBrowser.Model.AgeClass objects, or null in the event
     * of failure.
     * @param {String} data - The data read.
-    * @return {Array} Array of classes read in, or null for failure.
+    * @return {Event} Event data read in, or null for failure.
     */ 
     SplitsBrowser.Input.parseEventData = function (data) {
         for (var i = 0; i < PARSERS.length; i += 1) {

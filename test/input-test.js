@@ -5,6 +5,7 @@
 (function () {
     "use strict";
     
+    var Event = SplitsBrowser.Model.Event;
     var parseEventData = SplitsBrowser.Input.parseEventData;
     
     module("Input");
@@ -15,15 +16,18 @@
         
         var result = parseEventData(csvData);
         assert.ok(result !== null, "There should be an array of classes returned");
-        assert.equal(result.length, 2, "Two classes should be read in");
+        assert.ok(result instanceof Event, "An event should be returned");
+        assert.equal(result.classes.length, 2, "Two classes should be read in");
+        assert.equal(result.courses.length, 2, "Two courses should be read in");
     });
     
     QUnit.test("Can read in 'SI' semicolon-delimited data", function (assert) { 
-        var siData = "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                     "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;03:38;06:02;\r\n";
-        var result = parseEventData(siData);
-        assert.ok(result !== null, "There should be an array of classes returned");
-        assert.ok(result.length, 1, "One class should be read in");
+        var siData = "First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                     "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;4.1;140;3;01:50;03:38;06:02;\r\n";
+        var eventData = parseEventData(siData);
+        assert.ok(eventData !== null, "There should be an array of classes returned");
+        assert.equal(eventData.classes.length, 1, "One class should be read in");
+        assert.equal(eventData.courses.length, 1, "One course should be read in");
     });
     
     QUnit.test("Cannot read in invalid data", function (assert) {

@@ -7,6 +7,8 @@
     
     var parseEventData = SplitsBrowser.Input.SI.parseEventData;
     var AgeClass = SplitsBrowser.Model.AgeClass;
+    var Course = SplitsBrowser.Model.Course;
+    var Event = SplitsBrowser.Model.Event;
     
     module("Input.SI");
     
@@ -40,16 +42,23 @@
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;11:27:45;06:33;Test class;1;3;01:50;03:38;06:02;\r\n");
-        assert.ok($.isArray(results), "Parsing output not an array");
-        assert.equal(results.length, 1, "There should be one element in the array");
-        assert.ok(results[0] instanceof AgeClass, "Array element should be an AgeClass object");
-        assert.equal(results[0].numControls, 3, "Class should have three controls");
-        assert.equal(results[0].name, "Test class", "Class should have correct name");
-        assert.equal(results[0].competitors.length, 1, "One competitor should have been read");
+        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;11:27:45;06:33;Test class;1;Test course;4.1;140;3;01:50;03:38;06:02;\r\n");
+        assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+        assert.equal(eventData.classes.length, 1, "There should be one class");
+        assert.ok(eventData.classes[0] instanceof AgeClass, "Class element should be an AgeClass object");
+        assert.equal(eventData.classes[0].numControls, 3, "Class should have three controls");
+        assert.equal(eventData.classes[0].name, "Test class", "Class should have correct name");
+        assert.equal(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
         
-        var competitor = results[0].competitors[0];
+        assert.equal(eventData.courses.length, 1, "There should be one course");
+        var course = eventData.courses[0];
+        assert.equal(course.name, "Test course", "Course name should be correct");
+        assert.strictEqual(course.length, 4.1, "Course length should be correct");
+        assert.strictEqual(course.climb, 140, "Course climb should be correct");
+        assert.deepEqual(course.classes, [eventData.classes[0]], "The one class in the course should be the one course");
+        
+        var competitor = eventData.classes[0].competitors[0];
         assert.equal(competitor.forename, "John", "Should read correct forename");
         assert.equal(competitor.surname, "Smith", "Should read correct surname");
         assert.equal(competitor.club, "ABC", "Should read correct club");
@@ -57,157 +66,245 @@
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
     });
     
-    QUnit.test("Can parse a string that contains a single competitor's data ignoring second blank City column", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;City;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1; ;3;01:50;03:38;06:02;\r\n");
-        assert.ok($.isArray(results), "Parsing output not an array");
-        assert.equal(results.length, 1, "There should be one element in the array");
-        assert.ok(results[0] instanceof AgeClass, "Array element should be an AgeClass object");
-        assert.equal(results[0].competitors.length, 1, "One competitor should have been read");
+    QUnit.test("Can parse a string that contains a single competitor's data with missing course length and climb", function (assert) {
+        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;11:27:45;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n");
+        assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
         
-        var competitor = results[0].competitors[0];
+        assert.equal(eventData.courses.length, 1, "There should be one course");
+        var course = eventData.courses[0];
+        assert.equal(course.name, "Test course", "Course name should be correct");
+        assert.strictEqual(course.length, null, "Course length should be null");
+        assert.strictEqual(course.climb, null, "Course climb should be null");
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor's data ignoring second blank City column", function (assert) {
+        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;City;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1; ;Test course;4.1;140;3;01:50;03:38;06:02;\r\n");
+        assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+        assert.equal(eventData.classes.length, 1, "There should be one class");
+        assert.ok(eventData.classes[0] instanceof AgeClass, "Array element should be an AgeClass object");
+        assert.equal(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+        
+        var competitor = eventData.classes[0].competitors[0];
         assert.equal(competitor.club, "ABC", "Should read correct club");
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;mp;3;01:50;-----;06:02;\r\n");
-        assert.ok($.isArray(results), "Parsing output not an array");
-        assert.equal(results.length, 1, "There should be one element in the array");
-        assert.equal(results[0].competitors.length, 1, "One competitor should have been read");
+        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;mp;Test course;4.1;140;3;01:50;-----;06:02;\r\n");
+        assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+        assert.equal(eventData.classes.length, 1, "There should be one class");
+        assert.equal(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
         
-        var competitor = results[0].competitors[0];
+        var competitor = eventData.classes[0].competitors[0];
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control and remove the trailing 'mp' from the surname", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith mp;ABC;10:00:00;06:33;Test class;mp;3;01:50;-----;06:02;\r\n");
-        assert.ok($.isArray(results), "Parsing output not an array");
-        assert.equal(results.length, 1, "There should be one element in the array");
-        assert.equal(results[0].competitors.length, 1, "One competitor should have been read");
+        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith mp;ABC;10:00:00;06:33;Test class;mp;Test course;4.1;140;3;01:50;-----;06:02;\r\n");
+        assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+        assert.equal(eventData.classes.length, 1, "There should be one class");
+        assert.equal(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
         
-        var competitor = results[0].competitors[0];
+        var competitor = eventData.classes[0].competitors[0];
         assert.equal(competitor.surname, "Smith", "Should read correct surname without 'mp' suffix");
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data and remove the trailing 'n/c' from the surname", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith n/c;ABC;10:00:00;06:33;Test class;n/c;3;01:50;03:38;06:02;\r\n");
-        assert.ok($.isArray(results), "Parsing output not an array");
-        assert.equal(results.length, 1, "There should be one element in the array");
-        assert.equal(results[0].competitors.length, 1, "One competitor should have been read");
+        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith n/c;ABC;10:00:00;06:33;Test class;n/c;Test course;4.1;140;3;01:50;03:38;06:02;\r\n");
+        assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+        assert.equal(eventData.classes.length, 1, "There should be one class");
+        assert.equal(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
         
-        var competitor = results[0].competitors[0];
+        var competitor = eventData.classes[0].competitors[0];
         assert.equal(competitor.surname, "Smith", "Should read correct surname without 'n/c' suffix");
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
         assert.ok(competitor.isNonCompetitive, "Competitor should be marked as non-competitive");
     });
     
-    QUnit.test("Can parse a string that contains two competitors in the same class", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;03:38;06:02;\r\n" +
-                           "Fred;Baker;DEF;10:30:00;07:11;Test class;2;3;02:01;04:06;06:37;\r\n");
-        assert.equal(results.length, 1, "There should be one element in the array");
-        assert.ok(results[0] instanceof AgeClass, "Array element should be an AgeClass object");
-        assert.equal(results[0].numControls, 3, "Class should have three controls");
-        assert.equal(results[0].competitors.length, 2, "Two competitors should have been read");
+    QUnit.test("Can parse a string that contains two competitors in the same class and course", function (assert) {
+        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;4.1;140;3;01:50;03:38;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;07:11;Test class;2;Test course;4.1;140;3;02:01;04:06;06:37;\r\n");
+        assert.equal(eventData.classes.length, 1, "There should be one class");
+        assert.ok(eventData.classes[0] instanceof AgeClass, "Array element should be an AgeClass object");
+        assert.equal(eventData.classes[0].numControls, 3, "Class should have three controls");
+        assert.equal(eventData.classes[0].competitors.length, 2, "Two competitors should have been read");
         
-        assert.equal(results[0].competitors[0].forename, "John", "Should read correct forename for first competitor");
-        assert.equal(results[0].competitors[1].forename, "Fred", "Should read correct forename for second competitor");
+        assert.equal(eventData.classes[0].competitors[0].forename, "John", "Should read correct forename for first competitor");
+        assert.equal(eventData.classes[0].competitors[1].forename, "Fred", "Should read correct forename for second competitor");
     });
     
-    QUnit.test("Can parse a string that contains two competitors on different classes", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;Punch4;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class 1;1;3;01:50;03:38;06:02;\r\n" +
-                           "Fred;Baker;DEF;10:30:00;09:54;Test class 2;1;4;02:01;04:06;06:37;09:10\r\n");
-        assert.equal(results.length, 2, "There should be two elements in the array");
-        assert.ok(results[0] instanceof AgeClass, "First array element should be an AgeClass object");
-        assert.ok(results[1] instanceof AgeClass, "Second array element should be an AgeClass object");
-        assert.equal(results[0].numControls, 3, "First class should have three controls");
-        assert.equal(results[1].numControls, 4, "Second class should have four controls");
-        assert.equal(results[0].competitors.length, 1, "One competitor should have been read for the first class");
-        assert.equal(results[1].competitors.length, 1, "One competitor should have been read for the second class");
-        assert.equal(results[0].competitors[0].forename, "John", "Should read correct forename for competitor on first class");
-        assert.equal(results[1].competitors[0].forename, "Fred", "Should read correct forename for competitor on second class");
+    QUnit.test("Can parse a string that contains two competitors in the same class but different course", function (assert) {
+        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course 1;4.1;140;3;01:50;03:38;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;07:11;Test class;2;Test course 2;4.1;140;3;02:01;04:06;06:37;\r\n");
+        assert.equal(eventData.classes.length, 1, "There should be one class");
+        assert.ok(eventData.classes[0] instanceof AgeClass, "Array element should be an AgeClass object");
+        assert.equal(eventData.classes[0].numControls, 3, "Class should have three controls");
+        assert.equal(eventData.classes[0].competitors.length, 2, "Two competitors should have been read");
+        
+        assert.equal(eventData.classes[0].competitors[0].forename, "John", "Should read correct forename for first competitor");
+        assert.equal(eventData.classes[0].competitors[1].forename, "Fred", "Should read correct forename for second competitor");
+        
+        assert.equal(eventData.courses.length, 1, "There should be one element in the courses array");
+        assert.equal(eventData.courses[0].name, "Test course 1", "The course name should be the first course");
+    });
+    
+    QUnit.test("Can parse a string that contains two competitors in the same course but different class", function (assert) {
+        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class 1;1;Test course;4.1;140;3;01:50;03:38;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;07:11;Test class 2;1;Test course;4.1;140;3;02:01;04:06;06:37;\r\n");
+        assert.equal(eventData.classes.length, 2, "There should be two classes");
+        assert.equal(eventData.classes[0].competitors.length, 1, "First class should have two competitors");
+        assert.equal(eventData.classes[1].competitors.length, 1, "Second class should have two competitors");
+        
+        assert.equal(eventData.classes[0].competitors[0].forename, "John", "Should read correct forename for first competitor");
+        assert.equal(eventData.classes[1].competitors[0].forename, "Fred", "Should read correct forename for second competitor");
+        
+        assert.equal(eventData.courses.length, 1, "There should be one element in the courses array");
+        assert.equal(eventData.courses[0].name, "Test course", "The course name should be correct");
+        assert.deepEqual(eventData.courses[0].classes, eventData.classes, "The course should have the two classes");
+    });
+    
+    QUnit.test("Can parse a string that contains a course with two classes where one class is used in another course into an event with a single course", function (assert) {
+        var dataString = "First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                         "John;Smith;ABC;10:00:00;06:33;Test class 1;1;Test course 1;4.1;140;3;01:50;03:38;06:02;\r\n" +
+                         "Fred;Baker;DEF;10:30:00;07:11;Test class 2;1;Test course 1;4.1;140;3;02:01;04:06;06:37;\r\n" +
+                         "Bill;Jones;GHI;11:00:00;06:58;Test class 2;1;Test course 2;4.1;140;3;01:48;03:46;05:59;\r\n";
+                         
+        var eventData = parseEventData(dataString);
+        assert.equal(eventData.classes.length, 2, "There should be two classes");
+        assert.equal(eventData.classes[0].competitors.length, 1, "First class should have two competitors");
+        assert.equal(eventData.classes[1].competitors.length, 2, "Second class should have two competitors");
+        
+        assert.equal(eventData.classes[0].competitors[0].forename, "John", "Should read correct forename for competitor in first class");
+        assert.equal(eventData.classes[1].competitors[0].forename, "Fred", "Should read correct forename for first competitor in second class");
+        
+        assert.equal(eventData.courses.length, 1, "There should be one element in the courses array");
+        assert.equal(eventData.courses[0].name, "Test course 1", "The course name should be correct");
+        assert.deepEqual(eventData.courses[0].classes, eventData.classes, "The course should have the two classes");
+    });
+    
+    QUnit.test("Can parse a string that contains two competitors on different classes and courses", function (assert) {
+        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;Punch4;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class 1;1;Test course 1;4.1;140;3;01:50;03:38;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;09:54;Test class 2;1;Test course 2;5.3;155;4;02:01;04:06;06:37;09:10\r\n");
+        assert.equal(eventData.classes.length, 2, "There should be two classes");
+        assert.ok(eventData.classes[0] instanceof AgeClass, "First array element should be an AgeClass object");
+        assert.ok(eventData.classes[1] instanceof AgeClass, "Second array element should be an AgeClass object");
+        assert.equal(eventData.classes[0].numControls, 3, "First class should have three controls");
+        assert.equal(eventData.classes[1].numControls, 4, "Second class should have four controls");
+        assert.equal(eventData.classes[0].competitors.length, 1, "One competitor should have been read for the first class");
+        assert.equal(eventData.classes[1].competitors.length, 1, "One competitor should have been read for the second class");
+        assert.equal(eventData.classes[0].competitors[0].forename, "John", "Should read correct forename for competitor on first class");
+        assert.equal(eventData.classes[1].competitors[0].forename, "Fred", "Should read correct forename for competitor on second class");
+        
+        assert.equal(eventData.courses.length, 2, "There should be two elements in the courses array");
+        assert.ok(eventData.courses[0] instanceof Course, "First array element should be a Course object");
+        assert.ok(eventData.courses[1] instanceof Course, "Second array element should be a Course object");
+        assert.equal(eventData.courses[0].name, "Test course 1", "First course should have correct name");
+        assert.equal(eventData.courses[1].name, "Test course 2", "Second course should have correct name");
+        assert.deepEqual(eventData.courses[0].classes, [eventData.classes[0]], "First course should use the first class only");
+        assert.deepEqual(eventData.courses[1].classes, [eventData.classes[1]], "Second course should use the second class only");
+        assert.strictEqual(eventData.courses[0].length, 4.1, "First course length should be correct");
+        assert.strictEqual(eventData.courses[0].climb, 140, "First course climb should be correct");
+        assert.strictEqual(eventData.courses[1].length, 5.3, "Second course length should be correct");
+        assert.strictEqual(eventData.courses[1].climb, 155, "Second course climb should be correct");
     });
     
     QUnit.test("Can parse a string that contains two competitors on different classes, sorting the classes into order", function (assert) {
-        var results = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;Punch4;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class 2;1;3;01:50;03:38;06:02;\r\n" +
-                           "Fred;Baker;DEF;10:30:00;09:54;Test class 1;1;4;02:01;04:06;06:37;09:10\r\n");
-        assert.equal(results.length, 2, "There should be two elements in the array");
-        assert.ok(results[0] instanceof AgeClass, "First array element should be an AgeClass object");
-        assert.ok(results[1] instanceof AgeClass, "Second array element should be an AgeClass object");
-        assert.equal(results[0].name, "Test class 1", "First class should be first class alphabetically");
-        assert.equal(results[1].name, "Test class 2", "Second class should be second class alphabetically");
-        assert.equal(results[0].competitors[0].forename, "Fred", "Should read correct forename for competitor on first class");
-        assert.equal(results[1].competitors[0].forename, "John", "Should read correct forename for competitor on second class");
+        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;Punch4;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class 2;1;Test course 1;4.1;140;3;01:50;03:38;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;09:54;Test class 1;1;Test course 2;5.3;155;4;02:01;04:06;06:37;09:10\r\n");
+        assert.equal(eventData.classes.length, 2, "There should be two elements in the array");
+        assert.ok(eventData.classes[0] instanceof AgeClass, "First array element should be an AgeClass object");
+        assert.ok(eventData.classes[1] instanceof AgeClass, "Second array element should be an AgeClass object");
+        assert.equal(eventData.classes[0].name, "Test class 1", "First class should be first class alphabetically");
+        assert.equal(eventData.classes[1].name, "Test class 2", "Second class should be second class alphabetically");
+        assert.equal(eventData.classes[0].competitors[0].forename, "Fred", "Should read correct forename for competitor on first class");
+        assert.equal(eventData.classes[1].competitors[0].forename, "John", "Should read correct forename for competitor on second class");
+        
+        assert.equal(eventData.courses.length, 2, "There should be two elements in the courses array");
+        assert.ok(eventData.courses[0] instanceof Course, "First array element should be a Course object");
+        assert.ok(eventData.courses[1] instanceof Course, "Second array element should be a Course object");
+        assert.equal(eventData.courses[0].name, "Test course 1", "First course should have correct name");
+        assert.equal(eventData.courses[1].name, "Test course 2", "Second course should have correct name");
+        assert.deepEqual(eventData.courses[0].classes, [eventData.classes[1]], "First course should use the second class only");
+        assert.deepEqual(eventData.courses[1].classes, [eventData.classes[0]], "Second course should use the first class only");
     });
     
     QUnit.test("Cannot parse a string that contains no first name column", function (assert) {
-        runInvalidDataTest(assert, "First name XYZ;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;03:38;06:02;\r\n", "data with no first-name column");
+        runInvalidDataTest(assert, "First name XYZ;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no first-name column");
     });
     
     QUnit.test("Cannot parse a string that contains no surname column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname XYZ;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;03:38;06:02;\r\n", "data with no surname column");
+        runInvalidDataTest(assert, "First name;Surname XYZ;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no surname column");
     });
     
     QUnit.test("Cannot parse a string that contains no club column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;Club XYZ;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;03:38;06:02;\r\n", "data with no club column");
+        runInvalidDataTest(assert, "First name;Surname;Club XYZ;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no club column");
     });
     
     QUnit.test("Cannot parse a string that contains no start column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start XYZ;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;03:38;06:02;\r\n", "data with no start column");
+        runInvalidDataTest(assert, "First name;Surname;City;Start XYZ;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no start column");
     });
     
     QUnit.test("Cannot parse a string that contains no time column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time XYZ;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;03:38;06:02;\r\n", "data with no time column");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time XYZ;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no time column");
     });
     
     QUnit.test("Cannot parse a string that contains no class column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short XYZ;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;03:38;06:02;\r\n", "data with no class column");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short XYZ;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no class column");
     });
 
     QUnit.test("Cannot parse a string that contains no placing column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl XYZ;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;03:38;06:02;\r\n", "data with no placing column");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl XYZ;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no placing column");
+    });
+
+    QUnit.test("Cannot parse a string that contains no course column", function (assert) {
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course XYZ;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no course-controls column");
     });
 
     QUnit.test("Cannot parse a string that contains no 'course controls' column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls XYZ;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;03:38;06:02;\r\n", "data with no course-controls column");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course;Course controls XYZ;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no course-controls column");
     });
     
     QUnit.test("Cannot parse a string that contains no Punch N column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2 XYZ;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;03:38;06:02;\r\n", "data with no Control2 column");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2 XYZ;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no Control2 column");
     });
     
     QUnit.test("Cannot parse a string that contains cumulative time less than previous", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;07:38;06:02;\r\n", "data with cumulative times not strictly ascending");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;07:38;06:02;\r\n", "data with cumulative times not strictly ascending");
     });
     
     QUnit.test("Cannot parse a string that contains cumulative time equal to previous", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;3;01:50;06:02;06:02;\r\n", "data with cumulative times not strictly ascending");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;06:02;06:02;\r\n", "data with cumulative times not strictly ascending");
     });
     
     QUnit.test("Cannot parse a string that contains cumulative time less than previous before mispunch", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;mp;3;04:37;-----;04:22;\r\n", "data with cumulative times not strictly ascending with mispunch in middle");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;mp;Test course;3;04:37;-----;04:22;\r\n", "data with cumulative times not strictly ascending with mispunch in middle");
     });
     
     QUnit.test("Cannot parse a string that contains total time less than last split time", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;05:33;Test class;1;3;01:50;03:38;06:02;\r\n", "data with cumulative times not strictly ascending");
+        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
+                           "John;Smith;ABC;10:00:00;05:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with cumulative times not strictly ascending");
     });
 })();

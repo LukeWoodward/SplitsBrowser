@@ -301,13 +301,13 @@
     */
     function readEventData(data, status, jqXHR) {
         if (status === "success") {
-            var classes = SplitsBrowser.Input.parseEventData(data);
-            if (classes === null) {
+            var eventData = SplitsBrowser.Input.parseEventData(data);
+            if (eventData === null) {
                 alert("Unable to read in event data file");
             } else {
                 var viewer = new SplitsBrowser.Viewer();
                 viewer.buildUi();
-                viewer.setClasses(classes);
+                viewer.setClasses(eventData.classes);
                 viewer.selectClass(0);
             }
         } else {

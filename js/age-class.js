@@ -39,6 +39,7 @@
         this.name = name;
         this.numControls = numControls;
         this.competitors = competitors;
+        this.course = null;
         this.computeRanks();
     };
 
@@ -59,6 +60,14 @@
         return this.competitors[index].name;
     };
 
+    /**
+    * Sets the course that this age class belongs to.
+    * @param {SplitsBrowser.Model.Course} course - The course this class belongs to.
+    */
+    SplitsBrowser.Model.AgeClass.prototype.setCourse = function (course) {
+        this.course = course;
+    };
+    
     /**
     * Return the cumulative times of the 'winner' of this class, i.e. the
     * competitor with the least total time.  If there are no competitors that

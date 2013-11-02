@@ -61,10 +61,21 @@
         /**
         * Parse CSV data for an entire event.
         * @param {string} eventData - String containing the entire event data.
-        * @return {Array} Array of AgeClass objects.
+        * @return {SplitsBrowser.Model.Event} All event data read in.
         */
     SplitsBrowser.Input.CSV.parseEventData = function (eventData) {
-        var classes = eventData.split("\r\n\r\n").map($.trim).filter(SplitsBrowser.isTrue);
-        return classes.map(SplitsBrowser.Input.CSV.parseAgeClass);
+        var classSections = eventData.split("\r\n\r\n").map($.trim).filter(SplitsBrowser.isTrue);
+       
+        var classes = classSections.map(SplitsBrowser.Input.CSV.parseAgeClass);
+        
+        // Nulls are for the course length and climb, which aren't in the
+        // source data files, so we can't do anything about them.
+        var courses = classes.map(function (cls) { return new SplitsBrowser.Model.Course(cls.name, [cls], null, null); });
+        
+        for (var i = 0; i < classes.length; i += 1) {
+            classes[i].setCourse(courses[i]);
+        }
+        
+        return new SplitsBrowser.Model.Event(classes, courses);
     };
 })();
