@@ -1583,9 +1583,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
     /**
     * Handle a change of the selected option in the drop-down list.
-    *
-    * This text contains either a list of the selected classes, or placeholder
-    * text if none are selected.
     */
     SplitsBrowser.Controls.ClassSelector.prototype.onSelectionChanged = function() {
         var outerThis = this;
@@ -1595,6 +1592,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     
     /**
     * Updates the text in the other-class box at the top.
+    *
+    * This text contains either a list of the selected classes, or placeholder
+    * text if none are selected.
     */ 
     SplitsBrowser.Controls.ClassSelector.prototype.updateOtherClassText = function () {
         var classIdxs = this.selectedOtherClassIndexes.values();
