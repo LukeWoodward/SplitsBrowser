@@ -2,8 +2,8 @@
     "use strict";
     
     var ALL_COMPARISON_OPTIONS = [
-        { name: "Winner", selector: function (ageClass) { return ageClass.getWinnerCumTimes(); } },
-        { name: "Fastest time", selector: function (ageClass) { return ageClass.getFastestCumTimes(); } }
+        { name: "Winner", selector: function (ageClassSet) { return ageClassSet.getWinnerCumTimes(); } },
+        { name: "Fastest time", selector: function (ageClassSet) { return ageClassSet.getFastestCumTimes(); } }
     ];
     
     // All 'Fastest time + N %' values (not including zero).
@@ -12,7 +12,7 @@
     FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
         ALL_COMPARISON_OPTIONS.push({
             name: "Fastest time + " + percent + "%",
-            selector: function (ageClass) { return ageClass.getFastestCumTimesPlusPercentage(percent); }
+            selector: function (ageClassSet) { return ageClassSet.getFastestCumTimesPlusPercentage(percent); }
         });
     });
     
@@ -95,34 +95,18 @@
     * Sets the list of classes.
     * @param {Array} classes - Array of AgeClass objects.
     */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.setClasses = function (classes) {
-        var wasNull = (this.classes === null);
-        this.classes = classes;
-        
-        if (wasNull && this.classes !== null && this.classes.length > 0) {
-            this.setRunnersFromClass(0);
-        }
-    };
-    
-    /**
-    * Handles a change of selected class, by updating the list of runners that
-    * can be chosen from.
-    * @param {Number} classIndex - The index of the chosen age class among the
-    *     list of all of them.
-    */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.updateRunnerList = function (classIndex) {
-        if (this.classes !== null && 0 <= classIndex && classIndex < this.classes.length) {
-            this.setRunnersFromClass(classIndex);
-        }
+    SplitsBrowser.Controls.ComparisonSelector.prototype.setAgeClassSet = function (ageClassSet) {
+        this.ageClassSet = ageClassSet;
+        this.setRunners();
     };
 
     /**
-    * Populates the list of runners within a class in the Runner drop-down.
-    * @param {Number} classIndex - Index of the class among the list of all
-    *      classes.
+    * Populates the drop-down list of runners from an age-class set.
+    * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - Age-class set
+    *     containing all of the runners to populate the list from.
     */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.setRunnersFromClass = function (classIndex) {
-        var competitors = this.classes[classIndex].competitors;
+    SplitsBrowser.Controls.ComparisonSelector.prototype.setRunners = function () {
+        var competitors = this.ageClassSet.allCompetitors;
         var completingCompetitorIndexes = d3.range(competitors.length).filter(function (idx) { return competitors[idx].completed(); });
         var completingCompetitors = competitors.filter(function (comp) { return comp.completed(); });
         
@@ -148,7 +132,7 @@
             var dropdownSelectedIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
             this.currentRunnerIndex = parseInt(this.runnerDropDown.options[dropdownSelectedIndex].value, 10);
             var outerThis = this;
-            return function (ageClass) { return ageClass.competitors[outerThis.currentRunnerIndex].getAllCumulativeTimes(); };
+            return function (ageClassSet) { return ageClassSet.allCompetitors[outerThis.currentRunnerIndex].getAllCumulativeTimes(); };
         } else {
             return ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
         }

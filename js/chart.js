@@ -189,7 +189,7 @@
     SplitsBrowser.Controls.Chart.prototype.getFastestSplits = function () {
         // There's no split to the start, so if the current control is the
         // start, show the statistics for control 1 instead.
-        return this.ageClass.getFastestSplitsTo(MAX_FASTEST_SPLITS, Math.max(this.currentControlIndex, 1));
+        return this.ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, Math.max(this.currentControlIndex, 1));
     };
      
     /**
@@ -274,7 +274,7 @@
     */
     SplitsBrowser.Controls.Chart.prototype.getTimesBehind = function (controlIndex, indexes) {
         var outerThis = this;
-        var selectedCompetitors = indexes.map(function (index) { return outerThis.ageClass.competitors[index]; });
+        var selectedCompetitors = indexes.map(function (index) { return outerThis.ageClassSet.allCompetitors[index]; });
         var referenceSplit = this.referenceCumTimes[controlIndex] - this.referenceCumTimes[controlIndex - 1];
         var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - referenceSplit; });
         return timesBehind;
@@ -285,7 +285,7 @@
     */
     SplitsBrowser.Controls.Chart.prototype.updateCompetitorStatistics = function() {
         var outerThis = this;
-        var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return outerThis.ageClass.competitors[index]; });
+        var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return outerThis.ageClassSet.allCompetitors[index]; });
         var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, comp.getSuffix()); });
         
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
@@ -368,7 +368,7 @@
         } else {
             var outerThis = this;
             var nameWidths = this.selectedIndexes.map(function (index) {
-                var comp = outerThis.ageClass.competitors[index];
+                var comp = outerThis.ageClassSet.allCompetitors[index];
                 return outerThis.getTextWidth(formatNameAndSuffix(comp.name, comp.getSuffix()));
             });
             return d3.max(nameWidths) + this.determineMaxStatisticTextWidth();
@@ -389,7 +389,7 @@
         var maxRank = 0;
         
         var outerThis = this;
-        var selectedCompetitors = this.selectedIndexes.map(function (index) { return outerThis.ageClass.competitors[index]; });
+        var selectedCompetitors = this.selectedIndexes.map(function (index) { return outerThis.ageClassSet.allCompetitors[index]; });
         
         d3.range(1, this.numControls + 2).forEach(function (controlIndex) {
             var times = selectedCompetitors.map(function (comp) { return comp[timeFuncName](controlIndex); });
@@ -696,9 +696,9 @@
             var outerThis = this;
             this.currentCompetitorData = d3.range(this.numLines).map(function (i) {
                 var competitorIndex = outerThis.selectedIndexes[i];
-                var name = outerThis.ageClass.competitors[competitorIndex].name;
+                var name = outerThis.ageClassSet.allCompetitors[competitorIndex].name;
                 return {
-                    label: formatNameAndSuffix(name, outerThis.ageClass.competitors[competitorIndex].getSuffix()),
+                    label: formatNameAndSuffix(name, outerThis.ageClassSet.allCompetitors[competitorIndex].getSuffix()),
                     textHeight: outerThis.getTextHeight(name),
                     y: (finishColumn.ys[i] === null) ? null : outerThis.yScale(finishColumn.ys[i]),
                     colour: colours[competitorIndex % colours.length],
@@ -805,12 +805,12 @@
     * @param {boolean} showStartTimes - Whether to show start times to the left
     *                                   of the chart.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, ageClass, referenceCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, showStartTimes) {
+    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, ageClassSet, referenceCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, showStartTimes) {
         this.numControls = chartData.numControls;
         this.numLines = chartData.competitorNames.length;
         this.selectedIndexes = selectedIndexes;
         this.referenceCumTimes = referenceCumTimes;
-        this.ageClass = ageClass;
+        this.ageClassSet = ageClassSet;
         this.showStartTimes = showStartTimes;
         this.visibleStatistics = visibleStatistics;
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();

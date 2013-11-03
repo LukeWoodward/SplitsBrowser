@@ -8,8 +8,8 @@ module.exports = function(grunt) {
       },
       dist: {
         src: ['js/core.js', 'js/util.js', 'js/time.js', 'js/competitor.js',
-              'js/age-class.js', 'js/course.js', 'js/event.js',
-              'js/competitor-selection.js', 'js/csv-reader.js',
+              'js/age-class.js', 'js/age-class-set.js', 'js/course.js',
+              'js/event.js', 'js/competitor-selection.js', 'js/csv-reader.js',
               'js/si-reader.js', 'js/input.js', 'js/competitor-listbox.js',
               'js/class-selector.js', 'js/comparison-selector.js',
               'js/statistics-selector.js', 'js/chart-type-selector.js',

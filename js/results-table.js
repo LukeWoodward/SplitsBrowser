@@ -82,14 +82,19 @@
         
         var outerThis = this;
         var nonCompCount = 0;
-        competitors.forEach(function (competitor) {
+        var rank = 0;
+        competitors.forEach(function (competitor, index) {
             var tableRow = tableBody.append("tr");
             var numberCell = tableRow.append("td");
             if (competitor.isNonCompetitive) {
                 numberCell.text("n/c");
                 nonCompCount += 1;
             } else if (competitor.completed()) {
-                numberCell.text(competitor.cumRanks[competitor.cumRanks.length - 1] - nonCompCount);
+                if (index === 0 || competitors[index - 1].totalTime !== competitor.totalTime) {
+                    rank = index + 1 - nonCompCount;
+                }
+                
+                numberCell.text(rank);
             }
             
             addCell(tableRow, competitor.name, competitor.club);

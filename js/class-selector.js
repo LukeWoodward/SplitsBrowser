@@ -12,10 +12,14 @@
         span.text("Class: ");
         var outerThis = this;
         this.dropDown = span.append("select").node();
-        $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
+        $(this.dropDown).bind("change", function() {
+            outerThis.updateOtherClasses();
+            outerThis.onSelectionChanged();
+        });
         
         this.otherClassesCombiningLabel = span.append("span")
                                               .classed("otherClassCombining", true)
+                                              .style("display", "none")
                                               .text("and");
         
         this.otherClassesSelector = span.append("div")
@@ -76,18 +80,19 @@
                        
             optionsList.exit().remove();
       
-            if (classes.length > 0) {
-                this.updateOtherClasses();
-            }
+            this.updateOtherClasses();
         } else {
             SplitsBrowser.throwInvalidData("ClassSelector.setClasses: classes is not an array");
         }
     };
 
     /**
-    * Add a change handler to be called whenever the selected class is changed.
+    * Add a change handler to be called whenever the selected class or classes
+    * is changed.
     *
-    * The index of the newly-selected item is passed to each handler function.
+    * An array containing the indexes of the newly-selected classes is passed to
+    * each handler function.  This array is guaranteed to be non-empty.  The
+    * first index in the array is the 'primary' class.
     *
     * @param {Function} handler - Handler function to be called whenever the class
     *                   changes.
@@ -103,8 +108,9 @@
     */
     SplitsBrowser.Controls.ClassSelector.prototype.onSelectionChanged = function() {
         var outerThis = this;
-        this.changeHandlers.forEach(function(handler) { handler(outerThis.dropDown.selectedIndex); });
-        this.updateOtherClasses();
+        var indexes = [outerThis.dropDown.selectedIndex];
+        this.selectedOtherClassIndexes.forEach(function (index) { indexes.push(parseInt(index, 10)); });
+        this.changeHandlers.forEach(function(handler) { handler(indexes); });
     };
     
     /**
@@ -140,8 +146,13 @@
         $("div.otherClassItem").off("click");
             
         var outerThis = this;
-        var newClass = this.classes[this.dropDown.selectedIndex];
-        var otherClasses = newClass.course.getOtherClasses(newClass);
+        var otherClasses;
+        if (this.classes.length > 0) {
+            var newClass = this.classes[this.dropDown.selectedIndex];
+            otherClasses = newClass.course.getOtherClasses(newClass);
+        } else {
+            otherClasses = [];
+        }
         
         var otherClassIndexes = otherClasses.map(function (cls) { return outerThis.classes.indexOf(cls); });
         
@@ -195,6 +206,7 @@
         
         d3.select("div#ageClassIdx_" + classIdx).classed("selected", this.selectedOtherClassIndexes.has(classIdx));
         this.updateOtherClassText();
+        this.onSelectionChanged();
     };
     
 })();
