@@ -81,7 +81,7 @@
         assert.strictEqual(ageClassSet.getWinnerCumTimes(), null, "There should be no winner if there are no competitors that completed the course");
     });
 
-    QUnit.test("Cumulative times of the winner are those with quickest time", function (assert) {
+    QUnit.test("Cumulative times of the winner of a single-class set are those with quickest time", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
@@ -89,19 +89,27 @@
         assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], "John Smith should be the winner");
     });
 
-    QUnit.test("Fastest cumulative times on class with no competitors is null", function (assert) {
+    QUnit.test("Cumulative times of the winner of a multiple-class set are those with quickest time", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [competitor1]), new AgeClass("Test 2", 3, [competitor2])]);
+        var winTimes = ageClassSet.getWinnerCumTimes();
+        assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], "John Smith from the second course should be the winner");
+    });
+
+    QUnit.test("Fastest cumulative times on age-class set with no competitors is null", function (assert) {
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [])]);
         assert.strictEqual(ageClassSet.getFastestCumTimes(), null, "Empty age-class set should have null fastest time");
     });
 
-    QUnit.test("Fastest cumulative times on class with one control mispunched by everyone is null", function (assert) {
+    QUnit.test("Fastest cumulative times on age-class set with one control mispunched by everyone is null", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, null, 100]);
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
         assert.strictEqual(ageClassSet.getFastestCumTimes(), null, "Class with one control mispunched by all should have null fastest time");
     });
 
-    QUnit.test("Fastest cumulative times on class should be made up of fastest times", function (assert) {
+    QUnit.test("Fastest cumulative times on a single-class set should be made up of fastest times", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
@@ -109,7 +117,15 @@
         assert.deepEqual(ageClassSet.getFastestCumTimes(), [0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100], "Fastest cumulative time should be made up of fastest splits");
     });
 
-    QUnit.test("Fastest cumulative times plus 75% on class should be made up of fastest times with 75%", function (assert) {
+    QUnit.test("Fastest cumulative times on a multiple-class set should be made up of fastest times from competitors from both classes", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var ageClassSet = new AgeClassSet([new AgeClass("Test 1 ", 3, [competitor1]), new AgeClass("Test 2", 3, [competitor2])]);
+
+        assert.deepEqual(ageClassSet.getFastestCumTimes(), [0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100], "Fastest cumulative time should be made up of fastest splits");
+    });
+
+    QUnit.test("Fastest cumulative times plus 75% on single-class set should be made up of fastest times with 75%", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
@@ -118,7 +134,7 @@
                                 "Fastest cumulative times + 75% should be made up of fastest cumulative splits with 75% added");
     });
 
-    QUnit.test("Fastest cumulative times on class should be made up of fastest split times ignoring nulls", function (assert) {
+    QUnit.test("Fastest cumulative times on single-class set should be made up of fastest split times ignoring nulls", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, null, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, null]);
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
@@ -146,10 +162,21 @@
         assertCumulativeRanks(assert, competitor, [1, 1, 1, 1]);
     });
     
-    QUnit.test("Can compute ranks when there are two competitors with no equal times", function (assert) {
+    QUnit.test("Can compute ranks in single-class set when there are two competitors with no equal times", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
+        
+        assertSplitRanks(assert, competitor1, [2, 1, 2, 2]);
+        assertCumulativeRanks(assert, competitor1, [2, 1, 1, 2]);
+        assertSplitRanks(assert, competitor2, [1, 2, 1, 1]);
+        assertCumulativeRanks(assert, competitor2, [1, 2, 2, 1]);
+    });
+    
+    QUnit.test("Can compute ranks in multiple-class set when there are two competitors with no equal times", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [competitor1]), new AgeClass("Test 2", 3, [competitor2])]);
         
         assertSplitRanks(assert, competitor1, [2, 1, 2, 2]);
         assertCumulativeRanks(assert, competitor1, [2, 1, 1, 2]);
@@ -245,7 +272,7 @@
         assertCumulativeRanks(assert, competitor3, [2, null, null, null]);
     });
     
-    QUnit.test("Can get fastest two splits to control 3 from class with three competitors", function (assert) {
+    QUnit.test("Can get fastest two splits to control 3 from single-class set with three competitors", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
         var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);
@@ -255,7 +282,17 @@
         assert.deepEqual(fastestSplits, [[199, "Bill Baker"], [209, "John Smith"]]);
     });
     
-    QUnit.test("Can get fastest two splits to finish from class with three competitors", function (assert) {
+    QUnit.test("Can get fastest two splits to control 3 from multiple-class set with three competitors", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);
+        var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [competitor1]), new AgeClass("Test 2", 3, [competitor2, competitor3])]);
+        
+        var fastestSplits = ageClassSet.getFastestSplitsTo(2, 3);
+        assert.deepEqual(fastestSplits, [[199, "Bill Baker"], [209, "John Smith"]]);
+    });
+    
+    QUnit.test("Can get fastest two splits to finish from single-class set with three competitors", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
         var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);
@@ -265,7 +302,7 @@
         assert.deepEqual(fastestSplits, [[100, "John Smith"], [106, "Fred Brown"]]);
     });
     
-    QUnit.test("When getting fastest four splits to control 3 from class with three competitors then three splits returned", function (assert) {
+    QUnit.test("When getting fastest four splits to control 3 from single-class set with three competitors then three splits returned", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
         var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);
@@ -275,7 +312,7 @@
         assert.deepEqual(fastestSplits, [[199, "Bill Baker"], [209, "John Smith"], [212, "Fred Brown"]]);
     });
     
-    QUnit.test("When getting fastest two splits to control 3 from class with three competitors with one mispunching control 3 then splits for other two competitors returned", function (assert) {
+    QUnit.test("When getting fastest two splits to control 3 from single-class set with three competitors with one mispunching control 3 then splits for other two competitors returned", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
         var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);
@@ -285,7 +322,7 @@
         assert.deepEqual(fastestSplits, [[199, "Bill Baker"], [209, "John Smith"]]);
     });
     
-    QUnit.test("When getting fastest two splits to control 3 from class with three competitors with one mispunching a different control then splits for other two competitors returned", function (assert) {
+    QUnit.test("When getting fastest two splits to control 3 from single-class set with three competitors with one mispunching a different control then splits for other two competitors returned", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
         var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, null, 199, 117]);
@@ -295,7 +332,7 @@
         assert.deepEqual(fastestSplits, [[209, "John Smith"], [212, "Fred Brown"]]);
     });
     
-    QUnit.test("When getting fastest two splits to control 3 from class with three competitors with two mispunching control 3 then one split returned", function (assert) {
+    QUnit.test("When getting fastest two splits to control 3 from single-class set with three competitors with two mispunching control 3 then one split returned", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
         var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, null, 117]);
@@ -348,10 +385,35 @@
         assertCannotGetFastestSplits(assert, [competitor1], 1, "this is not a number");
     });
 
-    QUnit.test("Can return chart data for two competitors", function (assert) {
+    QUnit.test("Can return chart data for two competitors in same class", function (assert) {
         var competitor1 = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         var competitor2 = fromSplitTimes(2, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
+        var fastestTime = ageClassSet.getFastestCumTimes();
+
+        var chartData = ageClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 0, ys: [0, 0] },
+                { x: 65, ys: [0, 16] },
+                { x: 65 + 197, ys: [24, 16] },
+                { x: 65 + 197 + 184, ys: [24, 44] },
+                { x: 65 + 197 + 184 + 100, ys: [24, 50] }
+            ],
+            xExtent: [0, 65 + 197 + 184 + 100],
+            yExtent: [0, 50],
+            numControls: 3,
+            competitorNames: ["John Smith", "Fred Brown"]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+    QUnit.test("Can return chart data for two competitors in different classes of the set", function (assert) {
+        var competitor1 = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var competitor2 = fromSplitTimes(2, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [competitor1]), new AgeClass("Test 2", 3, [competitor2])]);
         var fastestTime = ageClassSet.getFastestCumTimes();
 
         var chartData = ageClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE);
