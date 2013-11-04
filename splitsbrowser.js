@@ -898,7 +898,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Model.CompetitorSelection = function (count) {
         if (typeof count !== NUMBER_TYPE) {
-            SplitsBrowser.throwInvalidData("Competitor count must be a number, got " + (typeof count));
+            SplitsBrowser.throwInvalidData("Competitor count must be a number");
         } else if (count <= 0) {
             SplitsBrowser.throwInvalidData("Competitor count must be a positive number");
         }
