@@ -80,7 +80,6 @@
         var competitors = this.ageClass.competitors.slice(0);
         competitors.sort(SplitsBrowser.Model.compareCompetitors);
         
-        var outerThis = this;
         var nonCompCount = 0;
         var rank = 0;
         competitors.forEach(function (competitor, index) {
@@ -100,10 +99,10 @@
             addCell(tableRow, competitor.name, competitor.club);
             addCell(tableRow, (competitor.completed()) ? SplitsBrowser.formatTime(competitor.totalTime) : "mp", NON_BREAKING_SPACE_CHAR, "time");
             
-            d3.range(1, outerThis.ageClass.numControls + 2).forEach(function (controlNum) {
+            d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
                 addCell(tableRow, SplitsBrowser.formatTime(competitor.getCumulativeTimeTo(controlNum)), SplitsBrowser.formatTime(competitor.getSplitTimeTo(controlNum)), "time");
             });
-        });
+        }, this);
     };
     
     /**

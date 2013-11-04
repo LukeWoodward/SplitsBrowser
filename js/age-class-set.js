@@ -138,7 +138,6 @@
     SplitsBrowser.Model.AgeClassSet.prototype.computeRanks = function () {
         var splitRanksByCompetitor = [];
         var cumRanksByCompetitor = [];
-        var outerThis = this;
         
         this.allCompetitors.forEach(function (_comp) {
             splitRanksByCompetitor.push([]);
@@ -146,15 +145,15 @@
         });
         
         d3.range(1, this.numControls + 2).forEach(function (control) {
-            var splitsByCompetitor = outerThis.allCompetitors.map(function(comp) { return comp.getSplitTimeTo(control); });
+            var splitsByCompetitor = this.allCompetitors.map(function(comp) { return comp.getSplitTimeTo(control); });
             var splitRanksForThisControl = SplitsBrowser.Model.getRanks(splitsByCompetitor);
-            outerThis.allCompetitors.forEach(function (_comp, idx) { splitRanksByCompetitor[idx].push(splitRanksForThisControl[idx]); });
-        });
+            this.allCompetitors.forEach(function (_comp, idx) { splitRanksByCompetitor[idx].push(splitRanksForThisControl[idx]); });
+        }, this);
         
         d3.range(1, this.numControls + 2).forEach(function (control) {
             // We want to null out all subsequent cumulative ranks after a
             // competitor mispunches.
-            var cumSplitsByCompetitor = outerThis.allCompetitors.map(function (comp, idx) {
+            var cumSplitsByCompetitor = this.allCompetitors.map(function (comp, idx) {
                 // -1 for previous control, another -1 because the cumulative
                 // time to control N is cumRanksByCompetitor[idx][N - 1].
                 if (control > 1 && cumRanksByCompetitor[idx][control - 1 - 1] === null) {
@@ -168,8 +167,8 @@
                 }
             });
             var cumRanksForThisControl = SplitsBrowser.Model.getRanks(cumSplitsByCompetitor);
-            outerThis.allCompetitors.forEach(function (_comp, idx) { cumRanksByCompetitor[idx].push(cumRanksForThisControl[idx]); });
-        });
+            this.allCompetitors.forEach(function (_comp, idx) { cumRanksByCompetitor[idx].push(cumRanksForThisControl[idx]); });
+        }, this);
         
         this.allCompetitors.forEach(function (comp, idx) {
             comp.setSplitAndCumulativeRanks(splitRanksByCompetitor[idx], cumRanksByCompetitor[idx]);
@@ -259,11 +258,10 @@
             yMax = yMin + 1;
         }
 
-        var outerThis = this;
         var cumulativeTimesByControl = d3.transpose(selectedCompetitorData);
         var xData = (chartType.skipStart) ? referenceCumTimes.slice(1) : referenceCumTimes;
         var zippedData = d3.zip(xData, cumulativeTimesByControl);
-        var competitorNames = currentIndexes.map(function (index) { return outerThis.allCompetitors[index].name; });
+        var competitorNames = currentIndexes.map(function (index) { return this.allCompetitors[index].name; }, this);
         return {
             dataColumns: zippedData.map(function (data) { return { x: data[0], ys: data[1] }; }),
             competitorNames: competitorNames,

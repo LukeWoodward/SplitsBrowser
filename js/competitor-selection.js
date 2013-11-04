@@ -54,12 +54,11 @@
         if (this.isSingleRunnerSelected()) {
             var refCompetitor = competitors[this.currentIndexes[0]];
             
-            var outerThis = this;
             competitors.forEach(function (comp, idx) {
                 if (comp.crosses(refCompetitor)) {
-                    outerThis.currentIndexes.push(idx);
+                    this.currentIndexes.push(idx);
                 }
-            });
+            }, this);
             
             this.currentIndexes.sort(d3.ascending);
             this.fireChangeHandlers();
@@ -70,9 +69,8 @@
     * Fires all of the change handlers currently registered.
     */
     SplitsBrowser.Model.CompetitorSelection.prototype.fireChangeHandlers = function () {
-        var outerThis = this;
         // Call slice(0) to return a copy of the list.
-        this.changeHandlers.forEach(function (handler) { handler(outerThis.currentIndexes.slice(0)); });
+        this.changeHandlers.forEach(function (handler) { handler(this.currentIndexes.slice(0)); }, this);
     };
 
     /**

@@ -273,8 +273,7 @@
     *     behind the reference time.
     */
     SplitsBrowser.Controls.Chart.prototype.getTimesBehind = function (controlIndex, indexes) {
-        var outerThis = this;
-        var selectedCompetitors = indexes.map(function (index) { return outerThis.ageClassSet.allCompetitors[index]; });
+        var selectedCompetitors = indexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
         var referenceSplit = this.referenceCumTimes[controlIndex] - this.referenceCumTimes[controlIndex - 1];
         var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - referenceSplit; });
         return timesBehind;
@@ -284,21 +283,20 @@
     * Updates the statistics text shown after the competitor.
     */
     SplitsBrowser.Controls.Chart.prototype.updateCompetitorStatistics = function() {
-        var outerThis = this;
-        var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return outerThis.ageClassSet.allCompetitors[index]; });
+        var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
         var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, comp.getSuffix()); });
         
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
             if (this.visibleStatistics[0]) {
-                var cumTimes = selectedCompetitors.map(function (comp) { return comp.getCumulativeTimeTo(outerThis.currentControlIndex); });
-                var cumRanks = selectedCompetitors.map(function (comp) { return comp.getCumulativeRankTo(outerThis.currentControlIndex); });
+                var cumTimes = selectedCompetitors.map(function (comp) { return comp.getCumulativeTimeTo(this.currentControlIndex); }, this);
+                var cumRanks = selectedCompetitors.map(function (comp) { return comp.getCumulativeRankTo(this.currentControlIndex); }, this);
                 labelTexts = d3.zip(labelTexts, cumTimes, cumRanks)
                                .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
             }
                            
             if (this.visibleStatistics[1]) {
-                var splitTimes = selectedCompetitors.map(function (comp) { return comp.getSplitTimeTo(outerThis.currentControlIndex); });
-                var splitRanks = selectedCompetitors.map(function (comp) { return comp.getSplitRankTo(outerThis.currentControlIndex); });
+                var splitTimes = selectedCompetitors.map(function (comp) { return comp.getSplitTimeTo(this.currentControlIndex); }, this);
+                var splitRanks = selectedCompetitors.map(function (comp) { return comp.getSplitRankTo(this.currentControlIndex); }, this);
                 labelTexts = d3.zip(labelTexts, splitTimes, splitRanks)
                                .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
             }
@@ -366,11 +364,10 @@
             // find the maximum of an empty array.
             return 0;
         } else {
-            var outerThis = this;
             var nameWidths = this.selectedIndexes.map(function (index) {
-                var comp = outerThis.ageClassSet.allCompetitors[index];
-                return outerThis.getTextWidth(formatNameAndSuffix(comp.name, comp.getSuffix()));
-            });
+                var comp = this.ageClassSet.allCompetitors[index];
+                return this.getTextWidth(formatNameAndSuffix(comp.name, comp.getSuffix()));
+            }, this);
             return d3.max(nameWidths) + this.determineMaxStatisticTextWidth();
         }
     };
@@ -388,8 +385,7 @@
         var maxTime = 0;
         var maxRank = 0;
         
-        var outerThis = this;
-        var selectedCompetitors = this.selectedIndexes.map(function (index) { return outerThis.ageClassSet.allCompetitors[index]; });
+        var selectedCompetitors = this.selectedIndexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
         
         d3.range(1, this.numControls + 2).forEach(function (controlIndex) {
             var times = selectedCompetitors.map(function (comp) { return comp[timeFuncName](controlIndex); });
@@ -464,10 +460,9 @@
     * @return {Number} Maximum width of a start time label.
     */
     SplitsBrowser.Controls.Chart.prototype.determineMaxStartTimeLabelWidth = function (chartData) {
-        var outerThis = this;
         var maxWidth;
         if (chartData.competitorNames.length > 0) {
-            maxWidth = d3.max(chartData.competitorNames.map(function (name) { return outerThis.getTextWidth("00:00:00 " + name); }));
+            maxWidth = d3.max(chartData.competitorNames.map(function (name) { return this.getTextWidth("00:00:00 " + name); }, this));
         } else {
             maxWidth = 0;
         }
@@ -693,18 +688,17 @@
             this.currentCompetitorData = [];
         } else {
             var finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
-            var outerThis = this;
             this.currentCompetitorData = d3.range(this.numLines).map(function (i) {
-                var competitorIndex = outerThis.selectedIndexes[i];
-                var name = outerThis.ageClassSet.allCompetitors[competitorIndex].name;
+                var competitorIndex = this.selectedIndexes[i];
+                var name = this.ageClassSet.allCompetitors[competitorIndex].name;
                 return {
-                    label: formatNameAndSuffix(name, outerThis.ageClassSet.allCompetitors[competitorIndex].getSuffix()),
-                    textHeight: outerThis.getTextHeight(name),
-                    y: (finishColumn.ys[i] === null) ? null : outerThis.yScale(finishColumn.ys[i]),
+                    label: formatNameAndSuffix(name, this.ageClassSet.allCompetitors[competitorIndex].getSuffix()),
+                    textHeight: this.getTextHeight(name),
+                    y: (finishColumn.ys[i] === null) ? null : this.yScale(finishColumn.ys[i]),
                     colour: colours[competitorIndex % colours.length],
                     index: competitorIndex
                 };
-            });
+            }, this);
             
             // Draw the mispunchers at the bottom of the chart, with the last
             // one of them at the bottom.
@@ -735,6 +729,7 @@
         legendLines.enter()
                    .append("line");
 
+        var outerThis = this;
         legendLines.attr("x1", this.contentWidth + 1)
                    .attr("y1", function (data) { return data.y; })
                    .attr("x2", this.contentWidth + legendLineWidth + 1)

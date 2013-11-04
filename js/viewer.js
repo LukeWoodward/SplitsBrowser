@@ -250,9 +250,8 @@
         }
         
         // TODO if changing other classes added, adjust selection.
-        var outerThis = this;
         this.currentIndexes = [];
-        this.currentClasses = indexes.map(function (index) { return outerThis.classes[index]; });
+        this.currentClasses = indexes.map(function (index) { return this.classes[index]; }, this);
         this.ageClassSet = new SplitsBrowser.Model.AgeClassSet(this.currentClasses);
         this.comparisonSelector.setAgeClassSet(this.ageClassSet);
         this.selection = new SplitsBrowser.Model.CompetitorSelection(this.ageClassSet.allCompetitors.length);

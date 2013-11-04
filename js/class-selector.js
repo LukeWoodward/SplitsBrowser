@@ -107,8 +107,7 @@
     * Handle a change of the selected option in the drop-down list.
     */
     SplitsBrowser.Controls.ClassSelector.prototype.onSelectionChanged = function() {
-        var outerThis = this;
-        var indexes = [outerThis.dropDown.selectedIndex];
+        var indexes = [this.dropDown.selectedIndex];
         this.selectedOtherClassIndexes.forEach(function (index) { indexes.push(parseInt(index, 10)); });
         this.changeHandlers.forEach(function(handler) { handler(indexes); });
     };
@@ -126,9 +125,8 @@
         if (classIdxs.length === 0) {
             text = "<select>";
         } else {
-            var outerThis = this;
-            text = classIdxs.map(function (classIdx) { return outerThis.classes[classIdx].name; })
-                                 .join(", ");
+            text = classIdxs.map(function (classIdx) { return this.classes[classIdx].name; }, this)
+                            .join(", ");
         }
         
         this.otherClassesSpan.text(text);
@@ -154,7 +152,7 @@
             otherClasses = [];
         }
         
-        var otherClassIndexes = otherClasses.map(function (cls) { return outerThis.classes.indexOf(cls); });
+        var otherClassIndexes = otherClasses.map(function (cls) { return this.classes.indexOf(cls); }, this);
         
         var otherClassesSelection = this.otherClassesList.selectAll("div")
                                                          .data(otherClassIndexes);

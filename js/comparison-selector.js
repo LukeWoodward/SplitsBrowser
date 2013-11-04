@@ -143,7 +143,6 @@
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.onSelectionChanged = function() {
         this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? "" : "none");
-        var outerThis = this;
-        this.changeHandlers.forEach(function (handler) { handler(outerThis.getComparisonFunction()); });
+        this.changeHandlers.forEach(function (handler) { handler(this.getComparisonFunction()); }, this);
     };
 })();

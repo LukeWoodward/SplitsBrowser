@@ -684,7 +684,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Model.AgeClassSet.prototype.computeRanks = function () {
         var splitRanksByCompetitor = [];
         var cumRanksByCompetitor = [];
-        var outerThis = this;
         
         this.allCompetitors.forEach(function (_comp) {
             splitRanksByCompetitor.push([]);
@@ -692,15 +691,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         });
         
         d3.range(1, this.numControls + 2).forEach(function (control) {
-            var splitsByCompetitor = outerThis.allCompetitors.map(function(comp) { return comp.getSplitTimeTo(control); });
+            var splitsByCompetitor = this.allCompetitors.map(function(comp) { return comp.getSplitTimeTo(control); });
             var splitRanksForThisControl = SplitsBrowser.Model.getRanks(splitsByCompetitor);
-            outerThis.allCompetitors.forEach(function (_comp, idx) { splitRanksByCompetitor[idx].push(splitRanksForThisControl[idx]); });
-        });
+            this.allCompetitors.forEach(function (_comp, idx) { splitRanksByCompetitor[idx].push(splitRanksForThisControl[idx]); });
+        }, this);
         
         d3.range(1, this.numControls + 2).forEach(function (control) {
             // We want to null out all subsequent cumulative ranks after a
             // competitor mispunches.
-            var cumSplitsByCompetitor = outerThis.allCompetitors.map(function (comp, idx) {
+            var cumSplitsByCompetitor = this.allCompetitors.map(function (comp, idx) {
                 // -1 for previous control, another -1 because the cumulative
                 // time to control N is cumRanksByCompetitor[idx][N - 1].
                 if (control > 1 && cumRanksByCompetitor[idx][control - 1 - 1] === null) {
@@ -714,8 +713,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 }
             });
             var cumRanksForThisControl = SplitsBrowser.Model.getRanks(cumSplitsByCompetitor);
-            outerThis.allCompetitors.forEach(function (_comp, idx) { cumRanksByCompetitor[idx].push(cumRanksForThisControl[idx]); });
-        });
+            this.allCompetitors.forEach(function (_comp, idx) { cumRanksByCompetitor[idx].push(cumRanksForThisControl[idx]); });
+        }, this);
         
         this.allCompetitors.forEach(function (comp, idx) {
             comp.setSplitAndCumulativeRanks(splitRanksByCompetitor[idx], cumRanksByCompetitor[idx]);
@@ -805,11 +804,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             yMax = yMin + 1;
         }
 
-        var outerThis = this;
         var cumulativeTimesByControl = d3.transpose(selectedCompetitorData);
         var xData = (chartType.skipStart) ? referenceCumTimes.slice(1) : referenceCumTimes;
         var zippedData = d3.zip(xData, cumulativeTimesByControl);
-        var competitorNames = currentIndexes.map(function (index) { return outerThis.allCompetitors[index].name; });
+        var competitorNames = currentIndexes.map(function (index) { return this.allCompetitors[index].name; }, this);
         return {
             dataColumns: zippedData.map(function (data) { return { x: data[0], ys: data[1] }; }),
             competitorNames: competitorNames,
@@ -935,12 +933,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         if (this.isSingleRunnerSelected()) {
             var refCompetitor = competitors[this.currentIndexes[0]];
             
-            var outerThis = this;
             competitors.forEach(function (comp, idx) {
                 if (comp.crosses(refCompetitor)) {
-                    outerThis.currentIndexes.push(idx);
+                    this.currentIndexes.push(idx);
                 }
-            });
+            }, this);
             
             this.currentIndexes.sort(d3.ascending);
             this.fireChangeHandlers();
@@ -951,9 +948,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Fires all of the change handlers currently registered.
     */
     SplitsBrowser.Model.CompetitorSelection.prototype.fireChangeHandlers = function () {
-        var outerThis = this;
         // Call slice(0) to return a copy of the list.
-        this.changeHandlers.forEach(function (handler) { handler(outerThis.currentIndexes.slice(0)); });
+        this.changeHandlers.forEach(function (handler) { handler(this.currentIndexes.slice(0)); }, this);
     };
 
     /**
@@ -1613,8 +1609,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Handle a change of the selected option in the drop-down list.
     */
     SplitsBrowser.Controls.ClassSelector.prototype.onSelectionChanged = function() {
-        var outerThis = this;
-        var indexes = [outerThis.dropDown.selectedIndex];
+        var indexes = [this.dropDown.selectedIndex];
         this.selectedOtherClassIndexes.forEach(function (index) { indexes.push(parseInt(index, 10)); });
         this.changeHandlers.forEach(function(handler) { handler(indexes); });
     };
@@ -1632,9 +1627,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         if (classIdxs.length === 0) {
             text = "<select>";
         } else {
-            var outerThis = this;
-            text = classIdxs.map(function (classIdx) { return outerThis.classes[classIdx].name; })
-                                 .join(", ");
+            text = classIdxs.map(function (classIdx) { return this.classes[classIdx].name; }, this)
+                            .join(", ");
         }
         
         this.otherClassesSpan.text(text);
@@ -1660,7 +1654,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             otherClasses = [];
         }
         
-        var otherClassIndexes = otherClasses.map(function (cls) { return outerThis.classes.indexOf(cls); });
+        var otherClassIndexes = otherClasses.map(function (cls) { return this.classes.indexOf(cls); }, this);
         
         var otherClassesSelection = this.otherClassesList.selectAll("div")
                                                          .data(otherClassIndexes);
@@ -1863,8 +1857,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.onSelectionChanged = function() {
         this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? "" : "none");
-        var outerThis = this;
-        this.changeHandlers.forEach(function (handler) { handler(outerThis.getComparisonFunction()); });
+        this.changeHandlers.forEach(function (handler) { handler(this.getComparisonFunction()); }, this);
     };
 })();
 
@@ -2068,8 +2061,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Handle a change of the selected option in the drop-down list.
     */
     SplitsBrowser.Controls.ChartTypeSelector.prototype.onSelectionChanged = function () {
-        var outerThis = this;
-        this.changeHandlers.forEach(function(handler) { handler(ALL_CHART_TYPES[outerThis.dropDown.selectedIndex]); });
+        this.changeHandlers.forEach(function(handler) { handler(ALL_CHART_TYPES[this.dropDown.selectedIndex]); }, this);
     };
 })();
 
@@ -2468,8 +2460,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     *     behind the reference time.
     */
     SplitsBrowser.Controls.Chart.prototype.getTimesBehind = function (controlIndex, indexes) {
-        var outerThis = this;
-        var selectedCompetitors = indexes.map(function (index) { return outerThis.ageClassSet.allCompetitors[index]; });
+        var selectedCompetitors = indexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
         var referenceSplit = this.referenceCumTimes[controlIndex] - this.referenceCumTimes[controlIndex - 1];
         var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - referenceSplit; });
         return timesBehind;
@@ -2479,21 +2470,20 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Updates the statistics text shown after the competitor.
     */
     SplitsBrowser.Controls.Chart.prototype.updateCompetitorStatistics = function() {
-        var outerThis = this;
-        var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return outerThis.ageClassSet.allCompetitors[index]; });
+        var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
         var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, comp.getSuffix()); });
         
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
             if (this.visibleStatistics[0]) {
-                var cumTimes = selectedCompetitors.map(function (comp) { return comp.getCumulativeTimeTo(outerThis.currentControlIndex); });
-                var cumRanks = selectedCompetitors.map(function (comp) { return comp.getCumulativeRankTo(outerThis.currentControlIndex); });
+                var cumTimes = selectedCompetitors.map(function (comp) { return comp.getCumulativeTimeTo(this.currentControlIndex); }, this);
+                var cumRanks = selectedCompetitors.map(function (comp) { return comp.getCumulativeRankTo(this.currentControlIndex); }, this);
                 labelTexts = d3.zip(labelTexts, cumTimes, cumRanks)
                                .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
             }
                            
             if (this.visibleStatistics[1]) {
-                var splitTimes = selectedCompetitors.map(function (comp) { return comp.getSplitTimeTo(outerThis.currentControlIndex); });
-                var splitRanks = selectedCompetitors.map(function (comp) { return comp.getSplitRankTo(outerThis.currentControlIndex); });
+                var splitTimes = selectedCompetitors.map(function (comp) { return comp.getSplitTimeTo(this.currentControlIndex); }, this);
+                var splitRanks = selectedCompetitors.map(function (comp) { return comp.getSplitRankTo(this.currentControlIndex); }, this);
                 labelTexts = d3.zip(labelTexts, splitTimes, splitRanks)
                                .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
             }
@@ -2561,11 +2551,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             // find the maximum of an empty array.
             return 0;
         } else {
-            var outerThis = this;
             var nameWidths = this.selectedIndexes.map(function (index) {
-                var comp = outerThis.ageClassSet.allCompetitors[index];
-                return outerThis.getTextWidth(formatNameAndSuffix(comp.name, comp.getSuffix()));
-            });
+                var comp = this.ageClassSet.allCompetitors[index];
+                return this.getTextWidth(formatNameAndSuffix(comp.name, comp.getSuffix()));
+            }, this);
             return d3.max(nameWidths) + this.determineMaxStatisticTextWidth();
         }
     };
@@ -2583,8 +2572,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var maxTime = 0;
         var maxRank = 0;
         
-        var outerThis = this;
-        var selectedCompetitors = this.selectedIndexes.map(function (index) { return outerThis.ageClassSet.allCompetitors[index]; });
+        var selectedCompetitors = this.selectedIndexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
         
         d3.range(1, this.numControls + 2).forEach(function (controlIndex) {
             var times = selectedCompetitors.map(function (comp) { return comp[timeFuncName](controlIndex); });
@@ -2659,10 +2647,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @return {Number} Maximum width of a start time label.
     */
     SplitsBrowser.Controls.Chart.prototype.determineMaxStartTimeLabelWidth = function (chartData) {
-        var outerThis = this;
         var maxWidth;
         if (chartData.competitorNames.length > 0) {
-            maxWidth = d3.max(chartData.competitorNames.map(function (name) { return outerThis.getTextWidth("00:00:00 " + name); }));
+            maxWidth = d3.max(chartData.competitorNames.map(function (name) { return this.getTextWidth("00:00:00 " + name); }, this));
         } else {
             maxWidth = 0;
         }
@@ -2888,18 +2875,17 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             this.currentCompetitorData = [];
         } else {
             var finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
-            var outerThis = this;
             this.currentCompetitorData = d3.range(this.numLines).map(function (i) {
-                var competitorIndex = outerThis.selectedIndexes[i];
-                var name = outerThis.ageClassSet.allCompetitors[competitorIndex].name;
+                var competitorIndex = this.selectedIndexes[i];
+                var name = this.ageClassSet.allCompetitors[competitorIndex].name;
                 return {
-                    label: formatNameAndSuffix(name, outerThis.ageClassSet.allCompetitors[competitorIndex].getSuffix()),
-                    textHeight: outerThis.getTextHeight(name),
-                    y: (finishColumn.ys[i] === null) ? null : outerThis.yScale(finishColumn.ys[i]),
+                    label: formatNameAndSuffix(name, this.ageClassSet.allCompetitors[competitorIndex].getSuffix()),
+                    textHeight: this.getTextHeight(name),
+                    y: (finishColumn.ys[i] === null) ? null : this.yScale(finishColumn.ys[i]),
                     colour: colours[competitorIndex % colours.length],
                     index: competitorIndex
                 };
-            });
+            }, this);
             
             // Draw the mispunchers at the bottom of the chart, with the last
             // one of them at the bottom.
@@ -2930,6 +2916,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         legendLines.enter()
                    .append("line");
 
+        var outerThis = this;
         legendLines.attr("x1", this.contentWidth + 1)
                    .attr("y1", function (data) { return data.y; })
                    .attr("x2", this.contentWidth + legendLineWidth + 1)
@@ -3107,7 +3094,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var competitors = this.ageClass.competitors.slice(0);
         competitors.sort(SplitsBrowser.Model.compareCompetitors);
         
-        var outerThis = this;
         var nonCompCount = 0;
         var rank = 0;
         competitors.forEach(function (competitor, index) {
@@ -3127,10 +3113,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             addCell(tableRow, competitor.name, competitor.club);
             addCell(tableRow, (competitor.completed()) ? SplitsBrowser.formatTime(competitor.totalTime) : "mp", NON_BREAKING_SPACE_CHAR, "time");
             
-            d3.range(1, outerThis.ageClass.numControls + 2).forEach(function (controlNum) {
+            d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
                 addCell(tableRow, SplitsBrowser.formatTime(competitor.getCumulativeTimeTo(controlNum)), SplitsBrowser.formatTime(competitor.getSplitTimeTo(controlNum)), "time");
             });
-        });
+        }, this);
     };
     
     /**
@@ -3421,9 +3407,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         }
         
         // TODO if changing other classes added, adjust selection.
-        var outerThis = this;
         this.currentIndexes = [];
-        this.currentClasses = indexes.map(function (index) { return outerThis.classes[index]; });
+        this.currentClasses = indexes.map(function (index) { return this.classes[index]; }, this);
         this.ageClassSet = new SplitsBrowser.Model.AgeClassSet(this.currentClasses);
         this.comparisonSelector.setAgeClassSet(this.ageClassSet);
         this.selection = new SplitsBrowser.Model.CompetitorSelection(this.ageClassSet.allCompetitors.length);

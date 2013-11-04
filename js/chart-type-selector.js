@@ -110,7 +110,6 @@
     * Handle a change of the selected option in the drop-down list.
     */
     SplitsBrowser.Controls.ChartTypeSelector.prototype.onSelectionChanged = function () {
-        var outerThis = this;
-        this.changeHandlers.forEach(function(handler) { handler(ALL_CHART_TYPES[outerThis.dropDown.selectedIndex]); });
+        this.changeHandlers.forEach(function(handler) { handler(ALL_CHART_TYPES[this.dropDown.selectedIndex]); }, this);
     };
 })();
