@@ -106,23 +106,23 @@
     }
 
     /**
-     * Private object that represents the data for a single competitor.
-     *
-     * The first parameter (order) merely stores the order in which the competitor
-     * appears in the given list of results.  Its sole use is to stabilise sorts of
-     * competitors, as JavaScript's sort() method is not guaranteed to be a stable
-     * sort.  However, it is not strictly the finishing order of the competitors,
-     * as it has been known for them to be given not in the correct order.
-     *
-     * @constructor
-     * @param {Number} order - The position of the competitor within the list of results.
-     * @param {string} forename - The forename of the competitor.
-     * @param {string} surname - The surname of the competitor.
-     * @param {string} club - The name of the competitor's club.
-     * @param {string} startTime - The competitor's start time.
-     * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
-     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
-     */
+    * Private object that represents the data for a single competitor.
+    *
+    * The first parameter (order) merely stores the order in which the competitor
+    * appears in the given list of results.  Its sole use is to stabilise sorts of
+    * competitors, as JavaScript's sort() method is not guaranteed to be a stable
+    * sort.  However, it is not strictly the finishing order of the competitors,
+    * as it has been known for them to be given not in the correct order.
+    *
+    * @constructor
+    * @param {Number} order - The position of the competitor within the list of results.
+    * @param {string} forename - The forename of the competitor.
+    * @param {string} surname - The surname of the competitor.
+    * @param {string} club - The name of the competitor's club.
+    * @param {string} startTime - The competitor's start time.
+    * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
+    * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
+    */
     var Competitor = function (order, forename, surname, club, startTime, splitTimes, cumTimes) {
 
         if (typeof order !== NUMBER_TYPE) {
