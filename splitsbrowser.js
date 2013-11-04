@@ -1471,7 +1471,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         competitorDivs.enter().append("div")
                               .classed("competitor", true);
 
-        competitorDivs.classed("mispunched", function (comp) { return !comp.completed(); })
+        competitorDivs.classed("nonfinisher", function (comp) { return !comp.completed(); })
                       .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });
 
         competitorDivs.exit().remove();

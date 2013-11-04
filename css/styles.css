@@ -35,7 +35,7 @@ div.otherClassItem.selected
     color: white;
 }
 
-div.competitor.mispunched
+div.competitor.nonfinisher
 {
     font-style: italic;
 }
