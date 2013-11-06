@@ -39,7 +39,7 @@
 
     // Dummy functions for returning the width/height of pieces of text.
     function getTextWidth(text) {
-        while (text.substring(0, 1) == "\xa0") {
+        while (text.substring(0, 1) === "\xa0") {
             text = text.substring(1);
         }
         

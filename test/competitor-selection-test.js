@@ -95,7 +95,7 @@
         selection.toggle(1);
 
         for (i = 0; i < 3; i += 1) {
-            assert.ok(selection.isSelected(i) == (i == 1), "Competitor " + i + " should be " + ((i == 1) ? "selected" : "deselected"));
+            assert.ok(selection.isSelected(i) === (i === 1), "Competitor " + i + " should be " + ((i === 1) ? "selected" : "deselected"));
         }
 
         selection.toggle(1);
