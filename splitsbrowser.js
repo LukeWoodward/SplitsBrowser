@@ -897,8 +897,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Model.CompetitorSelection = function (count) {
         if (typeof count !== NUMBER_TYPE) {
             SplitsBrowser.throwInvalidData("Competitor count must be a number");
-        } else if (count <= 0) {
-            SplitsBrowser.throwInvalidData("Competitor count must be a positive number");
+        } else if (count < 0) {
+            SplitsBrowser.throwInvalidData("Competitor count must be a non-negative number");
         }
 
         this.count = count;
@@ -1023,6 +1023,43 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             SplitsBrowser.throwInvalidData("Index is not a number");
         }
     };
+    
+    /**
+    * Migrates the selected competitors from one list to another.
+    *
+    * After the migration, any competitors in the old list that were selected
+    * and are also in the new competitors list remain selected.
+    *
+    * @param {Array} oldCompetitors - Array of Competitor objects for the old
+    *      selection.  The length of this must match the current count of
+    *      competitors.
+    * @param {Array} newCompetitors - Array of Competitor objects for the new
+    *      selection.  This array must not be empty.
+    */
+    SplitsBrowser.Model.CompetitorSelection.prototype.migrate = function (oldCompetitors, newCompetitors) {
+        if (!$.isArray(oldCompetitors)) {
+            SplitsBrowser.throwInvalidData("CompetitorSelection.migrate: oldCompetitors not an array");
+        } else if (!$.isArray(newCompetitors)) {
+            SplitsBrowser.throwInvalidData("CompetitorSelection.migrate: newCompetitors not an array");
+        } else if (oldCompetitors.length !== this.count) {
+            SplitsBrowser.throwInvalidData("CompetitorSelection.migrate: oldCompetitors list must have the same length as the current count"); 
+        } else if (newCompetitors.length === 0) {
+            SplitsBrowser.throwInvalidData("CompetitorSelection.migrate: newCompetitors list must not be empty"); 
+        }
+    
+        var selectedCompetitors = this.currentIndexes.map(function (index) { return oldCompetitors[index]; });
+        
+        this.count = newCompetitors.length;
+        this.currentIndexes = [];
+        newCompetitors.forEach(function (comp, idx) {
+            if (selectedCompetitors.indexOf(comp) >= 0) {
+                this.currentIndexes.push(idx);
+            }
+        }, this);
+        
+        this.fireChangeHandlers();
+    };
+    
 })();
 
 
@@ -3189,6 +3226,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.currentIndexes = null;
         this.chartData = null;
         this.referenceCumTimes = null;
+        this.previousCompetitorList = [];
 
         this.selection = null;
         this.ageClassSet = null;
@@ -3407,22 +3445,30 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     
     /**
     * Change the graph to show the classes with the given indexes.
-    * @param {Number} indexes - The (zero-based) indexes of the classes.
+    * @param {Number} classIndexes - The (zero-based) indexes of the classes.
     */
-    SplitsBrowser.Viewer.prototype.selectClasses = function (indexes) {
-        if (this.selection !== null) {
-            this.selection.selectNone();
+    SplitsBrowser.Viewer.prototype.selectClasses = function (classIndexes) {
+    
+        if (this.selection === null) {
+            this.selection = new SplitsBrowser.Model.CompetitorSelection(0);
+            this.competitorListBox.setSelection(this.selection);
+        } else {
+            if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
+                // The 'primary' class hasn't changed, only the 'other' ones.
+                // In this case we don't clear the selection.
+            } else {
+                this.selection.selectNone();
+            }
         }
         
-        // TODO if changing other classes added, adjust selection.
         this.currentIndexes = [];
-        this.currentClasses = indexes.map(function (index) { return this.classes[index]; }, this);
+        this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
         this.ageClassSet = new SplitsBrowser.Model.AgeClassSet(this.currentClasses);
         this.comparisonSelector.setAgeClassSet(this.ageClassSet);
-        this.selection = new SplitsBrowser.Model.CompetitorSelection(this.ageClassSet.allCompetitors.length);
-        this.competitorListBox.setSelection(this.selection);
         this.resultsTable.setClass(this.currentClasses[0]);
         this.drawChart();
+        this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
+        this.previousCompetitorList = this.ageClassSet.allCompetitors;
     };
     
     /**

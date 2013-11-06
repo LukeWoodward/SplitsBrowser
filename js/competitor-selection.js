@@ -18,8 +18,8 @@
     SplitsBrowser.Model.CompetitorSelection = function (count) {
         if (typeof count !== NUMBER_TYPE) {
             SplitsBrowser.throwInvalidData("Competitor count must be a number");
-        } else if (count <= 0) {
-            SplitsBrowser.throwInvalidData("Competitor count must be a positive number");
+        } else if (count < 0) {
+            SplitsBrowser.throwInvalidData("Competitor count must be a non-negative number");
         }
 
         this.count = count;
@@ -144,4 +144,41 @@
             SplitsBrowser.throwInvalidData("Index is not a number");
         }
     };
+    
+    /**
+    * Migrates the selected competitors from one list to another.
+    *
+    * After the migration, any competitors in the old list that were selected
+    * and are also in the new competitors list remain selected.
+    *
+    * @param {Array} oldCompetitors - Array of Competitor objects for the old
+    *      selection.  The length of this must match the current count of
+    *      competitors.
+    * @param {Array} newCompetitors - Array of Competitor objects for the new
+    *      selection.  This array must not be empty.
+    */
+    SplitsBrowser.Model.CompetitorSelection.prototype.migrate = function (oldCompetitors, newCompetitors) {
+        if (!$.isArray(oldCompetitors)) {
+            SplitsBrowser.throwInvalidData("CompetitorSelection.migrate: oldCompetitors not an array");
+        } else if (!$.isArray(newCompetitors)) {
+            SplitsBrowser.throwInvalidData("CompetitorSelection.migrate: newCompetitors not an array");
+        } else if (oldCompetitors.length !== this.count) {
+            SplitsBrowser.throwInvalidData("CompetitorSelection.migrate: oldCompetitors list must have the same length as the current count"); 
+        } else if (newCompetitors.length === 0) {
+            SplitsBrowser.throwInvalidData("CompetitorSelection.migrate: newCompetitors list must not be empty"); 
+        }
+    
+        var selectedCompetitors = this.currentIndexes.map(function (index) { return oldCompetitors[index]; });
+        
+        this.count = newCompetitors.length;
+        this.currentIndexes = [];
+        newCompetitors.forEach(function (comp, idx) {
+            if (selectedCompetitors.indexOf(comp) >= 0) {
+                this.currentIndexes.push(idx);
+            }
+        }, this);
+        
+        this.fireChangeHandlers();
+    };
+    
 })();

@@ -43,13 +43,9 @@
         }
     });
 
-    QUnit.test("Cannot create a competitor selection if the number of competitors is zero", function (assert) {
-        try {
-            new CompetitorSelection(0);
-            assert.ok(false, "This should not be reached");
-        } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
-        }
+    QUnit.test("Can create a competitor selection if the number of competitors is zero", function (assert) {
+        var selection = new CompetitorSelection(0);
+        assert.strictEqual(selection.count, 0);
     });
 
     QUnit.test("Cannot toggle the selectedness of a competitor whose index is not numeric", function (assert) {
@@ -139,6 +135,7 @@
     });
 
     QUnit.test("Modifying the returned list from a handler has no effect on the the selection", function (assert) {
+        reset();
         var selection = new CompetitorSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.toggle(0);
@@ -262,6 +259,7 @@
     });
 
     QUnit.test("If a single runner is selected, when crossing competitors are selected, then one other competitor is selected", function (assert) {
+        reset();
         var selection = new CompetitorSelection(3);
         selection.toggle(1);
         
@@ -275,5 +273,68 @@
         selection.selectCrossingRunners(competitors);
         assert.deepEqual(lastIndexes, [1, 2], "Selected indexes should be 1 and 2");
         assert.equal(callCount, 1, "One call to the change-handler should be registered");
+    });
+
+    QUnit.test("Cannot migrate from an old list of competitors that isn't an array", function (assert) {
+        var selection = new CompetitorSelection(2);
+        var newCompetitors = [fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301])];
+        try {
+            selection.migrate("this is not an array", newCompetitors);
+            assert.ok(false, "This should not be reached");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+        }
+    });
+
+    QUnit.test("Cannot migrate from an old list of competitors that doesn't match the previous count", function (assert) {
+        var selection = new CompetitorSelection(2);
+        var oldCompetitors = [fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
+        var newCompetitors = [fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301])];
+        try {
+            selection.migrate(oldCompetitors, newCompetitors);
+            assert.ok(false, "This should not be reached");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+        }
+    });
+
+    QUnit.test("Cannot migrate to a new list of competitors that isn't an array", function (assert) {
+        var selection = new CompetitorSelection(2);
+        var oldCompetitors = [fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
+        try {
+            selection.migrate(oldCompetitors, "this is not an array");
+            assert.ok(false, "This should not be reached");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+        }
+    });
+
+    QUnit.test("Cannot migrate to an empty new list of competitors", function (assert) {
+        var selection = new CompetitorSelection(2);
+        var oldCompetitors = [fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
+        try {
+            selection.migrate(oldCompetitors, []);
+            assert.ok(false, "This should not be reached");
+        } catch (e) {
+            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+        }
+    });
+
+    QUnit.test("Can migrate to new list of competitors", function (assert) {
+        reset();
+        var competitor1 = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301]);
+        var competitor2 = fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561]);
+        var competitor3 = fromCumTimes(3, "Bill", "Baker", "GHI", 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381]);
+        var competitor4 = fromCumTimes(4, "Tony", "Giles", "JKL", 10 * 3600 + 2 * 60, [0, 78, 188, 252, 406]);
+        var oldCompetitors = [competitor2, competitor1, competitor3];
+        var newCompetitors = [competitor1, competitor2, competitor4];
+        var selection = new CompetitorSelection(oldCompetitors.length);
+        selection.toggle(1);
+        selection.toggle(2);
+        selection.registerChangeHandler(testHandler);        
+        selection.migrate(oldCompetitors, newCompetitors);
+        assert.strictEqual(selection.count, newCompetitors.length);
+        assert.deepEqual(lastIndexes, [0]);
+        assert.strictEqual(callCount, 1);
     });
 })();
