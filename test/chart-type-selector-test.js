@@ -26,7 +26,7 @@
         var selector = new ChartTypeSelector(d3.select("#qunit-fixture").node());
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         
         var htmlSelect = htmlSelectSelection.node();
         assert.ok(htmlSelect.options.length > 4, "At least four items should be created");
@@ -38,12 +38,12 @@
         selector.registerChangeHandler(handleChartTypeChanged);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
         $(htmlSelect).val(3).change();
         
-        assert.equal(lastChartTypeName, "Split position", "The fourth chart type should have been selected");
-        assert.equal(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(lastChartTypeName, "Split position", "The fourth chart type should have been selected");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
     QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", function(assert) {
@@ -61,14 +61,14 @@
         selector.registerChangeHandler(secondHandler);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
         $(htmlSelect).val(3).change();
         
-        assert.equal(lastChartTypeName, "Split position", "The fourth chart type should have been selected");
-        assert.equal(callCount, 1, "One change should have been recorded");
-        assert.equal(lastChartTypeName2, "Split position", "The fourth chart type should have been selected");
-        assert.equal(callCount2, 1, "One change should have been recorded");
+        assert.strictEqual(lastChartTypeName, "Split position", "The fourth chart type should have been selected");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(lastChartTypeName2, "Split position", "The fourth chart type should have been selected");
+        assert.strictEqual(callCount2, 1, "One change should have been recorded");
     });
 
 
@@ -79,12 +79,12 @@
         selector.registerChangeHandler(handleChartTypeChanged);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(3).change();
         
-        assert.equal(lastChartTypeName, "Split position", "The fourth chart type should have been selected");
-        assert.equal(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(lastChartTypeName, "Split position", "The fourth chart type should have been selected");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 })();

@@ -17,13 +17,13 @@
     
     var assertSplitTimes = function (assert, competitor, expectedSplitTimes) {
         expectedSplitTimes.forEach(function (splitTime, controlIdx) {
-            assert.equal(competitor.getSplitTimeTo(controlIdx + 1), splitTime);
+            assert.strictEqual(competitor.getSplitTimeTo(controlIdx + 1), splitTime);
         });
     };
     
     var assertCumulativeTimes = function (assert, competitor, expectedCumulativeTimes) {
         expectedCumulativeTimes.forEach(function (splitTime, controlIdx) {
-            assert.equal(competitor.getCumulativeTimeTo(controlIdx), splitTime);
+            assert.strictEqual(competitor.getCumulativeTimeTo(controlIdx), splitTime);
         });
     };
 
@@ -32,7 +32,7 @@
             fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, "This is not an array");
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
+            assert.strictEqual(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
         }
     });
 
@@ -41,7 +41,7 @@
             fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, []);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
 
@@ -52,14 +52,14 @@
         assertSplitTimes(assert, competitor, [65, 221, 184, 100]);
         assert.ok(competitor.completed(), "Competitor should be marked as completing the course");
         assert.ok(!competitor.isNonCompetitive, "Competitor should be competitive");
-        assert.equal(competitor.getSuffix(), "", "Competitor should have no suffix");
+        assert.strictEqual(competitor.getSuffix(), "", "Competitor should have no suffix");
     });
 
     QUnit.test("Can create a non-competitive competitor from split times and determine cumulative times", function (assert) {
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         competitor.setNonCompetitive();
         assert.ok(competitor.isNonCompetitive, "Competitor should not be competitive");
-        assert.equal(competitor.getSuffix(), "n/c", "Competitor should have non-competitive suffix");
+        assert.strictEqual(competitor.getSuffix(), "n/c", "Competitor should have non-competitive suffix");
     });
 
     QUnit.test("Can create a competitor from split times and determine cumulative times when competitor has missed a control", function (assert) {
@@ -67,7 +67,7 @@
         assertCumulativeTimes(assert, competitor, [0, 65, 65 + 221, null, null, null]);
         assertSplitTimes(assert, competitor, [65, 221, null, 184, 100]);
         assert.ok(!competitor.completed(), "Competitor should be marked as not completing the course");
-        assert.equal(competitor.getSuffix(), "mp", "Competitor should have mispunched suffix");
+        assert.strictEqual(competitor.getSuffix(), "mp", "Competitor should have mispunched suffix");
     });
 
     QUnit.test("Can create a competitor from split times and determine cumulative times when competitor has missed multiple consecutive controls", function (assert) {
@@ -82,7 +82,7 @@
             fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, "This is not an array");
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
+            assert.strictEqual(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
         }
     });
 
@@ -91,7 +91,7 @@
             fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, []);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
 
@@ -100,7 +100,7 @@
             fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [40, 60, 90]);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
 
@@ -109,7 +109,7 @@
             fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0]);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
 
@@ -141,7 +141,7 @@
 
     QUnit.test("Can determine total time of a competitor that punches all controls", function (assert) {
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
-        assert.equal(competitor.totalTime, 65 + 221 + 184 + 100, "Wrong total time");
+        assert.strictEqual(competitor.totalTime, 65 + 221 + 184 + 100, "Wrong total time");
     });
 
     QUnit.test("Determines total time of a competitor that mispunches as null", function (assert) {
@@ -151,13 +151,13 @@
     
     QUnit.test("Competitor with valid time compares equal to itself", function (assert) {
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [154]);
-        assert.equal(compareCompetitors(competitor, competitor), 0);
+        assert.strictEqual(compareCompetitors(competitor, competitor), 0);
     });
 
     QUnit.test("Competitor with lower total time comes before competitor with higher total time", function (assert) {
         var competitor1 = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [154]);
         var competitor2 = fromSplitTimes(2, "Fred", "Baker", "DEF", 12 * 3600, [188]);
-        assert.equal(signum(compareCompetitors(competitor1, competitor2)), -1);
+        assert.strictEqual(signum(compareCompetitors(competitor1, competitor2)), -1);
     });
 
     QUnit.test("Competitor with higher total time comes before competitor with higher total time", function (assert) {
@@ -186,7 +186,7 @@
 
     QUnit.test("Mispunching competitor compares equal to itself", function (assert) {
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [null]);
-        assert.equal(compareCompetitors(competitor, competitor), 0);
+        assert.strictEqual(compareCompetitors(competitor, competitor), 0);
     });
 
     QUnit.test("Mispunching competitor comes after competitor with valid time", function (assert) {
@@ -232,7 +232,7 @@
             competitor.getCumTimesAdjustedToReference(referenceCumTimes);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
 
@@ -245,7 +245,7 @@
             competitor.getCumTimesAdjustedToReference(referenceCumTimes);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
 
@@ -274,7 +274,7 @@
             competitor.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
 
@@ -287,7 +287,7 @@
             competitor.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
 
@@ -316,7 +316,7 @@
             competitor.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
 
@@ -329,7 +329,7 @@
             competitor.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
     
@@ -341,7 +341,7 @@
             competitor1.crosses(competitor2);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
     

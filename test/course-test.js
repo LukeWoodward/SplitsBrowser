@@ -36,7 +36,7 @@
             course.getOtherClasses(ageClass3);
             assert.ok(false, "Should have thrown an exception");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have been InvalidData; message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have been InvalidData; message is " + e.message);
         }
     });
     

@@ -64,22 +64,22 @@
         selector.setAgeClassSet(DUMMY_CLASS_SET);
         
         var htmlSelectSelection = d3.select(_COMPARISON_SELECTOR_SELECTOR);
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         
         var htmlSelect = htmlSelectSelection.node();
-        assert.equal(htmlSelect.disabled, false, "Selector should be enabled");
+        assert.strictEqual(htmlSelect.disabled, false, "Selector should be enabled");
         assert.ok(htmlSelect.options.length > 2, "More than two options should be created");
         assert.ok(htmlSelect.selectedIndex >= 0, "Selected index should not be negative");
         
         var func = selector.getComparisonFunction();
-        assert.equal(_FASTEST_TIME, func(DUMMY_CLASS_SET));
+        assert.strictEqual(_FASTEST_TIME, func(DUMMY_CLASS_SET));
         
         htmlSelectSelection = d3.select(_RUNNER_SELECTOR_SELECTOR);
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         
         htmlSelect = htmlSelectSelection.node();
-        assert.equal(htmlSelect.options.length, DUMMY_CLASS_SET.allCompetitors.length, "Wrong number of options created");
-        assert.equal(htmlSelect.selectedIndex, 0, "Runner selector should be created with the first item selected");
+        assert.strictEqual(htmlSelect.options.length, DUMMY_CLASS_SET.allCompetitors.length, "Wrong number of options created");
+        assert.strictEqual(htmlSelect.selectedIndex, 0, "Runner selector should be created with the first item selected");
         
         assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), false, "Runner selector should not be shown");
     });
@@ -90,11 +90,11 @@
         selector.setAgeClassSet(ageClassSet);
         
         var htmlSelectSelection = d3.select(_RUNNER_SELECTOR_SELECTOR);
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         
         var htmlSelect = htmlSelectSelection.node();
-        assert.equal(htmlSelect.options.length, ageClassSet.allCompetitors.length - 1, "Expected one fewer item than the number of competitors");
-        assert.equal(htmlSelect.selectedIndex, 0, "Runner selector should be created with the first item selected");
+        assert.strictEqual(htmlSelect.options.length, ageClassSet.allCompetitors.length - 1, "Expected one fewer item than the number of competitors");
+        assert.strictEqual(htmlSelect.selectedIndex, 0, "Runner selector should be created with the first item selected");
         
         assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), false, "Runner selector should not be shown");
     });
@@ -122,7 +122,7 @@
         
         var htmlRunnerSelector = d3.select(_RUNNER_SELECTOR_SELECTOR).node();
         $(htmlRunnerSelector).val(2).change();
-        assert.equal(htmlRunnerSelector.selectedIndex, 1);
+        assert.strictEqual(htmlRunnerSelector.selectedIndex, 1);
         var func = selector.getComparisonFunction();
         assert.deepEqual(func(DUMMY_CLASS_SET), DUMMY_CLASS_SET.allCompetitors[2].getAllCumulativeTimes()); 
     });
@@ -134,14 +134,14 @@
         selector.registerChangeHandler(handleComparisonChanged);
         
         var htmlSelectSelection = d3.select(_COMPARISON_SELECTOR_SELECTOR);
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(2).change();
 
         var func = selector.getComparisonFunction();
-        assert.equal(func(DUMMY_CLASS_SET), _FASTEST_TIME + ":5");
-        assert.equal(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(func(DUMMY_CLASS_SET), _FASTEST_TIME + ":5");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
     QUnit.test("Registering a handler and changing a value in the runner selector triggers a call to change callback", function(assert) {
@@ -175,16 +175,16 @@
         selector.registerChangeHandler(secondHandler);
         
         var htmlSelectSelection = d3.select(_COMPARISON_SELECTOR_SELECTOR);
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(2).change();
         
-        assert.equal(typeof lastSelector, "function");
-        assert.equal(lastSelector(DUMMY_CLASS_SET), _FASTEST_TIME + ":5", "Second comparison option should have been changed");
-        assert.equal(callCount, 1, "One change should have been recorded");
-        assert.equal(lastSelector2(DUMMY_CLASS_SET), _FASTEST_TIME + ":5", "Second comparison option should have been changed");
-        assert.equal(callCount2, 1, "One change should have been recorded");
+        assert.strictEqual(typeof lastSelector, "function");
+        assert.strictEqual(lastSelector(DUMMY_CLASS_SET), _FASTEST_TIME + ":5", "Second comparison option should have been changed");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(lastSelector2(DUMMY_CLASS_SET), _FASTEST_TIME + ":5", "Second comparison option should have been changed");
+        assert.strictEqual(callCount2, 1, "One change should have been recorded");
     });
 
     QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", function(assert) {
@@ -196,14 +196,14 @@
         selector.registerChangeHandler(handleComparisonChanged);
         
         var htmlSelectSelection = d3.select(_COMPARISON_SELECTOR_SELECTOR);
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(2).change();
         
-        assert.equal(typeof lastSelector, "function");
-        assert.equal(lastSelector(DUMMY_CLASS_SET), _FASTEST_TIME + ":5", "Second comparison option should have been changed");
-        assert.equal(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(typeof lastSelector, "function");
+        assert.strictEqual(lastSelector(DUMMY_CLASS_SET), _FASTEST_TIME + ":5", "Second comparison option should have been changed");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
     QUnit.test("Runner selector appears if 'Any Runner...' is selected and disappears when deselected", function(assert) {
@@ -222,7 +222,7 @@
 
         var func = selector.getComparisonFunction();
         assert.deepEqual(func(DUMMY_CLASS_SET), DUMMY_CLASS_SET.allCompetitors[1].getAllCumulativeTimes());
-        assert.equal(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
     QUnit.test("Runner selector repopulated when class data changes", function(assert) {
@@ -231,13 +231,13 @@
         var htmlSelect = d3.select(_RUNNER_SELECTOR_SELECTOR).node();
         
         selector.setAgeClassSet(DUMMY_CLASS_SET);        
-        assert.equal(htmlSelect.options.length, DUMMY_CLASS_SET.allCompetitors.length, "Expected "  + DUMMY_CLASS_SET.allCompetitors.length + " options to be created");
+        assert.strictEqual(htmlSelect.options.length, DUMMY_CLASS_SET.allCompetitors.length, "Expected "  + DUMMY_CLASS_SET.allCompetitors.length + " options to be created");
 
         selector.setAgeClassSet(getDummyAgeClassSet([{name: "four", completed: returnTrue}, {name: "five", completed: returnTrue}, {name: "six", completed: returnTrue}, {name: "seven", completed: returnTrue}]));
-        assert.equal(htmlSelect.options.length, 4, "Wrong number of options created");
+        assert.strictEqual(htmlSelect.options.length, 4, "Wrong number of options created");
 
         selector.setAgeClassSet(getDummyAgeClassSet([{name: "eight", completed: returnTrue}, {name: "nine", completed: returnTrue}]));
-        assert.equal(htmlSelect.options.length, 2, "Wrong number of options created");
+        assert.strictEqual(htmlSelect.options.length, 2, "Wrong number of options created");
     });
 
     QUnit.test("Runner selector appears if 'Any Runner...' is selected and disappears when deselected", function(assert) {
@@ -255,7 +255,7 @@
 
         var func = selector.getComparisonFunction();
         assert.deepEqual(func(DUMMY_CLASS_SET), DUMMY_CLASS_SET.allCompetitors[1].getAllCumulativeTimes());
-        assert.equal(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
     QUnit.test("Runner selector remains selected on same runner if age-class set changes and selected runner still in list", function(assert) {

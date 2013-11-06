@@ -21,7 +21,7 @@
             new AgeClassSet([]);
             assert.ok(false, "Should throw an exception");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
     
@@ -64,7 +64,7 @@
             new AgeClassSet([ageClass1, ageClass2]);
             assert.ok(false, "An exception should have been thrown");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
 
@@ -145,13 +145,13 @@
     
     function assertSplitRanks(assert, competitor, expectedSplitRanks) {
         expectedSplitRanks.forEach(function (splitRank, index) {
-            assert.equal(competitor.getSplitRankTo(index + 1), splitRank);
+            assert.strictEqual(competitor.getSplitRankTo(index + 1), splitRank);
         });
     }
     
     function assertCumulativeRanks(assert, competitor, expectedCumulativeRanks) {
         expectedCumulativeRanks.forEach(function (cumulativeRank, index) {
-            assert.equal(competitor.getCumulativeRankTo(index + 1), cumulativeRank);
+            assert.strictEqual(competitor.getCumulativeRankTo(index + 1), cumulativeRank);
         });
     }
     
@@ -356,7 +356,7 @@
             ageClassSet.getFastestSplitsTo(numSplits, controlIdx);
             assert.ok(false, "An InvalidData exception should have been thrown but was not");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     }
     
@@ -512,7 +512,7 @@
             ageClassSet.getChartData([0, 87, 87 + 147, 87 + 147 + 92], [0, 2], _DUMMY_CHART_TYPE);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
         }
     });
 
@@ -524,7 +524,7 @@
             ageClassSet.getChartData();
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
+            assert.strictEqual(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
         }
     });
 
@@ -536,7 +536,7 @@
             ageClassSet.getChartData([0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100], _DUMMY_CHART_TYPE);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
+            assert.strictEqual(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
         }
     });
     

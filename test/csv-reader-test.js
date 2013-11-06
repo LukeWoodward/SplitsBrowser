@@ -35,7 +35,7 @@
             parseEventData(csvData);
             assert.ok(false, "Should not get here - invalid control count should have been reported");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
         }
     });
 
@@ -47,7 +47,7 @@
             parseEventData(csvData);
             assert.ok(false, "Should not get here - negative control count should have been reported");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
         }
     });
 
@@ -58,7 +58,7 @@
             parseEventData(csvData);
             assert.ok(false, "Should not get here - wrong number of items on first line should have been reported");
         } catch (e) {
-            assert.equal(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
+            assert.strictEqual(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
         }
     });
 
@@ -69,7 +69,7 @@
             parseEventData(csvData);
             assert.ok(false, "Should not get here - wrong number of items on first line should have been reported");
         } catch (e) {
-            assert.equal(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
+            assert.strictEqual(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
         }
     });
     
@@ -80,7 +80,7 @@
             parseEventData(siData);
             assert.ok(false, "Should not get here - wrong number of items on first line should have been reported");
         } catch (e) {
-            assert.equal(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
+            assert.strictEqual(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
         }
     });
 
@@ -103,7 +103,7 @@
             parseEventData(csvData);
             assert.ok(false, "Should not get here - zero split time should have been reported");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
         }
     });
 
@@ -231,7 +231,7 @@
             var actualClass = parseEventData(csvData);
             assert.ok(false, "Should not get here");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
         }
     });
 })();

@@ -49,10 +49,10 @@
         var shouldOrShouldNot = (isVisible) ? "should" : "should not";
         var selector = d3.selectAll("#qunit-fixture .otherClassSelector");
         var combiningText = d3.selectAll("#qunit-fixture .otherClassCombining");
-        assert.equal(selector.size(), 1, "One other-class selector should be present");
-        assert.equal(combiningText.size(), 1, "One other-class combining-text element should be present");
-        assert.equal(selector.style("display"), (isVisible) ? "inline-block" : "none", "Other-class selector " + shouldOrShouldNot + " be displayed");
-        assert.equal(combiningText.style("display"), (isVisible) ? "inline" : "none", "Other-class combining-text element " + shouldOrShouldNot + " be displayed");
+        assert.strictEqual(selector.size(), 1, "One other-class selector should be present");
+        assert.strictEqual(combiningText.size(), 1, "One other-class combining-text element should be present");
+        assert.strictEqual(selector.style("display"), (isVisible) ? "inline-block" : "none", "Other-class selector " + shouldOrShouldNot + " be displayed");
+        assert.strictEqual(combiningText.style("display"), (isVisible) ? "inline" : "none", "Other-class combining-text element " + shouldOrShouldNot + " be displayed");
         
         if (!isVisible) {
             assertOtherClassListVisibility(assert, false);
@@ -71,12 +71,12 @@
     function assertOtherClassListVisibility(assert, isVisible, itemCount) {
         var shouldOrShouldNot = (isVisible) ? "should" : "should not";
         var list = d3.selectAll("#qunit-fixture .otherClassList");
-        assert.equal(list.size(), 1, "One other-class list should be present");
-        assert.equal(list.style("display"), "none", "Other-class list element " + shouldOrShouldNot + "  be displayed");
+        assert.strictEqual(list.size(), 1, "One other-class list should be present");
+        assert.strictEqual(list.style("display"), "none", "Other-class list element " + shouldOrShouldNot + "  be displayed");
     
         if (typeof itemCount !== "undefined") {
             var items = d3.selectAll("#qunit-fixture .otherClassList div.otherClassItem");
-            assert.equal(items.size(), itemCount, "Expected " + itemCount + " list item(s)");
+            assert.strictEqual(items.size(), itemCount, "Expected " + itemCount + " list item(s)");
         }
     }
 
@@ -84,11 +84,11 @@
         var selector = new ClassSelector(d3.select("#qunit-fixture").node());
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         
         var htmlSelect = htmlSelectSelection.node();
-        assert.equal(htmlSelect.disabled, true, "Selector should be disabled");
-        assert.equal(htmlSelect.options.length, 1, "One placeholder option should be created");
+        assert.strictEqual(htmlSelect.disabled, true, "Selector should be disabled");
+        assert.strictEqual(htmlSelect.options.length, 1, "One placeholder option should be created");
         
         assertOtherClassSelectorVisibility(assert, false);
     });
@@ -99,11 +99,11 @@
         setClassesInSelector(selector, [new AgeClass("Class 1", 11, [])]);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         
         var htmlSelect = htmlSelectSelection.node();
-        assert.equal(htmlSelect.disabled, false, "Selector should be enabled");
-        assert.equal(htmlSelect.options.length, 1, "One placeholder option should be created");
+        assert.strictEqual(htmlSelect.disabled, false, "Selector should be enabled");
+        assert.strictEqual(htmlSelect.options.length, 1, "One placeholder option should be created");
         
         assertOtherClassSelectorVisibility(assert, false);
     });
@@ -114,14 +114,14 @@
         setClassesInSelector(selector, [new AgeClass("Class 1", 11, []), new AgeClass("Class 2", 17, []), new AgeClass("Class 3", 22, [])]);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         
         var htmlSelect = htmlSelectSelection.node();
-        assert.equal(htmlSelect.disabled, false, "Selector should not be disabled");
-        assert.equal(htmlSelect.options.length, 3, "Three items should be created");
+        assert.strictEqual(htmlSelect.disabled, false, "Selector should not be disabled");
+        assert.strictEqual(htmlSelect.options.length, 3, "Three items should be created");
         for (var i = 0; i < 3; i += 1) {
-            assert.equal(htmlSelect.options[i].value, i);
-            assert.equal(htmlSelect.options[i].text, "Class " + (i + 1));
+            assert.strictEqual(htmlSelect.options[i].value, i.toString());
+            assert.strictEqual(htmlSelect.options[i].text, "Class " + (i + 1));
         }
         
         assertOtherClassSelectorVisibility(assert, true);
@@ -135,13 +135,13 @@
         setClassesInSelector(selector,[new AgeClass("Class 4", 20, [])]);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         
         var htmlSelect = htmlSelectSelection.node();
-        assert.equal(htmlSelect.disabled, false, "Selector should not be disabled");
-        assert.equal(htmlSelect.options.length, 1, "One item should be created");
-        assert.equal(htmlSelect.options[0].value, 0);
-        assert.equal(htmlSelect.options[0].text, "Class 4");
+        assert.strictEqual(htmlSelect.disabled, false, "Selector should not be disabled");
+        assert.strictEqual(htmlSelect.options.length, 1, "One item should be created");
+        assert.strictEqual(htmlSelect.options[0].value, "0");
+        assert.strictEqual(htmlSelect.options[0].text, "Class 4");
         
         assertOtherClassSelectorVisibility(assert, false);
     });
@@ -153,11 +153,11 @@
         setClassesInSelector(selector, []);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         
         var htmlSelect = htmlSelectSelection.node();
-        assert.equal(htmlSelect.disabled, true, "Selector should be disabled");
-        assert.equal(htmlSelect.options.length, 1, "One placeholder option should be created");
+        assert.strictEqual(htmlSelect.disabled, true, "Selector should be disabled");
+        assert.strictEqual(htmlSelect.options.length, 1, "One placeholder option should be created");
         
         assertOtherClassSelectorVisibility(assert, false);
     });
@@ -169,12 +169,12 @@
         
         setClassesInSelector(selector, [new AgeClass("Class 1", 11, []), new AgeClass("Class 2", 17, []), new AgeClass("Class 3", 22, [])]);
         var htmlSelectSelection = d3.select("#qunit-fixture select");
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(2).change();
         assert.deepEqual(lastClassIdxs, [2], "Class 2 should have been changed");
-        assert.equal(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
     QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", function(assert) {
@@ -193,14 +193,14 @@
         
         setClassesInSelector(selector, [new AgeClass("Class 1", 11, []), new AgeClass("Class 2", 17, []), new AgeClass("Class 3", 22, [])]);
         var htmlSelectSelection = d3.select("#qunit-fixture select");
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(2).change();
         assert.deepEqual(lastClassIdxs, [2], "Class 2 should have been changed");
-        assert.equal(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
         assert.deepEqual(lastClassIdxs2, [2], "Class 2 should have been changed");
-        assert.equal(callCount2, 1, "One change should have been recorded");
+        assert.strictEqual(callCount2, 1, "One change should have been recorded");
     });
 
     QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", function(assert) {
@@ -211,12 +211,12 @@
         
         setClassesInSelector(selector, [new AgeClass("Class 1", 11, []), new AgeClass("Class 2", 17, []), new AgeClass("Class 3", 22, [])]);
         var htmlSelectSelection = d3.select("#qunit-fixture select");
-        assert.equal(htmlSelectSelection.size(), 1, "One element should be selected");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(2).change();
         assert.deepEqual(lastClassIdxs, [2], "Class 2 should have been changed");
-        assert.equal(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
     QUnit.test("Can create class selector with three courses and two classes and show and hide the other-class selector", function(assert) {
@@ -304,13 +304,13 @@
         htmlSelect.click();
         assertOtherClassListVisibility(assert, true, 1);
         
-        assert.equal($("div.otherClassItem.selected").length, 0, "The other class item should not be selected");
+        assert.strictEqual($("div.otherClassItem.selected").length, 0, "The other class item should not be selected");
         
         $("div.otherClassItem").click();
-        assert.equal($("div.otherClassItem.selected").length, 1, "The other class item should be selected");
+        assert.strictEqual($("div.otherClassItem.selected").length, 1, "The other class item should be selected");
         
         assert.deepEqual(lastClassIdxs, [1, 2], "Classes 1 and 2 should have been selected");
-        assert.equal(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
     QUnit.test("Can create class selector with three courses and two classes, open the list of other classes and select and deselect the other class", function(assert) {
@@ -333,16 +333,16 @@
         htmlSelect.click();
         assertOtherClassListVisibility(assert, true, 1);
         
-        assert.equal($("div.otherClassItem.selected").length, 0, "The other class item should not be selected");
+        assert.strictEqual($("div.otherClassItem.selected").length, 0, "The other class item should not be selected");
         
         $("div.otherClassItem").click();
-        assert.equal($("div.otherClassItem.selected").length, 1, "The other class item should be selected");
+        assert.strictEqual($("div.otherClassItem.selected").length, 1, "The other class item should be selected");
         
         $("div.otherClassItem").click();
-        assert.equal($("div.otherClassItem.selected").length, 0, "The other class item should not be selected");
+        assert.strictEqual($("div.otherClassItem.selected").length, 0, "The other class item should not be selected");
         
         assert.deepEqual(lastClassIdxs, [1], "Class 1 only should have been selected");
-        assert.equal(callCount, 2, "Two changes should have been recorded");
+        assert.strictEqual(callCount, 2, "Two changes should have been recorded");
     });
 
     QUnit.test("Can create class selector with three courses and two classes, select the last class, open the list of other classes and select the other class", function(assert) {
@@ -365,13 +365,13 @@
         htmlSelect.click();
         assertOtherClassListVisibility(assert, true, 1);
         
-        assert.equal($("div.otherClassItem.selected").length, 0, "The other class item should not be selected");
+        assert.strictEqual($("div.otherClassItem.selected").length, 0, "The other class item should not be selected");
         
         $("div.otherClassItem").click();
-        assert.equal($("div.otherClassItem.selected").length, 1, "The other class item should be selected");
+        assert.strictEqual($("div.otherClassItem.selected").length, 1, "The other class item should be selected");
         
         assert.deepEqual(lastClassIdxs, [2, 1], "Classes 2 and 1 should have been selected, in that order");
-        assert.equal(callCount, 1, "One change should have been recorded");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
     
 })();

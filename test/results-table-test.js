@@ -22,15 +22,15 @@
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(ageClass);
         
-        assert.equal(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
         var table = d3.select("table.resultsTable");
-        assert.equal(table.selectAll("thead").size(), 1);
-        assert.equal(table.selectAll("thead tr").size(), 1);
-        assert.equal(table.selectAll("thead tr th").size(), 7);
-        assert.equal(table.selectAll("tbody").size(), 1);
-        assert.equal(table.selectAll("tbody tr").size(), 2);
-        assert.equal(table.selectAll("tbody tr:first-child td").size(), 7);
-        assert.equal(table.selectAll("tbody tr:last-child td").size(), 7);    
+        assert.strictEqual(table.selectAll("thead").size(), 1);
+        assert.strictEqual(table.selectAll("thead tr").size(), 1);
+        assert.strictEqual(table.selectAll("thead tr th").size(), 7);
+        assert.strictEqual(table.selectAll("tbody").size(), 1);
+        assert.strictEqual(table.selectAll("tbody tr").size(), 2);
+        assert.strictEqual(table.selectAll("tbody tr:first-child td").size(), 7);
+        assert.strictEqual(table.selectAll("tbody tr:last-child td").size(), 7);    
     });
     
     QUnit.test("Can create a results table with one competitor not finishing sorted to the bottom", function (assert) {
@@ -43,9 +43,9 @@
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(ageClass);
         
-        assert.equal(d3.selectAll("table.resultsTable").size(), 1);
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
         var table = d3.select("table.resultsTable");
-        assert.equal(table.selectAll("tbody tr:last-child td:first-child").text(), "");
+        assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
     });
     
     QUnit.test("Can create a results table with one non-competitive competitor and the other competitor getting rank 1", function (assert) {
@@ -59,9 +59,9 @@
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(ageClass);
         
-        assert.equal(d3.selectAll("table.resultsTable").size(), 1);
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
         var table = d3.select("table.resultsTable");
-        assert.equal(table.selectAll("tbody tr:last-child td:first-child").text(), "1");
+        assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "1");
     });
     
     QUnit.test("Can create a results table with course with no length and climb", function (assert) {

@@ -30,7 +30,7 @@
             new CompetitorSelection("this is not a number");
             assert.ok(false, "This should not be reached");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
         }
     });
 
@@ -39,7 +39,7 @@
             new CompetitorSelection(-1);
             assert.ok(false, "This should not be reached");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
         }
     });
 
@@ -54,7 +54,7 @@
             selection.toggle("this is not a number");
             assert.ok(false, "This should not be reached");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
         }
     });
 
@@ -64,7 +64,7 @@
             selection.toggle(-1);
             assert.ok(false, "This should not be reached");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
         }
     });
 
@@ -74,7 +74,7 @@
             selection.toggle(3);
             assert.ok(false, "This should not be reached");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
         }
     });
 
@@ -131,7 +131,7 @@
         selection.registerChangeHandler(testHandler);
         selection.toggle(2);
         assert.deepEqual(lastIndexes, [2], "Only competitor 2 should be selected");
-        assert.equal(callCount, 1, "Handler should only have been called once");
+        assert.strictEqual(callCount, 1, "Handler should only have been called once");
     });
 
     QUnit.test("Modifying the returned list from a handler has no effect on the the selection", function (assert) {
@@ -151,7 +151,7 @@
         selection.toggle(2);
         selection.toggle(0);
         assert.deepEqual(lastIndexes, [0, 2], "Only competitors 0 and 2 should be selected");
-        assert.equal(callCount, 2, "Handler should have been called twice");
+        assert.strictEqual(callCount, 2, "Handler should have been called twice");
     });
 
     QUnit.test("Can register handler and have it called when all competitors selected", function (assert) {
@@ -160,7 +160,7 @@
         selection.registerChangeHandler(testHandler);
         selection.selectAll();
         assert.deepEqual(lastIndexes, [0, 1, 2], "All competitors should be selected");
-        assert.equal(callCount, 1, "Handler should only have been called once");
+        assert.strictEqual(callCount, 1, "Handler should only have been called once");
     });
 
     QUnit.test("Can register handler and have it called when all competitors deselected", function (assert) {
@@ -170,7 +170,7 @@
         selection.registerChangeHandler(testHandler);
         selection.selectNone();
         assert.deepEqual(lastIndexes, [], "No competitors should be selected");
-        assert.equal(callCount, 1, "Handler should only have been called once");
+        assert.strictEqual(callCount, 1, "Handler should only have been called once");
     });
 
     QUnit.test("Can register multiple handlers and have them all called when competitor selection toggled", function (assert) {
@@ -190,9 +190,9 @@
         selection.toggle(2);
 
         assert.deepEqual(lastIndexes, [2], "Only competitor 2 should have been selected");
-        assert.equal(callCount, 1, "Handler should only have been called once");
+        assert.strictEqual(callCount, 1, "Handler should only have been called once");
         assert.deepEqual(lastIndexes2, [2], "Only competitor 2 should have been selected");
-        assert.equal(callCount2, 1, "Handler should only have been called once");
+        assert.strictEqual(callCount2, 1, "Handler should only have been called once");
     });
 
     QUnit.test("Handler only called once even if registered miltiple times", function (assert) {
@@ -202,7 +202,7 @@
         selection.registerChangeHandler(testHandler);
         selection.toggle(2);
         assert.deepEqual(lastIndexes, [2], "Only competitor 2 should have been selected");
-        assert.equal(callCount, 1, "Handler should only have been called once");
+        assert.strictEqual(callCount, 1, "Handler should only have been called once");
     });
 
     QUnit.test("Can deregister previously-registered handler", function (assert) {
@@ -211,12 +211,12 @@
         selection.registerChangeHandler(testHandler);
         selection.toggle(2);
         assert.deepEqual(lastIndexes, [2], "Only competitor 2 should have been selected");
-        assert.equal(callCount, 1, "Handler should only have been called once");
+        assert.strictEqual(callCount, 1, "Handler should only have been called once");
 
         selection.deregisterChangeHandler(testHandler);
         selection.toggle(2);
         assert.deepEqual(lastIndexes, [2], "Only competitor 2 should have been selected");
-        assert.equal(callCount, 1, "Handler should still only have been called once");
+        assert.strictEqual(callCount, 1, "Handler should still only have been called once");
     });
 
     QUnit.test("Can deregister previously-registered handler multiple times without error", function (assert) {
@@ -225,13 +225,13 @@
         selection.registerChangeHandler(testHandler);
         selection.toggle(2);
         assert.deepEqual(lastIndexes, [2], "Only competitor 2 should have been selected");
-        assert.equal(callCount, 1, "Handler should only have been called once");
+        assert.strictEqual(callCount, 1, "Handler should only have been called once");
 
         selection.deregisterChangeHandler(testHandler);
         selection.deregisterChangeHandler(testHandler);
         selection.toggle(2);
         assert.deepEqual(lastIndexes, [2], "Only competitor 2 should have been selected");
-        assert.equal(callCount, 1, "Handler should still only have been called once");
+        assert.strictEqual(callCount, 1, "Handler should still only have been called once");
     });
 
     QUnit.test("Can deregister handler that was never registered without error", function (assert) {
@@ -272,7 +272,7 @@
         selection.registerChangeHandler(testHandler);
         selection.selectCrossingRunners(competitors);
         assert.deepEqual(lastIndexes, [1, 2], "Selected indexes should be 1 and 2");
-        assert.equal(callCount, 1, "One call to the change-handler should be registered");
+        assert.strictEqual(callCount, 1, "One call to the change-handler should be registered");
     });
 
     QUnit.test("Cannot migrate from an old list of competitors that isn't an array", function (assert) {
@@ -282,7 +282,7 @@
             selection.migrate("this is not an array", newCompetitors);
             assert.ok(false, "This should not be reached");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
         }
     });
 
@@ -294,7 +294,7 @@
             selection.migrate(oldCompetitors, newCompetitors);
             assert.ok(false, "This should not be reached");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
         }
     });
 
@@ -305,7 +305,7 @@
             selection.migrate(oldCompetitors, "this is not an array");
             assert.ok(false, "This should not be reached");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
         }
     });
 
@@ -316,7 +316,7 @@
             selection.migrate(oldCompetitors, []);
             assert.ok(false, "This should not be reached");
         } catch (e) {
-            assert.equal(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
         }
     });
 
