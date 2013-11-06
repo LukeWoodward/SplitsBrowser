@@ -36,6 +36,7 @@
         this.changeHandlers = [];
         this.classes = null;
         this.currentRunnerIndex = null;
+        this.previousCompetitorList = null;
         
         var span = d3.select(parent).append("span");
         span.text("Compare with ");
@@ -117,9 +118,18 @@
         optionsList.attr("value", function (_comp, complCompIndex) { return completingCompetitorIndexes[complCompIndex].toString(); })
                    .text(function (comp) { return comp.name; });
         optionsList.exit().remove();
+
+        if (this.previousCompetitorList === null) {
+            this.currentRunnerIndex = 0;
+        } else {
+            var oldSelectedRunner = this.previousCompetitorList[this.currentRunnerIndex];
+            var newIndex = this.ageClassSet.allCompetitors.indexOf(oldSelectedRunner);
+            this.currentRunnerIndex = Math.max(newIndex, 0);
+        }
+        
+        this.runnerDropDown.selectedIndex = this.currentRunnerIndex;
        
-        this.runnerDropDown.selectedIndex = 0;
-        this.currentRunnerIndex = 0;
+        this.previousCompetitorList = this.ageClassSet.allCompetitors;
     };
     
     /**
@@ -129,8 +139,6 @@
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.getComparisonFunction = function () {
         if (this.isAnyRunnerSelected()) {
-            var dropdownSelectedIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
-            this.currentRunnerIndex = parseInt(this.runnerDropDown.options[dropdownSelectedIndex].value, 10);
             var outerThis = this;
             return function (ageClassSet) { return ageClassSet.allCompetitors[outerThis.currentRunnerIndex].getAllCumulativeTimes(); };
         } else {
@@ -143,6 +151,8 @@
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.onSelectionChanged = function() {
         this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? "" : "none");
+        var dropdownSelectedIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
+        this.currentRunnerIndex = (this.runnerDropDown.options.length === 0) ? 0 : parseInt(this.runnerDropDown.options[dropdownSelectedIndex].value, 10);
         this.changeHandlers.forEach(function (handler) { handler(this.getComparisonFunction()); }, this);
     };
 })();

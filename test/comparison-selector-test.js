@@ -239,4 +239,52 @@
         selector.setAgeClassSet(getDummyAgeClassSet([{name: "eight", completed: returnTrue}, {name: "nine", completed: returnTrue}]));
         assert.equal(htmlSelect.options.length, 2, "Wrong number of options created");
     });
+
+    QUnit.test("Runner selector appears if 'Any Runner...' is selected and disappears when deselected", function(assert) {
+        resetLastSelector();
+        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        selector.setAgeClassSet(DUMMY_CLASS_SET);        
+        
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        $(htmlSelect).val(htmlSelect.options.length - 1).change();
+        
+        selector.registerChangeHandler(handleComparisonChanged);
+        
+        htmlSelect = d3.select(_RUNNER_SELECTOR_SELECTOR).node();
+        $(htmlSelect).val(1).change();
+
+        var func = selector.getComparisonFunction();
+        assert.deepEqual(func(DUMMY_CLASS_SET), DUMMY_CLASS_SET.allCompetitors[1].getAllCumulativeTimes());
+        assert.equal(callCount, 1, "One change should have been recorded");
+    });
+
+    QUnit.test("Runner selector remains selected on same runner if age-class set changes and selected runner still in list", function(assert) {
+        resetLastSelector();
+        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        $(htmlSelect).val(htmlSelect.options.length - 1).change();
+        
+        htmlSelect = d3.select(_RUNNER_SELECTOR_SELECTOR).node();
+        
+        selector.setAgeClassSet(DUMMY_CLASS_SET);
+        $(htmlSelect).val(2).change();
+
+        selector.setAgeClassSet(getDummyAgeClassSet(competitors.slice(1)));
+        assert.strictEqual($(htmlSelect).val(), "1");
+    });
+
+    QUnit.test("Runner selector returns to first runner if age-class set changes and selected runner no longer in list", function(assert) {
+        resetLastSelector();
+        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        $(htmlSelect).val(htmlSelect.options.length - 1).change();
+        
+        htmlSelect = d3.select(_RUNNER_SELECTOR_SELECTOR).node();
+        
+        selector.setAgeClassSet(DUMMY_CLASS_SET);        
+        $(htmlSelect).val(2).change();
+
+        selector.setAgeClassSet(getDummyAgeClassSet(competitors.slice(0, 2)));
+        assert.strictEqual($(htmlSelect).val(), "0");
+    });
 })();
