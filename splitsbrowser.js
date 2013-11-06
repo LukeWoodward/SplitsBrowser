@@ -1553,7 +1553,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                     listDiv.style.display = "none";
                 }
             }
-        });        
+        });
+        
+        // Close the class selector if Escape is pressed.
+        // 27 is the key code for the Escape key.
+        $(document).keydown(function (e) {
+            if (e.which === 27) {
+                outerThis.otherClassesList.style("display", "none");
+            }
+        });
     };
 
     /**
