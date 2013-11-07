@@ -51,8 +51,10 @@
     /**
     * Sets the list of competitors.
     * @param {Array} competitors - Array of competitor data.
+    * @param {boolean} hasMultipleClasses - Whether the list of competitors is
+    *      made up from those in multiple classes.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitors) {
+    SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitors, multipleClasses) {
         // Note that we use jQuery's click event handling here instead of d3's,
         // as d3's doesn't seem to work in PhantomJS.
         $("div.competitor").off("click");
@@ -62,8 +64,17 @@
         competitorDivs.enter().append("div")
                               .classed("competitor", true);
 
-        competitorDivs.classed("nonfinisher", function (comp) { return !comp.completed(); })
-                      .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });
+        competitorDivs.selectAll("span").remove();
+        
+        if (multipleClasses) {
+            competitorDivs.append("span")
+                          .classed("competitorClassLabel", true)
+                          .text(function (comp) { return comp.className; });
+        }
+        
+        competitorDivs.append("span")
+                      .classed("nonfinisher", function (comp) { return !comp.completed(); })
+                      .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });        
 
         competitorDivs.exit().remove();
         

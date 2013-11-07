@@ -35,9 +35,14 @@ div.otherClassItem.selected
     color: white;
 }
 
-div.competitor.nonfinisher
+div.competitor span.nonfinisher
 {
     font-style: italic;
+}
+
+span.competitorClassLabel
+{
+    padding-right: 10px;
 }
 
 svg text

@@ -135,6 +135,7 @@
         this.club = club;
         this.startTime = startTime;
         this.isNonCompetitive = false;
+        this.className = null;
         
         this.splitTimes = splitTimes;
         this.cumTimes = cumTimes;
@@ -150,6 +151,14 @@
     */
     Competitor.prototype.setNonCompetitive = function () {
         this.isNonCompetitive = true;
+    };
+    
+    /**
+    * Sets the name of the class that the competitor belongs to.
+    * @param {String} className - The name of the class.
+    */
+    Competitor.prototype.setClassName = function (className) {
+        this.className = className;
     };
     
     SplitsBrowser.Model.Competitor = {};

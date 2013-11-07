@@ -277,6 +277,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.club = club;
         this.startTime = startTime;
         this.isNonCompetitive = false;
+        this.className = null;
         
         this.splitTimes = splitTimes;
         this.cumTimes = cumTimes;
@@ -292,6 +293,14 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     Competitor.prototype.setNonCompetitive = function () {
         this.isNonCompetitive = true;
+    };
+    
+    /**
+    * Sets the name of the class that the competitor belongs to.
+    * @param {String} className - The name of the class.
+    */
+    Competitor.prototype.setClassName = function (className) {
+        this.className = className;
     };
     
     SplitsBrowser.Model.Competitor = {};
@@ -533,6 +542,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.numControls = numControls;
         this.competitors = competitors;
         this.course = null;
+        
+        this.competitors.forEach(function (comp) {
+            comp.setClassName(this.name);
+        }, this);
     };
 
     /**
@@ -1497,8 +1510,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     /**
     * Sets the list of competitors.
     * @param {Array} competitors - Array of competitor data.
+    * @param {boolean} hasMultipleClasses - Whether the list of competitors is
+    *      made up from those in multiple classes.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitors) {
+    SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitors, multipleClasses) {
         // Note that we use jQuery's click event handling here instead of d3's,
         // as d3's doesn't seem to work in PhantomJS.
         $("div.competitor").off("click");
@@ -1508,8 +1523,17 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         competitorDivs.enter().append("div")
                               .classed("competitor", true);
 
-        competitorDivs.classed("nonfinisher", function (comp) { return !comp.completed(); })
-                      .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });
+        competitorDivs.selectAll("span").remove();
+        
+        if (multipleClasses) {
+            competitorDivs.append("span")
+                          .classed("competitorClassLabel", true)
+                          .text(function (comp) { return comp.className; });
+        }
+        
+        competitorDivs.append("span")
+                      .classed("nonfinisher", function (comp) { return !comp.completed(); })
+                      .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });        
 
         competitorDivs.exit().remove();
         
@@ -3402,7 +3426,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
 
-        this.competitorListBox.setCompetitorList(this.ageClassSet.allCompetitors);
+        this.competitorListBox.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
 
         var topPanelHeight = $(this.topPanel.node()).height();
         

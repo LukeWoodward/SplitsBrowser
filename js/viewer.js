@@ -186,7 +186,7 @@
         
         this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
 
-        this.competitorListBox.setCompetitorList(this.ageClassSet.allCompetitors);
+        this.competitorListBox.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
 
         var topPanelHeight = $(this.topPanel.node()).height();
         

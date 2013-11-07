@@ -13,6 +13,10 @@
         this.numControls = numControls;
         this.competitors = competitors;
         this.course = null;
+        
+        this.competitors.forEach(function (comp) {
+            comp.setClassName(this.name);
+        }, this);
     };
 
     /**
