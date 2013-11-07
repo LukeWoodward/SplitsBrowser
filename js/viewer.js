@@ -24,6 +24,7 @@
         this.currentIndexes = null;
         this.chartData = null;
         this.referenceCumTimes = null;
+        this.fastestCumTimes = null;
         this.previousCompetitorList = [];
 
         this.selection = null;
@@ -177,6 +178,7 @@
         }
 
         this.referenceCumTimes = this.comparisonFunction(this.ageClassSet);
+        this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
         this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
 
         var windowWidth = $(window).width();
@@ -228,7 +230,8 @@
     * Redraws the chart using all of the current data.
     */ 
     SplitsBrowser.Viewer.prototype.redrawChart = function () {
-        this.chart.drawChart(this.chartData, this.ageClassSet, this.referenceCumTimes, this.currentIndexes, this.currentVisibleStatistics, this.chartType.yAxisLabel, (this.chartType.showCrossingRunnersButton));
+        this.chart.drawChart(this.chartData, this.ageClassSet, this.referenceCumTimes, this.fastestCumTimes, this.currentIndexes,
+                this.currentVisibleStatistics, this.chartType.yAxisLabel, (this.chartType.showCrossingRunnersButton));
     };
     
     /**

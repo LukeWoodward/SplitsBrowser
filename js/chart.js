@@ -82,6 +82,7 @@
         // they appear in the list of labels.
         this.selectedIndexesOrderedByLastYValue = [];
         this.referenceCumTimes = [];
+        this.fastestCumTimes = [];
         
         this.isMouseIn = false;
         
@@ -266,21 +267,21 @@
 
     /**
     * Returns an array of the the times that the selected competitors are
-    * behind the reference times at the given control.
+    * behind the fastest time at the given control.
     * @param {Number} controlIndex - Index of the given control.
     * @param {Array} indexes - Array of indexes of selected competitors.
     * @return {Array} Array of times in seconds that the given competitors are
-    *     behind the reference time.
+    *     behind the fastest time.
     */
-    SplitsBrowser.Controls.Chart.prototype.getTimesBehind = function (controlIndex, indexes) {
+    SplitsBrowser.Controls.Chart.prototype.getTimesBehindFastest = function (controlIndex, indexes) {
         var selectedCompetitors = indexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
-        var referenceSplit = this.referenceCumTimes[controlIndex] - this.referenceCumTimes[controlIndex - 1];
-        var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - referenceSplit; });
+        var fastestSplit = this.fastestCumTimes[controlIndex] - this.fastestCumTimes[controlIndex - 1];
+        var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - fastestSplit; });
         return timesBehind;
     };
     
     /**
-    * Updates the statistics text shown after the competitor.
+    * Updates the statistics text shown after the competitors.
     */
     SplitsBrowser.Controls.Chart.prototype.updateCompetitorStatistics = function() {
         var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
@@ -302,7 +303,7 @@
             }
              
             if (this.visibleStatistics[2]) {
-                var timesBehind = this.getTimesBehind(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
+                var timesBehind = this.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                 labelTexts = d3.zip(labelTexts, timesBehind)
                                .map(function(pair) { return pair[0] + SPACER + SplitsBrowser.formatTime(pair[1]); });
             }
@@ -427,7 +428,7 @@
         var maxTime = 0;
         
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
-            var times = this.getTimesBehind(controlIndex, this.selectedIndexes);
+            var times = this.getTimesBehindFastest(controlIndex, this.selectedIndexes);
             maxTime = Math.max(maxTime, d3.max(times.filter(SplitsBrowser.isNotNull)));
         }
         
@@ -791,6 +792,8 @@
     * @param {SplitsBrowser.Model.ageClass} ageClass - The age-class data object.
     * @param {Array} referenceCumTimes - Array of cumulative times of the
     *                            'reference', in units of seconds.
+    * @param {Array} fastestCumTimes - Array of cumulative times of the fastest
+    *                            splits, in units of seconds.
     * @param {Array} selectedIndexes - Array of indexes of selected competitors
     *                (0 in this array means the first competitor is selected, 1
     *                means the second is selected, and so on.)
@@ -800,11 +803,12 @@
     * @param {boolean} showStartTimes - Whether to show start times to the left
     *                                   of the chart.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, ageClassSet, referenceCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, showStartTimes) {
+    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, ageClassSet, referenceCumTimes, fastestCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, showStartTimes) {
         this.numControls = chartData.numControls;
         this.numLines = chartData.competitorNames.length;
         this.selectedIndexes = selectedIndexes;
         this.referenceCumTimes = referenceCumTimes;
+        this.fastestCumTimes = fastestCumTimes;
         this.ageClassSet = ageClassSet;
         this.showStartTimes = showStartTimes;
         this.visibleStatistics = visibleStatistics;

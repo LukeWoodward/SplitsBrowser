@@ -96,7 +96,7 @@
 
         var chart = createTestChart();
         chart.setSize(1000, 1000);
-        chart.drawChart(chartData, ageClassSet, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", false);
+        chart.drawChart(chartData, ageClassSet, fastestCumTimes, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", false);
         expect(0);
     });
 
@@ -107,7 +107,7 @@
 
         var chart = createTestChart();
         chart.setSize(1000, 1000);
-        chart.drawChart(chartData, ageClassSet, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", false);
+        chart.drawChart(chartData, ageClassSet, fastestCumTimes, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", false);
         expect(0);
     });
 
@@ -118,7 +118,7 @@
 
         var chart = createTestChart();
         chart.setSize(1000, 1000);
-        chart.drawChart(chartData, ageClassSet, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", true);
+        chart.drawChart(chartData, ageClassSet, fastestCumTimes, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", true);
         expect(0);
     });
     
