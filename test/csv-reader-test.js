@@ -31,57 +31,42 @@
     QUnit.test("Cannot parse single class with non-numeric control count", function (assert) {
 
         var csvData = "Example, fifteen";
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             parseEventData(csvData);
-            assert.ok(false, "Should not get here - invalid control count should have been reported");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
-        }
+        });
     });
 
     // Allow 0 controls, as that essentially means a start and a finish.
     QUnit.test("Cannot parse single class with negative control count", function (assert) {
 
         var csvData = "Example, -1";
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             parseEventData(csvData);
-            assert.ok(false, "Should not get here - negative control count should have been reported");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
-        }
+        });
     });
 
-    QUnit.test("Rects single class with only one item on first line as being of the wrong format", function (assert) {
+    QUnit.test("Rejects single class with only one item on first line as being of the wrong format", function (assert) {
 
         var csvData = "There is no control count here";
-        try {
+        SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseEventData(csvData);
-            assert.ok(false, "Should not get here - wrong number of items on first line should have been reported");
-        } catch (e) {
-            assert.strictEqual(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
-        }
+        });
     });
 
-    QUnit.test("Rects single class with too many items on first line as being of the wrong format", function (assert) {
+    QUnit.test("Rejects single class with too many items on first line as being of the wrong format", function (assert) {
 
         var csvData = "Example, 4, 2";
-        try {
+        SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseEventData(csvData);
-            assert.ok(false, "Should not get here - wrong number of items on first line should have been reported");
-        } catch (e) {
-            assert.strictEqual(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
-        }
+        });
     });
     
     QUnit.test("Rejects SI-format file as being of the wrong format", function (assert) {
         var siData = "First name;Surname;City;Start;Time;Short;AgeClass controls;Punch1;Punch2;Punch3;\r\n" + 
                            "John;Smith;ABC;10:00:00;06:33;Test class;3;01:50;03:38;06:02;\r\n";
-        try {
+        SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseEventData(siData);
-            assert.ok(false, "Should not get here - wrong number of items on first line should have been reported");
-        } catch (e) {
-            assert.strictEqual(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Can parse a single class with a single valid competitor", function (assert) {
@@ -99,12 +84,9 @@
 
     QUnit.test("Cannot parse a single class with a single competitor with zero split", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,00:00,03:31,02:01,00:23";
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             parseEventData(csvData);
-            assert.ok(false, "Should not get here - zero split time should have been reported");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Can parse a single class with a single valid competitor and trailing end-of-line", function (assert) {
@@ -227,11 +209,8 @@
 
     QUnit.test("Cannot parse a single class with two valid competitors and one competitor with the wrong number of items", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\nFred,Baker,DEF,12:12,02:42,01:51,04:00,01:31,00:30,01:35\r\nJane,Palmer,GHI,11:22,02:50,01:44,03:29,01:40,00:28";
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             var actualClass = parseEventData(csvData);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
-        }
+        });
     });
 })();

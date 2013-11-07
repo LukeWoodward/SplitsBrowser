@@ -26,21 +26,15 @@
     }
 
     QUnit.test("Cannot create a competitor selection if the number of competitors is not a number", function (assert) {
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             new CompetitorSelection("this is not a number");
-            assert.ok(false, "This should not be reached");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot create a competitor selection if the number of competitors is negative", function (assert) {
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             new CompetitorSelection(-1);
-            assert.ok(false, "This should not be reached");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Can create a competitor selection if the number of competitors is zero", function (assert) {
@@ -50,32 +44,23 @@
 
     QUnit.test("Cannot toggle the selectedness of a competitor whose index is not numeric", function (assert) {
         var selection = new CompetitorSelection(3);
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.toggle("this is not a number");
-            assert.ok(false, "This should not be reached");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot toggle the selectedness of a competitor whose index is negative", function (assert) {
         var selection = new CompetitorSelection(3);
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.toggle(-1);
-            assert.ok(false, "This should not be reached");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot toggle the selectedness of a competitor whose index is too large", function (assert) {
         var selection = new CompetitorSelection(3);
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.toggle(3);
-            assert.ok(false, "This should not be reached");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("All competitors unselected in newly-created selection", function (assert) {
@@ -278,46 +263,34 @@
     QUnit.test("Cannot migrate from an old list of competitors that isn't an array", function (assert) {
         var selection = new CompetitorSelection(2);
         var newCompetitors = [fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301])];
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate("this is not an array", newCompetitors);
-            assert.ok(false, "This should not be reached");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot migrate from an old list of competitors that doesn't match the previous count", function (assert) {
         var selection = new CompetitorSelection(2);
         var oldCompetitors = [fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
         var newCompetitors = [fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301])];
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate(oldCompetitors, newCompetitors);
-            assert.ok(false, "This should not be reached");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot migrate to a new list of competitors that isn't an array", function (assert) {
         var selection = new CompetitorSelection(2);
         var oldCompetitors = [fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate(oldCompetitors, "this is not an array");
-            assert.ok(false, "This should not be reached");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot migrate to an empty new list of competitors", function (assert) {
         var selection = new CompetitorSelection(2);
         var oldCompetitors = [fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate(oldCompetitors, []);
-            assert.ok(false, "This should not be reached");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should be an InvalidData.  Exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Can migrate to new list of competitors", function (assert) {

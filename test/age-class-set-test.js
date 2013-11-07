@@ -17,12 +17,9 @@
     var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
     
     QUnit.test("Cannot create an AgeClassSet from an empty array of of age classes", function (assert) {
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function() {
             new AgeClassSet([]);
-            assert.ok(false, "Should throw an exception");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
     
     QUnit.test("Can create an AgeClassSet from a single age class", function (assert) {
@@ -59,13 +56,10 @@
         var competitor1 = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
         var competitor2 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 108]);
         var ageClass1 = new AgeClass("Test", 3, [competitor1]);
-        var ageClass2 = new AgeClass("Test", 4, [competitor2]); 
-        try {
+        var ageClass2 = new AgeClass("Test", 4, [competitor2]);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             new AgeClassSet([ageClass1, ageClass2]);
-            assert.ok(false, "An exception should have been thrown");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cumulative times of the winner of an empty age-class set is null", function (assert) {
@@ -352,12 +346,9 @@
     */
     function assertCannotGetFastestSplits(assert, competitors, numSplits, controlIdx) {
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, competitors)]);
-        try {
-            ageClassSet.getFastestSplitsTo(numSplits, controlIdx);
-            assert.ok(false, "An InvalidData exception should have been thrown but was not");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            ageClassSet.getFastestSplitsTo(numSplits, controlIdx);        
+        });
     }
     
     QUnit.test("Cannot return fastest 0 splits to a control", function (assert) {
@@ -508,36 +499,27 @@
 
     QUnit.test("Cannot return chart data when no competitors", function (assert) {
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [])]);
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             ageClassSet.getChartData([0, 87, 87 + 147, 87 + 147 + 92], [0, 2], _DUMMY_CHART_TYPE);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot return chart data when no reference data given", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
-        try {
+        SplitsBrowserTest.assertException(assert, "TypeError", function () {
             ageClassSet.getChartData();
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot return chart data when no current indexes given", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
-        try {
+        SplitsBrowserTest.assertException(assert, "TypeError", function () {
             ageClassSet.getChartData([0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100], _DUMMY_CHART_TYPE);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
-        }
+        });
     });
     
 })();

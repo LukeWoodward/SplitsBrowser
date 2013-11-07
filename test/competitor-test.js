@@ -28,21 +28,15 @@
     };
 
     QUnit.test("Cannot create a competitor from split times when the split times argument isn't a array", function (assert) {
-        try {
+        SplitsBrowserTest.assertException(assert, "TypeError", function () {
             fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, "This is not an array");
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot create a competitor from an empty array of split times", function (assert) {
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, []);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Can create a competitor from split times and determine cumulative times", function (assert) {
@@ -78,39 +72,27 @@
     });
 
     QUnit.test("Cannot create a competitor from cumulative times when the cumulative times argument isn't an array", function (assert) {
-        try {
+        SplitsBrowserTest.assertException(assert, "TypeError", function () {
             fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, "This is not an array");
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "TypeError", "Exception should have name TypeError: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot create a competitor from an empty array of cumulative times", function (assert) {
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, []);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot create a competitor from an array of cumulative times that does not start with zero", function (assert) {
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [40, 60, 90]);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot create a competitor from an array of cumulative times containing only a single zero", function (assert) {
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0]);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Can create a competitor from cumulative times and determine split times", function (assert) {
@@ -228,12 +210,9 @@
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176];
         
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             competitor.getCumTimesAdjustedToReference(referenceCumTimes);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot adjust a competitor's cumulative times by reference data with a null value", function (assert) {
@@ -241,12 +220,9 @@
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         var referenceCumTimes = [0, 61, 61 + 193, null, 61 + 193 + 176 + 103];
         
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             competitor.getCumTimesAdjustedToReference(referenceCumTimes);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Can adjust a competitor's cumulative times by reference data and add start time with all valid times and same number of controls", function (assert) {
@@ -270,12 +246,9 @@
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 41 * 60, [65, 221, 184, 100]);
         var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176];
         
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             competitor.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot adjust a competitor's cumulative times by reference data and add start time if reference data contains a null value", function (assert) {
@@ -283,12 +256,9 @@
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 41 * 60, [65, 221, 184, 100]);
         var referenceCumTimes = [0, 61, 61 + 193, null, 61 + 193 + 176 + 103];
         
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             competitor.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Can determine the percentages a competitor is behind reference data with all valid times and same number of controls", function (assert) {
@@ -312,12 +282,9 @@
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176];
         
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             competitor.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
 
     QUnit.test("Cannot determine the percentages a competitor is behind reference data with a null value", function (assert) {
@@ -325,24 +292,18 @@
         var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         var referenceCumTimes = [0, 61, 61 + 193, null, 61 + 193 + 176 + 103];
         
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             competitor.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
     
     QUnit.test("Cannot determine that a competitor crosses another one with a different number of controls", function (assert) {
         var competitor1 = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 421]);
         var competitor2 = fromCumTimes(2, "Fred", "Baker", "DEF", 12 * 3600, [0, 71, 218, 379, 440, 491]);
         
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             competitor1.crosses(competitor2);
-            assert.ok(false, "Should not get here");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData: exception message is " + e.message);
-        }
+        });
     });
     
     QUnit.test("Can determine that a competitor does not cross themselves", function (assert) {

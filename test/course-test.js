@@ -32,12 +32,9 @@
         var ageClass2 = new AgeClass("Test class 2", 3, []);
         var ageClass3 = new AgeClass("Test class 3", 3, []);
         var course = new Course("Test course", [ageClass1, ageClass2], null, null);
-        try {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
             course.getOtherClasses(ageClass3);
-            assert.ok(false, "Should have thrown an exception");
-        } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have been InvalidData; message is " + e.message);
-        }
+        });
     });
     
 })();
