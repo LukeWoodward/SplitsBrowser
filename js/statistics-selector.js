@@ -30,6 +30,7 @@
                   
         childSpans.append("label")
                   .attr("for", function(val, index) { return LABEL_ID_PREFIX + index; })
+                  .classed("statisticsSelectorLabel", true)
                   .text(function(name) { return name; });
         
         var outerThis = this;
@@ -38,6 +39,18 @@
         this.handlers = [];
     };
 
+    /**
+    * Sets whether the statistics selector controls are enabled.
+    * @param {boolean} isEnabled - True if the controls are to be enabled,
+    *      false if the controls are to be disabled.
+    */
+    SplitsBrowser.Controls.StatisticsSelector.prototype.setEnabled = function (isEnabled) {
+        this.span.selectAll("label.statisticsSelectorLabel")
+                 .classed("disabled", !isEnabled);
+        this.span.selectAll("input")
+                 .attr("disabled", (isEnabled) ? null : "disabled");
+    };
+    
     /**
     * Register a change handler to be called whenever the choice of currently-
     * visible statistics is changed.

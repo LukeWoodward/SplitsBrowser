@@ -11,9 +11,21 @@ div.otherClassSelector
     background-color: #eeeeee;
 }
 
+div.otherClassSelector.disabled
+{
+    border: 1px solid #999999;
+    background-color: #f9f9f9;
+    color: #999999;
+}
+
 span.otherClassCombining
 {
     padding: 0px 10px;
+}
+
+span.otherClassCombining.disabled
+{
+    color: #999999;
 }
 
 div.otherClassList
@@ -33,6 +45,16 @@ div.otherClassItem.selected
 {
     background-color: #286880;
     color: white;
+}
+
+span.comparisonSelectorLabel.disabled
+{
+    color: #999999;
+}
+
+label.statisticsSelectorLabel.disabled
+{
+    color: #999999;
 }
 
 div.competitor span.nonfinisher

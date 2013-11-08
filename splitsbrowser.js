@@ -1570,6 +1570,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Controls.ClassSelector = function(parent) {
         this.changeHandlers = [];
+        this.otherClassesEnabled = true;
         
         var span = d3.select(parent).append("span");
         span.text("Class: ");
@@ -1623,6 +1624,18 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 outerThis.otherClassesList.style("display", "none");
             }
         });
+    };
+    
+    /**
+    * Sets whether the other-classes selector is enabled, if it is shown at
+    * all.
+    * @param {boolean} otherClassesEnabled - true to enable the selector, false
+    *      to disable it.
+    */
+    SplitsBrowser.Controls.ClassSelector.prototype.setOtherClassesEnabled = function (otherClassesEnabled) {
+        this.otherClassesCombiningLabel.classed("disabled", !otherClassesEnabled);
+        this.otherClassesSelector.classed("disabled", !otherClassesEnabled);
+        this.otherClassesEnabled = otherClassesEnabled;
     };
 
     /**
@@ -1756,10 +1769,12 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
     
     /**
-    * Shows or hides the class-selector.
+    * Shows or hides the other-class selector, if it is enabled.
     */
     SplitsBrowser.Controls.ClassSelector.prototype.showHideClassSelector = function () {
-        this.otherClassesList.style("display", (this.otherClassesList.style("display") === "none") ? "" : "none");
+        if (this.otherClassesEnabled) {
+            this.otherClassesList.style("display", (this.otherClassesList.style("display") === "none") ? "" : "none");
+        }
     };
     
     /**
@@ -1820,9 +1835,14 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.classes = null;
         this.currentRunnerIndex = null;
         this.previousCompetitorList = null;
+        this.parent = parent;
         
         var span = d3.select(parent).append("span");
-        span.text("Compare with ");
+        
+        span.append("span")
+            .classed("comparisonSelectorLabel", true)
+            .text("Compare with ");
+
         var outerThis = this;
         this.dropDown = span.append("select")
                             .attr("id", COMPARISON_SELECTOR_ID)
@@ -1843,7 +1863,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                                            .style("display", "none")
                                            .style("padding-left", "20px");
         
-        this.runnerSpan.text("Runner: ");
+        this.runnerSpan.append("span")
+                       .classed("comparisonSelectorLabel", true)
+                       .text("Runner: ");
         
         this.runnerDropDown = this.runnerSpan.append("select")
                                              .attr("id", RUNNER_SELECTOR_ID)
@@ -1916,6 +1938,19 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Sets whether the control is enabled.
+    * @param {boolean} isEnabled - True if the control is enabled, false if
+    *      disabled.
+    */
+    SplitsBrowser.Controls.ComparisonSelector.prototype.setEnabled = function (isEnabled) {
+        d3.select(this.parent).selectAll("span.comparisonSelectorLabel")
+                              .classed("disabled", !isEnabled);
+                              
+        this.dropDown.disabled = !isEnabled;
+        this.runnerDropDown.disabled = !isEnabled;
+    };
+    
+    /**
     * Returns the function that compares a competitor's splits against some
     * reference data.
     * @return {Function} Comparison function.
@@ -1973,6 +2008,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                   
         childSpans.append("label")
                   .attr("for", function(val, index) { return LABEL_ID_PREFIX + index; })
+                  .classed("statisticsSelectorLabel", true)
                   .text(function(name) { return name; });
         
         var outerThis = this;
@@ -1981,6 +2017,18 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.handlers = [];
     };
 
+    /**
+    * Sets whether the statistics selector controls are enabled.
+    * @param {boolean} isEnabled - True if the controls are to be enabled,
+    *      false if the controls are to be disabled.
+    */
+    SplitsBrowser.Controls.StatisticsSelector.prototype.setEnabled = function (isEnabled) {
+        this.span.selectAll("label.statisticsSelectorLabel")
+                 .classed("disabled", !isEnabled);
+        this.span.selectAll("input")
+                 .attr("disabled", (isEnabled) ? null : "disabled");
+    };
+    
     /**
     * Register a change handler to be called whenever the choice of currently-
     * visible statistics is changed.
@@ -3539,6 +3587,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             this.resultsTable.hide();
             this.mainPanel.style("display", "");
         }
+        
+        this.classSelector.setOtherClassesEnabled(!chartType.isResultsTable);
+        this.comparisonSelector.setEnabled(!chartType.isResultsTable);
+        this.statisticsSelector.setEnabled(!chartType.isResultsTable);
         
         this.crossingRunnersButton.style("display", (chartType.showCrossingRunnersButton) ? "" : "none");
         

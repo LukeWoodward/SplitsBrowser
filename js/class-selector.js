@@ -7,6 +7,7 @@
     */
     SplitsBrowser.Controls.ClassSelector = function(parent) {
         this.changeHandlers = [];
+        this.otherClassesEnabled = true;
         
         var span = d3.select(parent).append("span");
         span.text("Class: ");
@@ -60,6 +61,18 @@
                 outerThis.otherClassesList.style("display", "none");
             }
         });
+    };
+    
+    /**
+    * Sets whether the other-classes selector is enabled, if it is shown at
+    * all.
+    * @param {boolean} otherClassesEnabled - true to enable the selector, false
+    *      to disable it.
+    */
+    SplitsBrowser.Controls.ClassSelector.prototype.setOtherClassesEnabled = function (otherClassesEnabled) {
+        this.otherClassesCombiningLabel.classed("disabled", !otherClassesEnabled);
+        this.otherClassesSelector.classed("disabled", !otherClassesEnabled);
+        this.otherClassesEnabled = otherClassesEnabled;
     };
 
     /**
@@ -193,10 +206,12 @@
     };
     
     /**
-    * Shows or hides the class-selector.
+    * Shows or hides the other-class selector, if it is enabled.
     */
     SplitsBrowser.Controls.ClassSelector.prototype.showHideClassSelector = function () {
-        this.otherClassesList.style("display", (this.otherClassesList.style("display") === "none") ? "" : "none");
+        if (this.otherClassesEnabled) {
+            this.otherClassesList.style("display", (this.otherClassesList.style("display") === "none") ? "" : "none");
+        }
     };
     
     /**

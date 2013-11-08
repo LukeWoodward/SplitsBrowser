@@ -296,6 +296,10 @@
             this.mainPanel.style("display", "");
         }
         
+        this.classSelector.setOtherClassesEnabled(!chartType.isResultsTable);
+        this.comparisonSelector.setEnabled(!chartType.isResultsTable);
+        this.statisticsSelector.setEnabled(!chartType.isResultsTable);
+        
         this.crossingRunnersButton.style("display", (chartType.showCrossingRunnersButton) ? "" : "none");
         
         this.drawChart();

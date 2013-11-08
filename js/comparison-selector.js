@@ -37,9 +37,14 @@
         this.classes = null;
         this.currentRunnerIndex = null;
         this.previousCompetitorList = null;
+        this.parent = parent;
         
         var span = d3.select(parent).append("span");
-        span.text("Compare with ");
+        
+        span.append("span")
+            .classed("comparisonSelectorLabel", true)
+            .text("Compare with ");
+
         var outerThis = this;
         this.dropDown = span.append("select")
                             .attr("id", COMPARISON_SELECTOR_ID)
@@ -60,7 +65,9 @@
                                            .style("display", "none")
                                            .style("padding-left", "20px");
         
-        this.runnerSpan.text("Runner: ");
+        this.runnerSpan.append("span")
+                       .classed("comparisonSelectorLabel", true)
+                       .text("Runner: ");
         
         this.runnerDropDown = this.runnerSpan.append("select")
                                              .attr("id", RUNNER_SELECTOR_ID)
@@ -130,6 +137,19 @@
         this.runnerDropDown.selectedIndex = this.currentRunnerIndex;
        
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
+    };
+    
+    /**
+    * Sets whether the control is enabled.
+    * @param {boolean} isEnabled - True if the control is enabled, false if
+    *      disabled.
+    */
+    SplitsBrowser.Controls.ComparisonSelector.prototype.setEnabled = function (isEnabled) {
+        d3.select(this.parent).selectAll("span.comparisonSelectorLabel")
+                              .classed("disabled", !isEnabled);
+                              
+        this.dropDown.disabled = !isEnabled;
+        this.runnerDropDown.disabled = !isEnabled;
     };
     
     /**
