@@ -158,6 +158,10 @@
                 if (bisectIndex >= this.referenceCumTimes.length) {
                     // Off the right-hand end, use the finish.
                     controlIndex = this.numControls + 1;
+                } else if (bisectIndex === 1) {
+                    // Before control 1, so use control 1 even if we are closer
+                    // to the start.
+                    controlIndex = 1;
                 } else {
                     var diffToNext = Math.abs(this.referenceCumTimes[bisectIndex] - chartX);
                     var diffToPrev = Math.abs(chartX - this.referenceCumTimes[bisectIndex - 1]);
@@ -190,7 +194,7 @@
     SplitsBrowser.Controls.Chart.prototype.getFastestSplits = function () {
         // There's no split to the start, so if the current control is the
         // start, show the statistics for control 1 instead.
-        return this.ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, Math.max(this.currentControlIndex, 1));
+        return this.ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, this.currentControlIndex);
     };
      
     /**
