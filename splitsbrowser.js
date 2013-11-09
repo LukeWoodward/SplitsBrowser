@@ -2328,7 +2328,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     
     var MARGIN = { top: 20, right: 20, bottom: 30, left: 50 };
 
-    var legendLineWidth = 10;
+    var LEGEND_LINE_WIDTH = 10;
     
     // Minimum distance between a Y-axis tick label and a competitor's start
     // time, in pixels.
@@ -3044,7 +3044,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var outerThis = this;
         legendLines.attr("x1", this.contentWidth + 1)
                    .attr("y1", function (data) { return data.y; })
-                   .attr("x2", this.contentWidth + legendLineWidth + 1)
+                   .attr("x2", this.contentWidth + LEGEND_LINE_WIDTH + 1)
                    .attr("y2", function (data) { return data.y; })
                    .attr("stroke", function (data) { return data.colour; })
                    .attr("class", function (data) { return "competitorLegendLine competitor" + data.index; })
@@ -3057,7 +3057,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         labels.enter()
               .append("text");
 
-        labels.attr("x", this.contentWidth + legendLineWidth + 2)
+        labels.attr("x", this.contentWidth + LEGEND_LINE_WIDTH + 2)
               .attr("y", function (data) { return data.y + data.textHeight / 4; })
               .attr("class", function (data) { return "competitorLabel competitor" + data.index; })
               .on("mouseenter", function (data) { outerThis.highlight(data.index); })
@@ -3080,7 +3080,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Controls.Chart.prototype.adjustContentSize = function () {
         var maxTextWidth = this.getMaxGraphEndTextWidth();
         this.setLeftMargin(this.maxStartTimeLabelWidth + MARGIN.left);
-        this.contentWidth = Math.max(this.overallWidth - this.currentLeftMargin - MARGIN.right - maxTextWidth - (legendLineWidth + 2), 100);
+        this.contentWidth = Math.max(this.overallWidth - this.currentLeftMargin - MARGIN.right - maxTextWidth - (LEGEND_LINE_WIDTH + 2), 100);
         this.contentHeight = Math.max(this.overallHeight - MARGIN.top - MARGIN.bottom, 100);
     };
 
