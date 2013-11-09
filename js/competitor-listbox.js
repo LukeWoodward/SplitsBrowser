@@ -1,5 +1,4 @@
-﻿/* global SplitsBrowser, d3, $ */
-(function (){
+﻿(function (){
     "use strict";
 
     // ID of the competitor list div.

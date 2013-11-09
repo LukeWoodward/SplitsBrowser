@@ -1,5 +1,3 @@
-/* global SplitsBrowser, d3, $ */
-
 (function () {
     "use strict";
     

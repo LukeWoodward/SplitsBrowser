@@ -33,11 +33,26 @@ module.exports = function(grunt) {
       files: ['gruntfile.js', 'js/*.js', 'test/*-test.js'],
       options: {
         // options here to override JSHint defaults
+        plusplus: true,
+        eqeqeq: true,
+        undef: true,
         globals: {
-          jQuery: true,
-          console: true,
-          module: true,
-          document: true
+          "$": false,
+          d3: false,
+          window: false,
+          document: false,
+          setTimeout: false,
+          clearTimeout: false,
+          alert: false,
+          SplitsBrowser: true,
+          
+          // QUnit globals
+          QUnit: false,
+          module: false,
+          expect: false,
+          
+          // Test namespace.
+          SplitsBrowserTest: true
         }
       }
     }

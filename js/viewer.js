@@ -1,5 +1,3 @@
-/* global window, $, SplitsBrowser, d3, setTimeout, clearTimeout */
-
 (function () {
     "use strict";
     // Delay in milliseconds between a resize event being triggered and the

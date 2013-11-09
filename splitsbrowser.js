@@ -834,8 +834,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
 })();
 
-/* global $, SplitsBrowser, d3 */
-
 (function () {
     "use strict";
     
@@ -874,8 +872,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
 })();
 
-/* global SplitsBrowser, $, d3 */
-
 (function () {
     "use strict";
     
@@ -892,7 +888,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
 })();
 
-/* global SplitsBrowser, d3 */
 (function (){
     "use strict";
 
@@ -1459,7 +1454,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
 })();
 
-/* global SplitsBrowser, d3, $ */
 (function (){
     "use strict";
 
@@ -2195,8 +2189,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 })();
 
 
-/* global SplitsBrowser, d3, $ */
-
 (function () {
     "use strict";
     
@@ -2313,8 +2305,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         return $(this.popupDiv.node()).height();
     };
 })();
-
-/* global SplitsBrowser, d3, $ */
 
 (function (){
     "use strict";
@@ -3291,8 +3281,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.div.style("display", "none");
     };
 })();
-
-/* global window, $, SplitsBrowser, d3, setTimeout, clearTimeout */
 
 (function () {
     "use strict";

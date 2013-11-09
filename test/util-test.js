@@ -1,8 +1,4 @@
-﻿/* global d3 */
-/* global QUnit, module, expect */
-/* global SplitsBrowser */
-
-(function() {
+﻿(function() {
     "use strict";
 
     var isNotNull = SplitsBrowser.isNotNull;

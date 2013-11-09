@@ -1,6 +1,3 @@
-/* global QUnit, module */
-/* global SplitsBrowser */
-
 (function (){
     "use strict";
 

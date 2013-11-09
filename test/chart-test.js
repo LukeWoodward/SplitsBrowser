@@ -1,8 +1,4 @@
-﻿/* global d3 */
-/* global QUnit, module, expect, document */
-/* global SplitsBrowser */
-
-(function () {
+﻿(function () {
     "use strict";
 
     var Chart = SplitsBrowser.Controls.Chart;
