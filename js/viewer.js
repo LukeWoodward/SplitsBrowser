@@ -308,9 +308,8 @@
     * data and starting SplitsBrowser.
     * @param {String} data - The data returned from the AJAX request.
     * @param {String} status - The status of the request.
-    * @param {Object} jqXHR - jQuery XmlHttpRequest object.
     */
-    function readEventData(data, status, jqXHR) {
+    function readEventData(data, status) {
         if (status === "success") {
             var eventData = SplitsBrowser.Input.parseEventData(data);
             if (eventData === null) {

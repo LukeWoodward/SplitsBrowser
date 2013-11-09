@@ -149,7 +149,7 @@
     
     QUnit.test("Can compute ranks of single competitor as all 1s", function (assert) {
         var competitor = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor])]);
+        new AgeClassSet([new AgeClass("Test", 3, [competitor])]);
         assertSplitRanks(assert, competitor, [1, 1, 1, 1]);
         assertCumulativeRanks(assert, competitor, [1, 1, 1, 1]);
     });
@@ -157,7 +157,7 @@
     QUnit.test("Can compute ranks in single-class set when there are two competitors with no equal times", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
-        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
+        new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
         
         assertSplitRanks(assert, competitor1, [2, 1, 2, 2]);
         assertCumulativeRanks(assert, competitor1, [2, 1, 1, 2]);
@@ -168,7 +168,7 @@
     QUnit.test("Can compute ranks in multiple-class set when there are two competitors with no equal times", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
-        var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [competitor1]), new AgeClass("Test 2", 3, [competitor2])]);
+        new AgeClassSet([new AgeClass("Test 1", 3, [competitor1]), new AgeClass("Test 2", 3, [competitor2])]);
         
         assertSplitRanks(assert, competitor1, [2, 1, 2, 2]);
         assertCumulativeRanks(assert, competitor1, [2, 1, 1, 2]);
@@ -180,7 +180,7 @@
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
         var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);
-        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
+        new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         assertSplitRanks(assert, competitor1, [3, 1, 3, 2]);
         assertCumulativeRanks(assert, competitor1, [3, 1, 2, 2]);
@@ -194,7 +194,7 @@
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 197, 209, 100]);
         var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);
-        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
+        new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         assertSplitRanks(assert, competitor1, [3, 1, 3, 2]);
         assertCumulativeRanks(assert, competitor1, [3, 2, 3, 2]);
@@ -208,7 +208,7 @@
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
         var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 109]);
-        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
+        new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         assertSplitRanks(assert, competitor1, [3, 1, 3, 2]);
         assertCumulativeRanks(assert, competitor1, [3, 1, 2, 3]);
@@ -222,7 +222,7 @@
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
         var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, null, 199, 117]);
-        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
+        new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         assertSplitRanks(assert, competitor1, [3, 1, 3, 2]);
         assertCumulativeRanks(assert, competitor1, [3, 1, 1, 2]);
@@ -236,7 +236,7 @@
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, null]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, null]);
         var competitor3 = fromSplitTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, null]);
-        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
+        new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         assertSplitRanks(assert, competitor1, [3, 1, 3, null]);
         assertCumulativeRanks(assert, competitor1, [3, 1, 2, null]);
@@ -250,7 +250,7 @@
         var competitor1 = fromCumTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var competitor2 = fromCumTimes(2, "John", "Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100]);
         var competitor3 = fromCumTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [0, 78, null,     78 + 209 + 199, 78 + 209 + 199 + 117]);
-        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
+        new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         assertSplitRanks(assert, competitor1, [3, 1, 2, 2]);
         assertCumulativeRanks(assert, competitor1, [3, 1, 1, 2]);

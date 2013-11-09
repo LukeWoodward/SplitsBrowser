@@ -139,7 +139,7 @@
         var splitRanksByCompetitor = [];
         var cumRanksByCompetitor = [];
         
-        this.allCompetitors.forEach(function (_comp) {
+        this.allCompetitors.forEach(function () {
             splitRanksByCompetitor.push([]);
             cumRanksByCompetitor.push([]);
         });

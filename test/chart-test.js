@@ -14,7 +14,7 @@
     
     var _DUMMY_CHART_TYPE_SKIP = {
         name: "dummy skip",
-        dataSelector: function (comp, referenceCumTimes) { return comp.splitRanks; },
+        dataSelector: function (comp) { return comp.splitRanks; },
         skipStart: true
     };
 
@@ -85,7 +85,7 @@
     // expected.  If we don't do this, it will complain that the test isn't
     // testing anything.
 
-    QUnit.test("Can create a chart", function (assert) {
+    QUnit.test("Can create a chart", function () {
         var ageClassSet = getTestAgeClassSet();
         var fastestCumTimes = ageClassSet.getFastestCumTimes();
         var chartData = ageClassSet.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP);
@@ -96,7 +96,7 @@
         expect(0);
     });
 
-    QUnit.test("Can create a chart with a chart type skipping the start", function (assert) {
+    QUnit.test("Can create a chart with a chart type skipping the start", function () {
         var ageClassSet = getTestAgeClassSet();
         var fastestCumTimes = ageClassSet.getFastestCumTimes();
         var chartData = ageClassSet.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_SKIP);
@@ -107,7 +107,7 @@
         expect(0);
     });
 
-    QUnit.test("Can create a chart with start-time labels", function (assert) {
+    QUnit.test("Can create a chart with start-time labels", function () {
         var ageClassSet = getTestAgeClassSet();
         var fastestCumTimes = ageClassSet.getFastestCumTimes();
         var chartData = ageClassSet.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP);

@@ -77,7 +77,7 @@
     }
 
     QUnit.test("Class selector created initially disabled and with only a dummy entry, with other-class selector hidden", function(assert) {
-        var selector = new ClassSelector(d3.select("#qunit-fixture").node());
+        new ClassSelector(d3.select("#qunit-fixture").node());
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");

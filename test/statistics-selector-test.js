@@ -90,7 +90,7 @@
         assert.strictEqual(1, callCount);
     });
 
-    QUnit.test("Can deregister change handler that was never registered without error", function (assert) {
+    QUnit.test("Can deregister change handler that was never registered without error", function () {
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
         

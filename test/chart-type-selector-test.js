@@ -19,7 +19,7 @@
     }
 
     QUnit.test("Can construct the selector", function(assert) {
-        var selector = new ChartTypeSelector(d3.select("#qunit-fixture").node());
+        new ChartTypeSelector(d3.select("#qunit-fixture").node());
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");

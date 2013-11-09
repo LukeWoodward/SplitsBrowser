@@ -60,7 +60,7 @@
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "1");
     });
     
-    QUnit.test("Can create a results table with course with no length and climb", function (assert) {
+    QUnit.test("Can create a results table with course with no length and climb", function () {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);

@@ -206,7 +206,7 @@
     QUnit.test("Cannot parse a single class with two valid competitors and one competitor with the wrong number of items", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\nFred,Baker,DEF,12:12,02:42,01:51,04:00,01:31,00:30,01:35\r\nJane,Palmer,GHI,11:22,02:50,01:44,03:29,01:40,00:28";
         SplitsBrowserTest.assertInvalidData(assert, function () {
-            var actualClass = parseEventData(csvData);
+            parseEventData(csvData);
         });
     });
 })();

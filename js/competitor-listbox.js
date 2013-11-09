@@ -30,10 +30,8 @@
     /**
     * Handles a change to the selection of competitors, by highlighting all
     * those selected and unhighlighting all those no longer selected.
-    * @param {Array} indexes - Array of indexes corresponding to selected
-    *                          competitors.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.selectionChanged = function (indexes) {
+    SplitsBrowser.Controls.CompetitorListBox.prototype.selectionChanged = function () {
         var outerThis = this;
         this.listDiv.selectAll("div.competitor")
                     .data(d3.range(this.competitorSelection.count))

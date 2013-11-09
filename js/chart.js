@@ -229,9 +229,8 @@
     
     /**
     * Handles a mouse button being pressed over the chart.
-    * @param {Event} event - DOM event object.
     */
-    SplitsBrowser.Controls.Chart.prototype.onMouseUp = function (event) {
+    SplitsBrowser.Controls.Chart.prototype.onMouseUp = function () {
         this.popup.hide();
     };
 
@@ -527,7 +526,6 @@
             } else {
                 // Some start times are to be drawn - only draw tick marks if
                 // they are far enough away from competitors.
-                var yRange = chartData.yExtent[1] - chartData.yExtent[0];
                 var yScale = this.yScale;
                 return function (time) {
                     var nearestOffset = d3.min(startTimes.map(function (startTime) { return Math.abs(yScale(startTime) - yScale(time)); }));
@@ -604,8 +602,8 @@
                 // draw.  d3 will report an error ('Error parsing d=""') if no
                 // points on the line are defined, as will happen in this case,
                 // so we substitute some dummy data instead.
-                return d3.svg.line().x(function (d) { return -10000; })
-                                    .y(function (d) { return -10000; });
+                return d3.svg.line().x(-10000)
+                                    .y(-10000);
             }
             else {
                 return d3.svg.line()
@@ -740,7 +738,7 @@
                    .attr("stroke", function (data) { return data.colour; })
                    .attr("class", function (data) { return "competitorLegendLine competitor" + data.index; })
                    .on("mouseenter", function (data) { outerThis.highlight(data.index); })
-                   .on("mouseleave", function (data) { outerThis.unhighlight(); });
+                   .on("mouseleave", function () { outerThis.unhighlight(); });
 
         legendLines.exit().remove();
 
@@ -752,7 +750,7 @@
               .attr("y", function (data) { return data.y + data.textHeight / 4; })
               .attr("class", function (data) { return "competitorLabel competitor" + data.index; })
               .on("mouseenter", function (data) { outerThis.highlight(data.index); })
-              .on("mouseleave", function (data) { outerThis.unhighlight(); })
+              .on("mouseleave", function () { outerThis.unhighlight(); })
               .text(function (data) { return data.label; });
 
         labels.exit().remove();

@@ -35,7 +35,7 @@
 
     QUnit.test("Can create a listbox for a single class with all competitors deselected and without class labels", function (assert) {
 
-        var listboxAndSelection = createSampleListbox([], false);
+        createSampleListbox([], false);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor").size(), 3);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 0);
         assert.strictEqual(d3.selectAll("div#qunit-fixture span.competitorClassLabel").size(), 0);
@@ -43,7 +43,7 @@
 
     QUnit.test("Can create a listbox for multiple classes with all competitors deselected but with class labels shown", function (assert) {
 
-        var listboxAndSelection = createSampleListbox([], true);
+        createSampleListbox([], true);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor").size(), 3);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 0);
         assert.strictEqual(d3.selectAll("div#qunit-fixture span.competitorClassLabel").size(), 3);
@@ -51,7 +51,7 @@
 
     QUnit.test("Can create a listbox with two of three competitors initially selected", function (assert) {
 
-        var listboxAndSelection = createSampleListbox([0, 2], false);
+        createSampleListbox([0, 2], false);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor").size(), 3);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 2);
     });

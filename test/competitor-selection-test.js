@@ -215,7 +215,7 @@
         assert.strictEqual(callCount, 1, "Handler should still only have been called once");
     });
 
-    QUnit.test("Can deregister handler that was never registered without error", function (assert) {
+    QUnit.test("Can deregister handler that was never registered without error", function () {
         reset();
         var selection = new CompetitorSelection(3);
         selection.deregisterChangeHandler(testHandler);

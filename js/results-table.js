@@ -41,8 +41,6 @@
     * Populates the contents of the table with the age-class data.
     */
     SplitsBrowser.Controls.ResultsTable.prototype.populateTable = function () {
-        var resultLines = [];
-        
         var headerText = this.ageClass.name + ", " + this.ageClass.numControls + " control" + ((this.ageClass.numControls === 1) ? "" : "s");
         var course = this.ageClass.course;
         if (course.length !== null) {
@@ -54,7 +52,6 @@
         
         this.headerSpan.text(headerText);
         
-        var headerRow = this.table.select("thead");
         var headerCellData = ["#", "Name", "Time"].concat(d3.range(1, this.ageClass.numControls + 1)).concat(["Finish"]);
         var headerCells = this.table.select("thead tr")
                                     .selectAll("th")

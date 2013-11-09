@@ -1,6 +1,9 @@
 /*
  * Namespace declarations that the rest of the code can depend upon.
  */
+
+// Tell JSHint not to complain that this isn't used anywhere.
+/* exported SplitsBrowser */
 var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
 
@@ -700,7 +703,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var splitRanksByCompetitor = [];
         var cumRanksByCompetitor = [];
         
-        this.allCompetitors.forEach(function (_comp) {
+        this.allCompetitors.forEach(function () {
             splitRanksByCompetitor.push([]);
             cumRanksByCompetitor.push([]);
         });
@@ -1486,10 +1489,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     /**
     * Handles a change to the selection of competitors, by highlighting all
     * those selected and unhighlighting all those no longer selected.
-    * @param {Array} indexes - Array of indexes corresponding to selected
-    *                          competitors.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.selectionChanged = function (indexes) {
+    SplitsBrowser.Controls.CompetitorListBox.prototype.selectionChanged = function () {
         var outerThis = this;
         this.listDiv.selectAll("div.competitor")
                     .data(d3.range(this.competitorSelection.count))
@@ -2537,9 +2538,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     
     /**
     * Handles a mouse button being pressed over the chart.
-    * @param {Event} event - DOM event object.
     */
-    SplitsBrowser.Controls.Chart.prototype.onMouseUp = function (event) {
+    SplitsBrowser.Controls.Chart.prototype.onMouseUp = function () {
         this.popup.hide();
     };
 
@@ -2835,7 +2835,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             } else {
                 // Some start times are to be drawn - only draw tick marks if
                 // they are far enough away from competitors.
-                var yRange = chartData.yExtent[1] - chartData.yExtent[0];
                 var yScale = this.yScale;
                 return function (time) {
                     var nearestOffset = d3.min(startTimes.map(function (startTime) { return Math.abs(yScale(startTime) - yScale(time)); }));
@@ -2912,8 +2911,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 // draw.  d3 will report an error ('Error parsing d=""') if no
                 // points on the line are defined, as will happen in this case,
                 // so we substitute some dummy data instead.
-                return d3.svg.line().x(function (d) { return -10000; })
-                                    .y(function (d) { return -10000; });
+                return d3.svg.line().x(-10000)
+                                    .y(-10000);
             }
             else {
                 return d3.svg.line()
@@ -3048,7 +3047,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                    .attr("stroke", function (data) { return data.colour; })
                    .attr("class", function (data) { return "competitorLegendLine competitor" + data.index; })
                    .on("mouseenter", function (data) { outerThis.highlight(data.index); })
-                   .on("mouseleave", function (data) { outerThis.unhighlight(); });
+                   .on("mouseleave", function () { outerThis.unhighlight(); });
 
         legendLines.exit().remove();
 
@@ -3060,7 +3059,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
               .attr("y", function (data) { return data.y + data.textHeight / 4; })
               .attr("class", function (data) { return "competitorLabel competitor" + data.index; })
               .on("mouseenter", function (data) { outerThis.highlight(data.index); })
-              .on("mouseleave", function (data) { outerThis.unhighlight(); })
+              .on("mouseleave", function () { outerThis.unhighlight(); })
               .text(function (data) { return data.label; });
 
         labels.exit().remove();
@@ -3182,8 +3181,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Populates the contents of the table with the age-class data.
     */
     SplitsBrowser.Controls.ResultsTable.prototype.populateTable = function () {
-        var resultLines = [];
-        
         var headerText = this.ageClass.name + ", " + this.ageClass.numControls + " control" + ((this.ageClass.numControls === 1) ? "" : "s");
         var course = this.ageClass.course;
         if (course.length !== null) {
@@ -3195,7 +3192,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         this.headerSpan.text(headerText);
         
-        var headerRow = this.table.select("thead");
         var headerCellData = ["#", "Name", "Time"].concat(d3.range(1, this.ageClass.numControls + 1)).concat(["Finish"]);
         var headerCells = this.table.select("thead tr")
                                     .selectAll("th")
@@ -3592,9 +3588,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * data and starting SplitsBrowser.
     * @param {String} data - The data returned from the AJAX request.
     * @param {String} status - The status of the request.
-    * @param {Object} jqXHR - jQuery XmlHttpRequest object.
     */
-    function readEventData(data, status, jqXHR) {
+    function readEventData(data, status) {
         if (status === "success") {
             var eventData = SplitsBrowser.Input.parseEventData(data);
             if (eventData === null) {
