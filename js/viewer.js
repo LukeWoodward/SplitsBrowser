@@ -334,7 +334,7 @@
             url: eventUrl,
             data: "",
             success: readEventData,
-            dataType: "text",
+            dataType: "text"
         });
     };
 })();

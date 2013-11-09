@@ -3614,7 +3614,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             url: eventUrl,
             data: "",
             success: readEventData,
-            dataType: "text",
+            dataType: "text"
         });
     };
 })();

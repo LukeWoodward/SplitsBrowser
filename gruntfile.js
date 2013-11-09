@@ -37,6 +37,10 @@ module.exports = function(grunt) {
         eqeqeq: true,
         undef: true,
         unused: true,
+        camelcase: true,
+        curly: true,
+        es3: true,
+        immed: true,
         globals: {
           "$": false,
           d3: false,
