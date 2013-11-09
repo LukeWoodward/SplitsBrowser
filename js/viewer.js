@@ -66,7 +66,11 @@
         
         this.topPanel.append("span").style("padding", "0px 30px 0px 30px");
         
-        this.chartTypeSelector = new SplitsBrowser.Controls.ChartTypeSelector(this.topPanel.node());
+        var types = SplitsBrowser.Model.ChartTypes;
+        var chartTypes = [types.SplitsGraph, types.RaceGraph, types.PositionAfterLeg,
+                          types.SplitPosition, types.PercentBehind, types.ResultsTable];
+        
+        this.chartTypeSelector = new SplitsBrowser.Controls.ChartTypeSelector(this.topPanel.node(), chartTypes);
         
         this.chartType = this.chartTypeSelector.getChartType();
         

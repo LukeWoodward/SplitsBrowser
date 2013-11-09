@@ -891,6 +891,70 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
 })();
 
+(function () {
+    
+    /**
+    * Converts a number of seconds into the corresponding number of minutes.
+    * This conversion is as simple as dividing by 60.
+    * @param {Number} seconds - The number of seconds to convert.
+    * @return {Number} The corresponding number of minutes.
+    */
+    function secondsToMinutes(seconds) { 
+        return (seconds === null) ? null : seconds / 60;
+    }
+
+    SplitsBrowser.Model.ChartTypes = {
+        SplitsGraph: {
+            name: "Splits graph",
+            dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
+            skipStart: false,
+            yAxisLabel: "Time loss (min)",
+            showCrossingRunnersButton: false,
+            isResultsTable: false
+        },
+        RaceGraph: {
+            name: "Race graph",
+            dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
+            skipStart: false,
+            yAxisLabel: "Time",
+            showCrossingRunnersButton: true,
+            isResultsTable: false
+        },
+        PositionAfterLeg: {
+            name: "Position after leg",
+            dataSelector: function (comp) { return comp.cumRanks; },
+            skipStart: true,
+            yAxisLabel: "Position",
+            showCrossingRunnersButton: false,
+            isResultsTable: false
+        },
+        SplitPosition: {
+            name: "Split position",
+            dataSelector: function (comp) { return comp.splitRanks; },
+            skipStart: true,
+            yAxisLabel: "Position",
+            showCrossingRunnersButton: false,
+            isResultsTable: false
+        },
+        PercentBehind: {
+            name: "Percent behind",
+            dataSelector: function (comp, referenceCumTimes) { return comp.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
+            skipStart: false,
+            yAxisLabel: "Percent behind",
+            showCrossingRunnersButton: false,
+            isResultsTable: false
+        },
+        ResultsTable: {
+            name: "Results table",
+            dataSelector: null,
+            skipStart: false,
+            yAxisLabel: null,
+            showCrossingRunnersButton: false,
+            isResultsTable: true
+        }
+    };
+})();
+
 (function (){
     "use strict";
 
@@ -2077,72 +2141,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     "use strict";
     
     /**
-    * Converts a number of seconds into the corresponding number of minutes.
-    * This conversion is as simple as dividing by 60.
-    * @param {Number} seconds - The number of seconds to convert.
-    * @return {Number} The corresponding number of minutes.
-    */
-    function secondsToMinutes(seconds) { 
-        return (seconds === null) ? null : seconds / 60;
-    }
-
-    var ALL_CHART_TYPES = [
-        {
-            name: "Splits graph",
-            dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
-            skipStart: false,
-            yAxisLabel: "Time loss (min)",
-            showCrossingRunnersButton: false,
-            isResultsTable: false
-        },
-        {
-            name: "Race graph",
-            dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
-            skipStart: false,
-            yAxisLabel: "Time",
-            showCrossingRunnersButton: true,
-            isResultsTable: false
-        },
-        {
-            name: "Position after leg",
-            dataSelector: function (comp) { return comp.cumRanks; },
-            skipStart: true,
-            yAxisLabel: "Position",
-            showCrossingRunnersButton: false,
-            isResultsTable: false
-        },
-        {
-            name: "Split position",
-            dataSelector: function (comp) { return comp.splitRanks; },
-            skipStart: true,
-            yAxisLabel: "Position",
-            showCrossingRunnersButton: false,
-            isResultsTable: false
-        },
-        {
-            name: "Percent behind",
-            dataSelector: function (comp, referenceCumTimes) { return comp.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
-            skipStart: false,
-            yAxisLabel: "Percent behind",
-            showCrossingRunnersButton: false,
-            isResultsTable: false
-        },
-        {
-            name: "Results table",
-            dataSelector: null,
-            skipStart: false,
-            yAxisLabel: null,
-            showCrossingRunnersButton: false,
-            isResultsTable: true
-        }
-    ];
-    
-    /**
     * A control that wraps a drop-down list used to choose the types of chart to view.
     * @param {HTMLElement} parent - The parent element to add the control to.
+    * @param {Array} chartTypes - Array of types of chart to list.
     */
-    SplitsBrowser.Controls.ChartTypeSelector = function(parent) {
+    SplitsBrowser.Controls.ChartTypeSelector = function (parent, chartTypes) {
         this.changeHandlers = [];
+        this.chartTypes = chartTypes;
         
         var span = d3.select(parent).append("span");
         span.text("View: ");
@@ -2150,7 +2155,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.dropDown = span.append("select").node();
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
         
-        var optionsList = d3.select(this.dropDown).selectAll("option").data(ALL_CHART_TYPES);
+        var optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);
         optionsList.enter().append("option");
         
         optionsList.attr("value", function (_value, index) { return index.toString(); })
@@ -2178,14 +2183,14 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @return {Array} The currently-selected chart type.
     */
     SplitsBrowser.Controls.ChartTypeSelector.prototype.getChartType = function () {
-        return ALL_CHART_TYPES[Math.max(this.dropDown.selectedIndex, 0)];
+        return this.chartTypes[Math.max(this.dropDown.selectedIndex, 0)];
     };
     
     /**
     * Handle a change of the selected option in the drop-down list.
     */
     SplitsBrowser.Controls.ChartTypeSelector.prototype.onSelectionChanged = function () {
-        this.changeHandlers.forEach(function(handler) { handler(ALL_CHART_TYPES[this.dropDown.selectedIndex]); }, this);
+        this.changeHandlers.forEach(function(handler) { handler(this.chartTypes[this.dropDown.selectedIndex]); }, this);
     };
 })();
 
@@ -3348,7 +3353,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         this.topPanel.append("span").style("padding", "0px 30px 0px 30px");
         
-        this.chartTypeSelector = new SplitsBrowser.Controls.ChartTypeSelector(this.topPanel.node());
+        var types = SplitsBrowser.Model.ChartTypes;
+        var chartTypes = [types.SplitsGraph, types.RaceGraph, types.PositionAfterLeg,
+                          types.SplitPosition, types.PercentBehind, types.ResultsTable];
+        
+        this.chartTypeSelector = new SplitsBrowser.Controls.ChartTypeSelector(this.topPanel.node(), chartTypes);
         
         this.chartType = this.chartTypeSelector.getChartType();
         
