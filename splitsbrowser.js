@@ -2223,7 +2223,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         // browsers support pointer-events: none, which means that this div
         // receives no mouse events at all.
         for (var eventName in handlers) {
-            $(this.popupDiv.node()).on(eventName, handlers[eventName]);
+            if (handlers.hasOwnProperty(eventName)) {
+                $(this.popupDiv.node()).on(eventName, handlers[eventName]);
+            }
         }
         
         var outerThis = this;

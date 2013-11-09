@@ -40,6 +40,7 @@ module.exports = function(grunt) {
         camelcase: true,
         curly: true,
         es3: true,
+        forin: true,
         immed: true,
         globals: {
           "$": false,
