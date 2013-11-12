@@ -26,4 +26,33 @@
     SplitsBrowser.Model.AgeClass.prototype.setCourse = function (course) {
         this.course = course;
     };
+    
+    /**
+    * Returns the fastest split time recorded by competitors in this class.  If
+    * no fastest split time is recorded (e.g. because all competitors
+    * mispunched that control, or the class is empty), null is returned.
+    * @param {Number} controlIdx - The index of the control to return the
+    *      fastest split to.
+    * @return {Object|null} Object containing the name and fastest split, or
+    *      null if no split times for that control were recorded.
+    */
+    SplitsBrowser.Model.AgeClass.prototype.getFastestSplitTo = function (controlIdx) {
+        if (typeof controlIdx !== "number" || controlIdx < 1 || controlIdx > this.numControls + 1) {
+            SplitsBrowser.throwInvalidData("Cannot return splits to leg '" + this.numControls + "' in a course with " + this.numControls + " control(s)");
+        }
+    
+        var fastestSplit = null;
+        var fastestCompetitor = null;
+        this.competitors.forEach(function (comp) {
+            var compSplit = comp.getSplitTimeTo(controlIdx);
+            if (compSplit !== null) {
+                if (fastestSplit === null || compSplit < fastestSplit) {
+                    fastestSplit = compSplit;
+                    fastestCompetitor = comp;
+                }
+            }
+        });
+        
+        return (fastestSplit === null) ? null : {split: fastestSplit, name: fastestCompetitor.name};
+    };
 })();

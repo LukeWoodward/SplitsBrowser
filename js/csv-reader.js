@@ -68,9 +68,9 @@
        
         var classes = classSections.map(SplitsBrowser.Input.CSV.parseAgeClass);
         
-        // Nulls are for the course length and climb, which aren't in the
-        // source data files, so we can't do anything about them.
-        var courses = classes.map(function (cls) { return new SplitsBrowser.Model.Course(cls.name, [cls], null, null); });
+        // Nulls are for the course length, climb and controls, which aren't in
+        // the source data files, so we can't do anything about them.
+        var courses = classes.map(function (cls) { return new SplitsBrowser.Model.Course(cls.name, [cls], null, null, null); });
         
         for (var i = 0; i < classes.length; i += 1) {
             classes[i].setCourse(courses[i]);

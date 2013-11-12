@@ -560,6 +560,35 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Model.AgeClass.prototype.setCourse = function (course) {
         this.course = course;
     };
+    
+    /**
+    * Returns the fastest split time recorded by competitors in this class.  If
+    * no fastest split time is recorded (e.g. because all competitors
+    * mispunched that control, or the class is empty), null is returned.
+    * @param {Number} controlIdx - The index of the control to return the
+    *      fastest split to.
+    * @return {Object|null} Object containing the name and fastest split, or
+    *      null if no split times for that control were recorded.
+    */
+    SplitsBrowser.Model.AgeClass.prototype.getFastestSplitTo = function (controlIdx) {
+        if (typeof controlIdx !== "number" || controlIdx < 1 || controlIdx > this.numControls + 1) {
+            SplitsBrowser.throwInvalidData("Cannot return splits to leg '" + this.numControls + "' in a course with " + this.numControls + " control(s)");
+        }
+    
+        var fastestSplit = null;
+        var fastestCompetitor = null;
+        this.competitors.forEach(function (comp) {
+            var compSplit = comp.getSplitTimeTo(controlIdx);
+            if (compSplit !== null) {
+                if (fastestSplit === null || compSplit < fastestSplit) {
+                    fastestSplit = compSplit;
+                    fastestCompetitor = comp;
+                }
+            }
+        });
+        
+        return (fastestSplit === null) ? null : {split: fastestSplit, name: fastestCompetitor.name};
+    };
 })();
 
 
@@ -850,12 +879,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {Array} classes - Array of AgeClass objects comprising the course.
     * @param {Number|null} length - Length of the course, in kilometres.
     * @param {Number|null} climb - The course climb, in metres.
+    * @param {Array|null} controls - Array of codes of the controls that make
+    *     up this course.  This may be null if no such information is provided.
     */
-    SplitsBrowser.Model.Course = function (name, classes, length, climb) {
+    SplitsBrowser.Model.Course = function (name, classes, length, climb, controls) {
         this.name = name;
         this.classes = classes;
         this.length = length;
         this.climb = climb;
+        this.controls = controls;
     };
     
     /**
@@ -873,6 +905,103 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             return otherClasses;
         }
     };
+    
+    /**
+    * Returns whether this course uses the given leg.
+    *
+    * If this course lacks leg information, it is assumed not to contain any
+    * legs and so will return false for every leg.
+    *
+    * @param {String} startCode - Code for the control at the start of the leg,
+    *     or null for the start.
+    * @param {String} endCode - Code for the control at the end of the leg, or
+    *     null for the finish.
+    * @return {boolean} Whether this course uses the given leg.
+    */
+    SplitsBrowser.Model.Course.prototype.usesLeg = function (startCode, endCode) {
+        return this.getLegNumber(startCode, endCode) >= 0;
+    };
+    
+    /**
+    * Returns the number of a leg in this course, given the start and end
+    * control codes.
+    *
+    * The number of a leg is the number of the end control (so the leg from
+    * control 3 to control 4 is leg number 4.)  The number of the finish
+    * control is one more than the number of controls.
+    *
+    * A negative number is returned if this course does not contain this leg.
+    *
+    * @param {String} startCode - Code for the control at the start of the leg,
+    *     or null for the start.
+    * @param {String} endCode - Code for the control at the end of the leg, or
+    *     null for the finish.
+    * @return {Number} The control number of the leg in this course, or a
+    *     negative number if the leg is not part of this course.
+    */
+    SplitsBrowser.Model.Course.prototype.getLegNumber = function (startCode, endCode) {
+        if (this.controls === null) {
+            // No controls, so no, it doesn't contain the leg specified.
+            return -1;
+        }
+        
+        if (startCode === null && endCode === null) {
+            // No controls - straight from the start to the finish.
+            // This leg is only present, and is leg 1, if there are no
+            // controls.
+            return (this.controls.length === 0) ? 1 : -1;
+        } else if (startCode === null) {
+            // From the start to control 1.
+            return (this.controls.length > 0 && this.controls[0] === endCode) ? 1 : -1;
+        } else if (endCode === null) {
+            return (this.controls.length > 0 && this.controls[this.controls.length - 1] === startCode) ? (this.controls.length + 1) : -1;
+        } else {
+            for (var controlIdx = 1; controlIdx < this.controls.length; controlIdx += 1) {
+                if (this.controls[controlIdx - 1] === startCode && this.controls[controlIdx] === endCode) {
+                    return controlIdx + 1;
+                }
+            }
+            
+            // If we get here, the given leg is not part of this course.
+            return -1;
+        }
+    };
+    
+    /**
+    * Returns the fastest splits recorded for a given leg of the course.
+    *
+    * Note that this method should only be called if the course is known to use
+    * the given leg.
+    *
+    * @param {String} startCode - Code for the control at the start of the leg,
+    *     or null for the start.
+    * @param {String} endCode - Code for the control at the end of the leg, or
+    *     null for the finish.
+    * @return {Array} Array of fastest splits for each age class using this
+    *      course.
+    */
+    SplitsBrowser.Model.Course.prototype.getFastestSplitsForLeg = function (startCode, endCode) {
+        if (this.legs === null) {
+            SplitsBrowser.throwInvalidData("Cannot determine fastest splits for a leg because leg information is not available");
+        }
+        
+        var legNumber = this.getLegNumber(startCode, endCode);
+        if (legNumber < 0) {
+            var legStr = ((startCode === null) ? "start" : startCode) + " to " + ((endCode === null) ? "end" : endCode);
+            SplitsBrowser.throwInvalidData("Leg from " +  legStr + " not found in course " + this.name);
+        }
+        
+        var controlNum = legNumber;
+        var fastestSplits = [];
+        this.classes.forEach(function (ageClass) {
+            var classFastest = ageClass.getFastestSplitTo(controlNum);
+            if (classFastest !== null) {
+                fastestSplits.push({name: classFastest.name, className: ageClass.name, split: classFastest.split});
+            }
+        });
+        
+        return fastestSplits;
+    };
 })();
 
 (function () {
@@ -888,6 +1017,29 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Model.Event = function (classes, courses) {
         this.classes = classes;
         this.courses = courses;
+    };
+    
+    /**
+    * Returns the fastest splits for each class on a given leg.
+    *
+    * The fastest splits are returned as an array of objects, where each object
+    * lists the competitors name, the class, and the split time in seconds.
+    *
+    * @param {String} startCode - Code for the control at the start of the leg,
+    *     or null for the start.
+    * @param {String} endCode - Code for the control at the end of the leg, or
+    *     null for the finish.
+    * @return {Array} Array of objects containing fastest splits for that leg.
+    */
+    SplitsBrowser.Model.Event.prototype.getFastestSplitsForLeg = function (startCode, endCode) {
+        var fastestSplits = [];
+        this.courses.forEach(function (course) {
+            if (course.usesLeg(startCode, endCode)) {
+                fastestSplits = fastestSplits.concat(course.getFastestSplitsForLeg(startCode, endCode));
+            }
+        });
+        
+        return fastestSplits;
     };
 })();
 
@@ -1210,9 +1362,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
        
         var classes = classSections.map(SplitsBrowser.Input.CSV.parseAgeClass);
         
-        // Nulls are for the course length and climb, which aren't in the
-        // source data files, so we can't do anything about them.
-        var courses = classes.map(function (cls) { return new SplitsBrowser.Model.Course(cls.name, [cls], null, null); });
+        // Nulls are for the course length, climb and controls, which aren't in
+        // the source data files, so we can't do anything about them.
+        var courses = classes.map(function (cls) { return new SplitsBrowser.Model.Course(cls.name, [cls], null, null, null); });
         
         for (var i = 0; i < classes.length; i += 1) {
             classes[i].setCourse(courses[i]);
@@ -1362,7 +1514,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 
                 var courseClasses = relatedClassNames.map(function (clsName) { return classesMap.get(clsName); });
                 var details = courseDetails.get(courseName);
-                var course = new SplitsBrowser.Model.Course(courseName, courseClasses, details.length, details.climb);
+                var course = new SplitsBrowser.Model.Course(courseName, courseClasses, details.length, details.climb, details.controls);
                 
                 courseClasses.forEach(function (ageClass) {
                     ageClass.setCourse(course);
@@ -1432,7 +1584,16 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             
             var courseName = row[COURSE_COLUMN_NAME];
             if (!courseDetails.has(courseName)) {
-                courseDetails.set(courseName, {length: parseFloat(row.Km) || null, climb: parseInt(row.m, 10) || null});
+                var controlNums = d3.range(1, numControls + 1).map(function (controlNum) {
+                    var key = "Control" + controlNum;
+                    if (row.hasOwnProperty(key)) {
+                        return row[key];
+                    } else {
+                        SplitsBrowser.throwInvalidData("No '" + key + "' column");
+                    }
+                });
+            
+                courseDetails.set(courseName, {length: parseFloat(row.Km) || null, climb: parseInt(row.m, 10) || null, controls: controlNums});
             }
             
             if (!classCoursePairs.some(function (pair) { return pair[0] === className && pair[1] === courseName; })) {

@@ -137,7 +137,7 @@
                 
                 var courseClasses = relatedClassNames.map(function (clsName) { return classesMap.get(clsName); });
                 var details = courseDetails.get(courseName);
-                var course = new SplitsBrowser.Model.Course(courseName, courseClasses, details.length, details.climb);
+                var course = new SplitsBrowser.Model.Course(courseName, courseClasses, details.length, details.climb, details.controls);
                 
                 courseClasses.forEach(function (ageClass) {
                     ageClass.setCourse(course);
@@ -207,7 +207,16 @@
             
             var courseName = row[COURSE_COLUMN_NAME];
             if (!courseDetails.has(courseName)) {
-                courseDetails.set(courseName, {length: parseFloat(row.Km) || null, climb: parseInt(row.m, 10) || null});
+                var controlNums = d3.range(1, numControls + 1).map(function (controlNum) {
+                    var key = "Control" + controlNum;
+                    if (row.hasOwnProperty(key)) {
+                        return row[key];
+                    } else {
+                        SplitsBrowser.throwInvalidData("No '" + key + "' column");
+                    }
+                });
+            
+                courseDetails.set(courseName, {length: parseFloat(row.Km) || null, climb: parseInt(row.m, 10) || null, controls: controlNums});
             }
             
             if (!classCoursePairs.some(function (pair) { return pair[0] === className && pair[1] === courseName; })) {

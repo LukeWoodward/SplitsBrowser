@@ -37,9 +37,11 @@
         runInvalidDataTest(assert, "This is not a valid data format", "invalid data", "WrongFileFormat");
     });
     
+    var HEADER = "First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Control1;Punch1;Control2;Punch2;Control3;Punch3;\r\n";
+    var HEADER_NO_KM_M = HEADER.replace(";Km;m;", ";");
+    
     QUnit.test("Can parse a string that contains a single competitor's data", function (assert) {
-        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;11:27:45;06:33;Test class;1;Test course;4.1;140;3;01:50;03:38;06:02;\r\n");
+        var eventData = parseEventData(HEADER + "John;Smith;ABC;11:27:45;06:33;Test class;1;Test course;4.1;140;3;208;01:50;227;03:38;212;06:02;\r\n");
         assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.ok(eventData.classes[0] instanceof AgeClass, "Class element should be an AgeClass object");
@@ -53,6 +55,7 @@
         assert.strictEqual(course.length, 4.1, "Course length should be correct");
         assert.strictEqual(course.climb, 140, "Course climb should be correct");
         assert.deepEqual(course.classes, [eventData.classes[0]], "The one class in the course should be the one course");
+        assert.deepEqual(course.controls, ["208", "227", "212"]);
         
         var competitor = eventData.classes[0].competitors[0];
         assert.strictEqual(competitor.forename, "John", "Should read correct forename");
@@ -65,8 +68,7 @@
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with missing course length and climb", function (assert) {
-        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;11:27:45;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n");
+        var eventData = parseEventData(HEADER_NO_KM_M + "John;Smith;ABC;11:27:45;06:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n");
         assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
         
         assert.strictEqual(eventData.courses.length, 1, "There should be one course");
@@ -77,8 +79,7 @@
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data ignoring second blank City column", function (assert) {
-        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;City;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1; ;Test course;4.1;140;3;01:50;03:38;06:02;\r\n");
+        var eventData = parseEventData(HEADER.replace(";Pl;", ";Pl;City;") + "John;Smith;ABC;10:00:00;06:33;Test class;1; ;Test course;4.1;140;3;208;01:50;227;03:38;212;06:02;\r\n");
         assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.ok(eventData.classes[0] instanceof AgeClass, "Array element should be an AgeClass object");
@@ -89,8 +90,7 @@
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control", function (assert) {
-        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;mp;Test course;4.1;140;3;01:50;-----;06:02;\r\n");
+        var eventData = parseEventData(HEADER + "John;Smith;ABC;10:00:00;06:33;Test class;mp;Test course;4.1;140;3;208;01:50;227;-----;212;06:02;\r\n");
         assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
@@ -100,8 +100,7 @@
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control and remove the trailing 'mp' from the surname", function (assert) {
-        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith mp;ABC;10:00:00;06:33;Test class;mp;Test course;4.1;140;3;01:50;-----;06:02;\r\n");
+        var eventData = parseEventData(HEADER + "John;Smith mp;ABC;10:00:00;06:33;Test class;mp;Test course;4.1;140;3;208;01:50;227;-----;212;06:02;\r\n");
         assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
@@ -112,8 +111,7 @@
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data and remove the trailing 'n/c' from the surname", function (assert) {
-        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith n/c;ABC;10:00:00;06:33;Test class;n/c;Test course;4.1;140;3;01:50;03:38;06:02;\r\n");
+        var eventData = parseEventData(HEADER + "John;Smith n/c;ABC;10:00:00;06:33;Test class;n/c;Test course;4.1;140;3;208;01:50;227;03:38;212;06:02;\r\n");
         assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
@@ -125,9 +123,9 @@
     });
     
     QUnit.test("Can parse a string that contains two competitors in the same class and course", function (assert) {
-        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;4.1;140;3;01:50;03:38;06:02;\r\n" +
-                           "Fred;Baker;DEF;10:30:00;07:11;Test class;2;Test course;4.1;140;3;02:01;04:06;06:37;\r\n");
+        var eventData = parseEventData(HEADER + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;4.1;140;3;208;01:50;227;03:38;212;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;07:11;Test class;2;Test course;4.1;140;3;208;02:01;227;04:06;212;06:37;\r\n");
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.ok(eventData.classes[0] instanceof AgeClass, "Array element should be an AgeClass object");
         assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
@@ -135,14 +133,14 @@
         
         assert.strictEqual(eventData.classes[0].competitors[0].forename, "John", "Should read correct forename for first competitor");
         assert.strictEqual(eventData.classes[0].competitors[1].forename, "Fred", "Should read correct forename for second competitor");
-        
         assert.strictEqual(eventData.classes[0].course, eventData.courses[0], "Course should be set on the class");
+        assert.deepEqual(eventData.courses[0].controls, ["208", "227", "212"]);
     });
     
     QUnit.test("Can parse a string that contains two competitors in the same class but different course", function (assert) {
-        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course 1;4.1;140;3;01:50;03:38;06:02;\r\n" +
-                           "Fred;Baker;DEF;10:30:00;07:11;Test class;2;Test course 2;4.1;140;3;02:01;04:06;06:37;\r\n");
+        var eventData = parseEventData(HEADER + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course 1;4.1;140;3;208;01:50;227;03:38;212;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;07:11;Test class;2;Test course 2;4.1;140;3;208;02:01;227;04:06;212;06:37;\r\n");
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.ok(eventData.classes[0] instanceof AgeClass, "Array element should be an AgeClass object");
         assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
@@ -155,12 +153,13 @@
         assert.strictEqual(eventData.courses[0].name, "Test course 1", "The course name should be the first course");
         
         assert.strictEqual(eventData.classes[0].course, eventData.courses[0], "Course should be set on the class");
+        assert.deepEqual(eventData.courses[0].controls, ["208", "227", "212"]);
     });
     
     QUnit.test("Can parse a string that contains two competitors in the same course but different class", function (assert) {
-        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class 1;1;Test course;4.1;140;3;01:50;03:38;06:02;\r\n" +
-                           "Fred;Baker;DEF;10:30:00;07:11;Test class 2;1;Test course;4.1;140;3;02:01;04:06;06:37;\r\n");
+        var eventData = parseEventData(HEADER + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class 1;1;Test course;4.1;140;3;208;01:50;227;03:38;212;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;07:11;Test class 2;1;Test course;4.1;140;3;208;02:01;227;04:06;212;06:37;\r\n");
         assert.strictEqual(eventData.classes.length, 2, "There should be two classes");
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "First class should have two competitors");
         assert.strictEqual(eventData.classes[1].competitors.length, 1, "Second class should have two competitors");
@@ -177,10 +176,10 @@
     });
     
     QUnit.test("Can parse a string that contains a course with two classes where one class is used in another course into an event with a single course", function (assert) {
-        var dataString = "First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                         "John;Smith;ABC;10:00:00;06:33;Test class 1;1;Test course 1;4.1;140;3;01:50;03:38;06:02;\r\n" +
-                         "Fred;Baker;DEF;10:30:00;07:11;Test class 2;1;Test course 1;4.1;140;3;02:01;04:06;06:37;\r\n" +
-                         "Bill;Jones;GHI;11:00:00;06:58;Test class 2;1;Test course 2;4.1;140;3;01:48;03:46;05:59;\r\n";
+        var dataString = HEADER + 
+                         "John;Smith;ABC;10:00:00;06:33;Test class 1;1;Test course 1;4.1;140;3;208;01:50;227;03:38;212;06:02;\r\n" +
+                         "Fred;Baker;DEF;10:30:00;07:11;Test class 2;1;Test course 1;4.1;140;3;208;02:01;227;04:06;212;06:37;\r\n" +
+                         "Bill;Jones;GHI;11:00:00;06:58;Test class 2;1;Test course 2;4.1;140;3;208;01:48;227;03:46;212;05:59;\r\n";
                          
         var eventData = parseEventData(dataString);
         assert.strictEqual(eventData.classes.length, 2, "There should be two classes");
@@ -196,12 +195,13 @@
         
         assert.strictEqual(eventData.classes[0].course, eventData.courses[0], "Course should be set on the first class");
         assert.strictEqual(eventData.classes[1].course, eventData.courses[0], "Course should be set on the second class");
+        assert.deepEqual(eventData.courses[0].controls, ["208", "227", "212"]);
     });
     
     QUnit.test("Can parse a string that contains two competitors on different classes and courses", function (assert) {
-        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;Punch4;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class 1;1;Test course 1;4.1;140;3;01:50;03:38;06:02;\r\n" +
-                           "Fred;Baker;DEF;10:30:00;09:54;Test class 2;1;Test course 2;5.3;155;4;02:01;04:06;06:37;09:10\r\n");
+        var eventData = parseEventData(HEADER.replace(";Punch3;", ";Punch3;Control4;Punch4;") + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class 1;1;Test course 1;4.1;140;3;208;01:50;227;03:38;212;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;09:54;Test class 2;1;Test course 2;5.3;155;4;208;02:01;222;04:06;219;06:37;213;09:10\r\n");
         assert.strictEqual(eventData.classes.length, 2, "There should be two classes");
         assert.ok(eventData.classes[0] instanceof AgeClass, "First array element should be an AgeClass object");
         assert.ok(eventData.classes[1] instanceof AgeClass, "Second array element should be an AgeClass object");
@@ -226,12 +226,14 @@
         
         assert.strictEqual(eventData.classes[0].course, eventData.courses[0], "First course should be set on the first class");
         assert.strictEqual(eventData.classes[1].course, eventData.courses[1], "Second course should be set on the second class");
+        assert.deepEqual(eventData.courses[0].controls, ["208", "227", "212"]);
+        assert.deepEqual(eventData.courses[1].controls, ["208", "222", "219", "213"]);
     });
     
     QUnit.test("Can parse a string that contains two competitors on different classes, sorting the classes into order", function (assert) {
-        var eventData = parseEventData("First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Punch1;Punch2;Punch3;Punch4;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class 2;1;Test course 1;4.1;140;3;01:50;03:38;06:02;\r\n" +
-                           "Fred;Baker;DEF;10:30:00;09:54;Test class 1;1;Test course 2;5.3;155;4;02:01;04:06;06:37;09:10\r\n");
+        var eventData = parseEventData(HEADER.replace(";Punch3;", ";Punch3;Control4;Punch4;") + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class 2;1;Test course 1;4.1;140;3;208;01:50;227;03:38;212;06:02;\r\n" +
+                           "Fred;Baker;DEF;10:30:00;09:54;Test class 1;1;Test course 2;5.3;155;4;208;02:01;222;04:06;219;06:37;213;09:10\r\n");
         assert.strictEqual(eventData.classes.length, 2, "There should be two elements in the array");
         assert.ok(eventData.classes[0] instanceof AgeClass, "First array element should be an AgeClass object");
         assert.ok(eventData.classes[1] instanceof AgeClass, "Second array element should be an AgeClass object");
@@ -253,72 +255,73 @@
     });
     
     QUnit.test("Cannot parse a string that contains no first name column", function (assert) {
-        runInvalidDataTest(assert, "First name XYZ;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no first-name column");
+        runInvalidDataTest(assert, HEADER.replace(/^First name;/, ";First name XYZ;") + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n", "data with no first-name column");
     });
     
     QUnit.test("Cannot parse a string that contains no surname column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname XYZ;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no surname column");
+        runInvalidDataTest(assert, HEADER.replace(";Surname;", ";Surname XYZ;") +
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n", "data with no surname column");
     });
     
     QUnit.test("Cannot parse a string that contains no club column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;Club XYZ;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no club column");
+        runInvalidDataTest(assert, HEADER.replace(";City;", ";City XYZ;") + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n", "data with no club column");
     });
     
     QUnit.test("Cannot parse a string that contains no start column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start XYZ;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no start column");
+        runInvalidDataTest(assert, HEADER.replace(";Start;", ";Start XYZ;") + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n", "data with no start column");
     });
     
     QUnit.test("Cannot parse a string that contains no time column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time XYZ;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no time column");
+        runInvalidDataTest(assert, HEADER.replace(";Time;", ";Time XYZ;") +
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n", "data with no time column");
     });
     
     QUnit.test("Cannot parse a string that contains no class column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short XYZ;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no class column");
+        runInvalidDataTest(assert, HEADER.replace(";Short;", ";Short XYZ;") + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n", "data with no class column");
     });
 
     QUnit.test("Cannot parse a string that contains no placing column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl XYZ;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no placing column");
+        runInvalidDataTest(assert, HEADER.replace(";Pl;", ";Pl XYZ;") + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n", "data with no placing column");
     });
 
     QUnit.test("Cannot parse a string that contains no course column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course XYZ;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no course-controls column");
+        runInvalidDataTest(assert, HEADER.replace(";Course;", ";Course XYZ;") + 
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n", "data with no course column");
     });
 
     QUnit.test("Cannot parse a string that contains no 'course controls' column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course;Course controls XYZ;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no course-controls column");
+        runInvalidDataTest(assert, HEADER.replace(";Course controls;", ";Course controls XYZ;") +
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n", "data with no course-controls column");
+    });
+    
+    QUnit.test("Cannot parse a string that contains no Control N column", function (assert) {
+        runInvalidDataTest(assert, HEADER_NO_KM_M.replace(";Control2;", ";Control2 XYZ;") +
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n", "data with no Control2 column");
     });
     
     QUnit.test("Cannot parse a string that contains no Punch N column", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2 XYZ;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with no Control2 column");
+        runInvalidDataTest(assert, HEADER_NO_KM_M.replace(";Punch2;", ";Punch2 XYZ;") +
+                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n", "data with no Punch2 column");
     });
     
     QUnit.test("Cannot parse a string that contains cumulative time less than previous", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;07:38;06:02;\r\n", "data with cumulative times not strictly ascending");
+        runInvalidDataTest(assert, HEADER_NO_KM_M + "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;07:38;212;06:02;\r\n", "data with cumulative times not strictly ascending");
     });
     
     QUnit.test("Cannot parse a string that contains cumulative time equal to previous", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;01:50;06:02;06:02;\r\n", "data with cumulative times not strictly ascending");
+        runInvalidDataTest(assert, HEADER_NO_KM_M + "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;3;208;01:50;227;06:02;212;06:02;\r\n", "data with cumulative times not strictly ascending");
     });
     
     QUnit.test("Cannot parse a string that contains cumulative time less than previous before mispunch", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;06:33;Test class;mp;Test course;3;04:37;-----;04:22;\r\n", "data with cumulative times not strictly ascending with mispunch in middle");
+        runInvalidDataTest(assert, HEADER_NO_KM_M + "John;Smith;ABC;10:00:00;06:33;Test class;mp;Test course;3;208;04:37;227;-----;212;04:22;\r\n", "data with cumulative times not strictly ascending with mispunch in middle");
     });
     
     QUnit.test("Cannot parse a string that contains total time less than last split time", function (assert) {
-        runInvalidDataTest(assert, "First name;Surname;City;Start;Time;Short;Pl;Course;Course controls;Punch1;Punch2;Punch3;\r\n" + 
-                           "John;Smith;ABC;10:00:00;05:33;Test class;1;Test course;3;01:50;03:38;06:02;\r\n", "data with cumulative times not strictly ascending");
+        runInvalidDataTest(assert, HEADER_NO_KM_M + "John;Smith;ABC;10:00:00;05:33;Test class;1;Test course;3;208;01:50;227;03:38;212;06:02;\r\n", "data with total time less than last cumulative time");
     });
 })();
