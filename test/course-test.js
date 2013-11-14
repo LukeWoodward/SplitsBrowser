@@ -33,7 +33,52 @@
         });
     });
     
-    QUnit.test("Course created without legs does not contain a given leg", function (assert) {
+    QUnit.test("Course created without controls does not contain controls", function (assert) {
+        var course = new Course("Test course", [new AgeClass("Test class", 3, [])], null, null, null);
+        assert.ok(!course.hasControls());
+    });
+    
+    QUnit.test("Course created with controls does contain controls", function (assert) {
+        var course = new Course("Test course", [new AgeClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
+        assert.ok(course.hasControls());
+    });
+    
+    QUnit.test("Course created with controls does contain controls", function (assert) {
+        var course = new Course("Test course", [new AgeClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
+        assert.ok(course.hasControls());
+    });
+    
+    QUnit.test("Cannot get the code of a control with negative number", function (assert) {
+        var course = new Course("Test course", [new AgeClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
+        SplitsBrowserTest.assertInvalidData(assert, function () { course.getControlCode(-1); });
+    });
+    
+    QUnit.test("Getting the code of start control returns null", function (assert) {
+        var course = new Course("Test course", [new AgeClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
+        assert.strictEqual(course.getControlCode(0), null);
+    });
+    
+    QUnit.test("Getting the code of the first control returns the first control's code", function (assert) {
+        var course = new Course("Test course", [new AgeClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
+        assert.strictEqual(course.getControlCode(1), "208");
+    });
+    
+    QUnit.test("Getting the code of the last control returns the last control's code", function (assert) {
+        var course = new Course("Test course", [new AgeClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
+        assert.strictEqual(course.getControlCode(3), "212");
+    });
+
+    QUnit.test("Getting the control code of the finish returns null", function (assert) {
+        var course = new Course("Test course", [new AgeClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
+        assert.strictEqual(course.getControlCode(4), null);
+    });
+        
+    QUnit.test("Cannot get the code of a control with number too large", function (assert) {
+        var course = new Course("Test course", [new AgeClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
+        SplitsBrowserTest.assertInvalidData(assert, function () { course.getControlCode(5); });
+    });
+
+    QUnit.test("Course created without controls does not contain a given leg", function (assert) {
         var ageClass = new AgeClass("Test class", 3, []);
         var course = new Course("Test course", [ageClass], null, null, null);
         assert.ok(!course.usesLeg("235", "212"));

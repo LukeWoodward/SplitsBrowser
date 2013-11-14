@@ -39,6 +39,41 @@
     };
     
     /**
+    * Returns whether this course has control code data.
+    * @return {boolean} true if this course has control codes, false if it does
+    *     not.
+    */
+    SplitsBrowser.Model.Course.prototype.hasControls = function () {
+        return (this.controls !== null);
+    };
+    
+    /**
+    * Returns the code of the control at the given number.
+    * 
+    * The start is control number 0 and has code null, and the finish has
+    * number one more than the number of controls and also has code null.
+    * Numbers outside this range are invalid and cause an exception to be
+    * thrown.
+    *
+    * @param {Number} controlNum - The number of the control.
+    * @return {String|null} The code of the control, or null for the start or
+    *     the finish.
+    */
+    SplitsBrowser.Model.Course.prototype.getControlCode = function (controlNum) {
+        if (controlNum === 0) {
+            // The start.
+            return null;
+        } else if (1 <= controlNum && controlNum <= this.controls.length) {
+            return this.controls[controlNum - 1];
+        } else if (controlNum === this.controls.length + 1) {
+            // The finish.
+            return null;
+        } else {
+            SplitsBrowser.throwInvalidData("Cannot get control code of control " + controlNum + " because it is out of range");
+        }
+    };
+    
+    /**
     * Returns whether this course uses the given leg.
     *
     * If this course lacks leg information, it is assumed not to contain any

@@ -74,6 +74,23 @@
     };
     
     /**
+    * Returns the course used by all of the age classes that make up this set.
+    * @return {SplitsBrowser.Model.Course} The course used by all age-classes.
+    */
+    SplitsBrowser.Model.AgeClassSet.prototype.getCourse = function () {
+        return this.ageClasses[0].course;
+    };
+    
+    /**
+    * Returns the name of the 'primary' age class, i.e. that that has been
+    * chosen in the drop-down list.
+    * @return {String} Name of the primary age class.
+    */
+    SplitsBrowser.Model.AgeClassSet.prototype.getPrimaryClassName = function () {
+        return this.ageClasses[0].name;
+    };
+    
+    /**
     * Returns an array of the cumulative times of the winner of the set of age
     * classes.
     * @return {Array} Array of the winner's cumulative times.

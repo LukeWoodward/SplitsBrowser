@@ -77,6 +77,29 @@
     };
     
     /**
+    * Populates the chart popup with the 'Fastest splits per leg' data.
+    * @param {Object} competitorData - Object that contains the title and the
+    *     array of competitor data.
+    */
+    SplitsBrowser.Controls.ChartPopup.prototype.setFastestSplitsForLeg = function (competitorData) {
+        this.popupDivHeader.text(competitorData.title);
+        
+        var rows = this.popupDivTable.selectAll("tr")
+                                     .data(competitorData.data);
+                                     
+        rows.enter().append("tr");
+                    
+        rows.classed("highlighted", function (row) { return row.highlight; });
+        
+        rows.selectAll("td").remove();
+        rows.append("td").text(function (row) { return SplitsBrowser.formatTime(row.split); });
+        rows.append("td").text(function (row) { return row.className; });
+        rows.append("td").text(function (row) { return row.name; });
+        
+        rows.exit().remove();
+    };
+    
+    /**
     * Adjusts the location of the chart popup.
     *
     * The coordinates are in units of pixels from top-left corner of the

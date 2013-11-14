@@ -10,6 +10,7 @@
     };
     
     var AgeClass = SplitsBrowser.Model.AgeClass;
+    var Course = SplitsBrowser.Model.Course;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
     var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
@@ -27,6 +28,31 @@
         var ageClass = new AgeClass("Test", 3, [competitor1, competitor2, competitor3]);
         var ageClassSet = new AgeClassSet([ageClass]);
         assert.deepEqual(ageClassSet.allCompetitors, ageClass.competitors, "An AgeClassSet created from one age class should contain the only the competitors of that class");
+    });
+    
+    QUnit.test("Can create an AgeClassSet from a single age class and get the course", function (assert) {
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        var ageClass = new AgeClass("Test", 3, [competitor]);
+        var course = new Course("Test course", [ageClass], null, null, null);
+        ageClass.setCourse(course);
+        var ageClassSet = new AgeClassSet([ageClass]);
+        assert.deepEqual(ageClassSet.getCourse(), course);
+    });
+    
+    QUnit.test("Can create an AgeClassSet from a single age class and get the primary class name as that of the given class", function (assert) {
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        var ageClass = new AgeClass("Test", 3, [competitor]);
+        var ageClassSet = new AgeClassSet([ageClass]);
+        assert.deepEqual(ageClassSet.getPrimaryClassName(), ageClass.name);
+    });
+    
+    QUnit.test("Can create an AgeClassSet from a multiple age class and get the primary class name as that of the first class", function (assert) {
+        var competitor1 = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        var competitor2 = fromSplitTimes(2, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var ageClass1 = new AgeClass("Test class 1", 3, [competitor1]);
+        var ageClass2 = new AgeClass("Test class 2", 3, [competitor2]);
+        var ageClassSet = new AgeClassSet([ageClass1, ageClass2]);
+        assert.deepEqual(ageClassSet.getPrimaryClassName(), ageClass1.name);
     });
     
     QUnit.test("Can create an AgeClassSet from a single age class, sorting competitors into order", function (assert) {

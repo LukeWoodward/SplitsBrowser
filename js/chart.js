@@ -25,6 +25,9 @@
     
     // The number that identifies the left mouse button in a jQuery event.
     var JQUERY_EVENT_LEFT_BUTTON = 1;
+    
+    // The number that identifies the right mouse button in a jQuery event.
+    var JQUERY_EVENT_RIGHT_BUTTON = 3;
 
     var SPACER = "\xa0\xa0\xa0\xa0";
 
@@ -75,6 +78,7 @@
         this.selectedIndexes = [];
         this.currentCompetitorData = null;
         this.isPopupOpen = false;
+        this.popupUpdateFunc = null;
         
         // Indexes of the currently-selected competitors, in the order that
         // they appear in the list of labels.
@@ -105,6 +109,10 @@
                           .mouseleave(function (event) { outerThis.onMouseLeave(event); })
                           .mousedown(mousedownHandler)
                           .mouseup(mouseupHandler);
+                          
+        // Disable the context menu on the chart, so that it doesn't open when
+        // showing the right-click popup.
+        $(this.svg.node()).contextmenu(function(e) { e.preventDefault(); });
 
         // Add an invisible text element used for determining text size.
         this.textSizeElement = this.svg.append("text").attr("fill", "transparent")
@@ -117,8 +125,9 @@
     /**
     * Handle the mouse entering the chart.
     */
-    SplitsBrowser.Controls.Chart.prototype.onMouseEnter = function() {
+    SplitsBrowser.Controls.Chart.prototype.onMouseEnter = function (event) {
         this.isMouseIn = true;
+        this.updateControlLineLocation(event);
     };
     
     /**
@@ -136,52 +145,61 @@
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseMove = function(event) {
         if (this.isMouseIn && this.xScale !== null) {
-            var svgNodeAsJQuery = $(this.svg.node());
-            var offset = svgNodeAsJQuery.offset();
-            var xOffset = event.pageX - offset.left;
-            var yOffset = event.pageY - offset.top;
+            this.updateControlLineLocation(event);
+        }
+    };
+    
+    /**
+    * Updates the location of the control line from the given mouse event.
+    * @param {jQuery.event} event - jQuery mousedown or mousemove event.
+    */
+    SplitsBrowser.Controls.Chart.prototype.updateControlLineLocation = function (event) {
+
+        var svgNodeAsJQuery = $(this.svg.node());
+        var offset = svgNodeAsJQuery.offset();
+        var xOffset = event.pageX - offset.left;
+        var yOffset = event.pageY - offset.top;
+        
+        if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - MARGIN.right && 
+            MARGIN.top <= yOffset && yOffset < svgNodeAsJQuery.height() - MARGIN.bottom) {
+            // In the chart.
+            // Get the time offset that the mouse is currently over.
+            var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
+            var bisectIndex = d3.bisect(this.referenceCumTimes, chartX);
             
-            if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - MARGIN.right && 
-                MARGIN.top <= yOffset && yOffset < svgNodeAsJQuery.height() - MARGIN.bottom) {
-                // In the chart.
-                // Get the time offset that the mouse is currently over.
-                var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
-                var bisectIndex = d3.bisect(this.referenceCumTimes, chartX);
-                
-                // bisectIndex is the index at which to insert chartX into
-                // referenceCumTimes in order to keep the array sorted.  So if
-                // this index is N, the mouse is between N - 1 and N.  Find
-                // which is nearer.
-                var controlIndex;
-                if (bisectIndex >= this.referenceCumTimes.length) {
-                    // Off the right-hand end, use the finish.
-                    controlIndex = this.numControls + 1;
-                } else if (bisectIndex === 1) {
-                    // Before control 1, so use control 1 even if we are closer
-                    // to the start.
-                    controlIndex = 1;
-                } else {
-                    var diffToNext = Math.abs(this.referenceCumTimes[bisectIndex] - chartX);
-                    var diffToPrev = Math.abs(chartX - this.referenceCumTimes[bisectIndex - 1]);
-                    controlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
-                }
-                
-                if (this.currentControlIndex === null || this.currentControlIndex !== controlIndex) {
-                    // The control line has appeared for ths first time or has moved, so redraw it.
-                    this.removeControlLine();
-                    this.drawControlLine(controlIndex);
-                }
-                
-                if (this.popup.isShown()) {
-                    this.popup.setSelectedClasses(this.getFastestSplits());
-                    this.popup.setLocation(event.pageX + 10, event.pageY - this.popup.height() / 2);
-                }
-                
+            // bisectIndex is the index at which to insert chartX into
+            // referenceCumTimes in order to keep the array sorted.  So if
+            // this index is N, the mouse is between N - 1 and N.  Find
+            // which is nearer.
+            var controlIndex;
+            if (bisectIndex >= this.referenceCumTimes.length) {
+                // Off the right-hand end, use the finish.
+                controlIndex = this.numControls + 1;
+            } else if (bisectIndex === 1) {
+                // Before control 1, so use control 1 even if we are closer
+                // to the start.
+                controlIndex = 1;
             } else {
-                // In the SVG element but outside the chart area.
-                this.removeControlLine();
-                this.popup.hide();
+                var diffToNext = Math.abs(this.referenceCumTimes[bisectIndex] - chartX);
+                var diffToPrev = Math.abs(chartX - this.referenceCumTimes[bisectIndex - 1]);
+                controlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
             }
+            
+            if (this.currentControlIndex === null || this.currentControlIndex !== controlIndex) {
+                // The control line has appeared for ths first time or has moved, so redraw it.
+                this.removeControlLine();
+                this.drawControlLine(controlIndex);
+            }
+            
+            if (this.popup.isShown() && this.currentControlIndex !== null) {
+                this.popupUpdateFunc();
+                this.popup.setLocation(event.pageX + 10, event.pageY - this.popup.height() / 2);
+            }
+            
+        } else {
+            // In the SVG element but outside the chart area.
+            this.removeControlLine();
+            this.popup.hide();
         }
     };
 
@@ -193,6 +211,26 @@
         // There's no split to the start, so if the current control is the
         // start, show the statistics for control 1 instead.
         return this.ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, this.currentControlIndex);
+    };
+    
+    /**
+    * Returns the fastest splits for the currently-shown leg.  The list
+    * returned contains the fastest splits for the current leg for each class.
+    * @return {Object} Object that contains the title for the popup and the
+    *     array of data to show within it.
+    */
+    SplitsBrowser.Controls.Chart.prototype.getFastestSplitsForCurrentLeg = function () {
+        var course = this.ageClassSet.getCourse();
+        var startCode = course.getControlCode(this.currentControlIndex - 1);
+        var endCode = course.getControlCode(this.currentControlIndex);
+        
+        var title = "Fastest leg-time " + ((startCode === null) ? "Start" : startCode) + " to " + ((endCode === null) ? "Finish" : endCode);
+        
+        var primaryClass = this.ageClassSet.getPrimaryClassName();
+        var data = this.eventData.getFastestSplitsForLeg(startCode, endCode)
+                                 .map(function (row) { return { name: row.name, className: row.className, split: row.split, highlight: (row.className === primaryClass)}; });
+        
+        return {title: title, data: data};
     };
      
     /**
@@ -220,18 +258,43 @@
     * @param {jQuery.Event} event - jQuery event object.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseDown = function (event) {
-        if (this.isMouseIn && event.which === JQUERY_EVENT_LEFT_BUTTON) {
-            // Left button pressed.
-            this.popup.setSelectedClasses(this.getFastestSplits());
-            this.popup.show(event.pageX + CHART_POPUP_X_OFFSET, event.pageY - this.popup.height() / 2);
+        var outerThis = this;
+        // Use a timeout to open the dialog as we require other events
+        // (mouseover in particular) to be processed first, and the precise
+        // order of these events is not consistent between browsers.
+        setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
+    };
+    
+    /**
+    * Shows the popup window, populating it with data as necessary
+    * @param {jQuery event} event - The jQuery onMouseDown event that triggered
+    *     the popup.
+    */ 
+    SplitsBrowser.Controls.Chart.prototype.showPopupDialog = function (event) {
+        if (this.isMouseIn && this.currentControlIndex !== null) {
+            var showPopup = false;
+            var outerThis = this;
+            if (event.which === JQUERY_EVENT_LEFT_BUTTON) {
+                this.popupUpdateFunc = function () { outerThis.popup.setSelectedClasses(outerThis.getFastestSplits()); };
+                showPopup = true;
+            } else if (this.hasControls && event.which === JQUERY_EVENT_RIGHT_BUTTON) {
+                this.popupUpdateFunc = function () { outerThis.popup.setFastestSplitsForLeg(outerThis.getFastestSplitsForCurrentLeg()); };
+                showPopup = true;
+            }
+            
+            if (showPopup) {
+                this.popupUpdateFunc();
+                this.popup.show(event.pageX + CHART_POPUP_X_OFFSET, Math.max(event.pageY - this.popup.height() / 2, 0));
+            }
         }
     };
     
     /**
     * Handles a mouse button being pressed over the chart.
     */
-    SplitsBrowser.Controls.Chart.prototype.onMouseUp = function () {
+    SplitsBrowser.Controls.Chart.prototype.onMouseUp = function (event) {
         this.popup.hide();
+        event.preventDefault();
     };
 
     /**
@@ -803,13 +866,15 @@
     * @param {boolean} showStartTimes - Whether to show start times to the left
     *                                   of the chart.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, ageClassSet, referenceCumTimes, fastestCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, showStartTimes) {
+    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, eventData, ageClassSet, referenceCumTimes, fastestCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, showStartTimes) {
         this.numControls = chartData.numControls;
         this.numLines = chartData.competitorNames.length;
         this.selectedIndexes = selectedIndexes;
         this.referenceCumTimes = referenceCumTimes;
         this.fastestCumTimes = fastestCumTimes;
+        this.eventData = eventData;
         this.ageClassSet = ageClassSet;
+        this.hasControls = ageClassSet.getCourse().hasControls();
         this.showStartTimes = showStartTimes;
         this.visibleStatistics = visibleStatistics;
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();

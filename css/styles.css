@@ -147,6 +147,11 @@ div.chartPopupTableContainer
     white-space: nowrap;
 }
 
+div.chartPopup tr.highlighted
+{
+    color: #0000ff;
+}
+
 #competitorList
 {
     overflow-y: scroll;

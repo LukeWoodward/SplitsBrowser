@@ -33,7 +33,7 @@
         assert.deepEqual(event.getFastestSplitsForLeg("235", "189"), []);
     });
     
-    QUnit.test("Returns list of fastest splits to a leg if the event has two courses with competitors in each on that leg", function (assert) {
+    QUnit.test("Returns list of fastest splits to a leg if the event has two courses with competitors in each on that leg, sorted into split order", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 143, 100]);
         var ageClass1 = new AgeClass("Test class 1", 3, [competitor1]);
@@ -42,6 +42,6 @@
         var course2 = new Course("Test course 2", [ageClass2], null, null, ["226", "212", "189", "211"]);
     
         var event = new Event([ageClass1, ageClass2], [course1, course2]);
-        assert.deepEqual(event.getFastestSplitsForLeg("212", "189"), [{name: competitor1.name, className: ageClass1.name, split: 212}, {name: competitor2.name, className: ageClass2.name, split: 184}]);
+        assert.deepEqual(event.getFastestSplitsForLeg("212", "189"), [{name: competitor2.name, className: ageClass2.name, split: 184}, {name: competitor1.name, className: ageClass1.name, split: 212}]);
     });
 })();

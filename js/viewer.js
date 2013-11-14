@@ -16,7 +16,8 @@
     * @constructor
     */
     SplitsBrowser.Viewer = function () {
-
+    
+        this.eventData = null;
         this.classes = null;
         this.currentClasses = [];
         this.currentIndexes = null;
@@ -41,10 +42,11 @@
     
     /**
     * Sets the classes that the viewer can view.
-    * @param {Array} classes - The array of classes that can be viewed.
+    * @param {SplitsBrowser.Model.Event} eventData - All event data loaded.
     */
-    SplitsBrowser.Viewer.prototype.setClasses = function (classes) {
-        this.classes = classes;
+    SplitsBrowser.Viewer.prototype.setEvent = function (eventData) {
+        this.eventData = eventData;
+        this.classes = eventData.classes;
         if (this.classSelector !== null) {
             this.classSelector.setClasses(this.classes);
         }
@@ -232,7 +234,7 @@
     * Redraws the chart using all of the current data.
     */ 
     SplitsBrowser.Viewer.prototype.redrawChart = function () {
-        this.chart.drawChart(this.chartData, this.ageClassSet, this.referenceCumTimes, this.fastestCumTimes, this.currentIndexes,
+        this.chart.drawChart(this.chartData, this.eventData, this.ageClassSet, this.referenceCumTimes, this.fastestCumTimes, this.currentIndexes,
                 this.currentVisibleStatistics, this.chartType.yAxisLabel, (this.chartType.showCrossingRunnersButton));
     };
     
@@ -321,7 +323,7 @@
             } else {
                 var viewer = new SplitsBrowser.Viewer();
                 viewer.buildUi();
-                viewer.setClasses(eventData.classes);
+                viewer.setEvent(eventData);
                 viewer.selectClasses([0]);
             }
         } else {

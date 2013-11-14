@@ -33,6 +33,8 @@
             }
         });
         
+        fastestSplits.sort(function (a, b) { return d3.ascending(a.split, b.split); });
+        
         return fastestSplits;
     };
 })();
