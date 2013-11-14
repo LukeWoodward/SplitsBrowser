@@ -79,6 +79,7 @@
         this.currentCompetitorData = null;
         this.isPopupOpen = false;
         this.popupUpdateFunc = null;
+        this.maxStartTimeLabelWidth = 0;
         
         // Indexes of the currently-selected competitors, in the order that
         // they appear in the list of labels.
