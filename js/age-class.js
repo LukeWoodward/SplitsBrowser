@@ -55,4 +55,35 @@
         
         return (fastestSplit === null) ? null : {split: fastestSplit, name: fastestCompetitor.name};
     };
+    
+    /**
+    * Returns all competitors that visited the control in the given time
+    * interval.
+    * @param {Number} controlNum - The number of the control, with 0 being the
+    *     start, and this.numControls + 1 being the finish.
+    * @param {Number} intervalStart - The start time of the interval, as
+    *     seconds past midnight.
+    * @param {Number} intervalEnd - The end time of the interval, as seconds
+    *     past midnight.
+    * @return {Array} Array of objects listing the name and start time of each
+    *     competitor visiting the control within the given time interval.
+    */
+    SplitsBrowser.Model.AgeClass.prototype.getCompetitorsAtControlInTimeRange = function (controlNum, intervalStart, intervalEnd) {
+        if (typeof controlNum !== "number" || isNaN(controlNum) || controlNum < 0 || controlNum > this.numControls + 1) {
+            SplitsBrowser.throwInvalidData("Control number must be a number between 0 and " + this.numControls + " inclusive");
+        }
+        
+        var matchingCompetitors = [];
+        this.competitors.forEach(function (comp) {
+            var cumTime = comp.getCumulativeTimeTo(controlNum);
+            if (cumTime !== null && comp.startTime !== null) {
+                var actualTimeAtControl = cumTime + comp.startTime;
+                if (intervalStart <= actualTimeAtControl && actualTimeAtControl <= intervalEnd) {
+                    matchingCompetitors.push({name: comp.name, time: actualTimeAtControl});
+                }
+            }
+        });
+        
+        return matchingCompetitors;
+    };
 })();

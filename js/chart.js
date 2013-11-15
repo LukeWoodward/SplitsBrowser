@@ -22,6 +22,10 @@
     // Minimum distance between a Y-axis tick label and a competitor's start
     // time, in pixels.
     var MIN_COMPETITOR_TICK_MARK_DISTANCE = 10;
+
+    // Width of the time interval, in seconds, when viewing nearby competitors
+    // at a control on the race graph.
+    var RACE_GRAPH_COMPETITOR_WINDOW = 240;
     
     // The number that identifies the left mouse button in a jQuery event.
     var JQUERY_EVENT_LEFT_BUTTON = 1;
@@ -193,6 +197,10 @@
             }
             
             if (this.popup.isShown() && this.currentControlIndex !== null) {
+                if (this.isRaceGraph) {
+                    this.setCurrentChartTime(event);
+                }
+                
                 this.popupUpdateFunc();
                 this.popup.setLocation(event.pageX + 10, event.pageY - this.popup.height() / 2);
             }
@@ -225,13 +233,48 @@
         var startCode = course.getControlCode(this.currentControlIndex - 1);
         var endCode = course.getControlCode(this.currentControlIndex);
         
-        var title = "Fastest leg-time " + ((startCode === null) ? "Start" : startCode) + " to " + ((endCode === null) ? "Finish" : endCode);
+        var title = "Fastest leg-time " + ((startCode === SplitsBrowser.Model.Course.START) ? "Start" : startCode) + " to " + ((endCode === SplitsBrowser.Model.Course.FINISH) ? "Finish" : endCode);
         
         var primaryClass = this.ageClassSet.getPrimaryClassName();
         var data = this.eventData.getFastestSplitsForLeg(startCode, endCode)
                                  .map(function (row) { return { name: row.name, className: row.className, split: row.split, highlight: (row.className === primaryClass)}; });
         
         return {title: title, data: data};
+    };
+    
+    /**
+    * Stores the current time the mouse is at, on the race graph.
+    * @param {jQuery.event} event - The mouse-down or mouse-move event.
+    */
+    SplitsBrowser.Controls.Chart.prototype.setCurrentChartTime = function (event) {
+        var yOffset = event.pageY - $(this.svg.node()).offset().top - MARGIN.top;
+        this.currentChartTime = Math.round(this.yScale.invert(yOffset) * 60) + this.referenceCumTimes[this.currentControlIndex];
+    };
+    
+    /**
+    * Returns an array of the competitors visiting the current control at the
+    * current time.
+    * @return {Array} Array of competitor data.
+    */
+    SplitsBrowser.Controls.Chart.prototype.getCompetitorsVisitingCurrentControl = function () {
+        var controlCode = this.ageClassSet.getCourse().getControlCode(this.currentControlIndex);
+        var intervalStart = this.currentChartTime - RACE_GRAPH_COMPETITOR_WINDOW / 2;
+        var intervalEnd = this.currentChartTime + RACE_GRAPH_COMPETITOR_WINDOW / 2;
+        var competitors = this.eventData.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
+            
+        var primaryClass = this.ageClassSet.getPrimaryClassName();
+        var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, split: row.time, highlight: (row.className === primaryClass)}; });
+        
+        var title = SplitsBrowser.formatTime(intervalStart) + " - " + SplitsBrowser.formatTime(intervalEnd) + ": ";
+        if (controlCode === SplitsBrowser.Model.Course.START) {
+            title += "Start";
+        } else if (controlCode === SplitsBrowser.Model.Course.FINISH) {
+            title += "Finish";
+        } else {
+            title += "Control " + controlCode;
+        }
+        
+        return {title: title, data: competitorData};
     };
      
     /**
@@ -275,12 +318,20 @@
         if (this.isMouseIn && this.currentControlIndex !== null) {
             var showPopup = false;
             var outerThis = this;
-            if (event.which === JQUERY_EVENT_LEFT_BUTTON) {
+            if (this.isRaceGraph && (event.which === JQUERY_EVENT_LEFT_BUTTON || event.which === JQUERY_EVENT_RIGHT_BUTTON)) {
+                if (this.hasControls) {
+                    this.setCurrentChartTime(event);
+                    this.popupUpdateFunc = function () { outerThis.popup.setFastestSplitsForLeg(outerThis.getCompetitorsVisitingCurrentControl()); };
+                    showPopup = true;
+                }
+            } else if (event.which === JQUERY_EVENT_LEFT_BUTTON) {
                 this.popupUpdateFunc = function () { outerThis.popup.setSelectedClasses(outerThis.getFastestSplits()); };
                 showPopup = true;
-            } else if (this.hasControls && event.which === JQUERY_EVENT_RIGHT_BUTTON) {
-                this.popupUpdateFunc = function () { outerThis.popup.setFastestSplitsForLeg(outerThis.getFastestSplitsForCurrentLeg()); };
-                showPopup = true;
+            } else if (event.which === JQUERY_EVENT_RIGHT_BUTTON) {
+                if (this.hasControls) {
+                    this.popupUpdateFunc = function () { outerThis.popup.setFastestSplitsForLeg(outerThis.getFastestSplitsForCurrentLeg()); };
+                    showPopup = true;
+                }
             }
             
             if (showPopup) {
@@ -580,7 +631,7 @@
     * @param {object} chartData - The chart data to read start times from.
     */
     SplitsBrowser.Controls.Chart.prototype.determineYAxisTickFormatter = function (chartData) {
-        if (this.showStartTimes) {
+        if (this.isRaceGraph) {
             // Assume column 0 of the data is the start times.
             // However, beware that there might not be any data.
             var startTimes = (chartData.dataColumns.length === 0) ? [] : chartData.dataColumns[0].ys;
@@ -864,10 +915,9 @@
     * @param {Array} visibleStatistics - Array of boolean flags indicating whether
     *                                    certain statistics are visible.
     * @param {yAxisLabel} yAxisLabel - The label of the y-axis.                                    
-    * @param {boolean} showStartTimes - Whether to show start times to the left
-    *                                   of the chart.
+    * @param {boolean} isRaceGraph - Whether the race graph is being shown.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, eventData, ageClassSet, referenceCumTimes, fastestCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, showStartTimes) {
+    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, eventData, ageClassSet, referenceCumTimes, fastestCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, isRaceGraph) {
         this.numControls = chartData.numControls;
         this.numLines = chartData.competitorNames.length;
         this.selectedIndexes = selectedIndexes;
@@ -876,17 +926,17 @@
         this.eventData = eventData;
         this.ageClassSet = ageClassSet;
         this.hasControls = ageClassSet.getCourse().hasControls();
-        this.showStartTimes = showStartTimes;
+        this.isRaceGraph = isRaceGraph;
         this.visibleStatistics = visibleStatistics;
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
-        this.maxStartTimeLabelWidth = (showStartTimes) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
+        this.maxStartTimeLabelWidth = (isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
         this.drawAxes(yAxisLabel, chartData);
         this.drawChartLines(chartData);
         this.drawCompetitorLegendLabels(chartData);
-        if (showStartTimes) {
+        if (isRaceGraph) {
             this.drawCompetitorStartTimeLabels(chartData);
         } else {
             this.removeCompetitorStartTimeLabels();

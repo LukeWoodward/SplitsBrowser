@@ -52,24 +52,75 @@
         assert.strictEqual(fastestSplitComp, null);
     });
     
-    QUnit.test("Cannot return fastest split to control 0", function (assert) {
+    function getTestAgeClass() {
         var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
-        var ageClass = new AgeClass("Test class name", 3, [competitor1, competitor2]);
-        SplitsBrowserTest.assertInvalidData(assert, function() { ageClass.getFastestSplitTo(0); });
+        return new AgeClass("Test class name", 3, [competitor1, competitor2]);
+    }
+    
+    QUnit.test("Cannot return fastest split to control 0", function (assert) {
+        SplitsBrowserTest.assertInvalidData(assert, function() { getTestAgeClass().getFastestSplitTo(0); });
     });
     
     QUnit.test("Cannot return fastest split to control too large", function (assert) {
-        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
-        var ageClass = new AgeClass("Test class name", 3, [competitor1, competitor2]);
-        SplitsBrowserTest.assertInvalidData(assert, function() { ageClass.getFastestSplitTo(5); });
+        SplitsBrowserTest.assertInvalidData(assert, function() { getTestAgeClass().getFastestSplitTo(5); });
     });
     
     QUnit.test("Cannot return fastest split to a non-numeric control", function (assert) {
-        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
-        var ageClass = new AgeClass("Test class name", 3, [competitor1, competitor2]);
-        SplitsBrowserTest.assertInvalidData(assert, function() { ageClass.getFastestSplitTo("this is not a number"); });
+        SplitsBrowserTest.assertInvalidData(assert, function() { getTestAgeClass().getFastestSplitTo("this is not a number"); });
     });
+    
+    QUnit.test("Cannot return competitors visiting a control in an interval if the control number is not numeric", function (assert) {
+        SplitsBrowserTest.assertInvalidData(assert, function() { getTestAgeClass().getCompetitorsAtControlInTimeRange("this is not a number", 10 * 3600, 12 * 3600); });
+    });
+    
+    QUnit.test("Cannot return competitors visiting a control in an interval if the control number is NaN", function (assert) {
+        SplitsBrowserTest.assertInvalidData(assert, function() { getTestAgeClass().getCompetitorsAtControlInTimeRange(NaN, 10 * 3600, 12 * 3600); });
+    });
+    
+    QUnit.test("Cannot return competitors visiting a control in an interval if the control number is negative", function (assert) {
+        SplitsBrowserTest.assertInvalidData(assert, function() { getTestAgeClass().getCompetitorsAtControlInTimeRange(-1, 10 * 3600, 12 * 3600); });
+    });
+    
+    QUnit.test("Cannot return competitors visiting a control in an interval if the control number is too large", function (assert) {
+        var ageClass = getTestAgeClass();
+        SplitsBrowserTest.assertInvalidData(assert, function() { getTestAgeClass().getCompetitorsAtControlInTimeRange(ageClass.numControls + 2, 10 * 3600, 12 * 3600); });
+    });
+    
+    QUnit.test("Can return competitors visiting the start in an interval including only one competitor", function (assert) {
+        var ageClass = getTestAgeClass();
+        var comp2 = ageClass.competitors[1];
+        assert.deepEqual(ageClass.getCompetitorsAtControlInTimeRange(0, 10 * 3600 - 1, 10 * 3600 + 1), [{name: comp2.name, time: 10 * 3600}]); 
+    });
+    
+    QUnit.test("Can return both competitors visiting the start in an interval including both competitors", function (assert) {
+        assert.strictEqual(getTestAgeClass().getCompetitorsAtControlInTimeRange(0, 10 * 3600 - 1, 10 * 3600 + 30 * 60 + 1).length, 2);
+    });
+    
+    QUnit.test("Can return one competitor visiting control 2 when time interval surrounds the time the competitor visited that control", function (assert) {
+        var expectedTime = 10 * 3600 + 30 * 60 + 81 + 197;
+        var ageClass = getTestAgeClass();
+        var comp1 = ageClass.competitors[0];
+        assert.deepEqual(ageClass.getCompetitorsAtControlInTimeRange(2, expectedTime - 1, expectedTime + 1), [{name: comp1.name, time: expectedTime}]);
+    });
+    
+    QUnit.test("Can return one competitor visiting control 2 when time interval starts at the time the competitor visited that control", function (assert) {
+        var expectedTime = 10 * 3600 + 30 * 60 + 81 + 197;
+        var ageClass = getTestAgeClass();
+        var comp1 = ageClass.competitors[0];
+        assert.deepEqual(ageClass.getCompetitorsAtControlInTimeRange(2, expectedTime, expectedTime + 2), [{name: comp1.name, time: expectedTime}]);
+    });
+    
+    QUnit.test("Can return one competitor visiting control 2 when time interval ends at the time the competitor visited that control", function (assert) {
+        var expectedTime = 10 * 3600 + 30 * 60 + 81 + 197;
+        var ageClass = getTestAgeClass();
+        var comp1 = ageClass.competitors[0];
+        assert.deepEqual(ageClass.getCompetitorsAtControlInTimeRange(2, expectedTime - 2, expectedTime), [{name: comp1.name, time: expectedTime}]);
+    });
+    
+    QUnit.test("Can return empty list of competitors visiting the finish if the time interval doesn't include any of their finishing times", function (assert) {
+        var ageClass = getTestAgeClass();
+        assert.deepEqual(ageClass.getCompetitorsAtControlInTimeRange(4, 10 * 3600 - 2, 10 * 3600 - 1), []);
+    });
+    
 })();

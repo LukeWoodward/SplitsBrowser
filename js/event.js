@@ -37,4 +37,30 @@
         
         return fastestSplits;
     };
+    
+    /**
+    * Returns a list of competitors that visit the control with the given code
+    * within the given time interval.
+    *
+    * The fastest splits are returned as an array of objects, where each object
+    * lists the competitors name, the class, and the split time in seconds.
+    *
+    * @param {String} startCode - Code for the control at the start of the leg,
+    *     or null for the start.
+    * @param {String} endCode - Code for the control at the end of the leg, or
+    *     null for the finish.
+    * @return {Array} Array of objects containing fastest splits for that leg.
+    */
+    SplitsBrowser.Model.Event.prototype.getCompetitorsAtControlInTimeRange = function (controlCode, intervalStart, intervalEnd) {
+        var competitors = [];
+        this.courses.forEach(function (course) {
+            course.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd).forEach(function (comp) {
+                competitors.push(comp);
+            });
+        });
+        
+        competitors.sort(function (a, b) { return d3.ascending(a.time, b.time); });
+        
+        return competitors;
+    };
 })();

@@ -22,6 +22,15 @@
         this.controls = controls;
     };
     
+    /** 'Magic' control code that represents the start. */
+    SplitsBrowser.Model.Course.START = "__START__";
+    
+    /** 'Magic' control code that represents the finish. */
+    SplitsBrowser.Model.Course.FINISH = "__FINISH__";
+    
+    var START = SplitsBrowser.Model.Course.START;
+    var FINISH = SplitsBrowser.Model.Course.FINISH;
+    
     /**
     * Returns an array of the 'other' classes on this course.
     * @param {SplitsBrowser.Model.AgeClass} ageClass - An age class that should
@@ -49,25 +58,27 @@
     
     /**
     * Returns the code of the control at the given number.
-    * 
-    * The start is control number 0 and has code null, and the finish has
-    * number one more than the number of controls and also has code null.
-    * Numbers outside this range are invalid and cause an exception to be
-    * thrown.
+    *
+    * The start is control number 0 and the finish has number one more than the
+    * number of controls.  Numbers outside this range are invalid and cause an
+    * exception to be thrown.
+    *
+    * The codes for the start and finish are given by the constants
+    * SplitsBrowser.Model.Course.START and SplitsBrowser.Model.Course.FINISH.
     *
     * @param {Number} controlNum - The number of the control.
-    * @return {String|null} The code of the control, or null for the start or
-    *     the finish.
+    * @return {String|null} The code of the control, or one of the
+    *     aforementioned constants for the start or finish.
     */
     SplitsBrowser.Model.Course.prototype.getControlCode = function (controlNum) {
         if (controlNum === 0) {
             // The start.
-            return null;
+            return START;
         } else if (1 <= controlNum && controlNum <= this.controls.length) {
             return this.controls[controlNum - 1];
         } else if (controlNum === this.controls.length + 1) {
             // The finish.
-            return null;
+            return FINISH;
         } else {
             SplitsBrowser.throwInvalidData("Cannot get control code of control " + controlNum + " because it is out of range");
         }
@@ -117,10 +128,10 @@
             // This leg is only present, and is leg 1, if there are no
             // controls.
             return (this.controls.length === 0) ? 1 : -1;
-        } else if (startCode === null) {
+        } else if (startCode === START) {
             // From the start to control 1.
             return (this.controls.length > 0 && this.controls[0] === endCode) ? 1 : -1;
-        } else if (endCode === null) {
+        } else if (endCode === FINISH) {
             return (this.controls.length > 0 && this.controls[this.controls.length - 1] === startCode) ? (this.controls.length + 1) : -1;
         } else {
             for (var controlIdx = 1; controlIdx < this.controls.length; controlIdx += 1) {
@@ -141,9 +152,9 @@
     * the given leg.
     *
     * @param {String} startCode - Code for the control at the start of the leg,
-    *     or null for the start.
+    *     or SplitsBrowser.Model.Course.START for the start.
     * @param {String} endCode - Code for the control at the end of the leg, or
-    *     null for the finish.
+    *     SplitsBrowser.Model.Course.FINISH for the finish.
     * @return {Array} Array of fastest splits for each age class using this
     *      course.
     */
@@ -154,7 +165,7 @@
         
         var legNumber = this.getLegNumber(startCode, endCode);
         if (legNumber < 0) {
-            var legStr = ((startCode === null) ? "start" : startCode) + " to " + ((endCode === null) ? "end" : endCode);
+            var legStr = ((startCode === START) ? "start" : startCode) + " to " + ((endCode === FINISH) ? "end" : endCode);
             SplitsBrowser.throwInvalidData("Leg from " +  legStr + " not found in course " + this.name);
         }
         
@@ -168,5 +179,64 @@
         });
         
         return fastestSplits;
+    };
+    
+    /**
+    * Returns a list of all competitors on this course that visit the control
+    * with the given code in the time interval given.
+    *
+    * Specify SplitsBrowser.Model.Course.START for the start and
+    * SplitsBrowser.Model.Course.FINISH for the finish.
+    *
+    * If the given control is not on this course, an empty list is returned.
+    *
+    * @param {String} controlCode - Control code of the required control.
+    * @param {Number} intervalStart - The start of the interval, as seconds
+    *     past midnight.
+    * @param {Number} intervalEnd - The end of the interval, as seconds past
+    *     midnight.
+    * @return  {Array} Array of all competitors visiting the given control
+    *     within the given time interval.
+    */
+    SplitsBrowser.Model.Course.prototype.getCompetitorsAtControlInTimeRange = function (controlCode, intervalStart, intervalEnd) {
+        if (this.controls === null) {
+            // No controls means don't return any competitors.
+            return [];
+        } else if (controlCode === SplitsBrowser.Model.Course.START) {
+            return this.getCompetitorsAtControlNumInTimeRange(0, intervalStart, intervalEnd);
+        } else if (controlCode === SplitsBrowser.Model.Course.FINISH) {
+            return this.getCompetitorsAtControlNumInTimeRange(this.controls.length + 1, intervalStart, intervalEnd);
+        } else {
+            var controlIdx = this.controls.indexOf(controlCode);
+            if (controlIdx >= 0) {
+                return this.getCompetitorsAtControlNumInTimeRange(controlIdx + 1, intervalStart, intervalEnd);
+            } else {
+                // Control not in this course.
+                return [];
+            }
+        }
+    };
+    
+    /**
+    * Returns a list of all competitors on this course that visit the control
+    * with the given number in the time interval given.
+    *
+    * @param {Number} controlNum - The number of the control (0 = start).
+    * @param {Number} intervalStart - The start of the interval, as seconds
+    *     past midnight.
+    * @param {Number} intervalEnd - The end of the interval, as seconds past
+    *     midnight.
+    * @return  {Array} Array of all competitors visiting the given control
+    *     within the given time interval.
+    */
+    SplitsBrowser.Model.Course.prototype.getCompetitorsAtControlNumInTimeRange = function (controlNum, intervalStart, intervalEnd) {
+        var matchingCompetitors = [];
+        this.classes.forEach(function (ageClass) {
+            ageClass.getCompetitorsAtControlInTimeRange(controlNum, intervalStart, intervalEnd).forEach(function (comp) {
+                matchingCompetitors.push({name: comp.name, time: comp.time, className: ageClass.name});
+            });
+        });
+        
+        return matchingCompetitors;
     };
 })();

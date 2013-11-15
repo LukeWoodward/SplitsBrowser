@@ -589,6 +589,37 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         return (fastestSplit === null) ? null : {split: fastestSplit, name: fastestCompetitor.name};
     };
+    
+    /**
+    * Returns all competitors that visited the control in the given time
+    * interval.
+    * @param {Number} controlNum - The number of the control, with 0 being the
+    *     start, and this.numControls + 1 being the finish.
+    * @param {Number} intervalStart - The start time of the interval, as
+    *     seconds past midnight.
+    * @param {Number} intervalEnd - The end time of the interval, as seconds
+    *     past midnight.
+    * @return {Array} Array of objects listing the name and start time of each
+    *     competitor visiting the control within the given time interval.
+    */
+    SplitsBrowser.Model.AgeClass.prototype.getCompetitorsAtControlInTimeRange = function (controlNum, intervalStart, intervalEnd) {
+        if (typeof controlNum !== "number" || isNaN(controlNum) || controlNum < 0 || controlNum > this.numControls + 1) {
+            SplitsBrowser.throwInvalidData("Control number must be a number between 0 and " + this.numControls + " inclusive");
+        }
+        
+        var matchingCompetitors = [];
+        this.competitors.forEach(function (comp) {
+            var cumTime = comp.getCumulativeTimeTo(controlNum);
+            if (cumTime !== null && comp.startTime !== null) {
+                var actualTimeAtControl = cumTime + comp.startTime;
+                if (intervalStart <= actualTimeAtControl && actualTimeAtControl <= intervalEnd) {
+                    matchingCompetitors.push({name: comp.name, time: actualTimeAtControl});
+                }
+            }
+        });
+        
+        return matchingCompetitors;
+    };
 })();
 
 
@@ -907,6 +938,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.controls = controls;
     };
     
+    /** 'Magic' control code that represents the start. */
+    SplitsBrowser.Model.Course.START = "__START__";
+    
+    /** 'Magic' control code that represents the finish. */
+    SplitsBrowser.Model.Course.FINISH = "__FINISH__";
+    
+    var START = SplitsBrowser.Model.Course.START;
+    var FINISH = SplitsBrowser.Model.Course.FINISH;
+    
     /**
     * Returns an array of the 'other' classes on this course.
     * @param {SplitsBrowser.Model.AgeClass} ageClass - An age class that should
@@ -934,25 +974,27 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     
     /**
     * Returns the code of the control at the given number.
-    * 
-    * The start is control number 0 and has code null, and the finish has
-    * number one more than the number of controls and also has code null.
-    * Numbers outside this range are invalid and cause an exception to be
-    * thrown.
+    *
+    * The start is control number 0 and the finish has number one more than the
+    * number of controls.  Numbers outside this range are invalid and cause an
+    * exception to be thrown.
+    *
+    * The codes for the start and finish are given by the constants
+    * SplitsBrowser.Model.Course.START and SplitsBrowser.Model.Course.FINISH.
     *
     * @param {Number} controlNum - The number of the control.
-    * @return {String|null} The code of the control, or null for the start or
-    *     the finish.
+    * @return {String|null} The code of the control, or one of the
+    *     aforementioned constants for the start or finish.
     */
     SplitsBrowser.Model.Course.prototype.getControlCode = function (controlNum) {
         if (controlNum === 0) {
             // The start.
-            return null;
+            return START;
         } else if (1 <= controlNum && controlNum <= this.controls.length) {
             return this.controls[controlNum - 1];
         } else if (controlNum === this.controls.length + 1) {
             // The finish.
-            return null;
+            return FINISH;
         } else {
             SplitsBrowser.throwInvalidData("Cannot get control code of control " + controlNum + " because it is out of range");
         }
@@ -1002,10 +1044,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             // This leg is only present, and is leg 1, if there are no
             // controls.
             return (this.controls.length === 0) ? 1 : -1;
-        } else if (startCode === null) {
+        } else if (startCode === START) {
             // From the start to control 1.
             return (this.controls.length > 0 && this.controls[0] === endCode) ? 1 : -1;
-        } else if (endCode === null) {
+        } else if (endCode === FINISH) {
             return (this.controls.length > 0 && this.controls[this.controls.length - 1] === startCode) ? (this.controls.length + 1) : -1;
         } else {
             for (var controlIdx = 1; controlIdx < this.controls.length; controlIdx += 1) {
@@ -1026,9 +1068,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * the given leg.
     *
     * @param {String} startCode - Code for the control at the start of the leg,
-    *     or null for the start.
+    *     or SplitsBrowser.Model.Course.START for the start.
     * @param {String} endCode - Code for the control at the end of the leg, or
-    *     null for the finish.
+    *     SplitsBrowser.Model.Course.FINISH for the finish.
     * @return {Array} Array of fastest splits for each age class using this
     *      course.
     */
@@ -1039,7 +1081,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         var legNumber = this.getLegNumber(startCode, endCode);
         if (legNumber < 0) {
-            var legStr = ((startCode === null) ? "start" : startCode) + " to " + ((endCode === null) ? "end" : endCode);
+            var legStr = ((startCode === START) ? "start" : startCode) + " to " + ((endCode === FINISH) ? "end" : endCode);
             SplitsBrowser.throwInvalidData("Leg from " +  legStr + " not found in course " + this.name);
         }
         
@@ -1053,6 +1095,65 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         });
         
         return fastestSplits;
+    };
+    
+    /**
+    * Returns a list of all competitors on this course that visit the control
+    * with the given code in the time interval given.
+    *
+    * Specify SplitsBrowser.Model.Course.START for the start and
+    * SplitsBrowser.Model.Course.FINISH for the finish.
+    *
+    * If the given control is not on this course, an empty list is returned.
+    *
+    * @param {String} controlCode - Control code of the required control.
+    * @param {Number} intervalStart - The start of the interval, as seconds
+    *     past midnight.
+    * @param {Number} intervalEnd - The end of the interval, as seconds past
+    *     midnight.
+    * @return  {Array} Array of all competitors visiting the given control
+    *     within the given time interval.
+    */
+    SplitsBrowser.Model.Course.prototype.getCompetitorsAtControlInTimeRange = function (controlCode, intervalStart, intervalEnd) {
+        if (this.controls === null) {
+            // No controls means don't return any competitors.
+            return [];
+        } else if (controlCode === SplitsBrowser.Model.Course.START) {
+            return this.getCompetitorsAtControlNumInTimeRange(0, intervalStart, intervalEnd);
+        } else if (controlCode === SplitsBrowser.Model.Course.FINISH) {
+            return this.getCompetitorsAtControlNumInTimeRange(this.controls.length + 1, intervalStart, intervalEnd);
+        } else {
+            var controlIdx = this.controls.indexOf(controlCode);
+            if (controlIdx >= 0) {
+                return this.getCompetitorsAtControlNumInTimeRange(controlIdx + 1, intervalStart, intervalEnd);
+            } else {
+                // Control not in this course.
+                return [];
+            }
+        }
+    };
+    
+    /**
+    * Returns a list of all competitors on this course that visit the control
+    * with the given number in the time interval given.
+    *
+    * @param {Number} controlNum - The number of the control (0 = start).
+    * @param {Number} intervalStart - The start of the interval, as seconds
+    *     past midnight.
+    * @param {Number} intervalEnd - The end of the interval, as seconds past
+    *     midnight.
+    * @return  {Array} Array of all competitors visiting the given control
+    *     within the given time interval.
+    */
+    SplitsBrowser.Model.Course.prototype.getCompetitorsAtControlNumInTimeRange = function (controlNum, intervalStart, intervalEnd) {
+        var matchingCompetitors = [];
+        this.classes.forEach(function (ageClass) {
+            ageClass.getCompetitorsAtControlInTimeRange(controlNum, intervalStart, intervalEnd).forEach(function (comp) {
+                matchingCompetitors.push({name: comp.name, time: comp.time, className: ageClass.name});
+            });
+        });
+        
+        return matchingCompetitors;
     };
 })();
 
@@ -1094,6 +1195,32 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         fastestSplits.sort(function (a, b) { return d3.ascending(a.split, b.split); });
         
         return fastestSplits;
+    };
+    
+    /**
+    * Returns a list of competitors that visit the control with the given code
+    * within the given time interval.
+    *
+    * The fastest splits are returned as an array of objects, where each object
+    * lists the competitors name, the class, and the split time in seconds.
+    *
+    * @param {String} startCode - Code for the control at the start of the leg,
+    *     or null for the start.
+    * @param {String} endCode - Code for the control at the end of the leg, or
+    *     null for the finish.
+    * @return {Array} Array of objects containing fastest splits for that leg.
+    */
+    SplitsBrowser.Model.Event.prototype.getCompetitorsAtControlInTimeRange = function (controlCode, intervalStart, intervalEnd) {
+        var competitors = [];
+        this.courses.forEach(function (course) {
+            course.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd).forEach(function (comp) {
+                competitors.push(comp);
+            });
+        });
+        
+        competitors.sort(function (a, b) { return d3.ascending(a.time, b.time); });
+        
+        return competitors;
     };
 })();
 
@@ -2576,6 +2703,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     // Minimum distance between a Y-axis tick label and a competitor's start
     // time, in pixels.
     var MIN_COMPETITOR_TICK_MARK_DISTANCE = 10;
+
+    // Width of the time interval, in seconds, when viewing nearby competitors
+    // at a control on the race graph.
+    var RACE_GRAPH_COMPETITOR_WINDOW = 240;
     
     // The number that identifies the left mouse button in a jQuery event.
     var JQUERY_EVENT_LEFT_BUTTON = 1;
@@ -2584,6 +2715,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     var JQUERY_EVENT_RIGHT_BUTTON = 3;
 
     var SPACER = "\xa0\xa0\xa0\xa0";
+    
 
     var colours = [
         "#FF0000", "#4444FF", "#00FF00", "#000000", "#CC0066", "#000099",
@@ -2633,6 +2765,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.currentCompetitorData = null;
         this.isPopupOpen = false;
         this.popupUpdateFunc = null;
+        this.maxStartTimeLabelWidth = 0;
         
         // Indexes of the currently-selected competitors, in the order that
         // they appear in the list of labels.
@@ -2721,6 +2854,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
             var bisectIndex = d3.bisect(this.referenceCumTimes, chartX);
             
+            
             // bisectIndex is the index at which to insert chartX into
             // referenceCumTimes in order to keep the array sorted.  So if
             // this index is N, the mouse is between N - 1 and N.  Find
@@ -2746,6 +2880,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             }
             
             if (this.popup.isShown() && this.currentControlIndex !== null) {
+                if (this.isRaceGraph) {
+                    this.setCurrentChartTime(event);
+                }
+                
                 this.popupUpdateFunc();
                 this.popup.setLocation(event.pageX + 10, event.pageY - this.popup.height() / 2);
             }
@@ -2778,13 +2916,48 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var startCode = course.getControlCode(this.currentControlIndex - 1);
         var endCode = course.getControlCode(this.currentControlIndex);
         
-        var title = "Fastest leg-time " + ((startCode === null) ? "Start" : startCode) + " to " + ((endCode === null) ? "Finish" : endCode);
+        var title = "Fastest leg-time " + ((startCode === SplitsBrowser.Model.Course.START) ? "Start" : startCode) + " to " + ((endCode === SplitsBrowser.Model.Course.FINISH) ? "Finish" : endCode);
         
         var primaryClass = this.ageClassSet.getPrimaryClassName();
         var data = this.eventData.getFastestSplitsForLeg(startCode, endCode)
                                  .map(function (row) { return { name: row.name, className: row.className, split: row.split, highlight: (row.className === primaryClass)}; });
         
         return {title: title, data: data};
+    };
+    
+    /**
+    * Stores the current time the mouse is at, on the race graph.
+    * @param {jQuery.event} event - The mouse-down or mouse-move event.
+    */
+    SplitsBrowser.Controls.Chart.prototype.setCurrentChartTime = function (event) {
+        var yOffset = event.pageY - $(this.svg.node()).offset().top - MARGIN.top;
+        this.currentChartTime = Math.round(this.yScale.invert(yOffset) * 60) + this.referenceCumTimes[this.currentControlIndex];
+    };
+    
+    /**
+    * Returns an array of the competitors visiting the current control at the
+    * current time.
+    * @return {Array} Array of competitor data.
+    */
+    SplitsBrowser.Controls.Chart.prototype.getCompetitorsVisitingCurrentControl = function () {
+        var controlCode = this.ageClassSet.getCourse().getControlCode(this.currentControlIndex);
+        var intervalStart = this.currentChartTime - RACE_GRAPH_COMPETITOR_WINDOW / 2;
+        var intervalEnd = this.currentChartTime + RACE_GRAPH_COMPETITOR_WINDOW / 2;
+        var competitors = this.eventData.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
+            
+        var primaryClass = this.ageClassSet.getPrimaryClassName();
+        var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, split: row.time, highlight: (row.className === primaryClass)}; });
+        
+        var title = SplitsBrowser.formatTime(intervalStart) + " - " + SplitsBrowser.formatTime(intervalEnd) + ": ";
+        if (controlCode === SplitsBrowser.Model.Course.START) {
+            title += "Start";
+        } else if (controlCode === SplitsBrowser.Model.Course.FINISH) {
+            title += "Finish";
+        } else {
+            title += "Control " + controlCode;
+        }
+        
+        return {title: title, data: competitorData};
     };
      
     /**
@@ -2828,12 +3001,20 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         if (this.isMouseIn && this.currentControlIndex !== null) {
             var showPopup = false;
             var outerThis = this;
-            if (event.which === JQUERY_EVENT_LEFT_BUTTON) {
+            if (this.isRaceGraph && (event.which === JQUERY_EVENT_LEFT_BUTTON || event.which === JQUERY_EVENT_RIGHT_BUTTON)) {
+                if (this.hasControls) {
+                    this.setCurrentChartTime(event);
+                    this.popupUpdateFunc = function () { outerThis.popup.setFastestSplitsForLeg(outerThis.getCompetitorsVisitingCurrentControl()); };
+                    showPopup = true;
+                }
+            } else if (event.which === JQUERY_EVENT_LEFT_BUTTON) {
                 this.popupUpdateFunc = function () { outerThis.popup.setSelectedClasses(outerThis.getFastestSplits()); };
                 showPopup = true;
-            } else if (this.hasControls && event.which === JQUERY_EVENT_RIGHT_BUTTON) {
-                this.popupUpdateFunc = function () { outerThis.popup.setFastestSplitsForLeg(outerThis.getFastestSplitsForCurrentLeg()); };
-                showPopup = true;
+            } else if (event.which === JQUERY_EVENT_RIGHT_BUTTON) {
+                if (this.hasControls) {
+                    this.popupUpdateFunc = function () { outerThis.popup.setFastestSplitsForLeg(outerThis.getFastestSplitsForCurrentLeg()); };
+                    showPopup = true;
+                }
             }
             
             if (showPopup) {
@@ -3133,7 +3314,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {object} chartData - The chart data to read start times from.
     */
     SplitsBrowser.Controls.Chart.prototype.determineYAxisTickFormatter = function (chartData) {
-        if (this.showStartTimes) {
+        if (this.isRaceGraph) {
             // Assume column 0 of the data is the start times.
             // However, beware that there might not be any data.
             var startTimes = (chartData.dataColumns.length === 0) ? [] : chartData.dataColumns[0].ys;
@@ -3417,10 +3598,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {Array} visibleStatistics - Array of boolean flags indicating whether
     *                                    certain statistics are visible.
     * @param {yAxisLabel} yAxisLabel - The label of the y-axis.                                    
-    * @param {boolean} showStartTimes - Whether to show start times to the left
-    *                                   of the chart.
+    * @param {boolean} isRaceGraph - Whether the race graph is being shown.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, eventData, ageClassSet, referenceCumTimes, fastestCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, showStartTimes) {
+    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, eventData, ageClassSet, referenceCumTimes, fastestCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, isRaceGraph) {
         this.numControls = chartData.numControls;
         this.numLines = chartData.competitorNames.length;
         this.selectedIndexes = selectedIndexes;
@@ -3429,17 +3609,17 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.eventData = eventData;
         this.ageClassSet = ageClassSet;
         this.hasControls = ageClassSet.getCourse().hasControls();
-        this.showStartTimes = showStartTimes;
+        this.isRaceGraph = isRaceGraph;
         this.visibleStatistics = visibleStatistics;
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
-        this.maxStartTimeLabelWidth = (showStartTimes) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
+        this.maxStartTimeLabelWidth = (isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
         this.drawAxes(yAxisLabel, chartData);
         this.drawChartLines(chartData);
         this.drawCompetitorLegendLabels(chartData);
-        if (showStartTimes) {
+        if (isRaceGraph) {
             this.drawCompetitorStartTimeLabels(chartData);
         } else {
             this.removeCompetitorStartTimeLabels();

@@ -53,9 +53,9 @@
         SplitsBrowserTest.assertInvalidData(assert, function () { course.getControlCode(-1); });
     });
     
-    QUnit.test("Getting the code of start control returns null", function (assert) {
+    QUnit.test("Getting the code of start control returns start constant", function (assert) {
         var course = new Course("Test course", [new AgeClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
-        assert.strictEqual(course.getControlCode(0), null);
+        assert.strictEqual(course.getControlCode(0), Course.START);
     });
     
     QUnit.test("Getting the code of the first control returns the first control's code", function (assert) {
@@ -70,7 +70,7 @@
 
     QUnit.test("Getting the control code of the finish returns null", function (assert) {
         var course = new Course("Test course", [new AgeClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
-        assert.strictEqual(course.getControlCode(4), null);
+        assert.strictEqual(course.getControlCode(4), Course.FINISH);
     });
         
     QUnit.test("Cannot get the code of a control with number too large", function (assert) {
@@ -88,10 +88,10 @@
         var ageClass = new AgeClass("Test class", 3, []);
         var controls = ["235", "212", "189"];
         var course = new Course("Test course", [ageClass], 4.1, 115, controls);
-        assert.ok(course.usesLeg(null, "235"), "Course should use leg from start to control 1");
+        assert.ok(course.usesLeg(Course.START, "235"), "Course should use leg from start to control 1");
         assert.ok(course.usesLeg("235", "212"), "Course should use leg from control 1 to 2");
         assert.ok(course.usesLeg("212", "189"), "Course should use leg from control 2 to control 3");
-        assert.ok(course.usesLeg("189", null), "Course should use leg from control 3 to the finish");
+        assert.ok(course.usesLeg("189", Course.FINISH), "Course should use leg from control 3 to the finish");
     });
     
     QUnit.test("Course created with empty list of controls contains leg from start to finish", function (assert) {
@@ -178,6 +178,72 @@
         var controls = ["235", "212", "189"];
         var course = new Course("Test course", [ageClass1, ageClass2], 4.1, 115, controls);
         assert.deepEqual(course.getFastestSplitsForLeg("212", "189"), [{name: competitor1.name, className: ageClass1.name, split: 212}, {name: competitor2.name, className: ageClass2.name, split: 184}]);
+    });
+    
+    QUnit.test("Returns empty list of competitors when attempting to fetch competitors visiting a control in an interval when there are no age classes", function (assert) {
+        var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
+        assert.deepEqual(course.getCompetitorsAtControlInTimeRange("212", 10 * 3600, 11 * 3600), []);
+    });
+    
+    QUnit.test("Returns empty list of competitors when attempting to fetch competitors visiting a control in an interval when course has no control information", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var ageClass = new AgeClass("Test class", 3, [competitor1, competitor2]);
+        var course = new Course("Test course", [ageClass], null, null, null);
+        assert.deepEqual(course.getCompetitorsAtControlInTimeRange("123", 10 * 3600, 11 * 3600), []);
+    });
+    
+    QUnit.test("Returns empty list of competitors when attempting to fetch competitors visiting a control in an interval whose code does not exist in the course", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var ageClass = new AgeClass("Test class", 3, [competitor1, competitor2]);
+        var controls = ["235", "212", "189"];
+        var course = new Course("Test course", [ageClass], null, null, controls);
+        assert.deepEqual(course.getCompetitorsAtControlInTimeRange("456", 10 * 3600, 11 * 3600), []);
+    });
+    
+    QUnit.test("Returns singleton list of competitors when attempting to fetch competitors visiting a control in an interval when the control is on the course", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var ageClass = new AgeClass("Test class", 3, [competitor1, competitor2]);
+        var controls = ["235", "212", "189"];
+        var course = new Course("Test course", [ageClass], null, null, controls);
+        var expectedTime = 10 * 3600 + 65 + 221;
+        assert.deepEqual(course.getCompetitorsAtControlInTimeRange("212", expectedTime - 1, expectedTime + 1), [{name: competitor2.name, time: expectedTime, className: ageClass.name}]);
+    });
+    
+    QUnit.test("Returns list of competitors from two different classes when attempting to fetch competitors visiting a control in an interval when the control is on the course", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var ageClass1 = new AgeClass("Test class 1", 3, [competitor1]);
+        var ageClass2 = new AgeClass("Test class 2", 3, [competitor2]);
+        var course = new Course("Test course", [ageClass1, ageClass2], null, null, ["235", "212", "189"]);
+        var competitor1Time = 10 * 3600 + 30 * 60 + 81 + 197;
+        var competitor2Time = 10 * 3600 + 65 + 221;
+        assert.deepEqual(course.getCompetitorsAtControlInTimeRange("212", competitor2Time - 1, competitor1Time + 1),
+            [{name: competitor1.name, time: competitor1Time, className: ageClass1.name},
+             {name: competitor2.name, time: competitor2Time, className: ageClass2.name}]);
+    });
+    
+    QUnit.test("Returns singleton list of competitors from two different classes when attempting to fetch competitor times at the start for an interval", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var ageClass1 = new AgeClass("Test class 1", 3, [competitor1]);
+        var ageClass2 = new AgeClass("Test class 2", 3, [competitor2]);
+        var course = new Course("Test course", [ageClass1, ageClass2], null, null, ["235", "212", "189"]);
+        assert.deepEqual(course.getCompetitorsAtControlInTimeRange(Course.START, 10 * 3600 + 30 * 60 - 1, 10 * 3600 + 30 * 60 + 1),
+            [{name: competitor1.name, time: 10 * 3600 + 30 * 60, className: ageClass1.name}]);
+    });
+    
+    QUnit.test("Returns singleton list of competitors from two different classes when attempting to fetch competitor times at the start for an interval", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var ageClass1 = new AgeClass("Test class 1", 3, [competitor1]);
+        var ageClass2 = new AgeClass("Test class 2", 3, [competitor2]);
+        var course = new Course("Test course", [ageClass1, ageClass2], null, null, ["235", "212", "189"]);
+        var expectedTime = 10 * 3600 + 65 + 221 + 184 + 100;
+        assert.deepEqual(course.getCompetitorsAtControlInTimeRange(Course.FINISH, expectedTime - 1, expectedTime + 1),
+            [{name: competitor2.name, time: expectedTime, className: ageClass2.name}]);
     });
     
 })();
