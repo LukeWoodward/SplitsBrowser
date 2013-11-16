@@ -849,7 +849,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             competitors.sort(comparator);
             var results = [];
             for (var i = 0; i < competitors.length && i < numSplits; i += 1) {
-                results.push([competitors[i].getSplitTimeTo(controlIdx), competitors[i].name]);
+                results.push({name: competitors[i].name, split: competitors[i].getSplitTimeTo(controlIdx)});
             }
             
             return results;
@@ -2896,7 +2896,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         // start, show the statistics for control 1 instead.
         var data = this.ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, this.currentControlIndex);
         data = data.map(function (comp) {
-            return {time: comp[0], name: comp[1], highlight: false};
+            return {time: comp.split, name: comp.name, highlight: false};
         });
         
         return {title: "Selected classes", data: data};

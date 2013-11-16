@@ -297,7 +297,7 @@
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         var fastestSplits = ageClassSet.getFastestSplitsTo(2, 3);
-        assert.deepEqual(fastestSplits, [[199, "Bill Baker"], [209, "John Smith"]]);
+        assert.deepEqual(fastestSplits, [{split: 199, name: "Bill Baker"}, {split: 209, name: "John Smith"}]);
     });
     
     QUnit.test("Can get fastest two splits to control 3 from multiple-class set with three competitors", function (assert) {
@@ -307,7 +307,7 @@
         var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [competitor1]), new AgeClass("Test 2", 3, [competitor2, competitor3])]);
         
         var fastestSplits = ageClassSet.getFastestSplitsTo(2, 3);
-        assert.deepEqual(fastestSplits, [[199, "Bill Baker"], [209, "John Smith"]]);
+        assert.deepEqual(fastestSplits, [{split: 199, name: "Bill Baker"}, {split: 209, name: "John Smith"}]);
     });
     
     QUnit.test("Can get fastest two splits to finish from single-class set with three competitors", function (assert) {
@@ -317,7 +317,7 @@
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         var fastestSplits = ageClassSet.getFastestSplitsTo(2, 4);
-        assert.deepEqual(fastestSplits, [[100, "John Smith"], [106, "Fred Brown"]]);
+        assert.deepEqual(fastestSplits, [{split: 100, name: "John Smith"}, {split: 106, name: "Fred Brown"}]);
     });
     
     QUnit.test("When getting fastest four splits to control 3 from single-class set with three competitors then three splits returned", function (assert) {
@@ -327,7 +327,7 @@
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         var fastestSplits = ageClassSet.getFastestSplitsTo(4, 3);
-        assert.deepEqual(fastestSplits, [[199, "Bill Baker"], [209, "John Smith"], [212, "Fred Brown"]]);
+        assert.deepEqual(fastestSplits, [{split: 199, name: "Bill Baker"}, {split: 209, name: "John Smith"}, {split: 212, name: "Fred Brown"}]);
     });
     
     QUnit.test("When getting fastest two splits to control 3 from single-class set with three competitors with one mispunching control 3 then splits for other two competitors returned", function (assert) {
@@ -337,7 +337,7 @@
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         var fastestSplits = ageClassSet.getFastestSplitsTo(2, 3);
-        assert.deepEqual(fastestSplits, [[199, "Bill Baker"], [209, "John Smith"]]);
+        assert.deepEqual(fastestSplits, [{split: 199, name: "Bill Baker"}, {split: 209, name: "John Smith"}]);
     });
     
     QUnit.test("When getting fastest two splits to control 3 from single-class set with three competitors with one mispunching a different control then splits for other two competitors returned", function (assert) {
@@ -347,7 +347,7 @@
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         var fastestSplits = ageClassSet.getFastestSplitsTo(2, 3);
-        assert.deepEqual(fastestSplits, [[209, "John Smith"], [212, "Fred Brown"]]);
+        assert.deepEqual(fastestSplits, [{split: 209, name: "John Smith"}, {split: 212, name: "Fred Brown"}]);
     });
     
     QUnit.test("When getting fastest two splits to control 3 from single-class set with three competitors with two mispunching control 3 then one split returned", function (assert) {
@@ -357,7 +357,7 @@
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         var fastestSplits = ageClassSet.getFastestSplitsTo(2, 3);
-        assert.deepEqual(fastestSplits, [[209, "John Smith"]]);
+        assert.deepEqual(fastestSplits, [{split: 209, name: "John Smith"}]);
     });
 
     /**

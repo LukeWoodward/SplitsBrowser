@@ -225,7 +225,7 @@
             competitors.sort(comparator);
             var results = [];
             for (var i = 0; i < competitors.length && i < numSplits; i += 1) {
-                results.push([competitors[i].getSplitTimeTo(controlIdx), competitors[i].name]);
+                results.push({name: competitors[i].name, split: competitors[i].getSplitTimeTo(controlIdx)});
             }
             
             return results;
