@@ -2597,42 +2597,36 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
     
     /**
-    * Populates the chart popup with the 'Selected classes' data.
-    * @param {Array} competitorData - Array of selected-classes data to show.
+    * Populates the chart popup with data.
+    *
+    * 'competitorData' should be an object that contains a 'title' and a 'data'
+    * property.  The 'title' is a string used as the popup's title, and the
+    * 'data' property is an array where each elementshould be an object that
+    * contains the following properties:
+    * * time - A time associated with a competitor.  This may be a split time,
+    *   cumulative time or the time of day.
+    * * className (Optional) - Name of the competitor's class.
+    * * name - The name of the competitor.
+    * * highlight - A boolean value which indicates whether to highlight the
+    *   competitor.
+    * @param {Object} competitorData - Array of data to show.
+    * @param {boolean} includeClassNames - Whether to include class names.
     */
-    SplitsBrowser.Controls.ChartPopup.prototype.setSelectedClasses = function (competitorData) {
-        this.popupDivHeader.text("Selected classes");
-        
-        var rows = this.popupDivTable.selectAll("tr")
-                                     .data(competitorData);
-                                     
-        rows.enter().append("tr");
-        
-        rows.selectAll("td").remove();
-        rows.append("td").text(function (row) { return SplitsBrowser.formatTime(row[0]); });
-        rows.append("td").text(function (row) { return row[1]; });
-        
-        rows.exit().remove();
-    };
-    
-    /**
-    * Populates the chart popup with the 'Fastest splits per leg' data.
-    * @param {Object} competitorData - Object that contains the title and the
-    *     array of competitor data.
-    */
-    SplitsBrowser.Controls.ChartPopup.prototype.setFastestSplitsForLeg = function (competitorData) {
+    SplitsBrowser.Controls.ChartPopup.prototype.setData = function (competitorData, includeClassNames) {
         this.popupDivHeader.text(competitorData.title);
         
         var rows = this.popupDivTable.selectAll("tr")
                                      .data(competitorData.data);
                                      
         rows.enter().append("tr");
-                    
+        
         rows.classed("highlighted", function (row) { return row.highlight; });
         
         rows.selectAll("td").remove();
-        rows.append("td").text(function (row) { return SplitsBrowser.formatTime(row.split); });
-        rows.append("td").text(function (row) { return row.className; });
+        rows.append("td").text(function (row) { return SplitsBrowser.formatTime(row.time); });
+        if (includeClassNames) {
+            rows.append("td").text(function (row) { return row.className; });
+        }
         rows.append("td").text(function (row) { return row.name; });
         
         rows.exit().remove();
@@ -2715,7 +2709,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     var JQUERY_EVENT_RIGHT_BUTTON = 3;
 
     var SPACER = "\xa0\xa0\xa0\xa0";
-    
 
     var colours = [
         "#FF0000", "#4444FF", "#00FF00", "#000000", "#CC0066", "#000099",
@@ -2854,7 +2847,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
             var bisectIndex = d3.bisect(this.referenceCumTimes, chartX);
             
-            
             // bisectIndex is the index at which to insert chartX into
             // referenceCumTimes in order to keep the array sorted.  So if
             // this index is N, the mouse is between N - 1 and N.  Find
@@ -2899,10 +2891,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Returns the fastest splits to the current control.
     * @return {Array} Array of fastest-split data.
     */
-    SplitsBrowser.Controls.Chart.prototype.getFastestSplits = function () {
+    SplitsBrowser.Controls.Chart.prototype.getFastestSplitsPopupData = function () {
         // There's no split to the start, so if the current control is the
         // start, show the statistics for control 1 instead.
-        return this.ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, this.currentControlIndex);
+        var data = this.ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, this.currentControlIndex);
+        data = data.map(function (comp) {
+            return {time: comp[0], name: comp[1], highlight: false};
+        });
+        
+        return {title: "Selected classes", data: data};
     };
     
     /**
@@ -2911,7 +2908,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @return {Object} Object that contains the title for the popup and the
     *     array of data to show within it.
     */
-    SplitsBrowser.Controls.Chart.prototype.getFastestSplitsForCurrentLeg = function () {
+    SplitsBrowser.Controls.Chart.prototype.getFastestSplitsForCurrentLegPopupData = function () {
         var course = this.ageClassSet.getCourse();
         var startCode = course.getControlCode(this.currentControlIndex - 1);
         var endCode = course.getControlCode(this.currentControlIndex);
@@ -2920,7 +2917,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         var primaryClass = this.ageClassSet.getPrimaryClassName();
         var data = this.eventData.getFastestSplitsForLeg(startCode, endCode)
-                                 .map(function (row) { return { name: row.name, className: row.className, split: row.split, highlight: (row.className === primaryClass)}; });
+                                 .map(function (row) { return { name: row.name, className: row.className, time: row.split, highlight: (row.className === primaryClass)}; });
         
         return {title: title, data: data};
     };
@@ -2939,14 +2936,14 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * current time.
     * @return {Array} Array of competitor data.
     */
-    SplitsBrowser.Controls.Chart.prototype.getCompetitorsVisitingCurrentControl = function () {
+    SplitsBrowser.Controls.Chart.prototype.getCompetitorsVisitingCurrentControlPopupData = function () {
         var controlCode = this.ageClassSet.getCourse().getControlCode(this.currentControlIndex);
         var intervalStart = this.currentChartTime - RACE_GRAPH_COMPETITOR_WINDOW / 2;
         var intervalEnd = this.currentChartTime + RACE_GRAPH_COMPETITOR_WINDOW / 2;
         var competitors = this.eventData.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
             
         var primaryClass = this.ageClassSet.getPrimaryClassName();
-        var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, split: row.time, highlight: (row.className === primaryClass)}; });
+        var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}; });
         
         var title = SplitsBrowser.formatTime(intervalStart) + " - " + SplitsBrowser.formatTime(intervalEnd) + ": ";
         if (controlCode === SplitsBrowser.Model.Course.START) {
@@ -3004,15 +3001,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             if (this.isRaceGraph && (event.which === JQUERY_EVENT_LEFT_BUTTON || event.which === JQUERY_EVENT_RIGHT_BUTTON)) {
                 if (this.hasControls) {
                     this.setCurrentChartTime(event);
-                    this.popupUpdateFunc = function () { outerThis.popup.setFastestSplitsForLeg(outerThis.getCompetitorsVisitingCurrentControl()); };
+                    this.popupUpdateFunc = function () { outerThis.popup.setData(outerThis.getCompetitorsVisitingCurrentControlPopupData(), true); };
                     showPopup = true;
                 }
             } else if (event.which === JQUERY_EVENT_LEFT_BUTTON) {
-                this.popupUpdateFunc = function () { outerThis.popup.setSelectedClasses(outerThis.getFastestSplits()); };
+                this.popupUpdateFunc = function () { outerThis.popup.setData(outerThis.getFastestSplitsPopupData(), false); };
                 showPopup = true;
             } else if (event.which === JQUERY_EVENT_RIGHT_BUTTON) {
                 if (this.hasControls) {
-                    this.popupUpdateFunc = function () { outerThis.popup.setFastestSplitsForLeg(outerThis.getFastestSplitsForCurrentLeg()); };
+                    this.popupUpdateFunc = function () { outerThis.popup.setData(outerThis.getFastestSplitsForCurrentLegPopupData(), true); };
                     showPopup = true;
                 }
             }

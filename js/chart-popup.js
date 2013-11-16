@@ -58,42 +58,36 @@
     };
     
     /**
-    * Populates the chart popup with the 'Selected classes' data.
-    * @param {Array} competitorData - Array of selected-classes data to show.
+    * Populates the chart popup with data.
+    *
+    * 'competitorData' should be an object that contains a 'title' and a 'data'
+    * property.  The 'title' is a string used as the popup's title, and the
+    * 'data' property is an array where each elementshould be an object that
+    * contains the following properties:
+    * * time - A time associated with a competitor.  This may be a split time,
+    *   cumulative time or the time of day.
+    * * className (Optional) - Name of the competitor's class.
+    * * name - The name of the competitor.
+    * * highlight - A boolean value which indicates whether to highlight the
+    *   competitor.
+    * @param {Object} competitorData - Array of data to show.
+    * @param {boolean} includeClassNames - Whether to include class names.
     */
-    SplitsBrowser.Controls.ChartPopup.prototype.setSelectedClasses = function (competitorData) {
-        this.popupDivHeader.text("Selected classes");
-        
-        var rows = this.popupDivTable.selectAll("tr")
-                                     .data(competitorData);
-                                     
-        rows.enter().append("tr");
-        
-        rows.selectAll("td").remove();
-        rows.append("td").text(function (row) { return SplitsBrowser.formatTime(row[0]); });
-        rows.append("td").text(function (row) { return row[1]; });
-        
-        rows.exit().remove();
-    };
-    
-    /**
-    * Populates the chart popup with the 'Fastest splits per leg' data.
-    * @param {Object} competitorData - Object that contains the title and the
-    *     array of competitor data.
-    */
-    SplitsBrowser.Controls.ChartPopup.prototype.setFastestSplitsForLeg = function (competitorData) {
+    SplitsBrowser.Controls.ChartPopup.prototype.setData = function (competitorData, includeClassNames) {
         this.popupDivHeader.text(competitorData.title);
         
         var rows = this.popupDivTable.selectAll("tr")
                                      .data(competitorData.data);
                                      
         rows.enter().append("tr");
-                    
+        
         rows.classed("highlighted", function (row) { return row.highlight; });
         
         rows.selectAll("td").remove();
-        rows.append("td").text(function (row) { return SplitsBrowser.formatTime(row.split); });
-        rows.append("td").text(function (row) { return row.className; });
+        rows.append("td").text(function (row) { return SplitsBrowser.formatTime(row.time); });
+        if (includeClassNames) {
+            rows.append("td").text(function (row) { return row.className; });
+        }
         rows.append("td").text(function (row) { return row.name; });
         
         rows.exit().remove();

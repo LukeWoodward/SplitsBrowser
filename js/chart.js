@@ -216,10 +216,15 @@
     * Returns the fastest splits to the current control.
     * @return {Array} Array of fastest-split data.
     */
-    SplitsBrowser.Controls.Chart.prototype.getFastestSplits = function () {
+    SplitsBrowser.Controls.Chart.prototype.getFastestSplitsPopupData = function () {
         // There's no split to the start, so if the current control is the
         // start, show the statistics for control 1 instead.
-        return this.ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, this.currentControlIndex);
+        var data = this.ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, this.currentControlIndex);
+        data = data.map(function (comp) {
+            return {time: comp[0], name: comp[1], highlight: false};
+        });
+        
+        return {title: "Selected classes", data: data};
     };
     
     /**
@@ -228,7 +233,7 @@
     * @return {Object} Object that contains the title for the popup and the
     *     array of data to show within it.
     */
-    SplitsBrowser.Controls.Chart.prototype.getFastestSplitsForCurrentLeg = function () {
+    SplitsBrowser.Controls.Chart.prototype.getFastestSplitsForCurrentLegPopupData = function () {
         var course = this.ageClassSet.getCourse();
         var startCode = course.getControlCode(this.currentControlIndex - 1);
         var endCode = course.getControlCode(this.currentControlIndex);
@@ -237,7 +242,7 @@
         
         var primaryClass = this.ageClassSet.getPrimaryClassName();
         var data = this.eventData.getFastestSplitsForLeg(startCode, endCode)
-                                 .map(function (row) { return { name: row.name, className: row.className, split: row.split, highlight: (row.className === primaryClass)}; });
+                                 .map(function (row) { return { name: row.name, className: row.className, time: row.split, highlight: (row.className === primaryClass)}; });
         
         return {title: title, data: data};
     };
@@ -256,14 +261,14 @@
     * current time.
     * @return {Array} Array of competitor data.
     */
-    SplitsBrowser.Controls.Chart.prototype.getCompetitorsVisitingCurrentControl = function () {
+    SplitsBrowser.Controls.Chart.prototype.getCompetitorsVisitingCurrentControlPopupData = function () {
         var controlCode = this.ageClassSet.getCourse().getControlCode(this.currentControlIndex);
         var intervalStart = this.currentChartTime - RACE_GRAPH_COMPETITOR_WINDOW / 2;
         var intervalEnd = this.currentChartTime + RACE_GRAPH_COMPETITOR_WINDOW / 2;
         var competitors = this.eventData.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
             
         var primaryClass = this.ageClassSet.getPrimaryClassName();
-        var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, split: row.time, highlight: (row.className === primaryClass)}; });
+        var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}; });
         
         var title = SplitsBrowser.formatTime(intervalStart) + " - " + SplitsBrowser.formatTime(intervalEnd) + ": ";
         if (controlCode === SplitsBrowser.Model.Course.START) {
@@ -321,15 +326,15 @@
             if (this.isRaceGraph && (event.which === JQUERY_EVENT_LEFT_BUTTON || event.which === JQUERY_EVENT_RIGHT_BUTTON)) {
                 if (this.hasControls) {
                     this.setCurrentChartTime(event);
-                    this.popupUpdateFunc = function () { outerThis.popup.setFastestSplitsForLeg(outerThis.getCompetitorsVisitingCurrentControl()); };
+                    this.popupUpdateFunc = function () { outerThis.popup.setData(outerThis.getCompetitorsVisitingCurrentControlPopupData(), true); };
                     showPopup = true;
                 }
             } else if (event.which === JQUERY_EVENT_LEFT_BUTTON) {
-                this.popupUpdateFunc = function () { outerThis.popup.setSelectedClasses(outerThis.getFastestSplits()); };
+                this.popupUpdateFunc = function () { outerThis.popup.setData(outerThis.getFastestSplitsPopupData(), false); };
                 showPopup = true;
             } else if (event.which === JQUERY_EVENT_RIGHT_BUTTON) {
                 if (this.hasControls) {
-                    this.popupUpdateFunc = function () { outerThis.popup.setFastestSplitsForLeg(outerThis.getFastestSplitsForCurrentLeg()); };
+                    this.popupUpdateFunc = function () { outerThis.popup.setData(outerThis.getFastestSplitsForCurrentLegPopupData(), true); };
                     showPopup = true;
                 }
             }
