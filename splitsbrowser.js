@@ -2641,25 +2641,28 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     /**
     * Adjusts the location of the chart popup.
     *
-    * The coordinates are in units of pixels from top-left corner of the
-    * viewport.
-    * @param {Number} x - The x-coordinate of the popup.
-    * @param {Number} y - The y-coordinate of the popup.
+    * The location object should contain "x" and "y" properties.  The two
+    * coordinates are in units of pixels from top-left corner of the viewport.
+    *
+    * @param {Object} location - The location of the chart popup.
     */
-    SplitsBrowser.Controls.ChartPopup.prototype.setLocation = function (x, y) {
-        this.popupDiv.style("left", x + "px")
-                     .style("top", y + "px");
+    SplitsBrowser.Controls.ChartPopup.prototype.setLocation = function (location) {
+        this.popupDiv.style("left", location.x + "px")
+                     .style("top", location.y + "px");
     };
     
     /**
     * Shows the chart popup.
-    * @param {Number} x - The x-coordinate of the popup.
-    * @param {Number} y - The y-coordinate of the popup.
+    *
+    * The location object should contain "x" and "y" properties.  The two
+    * coordinates are in units of pixels from top-left corner of the viewport.
+    *
+    * @param {Object} location - The location of the chart popup.
     */
-    SplitsBrowser.Controls.ChartPopup.prototype.show = function (x, y) {
+    SplitsBrowser.Controls.ChartPopup.prototype.show = function (location) {
         this.popupDiv.style("display", "");
         this.shown = true;
-        this.setLocation(x, y);
+        this.setLocation(location);
     };
     
     /**
@@ -2882,7 +2885,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 }
                 
                 this.popupUpdateFunc();
-                this.popup.setLocation(event.pageX + 10, event.pageY - this.popup.height() / 2);
+                this.popup.setLocation(this.getPopupLocation(event));
             }
             
         } else {
@@ -2892,6 +2895,18 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         }
     };
 
+    /**
+    * Sets the location of the chart popup following a mouse-button press or a
+    * mouse movement.
+    * @param {jQuery.event} event - jQuery mouse-down or mouse-move event.
+    */
+    SplitsBrowser.Controls.Chart.prototype.getPopupLocation = function (event) {
+        return {
+            x: event.pageX + CHART_POPUP_X_OFFSET,
+            y: Math.max(event.pageY - this.popup.height() / 2, 0)
+        };
+    };
+    
     /**
     * Returns the fastest splits to the current control.
     * @return {Array} Array of fastest-split data.
@@ -3021,7 +3036,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             
             if (showPopup) {
                 this.popupUpdateFunc();
-                this.popup.show(event.pageX + CHART_POPUP_X_OFFSET, Math.max(event.pageY - this.popup.height() / 2, 0));
+                this.popup.show(this.getPopupLocation(event));
             }
         }
     };

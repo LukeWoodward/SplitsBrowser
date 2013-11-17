@@ -96,25 +96,28 @@
     /**
     * Adjusts the location of the chart popup.
     *
-    * The coordinates are in units of pixels from top-left corner of the
-    * viewport.
-    * @param {Number} x - The x-coordinate of the popup.
-    * @param {Number} y - The y-coordinate of the popup.
+    * The location object should contain "x" and "y" properties.  The two
+    * coordinates are in units of pixels from top-left corner of the viewport.
+    *
+    * @param {Object} location - The location of the chart popup.
     */
-    SplitsBrowser.Controls.ChartPopup.prototype.setLocation = function (x, y) {
-        this.popupDiv.style("left", x + "px")
-                     .style("top", y + "px");
+    SplitsBrowser.Controls.ChartPopup.prototype.setLocation = function (location) {
+        this.popupDiv.style("left", location.x + "px")
+                     .style("top", location.y + "px");
     };
     
     /**
     * Shows the chart popup.
-    * @param {Number} x - The x-coordinate of the popup.
-    * @param {Number} y - The y-coordinate of the popup.
+    *
+    * The location object should contain "x" and "y" properties.  The two
+    * coordinates are in units of pixels from top-left corner of the viewport.
+    *
+    * @param {Object} location - The location of the chart popup.
     */
-    SplitsBrowser.Controls.ChartPopup.prototype.show = function (x, y) {
+    SplitsBrowser.Controls.ChartPopup.prototype.show = function (location) {
         this.popupDiv.style("display", "");
         this.shown = true;
-        this.setLocation(x, y);
+        this.setLocation(location);
     };
     
     /**

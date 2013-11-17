@@ -201,7 +201,7 @@
                 }
                 
                 this.popupUpdateFunc();
-                this.popup.setLocation(event.pageX + 10, event.pageY - this.popup.height() / 2);
+                this.popup.setLocation(this.getPopupLocation(event));
             }
             
         } else {
@@ -211,6 +211,18 @@
         }
     };
 
+    /**
+    * Gets the location the chart popup should be at following a mouse-button
+    * press or a mouse movement.
+    * @param {jQuery.event} event - jQuery mouse-down or mouse-move event.
+    */
+    SplitsBrowser.Controls.Chart.prototype.getPopupLocation = function (event) {
+        return {
+            x: event.pageX + CHART_POPUP_X_OFFSET,
+            y: Math.max(event.pageY - this.popup.height() / 2, 0)
+        };
+    };
+    
     /**
     * Returns the fastest splits to the current control.
     * @return {Array} Array of fastest-split data.
@@ -340,7 +352,7 @@
             
             if (showPopup) {
                 this.popupUpdateFunc();
-                this.popup.show(event.pageX + CHART_POPUP_X_OFFSET, Math.max(event.pageY - this.popup.height() / 2, 0));
+                this.popup.show(this.getPopupLocation(event));
             }
         }
     };
