@@ -16,48 +16,54 @@
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
             yAxisLabel: "Time loss (min)",
-            showCrossingRunnersButton: false,
-            isResultsTable: false
+            isRaceGraph: false,
+            isResultsTable: false,
+            minViewableControl: 1
         },
         RaceGraph: {
             name: "Race graph",
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
             yAxisLabel: "Time",
-            showCrossingRunnersButton: true,
-            isResultsTable: false
+            isRaceGraph: true,
+            isResultsTable: false,
+            minViewableControl: 0
         },
         PositionAfterLeg: {
             name: "Position after leg",
             dataSelector: function (comp) { return comp.cumRanks; },
             skipStart: true,
             yAxisLabel: "Position",
-            showCrossingRunnersButton: false,
-            isResultsTable: false
+            isRaceGraph: false,
+            isResultsTable: false,
+            minViewableControl: 1
         },
         SplitPosition: {
             name: "Split position",
             dataSelector: function (comp) { return comp.splitRanks; },
             skipStart: true,
             yAxisLabel: "Position",
-            showCrossingRunnersButton: false,
-            isResultsTable: false
+            isRaceGraph: false,
+            isResultsTable: false,
+            minViewableControl: 1
         },
         PercentBehind: {
             name: "Percent behind",
             dataSelector: function (comp, referenceCumTimes) { return comp.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
             skipStart: false,
             yAxisLabel: "Percent behind",
-            showCrossingRunnersButton: false,
-            isResultsTable: false
+            isRaceGraph: false,
+            isResultsTable: false,
+            minViewableControl: 1
         },
         ResultsTable: {
             name: "Results table",
             dataSelector: null,
             skipStart: false,
             yAxisLabel: null,
-            showCrossingRunnersButton: false,
-            isResultsTable: true
+            isRaceGraph: false,
+            isResultsTable: true,
+            minViewableControl: 1
         }
     };
 })();

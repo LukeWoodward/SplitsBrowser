@@ -11,13 +11,17 @@
     var _DUMMY_CHART_TYPE_NO_SKIP = {
         name: "dummy",
         dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
-        skipStart: false
+        skipStart: false,
+        yAxisLabel: "dummy axis label",
+        isRaceGraph: false
     };
     
     var _DUMMY_CHART_TYPE_SKIP = {
         name: "dummy skip",
         dataSelector: function (comp) { return comp.splitRanks; },
-        skipStart: true
+        skipStart: true,
+        yAxisLabel: "dummy axis label",
+        isRaceGraph: false
     };
 
     var TEXT_WIDTHS = {
@@ -94,33 +98,50 @@
     QUnit.test("Can create a chart", function () {
         var ageClassSetAndEvent = getTestAgeClassSetAndEvent();
         var fastestCumTimes = ageClassSetAndEvent.ageClassSet.getFastestCumTimes();
-        var chartData = ageClassSetAndEvent.ageClassSet.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP);
-        
         var chart = createTestChart();
         chart.setSize(1000, 1000);
-        chart.drawChart(chartData, ageClassSetAndEvent.eventData, ageClassSetAndEvent.ageClassSet, fastestCumTimes, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", false);
+        var data = {
+            chartData: ageClassSetAndEvent.ageClassSet.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP),
+            eventData: ageClassSetAndEvent.eventData,
+            ageClassSet: ageClassSetAndEvent.ageClassSet,
+            referenceCumTimes: fastestCumTimes,
+            fastestCumTimes: fastestCumTimes
+        };
+        chart.drawChart(data, [0, 1], [true, true, true], _DUMMY_CHART_TYPE_NO_SKIP);
         expect(0);
     });
 
     QUnit.test("Can create a chart with a chart type skipping the start", function () {
         var ageClassSetAndEvent = getTestAgeClassSetAndEvent();
         var fastestCumTimes = ageClassSetAndEvent.ageClassSet.getFastestCumTimes();
-        var chartData = ageClassSetAndEvent.ageClassSet.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_SKIP);
 
         var chart = createTestChart();
         chart.setSize(1000, 1000);
-        chart.drawChart(chartData, ageClassSetAndEvent.eventData, ageClassSetAndEvent.ageClassSet, fastestCumTimes, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", false);
+        var data = {
+            chartData: ageClassSetAndEvent.ageClassSet.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_SKIP),
+            eventData: ageClassSetAndEvent.eventData,
+            ageClassSet: ageClassSetAndEvent.ageClassSet,
+            referenceCumTimes: fastestCumTimes,
+            fastestCumTimes: fastestCumTimes
+        };
+        chart.drawChart(data, [0, 1], [true, true, true], _DUMMY_CHART_TYPE_SKIP);
         expect(0);
     });
 
     QUnit.test("Can create a chart with start-time labels", function () {
         var ageClassSetAndEvent = getTestAgeClassSetAndEvent();
         var fastestCumTimes = ageClassSetAndEvent.ageClassSet.getFastestCumTimes();
-        var chartData = ageClassSetAndEvent.ageClassSet.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP);
 
+        var data = {
+            chartData: ageClassSetAndEvent.ageClassSet.getChartData(fastestCumTimes, [0, 1], _DUMMY_CHART_TYPE_NO_SKIP),
+            eventData: ageClassSetAndEvent.eventData,
+            ageClassSet: ageClassSetAndEvent.ageClassSet,
+            referenceCumTimes: fastestCumTimes,
+            fastestCumTimes: fastestCumTimes
+        };
         var chart = createTestChart();
         chart.setSize(1000, 1000);
-        chart.drawChart(chartData, ageClassSetAndEvent.eventData, ageClassSetAndEvent.ageClassSet, fastestCumTimes, fastestCumTimes, [0, 1], [true, true, true], "y-axis label", true);
+        chart.drawChart(data, [0, 1], [true, true, true], _DUMMY_CHART_TYPE_NO_SKIP);
         expect(0);
     });
     

@@ -234,8 +234,15 @@
     * Redraws the chart using all of the current data.
     */ 
     SplitsBrowser.Viewer.prototype.redrawChart = function () {
-        this.chart.drawChart(this.chartData, this.eventData, this.ageClassSet, this.referenceCumTimes, this.fastestCumTimes, this.currentIndexes,
-                this.currentVisibleStatistics, this.chartType.yAxisLabel, (this.chartType.showCrossingRunnersButton));
+        var data = {
+            chartData: this.chartData,
+            eventData: this.eventData,
+            ageClassSet: this.ageClassSet,
+            referenceCumTimes: this.referenceCumTimes,
+            fastestCumTimes: this.fastestCumTimes
+        };
+            
+        this.chart.drawChart(data, this.currentIndexes, this.currentVisibleStatistics, this.chartType);
     };
     
     /**

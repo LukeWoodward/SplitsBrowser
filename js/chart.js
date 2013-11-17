@@ -180,10 +180,9 @@
             if (bisectIndex >= this.referenceCumTimes.length) {
                 // Off the right-hand end, use the finish.
                 controlIndex = this.numControls + 1;
-            } else if (bisectIndex === 1) {
-                // Before control 1, so use control 1 even if we are closer
-                // to the start.
-                controlIndex = 1;
+            } else if (bisectIndex <= this.minViewableControl) {
+                // Before the minimum viewable control, so use that.
+                controlIndex = this.minViewableControl;
             } else {
                 var diffToNext = Math.abs(this.referenceCumTimes[bisectIndex] - chartX);
                 var diffToPrev = Math.abs(chartX - this.referenceCumTimes[bisectIndex - 1]);
@@ -907,41 +906,46 @@
 
     /**
     * Draws the chart.
-    * @param {object} chartData - Data for all of the currently-visible
-    *                 competitors.
-    * @param {SplitsBrowser.Model.ageClass} ageClass - The age-class data object.
-    * @param {Array} referenceCumTimes - Array of cumulative times of the
-    *                            'reference', in units of seconds.
-    * @param {Array} fastestCumTimes - Array of cumulative times of the fastest
-    *                            splits, in units of seconds.
+    * @param {object} data - Object that contains various chart data.  This
+    *     must contain the following properties:
+    *     * chartData {Object} - the data to plot on the chart
+    *     * eventData {SplitsBrowser.Model.Event} - the overall Event object.
+    *     * ageClassSet {SplitsBrowser.Model.Event} - the age-class set.
+    *     * referenceCumTimes {Array} - Array of cumulative split times of the
+    *       'reference'.
+    *     * fastestCumTimes {Array} - Array of cumulative times of the
+    *       imaginary 'fastest' competitor.
     * @param {Array} selectedIndexes - Array of indexes of selected competitors
     *                (0 in this array means the first competitor is selected, 1
     *                means the second is selected, and so on.)
     * @param {Array} visibleStatistics - Array of boolean flags indicating whether
     *                                    certain statistics are visible.
-    * @param {yAxisLabel} yAxisLabel - The label of the y-axis.                                    
-    * @param {boolean} isRaceGraph - Whether the race graph is being shown.
+    * @param {Object} chartType - The type of chart being drawn.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, eventData, ageClassSet, referenceCumTimes, fastestCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, isRaceGraph) {
+    //SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, eventData, ageClassSet, referenceCumTimes, fastestCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, isRaceGraph) {
+    SplitsBrowser.Controls.Chart.prototype.drawChart = function (data, selectedIndexes, visibleStatistics, chartType) {
+        var chartData = data.chartData;
         this.numControls = chartData.numControls;
         this.numLines = chartData.competitorNames.length;
         this.selectedIndexes = selectedIndexes;
-        this.referenceCumTimes = referenceCumTimes;
-        this.fastestCumTimes = fastestCumTimes;
-        this.eventData = eventData;
-        this.ageClassSet = ageClassSet;
-        this.hasControls = ageClassSet.getCourse().hasControls();
-        this.isRaceGraph = isRaceGraph;
+        this.referenceCumTimes = data.referenceCumTimes;
+        this.fastestCumTimes = data.fastestCumTimes;
+        this.eventData = data.eventData;
+        this.ageClassSet = data.ageClassSet;
+        this.hasControls = data.ageClassSet.getCourse().hasControls();
+        this.isRaceGraph = chartType.isRaceGraph;
+        this.minViewableControl = chartType.minViewableControl;
         this.visibleStatistics = visibleStatistics;
+        
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
-        this.maxStartTimeLabelWidth = (isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
+        this.maxStartTimeLabelWidth = (this.isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
-        this.drawAxes(yAxisLabel, chartData);
+        this.drawAxes(chartType.yAxisLabel, chartData);
         this.drawChartLines(chartData);
         this.drawCompetitorLegendLabels(chartData);
-        if (isRaceGraph) {
+        if (this.isRaceGraph) {
             this.drawCompetitorStartTimeLabels(chartData);
         } else {
             this.removeCompetitorStartTimeLabels();

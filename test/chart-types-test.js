@@ -83,7 +83,7 @@
     QUnit.test("Only the position-after-leg and split-position chart types skip the start", function (assert) {
         ALL_CHART_TYPES.forEach(function (chartType) {
             if (chartType !== ChartTypes.ResultsTable) {
-                assert.strictEqual(chartType.showCrossingRunnersButton, chartType === ChartTypes.RaceGraph);
+                assert.strictEqual(chartType.skipStart, chartType === ChartTypes.PositionAfterLeg || chartType === ChartTypes.SplitPosition);
             }
         });
     });
@@ -98,13 +98,25 @@
     
     QUnit.test("Only the Race Graph shows the Crossing Runners button", function (assert) {
         ALL_CHART_TYPES.forEach(function (chartType) {
-            assert.strictEqual(chartType.showCrossingRunnersButton, chartType === ChartTypes.RaceGraph);
+            assert.strictEqual(chartType.isRaceGraph, chartType === ChartTypes.RaceGraph);
         });
     });
     
     QUnit.test("Only the Results Table is the Results Table", function (assert) {
         ALL_CHART_TYPES.forEach(function (chartType) {
             assert.strictEqual(chartType.isResultsTable, chartType === ChartTypes.ResultsTable);
+        });
+    });
+
+    QUnit.test("All chart types have a minimum viewable control", function (assert) {
+        ALL_CHART_TYPES.forEach(function (chartType) {
+            assert.strictEqual(typeof chartType.minViewableControl, "number");
+        });
+    });
+
+    QUnit.test("Race graph's min viewable control is the start, for all others it's control 1", function (assert) {
+        ALL_CHART_TYPES.forEach(function (chartType) {
+            assert.strictEqual(chartType.minViewableControl, (chartType === ChartTypes.RaceGraph) ? 0 : 1);
         });
     });
     
