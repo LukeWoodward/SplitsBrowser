@@ -311,7 +311,7 @@
         this.comparisonSelector.setEnabled(!chartType.isResultsTable);
         this.statisticsSelector.setEnabled(!chartType.isResultsTable);
         
-        this.crossingRunnersButton.style("display", (chartType.showCrossingRunnersButton) ? "" : "none");
+        this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "" : "none");
         
         this.drawChart();
     };

@@ -2896,8 +2896,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
 
     /**
-    * Sets the location of the chart popup following a mouse-button press or a
-    * mouse movement.
+    * Gets the location the chart popup should be at following a mouse-button
+    * press or a mouse movement.
     * @param {jQuery.event} event - jQuery mouse-down or mouse-move event.
     */
     SplitsBrowser.Controls.Chart.prototype.getPopupLocation = function (event) {
@@ -4103,7 +4103,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.comparisonSelector.setEnabled(!chartType.isResultsTable);
         this.statisticsSelector.setEnabled(!chartType.isResultsTable);
         
-        this.crossingRunnersButton.style("display", (chartType.showCrossingRunnersButton) ? "" : "none");
+        this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "" : "none");
         
         this.drawChart();
     };
