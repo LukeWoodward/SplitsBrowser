@@ -215,6 +215,7 @@ pip-log.txt
 .mr.developer.cfg
 
 
+data
 node_modules
 d3*.js
 jquery*.js
