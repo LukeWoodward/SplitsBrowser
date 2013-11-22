@@ -6,57 +6,61 @@
     
     module("Age-class");
     
+    function getCompetitor1() {
+        return fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+    }
+    
+    function getCompetitor1WithNullSplitForControl3() {
+        return fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
+    }
+    
+    function getCompetitor2() {
+        return fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+    }
+    
+    function getCompetitor2WithNullSplitForControl3() {
+        return fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, null, 100]);
+    }
+    
+    function getTestAgeClass() {
+        return new AgeClass("Test class name", 3, [getCompetitor1(), getCompetitor2()]);
+    }
+    
     QUnit.test("Creating a class with competitors sets the class name in each competitor", function (assert) {
-        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var competitor1 = getCompetitor1();
+        var competitor2 = getCompetitor2();
         var ageClass = new AgeClass("Test class name", 3, [competitor1, competitor2]);
         assert.strictEqual(competitor1.className, ageClass.name);
         assert.strictEqual(competitor2.className, ageClass.name);
     });
     
     QUnit.test("Can return fastest split for a control", function (assert) {
-        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
-        var ageClass = new AgeClass("Test class name", 3, [competitor1, competitor2]);
-        var fastestSplitComp = ageClass.getFastestSplitTo(3);
-        assert.deepEqual(fastestSplitComp, {name: competitor2.name, split: 184});
+        var competitor2 = getCompetitor2();
+        var ageClass = new AgeClass("Test class name", 3, [getCompetitor1(), competitor2]);
+        assert.deepEqual(ageClass.getFastestSplitTo(3), {name: competitor2.name, split: 184});
     });
     
     QUnit.test("Can return fastest split for the finish control", function (assert) {
-        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
-        var ageClass = new AgeClass("Test class name", 3, [competitor1, competitor2]);
-        var fastestSplitComp = ageClass.getFastestSplitTo(4);
-        assert.deepEqual(fastestSplitComp, {name: competitor2.name, split: 100});
+        var competitor2 = getCompetitor2();
+        var ageClass = new AgeClass("Test class name", 3, [getCompetitor1(), competitor2]);
+        assert.deepEqual(ageClass.getFastestSplitTo(4), {name: competitor2.name, split: 100});
     });
     
     QUnit.test("Can return fastest split for a control ignoring null times", function (assert) {
-        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, null, 100]);
-        var ageClass = new AgeClass("Test class name", 3, [competitor1, competitor2]);
-        var fastestSplitComp = ageClass.getFastestSplitTo(3);
-        assert.deepEqual(fastestSplitComp, {name: competitor1.name, split: 212});
+        var competitor1 = getCompetitor1();
+        var ageClass = new AgeClass("Test class name", 3, [competitor1, getCompetitor2WithNullSplitForControl3()]);
+        assert.deepEqual(ageClass.getFastestSplitTo(3), {name: competitor1.name, split: 212});
     });
     
     QUnit.test("Returns null fastest split for a control that all competitors mispunched", function (assert) {
-        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
-        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, null, 100]);
-        var ageClass = new AgeClass("Test class name", 3, [competitor1, competitor2]);
-        var fastestSplitComp = ageClass.getFastestSplitTo(3);
-        assert.strictEqual(fastestSplitComp, null);
+        var ageClass = new AgeClass("Test class name", 3, [getCompetitor1WithNullSplitForControl3(), getCompetitor2WithNullSplitForControl3()]);
+        assert.strictEqual(ageClass.getFastestSplitTo(3), null);
     });
     
     QUnit.test("Returns null fastest split for a control in empty age class", function (assert) {
         var ageClass = new AgeClass("Test class name", 3, []);
-        var fastestSplitComp = ageClass.getFastestSplitTo(3);
-        assert.strictEqual(fastestSplitComp, null);
+        assert.strictEqual(ageClass.getFastestSplitTo(3), null);
     });
-    
-    function getTestAgeClass() {
-        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
-        return new AgeClass("Test class name", 3, [competitor1, competitor2]);
-    }
     
     QUnit.test("Cannot return fastest split to control 0", function (assert) {
         SplitsBrowserTest.assertInvalidData(assert, function() { getTestAgeClass().getFastestSplitTo(0); });
