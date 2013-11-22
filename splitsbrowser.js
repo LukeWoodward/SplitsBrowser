@@ -1,7 +1,3 @@
-/*
- * Namespace declarations that the rest of the code can depend upon.
- */
-
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
 var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
@@ -18,7 +14,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.isTrue = function (x) { return x; };
 
     /**
-    * Utility function that returns whether a value is null.
+    * Utility function that returns whether a value is not null.
     * @param x - Any input value.
     * @returns True if the value is not null, false otherwise.
     */
@@ -621,7 +617,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         return matchingCompetitors;
     };
 })();
-
 
 (function () {
     "use strict";
