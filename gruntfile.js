@@ -25,7 +25,7 @@ module.exports = function(grunt) {
     concat: {
       options: {
         separator: '\n\n',
-        stripBanners: true // { block: true }
+        stripBanners: true
       },
       dist: {
         src: ['js/core.js',
