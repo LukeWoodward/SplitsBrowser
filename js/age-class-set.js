@@ -110,6 +110,15 @@
     };
     
     /**
+    * Returns the number of age classes that this age-class set is made up of.
+    * @return {Number} The number of age classes that this age-class set is
+    *     made up of.
+    */
+    SplitsBrowser.Model.AgeClassSet.prototype.getNumClasses = function () {
+        return this.ageClasses.length;
+    };
+    
+    /**
     * Returns an array of the cumulative times of the winner of the set of age
     * classes.
     * @return {Array} Array of the winner's cumulative times.
@@ -133,6 +142,30 @@
     */
     SplitsBrowser.Model.AgeClassSet.prototype.getFastestCumTimes = function () {
         return this.getFastestCumTimesPlusPercentage(0);
+    };
+
+    /**
+    * Returns an array of controls that no competitor in any of the age-classes
+    * in this set punched.
+    * @return {Array} Array of control numbers of controls that no competitor
+    *     punched.
+    */
+    SplitsBrowser.Model.AgeClassSet.prototype.getControlsWithNoSplits = function () {
+        var controlsWithNoSplits = this.ageClasses[0].getControlsWithNoSplits();
+        for (var classIndex = 1; classIndex < this.ageClasses.length && controlsWithNoSplits.length > 0; classIndex += 1) {
+            var thisClassControlsWithNoSplits = this.ageClasses[classIndex].getControlsWithNoSplits();
+            
+            var controlIdx = 0;
+            while (controlIdx < controlsWithNoSplits.length) {
+                if (thisClassControlsWithNoSplits.indexOf(controlsWithNoSplits[controlIdx]) >= 0) {
+                    controlIdx += 1;
+                } else {
+                    controlsWithNoSplits.splice(controlIdx, 1);
+                }
+            }
+        }
+        
+        return controlsWithNoSplits;
     };
 
     /**

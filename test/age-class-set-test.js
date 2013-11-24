@@ -43,11 +43,11 @@
         return fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
-    function getCompetitor1WithNullSplitToControl2() {
+    function getCompetitor1WithNullSplitForControl2() {
         return fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, null, 184, 100]);
     }
     
-    function getCompetitor1WithNullSplitToControl3() {
+    function getCompetitor1WithNullSplitForControl3() {
         return fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, null, 100]);
     }
     
@@ -63,8 +63,12 @@
         return fromSplitTimes(2, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
-    function getCompetitor2WithNullSplitToControl2() {
+    function getCompetitor2WithNullSplitForControl2() {
         return fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, null, 212, 106]);
+    }
+    
+    function getCompetitor2WithNullSplitForControl3() {
+        return fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
     }
     
     function getCompetitor2WithNullFinishSplit() {
@@ -79,11 +83,11 @@
         return fromSplitTimes(3, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 109]);
     }
     
-    function getCompetitor3WithNullSplitToControl2() {
+    function getCompetitor3WithNullSplitForControl2() {
         return fromSplitTimes(3, "Bill", "Baker", "GHI", 11 * 3600, [78, null, 199, 117]);
     }
     
-    function getCompetitor3WithNullSplitToControl3() {
+    function getCompetitor3WithNullSplitForControl3() {
         return fromSplitTimes(3, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, null, 117]);
     }
     
@@ -153,6 +157,13 @@
             new AgeClassSet([ageClass1, ageClass2]);
         });
     });
+    
+    QUnit.test("AgeClassSet created from two age classes has two age classes", function (assert) {
+        var ageClass1 = new AgeClass("Test class 1", 3, [getCompetitor1()]);
+        var ageClass2 = new AgeClass("Test class 2", 3, [getCompetitor2()]);
+        var ageClassSet = new AgeClassSet([ageClass1, ageClass2]);
+        assert.deepEqual(ageClassSet.getNumClasses(), 2, "Age-class set should have two classes");
+    });
 
     QUnit.test("Cumulative times of the winner of an empty age-class set is null", function (assert) {
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [])]);
@@ -162,7 +173,7 @@
     QUnit.test("Cumulative times of the winner of an age-class set with only mispunchers is null", function (assert) {
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [
             getCompetitor1WithNullFinishSplit(),
-            getCompetitor2WithNullSplitToControl2()
+            getCompetitor2WithNullSplitForControl2()
         ])]);
         assert.strictEqual(ageClassSet.getWinnerCumTimes(), null, "There should be no winner if there are no competitors that completed the course");
     });
@@ -185,7 +196,7 @@
     });
 
     QUnit.test("Fastest cumulative times on age-class set with one control mispunched by everyone is null", function (assert) {
-        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor1WithNullSplitToControl2(), getCompetitor2WithNullSplitToControl2()])]);
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor1WithNullSplitForControl2(), getCompetitor2WithNullSplitForControl2()])]);
         assert.strictEqual(ageClassSet.getFastestCumTimes(), null, "Class with one control mispunched by all should have null fastest time");
     });
 
@@ -206,7 +217,7 @@
     });
 
     QUnit.test("Fastest cumulative times on single-class set should be made up of fastest split times ignoring nulls", function (assert) {
-        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor1WithNullFinishSplit(), getCompetitor2WithNullSplitToControl2()])]);
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor1WithNullFinishSplit(), getCompetitor2WithNullSplitForControl2()])]);
         assert.deepEqual(ageClassSet.getFastestCumTimes(), [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 106],
                             "Fastest cumulative times should be made up of fastest splits where not null");
     });
@@ -287,7 +298,7 @@
     
     QUnit.test("Can compute ranks when there are three competitors with one missing split times", function (assert) {
         var competitor1 = getCompetitor1();
-        var competitor2 = getCompetitor2WithNullSplitToControl2();
+        var competitor2 = getCompetitor2WithNullSplitForControl2();
         var competitor3 = getCompetitor3();
         new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
@@ -363,7 +374,7 @@
     });
     
     QUnit.test("When getting fastest two splits to control 3 from single-class set with three competitors with one mispunching control 3 then splits for other two competitors returned", function (assert) {
-        var competitor1 = getCompetitor1WithNullSplitToControl3();
+        var competitor1 = getCompetitor1WithNullSplitForControl3();
         var competitor2 = getCompetitor2();
         var competitor3 = getCompetitor3();
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
@@ -375,7 +386,7 @@
     QUnit.test("When getting fastest two splits to control 3 from single-class set with three competitors with one mispunching a different control then splits for other two competitors returned", function (assert) {
         var competitor1 = getCompetitor1();
         var competitor2 = getCompetitor2();
-        var competitor3 = getCompetitor3WithNullSplitToControl2();
+        var competitor3 = getCompetitor3WithNullSplitForControl2();
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         var fastestSplits = ageClassSet.getFastestSplitsTo(2, 3);
@@ -383,9 +394,9 @@
     });
     
     QUnit.test("When getting fastest two splits to control 3 from single-class set with three competitors with two mispunching control 3 then one split returned", function (assert) {
-        var competitor1 = getCompetitor1WithNullSplitToControl3();
+        var competitor1 = getCompetitor1WithNullSplitForControl3();
         var competitor2 = getCompetitor2();
-        var competitor3 = getCompetitor3WithNullSplitToControl3();
+        var competitor3 = getCompetitor3WithNullSplitForControl3();
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         var fastestSplits = ageClassSet.getFastestSplitsTo(2, 3);
@@ -557,6 +568,40 @@
         SplitsBrowserTest.assertException(assert, "TypeError", function () {
             ageClassSet.getChartData([0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100], _DUMMY_CHART_TYPE);
         });
+    });
+    
+    QUnit.test("Age-class set with a single class with splits for all controls has splits for all controls", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor1()])]);
+        assert.deepEqual(ageClassSet.getControlsWithNoSplits(), []);
+    });
+    
+    QUnit.test("Age-class set with a single class missing a split for control 3 is also missing a split for the same control", function (assert) {
+        var ageClassSet =  new AgeClassSet([new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControl3()])]);
+        assert.deepEqual(ageClassSet.getControlsWithNoSplits(), [3]);
+    });
+    
+    QUnit.test("Age-class set with one class having splits for all controls and one class having a missing split has splits for all controls", function (assert) {
+        var ageClassSet = new AgeClassSet([
+            new AgeClass("Test class 1", 3, [getCompetitor1()]),
+            new AgeClass("Test class 2", 3, [getCompetitor2WithNullSplitForControl3()])
+        ]);
+        assert.deepEqual(ageClassSet.getControlsWithNoSplits(), []);
+    });
+    
+    QUnit.test("Age-class set with two classes, each of which contains no splits for control 3 also does not have a split for control 3", function (assert) {
+        var ageClassSet = new AgeClassSet([
+            new AgeClass("Test class 1", 3, [getCompetitor1WithNullSplitForControl3()]),
+            new AgeClass("Test class 2", 3, [getCompetitor2WithNullSplitForControl3()])
+        ]);
+        assert.deepEqual(ageClassSet.getControlsWithNoSplits(), [3]);
+    });
+    
+    QUnit.test("Age-class set with two competitors mispunching different controls has splits for all controls", function (assert) {
+        var ageClassSet = new AgeClassSet([
+            new AgeClass("Test class 1", 3, [getCompetitor1WithNullSplitForControl3()]),
+            new AgeClass("Test class 2", 3, [getCompetitor2WithNullSplitForControl2()])
+        ]);
+        assert.deepEqual(ageClassSet.getControlsWithNoSplits(), []);
     });
     
 })();

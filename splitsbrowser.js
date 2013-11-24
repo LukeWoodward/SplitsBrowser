@@ -558,6 +558,18 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Returns the controls that all competitors in this class failed to punch.
+    *
+    * @return {Array} Array of numbers of controls that all competitors in this
+    *     class failed to punch.
+    */
+    SplitsBrowser.Model.AgeClass.prototype.getControlsWithNoSplits = function () {
+        return d3.range(1, this.numControls + 1).filter(function (controlNum) {
+            return this.competitors.every(function (competitor) { return competitor.getSplitTimeTo(controlNum) === null; });
+        }, this);
+    };
+    
+    /**
     * Returns the fastest split time recorded by competitors in this class.  If
     * no fastest split time is recorded (e.g. because all competitors
     * mispunched that control, or the class is empty), null is returned.
@@ -710,6 +722,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Returns the number of age classes that this age-class set is made up of.
+    * @return {Number} The number of age classes that this age-class set is
+    *     made up of.
+    */
+    SplitsBrowser.Model.AgeClassSet.prototype.getNumClasses = function () {
+        return this.ageClasses.length;
+    };
+    
+    /**
     * Returns an array of the cumulative times of the winner of the set of age
     * classes.
     * @return {Array} Array of the winner's cumulative times.
@@ -733,6 +754,30 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     SplitsBrowser.Model.AgeClassSet.prototype.getFastestCumTimes = function () {
         return this.getFastestCumTimesPlusPercentage(0);
+    };
+
+    /**
+    * Returns an array of controls that no competitor in any of the age-classes
+    * in this set punched.
+    * @return {Array} Array of control numbers of controls that no competitor
+    *     punched.
+    */
+    SplitsBrowser.Model.AgeClassSet.prototype.getControlsWithNoSplits = function () {
+        var controlsWithNoSplits = this.ageClasses[0].getControlsWithNoSplits();
+        for (var classIndex = 1; classIndex < this.ageClasses.length && controlsWithNoSplits.length > 0; classIndex += 1) {
+            var thisClassControlsWithNoSplits = this.ageClasses[classIndex].getControlsWithNoSplits();
+            
+            var controlIdx = 0;
+            while (controlIdx < controlsWithNoSplits.length) {
+                if (thisClassControlsWithNoSplits.indexOf(controlsWithNoSplits[controlIdx]) >= 0) {
+                    controlIdx += 1;
+                } else {
+                    controlsWithNoSplits.splice(controlIdx, 1);
+                }
+            }
+        }
+        
+        return controlsWithNoSplits;
     };
 
     /**
@@ -956,6 +1001,14 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         } else {
             return otherClasses;
         }
+    };
+    
+    /**
+    * Returns the number of age classes that use this course.
+    * @return {Number} Number of age classes that use this course.
+    */
+    SplitsBrowser.Model.Course.prototype.getNumClasses = function () {
+        return this.classes.length;
     };
     
     /**
@@ -1880,9 +1933,19 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.parent = parent;
         this.handler = null;
         this.competitorSelection = null;
+        this.isEnabled = true;
 
         this.listDiv = d3.select(parent).append("div")
                                         .attr("id", COMPETITOR_LIST_ID);
+    };
+    
+    /**
+    * Sets whether this competitor list-box is enabled.
+    * @param {boolean} isEnabled - Whether this list-box is enabled.
+    */
+    SplitsBrowser.Controls.CompetitorListBox.prototype.setEnabled = function (isEnabled) {
+        this.isEnabled = isEnabled;
+        this.listDiv.selectAll("div.competitor").classed("disabled", !isEnabled);
     };
 
     /**
@@ -1908,7 +1971,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Toggle the selectedness of a competitor.
     */
     SplitsBrowser.Controls.CompetitorListBox.prototype.toggleCompetitor = function (index) {
-        this.competitorSelection.toggle(index);
+        if (this.isEnabled) {
+            this.competitorSelection.toggle(index);
+        }
     };
 
     /**
@@ -2780,6 +2845,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.isPopupOpen = false;
         this.popupUpdateFunc = null;
         this.maxStartTimeLabelWidth = 0;
+        this.warningPanel = null;
         
         // Indexes of the currently-selected competitors, in the order that
         // they appear in the list of labels.
@@ -2827,8 +2893,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Handle the mouse entering the chart.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseEnter = function (event) {
-        this.isMouseIn = true;
-        this.updateControlLineLocation(event);
+        if (this.warningPanel === null) {
+            this.isMouseIn = true;
+            this.updateControlLineLocation(event);
+        }
     };
     
     /**
@@ -2845,7 +2913,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {EventObject} event - The event object.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseMove = function(event) {
-        if (this.isMouseIn && this.xScale !== null) {
+        if (this.isMouseIn && this.xScale !== null && this.warningPanel === null) {
             this.updateControlLineLocation(event);
         }
     };
@@ -2993,20 +3061,22 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Handle the mouse leaving the chart.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseLeave = function() {
-        var outerThis = this;
-        // Check that the mouse hasn't entered the popup.
-        // It seems that the mouseleave event for the chart is sent before the
-        // mouseenter event for the popup, so we use a timeout to check a short
-        // time later whether the mouse has left the chart and the popup.
-        // This is only necessary for IE9 and IE10; other browsers support
-        // "pointer-events: none" in CSS so the popup never gets any mouse
-        // events.
-        setTimeout(function() {
-            if (!outerThis.popup.isMouseIn()) {
-                outerThis.isMouseIn = false;
-                outerThis.removeControlLine();
-            }
-        }, 1);
+        if (this.warningPanel === null) {
+            var outerThis = this;
+            // Check that the mouse hasn't entered the popup.
+            // It seems that the mouseleave event for the chart is sent before the
+            // mouseenter event for the popup, so we use a timeout to check a short
+            // time later whether the mouse has left the chart and the popup.
+            // This is only necessary for IE9 and IE10; other browsers support
+            // "pointer-events: none" in CSS so the popup never gets any mouse
+            // events.
+            setTimeout(function() {
+                if (!outerThis.popup.isMouseIn()) {
+                    outerThis.isMouseIn = false;
+                    outerThis.removeControlLine();
+                }
+            }, 1);
+        }
     };
     
     /**
@@ -3014,11 +3084,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {jQuery.Event} event - jQuery event object.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseDown = function (event) {
-        var outerThis = this;
-        // Use a timeout to open the dialog as we require other events
-        // (mouseover in particular) to be processed first, and the precise
-        // order of these events is not consistent between browsers.
-        setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
+        if (this.warningPanel === null) {
+            var outerThis = this;
+            // Use a timeout to open the dialog as we require other events
+            // (mouseover in particular) to be processed first, and the precise
+            // order of these events is not consistent between browsers.
+            setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
+        }
     };
     
     /**
@@ -3057,8 +3129,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Handles a mouse button being pressed over the chart.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseUp = function (event) {
-        this.popup.hide();
-        event.preventDefault();
+        if (this.warningPanel === null) {
+            this.popup.hide();
+            event.preventDefault();
+        }
     };
 
     /**
@@ -3613,6 +3687,39 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
 
     /**
+    * Clears the graph by removing all controls from it.
+    */
+    SplitsBrowser.Controls.Chart.prototype.clearGraph = function () {
+        this.svgGroup.selectAll("*").remove();
+    };
+    
+    /**
+    * Removes the warning panel, if it is still shown.
+    */
+    SplitsBrowser.Controls.Chart.prototype.clearWarningPanel = function () {
+        if (this.warningPanel !== null) {
+            this.warningPanel.remove();
+            this.warningPanel = null;
+        }
+    };
+    
+    /**
+    * Shows a warning panel over the chart, with the given message.
+    * @param message The message to show.
+    */
+    SplitsBrowser.Controls.Chart.prototype.showWarningPanel = function (message) {
+        this.clearWarningPanel();
+        this.warningPanel = d3.select(this.parent).append("div")
+                                                  .classed("warningPanel", true);
+        this.warningPanel.text(message);
+        
+        var panelWidth = $(this.warningPanel.node()).width();
+        var panelHeight = $(this.warningPanel.node()).height();
+        this.warningPanel.style("left", ((this.overallWidth - panelWidth) / 2) + "px")
+                         .style("top", ((this.overallHeight - panelHeight) / 2) + "px");
+    };
+    
+    /**
     * Draws the chart.
     * @param {object} data - Object that contains various chart data.  This
     *     must contain the following properties:
@@ -3630,7 +3737,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     *                                    certain statistics are visible.
     * @param {Object} chartType - The type of chart being drawn.
     */
-    //SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, eventData, ageClassSet, referenceCumTimes, fastestCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, isRaceGraph) {
     SplitsBrowser.Controls.Chart.prototype.drawChart = function (data, selectedIndexes, visibleStatistics, chartType) {
         var chartData = data.chartData;
         this.numControls = chartData.numControls;
@@ -3647,6 +3753,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
         this.maxStartTimeLabelWidth = (this.isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
+        this.clearWarningPanel();
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
@@ -3658,6 +3765,32 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         } else {
             this.removeCompetitorStartTimeLabels();
         }
+    };
+    
+    /**
+    * Clears the chart and shows a warning message instead.
+    * @param {String} message - The text of the warning message to show.
+    */
+    SplitsBrowser.Controls.Chart.prototype.clearAndShowWarning = function (message) {
+        this.numControls = 0;
+        this.numLines = 0;
+        
+        var dummyChartData = {
+            dataColumns: [],
+            competitorNames: [],
+            numControls: 0,
+            xExtent: [0, 3600],
+            yExtent: [0, 1]
+        };
+        
+        this.maxStatisticTextWidth = 0;
+        this.maxStartTimeWidth = 0;
+        this.clearGraph();
+        this.adjustContentSize();
+        this.referenceCumTimes = [0];
+        this.createScales(dummyChartData);
+        this.drawAxes("", dummyChartData);
+        this.showWarningPanel(message);
     };
 })();
 
@@ -3816,6 +3949,16 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
     
     /**
+    * Enables or disables a control, by setting or clearing an HTML "disabled"
+    * attribute as necessary.
+    * @param {d3.selection} control - d3 selection containing the control.
+    * @param {boolean} isEnabled - Whether the control is enabled.
+    */
+    function enableControl(control, isEnabled) {
+        control.node().disabled = !isEnabled;
+    }
+    
+    /**
     * The 'overall' viewer object responsible for viewing the splits graph.
     * @constructor
     */
@@ -3829,6 +3972,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.referenceCumTimes = null;
         this.fastestCumTimes = null;
         this.previousCompetitorList = [];
+        
+        this.isChartEnabled = false;
 
         this.selection = null;
         this.ageClassSet = null;
@@ -3898,15 +4043,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                                                
         this.buttonsPanel = this.competitorListContainer.append("div");
                      
-        this.buttonsPanel.append("button")
-                         .text("All")
-                         .style("width", "50%")
-                         .on("click", function () { outerThis.selectAll(); });
+        this.allButton = this.buttonsPanel.append("button")
+                                          .text("All")
+                                          .style("width", "50%")
+                                          .on("click", function () { outerThis.selectAll(); });
                         
-        this.buttonsPanel.append("button")
-                         .text("None")
-                         .style("width", "50%")
-                         .on("click", function () { outerThis.selectNone(); });
+        this.noneButton = this.buttonsPanel.append("button")
+                                           .text("None")
+                                           .style("width", "50%")
+                                           .on("click", function () { outerThis.selectNone(); });
                         
         this.buttonsPanel.append("br");
                         
@@ -3914,7 +4059,6 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                                                       .text("Crossing runners")
                                                       .style("width", "100%")
                                                       .on("click", function () { outerThis.selectCrossingRunners(); })
-                                                      .attr("disabled", "disabled")
                                                       .style("display", "none");
 
         this.competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(this.competitorListContainer.node());
@@ -3984,15 +4128,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         if (this.chartType.isResultsTable) {
             return;
         }
-
-        this.referenceCumTimes = this.comparisonFunction(this.ageClassSet);
-        this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
-        this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
-
+        
         var windowWidth = $(window).width();
         var windowHeight = $(window).height();
-        
-        this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
 
         this.competitorListBox.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
 
@@ -4003,9 +4141,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var chartHeight = windowHeight - 19 - topPanelHeight;
 
         this.chart.setSize(chartWidth, chartHeight);
-        this.redrawChart();
-
-        var outerThis = this;
+        
+        $("body").height(windowHeight - 19 - topPanelHeight);
+        $(this.competitorListContainer.node()).height(windowHeight - 19 - $(this.buttonsPanel.node()).height() - topPanelHeight);
+        
+        this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
         
         if (this.selectionChangeHandler !== null) {
             this.selection.deregisterChangeHandler(this.selectionChangeHandler);
@@ -4015,9 +4155,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             this.statisticsSelector.deregisterChangeHandler(this.statisticsChangeHandler);
         }
         
+        var outerThis = this;
+        
         this.selectionChangeHandler = function (indexes) {
             outerThis.currentIndexes = indexes;
-            outerThis.crossingRunnersButton.attr("disabled", (outerThis.selection.isSingleRunnerSelected()) ? null : "disabled");
+            outerThis.enableOrDisableCrossingRunnersButton();
             outerThis.redraw();
         };
 
@@ -4030,8 +4172,22 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
-        $("body").height(windowHeight - 19 - topPanelHeight);
-        $(this.competitorListContainer.node()).height(windowHeight - 19 - $(this.buttonsPanel.node()).height() - topPanelHeight);
+        var missedControls = this.ageClassSet.getControlsWithNoSplits();
+        this.isChartEnabled = (missedControls.length === 0);
+        this.updateControlEnabledness();
+        if (this.isChartEnabled) {
+            this.referenceCumTimes = this.comparisonFunction(this.ageClassSet);
+            this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
+            this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+            this.redrawChart();
+        } else {
+            var message = "Cannot draw a graph because no competitor has recorded a split time for control " + missedControls[0] + ".";
+            if (this.ageClassSet.getCourse().getNumClasses() > this.ageClassSet.getNumClasses()) {
+                message += "\n\nTry selecting some other classes.";
+            }
+            
+            this.chart.clearAndShowWarning(message);
+        }
     };
 
     /**
@@ -4053,7 +4209,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Redraw the chart, possibly using new data.
     */
     SplitsBrowser.Viewer.prototype.redraw = function () {
-        if (!this.chartType.isResultsTable) {
+        if (!this.chartType.isResultsTable && this.isChartEnabled) {
             this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
             this.redrawChart();
         }
@@ -4111,13 +4267,31 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             this.mainPanel.style("display", "");
         }
         
-        this.classSelector.setOtherClassesEnabled(!chartType.isResultsTable);
-        this.comparisonSelector.setEnabled(!chartType.isResultsTable);
-        this.statisticsSelector.setEnabled(!chartType.isResultsTable);
+        this.updateControlEnabledness();
         
         this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "" : "none");
         
         this.drawChart();
+    };
+    
+    /**
+    * Updates whether a number of controls are enabled.
+    */
+    SplitsBrowser.Viewer.prototype.updateControlEnabledness = function () {
+        this.classSelector.setOtherClassesEnabled(!this.chartType.isResultsTable);
+        this.comparisonSelector.setEnabled(this.isChartEnabled && !this.chartType.isResultsTable);
+        this.statisticsSelector.setEnabled(this.isChartEnabled && !this.chartType.isResultsTable);
+        this.competitorListBox.setEnabled(this.isChartEnabled);
+        enableControl(this.allButton, this.isChartEnabled);
+        enableControl(this.noneButton, this.isChartEnabled);
+        this.enableOrDisableCrossingRunnersButton();
+    };
+    
+    /**
+    * Enables or disables the crossing-runners button as appropriate.
+    */
+    SplitsBrowser.Viewer.prototype.enableOrDisableCrossingRunnersButton = function () {
+        enableControl(this.crossingRunnersButton, this.isChartEnabled && this.selection.isSingleRunnerSelected());
     };
     
     /**

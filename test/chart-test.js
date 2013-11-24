@@ -141,15 +141,21 @@
     // testing anything.
 
     QUnit.test("Can create a chart without skipping the start", function () {
-        runChartCreationTest(DUMMY_CHART_TYPE_SKIP);
+        runChartCreationTest(DUMMY_CHART_TYPE_NO_SKIP);
     });
 
     QUnit.test("Can create a chart with a chart type skipping the start", function () {
-        runChartCreationTest(DUMMY_CHART_TYPE_NO_SKIP);
+        runChartCreationTest(DUMMY_CHART_TYPE_SKIP);
     });
 
     QUnit.test("Can create a chart with start-time labels", function () {
         runChartCreationTest(DUMMY_CHART_TYPE_RACE_GRAPH);
+    });
+    
+    QUnit.test("Can create a chart with only a warning label shown", function () {
+        var chart = createTestChart(DUMMY_CHART_TYPE_NO_SKIP);
+        chart.clearAndShowWarning("This is a test message");
+        expect(0);
     });
     
 })();

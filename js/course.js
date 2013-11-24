@@ -68,6 +68,14 @@
     };
     
     /**
+    * Returns the number of age classes that use this course.
+    * @return {Number} Number of age classes that use this course.
+    */
+    SplitsBrowser.Model.Course.prototype.getNumClasses = function () {
+        return this.classes.length;
+    };
+    
+    /**
     * Returns whether this course has control code data.
     * @return {boolean} true if this course has control codes, false if it does
     *     not.

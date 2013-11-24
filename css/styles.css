@@ -200,6 +200,17 @@ div.competitor.selected
     color: white;
 }
 
+div.competitor.disabled
+{
+    color: #999999;
+}
+
+div.competitor.selected.disabled
+{
+    background-color: #9dc3cc;
+    color: white;
+}
+
 #statisticSelector
 {
     float: right;
@@ -236,6 +247,18 @@ span.resultsTableHeader
 .resultsTable tbody td.time
 {
     text-align: right;
+}
+
+div.warningPanel
+{
+    position: absolute;
+    background-color: #EEEE66;
+    border: 5px solid #CCCC44;
+    padding: 10px;
+    color: black;
+    font-weight: bold;
+    max-width: 250px;
+    text-align: center;
 }
 
 /*

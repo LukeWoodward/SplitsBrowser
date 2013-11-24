@@ -104,6 +104,7 @@
         this.isPopupOpen = false;
         this.popupUpdateFunc = null;
         this.maxStartTimeLabelWidth = 0;
+        this.warningPanel = null;
         
         // Indexes of the currently-selected competitors, in the order that
         // they appear in the list of labels.
@@ -151,8 +152,10 @@
     * Handle the mouse entering the chart.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseEnter = function (event) {
-        this.isMouseIn = true;
-        this.updateControlLineLocation(event);
+        if (this.warningPanel === null) {
+            this.isMouseIn = true;
+            this.updateControlLineLocation(event);
+        }
     };
     
     /**
@@ -169,7 +172,7 @@
     * @param {EventObject} event - The event object.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseMove = function(event) {
-        if (this.isMouseIn && this.xScale !== null) {
+        if (this.isMouseIn && this.xScale !== null && this.warningPanel === null) {
             this.updateControlLineLocation(event);
         }
     };
@@ -317,20 +320,22 @@
     * Handle the mouse leaving the chart.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseLeave = function() {
-        var outerThis = this;
-        // Check that the mouse hasn't entered the popup.
-        // It seems that the mouseleave event for the chart is sent before the
-        // mouseenter event for the popup, so we use a timeout to check a short
-        // time later whether the mouse has left the chart and the popup.
-        // This is only necessary for IE9 and IE10; other browsers support
-        // "pointer-events: none" in CSS so the popup never gets any mouse
-        // events.
-        setTimeout(function() {
-            if (!outerThis.popup.isMouseIn()) {
-                outerThis.isMouseIn = false;
-                outerThis.removeControlLine();
-            }
-        }, 1);
+        if (this.warningPanel === null) {
+            var outerThis = this;
+            // Check that the mouse hasn't entered the popup.
+            // It seems that the mouseleave event for the chart is sent before the
+            // mouseenter event for the popup, so we use a timeout to check a short
+            // time later whether the mouse has left the chart and the popup.
+            // This is only necessary for IE9 and IE10; other browsers support
+            // "pointer-events: none" in CSS so the popup never gets any mouse
+            // events.
+            setTimeout(function() {
+                if (!outerThis.popup.isMouseIn()) {
+                    outerThis.isMouseIn = false;
+                    outerThis.removeControlLine();
+                }
+            }, 1);
+        }
     };
     
     /**
@@ -338,11 +343,13 @@
     * @param {jQuery.Event} event - jQuery event object.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseDown = function (event) {
-        var outerThis = this;
-        // Use a timeout to open the dialog as we require other events
-        // (mouseover in particular) to be processed first, and the precise
-        // order of these events is not consistent between browsers.
-        setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
+        if (this.warningPanel === null) {
+            var outerThis = this;
+            // Use a timeout to open the dialog as we require other events
+            // (mouseover in particular) to be processed first, and the precise
+            // order of these events is not consistent between browsers.
+            setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
+        }
     };
     
     /**
@@ -381,8 +388,10 @@
     * Handles a mouse button being pressed over the chart.
     */
     SplitsBrowser.Controls.Chart.prototype.onMouseUp = function (event) {
-        this.popup.hide();
-        event.preventDefault();
+        if (this.warningPanel === null) {
+            this.popup.hide();
+            event.preventDefault();
+        }
     };
 
     /**
@@ -937,6 +946,39 @@
     };
 
     /**
+    * Clears the graph by removing all controls from it.
+    */
+    SplitsBrowser.Controls.Chart.prototype.clearGraph = function () {
+        this.svgGroup.selectAll("*").remove();
+    };
+    
+    /**
+    * Removes the warning panel, if it is still shown.
+    */
+    SplitsBrowser.Controls.Chart.prototype.clearWarningPanel = function () {
+        if (this.warningPanel !== null) {
+            this.warningPanel.remove();
+            this.warningPanel = null;
+        }
+    };
+    
+    /**
+    * Shows a warning panel over the chart, with the given message.
+    * @param message The message to show.
+    */
+    SplitsBrowser.Controls.Chart.prototype.showWarningPanel = function (message) {
+        this.clearWarningPanel();
+        this.warningPanel = d3.select(this.parent).append("div")
+                                                  .classed("warningPanel", true);
+        this.warningPanel.text(message);
+        
+        var panelWidth = $(this.warningPanel.node()).width();
+        var panelHeight = $(this.warningPanel.node()).height();
+        this.warningPanel.style("left", ((this.overallWidth - panelWidth) / 2) + "px")
+                         .style("top", ((this.overallHeight - panelHeight) / 2) + "px");
+    };
+    
+    /**
     * Draws the chart.
     * @param {object} data - Object that contains various chart data.  This
     *     must contain the following properties:
@@ -954,7 +996,6 @@
     *                                    certain statistics are visible.
     * @param {Object} chartType - The type of chart being drawn.
     */
-    //SplitsBrowser.Controls.Chart.prototype.drawChart = function (chartData, eventData, ageClassSet, referenceCumTimes, fastestCumTimes, selectedIndexes, visibleStatistics, yAxisLabel, isRaceGraph) {
     SplitsBrowser.Controls.Chart.prototype.drawChart = function (data, selectedIndexes, visibleStatistics, chartType) {
         var chartData = data.chartData;
         this.numControls = chartData.numControls;
@@ -971,6 +1012,7 @@
         
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
         this.maxStartTimeLabelWidth = (this.isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
+        this.clearWarningPanel();
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
@@ -982,5 +1024,31 @@
         } else {
             this.removeCompetitorStartTimeLabels();
         }
+    };
+    
+    /**
+    * Clears the chart and shows a warning message instead.
+    * @param {String} message - The text of the warning message to show.
+    */
+    SplitsBrowser.Controls.Chart.prototype.clearAndShowWarning = function (message) {
+        this.numControls = 0;
+        this.numLines = 0;
+        
+        var dummyChartData = {
+            dataColumns: [],
+            competitorNames: [],
+            numControls: 0,
+            xExtent: [0, 3600],
+            yExtent: [0, 1]
+        };
+        
+        this.maxStatisticTextWidth = 0;
+        this.maxStartTimeWidth = 0;
+        this.clearGraph();
+        this.adjustContentSize();
+        this.referenceCumTimes = [0];
+        this.createScales(dummyChartData);
+        this.drawAxes("", dummyChartData);
+        this.showWarningPanel(message);
     };
 })();

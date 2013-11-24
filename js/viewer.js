@@ -32,6 +32,16 @@
     var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
     
     /**
+    * Enables or disables a control, by setting or clearing an HTML "disabled"
+    * attribute as necessary.
+    * @param {d3.selection} control - d3 selection containing the control.
+    * @param {boolean} isEnabled - Whether the control is enabled.
+    */
+    function enableControl(control, isEnabled) {
+        control.node().disabled = !isEnabled;
+    }
+    
+    /**
     * The 'overall' viewer object responsible for viewing the splits graph.
     * @constructor
     */
@@ -45,6 +55,8 @@
         this.referenceCumTimes = null;
         this.fastestCumTimes = null;
         this.previousCompetitorList = [];
+        
+        this.isChartEnabled = false;
 
         this.selection = null;
         this.ageClassSet = null;
@@ -114,15 +126,15 @@
                                                
         this.buttonsPanel = this.competitorListContainer.append("div");
                      
-        this.buttonsPanel.append("button")
-                         .text("All")
-                         .style("width", "50%")
-                         .on("click", function () { outerThis.selectAll(); });
+        this.allButton = this.buttonsPanel.append("button")
+                                          .text("All")
+                                          .style("width", "50%")
+                                          .on("click", function () { outerThis.selectAll(); });
                         
-        this.buttonsPanel.append("button")
-                         .text("None")
-                         .style("width", "50%")
-                         .on("click", function () { outerThis.selectNone(); });
+        this.noneButton = this.buttonsPanel.append("button")
+                                           .text("None")
+                                           .style("width", "50%")
+                                           .on("click", function () { outerThis.selectNone(); });
                         
         this.buttonsPanel.append("br");
                         
@@ -130,7 +142,6 @@
                                                       .text("Crossing runners")
                                                       .style("width", "100%")
                                                       .on("click", function () { outerThis.selectCrossingRunners(); })
-                                                      .attr("disabled", "disabled")
                                                       .style("display", "none");
 
         this.competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(this.competitorListContainer.node());
@@ -200,15 +211,9 @@
         if (this.chartType.isResultsTable) {
             return;
         }
-
-        this.referenceCumTimes = this.comparisonFunction(this.ageClassSet);
-        this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
-        this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
-
+        
         var windowWidth = $(window).width();
         var windowHeight = $(window).height();
-        
-        this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
 
         this.competitorListBox.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
 
@@ -219,9 +224,11 @@
         var chartHeight = windowHeight - 19 - topPanelHeight;
 
         this.chart.setSize(chartWidth, chartHeight);
-        this.redrawChart();
-
-        var outerThis = this;
+        
+        $("body").height(windowHeight - 19 - topPanelHeight);
+        $(this.competitorListContainer.node()).height(windowHeight - 19 - $(this.buttonsPanel.node()).height() - topPanelHeight);
+        
+        this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
         
         if (this.selectionChangeHandler !== null) {
             this.selection.deregisterChangeHandler(this.selectionChangeHandler);
@@ -231,9 +238,11 @@
             this.statisticsSelector.deregisterChangeHandler(this.statisticsChangeHandler);
         }
         
+        var outerThis = this;
+        
         this.selectionChangeHandler = function (indexes) {
             outerThis.currentIndexes = indexes;
-            outerThis.crossingRunnersButton.attr("disabled", (outerThis.selection.isSingleRunnerSelected()) ? null : "disabled");
+            outerThis.enableOrDisableCrossingRunnersButton();
             outerThis.redraw();
         };
 
@@ -246,8 +255,22 @@
         
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
-        $("body").height(windowHeight - 19 - topPanelHeight);
-        $(this.competitorListContainer.node()).height(windowHeight - 19 - $(this.buttonsPanel.node()).height() - topPanelHeight);
+        var missedControls = this.ageClassSet.getControlsWithNoSplits();
+        this.isChartEnabled = (missedControls.length === 0);
+        this.updateControlEnabledness();
+        if (this.isChartEnabled) {
+            this.referenceCumTimes = this.comparisonFunction(this.ageClassSet);
+            this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
+            this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+            this.redrawChart();
+        } else {
+            var message = "Cannot draw a graph because no competitor has recorded a split time for control " + missedControls[0] + ".";
+            if (this.ageClassSet.getCourse().getNumClasses() > this.ageClassSet.getNumClasses()) {
+                message += "\n\nTry selecting some other classes.";
+            }
+            
+            this.chart.clearAndShowWarning(message);
+        }
     };
 
     /**
@@ -269,7 +292,7 @@
     * Redraw the chart, possibly using new data.
     */
     SplitsBrowser.Viewer.prototype.redraw = function () {
-        if (!this.chartType.isResultsTable) {
+        if (!this.chartType.isResultsTable && this.isChartEnabled) {
             this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
             this.redrawChart();
         }
@@ -327,13 +350,31 @@
             this.mainPanel.style("display", "");
         }
         
-        this.classSelector.setOtherClassesEnabled(!chartType.isResultsTable);
-        this.comparisonSelector.setEnabled(!chartType.isResultsTable);
-        this.statisticsSelector.setEnabled(!chartType.isResultsTable);
+        this.updateControlEnabledness();
         
         this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "" : "none");
         
         this.drawChart();
+    };
+    
+    /**
+    * Updates whether a number of controls are enabled.
+    */
+    SplitsBrowser.Viewer.prototype.updateControlEnabledness = function () {
+        this.classSelector.setOtherClassesEnabled(!this.chartType.isResultsTable);
+        this.comparisonSelector.setEnabled(this.isChartEnabled && !this.chartType.isResultsTable);
+        this.statisticsSelector.setEnabled(this.isChartEnabled && !this.chartType.isResultsTable);
+        this.competitorListBox.setEnabled(this.isChartEnabled);
+        enableControl(this.allButton, this.isChartEnabled);
+        enableControl(this.noneButton, this.isChartEnabled);
+        this.enableOrDisableCrossingRunnersButton();
+    };
+    
+    /**
+    * Enables or disables the crossing-runners button as appropriate.
+    */
+    SplitsBrowser.Viewer.prototype.enableOrDisableCrossingRunnersButton = function () {
+        enableControl(this.crossingRunnersButton, this.isChartEnabled && this.selection.isSingleRunnerSelected());
     };
     
     /**
