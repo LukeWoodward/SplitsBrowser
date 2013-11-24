@@ -147,16 +147,6 @@
         var handlers = {"mousemove": mousemoveHandler, "mousedown": mousedownHandler, "mouseup": mouseupHandler};
         this.popup = new SplitsBrowser.Controls.ChartPopup(parent, handlers);
     };
-
-    /**
-    * Handle the mouse entering the chart.
-    */
-    SplitsBrowser.Controls.Chart.prototype.onMouseEnter = function (event) {
-        if (this.warningPanel === null) {
-            this.isMouseIn = true;
-            this.updateControlLineLocation(event);
-        }
-    };
     
     /**
     * Sets the left margin of the chart.
@@ -165,73 +155,6 @@
     SplitsBrowser.Controls.Chart.prototype.setLeftMargin = function (leftMargin) {
         this.currentLeftMargin = leftMargin;
         this.svgGroup.attr("transform", "translate(" + this.currentLeftMargin + "," + MARGIN.top + ")");
-    };
-
-    /**
-    * Handle a mouse movement.
-    * @param {EventObject} event - The event object.
-    */
-    SplitsBrowser.Controls.Chart.prototype.onMouseMove = function(event) {
-        if (this.isMouseIn && this.xScale !== null && this.warningPanel === null) {
-            this.updateControlLineLocation(event);
-        }
-    };
-    
-    /**
-    * Updates the location of the control line from the given mouse event.
-    * @param {jQuery.event} event - jQuery mousedown or mousemove event.
-    */
-    SplitsBrowser.Controls.Chart.prototype.updateControlLineLocation = function (event) {
-
-        var svgNodeAsJQuery = $(this.svg.node());
-        var offset = svgNodeAsJQuery.offset();
-        var xOffset = event.pageX - offset.left;
-        var yOffset = event.pageY - offset.top;
-        
-        if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - MARGIN.right && 
-            MARGIN.top <= yOffset && yOffset < svgNodeAsJQuery.height() - MARGIN.bottom) {
-            // In the chart.
-            // Get the time offset that the mouse is currently over.
-            var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
-            var bisectIndex = d3.bisect(this.referenceCumTimes, chartX);
-            
-            // bisectIndex is the index at which to insert chartX into
-            // referenceCumTimes in order to keep the array sorted.  So if
-            // this index is N, the mouse is between N - 1 and N.  Find
-            // which is nearer.
-            var controlIndex;
-            if (bisectIndex >= this.referenceCumTimes.length) {
-                // Off the right-hand end, use the finish.
-                controlIndex = this.numControls + 1;
-            } else if (bisectIndex <= this.minViewableControl) {
-                // Before the minimum viewable control, so use that.
-                controlIndex = this.minViewableControl;
-            } else {
-                var diffToNext = Math.abs(this.referenceCumTimes[bisectIndex] - chartX);
-                var diffToPrev = Math.abs(chartX - this.referenceCumTimes[bisectIndex - 1]);
-                controlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
-            }
-            
-            if (this.currentControlIndex === null || this.currentControlIndex !== controlIndex) {
-                // The control line has appeared for ths first time or has moved, so redraw it.
-                this.removeControlLine();
-                this.drawControlLine(controlIndex);
-            }
-            
-            if (this.popup.isShown() && this.currentControlIndex !== null) {
-                if (this.isRaceGraph) {
-                    this.setCurrentChartTime(event);
-                }
-                
-                this.popupUpdateFunc();
-                this.popup.setLocation(this.getPopupLocation(event));
-            }
-            
-        } else {
-            // In the SVG element but outside the chart area.
-            this.removeControlLine();
-            this.popup.hide();
-        }
     };
 
     /**
@@ -315,11 +238,32 @@
         
         return {title: title, data: competitorData};
     };
+
+    /**
+    * Handle the mouse entering the chart.
+    * @param {jQuery.event} event - jQuery event object.
+    */
+    SplitsBrowser.Controls.Chart.prototype.onMouseEnter = function (event) {
+        if (this.warningPanel === null) {
+            this.isMouseIn = true;
+            this.updateControlLineLocation(event);
+        }
+    };
+
+    /**
+    * Handle a mouse movement.
+    * @param {jQuery.event} event - jQuery event object.
+    */
+    SplitsBrowser.Controls.Chart.prototype.onMouseMove = function (event) {
+        if (this.isMouseIn && this.xScale !== null && this.warningPanel === null) {
+            this.updateControlLineLocation(event);
+        }
+    };
      
     /**
     * Handle the mouse leaving the chart.
     */
-    SplitsBrowser.Controls.Chart.prototype.onMouseLeave = function() {
+    SplitsBrowser.Controls.Chart.prototype.onMouseLeave = function () {
         if (this.warningPanel === null) {
             var outerThis = this;
             // Check that the mouse hasn't entered the popup.
@@ -349,6 +293,16 @@
             // (mouseover in particular) to be processed first, and the precise
             // order of these events is not consistent between browsers.
             setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
+        }
+    };
+    
+    /**
+    * Handles a mouse button being pressed over the chart.
+    */
+    SplitsBrowser.Controls.Chart.prototype.onMouseUp = function (event) {
+        if (this.warningPanel === null) {
+            this.popup.hide();
+            event.preventDefault();
         }
     };
     
@@ -383,16 +337,6 @@
             }
         }
     };
-    
-    /**
-    * Handles a mouse button being pressed over the chart.
-    */
-    SplitsBrowser.Controls.Chart.prototype.onMouseUp = function (event) {
-        if (this.warningPanel === null) {
-            this.popup.hide();
-            event.preventDefault();
-        }
-    };
 
     /**
     * Draw a 'control line'.  This is a vertical line running the entire height of
@@ -411,6 +355,63 @@
                                         .attr("y2", this.contentHeight)
                                         .attr("class", "controlLine")
                                         .node();
+    };
+    
+    /**
+    * Updates the location of the control line from the given mouse event.
+    * @param {jQuery.event} event - jQuery mousedown or mousemove event.
+    */
+    SplitsBrowser.Controls.Chart.prototype.updateControlLineLocation = function (event) {
+
+        var svgNodeAsJQuery = $(this.svg.node());
+        var offset = svgNodeAsJQuery.offset();
+        var xOffset = event.pageX - offset.left;
+        var yOffset = event.pageY - offset.top;
+        
+        if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - MARGIN.right && 
+            MARGIN.top <= yOffset && yOffset < svgNodeAsJQuery.height() - MARGIN.bottom) {
+            // In the chart.
+            // Get the time offset that the mouse is currently over.
+            var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
+            var bisectIndex = d3.bisect(this.referenceCumTimes, chartX);
+            
+            // bisectIndex is the index at which to insert chartX into
+            // referenceCumTimes in order to keep the array sorted.  So if
+            // this index is N, the mouse is between N - 1 and N.  Find
+            // which is nearer.
+            var controlIndex;
+            if (bisectIndex >= this.referenceCumTimes.length) {
+                // Off the right-hand end, use the finish.
+                controlIndex = this.numControls + 1;
+            } else if (bisectIndex <= this.minViewableControl) {
+                // Before the minimum viewable control, so use that.
+                controlIndex = this.minViewableControl;
+            } else {
+                var diffToNext = Math.abs(this.referenceCumTimes[bisectIndex] - chartX);
+                var diffToPrev = Math.abs(chartX - this.referenceCumTimes[bisectIndex - 1]);
+                controlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
+            }
+            
+            if (this.currentControlIndex === null || this.currentControlIndex !== controlIndex) {
+                // The control line has appeared for ths first time or has moved, so redraw it.
+                this.removeControlLine();
+                this.drawControlLine(controlIndex);
+            }
+            
+            if (this.popup.isShown() && this.currentControlIndex !== null) {
+                if (this.isRaceGraph) {
+                    this.setCurrentChartTime(event);
+                }
+                
+                this.popupUpdateFunc();
+                this.popup.setLocation(this.getPopupLocation(event));
+            }
+            
+        } else {
+            // In the SVG element but outside the chart area.
+            this.removeControlLine();
+            this.popup.hide();
+        }
     };
 
     /**
