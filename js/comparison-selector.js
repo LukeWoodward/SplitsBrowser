@@ -22,8 +22,8 @@
     "use strict";
     
     var ALL_COMPARISON_OPTIONS = [
-        { name: "Winner", selector: function (ageClassSet) { return ageClassSet.getWinnerCumTimes(); } },
-        { name: "Fastest time", selector: function (ageClassSet) { return ageClassSet.getFastestCumTimes(); } }
+        { name: "Winner", selector: function (ageClassSet) { return ageClassSet.getWinnerCumTimes(); }, requiresWinner: true },
+        { name: "Fastest time", selector: function (ageClassSet) { return ageClassSet.getFastestCumTimes(); }, requiresWinner: false }
     ];
     
     // All 'Fastest time + N %' values (not including zero).
@@ -32,11 +32,12 @@
     FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
         ALL_COMPARISON_OPTIONS.push({
             name: "Fastest time + " + percent + "%",
-            selector: function (ageClassSet) { return ageClassSet.getFastestCumTimesPlusPercentage(percent); }
+            selector: function (ageClassSet) { return ageClassSet.getFastestCumTimesPlusPercentage(percent); },
+            requiresWinner: false
         });
     });
     
-    ALL_COMPARISON_OPTIONS.push({ name: "Any runner..." });
+    ALL_COMPARISON_OPTIONS.push({ name: "Any runner...", requiresWinner: true });
     
     // Default selected index of the comparison function.
     var DEFAULT_COMPARISON_INDEX = 1; // 1 = fastest time.
@@ -51,13 +52,18 @@
     * A control that wraps a drop-down list used to choose what to compare
     * times against.
     * @param {HTMLElement} parent - The parent element to add the control to.
+    * @param {Function} alerter - Function to call with any messages to show to
+    *     the user.
     */
-    SplitsBrowser.Controls.ComparisonSelector = function(parent) {
+    SplitsBrowser.Controls.ComparisonSelector = function (parent, alerter) {
         this.changeHandlers = [];
         this.classes = null;
         this.currentRunnerIndex = null;
         this.previousCompetitorList = null;
         this.parent = parent;
+        this.alerter = alerter;
+        this.hasWinner = false;
+        this.previousSelectedIndex = -1;
         
         var span = d3.select(parent).append("span");
         
@@ -95,6 +101,7 @@
         $(this.runnerDropDown).bind("change", function () { outerThis.onSelectionChanged(); });
         
         this.dropDown.selectedIndex = DEFAULT_COMPARISON_INDEX;
+        this.previousSelectedIndex = DEFAULT_COMPARISON_INDEX;
     };
 
     /**
@@ -137,6 +144,8 @@
         var competitors = this.ageClassSet.allCompetitors;
         var completingCompetitorIndexes = d3.range(competitors.length).filter(function (idx) { return competitors[idx].completed(); });
         var completingCompetitors = competitors.filter(function (comp) { return comp.completed(); });
+        
+        this.hasWinner = (completingCompetitors.length > 0);
         
         var optionsList = d3.select(this.runnerDropDown).selectAll("option")
                                                         .data(completingCompetitors);
@@ -190,9 +199,17 @@
     * Handle a change of the selected option in either drop-down list.
     */
     SplitsBrowser.Controls.ComparisonSelector.prototype.onSelectionChanged = function() {
-        this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? "" : "none");
-        var dropdownSelectedIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
-        this.currentRunnerIndex = (this.runnerDropDown.options.length === 0) ? 0 : parseInt(this.runnerDropDown.options[dropdownSelectedIndex].value, 10);
-        this.changeHandlers.forEach(function (handler) { handler(this.getComparisonFunction()); }, this);
+        var runnerDropdownSelectedIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
+        var option = ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex];
+        if (!this.hasWinner && option.requiresWinner) {
+            // No winner on this course means you can't select this option.
+            this.alerter("Cannot compare against '" + option.name + "' because no competitors in this class complete the course.");
+            this.dropDown.selectedIndex = this.previousSelectedIndex;
+        } else {
+            this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? "" : "none");
+            this.currentRunnerIndex = (this.runnerDropDown.options.length === 0) ? 0 : parseInt(this.runnerDropDown.options[runnerDropdownSelectedIndex].value, 10);
+            this.previousSelectedIndex = this.dropDown.selectedIndex;
+            this.changeHandlers.forEach(function (handler) { handler(this.getComparisonFunction()); }, this);
+        }
     };
 })();

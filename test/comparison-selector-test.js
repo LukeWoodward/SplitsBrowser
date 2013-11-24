@@ -28,9 +28,12 @@
     var lastSelector = null;
     var callCount = 0;
 
+    var alertsReceived = [];
+    
     function resetLastSelector() {
         lastSelector = null;
         callCount = 0;
+        alertsReceived = [];
     }
 
     var _FASTEST_TIME = "fastest time";
@@ -43,6 +46,10 @@
     // CSS selector for the runner drop-down.
     var _RUNNER_SELECTOR_SELECTOR = "#qunit-fixture select#runnerSelector";
 
+    function alerter(message) {
+        alertsReceived.push(message);
+    }
+    
     function handleComparisonChanged(selector) {
         lastSelector = selector;
         callCount += 1;
@@ -74,9 +81,23 @@
         competitorsWithMispuncher[1] = { name : competitors[1].name, completed: function () { return false; } };
         return getDummyAgeClassSet(competitorsWithMispuncher);
     }
+    
+    function getDummyAgeClassSetWithNoWinner() {
+        var returnFalse = function () { return false; };
+        var winnerlessCompetitors = competitors.map(function (comp) {
+            return { name: comp.name, getAllCumulativeTimes: comp.getAllCumulativeTimes, completed: returnFalse };
+        });
+
+        return getDummyAgeClassSet(winnerlessCompetitors);
+    }
+    
+    function createSelector() {
+        return new ComparisonSelector(d3.select("#qunit-fixture").node(), alerter);
+    }
 
     QUnit.test("Comparison selector created enabled and with runner selector populated but not displayed", function(assert) {
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        resetLastSelector();
+        var selector = createSelector();
         selector.setAgeClassSet(DUMMY_CLASS_SET);
         
         var htmlSelectSelection = d3.select(_COMPARISON_SELECTOR_SELECTOR);
@@ -98,10 +119,13 @@
         assert.strictEqual(htmlSelect.selectedIndex, 0, "Runner selector should be created with the first item selected");
         
         assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), false, "Runner selector should not be shown");
+        
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
     QUnit.test("Comparison selector created enabled and with runner selector populated with completing competitors only", function(assert) {
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        resetLastSelector();
+        var selector = createSelector();
         var ageClassSet = getDummyAgeClassSetWithMispuncher();
         selector.setAgeClassSet(ageClassSet);
         
@@ -113,10 +137,13 @@
         assert.strictEqual(htmlSelect.selectedIndex, 0, "Runner selector should be created with the first item selected");
         
         assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), false, "Runner selector should not be shown");
+
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
     QUnit.test("Comparison selector created and runner selector displayed when selecting last item", function(assert) {
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        resetLastSelector();
+        var selector = createSelector();
         selector.setAgeClassSet(DUMMY_CLASS_SET);
         
         var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
@@ -126,10 +153,13 @@
         assert.deepEqual(func(DUMMY_CLASS_SET), DUMMY_CLASS_SET.allCompetitors[0].getAllCumulativeTimes());
         
         assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), true, "Runner selector should be shown");
+
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
     QUnit.test("Correct competitor index selected when runner list contains a mispuncher", function(assert) {
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        resetLastSelector();
+        var selector = createSelector();
         var ageClassSet = getDummyAgeClassSetWithMispuncher();
         selector.setAgeClassSet(ageClassSet);
         
@@ -141,11 +171,13 @@
         assert.strictEqual(htmlRunnerSelector.selectedIndex, 1);
         var func = selector.getComparisonFunction();
         assert.deepEqual(func(DUMMY_CLASS_SET), DUMMY_CLASS_SET.allCompetitors[2].getAllCumulativeTimes()); 
+
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
     QUnit.test("Registering a handler and changing a value in the comparison selector triggers a call to change callback", function(assert) {
         resetLastSelector();
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        var selector = createSelector();
         selector.setAgeClassSet(DUMMY_CLASS_SET);
         selector.registerChangeHandler(handleComparisonChanged);
         
@@ -158,11 +190,13 @@
         var func = selector.getComparisonFunction();
         assert.strictEqual(func(DUMMY_CLASS_SET), _FASTEST_TIME + ":5");
         assert.strictEqual(callCount, 1, "One change should have been recorded");
+
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
     QUnit.test("Registering a handler and changing a value in the runner selector triggers a call to change callback", function(assert) {
         resetLastSelector();
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        var selector = createSelector();
         selector.setAgeClassSet(DUMMY_CLASS_SET);        
 
         var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
@@ -172,6 +206,8 @@
         assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), true, "Runner selector should be shown");
         $(htmlSelect).val(0).change();
         assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), false, "Runner selector should not be shown");
+        
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
     QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", function(assert) {
@@ -184,7 +220,7 @@
             callCount2 += 1;
         };
         
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        var selector = createSelector();
         selector.setAgeClassSet(DUMMY_CLASS_SET);
         
         selector.registerChangeHandler(handleComparisonChanged);
@@ -201,11 +237,13 @@
         assert.strictEqual(callCount, 1, "One change should have been recorded");
         assert.strictEqual(lastSelector2(DUMMY_CLASS_SET), _FASTEST_TIME + ":5", "Second comparison option should have been changed");
         assert.strictEqual(callCount2, 1, "One change should have been recorded");
+        
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
     QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", function(assert) {
         resetLastSelector();
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        var selector = createSelector();
         selector.setAgeClassSet(DUMMY_CLASS_SET);
         
         selector.registerChangeHandler(handleComparisonChanged);
@@ -220,11 +258,13 @@
         assert.strictEqual(typeof lastSelector, "function");
         assert.strictEqual(lastSelector(DUMMY_CLASS_SET), _FASTEST_TIME + ":5", "Second comparison option should have been changed");
         assert.strictEqual(callCount, 1, "One change should have been recorded");
+        
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
     QUnit.test("Runner selector appears if 'Any Runner...' is selected and disappears when deselected", function(assert) {
         resetLastSelector();
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        var selector = createSelector();
         selector.setAgeClassSet(DUMMY_CLASS_SET);        
         
         var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
@@ -239,11 +279,13 @@
         var func = selector.getComparisonFunction();
         assert.deepEqual(func(DUMMY_CLASS_SET), DUMMY_CLASS_SET.allCompetitors[1].getAllCumulativeTimes());
         assert.strictEqual(callCount, 1, "One change should have been recorded");
+        
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
     QUnit.test("Runner selector repopulated when class data changes", function(assert) {
         resetLastSelector();
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        var selector = createSelector();
         var htmlSelect = d3.select(_RUNNER_SELECTOR_SELECTOR).node();
         
         selector.setAgeClassSet(DUMMY_CLASS_SET);        
@@ -254,12 +296,14 @@
 
         selector.setAgeClassSet(getDummyAgeClassSet([{name: "eight", completed: returnTrue}, {name: "nine", completed: returnTrue}]));
         assert.strictEqual(htmlSelect.options.length, 2, "Wrong number of options created");
+        
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
     QUnit.test("Runner selector appears if 'Any Runner...' is selected and disappears when deselected", function(assert) {
         resetLastSelector();
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
-        selector.setAgeClassSet(DUMMY_CLASS_SET);        
+        var selector = createSelector();
+        selector.setAgeClassSet(DUMMY_CLASS_SET);    
         
         var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(htmlSelect.options.length - 1).change();
@@ -272,35 +316,73 @@
         var func = selector.getComparisonFunction();
         assert.deepEqual(func(DUMMY_CLASS_SET), DUMMY_CLASS_SET.allCompetitors[1].getAllCumulativeTimes());
         assert.strictEqual(callCount, 1, "One change should have been recorded");
+        
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
     QUnit.test("Runner selector remains selected on same runner if age-class set changes and selected runner still in list", function(assert) {
         resetLastSelector();
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        var selector = createSelector();
+        selector.setAgeClassSet(DUMMY_CLASS_SET);
         var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(htmlSelect.options.length - 1).change();
         
         htmlSelect = d3.select(_RUNNER_SELECTOR_SELECTOR).node();
         
-        selector.setAgeClassSet(DUMMY_CLASS_SET);
         $(htmlSelect).val(2).change();
 
         selector.setAgeClassSet(getDummyAgeClassSet(competitors.slice(1)));
         assert.strictEqual($(htmlSelect).val(), "1");
+        
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
     QUnit.test("Runner selector returns to first runner if age-class set changes and selected runner no longer in list", function(assert) {
         resetLastSelector();
-        var selector = new ComparisonSelector(d3.select("#qunit-fixture").node());
+        var selector = createSelector();
+        selector.setAgeClassSet(DUMMY_CLASS_SET);
         var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(htmlSelect.options.length - 1).change();
         
         htmlSelect = d3.select(_RUNNER_SELECTOR_SELECTOR).node();
         
-        selector.setAgeClassSet(DUMMY_CLASS_SET);        
         $(htmlSelect).val(2).change();
 
         selector.setAgeClassSet(getDummyAgeClassSet(competitors.slice(0, 2)));
         assert.strictEqual($(htmlSelect).val(), "0");
+        
+        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
+
+    QUnit.test("Alert issued and selector returns to previous index without firing handlers if age-class set has no winner and 'Winner' option chosen", function(assert) {
+        resetLastSelector();
+        var selector = createSelector();
+        selector.setAgeClassSet(getDummyAgeClassSetWithNoWinner());
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        $(htmlSelect).val(2).change();
+        
+        selector.registerChangeHandler(handleComparisonChanged);
+        $(htmlSelect).val(0).change();
+        
+        assert.strictEqual($(htmlSelect).val(), "2", "Selector should return to previous index: selector index is " + $(htmlSelect)[0].selectedIndex);
+        assert.strictEqual(callCount, 0, "No calls to the change-handler should have been made");
+        
+        assert.strictEqual(alertsReceived.length, 1, "One alert should have been issued");
+    });
+
+    QUnit.test("Alert issued and selector returns to previous index without firing handlers if age-class set has no winner and 'Any runner...' option chosen", function(assert) {
+        resetLastSelector();
+        var selector = createSelector();
+        selector.setAgeClassSet(getDummyAgeClassSetWithNoWinner());
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        $(htmlSelect).val(3).change();
+        
+        selector.registerChangeHandler(handleComparisonChanged);
+        $(htmlSelect).val(htmlSelect.options.length - 1).change();
+        
+        assert.strictEqual($(htmlSelect).val(), "3", "Selector should return to previous index");
+        assert.strictEqual(callCount, 0, "No calls to the change-handler should have been made");
+        assert.strictEqual(alertsReceived.length, 1, "One alert should have been issued, message was '" + ((alertsReceived.length === 0) ? "(none)" : alertsReceived[0]) + "'");
+        assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), false, "Runner selector should not be shown");
+    });    
 })();

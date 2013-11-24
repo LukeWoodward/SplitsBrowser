@@ -98,7 +98,7 @@
         
         this.topPanel.append("span").style("padding", "0px 30px 0px 30px");
         
-        this.comparisonSelector = new SplitsBrowser.Controls.ComparisonSelector(this.topPanel.node());
+        this.comparisonSelector = new SplitsBrowser.Controls.ComparisonSelector(this.topPanel.node(), function (message) { alert(message); });
         if (this.classes !== null) {
             this.comparisonSelector.setClasses(this.classes);
         }
