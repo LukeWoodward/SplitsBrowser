@@ -690,7 +690,7 @@
                 var yScale = this.yScale;
                 return function (time) {
                     var nearestOffset = d3.min(startTimes.map(function (startTime) { return Math.abs(yScale(startTime) - yScale(time)); }));
-                    return (nearestOffset >= MIN_COMPETITOR_TICK_MARK_DISTANCE) ? SplitsBrowser.formatTime(time * 60) : "";
+                    return (nearestOffset >= MIN_COMPETITOR_TICK_MARK_DISTANCE) ? SplitsBrowser.formatTime(Math.round(time * 60)) : "";
                 };
            }
         } else {
