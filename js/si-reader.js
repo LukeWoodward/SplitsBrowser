@@ -21,15 +21,23 @@
 (function () {
     "use strict";
     
-    var CLUB_COLUMN_NAME = "City";
+    // Indexes into the columns.
+    var COLUMN_INDEXES = {
+        SURNAME: 3,
+        FORENAME: 4,
+        START: 9,
+        TIME: 11,
+        CLUB: 15,
+        AGE_CLASS: 18,
+        COURSE: 39,
+        DISTANCE: 40,
+        CLIMB: 41,
+        CONTROL_COUNT: 42,
+        PLACING: 43
+    };
     
-    var CLASS_COLUMN_NAME = "Short";
-    
-    var COURSE_COLUMN_NAME = "Course";
-    
-    var PLACING_COLUMN_NAME = "Pl";
-    
-    var MANDATORY_COLUMN_NAMES = ["First name", "Surname", CLUB_COLUMN_NAME, "Start", "Time", CLASS_COLUMN_NAME, "Course controls", PLACING_COLUMN_NAME, COURSE_COLUMN_NAME];
+    // Index of the first column of control-specific data.
+    var CONTROLS_OFFSET = 46;
     
     SplitsBrowser.Input.SI = {};
     
@@ -177,17 +185,19 @@
     */
     SplitsBrowser.Input.SI.parseEventData = function (data) {
         
-        // Work around oddity of the file format: 'City' seems to contain the
-        // club name, and it seems to be repeated later on.  Adjust the second
-        // occurrence to move it out of the way.
-        data = data.replace(/;City;(.*?);City;/, ";City;$1;City2;");
-        var dsvData = d3.dsv(";").parse(data);
+        var lines = data.split(/\r?\n/);
         
-        if (!$.isArray(dsvData) || dsvData.length === 0) {
-            SplitsBrowser.throwWrongFileFormat("No data found to read");
-        } else if (dsvData[0].length === 1) {
-            SplitsBrowser.throwWrongFileFormat("Data seems not to be in the SI semicolon-separated format");
+        if (lines.length <= 1) {
+             SplitsBrowser.throwWrongFileFormat("No data found to read");
         }
+        
+        var headers = lines[0].split(";");
+        if (headers.length <= 1) {
+            SplitsBrowser.throwWrongFileFormat("Data appears not to be in the SI CSV format");
+        }
+        
+        // Discard the header row.
+        lines.shift();
         
         // Map that associates classes to all of the competitors running on
         // that age class.
@@ -202,41 +212,46 @@
         // M21E at BOC 2013.)
         var classCoursePairs = [];
         
-        dsvData.forEach(function (row) {
-            
-            MANDATORY_COLUMN_NAMES.forEach(function (columnName) {
-                if (!row.hasOwnProperty(columnName)) {
-                    SplitsBrowser.throwInvalidData("Column '" + columnName + "' missing");
-                }
-            });
+        var anyLines = false;
         
-            var forename = row["First name"];
-            var surname = row.Surname;
-            var club = row[CLUB_COLUMN_NAME];
-            var startTime = SplitsBrowser.parseTime(row.Start);
+        lines.forEach(function (line, lineIndex) {
+        
+            if (line === "") {
+                // Skip this blank line.
+                return;
+            }
             
-            var className = row[CLASS_COLUMN_NAME];
+            anyLines = true;
+        
+            var row = line.split(";");
+            
+            if (row.length < CONTROLS_OFFSET) {
+                SplitsBrowser.throwInvalidData("Too few items on line " + (lineIndex + 1) + " of the input file: expected at least " + CONTROLS_OFFSET + ", got " + row.length);
+            }
+            
+            var className = row[COLUMN_INDEXES.AGE_CLASS];
             
             var numControls;
             if (ageClasses.has(className)) {
                 numControls = ageClasses.get(className).numControls;
             } else {
-                numControls = parseInt(row["Course controls"], 10);
+                numControls = parseInt(row[COLUMN_INDEXES.CONTROL_COUNT], 10);
                 ageClasses.set(className, { numControls: numControls, competitors: [] });
             }
             
-            var courseName = row[COURSE_COLUMN_NAME];
-            if (!courseDetails.has(courseName)) {
-                var controlNums = d3.range(1, numControls + 1).map(function (controlNum) {
-                    var key = "Control" + controlNum;
-                    if (row.hasOwnProperty(key)) {
-                        return row[key];
-                    } else {
-                        SplitsBrowser.throwInvalidData("No '" + key + "' column");
-                    }
-                });
+            // Check that the row is long enough.
+            if (row.length <= CONTROLS_OFFSET + 1 + 2 * (numControls - 1)) {
+                SplitsBrowser.throwInvalidData("Line " + (lineIndex + 1) + " reports " + numControls + " controls but there aren't enough data values in the row for this many controls");
+            }
             
-                courseDetails.set(courseName, {length: parseFloat(row.Km) || null, climb: parseInt(row.m, 10) || null, controls: controlNums});
+            var courseName = row[COLUMN_INDEXES.COURSE];
+            if (!courseDetails.has(courseName)) {
+                var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[CONTROLS_OFFSET + 2 * controlIdx]; });
+                courseDetails.set(courseName, {
+                    length: parseFloat(row[COLUMN_INDEXES.DISTANCE]) || null,
+                    climb: parseInt(row[COLUMN_INDEXES.CLIMB], 10) || null,
+                    controls: controlNums
+                });
             }
             
             if (!classCoursePairs.some(function (pair) { return pair[0] === className && pair[1] === courseName; })) {
@@ -245,39 +260,49 @@
             
             var cumTimes = [0];
             var lastCumTime = 0;
-            for (var i = 1; i <= numControls; i += 1) {
-                var key = "Punch" + i;
-                if (row.hasOwnProperty(key)) {
-                    var cumTimeStr = row[key];
-                    var cumTime = SplitsBrowser.parseTime(cumTimeStr);
-                    SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, cumTime);
-                    
-                    cumTimes.push(cumTime);
-                    if (cumTime !== null) {
-                        lastCumTime = cumTime;
-                    }
-                } else {
-                    SplitsBrowser.throwInvalidData("No '" + key + "' column");
+            
+            for (var controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
+                var cumTimeStr = row[CONTROLS_OFFSET + 1 + 2 * controlIdx];
+                var cumTime = SplitsBrowser.parseTime(cumTimeStr);
+                SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, cumTime);
+                
+                cumTimes.push(cumTime);
+                if (cumTime !== null) {
+                    lastCumTime = cumTime;
                 }
             }
             
-            var totalTime = SplitsBrowser.parseTime(row.Time);
+            var totalTime = SplitsBrowser.parseTime(row[COLUMN_INDEXES.TIME]);
             SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, totalTime);
             
-            // Some surnames have an 'mp' suffix or an 'n/c' suffix added to
-            // them.  Remove either of them if they exist.
-            surname = surname.replace(/ mp$| n\/c$/, "");
-            
             cumTimes.push(totalTime);
+        
+            var forename = row[COLUMN_INDEXES.FORENAME];
+            var surname = row[COLUMN_INDEXES.SURNAME];
+            var club = row[COLUMN_INDEXES.CLUB];
+            var startTime = SplitsBrowser.parseTime(row[COLUMN_INDEXES.START]);
+            
+            // Some surnames have their placing appended to them.  If so,
+            // remove it.
+            var placing = row[COLUMN_INDEXES.PLACING];
+            if (isNaN(parseInt(placing, 10)) && surname.substring(surname.length - placing.length) === placing) {
+                surname = $.trim(surname.substring(0, surname.length - placing.length));
+            }
             
             var order = ageClasses.get(className).competitors.length + 1;
             var competitor = SplitsBrowser.Model.Competitor.fromCumTimes(order, forename, surname, club, startTime, cumTimes);
-            if (row[PLACING_COLUMN_NAME] === "n/c") {
+            if (isNaN(parseInt(row[COLUMN_INDEXES.PLACING], 10)) && competitor.completed()) {
+                // Competitor has completed the course but has no placing.
+                // Assume that they are non-competitive.
                 competitor.setNonCompetitive();
             }
 
             ageClasses.get(className).competitors.push(competitor);
         });
+        
+        if (!anyLines) {
+            SplitsBrowser.throwWrongFileFormat("No rows of data were found");
+        }
         
         var classNames = ageClasses.keys();
         classNames.sort();

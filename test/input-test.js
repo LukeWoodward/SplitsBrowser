@@ -24,6 +24,8 @@
     var Event = SplitsBrowser.Model.Event;
     var parseEventData = SplitsBrowser.Input.parseEventData;
     
+    var SI_HEADER = "Stno;SI card;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
+    
     module("Input");
     
     QUnit.test("Can read in 'EMIT' CSV data", function (assert) {
@@ -38,8 +40,7 @@
     });
     
     QUnit.test("Can read in 'SI' semicolon-delimited data", function (assert) { 
-        var siData = "First name;Surname;City;Start;Time;Short;Pl;Course;Km;m;Course controls;Control1;Punch1;Control2;Punch2;Control3;Punch3;\r\n" + 
-                     "John;Smith;ABC;10:00:00;06:33;Test class;1;Test course;4.1;140;3;208;01:50;227;03:38;212;06:02;\r\n";
+        var siData = SI_HEADER + "0;1;2;Smith;John;5;6;7;8;11:27:45;10;06:33;12;13;14;ABC;16;17;Test class;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;Test course;4.1;140;3;1;44;45;208;01:50;227;03:38;212;06:02";
         var eventData = parseEventData(siData);
         assert.ok(eventData !== null, "There should be an array of classes returned");
         assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
