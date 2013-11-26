@@ -454,4 +454,35 @@
         runInvalidDataTest(assert, HEADER + generateRow(comp1, getControls1()), "Line with too few controls");
     });
     
+    QUnit.test("Can parse a string that contains two competitors in the same class and ignore the one competitor that mispunches all controls", function (assert) {
+        var comp1 = getCompetitor1();
+        var comp2 = getCompetitor2();
+        var controls2 = getControls2();
+        for (var i = 0; i < 3; i += 1) {
+            controls2[i].time = "-----";
+        }
+        
+        var eventData = parseEventData(HEADER + generateRow(comp1, getControls1()) + generateRow(comp2, controls2));
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.ok(eventData.classes[0] instanceof AgeClass, "Array element should be an AgeClass object");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitors should have been read");
+    });
+    
+    QUnit.test("Can parse a string that contains two competitors on different classes and courses and ignoring the one competitor that mispunches all controls and the course and class they belong to", function (assert) {
+        var comp1 = getCompetitor1();
+        comp1.ageClass = "Test class 1";
+        comp1.course = "Test course 1";
+        var comp2 = getCompetitor2();
+        comp2.ageClass = "Test class 2";
+        comp2.course = "Test course 2";
+        var controls2 = getControls2();
+        for (var i = 0; i < 3; i += 1) {
+            controls2[i].time = "-----";
+        }
+        
+        var eventData = parseEventData(HEADER + generateRow(comp1, getControls1()) + generateRow(comp2, controls2));
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.strictEqual(eventData.courses.length, 1, "There should be one course");
+    });
+    
 })();

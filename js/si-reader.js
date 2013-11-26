@@ -225,6 +225,7 @@
         
             var row = line.split(";");
             
+            // Check the row is long enough to have basic data.
             if (row.length < CONTROLS_OFFSET) {
                 SplitsBrowser.throwInvalidData("Too few items on line " + (lineIndex + 1) + " of the input file: expected at least " + CONTROLS_OFFSET + ", got " + row.length);
             }
@@ -236,12 +237,37 @@
                 numControls = ageClasses.get(className).numControls;
             } else {
                 numControls = parseInt(row[COLUMN_INDEXES.CONTROL_COUNT], 10);
-                ageClasses.set(className, { numControls: numControls, competitors: [] });
             }
             
-            // Check that the row is long enough.
+            // Check that the row is long enough, given that we now know how
+            // many controls it should contain
             if (row.length <= CONTROLS_OFFSET + 1 + 2 * (numControls - 1)) {
                 SplitsBrowser.throwInvalidData("Line " + (lineIndex + 1) + " reports " + numControls + " controls but there aren't enough data values in the row for this many controls");
+            }
+            
+            var cumTimes = [0];
+            var lastCumTime = 0;
+            var anyTimes = false;
+            
+            for (var controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
+                var cumTimeStr = row[CONTROLS_OFFSET + 1 + 2 * controlIdx];
+                var cumTime = SplitsBrowser.parseTime(cumTimeStr);
+                SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, cumTime);
+                
+                cumTimes.push(cumTime);
+                if (cumTime !== null) {
+                    lastCumTime = cumTime;
+                    anyTimes = true;
+                }
+            }
+            
+            if (!anyTimes) {
+                // No splits at all. Ignore this competitor.
+                return;
+            }
+            
+            if (!ageClasses.has(className)) {
+                ageClasses.set(className, { numControls: numControls, competitors: [] });
             }
             
             var courseName = row[COLUMN_INDEXES.COURSE];
@@ -256,20 +282,6 @@
             
             if (!classCoursePairs.some(function (pair) { return pair[0] === className && pair[1] === courseName; })) {
                 classCoursePairs.push([className, courseName]);
-            }
-            
-            var cumTimes = [0];
-            var lastCumTime = 0;
-            
-            for (var controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
-                var cumTimeStr = row[CONTROLS_OFFSET + 1 + 2 * controlIdx];
-                var cumTime = SplitsBrowser.parseTime(cumTimeStr);
-                SplitsBrowser.Input.SI.verifyCumulativeTimesInOrder(lastCumTime, cumTime);
-                
-                cumTimes.push(cumTime);
-                if (cumTime !== null) {
-                    lastCumTime = cumTime;
-                }
             }
             
             var totalTime = SplitsBrowser.parseTime(row[COLUMN_INDEXES.TIME]);
