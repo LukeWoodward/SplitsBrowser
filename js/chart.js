@@ -828,7 +828,7 @@
                    .attr("class", function (compIndex) { return "startLabel competitor" + compIndex; })
                    .on("mouseenter", function (compIndex) { outerThis.highlight(compIndex); })
                    .on("mouseleave", function () { outerThis.unhighlight(); })
-                   .text(function (_compIndex, selCompIndex) { return SplitsBrowser.formatTime(startColumn.ys[selCompIndex] * 60) + " " + chartData.competitorNames[selCompIndex]; });
+                   .text(function (_compIndex, selCompIndex) { return SplitsBrowser.formatTime(Math.round(startColumn.ys[selCompIndex] * 60)) + " " + chartData.competitorNames[selCompIndex]; });
         
         startLabels.exit().remove();
     };
