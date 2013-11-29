@@ -975,7 +975,7 @@
         
         var panelWidth = $(this.warningPanel.node()).width();
         var panelHeight = $(this.warningPanel.node()).height();
-        this.warningPanel.style("left", ((this.overallWidth - panelWidth) / 2) + "px")
+        this.warningPanel.style("left", (($(this.parent).width() - panelWidth) / 2) + "px")
                          .style("top", ((this.overallHeight - panelHeight) / 2) + "px");
     };
     
