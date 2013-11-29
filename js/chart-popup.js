@@ -82,16 +82,18 @@
     /**
     * Populates the chart popup with data.
     *
-    * 'competitorData' should be an object that contains a 'title' and a 'data'
-    * property.  The 'title' is a string used as the popup's title, and the
-    * 'data' property is an array where each elementshould be an object that
-    * contains the following properties:
+    * 'competitorData' should be an object that contains a 'title', a 'data'
+    * and a 'placeholder' property.  The 'title' is a string used as the
+    * popup's title.  The 'data' property is an array where each element should
+    * be an object that contains the following properties:
     * * time - A time associated with a competitor.  This may be a split time,
     *   cumulative time or the time of day.
     * * className (Optional) - Name of the competitor's class.
     * * name - The name of the competitor.
     * * highlight - A boolean value which indicates whether to highlight the
     *   competitor.
+    * The 'placeholder' property is a placeholder string to show if there is no
+    * 'data' array is empty.  It can be null to show no such message.
     * @param {Object} competitorData - Array of data to show.
     * @param {boolean} includeClassNames - Whether to include class names.
     */
@@ -113,6 +115,12 @@
         rows.append("td").text(function (row) { return row.name; });
         
         rows.exit().remove();
+        
+        if (competitorData.data.length === 0 && competitorData.placeholder !== null) {
+            this.popupDivTable.append("tr")
+                              .append("td")
+                              .text(competitorData.placeholder);
+        }
     };
     
     /**

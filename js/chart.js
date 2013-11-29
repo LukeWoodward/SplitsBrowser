@@ -190,7 +190,7 @@
             return {time: comp.split, name: comp.name, highlight: false};
         });
         
-        return {title: "Selected classes", data: data};
+        return {title: "Selected classes", data: data, placeholder: "No competitors completed this course"};
     };
     
     /**
@@ -210,7 +210,7 @@
         var data = this.eventData.getFastestSplitsForLeg(startCode, endCode)
                                  .map(function (row) { return { name: row.name, className: row.className, time: row.split, highlight: (row.className === primaryClass)}; });
         
-        return {title: title, data: data};
+        return {title: title, data: data, placeholder: null};
     };
     
     /**
@@ -245,7 +245,7 @@
             title += "Control " + controlCode;
         }
         
-        return {title: title, data: competitorData};
+        return {title: title, data: competitorData, placeholder: "No competitors."};
     };
 
     /**
