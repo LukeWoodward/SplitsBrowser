@@ -386,6 +386,21 @@
     };
     
     SplitsBrowser.Viewer = Viewer;
+
+    /**
+    * Shows a message that appears if SplitsBrowser is unable to load event
+    * data.
+    * @param {String} message - The text of the message to show.
+    */
+    function showLoadFailureMessage(message) {
+        d3.select("body")
+          .append("h1")
+          .text("SplitsBrowser \u2013 Error");
+          
+       d3.select("body")
+         .append("p")
+         .text(message);
+    }
     
     /**
     * Handles an asynchronous callback that fetched event data, by parsing the
@@ -395,9 +410,20 @@
     */
     function readEventData(data, status) {
         if (status === "success") {
-            var eventData = SplitsBrowser.Input.parseEventData(data);
+            var eventData;
+            try {
+                eventData = SplitsBrowser.Input.parseEventData(data);
+            } catch (e) {
+                if (e.name === "InvalidData") {
+                    showLoadFailureMessage("Sorry, it wasn't possible to read in the results data, as the data appears to be invalid: '" + e.message + "'.");
+                    return;
+                } else {
+                    throw e;
+                }
+            }
+            
             if (eventData === null) {
-                alert("Unable to read in event data file");
+                showLoadFailureMessage("Sorry, it wasn't possible to read in the results data.  The data doesn't appear to be in any recognised format.");
             } else {
                 var viewer = new Viewer();
                 viewer.buildUi();
@@ -405,8 +431,18 @@
                 viewer.selectClasses([0]);
             }
         } else {
-            alert("Unable to read event data.  Status: " + status);
+            showLoadFailureMessage("Sorry, it wasn't possible to read in the results data.  Status: " + status);
         }
+    }
+    
+    /**
+    * Handles the failure to read an event.
+    * @param {jQuery.jqXHR} jqXHR - jQuery jqHXR object.
+    * @param {String} textStatus - The text status of the request.
+    * @param {String} errorThrown - The error message returned from the server.
+    */
+    function readEventDataError(jqXHR, textStatus, errorThrown) {
+        showLoadFailureMessage("Sorry, it wasn't possible to load the results data.  The message returned from the server was '" + errorThrown + "'.");
     }
 
     /**
@@ -418,7 +454,8 @@
             url: eventUrl,
             data: "",
             success: readEventData,
-            dataType: "text"
+            dataType: "text",
+            error: readEventDataError
         });
     };    
 })();
