@@ -62,6 +62,15 @@
         "#888888", "#FF99FF", "#55BB33"
     ];
 
+    // 'Imports'.
+    var START = SplitsBrowser.Model.Course.START;
+    var FINISH = SplitsBrowser.Model.Course.FINISH;
+    
+    var isNotNull = SplitsBrowser.isNotNull;
+    var formatTime = SplitsBrowser.formatTime;
+    
+    var ChartPopup = SplitsBrowser.Controls.ChartPopup;
+    
     /**
     * Format a time and a rank as a string, with the split time in mm:ss or h:mm:ss
     * as appropriate.
@@ -70,7 +79,7 @@
     * @returns Time and rank formatted as a string.
     */
     function formatTimeAndRank(time, rank) {
-        return SPACER + SplitsBrowser.formatTime(time) + " (" + ((rank === null) ? "-" : rank) + ")";
+        return SPACER + formatTime(time) + " (" + ((rank === null) ? "-" : rank) + ")";
     }
     
     /**
@@ -89,7 +98,7 @@
     * @constructor
     * @param {HTMLElement} parent - The parent object to create the element within.
     */
-    SplitsBrowser.Controls.Chart = function (parent) {
+    var Chart = function (parent) {
         this.parent = parent;
 
         this.xScale = null;
@@ -145,14 +154,14 @@
                                                       .attr("id", TEXT_SIZE_ELEMENT_ID);
         
         var handlers = {"mousemove": mousemoveHandler, "mousedown": mousedownHandler, "mouseup": mouseupHandler};
-        this.popup = new SplitsBrowser.Controls.ChartPopup(parent, handlers);
+        this.popup = new ChartPopup(parent, handlers);
     };
     
     /**
     * Sets the left margin of the chart.
     * @param {Number} leftMargin - The left margin of the chart.
     */
-    SplitsBrowser.Controls.Chart.prototype.setLeftMargin = function (leftMargin) {
+    Chart.prototype.setLeftMargin = function (leftMargin) {
         this.currentLeftMargin = leftMargin;
         this.svgGroup.attr("transform", "translate(" + this.currentLeftMargin + "," + MARGIN.top + ")");
     };
@@ -162,7 +171,7 @@
     * press or a mouse movement.
     * @param {jQuery.event} event - jQuery mouse-down or mouse-move event.
     */
-    SplitsBrowser.Controls.Chart.prototype.getPopupLocation = function (event) {
+    Chart.prototype.getPopupLocation = function (event) {
         return {
             x: event.pageX + CHART_POPUP_X_OFFSET,
             y: Math.max(event.pageY - this.popup.height() / 2, 0)
@@ -173,7 +182,7 @@
     * Returns the fastest splits to the current control.
     * @return {Array} Array of fastest-split data.
     */
-    SplitsBrowser.Controls.Chart.prototype.getFastestSplitsPopupData = function () {
+    Chart.prototype.getFastestSplitsPopupData = function () {
         // There's no split to the start, so if the current control is the
         // start, show the statistics for control 1 instead.
         var data = this.ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, this.currentControlIndex);
@@ -190,12 +199,12 @@
     * @return {Object} Object that contains the title for the popup and the
     *     array of data to show within it.
     */
-    SplitsBrowser.Controls.Chart.prototype.getFastestSplitsForCurrentLegPopupData = function () {
+    Chart.prototype.getFastestSplitsForCurrentLegPopupData = function () {
         var course = this.ageClassSet.getCourse();
         var startCode = course.getControlCode(this.currentControlIndex - 1);
         var endCode = course.getControlCode(this.currentControlIndex);
         
-        var title = "Fastest leg-time " + ((startCode === SplitsBrowser.Model.Course.START) ? "Start" : startCode) + " to " + ((endCode === SplitsBrowser.Model.Course.FINISH) ? "Finish" : endCode);
+        var title = "Fastest leg-time " + ((startCode === START) ? "Start" : startCode) + " to " + ((endCode === FINISH) ? "Finish" : endCode);
         
         var primaryClass = this.ageClassSet.getPrimaryClassName();
         var data = this.eventData.getFastestSplitsForLeg(startCode, endCode)
@@ -208,7 +217,7 @@
     * Stores the current time the mouse is at, on the race graph.
     * @param {jQuery.event} event - The mouse-down or mouse-move event.
     */
-    SplitsBrowser.Controls.Chart.prototype.setCurrentChartTime = function (event) {
+    Chart.prototype.setCurrentChartTime = function (event) {
         var yOffset = event.pageY - $(this.svg.node()).offset().top - MARGIN.top;
         this.currentChartTime = Math.round(this.yScale.invert(yOffset) * 60) + this.referenceCumTimes[this.currentControlIndex];
     };
@@ -218,7 +227,7 @@
     * current time.
     * @return {Array} Array of competitor data.
     */
-    SplitsBrowser.Controls.Chart.prototype.getCompetitorsVisitingCurrentControlPopupData = function () {
+    Chart.prototype.getCompetitorsVisitingCurrentControlPopupData = function () {
         var controlCode = this.ageClassSet.getCourse().getControlCode(this.currentControlIndex);
         var intervalStart = this.currentChartTime - RACE_GRAPH_COMPETITOR_WINDOW / 2;
         var intervalEnd = this.currentChartTime + RACE_GRAPH_COMPETITOR_WINDOW / 2;
@@ -227,10 +236,10 @@
         var primaryClass = this.ageClassSet.getPrimaryClassName();
         var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}; });
         
-        var title = SplitsBrowser.formatTime(intervalStart) + " - " + SplitsBrowser.formatTime(intervalEnd) + ": ";
-        if (controlCode === SplitsBrowser.Model.Course.START) {
+        var title = formatTime(intervalStart) + " - " + formatTime(intervalEnd) + ": ";
+        if (controlCode === START) {
             title += "Start";
-        } else if (controlCode === SplitsBrowser.Model.Course.FINISH) {
+        } else if (controlCode === FINISH) {
             title += "Finish";
         } else {
             title += "Control " + controlCode;
@@ -243,7 +252,7 @@
     * Handle the mouse entering the chart.
     * @param {jQuery.event} event - jQuery event object.
     */
-    SplitsBrowser.Controls.Chart.prototype.onMouseEnter = function (event) {
+    Chart.prototype.onMouseEnter = function (event) {
         if (this.warningPanel === null) {
             this.isMouseIn = true;
             this.updateControlLineLocation(event);
@@ -254,7 +263,7 @@
     * Handle a mouse movement.
     * @param {jQuery.event} event - jQuery event object.
     */
-    SplitsBrowser.Controls.Chart.prototype.onMouseMove = function (event) {
+    Chart.prototype.onMouseMove = function (event) {
         if (this.isMouseIn && this.xScale !== null && this.warningPanel === null) {
             this.updateControlLineLocation(event);
         }
@@ -263,7 +272,7 @@
     /**
     * Handle the mouse leaving the chart.
     */
-    SplitsBrowser.Controls.Chart.prototype.onMouseLeave = function () {
+    Chart.prototype.onMouseLeave = function () {
         if (this.warningPanel === null) {
             var outerThis = this;
             // Check that the mouse hasn't entered the popup.
@@ -286,7 +295,7 @@
     * Handles a mouse button being pressed over the chart.
     * @param {jQuery.Event} event - jQuery event object.
     */
-    SplitsBrowser.Controls.Chart.prototype.onMouseDown = function (event) {
+    Chart.prototype.onMouseDown = function (event) {
         if (this.warningPanel === null) {
             var outerThis = this;
             // Use a timeout to open the dialog as we require other events
@@ -299,7 +308,7 @@
     /**
     * Handles a mouse button being pressed over the chart.
     */
-    SplitsBrowser.Controls.Chart.prototype.onMouseUp = function (event) {
+    Chart.prototype.onMouseUp = function (event) {
         if (this.warningPanel === null) {
             this.popup.hide();
             event.preventDefault();
@@ -311,7 +320,7 @@
     * @param {jQuery event} event - The jQuery onMouseDown event that triggered
     *     the popup.
     */ 
-    SplitsBrowser.Controls.Chart.prototype.showPopupDialog = function (event) {
+    Chart.prototype.showPopupDialog = function (event) {
         if (this.isMouseIn && this.currentControlIndex !== null) {
             var showPopup = false;
             var outerThis = this;
@@ -344,7 +353,7 @@
     * @param {Number} controlIndex - The index of the control at which to draw the
     *                                control line.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawControlLine = function(controlIndex) {
+    Chart.prototype.drawControlLine = function(controlIndex) {
         this.currentControlIndex = controlIndex;
         this.updateCompetitorStatistics();    
         var xPosn = this.xScale(this.referenceCumTimes[controlIndex]);
@@ -361,7 +370,7 @@
     * Updates the location of the control line from the given mouse event.
     * @param {jQuery.event} event - jQuery mousedown or mousemove event.
     */
-    SplitsBrowser.Controls.Chart.prototype.updateControlLineLocation = function (event) {
+    Chart.prototype.updateControlLineLocation = function (event) {
 
         var svgNodeAsJQuery = $(this.svg.node());
         var offset = svgNodeAsJQuery.offset();
@@ -418,7 +427,7 @@
     * Remove any previously-drawn control line.  If no such line existed, nothing
     * happens.
     */
-    SplitsBrowser.Controls.Chart.prototype.removeControlLine = function() {
+    Chart.prototype.removeControlLine = function() {
         this.currentControlIndex = null;
         this.updateCompetitorStatistics();
         if (this.controlLine !== null) {
@@ -435,7 +444,7 @@
     * @return {Array} Array of times in seconds that the given competitors are
     *     behind the fastest time.
     */
-    SplitsBrowser.Controls.Chart.prototype.getTimesBehindFastest = function (controlIndex, indexes) {
+    Chart.prototype.getTimesBehindFastest = function (controlIndex, indexes) {
         var selectedCompetitors = indexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
         var fastestSplit = this.fastestCumTimes[controlIndex] - this.fastestCumTimes[controlIndex - 1];
         var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - fastestSplit; });
@@ -445,7 +454,7 @@
     /**
     * Updates the statistics text shown after the competitors.
     */
-    SplitsBrowser.Controls.Chart.prototype.updateCompetitorStatistics = function() {
+    Chart.prototype.updateCompetitorStatistics = function() {
         var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
         var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, comp.getSuffix()); });
         
@@ -467,7 +476,7 @@
             if (this.visibleStatistics[2]) {
                 var timesBehind = this.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                 labelTexts = d3.zip(labelTexts, timesBehind)
-                               .map(function(pair) { return pair[0] + SPACER + SplitsBrowser.formatTime(pair[1]); });
+                               .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
             }
         }
         
@@ -488,7 +497,7 @@
     *
     * @returns {function} Tick-formatting function.
     */
-    SplitsBrowser.Controls.Chart.prototype.getTickFormatter = function () {
+    Chart.prototype.getTickFormatter = function () {
         var outerThis = this;
         return function (value, idx) {
             return (idx === 0) ? "S" : ((idx === outerThis.numControls + 1) ? "F" : idx.toString());
@@ -500,7 +509,7 @@
     * @param {string} text - The piece of text to measure the width of.
     * @returns {Number} The width of the piece of text, in pixels. 
     */
-    SplitsBrowser.Controls.Chart.prototype.getTextWidth = function (text) {
+    Chart.prototype.getTextWidth = function (text) {
         return this.textSizeElement.text(text).node().getBBox().width;
     };
 
@@ -510,7 +519,7 @@
     * @param {string} text - The piece of text to measure the height of.
     * @returns {Number} The height of the piece of text, in pixels.
     */
-    SplitsBrowser.Controls.Chart.prototype.getTextHeight = function (text) {
+    Chart.prototype.getTextHeight = function (text) {
         return this.textSizeElement.text(text).node().getBBox().height;
     };
 
@@ -521,7 +530,7 @@
     * list given.  This method returns zero if the list is empty.
     * @returns {Number} Maximum width of text, in pixels.
     */
-    SplitsBrowser.Controls.Chart.prototype.getMaxGraphEndTextWidth = function () {
+    Chart.prototype.getMaxGraphEndTextWidth = function () {
         if (this.selectedIndexes.length === 0) {
             // No competitors selected.  Avoid problems caused by trying to
             // find the maximum of an empty array.
@@ -544,7 +553,7 @@
                                      data.
     * @returns {Number} Maximum width of split-time and rank text, in pixels.
     */
-    SplitsBrowser.Controls.Chart.prototype.getMaxTimeAndRankTextWidth = function(timeFuncName, rankFuncName) {
+    Chart.prototype.getMaxTimeAndRankTextWidth = function(timeFuncName, rankFuncName) {
         var maxTime = 0;
         var maxRank = 0;
         
@@ -552,10 +561,10 @@
         
         d3.range(1, this.numControls + 2).forEach(function (controlIndex) {
             var times = selectedCompetitors.map(function (comp) { return comp[timeFuncName](controlIndex); });
-            maxTime = Math.max(maxTime, d3.max(times.filter(SplitsBrowser.isNotNull)));
+            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
             
             var ranks = selectedCompetitors.map(function (comp) { return comp[rankFuncName](controlIndex); });
-            maxRank = Math.max(maxRank, d3.max(ranks.filter(SplitsBrowser.isNotNull)));
+            maxRank = Math.max(maxRank, d3.max(ranks.filter(isNotNull)));
         });
         
         var text = formatTimeAndRank(maxTime, maxRank);
@@ -567,7 +576,7 @@
     * of each competitor 
     * @returns {Number} Maximum width of split-time and rank text, in pixels.
     */
-    SplitsBrowser.Controls.Chart.prototype.getMaxSplitTimeAndRankTextWidth = function() {
+    Chart.prototype.getMaxSplitTimeAndRankTextWidth = function() {
         return this.getMaxTimeAndRankTextWidth("getSplitTimeTo", "getSplitRankTo");
     };
 
@@ -577,7 +586,7 @@
     * @returns {Number} Maximum width of cumulative time and cumulative-time rank text, in
     *                   pixels.
     */
-    SplitsBrowser.Controls.Chart.prototype.getMaxCumulativeTimeAndRankTextWidth = function() {
+    Chart.prototype.getMaxCumulativeTimeAndRankTextWidth = function() {
         return this.getMaxTimeAndRankTextWidth("getCumulativeTimeTo", "getCumulativeRankTo");
     };
 
@@ -586,22 +595,22 @@
     * each competitor 
     * @returns {Number} Maximum width of behind-fastest time rank text, in pixels.
     */
-    SplitsBrowser.Controls.Chart.prototype.getMaxTimeBehindFastestWidth = function() {
+    Chart.prototype.getMaxTimeBehindFastestWidth = function() {
         var maxTime = 0;
         
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
             var times = this.getTimesBehindFastest(controlIndex, this.selectedIndexes);
-            maxTime = Math.max(maxTime, d3.max(times.filter(SplitsBrowser.isNotNull)));
+            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
         }
         
-        return this.getTextWidth(SPACER + SplitsBrowser.formatTime(maxTime));
+        return this.getTextWidth(SPACER + formatTime(maxTime));
     };
 
     /**
     * Determines the maximum width of the statistics text at the end of the competitor.
     * @returns {Number} Maximum width of the statistics text, in pixels.
     */
-    SplitsBrowser.Controls.Chart.prototype.determineMaxStatisticTextWidth = function() {
+    Chart.prototype.determineMaxStatisticTextWidth = function() {
         var maxWidth = 0;
         if (this.visibleStatistics[0]) {
             maxWidth += this.getMaxCumulativeTimeAndRankTextWidth();
@@ -622,7 +631,7 @@
     * @param {object} chartData - Object containing the chart data.
     * @return {Number} Maximum width of a start time label.
     */
-    SplitsBrowser.Controls.Chart.prototype.determineMaxStartTimeLabelWidth = function (chartData) {
+    Chart.prototype.determineMaxStartTimeLabelWidth = function (chartData) {
         var maxWidth;
         if (chartData.competitorNames.length > 0) {
             maxWidth = d3.max(chartData.competitorNames.map(function (name) { return this.getTextWidth("00:00:00 " + name); }, this));
@@ -637,7 +646,7 @@
     * Creates the X and Y scales necessary for the chart and its axes.
     * @param {object} chartData - Chart data object.
     */
-    SplitsBrowser.Controls.Chart.prototype.createScales = function (chartData) {
+    Chart.prototype.createScales = function (chartData) {
         this.xScale = d3.scale.linear().domain(chartData.xExtent).range([0, this.contentWidth]);
         this.yScale = d3.scale.linear().domain(chartData.yExtent).range([0, this.contentHeight]);
         this.xScaleMinutes = d3.scale.linear().domain([chartData.xExtent[0] / 60, chartData.xExtent[1] / 60]).range([0, this.contentWidth]);
@@ -647,7 +656,7 @@
     * Draw the background rectangles that indicate sections of the course
     * between controls.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawBackgroundRectangles = function () {
+    Chart.prototype.drawBackgroundRectangles = function () {
         var rects = this.svgGroup.selectAll("rect")
                                  .data(d3.range(this.numControls + 1));
 
@@ -676,21 +685,21 @@
     * 
     * @param {object} chartData - The chart data to read start times from.
     */
-    SplitsBrowser.Controls.Chart.prototype.determineYAxisTickFormatter = function (chartData) {
+    Chart.prototype.determineYAxisTickFormatter = function (chartData) {
         if (this.isRaceGraph) {
             // Assume column 0 of the data is the start times.
             // However, beware that there might not be any data.
             var startTimes = (chartData.dataColumns.length === 0) ? [] : chartData.dataColumns[0].ys;
             if (startTimes.length === 0) {
                 // No start times - draw all tick marks.
-                return function (time) { return SplitsBrowser.formatTime(time * 60); };
+                return function (time) { return formatTime(time * 60); };
             } else {
                 // Some start times are to be drawn - only draw tick marks if
                 // they are far enough away from competitors.
                 var yScale = this.yScale;
                 return function (time) {
                     var nearestOffset = d3.min(startTimes.map(function (startTime) { return Math.abs(yScale(startTime) - yScale(time)); }));
-                    return (nearestOffset >= MIN_COMPETITOR_TICK_MARK_DISTANCE) ? SplitsBrowser.formatTime(Math.round(time * 60)) : "";
+                    return (nearestOffset >= MIN_COMPETITOR_TICK_MARK_DISTANCE) ? formatTime(Math.round(time * 60)) : "";
                 };
            }
         } else {
@@ -704,7 +713,7 @@
     * @param {String} yAxisLabel - The label to use for the Y-axis.
     * @param {object} chartData - The chart data to use.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawAxes = function (yAxisLabel, chartData) {
+    Chart.prototype.drawAxes = function (yAxisLabel, chartData) {
     
         var tickFormatter = this.determineYAxisTickFormatter(chartData);
         
@@ -755,7 +764,7 @@
     * Draw the lines on the chart.
     * @param {Array} chartData - Array of chart data.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawChartLines = function (chartData) {
+    Chart.prototype.drawChartLines = function (chartData) {
         var outerThis = this;
         var lineFunctionGenerator = function (selCompIdx) {
             if (chartData.dataColumns.every(function (col) { return col.ys[selCompIdx] === null; })) {
@@ -794,7 +803,7 @@
     * Highlights the competitor with the given index.
     * @param {Number} competitorIdx - The index of the competitor to highlight.
     */
-    SplitsBrowser.Controls.Chart.prototype.highlight = function (competitorIdx) {
+    Chart.prototype.highlight = function (competitorIdx) {
         this.svg.selectAll("path.graphLine.competitor" + competitorIdx).classed("selected", true);
         this.svg.selectAll("line.competitorLegendLine.competitor" + competitorIdx).classed("selected", true);
         this.svg.selectAll("text.competitorLabel.competitor" + competitorIdx).classed("selected", true);
@@ -804,7 +813,7 @@
     /**
     * Removes any competitor-specific higlighting.
     */
-    SplitsBrowser.Controls.Chart.prototype.unhighlight = function () {
+    Chart.prototype.unhighlight = function () {
         this.svg.selectAll("path.graphLine.selected").classed("selected", false);
         this.svg.selectAll("line.competitorLegendLine.selected").classed("selected", false);
         this.svg.selectAll("text.competitorLabel.selected").classed("selected", false);
@@ -815,7 +824,7 @@
     * Draws the start-time labels for the currently-selected competitors.
     * @param {object} chartData - The chart data that contains the start offsets.
     */ 
-    SplitsBrowser.Controls.Chart.prototype.drawCompetitorStartTimeLabels = function (chartData) {
+    Chart.prototype.drawCompetitorStartTimeLabels = function (chartData) {
         var startColumn = chartData.dataColumns[0];
         var outerThis = this;
         
@@ -828,7 +837,7 @@
                    .attr("class", function (compIndex) { return "startLabel competitor" + compIndex; })
                    .on("mouseenter", function (compIndex) { outerThis.highlight(compIndex); })
                    .on("mouseleave", function () { outerThis.unhighlight(); })
-                   .text(function (_compIndex, selCompIndex) { return SplitsBrowser.formatTime(Math.round(startColumn.ys[selCompIndex] * 60)) + " " + chartData.competitorNames[selCompIndex]; });
+                   .text(function (_compIndex, selCompIndex) { return formatTime(Math.round(startColumn.ys[selCompIndex] * 60)) + " " + chartData.competitorNames[selCompIndex]; });
         
         startLabels.exit().remove();
     };
@@ -836,7 +845,7 @@
     /**
     * Removes all of the competitor start-time labels from the chart.
     */ 
-    SplitsBrowser.Controls.Chart.prototype.removeCompetitorStartTimeLabels = function () {
+    Chart.prototype.removeCompetitorStartTimeLabels = function () {
         this.svgGroup.selectAll("text.startLabel").remove();
     };
 
@@ -844,7 +853,7 @@
     * Draw legend labels to the right of the chart.
     * @param {object} chartData - The chart data that contains the final time offsets.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawCompetitorLegendLabels = function (chartData) {
+    Chart.prototype.drawCompetitorLegendLabels = function (chartData) {
         
         if (chartData.dataColumns.length === 0) {
             this.currentCompetitorData = [];
@@ -927,7 +936,7 @@
     * If you find part of the chart is missing sometimes, chances are you've
     * omitted a necessary call to this method.
     */
-    SplitsBrowser.Controls.Chart.prototype.adjustContentSize = function () {
+    Chart.prototype.adjustContentSize = function () {
         var maxTextWidth = this.getMaxGraphEndTextWidth();
         this.setLeftMargin(this.maxStartTimeLabelWidth + MARGIN.left);
         this.contentWidth = Math.max(this.overallWidth - this.currentLeftMargin - MARGIN.right - maxTextWidth - (LEGEND_LINE_WIDTH + 2), 100);
@@ -939,7 +948,7 @@
     * @param {Number} overallWidth - Overall width
     * @param {Number} overallHeight - Overall height
     */
-    SplitsBrowser.Controls.Chart.prototype.setSize = function (overallWidth, overallHeight) {
+    Chart.prototype.setSize = function (overallWidth, overallHeight) {
         this.overallWidth = overallWidth;
         this.overallHeight = overallHeight;
         $(this.svg.node()).width(overallWidth).height(overallHeight);
@@ -949,14 +958,14 @@
     /**
     * Clears the graph by removing all controls from it.
     */
-    SplitsBrowser.Controls.Chart.prototype.clearGraph = function () {
+    Chart.prototype.clearGraph = function () {
         this.svgGroup.selectAll("*").remove();
     };
     
     /**
     * Removes the warning panel, if it is still shown.
     */
-    SplitsBrowser.Controls.Chart.prototype.clearWarningPanel = function () {
+    Chart.prototype.clearWarningPanel = function () {
         if (this.warningPanel !== null) {
             this.warningPanel.remove();
             this.warningPanel = null;
@@ -967,7 +976,7 @@
     * Shows a warning panel over the chart, with the given message.
     * @param message The message to show.
     */
-    SplitsBrowser.Controls.Chart.prototype.showWarningPanel = function (message) {
+    Chart.prototype.showWarningPanel = function (message) {
         this.clearWarningPanel();
         this.warningPanel = d3.select(this.parent).append("div")
                                                   .classed("warningPanel", true);
@@ -997,7 +1006,7 @@
     *                                    certain statistics are visible.
     * @param {Object} chartType - The type of chart being drawn.
     */
-    SplitsBrowser.Controls.Chart.prototype.drawChart = function (data, selectedIndexes, visibleStatistics, chartType) {
+    Chart.prototype.drawChart = function (data, selectedIndexes, visibleStatistics, chartType) {
         var chartData = data.chartData;
         this.numControls = chartData.numControls;
         this.numLines = chartData.competitorNames.length;
@@ -1031,7 +1040,7 @@
     * Clears the chart and shows a warning message instead.
     * @param {String} message - The text of the warning message to show.
     */
-    SplitsBrowser.Controls.Chart.prototype.clearAndShowWarning = function (message) {
+    Chart.prototype.clearAndShowWarning = function (message) {
         this.numControls = 0;
         this.numLines = 0;
         
@@ -1052,4 +1061,6 @@
         this.drawAxes("", dummyChartData);
         this.showWarningPanel(message);
     };
+    
+    SplitsBrowser.Controls.Chart = Chart;
 })();

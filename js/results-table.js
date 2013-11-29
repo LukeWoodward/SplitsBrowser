@@ -21,6 +21,9 @@
 (function () {
     "use strict";
     
+    var formatTime = SplitsBrowser.formatTime;
+    var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
+    
     var NON_BREAKING_SPACE_CHAR = "\u00a0";
 
     /**
@@ -28,7 +31,7 @@
     * @constructor
     * @param {HTMLElement} parent - The parent element to add this control to.
     */
-    SplitsBrowser.Controls.ResultsTable = function (parent) {
+    var ResultsTable = function (parent) {
         this.parent = parent;
         this.ageClass = null;
         this.div = null;
@@ -40,7 +43,7 @@
     /**
     * Build the results table.
     */
-    SplitsBrowser.Controls.ResultsTable.prototype.buildTable = function () {
+    ResultsTable.prototype.buildTable = function () {
         this.div = d3.select(this.parent).append("div")
                                          .attr("id", "resultsTableContainer");
                                          
@@ -60,7 +63,7 @@
     /**
     * Populates the contents of the table with the age-class data.
     */
-    SplitsBrowser.Controls.ResultsTable.prototype.populateTable = function () {
+    ResultsTable.prototype.populateTable = function () {
         var headerText = this.ageClass.name + ", " + this.ageClass.numControls + " control" + ((this.ageClass.numControls === 1) ? "" : "s");
         var course = this.ageClass.course;
         if (course.length !== null) {
@@ -95,7 +98,7 @@
         }
         
         var competitors = this.ageClass.competitors.slice(0);
-        competitors.sort(SplitsBrowser.Model.compareCompetitors);
+        competitors.sort(compareCompetitors);
         
         var nonCompCount = 0;
         var rank = 0;
@@ -114,10 +117,10 @@
             }
             
             addCell(tableRow, competitor.name, competitor.club);
-            addCell(tableRow, (competitor.completed()) ? SplitsBrowser.formatTime(competitor.totalTime) : "mp", NON_BREAKING_SPACE_CHAR, "time");
+            addCell(tableRow, (competitor.completed()) ? formatTime(competitor.totalTime) : "mp", NON_BREAKING_SPACE_CHAR, "time");
             
             d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
-                addCell(tableRow, SplitsBrowser.formatTime(competitor.getCumulativeTimeTo(controlNum)), SplitsBrowser.formatTime(competitor.getSplitTimeTo(controlNum)), "time");
+                addCell(tableRow, formatTime(competitor.getCumulativeTimeTo(controlNum)), formatTime(competitor.getSplitTimeTo(controlNum)), "time");
             });
         }, this);
     };
@@ -126,7 +129,7 @@
     * Sets the class whose data is displayed.
     * @param {SplitsBrowser.Model.AgeClass} ageClass - The class displayed.
     */
-    SplitsBrowser.Controls.ResultsTable.prototype.setClass = function (ageClass) {
+    ResultsTable.prototype.setClass = function (ageClass) {
         this.ageClass = ageClass;
         this.populateTable();
         if (this.div.style("display") !== "none") {
@@ -137,7 +140,7 @@
     /**
     * Adjust the widths of the time table cells so that they have the same width.
     */
-    SplitsBrowser.Controls.ResultsTable.prototype.adjustTableCellWidths = function () {
+    ResultsTable.prototype.adjustTableCellWidths = function () {
         var lastCellOnFirstRow = d3.select("tbody tr td:last-child").node();
         $("tbody td.time").width($(lastCellOnFirstRow).width());
     };
@@ -145,7 +148,7 @@
     /**
     * Shows the table of results.
     */
-    SplitsBrowser.Controls.ResultsTable.prototype.show = function () {
+    ResultsTable.prototype.show = function () {
         this.div.style("display", "");
         this.adjustTableCellWidths();
     };
@@ -153,7 +156,9 @@
     /**
     * Hides the table of results.
     */
-    SplitsBrowser.Controls.ResultsTable.prototype.hide = function () {
+    ResultsTable.prototype.hide = function () {
         this.div.style("display", "none");
     };
+    
+    SplitsBrowser.Controls.ResultsTable = ResultsTable;
 })();

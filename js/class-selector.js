@@ -20,12 +20,14 @@
  */
 (function (){
     "use strict";
+    
+    var throwInvalidData = SplitsBrowser.throwInvalidData;
 
     /**
     * A control that wraps a drop-down list used to choose between classes.
     * @param {HTMLElement} parent - The parent element to add the control to.
     */
-    SplitsBrowser.Controls.ClassSelector = function(parent) {
+    var ClassSelector = function(parent) {
         this.changeHandlers = [];
         this.otherClassesEnabled = true;
         
@@ -82,14 +84,14 @@
             }
         });
     };
-    
+
     /**
     * Sets whether the other-classes selector is enabled, if it is shown at
     * all.
     * @param {boolean} otherClassesEnabled - true to enable the selector, false
     *      to disable it.
     */
-    SplitsBrowser.Controls.ClassSelector.prototype.setOtherClassesEnabled = function (otherClassesEnabled) {
+    ClassSelector.prototype.setOtherClassesEnabled = function (otherClassesEnabled) {
         this.otherClassesCombiningLabel.classed("disabled", !otherClassesEnabled);
         this.otherClassesSelector.classed("disabled", !otherClassesEnabled);
         this.otherClassesEnabled = otherClassesEnabled;
@@ -101,7 +103,7 @@
     * If there are no classes, a 'dummy' entry is added
     * @param {Array} classes - Array of AgeClass objects containing class data.
     */
-    SplitsBrowser.Controls.ClassSelector.prototype.setClasses = function(classes) {
+    ClassSelector.prototype.setClasses = function(classes) {
         if ($.isArray(classes)) {
             this.classes = classes;
             var options;
@@ -123,7 +125,7 @@
       
             this.updateOtherClasses();
         } else {
-            SplitsBrowser.throwInvalidData("ClassSelector.setClasses: classes is not an array");
+            throwInvalidData("ClassSelector.setClasses: classes is not an array");
         }
     };
 
@@ -138,7 +140,7 @@
     * @param {Function} handler - Handler function to be called whenever the class
     *                   changes.
     */
-    SplitsBrowser.Controls.ClassSelector.prototype.registerChangeHandler = function(handler) {
+    ClassSelector.prototype.registerChangeHandler = function(handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
             this.changeHandlers.push(handler);
         }    
@@ -147,7 +149,7 @@
     /**
     * Handle a change of the selected option in the drop-down list.
     */
-    SplitsBrowser.Controls.ClassSelector.prototype.onSelectionChanged = function() {
+    ClassSelector.prototype.onSelectionChanged = function() {
         var indexes = [this.dropDown.selectedIndex];
         this.selectedOtherClassIndexes.forEach(function (index) { indexes.push(parseInt(index, 10)); });
         this.changeHandlers.forEach(function(handler) { handler(indexes); });
@@ -159,7 +161,7 @@
     * This text contains either a list of the selected classes, or placeholder
     * text if none are selected.
     */ 
-    SplitsBrowser.Controls.ClassSelector.prototype.updateOtherClassText = function () {
+    ClassSelector.prototype.updateOtherClassText = function () {
         var classIdxs = this.selectedOtherClassIndexes.values();
         classIdxs.sort(d3.ascending);
         var text;
@@ -177,7 +179,7 @@
     * Updates the other-classes selector div following a change of selected
     * 'main' class.
     */
-    SplitsBrowser.Controls.ClassSelector.prototype.updateOtherClasses = function () {
+    ClassSelector.prototype.updateOtherClasses = function () {
         this.otherClassesList.style("display", "none");
         this.selectedOtherClassIndexes = d3.set();
         this.updateOtherClassText();
@@ -228,7 +230,7 @@
     /**
     * Shows or hides the other-class selector, if it is enabled.
     */
-    SplitsBrowser.Controls.ClassSelector.prototype.showHideClassSelector = function () {
+    ClassSelector.prototype.showHideClassSelector = function () {
         if (this.otherClassesEnabled) {
             this.otherClassesList.style("display", (this.otherClassesList.style("display") === "none") ? "" : "none");
         }
@@ -238,7 +240,7 @@
     * Toggles the selection of an other class.
     * @param {Number} classIdx - Index of the class among the list of all classes.
     */
-    SplitsBrowser.Controls.ClassSelector.prototype.toggleOtherClass = function (classIdx) {
+    ClassSelector.prototype.toggleOtherClass = function (classIdx) {
         if (this.selectedOtherClassIndexes.has(classIdx)) {
             this.selectedOtherClassIndexes.remove(classIdx);
         } else {
@@ -250,4 +252,5 @@
         this.onSelectionChanged();
     };
     
+    SplitsBrowser.Controls.ClassSelector = ClassSelector;
 })();

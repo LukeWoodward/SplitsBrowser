@@ -22,6 +22,8 @@
     "use strict";
 
     var NUMBER_TYPE = typeof 0;
+    
+    var throwInvalidData = SplitsBrowser.throwInvalidData;
 
     /**
     * Function used with the JavaScript sort method to sort competitors in order
@@ -85,7 +87,7 @@
         if (!$.isArray(splitTimes)) {
             throw new TypeError("Split times must be an array - got " + typeof splitTimes + " instead");
         } else if (splitTimes.length === 0) {
-            SplitsBrowser.throwInvalidData("Array of split times must not be empty");
+            throwInvalidData("Array of split times must not be empty");
         }
         
         var cumTimes = [0];
@@ -110,11 +112,11 @@
         if (!$.isArray(cumTimes)) {
             throw new TypeError("Cumulative times must be an array - got " + typeof cumTimes + " instead");
         } else if (cumTimes.length === 0) {
-            SplitsBrowser.throwInvalidData("Array of cumulative times must not be empty");
+            throwInvalidData("Array of cumulative times must not be empty");
         } else if (cumTimes[0] !== 0) {
-            SplitsBrowser.throwInvalidData("Array of cumulative times must have zero as its first item");
+            throwInvalidData("Array of cumulative times must have zero as its first item");
         } else if (cumTimes.length === 1) {
-            SplitsBrowser.throwInvalidData("Array of cumulative times must contain more than just a single zero");
+            throwInvalidData("Array of cumulative times must contain more than just a single zero");
         }
         
         var splitTimes = [];
@@ -147,10 +149,10 @@
     * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
     */
-    SplitsBrowser.Model.Competitor = function (order, forename, surname, club, startTime, splitTimes, cumTimes) {
+    var Competitor = function (order, forename, surname, club, startTime, splitTimes, cumTimes) {
 
         if (typeof order !== NUMBER_TYPE) {
-            SplitsBrowser.throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
+            throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
         }
 
         this.order = order;
@@ -173,7 +175,7 @@
     /**
     * Marks this competitor as being non-competitive.
     */
-    SplitsBrowser.Model.Competitor.prototype.setNonCompetitive = function () {
+    Competitor.prototype.setNonCompetitive = function () {
         this.isNonCompetitive = true;
     };
     
@@ -181,7 +183,7 @@
     * Sets the name of the class that the competitor belongs to.
     * @param {String} className - The name of the class.
     */
-    SplitsBrowser.Model.Competitor.prototype.setClassName = function (className) {
+    Competitor.prototype.setClassName = function (className) {
         this.className = className;
     };
     
@@ -202,9 +204,9 @@
     * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
     */
-    SplitsBrowser.Model.Competitor.fromSplitTimes = function (order, forename, surname, club, startTime, splitTimes) {
+    Competitor.fromSplitTimes = function (order, forename, surname, club, startTime, splitTimes) {
         var cumTimes = cumTimesFromSplitTimes(splitTimes);
-        return new SplitsBrowser.Model.Competitor(order, forename, surname, club, startTime, splitTimes, cumTimes);
+        return new Competitor(order, forename, surname, club, startTime, splitTimes, cumTimes);
     };
     
     /**
@@ -224,16 +226,16 @@
     * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
     */
-    SplitsBrowser.Model.Competitor.fromCumTimes = function (order, forename, surname, club, startTime, cumTimes) {
+    Competitor.fromCumTimes = function (order, forename, surname, club, startTime, cumTimes) {
         var splitTimes = splitTimesFromCumTimes(cumTimes);
-        return new SplitsBrowser.Model.Competitor(order, forename, surname, club, startTime, splitTimes, cumTimes);
+        return new Competitor(order, forename, surname, club, startTime, splitTimes, cumTimes);
     };
     
     /**
     * Returns whether this competitor completed the course.
     * @return {boolean} Whether the competitor completed the course.
     */
-    SplitsBrowser.Model.Competitor.prototype.completed = function () {
+    Competitor.prototype.completed = function () {
         return this.totalTime !== null;
     };
     
@@ -243,7 +245,7 @@
     * they are neither, an empty string is returned.
     * @return Suffix.
     */
-    SplitsBrowser.Model.Competitor.prototype.getSuffix = function () {
+    Competitor.prototype.getSuffix = function () {
         if (this.completed()) {
             return (this.isNonCompetitive) ? "n/c" : "";
         } else {
@@ -259,7 +261,7 @@
     * @return {Number} The split time in seconds for the competitor to the
     *      given control.
     */
-    SplitsBrowser.Model.Competitor.prototype.getSplitTimeTo = function (controlIndex) {
+    Competitor.prototype.getSplitTimeTo = function (controlIndex) {
         return (controlIndex === 0) ? 0 : this.splitTimes[controlIndex - 1];
     };
     
@@ -272,7 +274,7 @@
     * @return {Number} The cumulative split time in seconds for the competitor
     *      to the given control.
     */
-    SplitsBrowser.Model.Competitor.prototype.getCumulativeTimeTo = function (controlIndex) {
+    Competitor.prototype.getCumulativeTimeTo = function (controlIndex) {
         return this.cumTimes[controlIndex];
     };
     
@@ -284,7 +286,7 @@
     * @return {Number} The split time in seconds for the competitor to the
     *      given control.
     */
-    SplitsBrowser.Model.Competitor.prototype.getSplitRankTo = function (controlIndex) {
+    Competitor.prototype.getSplitRankTo = function (controlIndex) {
        return (controlIndex === 0) ? null : this.splitRanks[controlIndex - 1];
     };
     
@@ -296,7 +298,7 @@
     * @return {Number} The split time in seconds for the competitor to the
     *      given control.
     */
-    SplitsBrowser.Model.Competitor.prototype.getCumulativeRankTo = function (controlIndex) {
+    Competitor.prototype.getCumulativeRankTo = function (controlIndex) {
         return (controlIndex === 0) ? null : this.cumRanks[controlIndex - 1];
     };
     
@@ -304,7 +306,7 @@
     * Returns all of the competitor's cumulative time splits.
     * @return {Array} The cumulative split times in seconds for the competitor.
     */
-    SplitsBrowser.Model.Competitor.prototype.getAllCumulativeTimes = function () {
+    Competitor.prototype.getAllCumulativeTimes = function () {
         return this.cumTimes;
     };
     
@@ -313,7 +315,7 @@
     * @param {Array} splitRanks - Array of split ranks for this competitor.
     * @param {Array} cumRanks - Array of cumulative-split ranks for this competitor.
     */
-    SplitsBrowser.Model.Competitor.prototype.setSplitAndCumulativeRanks = function (splitRanks, cumRanks) {
+    Competitor.prototype.setSplitAndCumulativeRanks = function (splitRanks, cumRanks) {
         this.splitRanks = splitRanks;
         this.cumRanks = cumRanks;
     };
@@ -323,11 +325,11 @@
     * @param {Array} referenceCumTimes - The reference cumulative-split-time data to adjust by.
     * @return {Array} The array of adjusted data.
     */
-    SplitsBrowser.Model.Competitor.prototype.getCumTimesAdjustedToReference = function (referenceCumTimes) {
+    Competitor.prototype.getCumTimesAdjustedToReference = function (referenceCumTimes) {
         if (referenceCumTimes.length !== this.cumTimes.length) {
-            SplitsBrowser.throwInvalidData("Cannot adjust competitor times because the numbers of times are different (" + this.cumTimes.length + " and " + referenceCumTimes.length + ")");
+            throwInvalidData("Cannot adjust competitor times because the numbers of times are different (" + this.cumTimes.length + " and " + referenceCumTimes.length + ")");
         } else if (referenceCumTimes.indexOf(null) > -1) {
-            SplitsBrowser.throwInvalidData("Cannot adjust competitor times because a null value is in the reference data");
+            throwInvalidData("Cannot adjust competitor times because a null value is in the reference data");
         }
 
         var adjustedTimes = this.cumTimes.map(function (time, idx) { return subtractIfNotNull(time, referenceCumTimes[idx]); });
@@ -339,7 +341,7 @@
     * @param {Array} referenceCumTimes - The reference cumulative-split-time data to adjust by.
     * @return {Array} The array of adjusted data.
     */
-    SplitsBrowser.Model.Competitor.prototype.getCumTimesAdjustedToReferenceWithStartAdded = function (referenceCumTimes) {
+    Competitor.prototype.getCumTimesAdjustedToReferenceWithStartAdded = function (referenceCumTimes) {
         var adjustedTimes = this.getCumTimesAdjustedToReference(referenceCumTimes);
         var startTime = this.startTime;
         return adjustedTimes.map(function (adjTime) { return addIfNotNull(adjTime, startTime); });
@@ -351,11 +353,11 @@
     * @param {Array} referenceCumTimes - The reference cumulative split times
     * @return {Array} The array of percentages.
     */
-    SplitsBrowser.Model.Competitor.prototype.getSplitPercentsBehindReferenceCumTimes = function (referenceCumTimes) {
+    Competitor.prototype.getSplitPercentsBehindReferenceCumTimes = function (referenceCumTimes) {
         if (referenceCumTimes.length !== this.cumTimes.length) {
-            SplitsBrowser.throwInvalidData("Cannot determine percentages-behind because the numbers of times are different (" + this.cumTimes.length + " and " + referenceCumTimes.length + ")");
+            throwInvalidData("Cannot determine percentages-behind because the numbers of times are different (" + this.cumTimes.length + " and " + referenceCumTimes.length + ")");
         } else if (referenceCumTimes.indexOf(null) > -1) {
-            SplitsBrowser.throwInvalidData("Cannot determine percentages-behind because a null value is in the reference data");
+            throwInvalidData("Cannot determine percentages-behind because a null value is in the reference data");
         }
         
         var percentsBehind = [0];
@@ -377,9 +379,9 @@
     * @param {Competitor} other - The competitor to compare against.
     * @return {Boolean} true if the competitors cross, false if they don't.
     */
-    SplitsBrowser.Model.Competitor.prototype.crosses = function (other) {
+    Competitor.prototype.crosses = function (other) {
         if (other.cumTimes.length !== this.cumTimes.length) {
-            SplitsBrowser.throwInvalidData("Two competitors with different numbers of controls cannot cross");
+            throwInvalidData("Two competitors with different numbers of controls cannot cross");
         }
         
         // We determine whether two competitors cross by keeping track of
@@ -404,5 +406,5 @@
          return beforeOther && afterOther;
     };
     
-    
+    SplitsBrowser.Model.Competitor = Competitor;
 })();

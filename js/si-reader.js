@@ -21,6 +21,15 @@
 (function () {
     "use strict";
     
+    var throwInvalidData = SplitsBrowser.throwInvalidData;
+    var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var formatTime = SplitsBrowser.formatTime;
+    var parseTime = SplitsBrowser.parseTime;
+    var Competitor = SplitsBrowser.Model.Competitor;
+    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var Course = SplitsBrowser.Model.Course;
+    var Event = SplitsBrowser.Model.Event;
+    
     // Indexes into the columns.
     var COLUMN_INDEXES = {
         SURNAME: 3,
@@ -49,8 +58,8 @@
     */
     function verifyCumulativeTimesInOrder(prevTime, nextTime) {
         if (nextTime !== null && nextTime <= prevTime) {
-            SplitsBrowser.throwInvalidData("Cumulative times must be strictly ascending: read " +
-                    SplitsBrowser.formatTime(prevTime) + " and " + SplitsBrowser.formatTime(nextTime) +
+            throwInvalidData("Cumulative times must be strictly ascending: read " +
+                    formatTime(prevTime) + " and " + formatTime(nextTime) +
                     " in that order");
         }
     }
@@ -84,19 +93,21 @@
         // ignored, as are competitors that have no times at all.
         this.anyCompetitors = false;
     };
+    
+    var Reader = SplitsBrowser.Input.SI.Reader;
 
     /**
     * Checks that the data read in contains a header that suggests it is
     * SI-format data.
     */
-    SplitsBrowser.Input.SI.Reader.prototype.checkHeader = function() {
+    Reader.prototype.checkHeader = function() {
         if (this.lines.length <= 1) {
-             SplitsBrowser.throwWrongFileFormat("No data found to read");
+             throwWrongFileFormat("No data found to read");
         }
         
         var headers = this.lines[0].split(";");
         if (headers.length <= 1) {
-            SplitsBrowser.throwWrongFileFormat("Data appears not to be in the SI CSV format");
+            throwWrongFileFormat("Data appears not to be in the SI CSV format");
         }
     };
     
@@ -105,7 +116,7 @@
     * @param {Array} row - Array of row data items.
     * @return {Number} Number of controls read.
     */
-    SplitsBrowser.Input.SI.Reader.prototype.getNumControls = function (row) {
+    Reader.prototype.getNumControls = function (row) {
         var className = row[COLUMN_INDEXES.AGE_CLASS];
         if (this.ageClasses.has(className)) {
             return this.ageClasses.get(className).numControls;
@@ -120,12 +131,12 @@
     * @param {Number} lineNumber - Line number of the row within the source data.
     * @param {Number} numControls - The number of controls to read.
     */
-    SplitsBrowser.Input.SI.Reader.prototype.readCumulativeTimes = function (row, lineNumber, numControls) {
+    Reader.prototype.readCumulativeTimes = function (row, lineNumber, numControls) {
         
         // Check that the row is long enough for all of the control data,
         // given that we now know how many controls it should contain.
         if (row.length <= CONTROLS_OFFSET + 1 + 2 * (numControls - 1)) {
-            SplitsBrowser.throwInvalidData("Line " + lineNumber + " reports " + numControls + " controls but there aren't enough data values in the row for this many controls");
+            throwInvalidData("Line " + lineNumber + " reports " + numControls + " controls but there aren't enough data values in the row for this many controls");
         }
         
         var cumTimes = [0];
@@ -133,7 +144,7 @@
         
         for (var controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
             var cumTimeStr = row[CONTROLS_OFFSET + 1 + 2 * controlIdx];
-            var cumTime = SplitsBrowser.parseTime(cumTimeStr);
+            var cumTime = parseTime(cumTimeStr);
             verifyCumulativeTimesInOrder(lastCumTime, cumTime);
             
             cumTimes.push(cumTime);
@@ -142,7 +153,7 @@
             }
         }
         
-        var totalTime = SplitsBrowser.parseTime(row[COLUMN_INDEXES.TIME]);
+        var totalTime = parseTime(row[COLUMN_INDEXES.TIME]);
         verifyCumulativeTimesInOrder(lastCumTime, totalTime);
         cumTimes.push(totalTime);
     
@@ -155,7 +166,7 @@
     * @param {Array} row - Array of row data items.
     * @param {Number} numControls - The number of controls to read.
     */
-    SplitsBrowser.Input.SI.Reader.prototype.createAgeClassIfNecessary = function (row, numControls) {
+    Reader.prototype.createAgeClassIfNecessary = function (row, numControls) {
         var className = row[COLUMN_INDEXES.AGE_CLASS];
         if (!this.ageClasses.has(className)) {
             this.ageClasses.set(className, { numControls: numControls, competitors: [] });
@@ -168,7 +179,7 @@
     * @param {Array} row - Array of row data items.
     * @param {Number} numControls - The number of controls to read.
     */
-    SplitsBrowser.Input.SI.Reader.prototype.createCourseIfNecessary = function (row, numControls) {
+    Reader.prototype.createCourseIfNecessary = function (row, numControls) {
 
         var courseName = row[COLUMN_INDEXES.COURSE];
         if (!this.courseDetails.has(courseName)) {
@@ -186,7 +197,7 @@
     * we haven't seen so far, and adds one if not.
     * @param {Array} row - Array of row data items.
     */
-    SplitsBrowser.Input.SI.Reader.prototype.createClassCoursePairIfNecessary = function (row) {
+    Reader.prototype.createClassCoursePairIfNecessary = function (row) {
         var className = row[COLUMN_INDEXES.AGE_CLASS];
         var courseName = row[COLUMN_INDEXES.COURSE];
         
@@ -201,14 +212,14 @@
     * @param {Array} row - Row of items read from a line of the input data.
     * @param {Array} cumTimes - Array of cumulative times for the competitor.
     */
-    SplitsBrowser.Input.SI.Reader.prototype.addCompetitor = function (row, cumTimes) {
+    Reader.prototype.addCompetitor = function (row, cumTimes) {
     
         var className = row[COLUMN_INDEXES.AGE_CLASS];
         
         var forename = row[COLUMN_INDEXES.FORENAME];
         var surname = row[COLUMN_INDEXES.SURNAME];
         var club = row[COLUMN_INDEXES.CLUB];
-        var startTime = SplitsBrowser.parseTime(row[COLUMN_INDEXES.START]);
+        var startTime = parseTime(row[COLUMN_INDEXES.START]);
         
         // Some surnames have their placing appended to them, if their placing
         // isn't a number (e.g. mp, n/c).  If so, remove this.
@@ -219,7 +230,7 @@
         }
         
         var order = this.ageClasses.get(className).competitors.length + 1;
-        var competitor = SplitsBrowser.Model.Competitor.fromCumTimes(order, forename, surname, club, startTime, cumTimes);
+        var competitor = Competitor.fromCumTimes(order, forename, surname, club, startTime, cumTimes);
         if (isPlacingNonNumeric && competitor.completed()) {
             // Competitor has completed the course but has no placing.
             // Assume that they are non-competitive.
@@ -235,7 +246,7 @@
     * @param {Number} lineNumber - The number of the line (used in error
     *     messages).
     */
-    SplitsBrowser.Input.SI.Reader.prototype.readLine = function (line, lineNumber) {
+    Reader.prototype.readLine = function (line, lineNumber) {
     
         if ($.trim(line) === "") {
             // Skip this blank line.
@@ -247,7 +258,7 @@
         // Check the row is long enough to have all the data besides the
         // controls data.
         if (row.length < CONTROLS_OFFSET) {
-            SplitsBrowser.throwInvalidData("Too few items on line " + lineNumber + " of the input file: expected at least " + CONTROLS_OFFSET + ", got " + row.length);
+            throwInvalidData("Too few items on line " + lineNumber + " of the input file: expected at least " + CONTROLS_OFFSET + ", got " + row.length);
         }
         
         var numControls = this.getNumControls(row);
@@ -271,7 +282,7 @@
     * @return {Object} Object that contains two maps describing the
     *     many-to-many join.
     */    
-    SplitsBrowser.Input.SI.Reader.prototype.getMapsBetweenClassesAndCourses = function () {
+    Reader.prototype.getMapsBetweenClassesAndCourses = function () {
         
         var classesToCourses = d3.map();
         var coursesToClasses = d3.map();
@@ -300,12 +311,12 @@
     * Creates and return a list of AgeClass objects from all of the data read.
     * @return {Array} Array of AgeClass objects.
     */
-    SplitsBrowser.Input.SI.Reader.prototype.createAgeClasses = function () {
+    Reader.prototype.createAgeClasses = function () {
         var classNames = this.ageClasses.keys();
         classNames.sort();
         return classNames.map(function (className) {
             var ageClass = this.ageClasses.get(className);
-            return new SplitsBrowser.Model.AgeClass(className, ageClass.numControls, ageClass.competitors);
+            return new AgeClass(className, ageClass.numControls, ageClass.competitors);
         }, this);
     };
     
@@ -333,7 +344,7 @@
     *     objects.
     * @return {SplitsBrowser.Model.Course} - The created Course object.
     */
-    SplitsBrowser.Input.SI.Reader.prototype.createCourseFromLinkedClassesAndCourses = function (initCourseName, manyToManyMaps, doneCourseNames, classesMap) {
+    Reader.prototype.createCourseFromLinkedClassesAndCourses = function (initCourseName, manyToManyMaps, doneCourseNames, classesMap) {
 
         var courseNamesToDo = [initCourseName];
         var classNamesToDo = [];
@@ -378,7 +389,7 @@
         
         var courseClasses = relatedClassNames.map(function (className) { return classesMap.get(className); });
         var details = this.courseDetails.get(initCourseName);
-        var course = new SplitsBrowser.Model.Course(initCourseName, courseClasses, details.length, details.climb, details.controls);
+        var course = new Course(initCourseName, courseClasses, details.length, details.climb, details.controls);
         
         courseClasses.forEach(function (ageClass) {
             ageClass.setCourse(course);
@@ -393,7 +404,7 @@
     * @param {Array} classes - Array of AgeClass objects read.
     * @return {Array} Array of course objects.
     */
-    SplitsBrowser.Input.SI.Reader.prototype.determineCourses = function (classes) {
+    Reader.prototype.determineCourses = function (classes) {
         
         var manyToManyMaps = this.getMapsBetweenClassesAndCourses();
         
@@ -423,9 +434,9 @@
     
     /**
     * Parses the read-in data and returns it.
-    * @return {SplitsBrowser.Model.EventData} Event-data read.
+    * @return {SplitsBrowser.Model.Event} Event-data read.
     */
-    SplitsBrowser.Input.SI.Reader.prototype.parseEventData = function () {
+    Reader.prototype.parseEventData = function () {
         
         this.lines = this.data.split(/\r?\n/);
         
@@ -439,12 +450,12 @@
         }, this);
         
         if (!this.anyCompetitors) {
-            SplitsBrowser.throwWrongFileFormat("No competitors' data were found");
+            throwWrongFileFormat("No competitors' data were found");
         }
         
         var classes = this.createAgeClasses();
         var courses = this.determineCourses(classes);
-        return new SplitsBrowser.Model.Event(classes, courses);
+        return new Event(classes, courses);
     };
     
     /**
@@ -453,7 +464,7 @@
     * @return {SplitsBrowser.Model.Event} All event data read.
     */
     SplitsBrowser.Input.SI.parseEventData = function (data) {
-        var reader = new SplitsBrowser.Input.SI.Reader(data);
+        var reader = new Reader(data);
         return reader.parseEventData();
     };
 })();

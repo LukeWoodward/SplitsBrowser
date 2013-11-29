@@ -35,7 +35,7 @@
     * @constructor
     * @param {HTMLElement} parent - The parent element.
     */
-    SplitsBrowser.Controls.StatisticsSelector = function (parent) {
+    var StatisticsSelector = function (parent) {
         this.span = d3.select(parent).append("span")
                                      .attr("id", STATISTIC_SELECTOR_ID);   
 
@@ -64,7 +64,7 @@
     * @param {boolean} isEnabled - True if the controls are to be enabled,
     *      false if the controls are to be disabled.
     */
-    SplitsBrowser.Controls.StatisticsSelector.prototype.setEnabled = function (isEnabled) {
+    StatisticsSelector.prototype.setEnabled = function (isEnabled) {
         this.span.selectAll("label.statisticsSelectorLabel")
                  .classed("disabled", !isEnabled);
         this.span.selectAll("input")
@@ -79,7 +79,7 @@
     * @param {Function} handler - Function to be called whenever the choice
     *                             changes.
     */
-    SplitsBrowser.Controls.StatisticsSelector.prototype.registerChangeHandler = function (handler) {
+    StatisticsSelector.prototype.registerChangeHandler = function (handler) {
         if (this.handlers.indexOf(handler) === -1) {
             this.handlers.push(handler);
         }
@@ -93,7 +93,7 @@
     * @param {Function} handler - Function to be called whenever the choice
     *                             changes.
     */
-    SplitsBrowser.Controls.StatisticsSelector.prototype.deregisterChangeHandler = function (handler) {
+    StatisticsSelector.prototype.deregisterChangeHandler = function (handler) {
         var index = this.handlers.indexOf(handler);
         if (index !== -1) {
             this.handlers.splice(index, 1);
@@ -104,15 +104,17 @@
     * Return the statistics that are currently enabled.
     * @returns {Array} Array of booleans corresponding to enabled statistics.
     */
-    SplitsBrowser.Controls.StatisticsSelector.prototype.getVisibleStatistics = function () {
+    StatisticsSelector.prototype.getVisibleStatistics = function () {
         return this.span.selectAll("input")[0].map(function (checkbox) { return checkbox.checked; });
     };
 
     /**
     * Handles the change in state of a checkbox, by firing all of the handlers.
     */
-    SplitsBrowser.Controls.StatisticsSelector.prototype.onCheckboxChanged = function () {
+    StatisticsSelector.prototype.onCheckboxChanged = function () {
         var checkedFlags = this.getVisibleStatistics();
         this.handlers.forEach(function (handler) { handler(checkedFlags); });
     };
+    
+    SplitsBrowser.Controls.StatisticsSelector = StatisticsSelector;
 })();

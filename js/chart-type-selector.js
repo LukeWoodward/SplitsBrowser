@@ -26,7 +26,7 @@
     * @param {HTMLElement} parent - The parent element to add the control to.
     * @param {Array} chartTypes - Array of types of chart to list.
     */
-    SplitsBrowser.Controls.ChartTypeSelector = function (parent, chartTypes) {
+    var ChartTypeSelector = function (parent, chartTypes) {
         this.changeHandlers = [];
         this.chartTypes = chartTypes;
         
@@ -44,7 +44,7 @@
                    
         optionsList.exit().remove();
     };
-
+    
     /**
     * Add a change handler to be called whenever the selected type of chart is changed.
     *
@@ -53,7 +53,7 @@
     * @param {Function} handler - Handler function to be called whenever the
     *                             chart type changes.
     */
-    SplitsBrowser.Controls.ChartTypeSelector.prototype.registerChangeHandler = function (handler) {
+    ChartTypeSelector.prototype.registerChangeHandler = function (handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
             this.changeHandlers.push(handler);
         }    
@@ -63,14 +63,16 @@
     * Returns the currently-selected chart type.
     * @return {Array} The currently-selected chart type.
     */
-    SplitsBrowser.Controls.ChartTypeSelector.prototype.getChartType = function () {
+    ChartTypeSelector.prototype.getChartType = function () {
         return this.chartTypes[Math.max(this.dropDown.selectedIndex, 0)];
     };
     
     /**
     * Handle a change of the selected option in the drop-down list.
     */
-    SplitsBrowser.Controls.ChartTypeSelector.prototype.onSelectionChanged = function () {
+    ChartTypeSelector.prototype.onSelectionChanged = function () {
         this.changeHandlers.forEach(function(handler) { handler(this.chartTypes[this.dropDown.selectedIndex]); }, this);
     };
+    
+    SplitsBrowser.Controls.ChartTypeSelector = ChartTypeSelector;
 })();

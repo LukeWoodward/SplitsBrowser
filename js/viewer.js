@@ -31,6 +31,14 @@
     // Must match that used in styles.css.
     var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
     
+    var ClassSelector = SplitsBrowser.Controls.ClassSelector;
+    var ChartTypeSelector = SplitsBrowser.Controls.ChartTypeSelector;
+    var ComparisonSelector = SplitsBrowser.Controls.ComparisonSelector;
+    var StatisticsSelector = SplitsBrowser.Controls.StatisticsSelector;
+    var CompetitorListBox = SplitsBrowser.Controls.CompetitorListBox;
+    var Chart = SplitsBrowser.Controls.Chart;
+    var ResultsTable = SplitsBrowser.Controls.ResultsTable;
+    
     /**
     * Enables or disables a control, by setting or clearing an HTML "disabled"
     * attribute as necessary.
@@ -45,7 +53,7 @@
     * The 'overall' viewer object responsible for viewing the splits graph.
     * @constructor
     */
-    SplitsBrowser.Viewer = function () {
+    var Viewer = function () {
     
         this.eventData = null;
         this.classes = null;
@@ -76,7 +84,7 @@
     * Sets the classes that the viewer can view.
     * @param {SplitsBrowser.Model.Event} eventData - All event data loaded.
     */
-    SplitsBrowser.Viewer.prototype.setEvent = function (eventData) {
+    Viewer.prototype.setEvent = function (eventData) {
         this.eventData = eventData;
         this.classes = eventData.classes;
         if (this.classSelector !== null) {
@@ -87,13 +95,13 @@
     /**
     * Construct the UI inside the HTML body.
     */
-    SplitsBrowser.Viewer.prototype.buildUi = function () {
+    Viewer.prototype.buildUi = function () {
         var body = d3.select("body");
         
         this.topPanel = body.append("div");
                            
         var outerThis = this;
-        this.classSelector = new SplitsBrowser.Controls.ClassSelector(this.topPanel.node());
+        this.classSelector = new ClassSelector(this.topPanel.node());
         if (this.classes !== null) {
             this.classSelector.setClasses(this.classes);
         }
@@ -104,20 +112,20 @@
         var chartTypes = [types.SplitsGraph, types.RaceGraph, types.PositionAfterLeg,
                           types.SplitPosition, types.PercentBehind, types.ResultsTable];
         
-        this.chartTypeSelector = new SplitsBrowser.Controls.ChartTypeSelector(this.topPanel.node(), chartTypes);
+        this.chartTypeSelector = new ChartTypeSelector(this.topPanel.node(), chartTypes);
         
         this.chartType = this.chartTypeSelector.getChartType();
         
         this.topPanel.append("span").style("padding", "0px 30px 0px 30px");
         
-        this.comparisonSelector = new SplitsBrowser.Controls.ComparisonSelector(this.topPanel.node(), function (message) { alert(message); });
+        this.comparisonSelector = new ComparisonSelector(this.topPanel.node(), function (message) { alert(message); });
         if (this.classes !== null) {
             this.comparisonSelector.setClasses(this.classes);
         }
         
         this.comparisonFunction = this.comparisonSelector.getComparisonFunction();
         
-        this.statisticsSelector = new SplitsBrowser.Controls.StatisticsSelector(this.topPanel.node());
+        this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
         
         this.mainPanel = body.append("div");
         
@@ -144,10 +152,10 @@
                                                       .on("click", function () { outerThis.selectCrossingRunners(); })
                                                       .style("display", "none");
 
-        this.competitorListBox = new SplitsBrowser.Controls.CompetitorListBox(this.competitorListContainer.node());
-        this.chart = new SplitsBrowser.Controls.Chart(this.mainPanel.node());
+        this.competitorListBox = new CompetitorListBox(this.competitorListContainer.node());
+        this.chart = new Chart(this.mainPanel.node());
         
-        this.resultsTable = new SplitsBrowser.Controls.ResultsTable(body.node());
+        this.resultsTable = new ResultsTable(body.node());
         this.resultsTable.hide();
         
         this.classSelector.registerChangeHandler(function (indexes) { outerThis.selectClasses(indexes); });
@@ -162,21 +170,21 @@
     /**
     * Select all of the competitors.
     */
-    SplitsBrowser.Viewer.prototype.selectAll = function () {
+    Viewer.prototype.selectAll = function () {
         this.selection.selectAll();
     };
 
     /**
     * Select none of the competitors.
     */
-    SplitsBrowser.Viewer.prototype.selectNone = function () {
+    Viewer.prototype.selectNone = function () {
         this.selection.selectNone();
     };
 
     /**
     * Select all of the competitors that cross the unique selected competitor.
     */
-    SplitsBrowser.Viewer.prototype.selectCrossingRunners = function () {
+    Viewer.prototype.selectCrossingRunners = function () {
         this.selection.selectCrossingRunners(this.ageClassSet.allCompetitors); 
         if (this.selection.isSingleRunnerSelected()) {
             var competitorName = this.ageClassSet.allCompetitors[this.currentIndexes[0]].name;
@@ -187,7 +195,7 @@
     /**
      * Handle a resize of the window.
      */
-    SplitsBrowser.Viewer.prototype.handleWindowResize = function () {
+    Viewer.prototype.handleWindowResize = function () {
         if (this.currentResizeTimeout !== null) {
             clearTimeout(this.currentResizeTimeout);
         }
@@ -199,7 +207,7 @@
     /**
     * Resize the chart following a change of size of the chart.
     */
-    SplitsBrowser.Viewer.prototype.postResizeHook = function () {
+    Viewer.prototype.postResizeHook = function () {
         this.currentResizeTimeout = null;
         this.drawChart();
     };
@@ -207,7 +215,7 @@
     /**
     * Draw the chart using the current data.
     */
-    SplitsBrowser.Viewer.prototype.drawChart = function () {
+    Viewer.prototype.drawChart = function () {
         if (this.chartType.isResultsTable) {
             return;
         }
@@ -276,7 +284,7 @@
     /**
     * Redraws the chart using all of the current data.
     */ 
-    SplitsBrowser.Viewer.prototype.redrawChart = function () {
+    Viewer.prototype.redrawChart = function () {
         var data = {
             chartData: this.chartData,
             eventData: this.eventData,
@@ -291,7 +299,7 @@
     /**
     * Redraw the chart, possibly using new data.
     */
-    SplitsBrowser.Viewer.prototype.redraw = function () {
+    Viewer.prototype.redraw = function () {
         if (!this.chartType.isResultsTable && this.isChartEnabled) {
             this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
             this.redrawChart();
@@ -302,7 +310,7 @@
     * Change the graph to show the classes with the given indexes.
     * @param {Number} classIndexes - The (zero-based) indexes of the classes.
     */
-    SplitsBrowser.Viewer.prototype.selectClasses = function (classIndexes) {
+    Viewer.prototype.selectClasses = function (classIndexes) {
     
         if (this.selection === null) {
             this.selection = new SplitsBrowser.Model.CompetitorSelection(0);
@@ -331,7 +339,7 @@
     * @param {Function} comparisonFunc - The function that returns the
     *      reference class data from the class data.
     */
-    SplitsBrowser.Viewer.prototype.selectComparison = function (comparisonFunc) {
+    Viewer.prototype.selectComparison = function (comparisonFunc) {
         this.comparisonFunction = comparisonFunc;
         this.drawChart();
     };
@@ -340,7 +348,7 @@
     * Change the type of chart shown.
     * @param {Object} chartType - The type of chart to draw.
     */
-    SplitsBrowser.Viewer.prototype.selectChartType = function (chartType) {
+    Viewer.prototype.selectChartType = function (chartType) {
         this.chartType = chartType;
         if (chartType.isResultsTable) {
             this.mainPanel.style("display", "none");
@@ -360,7 +368,7 @@
     /**
     * Updates whether a number of controls are enabled.
     */
-    SplitsBrowser.Viewer.prototype.updateControlEnabledness = function () {
+    Viewer.prototype.updateControlEnabledness = function () {
         this.classSelector.setOtherClassesEnabled(!this.chartType.isResultsTable);
         this.comparisonSelector.setEnabled(this.isChartEnabled && !this.chartType.isResultsTable);
         this.statisticsSelector.setEnabled(this.isChartEnabled && !this.chartType.isResultsTable);
@@ -373,9 +381,11 @@
     /**
     * Enables or disables the crossing-runners button as appropriate.
     */
-    SplitsBrowser.Viewer.prototype.enableOrDisableCrossingRunnersButton = function () {
+    Viewer.prototype.enableOrDisableCrossingRunnersButton = function () {
         enableControl(this.crossingRunnersButton, this.isChartEnabled && this.selection.isSingleRunnerSelected());
     };
+    
+    SplitsBrowser.Viewer = Viewer;
     
     /**
     * Handles an asynchronous callback that fetched event data, by parsing the
@@ -389,7 +399,7 @@
             if (eventData === null) {
                 alert("Unable to read in event data file");
             } else {
-                var viewer = new SplitsBrowser.Viewer();
+                var viewer = new Viewer();
                 viewer.buildUi();
                 viewer.setEvent(eventData);
                 viewer.selectClasses([0]);
@@ -410,5 +420,5 @@
             success: readEventData,
             dataType: "text"
         });
-    };
+    };    
 })();

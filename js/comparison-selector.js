@@ -55,7 +55,7 @@
     * @param {Function} alerter - Function to call with any messages to show to
     *     the user.
     */
-    SplitsBrowser.Controls.ComparisonSelector = function (parent, alerter) {
+    var ComparisonSelector = function (parent, alerter) {
         this.changeHandlers = [];
         this.classes = null;
         this.currentRunnerIndex = null;
@@ -112,7 +112,7 @@
     * @param {Function} handler - Handler function to be called whenever the class
     *                   changes.
     */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.registerChangeHandler = function(handler) {
+    ComparisonSelector.prototype.registerChangeHandler = function(handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
             this.changeHandlers.push(handler);
         }    
@@ -122,7 +122,7 @@
     * Returns whether the 'Any Runner...' option is selected.
     * @return Whether the 'Any Runner...' option is selected.
     */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.isAnyRunnerSelected = function () {
+    ComparisonSelector.prototype.isAnyRunnerSelected = function () {
         return this.dropDown.selectedIndex === ALL_COMPARISON_OPTIONS.length - 1;
     };
     
@@ -130,7 +130,7 @@
     * Sets the list of classes.
     * @param {Array} classes - Array of AgeClass objects.
     */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.setAgeClassSet = function (ageClassSet) {
+    ComparisonSelector.prototype.setAgeClassSet = function (ageClassSet) {
         this.ageClassSet = ageClassSet;
         this.setRunners();
     };
@@ -140,7 +140,7 @@
     * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - Age-class set
     *     containing all of the runners to populate the list from.
     */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.setRunners = function () {
+    ComparisonSelector.prototype.setRunners = function () {
         var competitors = this.ageClassSet.allCompetitors;
         var completingCompetitorIndexes = d3.range(competitors.length).filter(function (idx) { return competitors[idx].completed(); });
         var completingCompetitors = competitors.filter(function (comp) { return comp.completed(); });
@@ -173,7 +173,7 @@
     * @param {boolean} isEnabled - True if the control is enabled, false if
     *      disabled.
     */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.setEnabled = function (isEnabled) {
+    ComparisonSelector.prototype.setEnabled = function (isEnabled) {
         d3.select(this.parent).selectAll("span.comparisonSelectorLabel")
                               .classed("disabled", !isEnabled);
                               
@@ -186,7 +186,7 @@
     * reference data.
     * @return {Function} Comparison function.
     */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.getComparisonFunction = function () {
+    ComparisonSelector.prototype.getComparisonFunction = function () {
         if (this.isAnyRunnerSelected()) {
             var outerThis = this;
             return function (ageClassSet) { return ageClassSet.allCompetitors[outerThis.currentRunnerIndex].getAllCumulativeTimes(); };
@@ -198,7 +198,7 @@
     /**
     * Handle a change of the selected option in either drop-down list.
     */
-    SplitsBrowser.Controls.ComparisonSelector.prototype.onSelectionChanged = function() {
+    ComparisonSelector.prototype.onSelectionChanged = function() {
         var runnerDropdownSelectedIndex = Math.max(this.runnerDropDown.selectedIndex, 0);
         var option = ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex];
         if (!this.hasWinner && option.requiresWinner) {
@@ -212,4 +212,6 @@
             this.changeHandlers.forEach(function (handler) { handler(this.getComparisonFunction()); }, this);
         }
     };
+    
+    SplitsBrowser.Controls.ComparisonSelector = ComparisonSelector;
 })();

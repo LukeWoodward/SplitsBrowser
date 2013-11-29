@@ -21,6 +21,8 @@
 (function () {
     "use strict";
     
+    var throwInvalidData = SplitsBrowser.throwInvalidData;
+    
     /**
     * A collection of 'classes', all runners within which ran the same physical
     * course.
@@ -34,7 +36,7 @@
     * @param {Array|null} controls - Array of codes of the controls that make
     *     up this course.  This may be null if no such information is provided.
     */
-    SplitsBrowser.Model.Course = function (name, classes, length, climb, controls) {
+    var Course = function (name, classes, length, climb, controls) {
         this.name = name;
         this.classes = classes;
         this.length = length;
@@ -43,13 +45,13 @@
     };
     
     /** 'Magic' control code that represents the start. */
-    SplitsBrowser.Model.Course.START = "__START__";
+    Course.START = "__START__";
     
     /** 'Magic' control code that represents the finish. */
-    SplitsBrowser.Model.Course.FINISH = "__FINISH__";
+    Course.FINISH = "__FINISH__";
     
-    var START = SplitsBrowser.Model.Course.START;
-    var FINISH = SplitsBrowser.Model.Course.FINISH;
+    var START = Course.START;
+    var FINISH = Course.FINISH;
     
     /**
     * Returns an array of the 'other' classes on this course.
@@ -57,11 +59,11 @@
     *     be on this course,
     * @return {Array} Array of other age classes.
     */
-    SplitsBrowser.Model.Course.prototype.getOtherClasses = function (ageClass) {
+    Course.prototype.getOtherClasses = function (ageClass) {
         var otherClasses = this.classes.filter(function (cls) { return cls !== ageClass; });
         if (otherClasses.length === this.classes.length) {
             // Given class not found.
-            SplitsBrowser.throwInvalidData("Course.getOtherClasses: given class is not in this course");
+            throwInvalidData("Course.getOtherClasses: given class is not in this course");
         } else {
             return otherClasses;
         }
@@ -71,7 +73,7 @@
     * Returns the number of age classes that use this course.
     * @return {Number} Number of age classes that use this course.
     */
-    SplitsBrowser.Model.Course.prototype.getNumClasses = function () {
+    Course.prototype.getNumClasses = function () {
         return this.classes.length;
     };
     
@@ -80,7 +82,7 @@
     * @return {boolean} true if this course has control codes, false if it does
     *     not.
     */
-    SplitsBrowser.Model.Course.prototype.hasControls = function () {
+    Course.prototype.hasControls = function () {
         return (this.controls !== null);
     };
     
@@ -98,7 +100,7 @@
     * @return {String|null} The code of the control, or one of the
     *     aforementioned constants for the start or finish.
     */
-    SplitsBrowser.Model.Course.prototype.getControlCode = function (controlNum) {
+    Course.prototype.getControlCode = function (controlNum) {
         if (controlNum === 0) {
             // The start.
             return START;
@@ -108,7 +110,7 @@
             // The finish.
             return FINISH;
         } else {
-            SplitsBrowser.throwInvalidData("Cannot get control code of control " + controlNum + " because it is out of range");
+            throwInvalidData("Cannot get control code of control " + controlNum + " because it is out of range");
         }
     };
     
@@ -124,7 +126,7 @@
     *     null for the finish.
     * @return {boolean} Whether this course uses the given leg.
     */
-    SplitsBrowser.Model.Course.prototype.usesLeg = function (startCode, endCode) {
+    Course.prototype.usesLeg = function (startCode, endCode) {
         return this.getLegNumber(startCode, endCode) >= 0;
     };
     
@@ -145,7 +147,7 @@
     * @return {Number} The control number of the leg in this course, or a
     *     negative number if the leg is not part of this course.
     */
-    SplitsBrowser.Model.Course.prototype.getLegNumber = function (startCode, endCode) {
+    Course.prototype.getLegNumber = function (startCode, endCode) {
         if (this.controls === null) {
             // No controls, so no, it doesn't contain the leg specified.
             return -1;
@@ -186,15 +188,15 @@
     * @return {Array} Array of fastest splits for each age class using this
     *      course.
     */
-    SplitsBrowser.Model.Course.prototype.getFastestSplitsForLeg = function (startCode, endCode) {
+    Course.prototype.getFastestSplitsForLeg = function (startCode, endCode) {
         if (this.legs === null) {
-            SplitsBrowser.throwInvalidData("Cannot determine fastest splits for a leg because leg information is not available");
+            throwInvalidData("Cannot determine fastest splits for a leg because leg information is not available");
         }
         
         var legNumber = this.getLegNumber(startCode, endCode);
         if (legNumber < 0) {
             var legStr = ((startCode === START) ? "start" : startCode) + " to " + ((endCode === FINISH) ? "end" : endCode);
-            SplitsBrowser.throwInvalidData("Leg from " +  legStr + " not found in course " + this.name);
+            throwInvalidData("Leg from " +  legStr + " not found in course " + this.name);
         }
         
         var controlNum = legNumber;
@@ -226,13 +228,13 @@
     * @return  {Array} Array of all competitors visiting the given control
     *     within the given time interval.
     */
-    SplitsBrowser.Model.Course.prototype.getCompetitorsAtControlInTimeRange = function (controlCode, intervalStart, intervalEnd) {
+    Course.prototype.getCompetitorsAtControlInTimeRange = function (controlCode, intervalStart, intervalEnd) {
         if (this.controls === null) {
             // No controls means don't return any competitors.
             return [];
-        } else if (controlCode === SplitsBrowser.Model.Course.START) {
+        } else if (controlCode === START) {
             return this.getCompetitorsAtControlNumInTimeRange(0, intervalStart, intervalEnd);
-        } else if (controlCode === SplitsBrowser.Model.Course.FINISH) {
+        } else if (controlCode === FINISH) {
             return this.getCompetitorsAtControlNumInTimeRange(this.controls.length + 1, intervalStart, intervalEnd);
         } else {
             var controlIdx = this.controls.indexOf(controlCode);
@@ -257,7 +259,7 @@
     * @return  {Array} Array of all competitors visiting the given control
     *     within the given time interval.
     */
-    SplitsBrowser.Model.Course.prototype.getCompetitorsAtControlNumInTimeRange = function (controlNum, intervalStart, intervalEnd) {
+    Course.prototype.getCompetitorsAtControlNumInTimeRange = function (controlNum, intervalStart, intervalEnd) {
         var matchingCompetitors = [];
         this.classes.forEach(function (ageClass) {
             ageClass.getCompetitorsAtControlInTimeRange(controlNum, intervalStart, intervalEnd).forEach(function (comp) {
@@ -267,4 +269,6 @@
         
         return matchingCompetitors;
     };
+    
+    SplitsBrowser.Model.Course = Course;
 })();

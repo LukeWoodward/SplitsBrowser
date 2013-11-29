@@ -21,6 +21,8 @@
 (function (){
     "use strict";
 
+    var throwInvalidData = SplitsBrowser.throwInvalidData;
+    
     /**
      * Object that represents a collection of competitor data for a class.
      * @constructor.
@@ -28,7 +30,7 @@
      * @param {Number} numControls - Number of controls.
      * @param {Array} competitors - Array of Competitor objects.
      */
-    SplitsBrowser.Model.AgeClass = function (name, numControls, competitors) {
+    var AgeClass = function (name, numControls, competitors) {
         this.name = name;
         this.numControls = numControls;
         this.competitors = competitors;
@@ -38,12 +40,12 @@
             comp.setClassName(this.name);
         }, this);
     };
-
+    
     /**
     * Sets the course that this age class belongs to.
     * @param {SplitsBrowser.Model.Course} course - The course this class belongs to.
     */
-    SplitsBrowser.Model.AgeClass.prototype.setCourse = function (course) {
+    AgeClass.prototype.setCourse = function (course) {
         this.course = course;
     };
     
@@ -53,7 +55,7 @@
     * @return {Array} Array of numbers of controls that all competitors in this
     *     class failed to punch.
     */
-    SplitsBrowser.Model.AgeClass.prototype.getControlsWithNoSplits = function () {
+    AgeClass.prototype.getControlsWithNoSplits = function () {
         return d3.range(1, this.numControls + 1).filter(function (controlNum) {
             return this.competitors.every(function (competitor) { return competitor.getSplitTimeTo(controlNum) === null; });
         }, this);
@@ -68,9 +70,9 @@
     * @return {Object|null} Object containing the name and fastest split, or
     *      null if no split times for that control were recorded.
     */
-    SplitsBrowser.Model.AgeClass.prototype.getFastestSplitTo = function (controlIdx) {
+    AgeClass.prototype.getFastestSplitTo = function (controlIdx) {
         if (typeof controlIdx !== "number" || controlIdx < 1 || controlIdx > this.numControls + 1) {
-            SplitsBrowser.throwInvalidData("Cannot return splits to leg '" + this.numControls + "' in a course with " + this.numControls + " control(s)");
+            throwInvalidData("Cannot return splits to leg '" + this.numControls + "' in a course with " + this.numControls + " control(s)");
         }
     
         var fastestSplit = null;
@@ -100,9 +102,9 @@
     * @return {Array} Array of objects listing the name and start time of each
     *     competitor visiting the control within the given time interval.
     */
-    SplitsBrowser.Model.AgeClass.prototype.getCompetitorsAtControlInTimeRange = function (controlNum, intervalStart, intervalEnd) {
+    AgeClass.prototype.getCompetitorsAtControlInTimeRange = function (controlNum, intervalStart, intervalEnd) {
         if (typeof controlNum !== "number" || isNaN(controlNum) || controlNum < 0 || controlNum > this.numControls + 1) {
-            SplitsBrowser.throwInvalidData("Control number must be a number between 0 and " + this.numControls + " inclusive");
+            throwInvalidData("Control number must be a number between 0 and " + this.numControls + " inclusive");
         }
         
         var matchingCompetitors = [];
@@ -118,4 +120,6 @@
         
         return matchingCompetitors;
     };
+    
+    SplitsBrowser.Model.AgeClass = AgeClass;
 })();

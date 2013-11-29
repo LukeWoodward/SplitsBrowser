@@ -20,13 +20,10 @@
  */
 (function (){
     "use strict";
-
-    /*
-    * An object that keeps track of the current selection of competitors, and
-    * provides a notification mechanism for changes to the selection.
-    */
-
+    
     var NUMBER_TYPE = typeof 0;
+    
+    var throwInvalidData = SplitsBrowser.throwInvalidData;
 
     /**
     * Represents the currently-selected competitors, and offers a callback
@@ -34,11 +31,11 @@
     * @constructor
     * @param {Number} count - The number of competitors that can be chosen.
     */
-    SplitsBrowser.Model.CompetitorSelection = function (count) {
+    var CompetitorSelection = function (count) {
         if (typeof count !== NUMBER_TYPE) {
-            SplitsBrowser.throwInvalidData("Competitor count must be a number");
+            throwInvalidData("Competitor count must be a number");
         } else if (count < 0) {
-            SplitsBrowser.throwInvalidData("Competitor count must be a non-negative number");
+            throwInvalidData("Competitor count must be a non-negative number");
         }
 
         this.count = count;
@@ -51,7 +48,7 @@
     * @param {Number} index - The index of the competitor.
     * @returns {boolean} True if the competitor is selected, false if not.
     */
-    SplitsBrowser.Model.CompetitorSelection.prototype.isSelected = function (index) {
+    CompetitorSelection.prototype.isSelected = function (index) {
         return this.currentIndexes.indexOf(index) > -1;
     };
     
@@ -60,7 +57,7 @@
     * @returns {boolean} True if precisely one competitor is selected, false if
     *     either no competitors, or two or more competitors, are selected.
     */
-    SplitsBrowser.Model.CompetitorSelection.prototype.isSingleRunnerSelected = function () {
+    CompetitorSelection.prototype.isSingleRunnerSelected = function () {
         return this.currentIndexes.length === 1;
     };
 
@@ -69,7 +66,7 @@
     * that 'cross' this runner.
     * @param {Array} competitors - All competitors in the same class.
     */    
-    SplitsBrowser.Model.CompetitorSelection.prototype.selectCrossingRunners = function (competitors) {
+    CompetitorSelection.prototype.selectCrossingRunners = function (competitors) {
         if (this.isSingleRunnerSelected()) {
             var refCompetitor = competitors[this.currentIndexes[0]];
             
@@ -87,7 +84,7 @@
     /**
     * Fires all of the change handlers currently registered.
     */
-    SplitsBrowser.Model.CompetitorSelection.prototype.fireChangeHandlers = function () {
+    CompetitorSelection.prototype.fireChangeHandlers = function () {
         // Call slice(0) to return a copy of the list.
         this.changeHandlers.forEach(function (handler) { handler(this.currentIndexes.slice(0)); }, this);
     };
@@ -95,7 +92,7 @@
     /**
     * Select all of the competitors.
     */
-    SplitsBrowser.Model.CompetitorSelection.prototype.selectAll = function () {
+    CompetitorSelection.prototype.selectAll = function () {
         this.currentIndexes = d3.range(this.count);
         this.fireChangeHandlers();
     };
@@ -103,7 +100,7 @@
     /**
     * Select none of the competitors.
     */
-    SplitsBrowser.Model.CompetitorSelection.prototype.selectNone = function () {
+    CompetitorSelection.prototype.selectNone = function () {
         this.currentIndexes = [];
         this.fireChangeHandlers();
     };
@@ -120,7 +117,7 @@
     *
     * @param {function} handler - The handler to register.
     */
-    SplitsBrowser.Model.CompetitorSelection.prototype.registerChangeHandler = function (handler) {
+    CompetitorSelection.prototype.registerChangeHandler = function (handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
             this.changeHandlers.push(handler);
         }
@@ -133,7 +130,7 @@
     *
     * @param {function} handler - The handler to register.
     */
-    SplitsBrowser.Model.CompetitorSelection.prototype.deregisterChangeHandler = function (handler) {
+    CompetitorSelection.prototype.deregisterChangeHandler = function (handler) {
         var index = this.changeHandlers.indexOf(handler);
         if (index > -1) {
             this.changeHandlers.splice(index, 1);
@@ -144,7 +141,7 @@
     * Toggles whether the competitor at the given index is selected.
     * @param {Number} index - The index of the competitor.
     */
-    SplitsBrowser.Model.CompetitorSelection.prototype.toggle = function (index) {
+    CompetitorSelection.prototype.toggle = function (index) {
         if (typeof index === NUMBER_TYPE) {
             if (0 <= index && index < this.count) {
                 var position = this.currentIndexes.indexOf(index);
@@ -157,10 +154,10 @@
 
                 this.fireChangeHandlers();
             } else {
-                SplitsBrowser.throwInvalidData("Index '" + index + "' is out of range");
+                throwInvalidData("Index '" + index + "' is out of range");
             }
         } else {
-            SplitsBrowser.throwInvalidData("Index is not a number");
+            throwInvalidData("Index is not a number");
         }
     };
     
@@ -176,15 +173,15 @@
     * @param {Array} newCompetitors - Array of Competitor objects for the new
     *      selection.  This array must not be empty.
     */
-    SplitsBrowser.Model.CompetitorSelection.prototype.migrate = function (oldCompetitors, newCompetitors) {
+    CompetitorSelection.prototype.migrate = function (oldCompetitors, newCompetitors) {
         if (!$.isArray(oldCompetitors)) {
-            SplitsBrowser.throwInvalidData("CompetitorSelection.migrate: oldCompetitors not an array");
+            throwInvalidData("CompetitorSelection.migrate: oldCompetitors not an array");
         } else if (!$.isArray(newCompetitors)) {
-            SplitsBrowser.throwInvalidData("CompetitorSelection.migrate: newCompetitors not an array");
+            throwInvalidData("CompetitorSelection.migrate: newCompetitors not an array");
         } else if (oldCompetitors.length !== this.count) {
-            SplitsBrowser.throwInvalidData("CompetitorSelection.migrate: oldCompetitors list must have the same length as the current count"); 
+            throwInvalidData("CompetitorSelection.migrate: oldCompetitors list must have the same length as the current count"); 
         } else if (newCompetitors.length === 0) {
-            SplitsBrowser.throwInvalidData("CompetitorSelection.migrate: newCompetitors list must not be empty"); 
+            throwInvalidData("CompetitorSelection.migrate: newCompetitors list must not be empty"); 
         }
     
         var selectedCompetitors = this.currentIndexes.map(function (index) { return oldCompetitors[index]; });
@@ -199,5 +196,6 @@
         
         this.fireChangeHandlers();
     };
-    
+
+    SplitsBrowser.Model.CompetitorSelection = CompetitorSelection;
 })();

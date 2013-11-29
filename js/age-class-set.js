@@ -20,7 +20,10 @@
  */
 (function () {
     "use strict";
-        
+      
+    var throwInvalidData = SplitsBrowser.throwInvalidData; 
+    var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
+    
     /**
     * Utility function to merge the lists of all competitors in a number of age
     * classes.  All age classes must contain the same number of controls.
@@ -28,20 +31,20 @@
     */
     function mergeCompetitors(ageClasses) {
         if (ageClasses.length === 0) {
-            SplitsBrowser.throwInvalidData("Cannot create an AgeClassSet from an empty set of competitors");
+            throwInvalidData("Cannot create an AgeClassSet from an empty set of competitors");
         }
         
         var allCompetitors = [];
         var expectedControlCount = ageClasses[0].numControls;
         ageClasses.forEach(function (ageClass) {
             if (ageClass.numControls !== expectedControlCount) {
-                SplitsBrowser.throwInvalidData("Cannot merge age classes with " + expectedControlCount + " and " + ageClass.numControls + " controls");
+                throwInvalidData("Cannot merge age classes with " + expectedControlCount + " and " + ageClass.numControls + " controls");
             }
             
             ageClass.competitors.forEach(function (comp) { allCompetitors.push(comp); });
         });
 
-        allCompetitors.sort(SplitsBrowser.Model.compareCompetitors);
+        allCompetitors.sort(compareCompetitors);
         return allCompetitors;
     }
 
@@ -51,7 +54,7 @@
     * @param {Array} sourceData - Array of number values.
     * @returns Array of corresponding ranks.
     */
-    SplitsBrowser.Model.getRanks = function (sourceData) {
+    function getRanks(sourceData) {
         // First, sort the source data, removing nulls.
         var sortedData = sourceData.filter(function (x) { return x !== null; });
         sortedData.sort(d3.ascending);
@@ -70,14 +73,14 @@
         });
         
         return ranks;
-    };
+    }
     
     /**
     * An object that represents the currently-selected age classes.
     * @constructor
     * @param {Array} ageClasses - Array of currently-selected age classes.
     */
-    SplitsBrowser.Model.AgeClassSet = function (ageClasses) {
+    var AgeClassSet = function (ageClasses) {
         this.allCompetitors = mergeCompetitors(ageClasses);
         this.ageClasses = ageClasses;
         this.numControls = ageClasses[0].numControls;
@@ -88,7 +91,7 @@
     * Returns whether this age-class set is empty, i.e. whether it has no
     * competitors at all.
     */    
-    SplitsBrowser.Model.AgeClassSet.prototype.isEmpty = function () {
+    AgeClassSet.prototype.isEmpty = function () {
         return this.allCompetitors.length === 0;
     };
     
@@ -96,7 +99,7 @@
     * Returns the course used by all of the age classes that make up this set.
     * @return {SplitsBrowser.Model.Course} The course used by all age-classes.
     */
-    SplitsBrowser.Model.AgeClassSet.prototype.getCourse = function () {
+    AgeClassSet.prototype.getCourse = function () {
         return this.ageClasses[0].course;
     };
     
@@ -105,7 +108,7 @@
     * chosen in the drop-down list.
     * @return {String} Name of the primary age class.
     */
-    SplitsBrowser.Model.AgeClassSet.prototype.getPrimaryClassName = function () {
+    AgeClassSet.prototype.getPrimaryClassName = function () {
         return this.ageClasses[0].name;
     };
     
@@ -114,7 +117,7 @@
     * @return {Number} The number of age classes that this age-class set is
     *     made up of.
     */
-    SplitsBrowser.Model.AgeClassSet.prototype.getNumClasses = function () {
+    AgeClassSet.prototype.getNumClasses = function () {
         return this.ageClasses.length;
     };
     
@@ -123,7 +126,7 @@
     * classes.
     * @return {Array} Array of the winner's cumulative times.
     */
-    SplitsBrowser.Model.AgeClassSet.prototype.getWinnerCumTimes = function () {
+    AgeClassSet.prototype.getWinnerCumTimes = function () {
         if (this.allCompetitors.length === 0) {
             return null;
         }
@@ -140,7 +143,7 @@
     * @returns {Array|null} Cumulative splits of the imaginary competitor with
     *           fastest time, if any.
     */
-    SplitsBrowser.Model.AgeClassSet.prototype.getFastestCumTimes = function () {
+    AgeClassSet.prototype.getFastestCumTimes = function () {
         return this.getFastestCumTimesPlusPercentage(0);
     };
 
@@ -150,7 +153,7 @@
     * @return {Array} Array of control numbers of controls that no competitor
     *     punched.
     */
-    SplitsBrowser.Model.AgeClassSet.prototype.getControlsWithNoSplits = function () {
+    AgeClassSet.prototype.getControlsWithNoSplits = function () {
         var controlsWithNoSplits = this.ageClasses[0].getControlsWithNoSplits();
         for (var classIndex = 1; classIndex < this.ageClasses.length && controlsWithNoSplits.length > 0; classIndex += 1) {
             var thisClassControlsWithNoSplits = this.ageClasses[classIndex].getControlsWithNoSplits();
@@ -177,7 +180,7 @@
     * @returns {Array|null} Cumulative splits of the imaginary competitor with
     *           fastest time, if any, after adding a percentage.
     */
-    SplitsBrowser.Model.AgeClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
+    AgeClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
         var ratio = 1 + percent / 100;
         var fastestCumTimes = new Array(this.numControls + 1);
         fastestCumTimes[0] = 0;
@@ -204,7 +207,7 @@
     /**
     * Compute the ranks of each competitor within their class.
     */
-    SplitsBrowser.Model.AgeClassSet.prototype.computeRanks = function () {
+    AgeClassSet.prototype.computeRanks = function () {
         var splitRanksByCompetitor = [];
         var cumRanksByCompetitor = [];
         
@@ -215,7 +218,7 @@
         
         d3.range(1, this.numControls + 2).forEach(function (control) {
             var splitsByCompetitor = this.allCompetitors.map(function(comp) { return comp.getSplitTimeTo(control); });
-            var splitRanksForThisControl = SplitsBrowser.Model.getRanks(splitsByCompetitor);
+            var splitRanksForThisControl = getRanks(splitsByCompetitor);
             this.allCompetitors.forEach(function (_comp, idx) { splitRanksByCompetitor[idx].push(splitRanksForThisControl[idx]); });
         }, this);
         
@@ -235,7 +238,7 @@
                     return comp.getCumulativeTimeTo(control);
                 }
             });
-            var cumRanksForThisControl = SplitsBrowser.Model.getRanks(cumSplitsByCompetitor);
+            var cumRanksForThisControl = getRanks(cumSplitsByCompetitor);
             this.allCompetitors.forEach(function (_comp, idx) { cumRanksByCompetitor[idx].push(cumRanksForThisControl[idx]); });
         }, this);
         
@@ -259,11 +262,11 @@
     * @param {Number} controlIdx - Index of the control.
     * @return {Array} Array of the fastest splits to the given control.
     */
-    SplitsBrowser.Model.AgeClassSet.prototype.getFastestSplitsTo = function (numSplits, controlIdx) {
+    AgeClassSet.prototype.getFastestSplitsTo = function (numSplits, controlIdx) {
         if (typeof numSplits !== "number" || numSplits <= 0) {
-            SplitsBrowser.throwInvalidData("The number of splits must be a positive integer");
+            throwInvalidData("The number of splits must be a positive integer");
         } else if (typeof controlIdx !== "number" || controlIdx <= 0 || controlIdx > this.numControls + 1) {
-            SplitsBrowser.throwInvalidData("Control " + controlIdx + " out of range");
+            throwInvalidData("Control " + controlIdx + " out of range");
         } else {
             // Compare competitors by split time at this control, and, if those
             // are equal, total time.
@@ -293,9 +296,9 @@
     * @param {Object} chartType - The type of chart to draw.
     * @returns {Array} Array of data.
     */
-    SplitsBrowser.Model.AgeClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
+    AgeClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
         if (this.isEmpty()) {
-            SplitsBrowser.throwInvalidData("Cannot return chart data when there is no data");
+            throwInvalidData("Cannot return chart data when there is no data");
         } else if (typeof referenceCumTimes === "undefined") {
             throw new TypeError("referenceCumTimes undefined or missing");
         } else if (typeof currentIndexes === "undefined") {
@@ -339,5 +342,6 @@
             yExtent: [yMin, yMax]
         };
     };
-
+    
+    SplitsBrowser.Model.AgeClassSet = AgeClassSet;
 })();

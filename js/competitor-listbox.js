@@ -30,7 +30,7 @@
     * @constructor
     * @param {HTMLElement} parent - Parent element to add this listbox to.
     */
-    SplitsBrowser.Controls.CompetitorListBox = function (parent) {
+    var CompetitorListBox = function (parent) {
         this.parent = parent;
         this.handler = null;
         this.competitorSelection = null;
@@ -44,7 +44,7 @@
     * Sets whether this competitor list-box is enabled.
     * @param {boolean} isEnabled - Whether this list-box is enabled.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.setEnabled = function (isEnabled) {
+    CompetitorListBox.prototype.setEnabled = function (isEnabled) {
         this.isEnabled = isEnabled;
         this.listDiv.selectAll("div.competitor").classed("disabled", !isEnabled);
     };
@@ -53,7 +53,7 @@
     * Returns the width of the listbox, in pixels.
     * @returns {Number} Width of the listbox.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.width = function () {
+    CompetitorListBox.prototype.width = function () {
         return $(this.listDiv.node()).width();
     };
 
@@ -61,7 +61,7 @@
     * Handles a change to the selection of competitors, by highlighting all
     * those selected and unhighlighting all those no longer selected.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.selectionChanged = function () {
+    CompetitorListBox.prototype.selectionChanged = function () {
         var outerThis = this;
         this.listDiv.selectAll("div.competitor")
                     .data(d3.range(this.competitorSelection.count))
@@ -71,7 +71,7 @@
     /**
     * Toggle the selectedness of a competitor.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.toggleCompetitor = function (index) {
+    CompetitorListBox.prototype.toggleCompetitor = function (index) {
         if (this.isEnabled) {
             this.competitorSelection.toggle(index);
         }
@@ -83,7 +83,7 @@
     * @param {boolean} hasMultipleClasses - Whether the list of competitors is
     *      made up from those in multiple classes.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.setCompetitorList = function (competitors, multipleClasses) {
+    CompetitorListBox.prototype.setCompetitorList = function (competitors, multipleClasses) {
         // Note that we use jQuery's click event handling here instead of d3's,
         // as d3's doesn't seem to work in PhantomJS.
         $("div.competitor").off("click");
@@ -117,7 +117,7 @@
     * Sets the competitor selection object.
     * @param {SplitsBrowser.Controls.CompetitorSelection} selection - Competitor selection.
     */
-    SplitsBrowser.Controls.CompetitorListBox.prototype.setSelection = function (selection) {
+    CompetitorListBox.prototype.setSelection = function (selection) {
         if (this.competitorSelection !== null) {
             this.competitorSelection.deregisterChangeHandler(this.handler);
         }
@@ -128,4 +128,6 @@
         this.competitorSelection.registerChangeHandler(this.handler);
         this.selectionChanged(d3.range(selection.count));
     };
+    
+    SplitsBrowser.Controls.CompetitorListBox = CompetitorListBox;
 })();

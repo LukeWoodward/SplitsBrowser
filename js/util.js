@@ -40,7 +40,7 @@
     * @constructor.
     * @param {string} message - The exception detail message.
     */
-    SplitsBrowser.InvalidData = function (message) {
+    var InvalidData = function (message) {
         this.name = "InvalidData";
         this.message = message;
     };
@@ -49,7 +49,7 @@
     * Returns a string representation of this exception.
     * @returns {String} String representation.
     */
-    SplitsBrowser.InvalidData.prototype.toString = function () {
+    InvalidData.prototype.toString = function () {
         return this.name + ": " + this.message;
     };
 
@@ -59,7 +59,7 @@
     * @throws {InvalidData} if invoked.
     */
     SplitsBrowser.throwInvalidData = function (message) {
-        throw new SplitsBrowser.InvalidData(message);
+        throw new InvalidData(message);
     };
     
     /**
@@ -68,7 +68,7 @@
     * @constructor
     * @param {String} message - The exception message.
     */
-    SplitsBrowser.WrongFileFormat = function (message) {
+    var WrongFileFormat = function (message) {
         this.name = "WrongFileFormat";
         this.message = message;
     };
@@ -77,7 +77,7 @@
     * Returns a string representation of this exception.
     * @returns {String} String representation.
     */
-    SplitsBrowser.WrongFileFormat.prototype.toString = function () {
+    WrongFileFormat.prototype.toString = function () {
         return this.name + ": " + this.message;
     };
     
@@ -87,6 +87,6 @@
     * @throws {WrongFileFormat} if invoked.
     */
     SplitsBrowser.throwWrongFileFormat = function (message) {
-        throw new SplitsBrowser.WrongFileFormat(message);
+        throw new WrongFileFormat(message);
     };
 })();

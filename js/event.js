@@ -28,7 +28,7 @@
     * @param {Array} courses - Array of Course objects representing all of the
     *     courses of the event.
     */ 
-    SplitsBrowser.Model.Event = function (classes, courses) {
+    var Event = function (classes, courses) {
         this.classes = classes;
         this.courses = courses;
     };
@@ -45,7 +45,7 @@
     *     null for the finish.
     * @return {Array} Array of objects containing fastest splits for that leg.
     */
-    SplitsBrowser.Model.Event.prototype.getFastestSplitsForLeg = function (startCode, endCode) {
+    Event.prototype.getFastestSplitsForLeg = function (startCode, endCode) {
         var fastestSplits = [];
         this.courses.forEach(function (course) {
             if (course.usesLeg(startCode, endCode)) {
@@ -71,7 +71,7 @@
     *     null for the finish.
     * @return {Array} Array of objects containing fastest splits for that leg.
     */
-    SplitsBrowser.Model.Event.prototype.getCompetitorsAtControlInTimeRange = function (controlCode, intervalStart, intervalEnd) {
+    Event.prototype.getCompetitorsAtControlInTimeRange = function (controlCode, intervalStart, intervalEnd) {
         var competitors = [];
         this.courses.forEach(function (course) {
             course.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd).forEach(function (comp) {
@@ -83,4 +83,6 @@
         
         return competitors;
     };
+    
+    SplitsBrowser.Model.Event = Event;
 })();
