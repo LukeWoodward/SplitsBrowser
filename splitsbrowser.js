@@ -4386,13 +4386,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
 
     /**
-    * Draw the chart using the current data.
+    * Adjusts the size of the viewer.
     */
-    Viewer.prototype.drawChart = function () {
-        if (this.chartType.isResultsTable) {
-            return;
-        }
-        
+    Viewer.prototype.adjustSize = function () {
         // Margin around the body element.
         var horzMargin = parseInt($("body").css("margin-left"), 10) + parseInt($("body").css("margin-right"), 10);
         var vertMargin = parseInt($("body").css("margin-top"), 10) + parseInt($("body").css("margin-bottom"), 10);
@@ -4426,7 +4422,18 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.chart.setSize(chartWidth, chartHeight);
         this.chart.show();
         
-        $(this.competitorListContainer.node()).height(bodyHeight - $(this.buttonsPanel.node()).height() - topPanelHeight);
+        $(this.competitorListContainer.node()).height(bodyHeight - $(this.buttonsPanel.node()).height() - topPanelHeight);    
+    };
+    
+    /**
+    * Draw the chart using the current data.
+    */
+    Viewer.prototype.drawChart = function () {
+        if (this.chartType.isResultsTable) {
+            return;
+        }
+        
+        this.adjustSize();
         
         this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
         
