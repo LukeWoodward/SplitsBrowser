@@ -4279,7 +4279,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             this.classSelector.setClasses(this.classes);
         }
         
-        this.topPanel.append("span").style("padding", "0px 30px 0px 30px");
+        this.topPanel.append("span").classed("topRowSpacer", true);
         
         var types = SplitsBrowser.Model.ChartTypes;
         var chartTypes = [types.SplitsGraph, types.RaceGraph, types.PositionAfterLeg,
@@ -4289,7 +4289,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         this.chartType = this.chartTypeSelector.getChartType();
         
-        this.topPanel.append("span").style("padding", "0px 30px 0px 30px");
+        this.topPanel.append("span").classed("topRowSpacer", true);
         
         this.comparisonSelector = new ComparisonSelector(this.topPanel.node(), function (message) { alert(message); });
         if (this.classes !== null) {

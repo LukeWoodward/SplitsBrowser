@@ -23,6 +23,11 @@ body
     font: 12px sans-serif;
 }
 
+span.topRowSpacer
+{
+    padding: 0px 30px 0px 30px;
+}
+
 div.otherClassSelector
 {
     min-width: 100px;
