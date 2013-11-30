@@ -31,8 +31,11 @@ var SplitsBrowserTest = {};
     * @param {QUnit.assert} assert - QUnit assert object.
     * @param {String} exceptionName - The name of the exception to expect.
     * @param {Function} func - The function to call.
+    * @param {String} failureMessage - Optional message to show in assertion
+    *     failure message if no exception is thrown.  A default message is used
+    *     instead if this is not specified.
     */
-    SplitsBrowserTest.assertException = function (assert, exceptionName, func) {
+    SplitsBrowserTest.assertException = function (assert, exceptionName, func, failureMessage) {
         try {
             func();
             assert.ok(false, failureMessage || "An exception with name '" + exceptionName + "' should have been thrown, but no exception was thrown");
@@ -48,8 +51,11 @@ var SplitsBrowserTest = {};
     *
     * @param {QUnit.assert} assert - QUnit assert object.
     * @param {Function} func - The function to call.
+    * @param {String} failureMessage - Optional message to show in assertion
+    *     failure message if no exception is thrown.  A default message is used
+    *     instead if this is not specified.
     */
-    SplitsBrowserTest.assertInvalidData = function (assert,  func) {
-        SplitsBrowserTest.assertException(assert, "InvalidData", func);
+    SplitsBrowserTest.assertInvalidData = function (assert,  func, failureMessage) {
+        SplitsBrowserTest.assertException(assert, "InvalidData", func, failureMessage);
     };
 })();
