@@ -3001,7 +3001,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     // The maximum number of fastest splits to show when the popup is open.
     var MAX_FASTEST_SPLITS = 10;
     
-    var MARGIN = { top: 20, right: 20, bottom: 30, left: 50 };
+    // Margins on the four sides of the chart.
+    var MARGIN = {
+        top: 18, // Needs to be high enough not to obscure the upper X-axis.
+        right: 0,
+        bottom: 18, // Needs to be high enough not to obscure the lower X-axis.
+        left: 53 // Needs to be wide enough for times on the race graph.
+    };
 
     var LEGEND_LINE_WIDTH = 10;
     
@@ -3917,8 +3923,11 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * omitted a necessary call to this method.
     */
     Chart.prototype.adjustContentSize = function () {
+        // Extra length added to the maximum start-time label width to
+        // include the lengths of the Y-axis ticks.
+        var EXTRA_MARGIN = 8;
         var maxTextWidth = this.getMaxGraphEndTextWidth();
-        this.setLeftMargin(this.maxStartTimeLabelWidth + MARGIN.left);
+        this.setLeftMargin(Math.max(this.maxStartTimeLabelWidth + EXTRA_MARGIN, MARGIN.left));
         this.contentWidth = Math.max(this.overallWidth - this.currentLeftMargin - MARGIN.right - maxTextWidth - (LEGEND_LINE_WIDTH + 2), 100);
         this.contentHeight = Math.max(this.overallHeight - MARGIN.top - MARGIN.bottom, 100);
     };
