@@ -158,6 +158,20 @@
     };
     
     /**
+    * Hides the chart.
+    */
+    Chart.prototype.hide = function () {
+        this.svg.style("display", "none");
+    };
+    
+    /**
+    * Shows the chart, after it has been hidden.
+    */
+    Chart.prototype.show = function () {
+        this.svg.style("display", null);
+    };
+    
+    /**
     * Sets the left margin of the chart.
     * @param {Number} leftMargin - The left margin of the chart.
     */

@@ -186,6 +186,7 @@ div.chartPopup tr.highlighted
 #chart
 {
     float: left;
+    overflow: hidden;
 }
 
 div.competitor

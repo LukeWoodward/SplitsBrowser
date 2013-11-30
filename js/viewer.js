@@ -220,21 +220,40 @@
             return;
         }
         
-        var windowWidth = $(window).width();
-        var windowHeight = $(window).height();
-
-        this.competitorListBox.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
-
-        var topPanelHeight = $(this.topPanel.node()).height();
+        // Margin around the body element.
+        var horzMargin = parseInt($("body").css("margin-left"), 10) + parseInt($("body").css("margin-right"), 10);
+        var vertMargin = parseInt($("body").css("margin-top"), 10) + parseInt($("body").css("margin-bottom"), 10);
         
-        // Subtract some values to avoid scrollbars appearing.
-        var chartWidth = windowWidth - 18 - this.competitorListBox.width() - 40;
-        var chartHeight = windowHeight - 19 - topPanelHeight;
+        // Extra amount subtracted off of the width of the chart in order to
+        // prevent wrapping, in units of pixels.
+        // 1 for the benefit of IE; Firefox, Chrome and Opera work with 0.
+        var EXTRA_WRAP_PREVENTION_SPACE = 1;
+        
+        var bodyWidth = $(window).width() - horzMargin;
+        var bodyHeight = $(window).height() - vertMargin;
+
+        $("body").width(bodyWidth).height(bodyHeight);
+        
+        var topPanelHeight = $(this.topPanel.node()).height();
+
+        // Hide the chart before we adjust the width of the competitor list.
+        // If the competitor list gets wider, the new competitor list and the
+        // old chart may be too wide together, and so the chart wraps onto a
+        // new line.  Even after shrinking the chart back down, there still
+        // might not be enough horizontal space, because of the horizontal
+        // scrollbar.  So, hide the chart now, and re-show it later once we
+        // know what size it should have.
+        this.chart.hide();
+        
+        this.competitorListBox.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
+        
+        var chartWidth = bodyWidth - this.competitorListBox.width() - EXTRA_WRAP_PREVENTION_SPACE;
+        var chartHeight = bodyHeight - topPanelHeight;
 
         this.chart.setSize(chartWidth, chartHeight);
+        this.chart.show();
         
-        $("body").height(windowHeight - 19 - topPanelHeight);
-        $(this.competitorListContainer.node()).height(windowHeight - 19 - $(this.buttonsPanel.node()).height() - topPanelHeight);
+        $(this.competitorListContainer.node()).height(bodyHeight - $(this.buttonsPanel.node()).height() - topPanelHeight);
         
         this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
         
