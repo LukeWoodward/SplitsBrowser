@@ -554,6 +554,15 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Returns whether this age-class is empty, i.e. has no competitors.
+    * @return {boolean} True if this age class has no competitors, false if it
+    *     has at least one competitor.
+    */
+    AgeClass.prototype.isEmpty = function () {
+        return (this.competitors.length === 0);
+    };
+    
+    /**
     * Sets the course that this age class belongs to.
     * @param {SplitsBrowser.Model.Course} course - The course this class belongs to.
     */
@@ -1618,6 +1627,12 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var classSections = eventData.split("\r\n\r\n").map($.trim).filter(isTrue);
        
         var classes = classSections.map(parseAgeClass);
+        
+        classes = classes.filter(function (ageClass) { return !ageClass.isEmpty(); });
+        
+        if (classes.length === 0) {
+            throwInvalidData("No competitor data was found");
+        }
         
         // Nulls are for the course length, climb and controls, which aren't in
         // the source data files, so we can't do anything about them.

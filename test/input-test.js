@@ -52,4 +52,9 @@
         var result = parseEventData(invalidData);
         assert.strictEqual(result, null, "There should be no result");
     });
+    
+    QUnit.test("Cannot read in empty data", function (assert) {
+        SplitsBrowserTest.assertInvalidData(assert, function () { parseEventData(""); });
+    });
+    
 })();

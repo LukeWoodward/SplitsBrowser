@@ -96,6 +96,12 @@
        
         var classes = classSections.map(parseAgeClass);
         
+        classes = classes.filter(function (ageClass) { return !ageClass.isEmpty(); });
+        
+        if (classes.length === 0) {
+            throwInvalidData("No competitor data was found");
+        }
+        
         // Nulls are for the course length, climb and controls, which aren't in
         // the source data files, so we can't do anything about them.
         var courses = classes.map(function (cls) { return new Course(cls.name, [cls], null, null, null); });

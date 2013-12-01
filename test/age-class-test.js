@@ -54,6 +54,16 @@
         return new AgeClass("Test class name", 3, [getCompetitor1(), getCompetitor2()]);
     }
     
+    QUnit.test("Empty age class is empty", function (assert) {
+        var ageClass = new AgeClass("Test class name", 3, []);
+        assert.ok(ageClass.isEmpty(), "Empty age class should be empty");
+    });
+    
+    QUnit.test("Non-empty age class is not empty", function (assert) {
+        var ageClass = new AgeClass("Test class name", 3, [getCompetitor1()]);
+        assert.ok(!ageClass.isEmpty(), "Non-empty age class should not be empty");
+    });
+    
     QUnit.test("Creating a class with competitors sets the class name in each competitor", function (assert) {
         var competitor1 = getCompetitor1();
         var competitor2 = getCompetitor2();

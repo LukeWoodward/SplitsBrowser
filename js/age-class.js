@@ -42,6 +42,15 @@
     };
     
     /**
+    * Returns whether this age-class is empty, i.e. has no competitors.
+    * @return {boolean} True if this age class has no competitors, false if it
+    *     has at least one competitor.
+    */
+    AgeClass.prototype.isEmpty = function () {
+        return (this.competitors.length === 0);
+    };
+    
+    /**
     * Sets the course that this age class belongs to.
     * @param {SplitsBrowser.Model.Course} course - The course this class belongs to.
     */

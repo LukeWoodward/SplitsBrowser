@@ -29,19 +29,15 @@
 
     module("Input.CSV");
 
-    QUnit.test("Parsing empty string returns empty array of class data", function (assert) {
-
-        assert.deepEqual(parseEventData(""), new Event([], []));
+    QUnit.test("Cannot parse an empty string", function (assert) {
+        SplitsBrowserTest.assertInvalidData(assert, function () { parseEventData(""); });
     });
 
-    QUnit.test("Parsing single class with no competitors returns single empty class and course", function (assert) {
+    QUnit.test("Cannot parse single class with no competitors", function (assert) {
 
-        var csvData = "Example, 4";
-        var actualClass = parseEventData(csvData);
-        var ageClass = new AgeClass("Example", 4, []);
-        var course = new Course("Example", [ageClass], null, null, null);
-        ageClass.setCourse(course);
-        assert.deepEqual(actualClass, new Event([ageClass], [course]));
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            parseEventData("Example, 4");
+        });
     });
 
     QUnit.test("Cannot parse single class with non-numeric control count", function (assert) {
@@ -87,6 +83,19 @@
 
     QUnit.test("Can parse a single class with a single valid competitor", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23";
+        var actualEvent = parseEventData(csvData);
+        var expectedClass = new AgeClass("Example", 4, [
+            fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23])
+        ]);
+        
+        var expectedCourse = new Course("Example", [expectedClass], null, null, null);
+        expectedClass.setCourse(expectedCourse);
+        
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+    });
+
+    QUnit.test("Can parse a single class with a single valid competitor and an empty class", function (assert) {
+        var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n\r\nEmpty, 6\r\n";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new AgeClass("Example", 4, [
             fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23])
