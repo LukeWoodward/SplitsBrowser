@@ -176,11 +176,11 @@
     });
     
     QUnit.test("Cannot parse a string that contains only the headers", function (assert) {
-        runInvalidDataTest(assert, HEADER, "data with a header row only", "WrongFileFormat");
+        runInvalidDataTest(assert, HEADER, "data with a header row only", "InvalidData");
     });
     
     QUnit.test("Cannot parse a string that contains only the headers and blank lines", function (assert) {
-        runInvalidDataTest(assert, HEADER + "\r\n\r\n\r\n", "data with a header row and blank lines only", "WrongFileFormat");
+        runInvalidDataTest(assert, HEADER + "\r\n\r\n\r\n", "data with a header row and blank lines only", "InvalidData");
     });
     
     QUnit.test("Cannot parse a string that contains only the headers and a junk line that happens to contain a semicolon", function (assert) {

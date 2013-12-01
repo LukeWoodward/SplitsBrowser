@@ -2081,7 +2081,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         }, this);
         
         if (!this.anyCompetitors) {
-            throwWrongFileFormat("No competitors' data were found");
+            throwInvalidData("No competitors' data were found");
         }
         
         var classes = this.createAgeClasses();
