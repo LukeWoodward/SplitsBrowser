@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+ <link rel="stylesheet" type="text/css" href="../css/styles.css">
+ <title>SplitsBrowser testdata catalog</title>
+ <script type="text/javascript" src="../modernizr-2.6.2-svg.min.js"></script>
+ <script type="text/javascript">
+  if (!Modernizr.svg) {
+    document.location = "unsupported-browser.html";
+  }
+ </script> 
+ <script type="text/javascript" src="../jquery-2.0.3.min.js"></script>
+ <script type="text/javascript" src="../d3.v3.js"></script>
+ <script type="text/javascript" src="../splitsbrowser.min.js"></script>
+</head>
+<body>
+ <div style="position: absolute; right: 320px; top: 0px; background-color:#000080; color: white;">
+  <span style="font-weight: bold; padding: 1px 5px;">Test data catalog</span>
+  <select id="testdata-selector" onchange="onSelectChange();">
+   <option value="">(choose)</option>
+   <option value="nonexistent">Non-existent file</option>
+   <option value="empty">Empty file</option>
+   <option value="unrecognised-format">Unrecognised format</option>
+   <option value="">----- EMIT -----</option>
+   <option value="emit-invalid">Invalid EMIT file</option>
+   <option value="emit-empty-course">EMIT file with empty course only</option>
+   <option value="emit-zero-controls">EMIT class with no controls</option>
+   <option value="emit-one-control">EMIT class with one control</option>
+   <option value="emit-malicious">EMIT file with 'malicious' data</option>
+   <option value="">----- SI -----</option>
+   <option value="si-invalid">Invalid SI file</option>
+   <option value="si-headers-only">SI file with headers only</option>
+   <option value="dns-competitor-only">Non-starting competitor only</option>
+   <option value="no-winner">Course with no winner</option>
+   <option value="all-missed-c5">Course with nobody punching #5</option>
+   <option value="all-missed-c5-in-class-but-not-course">Class with nobody punching #5</option>
+   <option value="si-zero-controls">SI class with no controls</option>
+   <option value="si-one-control">SI class with one control</option>
+   <option value="si-malicious">SI file with 'malicious' data</option>
+   <option value="">----- Performance testing -----</option>
+   <option value="emit-1000-competitors">EMIT file with 1000 competitors</option>   
+   <option value="si-1000-competitors">SI file with 10000 competitors</option>
+  </select>
+ </div>
+ <script type="text/javascript">
+  function onSelectChange() {
+    $("div:not(:first), svg, p, h1").remove();
+    $("body").css("width", "").css("height", "");
+    var url = $("#testdata-selector").val();
+    if (url !== "") { SplitsBrowser.loadEvent(url); }
+  }
+ </script>
+ <noscript>
+  <h1>SplitsBrowser &ndash; JavaScript is disabled</h1>
+
+  <p>Your browser or is set to disable JavaScript.</p>
+  
+  <p>SplitsBrowser cannot run if JavaScript is not enabled.  Please enable JavaScript in your browser.</p>
+ </noscript>
+</body>
+</html>

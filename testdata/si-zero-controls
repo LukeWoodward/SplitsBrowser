@@ -1,0 +1,6 @@
+Stno;SI card;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;
+ ; ; ;Runner;First; ; ; ; ;10:00:00; ;01:48; ; ; ;ABC; ; ;Zero controls; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;Course 0;1.6;5;0;1;10:00;00;10:01:48
+ ; ; ;Runner;Second; ; ; ; ;10:30:00; ;03:27; ; ; ;DEF; ; ;Zero controls; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;Course 0;1.6;5;0;1;10:30;00;10:33:27
+ ; ; ;Runner;Third; ; ; ; ;11:00:00; ;04:41; ; ; ;GHI; ; ;Zero controls; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;Course 0;1.6;5;0;1;11:00;00;11:04:41
+ 
+
