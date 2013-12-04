@@ -169,14 +169,17 @@
     * Hides the chart.
     */
     Chart.prototype.hide = function () {
-        this.svg.style("display", "none");
+        this.svg.style("position", "absolute")
+                .style("left", "-9999px");
+        
     };
     
     /**
     * Shows the chart, after it has been hidden.
     */
     Chart.prototype.show = function () {
-        this.svg.style("display", null);
+        this.svg.style("position", "static")
+                .style("left", null);
     };
     
     /**
