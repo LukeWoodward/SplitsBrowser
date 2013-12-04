@@ -1067,6 +1067,7 @@
         this.drawAxes(chartType.yAxisLabel, chartData);
         this.drawChartLines(chartData);
         this.drawCompetitorLegendLabels(chartData);
+        this.removeControlLine();
         if (this.isRaceGraph) {
             this.drawCompetitorStartTimeLabels(chartData);
         } else {
