@@ -3102,6 +3102,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.maxStartTimeLabelWidth = 0;
         this.warningPanel = null;
         
+        this.mouseOutTimeout = null;
+        
         // Indexes of the currently-selected competitors, in the order that
         // they appear in the list of labels.
         this.selectedIndexesOrderedByLastYValue = [];
@@ -3255,8 +3257,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     Chart.prototype.onMouseEnter = function (event) {
         if (this.warningPanel === null) {
+            if (this.mouseOutTimeout !== null) {
+                clearTimeout(this.mouseOutTimeout);
+                this.mouseOutTimeout = null;
+            }
+            
             this.isMouseIn = true;
-            this.updateControlLineLocation(event);
+            this.updateControlLineLocation(event);            
         }
     };
 
@@ -3283,7 +3290,12 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             // This is only necessary for IE9 and IE10; other browsers support
             // "pointer-events: none" in CSS so the popup never gets any mouse
             // events.
-            setTimeout(function() {
+            
+            // Note that we keep a reference to the 'timeout', so that we can
+            // clear it if the mouse subsequently re-enters.  This happens a lot
+            // more often than might be expected for a function with a timeout of
+            // only a single millisecond.
+            this.mouseOutTimeout = setTimeout(function() {
                 if (!outerThis.popup.isMouseIn()) {
                     outerThis.isMouseIn = false;
                     outerThis.removeControlLine();
