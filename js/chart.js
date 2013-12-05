@@ -885,11 +885,56 @@
     };
 
     /**
+    * Adjust the locations of the legend labels downwards so that two labels
+    * do not overlap.
+    */
+    Chart.prototype.adjustCompetitorLegendLabelsDownwardsIfNecessary = function () {
+        for (var i = 1; i < this.numLines; i += 1) {
+            var prevComp = this.currentCompetitorData[i - 1];
+            var thisComp = this.currentCompetitorData[i];
+            if (thisComp.y < prevComp.y + prevComp.textHeight) {
+                thisComp.y = prevComp.y + prevComp.textHeight;
+            }
+        }
+    };
+
+    /**
+    * Adjusts the locations of the legend labels upwards so that as many as
+    * possible can fit on the chart.  If all competitor labels are already on
+    * the chart, then this method does nothing.
+    *
+    * This method does not move off the chart any label that is currently on
+    * the chart.
+    *
+    * @param {Number} minLastY - The minimum Y-coordinate of the lowest label.
+    */
+    Chart.prototype.adjustCompetitorLegendLabelsUpwardsIfNecessary = function (minLastY) {
+        if (this.numLines > 0 && this.currentCompetitorData[this.numLines - 1].y > this.contentHeight) {
+            // The list of competitors runs off the bottom.
+            // Put the last competitor at the bottom, or at its minimum
+            // Y-offset, whichever is larger, and move all labels up as
+            // much as we can.
+            this.currentCompetitorData[this.numLines - 1].y = Math.max(minLastY, this.contentHeight);
+            for (var i = this.numLines - 2; i >= 0; i -= 1) {
+                var nextComp = this.currentCompetitorData[i + 1];
+                var thisComp = this.currentCompetitorData[i];
+                if (thisComp.y + thisComp.textHeight > nextComp.y) {
+                    thisComp.y = nextComp.y - thisComp.textHeight;
+                } else {
+                    // No more adjustments need to be made.
+                    break;
+                }
+            }
+        }    
+    };
+    
+    /**
     * Draw legend labels to the right of the chart.
     * @param {object} chartData - The chart data that contains the final time offsets.
     */
     Chart.prototype.drawCompetitorLegendLabels = function (chartData) {
         
+        var minLastY = 0;
         if (chartData.dataColumns.length === 0) {
             this.currentCompetitorData = [];
         } else {
@@ -897,19 +942,23 @@
             this.currentCompetitorData = d3.range(this.numLines).map(function (i) {
                 var competitorIndex = this.selectedIndexes[i];
                 var name = this.ageClassSet.allCompetitors[competitorIndex].name;
+                var textHeight = this.getTextHeight(name);
+                minLastY += textHeight;
                 return {
                     label: formatNameAndSuffix(name, this.ageClassSet.allCompetitors[competitorIndex].getSuffix()),
-                    textHeight: this.getTextHeight(name),
+                    textHeight: textHeight,
                     y: (finishColumn.ys[i] === null) ? null : this.yScale(finishColumn.ys[i]),
                     colour: colours[competitorIndex % colours.length],
                     index: competitorIndex
                 };
             }, this);
             
+            minLastY -= this.currentCompetitorData[this.numLines - 1].textHeight;
+            
             // Draw the mispunchers at the bottom of the chart, with the last
             // one of them at the bottom.
             var lastMispuncherY = null;
-            for (var selCompIdx = this.currentCompetitorData.length - 1; selCompIdx >= 0; selCompIdx -= 1) {
+            for (var selCompIdx = this.numLines - 1; selCompIdx >= 0; selCompIdx -= 1) {
                 if (this.currentCompetitorData[selCompIdx].y === null) {
                     this.currentCompetitorData[selCompIdx].y = (lastMispuncherY === null) ? this.contentHeight : lastMispuncherY - this.currentCompetitorData[selCompIdx].textHeight;
                     lastMispuncherY = this.currentCompetitorData[selCompIdx].y;
@@ -923,13 +972,9 @@
         
         this.selectedIndexesOrderedByLastYValue = this.currentCompetitorData.map(function (comp) { return comp.index; });
 
-        // Some ys may be too close to the previous one.  Adjust them downwards
-        // as necessary.
-        for (var i = 1; i < this.currentCompetitorData.length; i += 1) {
-            if (this.currentCompetitorData[i].y < this.currentCompetitorData[i - 1].y + this.currentCompetitorData[i - 1].textHeight) {
-                this.currentCompetitorData[i].y = this.currentCompetitorData[i - 1].y + this.currentCompetitorData[i - 1].textHeight;
-            }
-        }
+        this.adjustCompetitorLegendLabelsDownwardsIfNecessary();
+        
+        this.adjustCompetitorLegendLabelsUpwardsIfNecessary(minLastY);
 
         var legendLines = this.svgGroup.selectAll("line.competitorLegendLine").data(this.currentCompetitorData);
         legendLines.enter()
