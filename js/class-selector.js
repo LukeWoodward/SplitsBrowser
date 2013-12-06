@@ -22,6 +22,7 @@
     "use strict";
     
     var throwInvalidData = SplitsBrowser.throwInvalidData;
+    var getMessage = SplitsBrowser.getMessage;
 
     /**
     * A control that wraps a drop-down list used to choose between classes.
@@ -32,7 +33,8 @@
         this.otherClassesEnabled = true;
         
         var span = d3.select(parent).append("span");
-        span.text("Class: ");
+        span.text(getMessage("ClassSelectorLabel"));
+        
         var outerThis = this;
         this.dropDown = span.append("select").node();
         $(this.dropDown).bind("change", function() {
@@ -43,7 +45,7 @@
         this.otherClassesCombiningLabel = span.append("span")
                                               .classed("otherClassCombining", true)
                                               .style("display", "none")
-                                              .text("and");
+                                              .text(getMessage("AdditionalClassSelectorLabel"));
         
         this.otherClassesSelector = span.append("div")
                                    .classed("otherClassSelector", true)
@@ -109,7 +111,7 @@
             var options;
             if (classes.length === 0) {
                 this.dropDown.disabled = true;
-                options = ["[No classes loaded]"];
+                options = [getMessage("NoClassesLoadedPlaceholder")];
             } else {
                 this.dropDown.disabled = false;
                 options = classes.map(function(ageClass) { return ageClass.name; });
@@ -166,7 +168,7 @@
         classIdxs.sort(d3.ascending);
         var text;
         if (classIdxs.length === 0) {
-            text = "<select>";
+            text = getMessage("NoAdditionalClassesSelectedPlaceholder");
         } else {
             text = classIdxs.map(function (classIdx) { return this.classes[classIdx].name; }, this)
                             .join(", ");

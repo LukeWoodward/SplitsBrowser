@@ -94,9 +94,9 @@
         assert.deepEqual(chartType.dataSelector(competitor, referenceCumTimes), expectedData);
     });
 
-    QUnit.test("All chart types have a name", function (assert) {
+    QUnit.test("All chart types have a name key", function (assert) {
         ALL_CHART_TYPES.forEach(function (chartType) {
-            assert.strictEqual(typeof chartType.name, "string");
+            assert.strictEqual(typeof chartType.nameKey, "string");
         });
     });
     
@@ -108,10 +108,10 @@
         });
     });
    
-    QUnit.test("All chart types except the results table have a y-axis label", function (assert) {
+    QUnit.test("All chart types except the results table have a y-axis label key", function (assert) {
         ALL_CHART_TYPES.forEach(function (chartType) {
             if (chartType !== ChartTypes.ResultsTable) {
-                assert.strictEqual(typeof chartType.yAxisLabel, "string");
+                assert.strictEqual(typeof chartType.yAxisLabelKey, "string");
             }
         });
     });

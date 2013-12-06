@@ -5,6 +5,87 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
 (function () {
     "use strict";
+    
+    // Whether a warning about missing messages has been given.  We don't
+    // really want to irritate the user with many alert boxes if there's a
+    // problem with the messages.
+    var warnedAboutMessages = false;
+    
+    // Default alerter function, just calls window.alert.
+    var alertFunc = function (message) { window.alert(message); };
+    
+    /**
+    * Issue a warning about the messages, if a warning hasn't already been
+    * issued.
+    * @param {String} warning - The warning message to issue.
+    */ 
+    function warn(warning) {
+        if (!warnedAboutMessages) {
+            alertFunc(warning);
+            warnedAboutMessages = true;
+        }
+    }
+    
+    /**
+    * Sets the alerter to use when a warning message should be shown.
+    *
+    * This function is intended only for testing purposes.
+    
+    * @param {Function} alerter - The function to be called when a warning is
+    *     to be shown.
+    */
+    SplitsBrowser.setMessageAlerter = function (alerter) {
+        alertFunc = alerter;
+    };
+    
+    /**
+    * Returns the message with the given key.
+    * @param {String} key - The key of the message.
+    * @return {String} The message with the given key, or a placeholder string
+    *     if the message could not be looked up.
+    */
+    SplitsBrowser.getMessage = function (key) {
+        if (SplitsBrowser.hasOwnProperty("Messages")) {
+            if (SplitsBrowser.Messages.hasOwnProperty(key)) {
+                return SplitsBrowser.Messages[key];
+            } else {
+                warn("Message not found for key '" + key + "'");
+                return "?????";
+            }
+        } else {
+            warn("No messages found.  Has a language file been loaded?");
+            return "?????";
+        }
+    };
+    
+    /**
+    * Returns the message with the given key, with some string formatting
+    * applied to the result.
+    *
+    * The object 'params' should map search strings to their replacements.
+    *
+    * @param {String} key - The key of the message.
+    * @param {Object} params - Object mapping parameter names to values.
+    */ 
+    SplitsBrowser.getMessageWithFormatting = function (key, params) {
+        var message = SplitsBrowser.getMessage(key);
+        for (var paramName in params) {
+            if (params.hasOwnProperty(paramName)) {
+                // Irritatingly there isn't a way of doing global replace
+                // without using regexps.  So we must escape any magic regex
+                // metacharacters first, so that we have a regexp that will
+                // match a single static string.
+                var paramNameRegexEscaped = paramName.replace(/([.+*?|{}()^$\[\]\\])/g, "\\$1");
+                message = message.replace(new RegExp(paramNameRegexEscaped, "g"), params[paramName]);
+            }
+        }
+        
+        return message;
+    };
+})();
+
+(function () {
+    "use strict";
 
     /**
      * Utility function used with filters that simply returns the object given.
@@ -145,6 +226,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     var NUMBER_TYPE = typeof 0;
     
     var throwInvalidData = SplitsBrowser.throwInvalidData;
+    var getMessage = SplitsBrowser.getMessage;
 
     /**
     * Function used with the JavaScript sort method to sort competitors in order
@@ -368,9 +450,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     Competitor.prototype.getSuffix = function () {
         if (this.completed()) {
-            return (this.isNonCompetitive) ? "n/c" : "";
+            return (this.isNonCompetitive) ? getMessage("NonCompetitiveShort") : "";
         } else {
-            return "mp";
+            return getMessage("MispunchedShort");
         }
     };
     
@@ -1311,55 +1393,55 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
     SplitsBrowser.Model.ChartTypes = {
         SplitsGraph: {
-            name: "Splits graph",
+            nameKey: "SplitsGraphChartType",
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
-            yAxisLabel: "Time loss (min)",
+            yAxisLabelKey: "SplitsGraphYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1
         },
         RaceGraph: {
-            name: "Race graph",
+            nameKey: "RaceGraphChartType",
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
-            yAxisLabel: "Time",
+            yAxisLabelKey: "RaceGraphYAxisLabel",
             isRaceGraph: true,
             isResultsTable: false,
             minViewableControl: 0
         },
         PositionAfterLeg: {
-            name: "Position after leg",
+            nameKey:  "PositionAfterLegChartType",
             dataSelector: function (comp) { return comp.cumRanks; },
             skipStart: true,
-            yAxisLabel: "Position",
+            yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1
         },
         SplitPosition: {
-            name: "Split position",
+            nameKey: "SplitPositionChartType",
             dataSelector: function (comp) { return comp.splitRanks; },
             skipStart: true,
-            yAxisLabel: "Position",
+            yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1
         },
         PercentBehind: {
-            name: "Percent behind",
+            nameKey: "PercentBehindChartType",
             dataSelector: function (comp, referenceCumTimes) { return comp.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
             skipStart: false,
-            yAxisLabel: "Percent behind",
+            yAxisLabelKey: "PercentBehindYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1
         },
         ResultsTable: {
-            name: "Results table",
+            nameKey: "ResultsTableChartType",
             dataSelector: null,
             skipStart: false,
-            yAxisLabel: null,
+            yAxisLabelKey: null,
             isRaceGraph: false,
             isResultsTable: true,
             minViewableControl: 1
@@ -2253,6 +2335,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     "use strict";
     
     var throwInvalidData = SplitsBrowser.throwInvalidData;
+    var getMessage = SplitsBrowser.getMessage;
 
     /**
     * A control that wraps a drop-down list used to choose between classes.
@@ -2263,7 +2346,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.otherClassesEnabled = true;
         
         var span = d3.select(parent).append("span");
-        span.text("Class: ");
+        span.text(getMessage("ClassSelectorLabel"));
+        
         var outerThis = this;
         this.dropDown = span.append("select").node();
         $(this.dropDown).bind("change", function() {
@@ -2274,7 +2358,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.otherClassesCombiningLabel = span.append("span")
                                               .classed("otherClassCombining", true)
                                               .style("display", "none")
-                                              .text("and");
+                                              .text(getMessage("AdditionalClassSelectorLabel"));
         
         this.otherClassesSelector = span.append("div")
                                    .classed("otherClassSelector", true)
@@ -2340,7 +2424,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             var options;
             if (classes.length === 0) {
                 this.dropDown.disabled = true;
-                options = ["[No classes loaded]"];
+                options = [getMessage("NoClassesLoadedPlaceholder")];
             } else {
                 this.dropDown.disabled = false;
                 options = classes.map(function(ageClass) { return ageClass.name; });
@@ -2397,7 +2481,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         classIdxs.sort(d3.ascending);
         var text;
         if (classIdxs.length === 0) {
-            text = "<select>";
+            text = getMessage("NoAdditionalClassesSelectedPlaceholder");
         } else {
             text = classIdxs.map(function (classIdx) { return this.classes[classIdx].name; }, this)
                             .join(", ");
@@ -2490,9 +2574,22 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 (function (){
     "use strict";
     
+    var getMessage = SplitsBrowser.getMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    
     var ALL_COMPARISON_OPTIONS = [
-        { name: "Winner", selector: function (ageClassSet) { return ageClassSet.getWinnerCumTimes(); }, requiresWinner: true },
-        { name: "Fastest time", selector: function (ageClassSet) { return ageClassSet.getFastestCumTimes(); }, requiresWinner: false }
+        {
+            nameKey: "CompareWithWinner",
+            selector: function (ageClassSet) { return ageClassSet.getWinnerCumTimes(); },
+            requiresWinner: true,
+            percentage: ""
+        },
+        {
+            nameKey: "CompareWithFastestTime",
+            selector: function (ageClassSet) { return ageClassSet.getFastestCumTimes(); },
+            requiresWinner: false,
+            percentage: ""
+        }
     ];
     
     // All 'Fastest time + N %' values (not including zero).
@@ -2500,13 +2597,19 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     
     FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
         ALL_COMPARISON_OPTIONS.push({
-            name: "Fastest time + " + percent + "%",
+            nameKey: "CompareWithFastestTimePlusPercentage",
             selector: function (ageClassSet) { return ageClassSet.getFastestCumTimesPlusPercentage(percent); },
-            requiresWinner: false
+            requiresWinner: false, 
+            percentage: percent
         });
     });
     
-    ALL_COMPARISON_OPTIONS.push({ name: "Any runner...", requiresWinner: true });
+    ALL_COMPARISON_OPTIONS.push({
+        nameKey: "CompareWithAnyRunner",
+        selector: null,
+        requiresWinner: true,
+        percentage: ""
+    });
     
     // Default selected index of the comparison function.
     var DEFAULT_COMPARISON_INDEX = 1; // 1 = fastest time.
@@ -2538,7 +2641,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         span.append("span")
             .classed("comparisonSelectorLabel", true)
-            .text("Compare with ");
+            .text(getMessage("ComparisonSelectorLabel"));
 
         var outerThis = this;
         this.dropDown = span.append("select")
@@ -2552,7 +2655,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         optionsList.enter().append("option");
         
         optionsList.attr("value", function (_opt, index) { return index.toString(); })
-                   .text(function (opt) { return opt.name; });
+                   .text(function (opt) { return getMessageWithFormatting(opt.nameKey, {"$$PERCENT$$": opt.percentage}); });
                    
         optionsList.exit().remove();
         
@@ -2562,7 +2665,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         this.runnerSpan.append("span")
                        .classed("comparisonSelectorLabel", true)
-                       .text("Runner: ");
+                       .text(getMessage("CompareWithAnyRunnerLabel"));
         
         this.runnerDropDown = this.runnerSpan.append("select")
                                              .attr("id", RUNNER_SELECTOR_ID)
@@ -2672,7 +2775,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var option = ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex];
         if (!this.hasWinner && option.requiresWinner) {
             // No winner on this course means you can't select this option.
-            this.alerter("Cannot compare against '" + option.name + "' because no competitors in this class complete the course.");
+            this.alerter(getMessageWithFormatting("CannotCompareAsNoWinner", {"$$OPTION$$": getMessage(option.nameKey)}));
             this.dropDown.selectedIndex = this.previousSelectedIndex;
         } else {
             this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? "" : "none");
@@ -2688,6 +2791,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
 (function () {
     "use strict";
+    
+    var getMessage = SplitsBrowser.getMessage;
 
     // ID of the statistics selector control.
     // Must match that used in styles.css.
@@ -2695,7 +2800,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 
     var LABEL_ID_PREFIX = "statisticCheckbox";
 
-    var STATISTIC_NAMES = ["Total time", "Split time", "Behind fastest"];
+    var STATISTIC_NAME_KEYS = ["StatisticsTotalTimeKey", "StatisticsSplitTimeKey", "StatisticsBehindFastestKey"];
 
     /**
     * Control that contains a number of checkboxes for enabling and/or disabling
@@ -2708,7 +2813,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                                      .attr("id", STATISTIC_SELECTOR_ID);   
 
         var childSpans = this.span.selectAll("span")
-                                  .data(STATISTIC_NAMES)
+                                  .data(STATISTIC_NAME_KEYS)
                                   .enter()
                                   .append("span");
          
@@ -2719,7 +2824,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         childSpans.append("label")
                   .attr("for", function(val, index) { return LABEL_ID_PREFIX + index; })
                   .classed("statisticsSelectorLabel", true)
-                  .text(function(name) { return name; });
+                  .text(function(nameKey) { return getMessage(nameKey); });
         
         var outerThis = this;
         $("input", this.span.node()).bind("change", function () { return outerThis.onCheckboxChanged(); });
@@ -2791,6 +2896,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
 (function (){
     "use strict";
     
+    var getMessage = SplitsBrowser.getMessage;
+    
     /**
     * A control that wraps a drop-down list used to choose the types of chart to view.
     * @param {HTMLElement} parent - The parent element to add the control to.
@@ -2801,7 +2908,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.chartTypes = chartTypes;
         
         var span = d3.select(parent).append("span");
-        span.text("View: ");
+        span.text(getMessage("ChartTypeSelectorLabel"));
         var outerThis = this;
         this.dropDown = span.append("select").node();
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
@@ -2810,7 +2917,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         optionsList.enter().append("option");
         
         optionsList.attr("value", function (_value, index) { return index.toString(); })
-                   .text(function (value) { return value.name; });
+                   .text(function (value) { return getMessage(value.nameKey); });
                    
         optionsList.exit().remove();
     };
@@ -3055,6 +3162,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     
     var isNotNull = SplitsBrowser.isNotNull;
     var formatTime = SplitsBrowser.formatTime;
+    var getMessage = SplitsBrowser.getMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
     var ChartPopup = SplitsBrowser.Controls.ChartPopup;
     
@@ -3196,7 +3305,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             return {time: comp.split, name: comp.name, highlight: false};
         });
         
-        return {title: "Selected classes", data: data, placeholder: "No competitors completed this course"};
+        return {title: getMessage("SelectedClassesPopupHeader"), data: data, placeholder: getMessage("SelectedClassesPopupPlaceholder")};
     };
     
     /**
@@ -3210,7 +3319,10 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var startCode = course.getControlCode(this.currentControlIndex - 1);
         var endCode = course.getControlCode(this.currentControlIndex);
         
-        var title = "Fastest leg-time " + ((startCode === START) ? "Start" : startCode) + " to " + ((endCode === FINISH) ? "Finish" : endCode);
+        var startControl = (startCode === START) ? getMessage("StartName") : startCode;
+        var endControl = (endCode === FINISH) ? getMessage("FinishName") : endCode;
+        
+        var title = getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": startControl, "$$END$$": endControl});
         
         var primaryClass = this.ageClassSet.getPrimaryClassName();
         var data = this.eventData.getFastestSplitsForLeg(startCode, endCode)
@@ -3242,16 +3354,20 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         var primaryClass = this.ageClassSet.getPrimaryClassName();
         var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}; });
         
-        var title = formatTime(intervalStart) + " - " + formatTime(intervalEnd) + ": ";
+        var controlName;
         if (controlCode === START) {
-            title += "Start";
+            controlName = getMessage("StartName");
         } else if (controlCode === FINISH) {
-            title += "Finish";
+            controlName = getMessage("FinishName");
         } else {
-            title += "Control " + controlCode;
+            controlName = getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
         }
         
-        return {title: title, data: competitorData, placeholder: "No competitors."};
+        var title = getMessageWithFormatting(
+            "NearbyCompetitorsPopupHeader",
+            {"$$START$$": formatTime(intervalStart), "$$END$$": formatTime(intervalEnd), "$$CONTROL$$": controlName});
+        
+        return {title: title, data: competitorData, placeholder: getMessage("NoNearbyCompetitors")};
     };
 
     /**
@@ -3508,15 +3624,13 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * top X-axis.
     *
     * The function returned is suitable for use with the D3 axis.tickFormat method.
-    * This label is "S" for index 0 (the start), "F" for the finish, and
-    * the control number for intermediate controls.
     *
     * @returns {function} Tick-formatting function.
     */
     Chart.prototype.getTickFormatter = function () {
         var outerThis = this;
         return function (value, idx) {
-            return (idx === 0) ? "S" : ((idx === outerThis.numControls + 1) ? "F" : idx.toString());
+            return (idx === 0) ? getMessage("StartNameShort") : ((idx === outerThis.numControls + 1) ? getMessage("FinishNameShort") : idx.toString());
         };
     };
 
@@ -3773,7 +3887,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                      .attr("x", 60)
                      .attr("y", -5)
                      .style("text-anchor", "start")
-                     .text("Time (min)");
+                     .text(getMessage("LowerXAxisChartLabel"));
     };
     
     /**
@@ -4090,7 +4204,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
-        this.drawAxes(chartType.yAxisLabel, chartData);
+        this.drawAxes(getMessage(chartType.yAxisLabelKey), chartData);
         this.drawChartLines(chartData);
         this.drawCompetitorLegendLabels(chartData);
         this.removeControlLine();
@@ -4136,6 +4250,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     
     var formatTime = SplitsBrowser.formatTime;
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
+    var getMessage = SplitsBrowser.getMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
     var NON_BREAKING_SPACE_CHAR = "\u00a0";
 
@@ -4177,18 +4293,29 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Populates the contents of the table with the age-class data.
     */
     ResultsTable.prototype.populateTable = function () {
-        var headerText = this.ageClass.name + ", " + this.ageClass.numControls + " control" + ((this.ageClass.numControls === 1) ? "" : "s");
+        var headerText = this.ageClass.name + ", ";
+        if (this.ageClass.numControls === 1) {
+            headerText += getMessage("ResultsTableHeaderSingleControl");
+        } else {
+            headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": this.ageClass.numControls});
+        }
+
         var course = this.ageClass.course;
         if (course.length !== null) {
-            headerText += ", " + course.length.toFixed(1) + "km";
+            headerText += ", " + getMessageWithFormatting("ResultsTableHeaderCourseLength", {"$$DISTANCE$$": course.length.toFixed(1)});
         }
         if (course.climb !== null) {
-            headerText += ", " + course.climb + "m";
+            headerText += ", " + getMessageWithFormatting("ResultsTableHeaderClimb", {"$$CLIMB$$": course.climb});
         }
         
         this.headerSpan.text(headerText);
         
-        var headerCellData = ["#", "Name", "Time"].concat(d3.range(1, this.ageClass.numControls + 1)).concat(["Finish"]);
+        var headerCellData = [
+            getMessage("ResultsTableHeaderControlNumber"),
+            getMessage("ResultsTableHeaderName"),
+            getMessage("ResultsTableHeaderTime")
+        ].concat(d3.range(1, this.ageClass.numControls + 1)).concat([getMessage("FinishName")]);
+        
         var headerCells = this.table.select("thead tr")
                                     .selectAll("th")
                                     .data(headerCellData);
@@ -4219,7 +4346,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             var tableRow = tableBody.append("tr");
             var numberCell = tableRow.append("td");
             if (competitor.isNonCompetitive) {
-                numberCell.text("n/c");
+                numberCell.text(getMessage("NonCompetitiveShort"));
                 nonCompCount += 1;
             } else if (competitor.completed()) {
                 if (index === 0 || competitors[index - 1].totalTime !== competitor.totalTime) {
@@ -4230,7 +4357,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             }
             
             addCell(tableRow, competitor.name, competitor.club);
-            addCell(tableRow, (competitor.completed()) ? formatTime(competitor.totalTime) : "mp", NON_BREAKING_SPACE_CHAR, "time");
+            addCell(tableRow, (competitor.completed()) ? formatTime(competitor.totalTime) : getMessage("MispunchedShort"), NON_BREAKING_SPACE_CHAR, "time");
             
             d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
                 addCell(tableRow, formatTime(competitor.getCumulativeTimeTo(controlNum)), formatTime(competitor.getSplitTimeTo(controlNum)), "time");
@@ -4296,6 +4423,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     var CompetitorListBox = SplitsBrowser.Controls.CompetitorListBox;
     var Chart = SplitsBrowser.Controls.Chart;
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
+    var getMessage = SplitsBrowser.getMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
     /**
     * Enables or disables a control, by setting or clearing an HTML "disabled"
@@ -4393,19 +4522,19 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.buttonsPanel = this.competitorListContainer.append("div");
                      
         this.allButton = this.buttonsPanel.append("button")
-                                          .text("All")
+                                          .text(getMessage("SelectAllCompetitors"))
                                           .style("width", "50%")
                                           .on("click", function () { outerThis.selectAll(); });
                         
         this.noneButton = this.buttonsPanel.append("button")
-                                           .text("None")
+                                           .text(getMessage("SelectNoCompetitors"))
                                            .style("width", "50%")
                                            .on("click", function () { outerThis.selectNone(); });
                         
         this.buttonsPanel.append("br");
                         
         this.crossingRunnersButton = this.buttonsPanel.append("button")
-                                                      .text("Crossing runners")
+                                                      .text(getMessage("SelectCrossingRunners"))
                                                       .style("width", "100%")
                                                       .on("click", function () { outerThis.selectCrossingRunners(); })
                                                       .style("display", "none");
@@ -4446,7 +4575,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.selection.selectCrossingRunners(this.ageClassSet.allCompetitors); 
         if (this.selection.isSingleRunnerSelected()) {
             var competitorName = this.ageClassSet.allCompetitors[this.currentIndexes[0]].name;
-            alert(competitorName + " has no crossing runners.");
+            alert(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
         }
     };
 
@@ -4556,11 +4685,8 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
             this.redrawChart();
         } else {
-            var message = "Cannot draw a graph because no competitor has recorded a split time for control " + missedControls[0] + ".";
-            if (this.ageClassSet.getCourse().getNumClasses() > this.ageClassSet.getNumClasses()) {
-                message += "\n\nTry selecting some other classes.";
-            }
-            
+            var showAddendum = (this.ageClassSet.getCourse().getNumClasses() > this.ageClassSet.getNumClasses());
+            var message = getMessageWithFormatting((showAddendum) ? "NoSplitsForControlTryOtherClasses" : "NoSplitsForControl", {"$$CONTROL$$": missedControls[0]});
             this.chart.clearAndShowWarning(message);
         }
     };
@@ -4674,16 +4800,17 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     /**
     * Shows a message that appears if SplitsBrowser is unable to load event
     * data.
-    * @param {String} message - The text of the message to show.
+    * @param {String} key - The key of the message to show.
+    * @param {Object} params - Object mapping parameter names to values.
     */
-    function showLoadFailureMessage(message) {
+    function showLoadFailureMessage(key, params) {
         d3.select("body")
           .append("h1")
-          .text("SplitsBrowser \u2013 Error");
+          .text(getMessage("LoadFailedHeader"));//  "SplitsBrowser \u2013 Error");
           
        d3.select("body")
          .append("p")
-         .text(message);
+         .text(getMessageWithFormatting(key, params));
     }
     
     /**
@@ -4699,7 +4826,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 eventData = SplitsBrowser.Input.parseEventData(data);
             } catch (e) {
                 if (e.name === "InvalidData") {
-                    showLoadFailureMessage("Sorry, it wasn't possible to read in the results data, as the data appears to be invalid: '" + e.message + "'.");
+                    showLoadFailureMessage("LoadFailedInvalidData", {"$$MESSAGE$$": e.message});
                     return;
                 } else {
                     throw e;
@@ -4707,7 +4834,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             }
             
             if (eventData === null) {
-                showLoadFailureMessage("Sorry, it wasn't possible to read in the results data.  The data doesn't appear to be in any recognised format.");
+                showLoadFailureMessage("LoadFailedUnrecognisedData", {});
             } else {
                 var viewer = new Viewer();
                 viewer.buildUi();
@@ -4715,7 +4842,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                 viewer.selectClasses([0]);
             }
         } else {
-            showLoadFailureMessage("Sorry, it wasn't possible to read in the results data.  Status: " + status);
+            showLoadFailureMessage("LoadFailedStatusNotSuccess", {"$$STATUS$$": status});
         }
     }
     
@@ -4726,7 +4853,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {String} errorThrown - The error message returned from the server.
     */
     function readEventDataError(jqXHR, textStatus, errorThrown) {
-        showLoadFailureMessage("Sorry, it wasn't possible to load the results data.  The message returned from the server was '" + errorThrown + "'.");
+        showLoadFailureMessage("LoadFailedReadError", {"$$ERROR$$": errorThrown});
     }
 
     /**

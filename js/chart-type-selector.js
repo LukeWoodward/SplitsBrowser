@@ -21,6 +21,8 @@
 (function (){
     "use strict";
     
+    var getMessage = SplitsBrowser.getMessage;
+    
     /**
     * A control that wraps a drop-down list used to choose the types of chart to view.
     * @param {HTMLElement} parent - The parent element to add the control to.
@@ -31,7 +33,7 @@
         this.chartTypes = chartTypes;
         
         var span = d3.select(parent).append("span");
-        span.text("View: ");
+        span.text(getMessage("ChartTypeSelectorLabel"));
         var outerThis = this;
         this.dropDown = span.append("select").node();
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
@@ -40,7 +42,7 @@
         optionsList.enter().append("option");
         
         optionsList.attr("value", function (_value, index) { return index.toString(); })
-                   .text(function (value) { return value.name; });
+                   .text(function (value) { return getMessage(value.nameKey); });
                    
         optionsList.exit().remove();
     };

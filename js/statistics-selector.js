@@ -20,6 +20,8 @@
  */
 (function () {
     "use strict";
+    
+    var getMessage = SplitsBrowser.getMessage;
 
     // ID of the statistics selector control.
     // Must match that used in styles.css.
@@ -27,7 +29,7 @@
 
     var LABEL_ID_PREFIX = "statisticCheckbox";
 
-    var STATISTIC_NAMES = ["Total time", "Split time", "Behind fastest"];
+    var STATISTIC_NAME_KEYS = ["StatisticsTotalTimeKey", "StatisticsSplitTimeKey", "StatisticsBehindFastestKey"];
 
     /**
     * Control that contains a number of checkboxes for enabling and/or disabling
@@ -40,7 +42,7 @@
                                      .attr("id", STATISTIC_SELECTOR_ID);   
 
         var childSpans = this.span.selectAll("span")
-                                  .data(STATISTIC_NAMES)
+                                  .data(STATISTIC_NAME_KEYS)
                                   .enter()
                                   .append("span");
          
@@ -51,7 +53,7 @@
         childSpans.append("label")
                   .attr("for", function(val, index) { return LABEL_ID_PREFIX + index; })
                   .classed("statisticsSelectorLabel", true)
-                  .text(function(name) { return name; });
+                  .text(function(nameKey) { return getMessage(nameKey); });
         
         var outerThis = this;
         $("input", this.span.node()).bind("change", function () { return outerThis.onCheckboxChanged(); });

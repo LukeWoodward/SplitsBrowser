@@ -24,6 +24,7 @@
     var NUMBER_TYPE = typeof 0;
     
     var throwInvalidData = SplitsBrowser.throwInvalidData;
+    var getMessage = SplitsBrowser.getMessage;
 
     /**
     * Function used with the JavaScript sort method to sort competitors in order
@@ -247,9 +248,9 @@
     */
     Competitor.prototype.getSuffix = function () {
         if (this.completed()) {
-            return (this.isNonCompetitive) ? "n/c" : "";
+            return (this.isNonCompetitive) ? getMessage("NonCompetitiveShort") : "";
         } else {
-            return "mp";
+            return getMessage("MispunchedShort");
         }
     };
     

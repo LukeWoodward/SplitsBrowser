@@ -38,6 +38,8 @@
     var CompetitorListBox = SplitsBrowser.Controls.CompetitorListBox;
     var Chart = SplitsBrowser.Controls.Chart;
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
+    var getMessage = SplitsBrowser.getMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
     /**
     * Enables or disables a control, by setting or clearing an HTML "disabled"
@@ -135,19 +137,19 @@
         this.buttonsPanel = this.competitorListContainer.append("div");
                      
         this.allButton = this.buttonsPanel.append("button")
-                                          .text("All")
+                                          .text(getMessage("SelectAllCompetitors"))
                                           .style("width", "50%")
                                           .on("click", function () { outerThis.selectAll(); });
                         
         this.noneButton = this.buttonsPanel.append("button")
-                                           .text("None")
+                                           .text(getMessage("SelectNoCompetitors"))
                                            .style("width", "50%")
                                            .on("click", function () { outerThis.selectNone(); });
                         
         this.buttonsPanel.append("br");
                         
         this.crossingRunnersButton = this.buttonsPanel.append("button")
-                                                      .text("Crossing runners")
+                                                      .text(getMessage("SelectCrossingRunners"))
                                                       .style("width", "100%")
                                                       .on("click", function () { outerThis.selectCrossingRunners(); })
                                                       .style("display", "none");
@@ -188,7 +190,7 @@
         this.selection.selectCrossingRunners(this.ageClassSet.allCompetitors); 
         if (this.selection.isSingleRunnerSelected()) {
             var competitorName = this.ageClassSet.allCompetitors[this.currentIndexes[0]].name;
-            alert(competitorName + " has no crossing runners.");
+            alert(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
         }
     };
 
@@ -298,11 +300,8 @@
             this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
             this.redrawChart();
         } else {
-            var message = "Cannot draw a graph because no competitor has recorded a split time for control " + missedControls[0] + ".";
-            if (this.ageClassSet.getCourse().getNumClasses() > this.ageClassSet.getNumClasses()) {
-                message += "\n\nTry selecting some other classes.";
-            }
-            
+            var showAddendum = (this.ageClassSet.getCourse().getNumClasses() > this.ageClassSet.getNumClasses());
+            var message = getMessageWithFormatting((showAddendum) ? "NoSplitsForControlTryOtherClasses" : "NoSplitsForControl", {"$$CONTROL$$": missedControls[0]});
             this.chart.clearAndShowWarning(message);
         }
     };
@@ -416,16 +415,17 @@
     /**
     * Shows a message that appears if SplitsBrowser is unable to load event
     * data.
-    * @param {String} message - The text of the message to show.
+    * @param {String} key - The key of the message to show.
+    * @param {Object} params - Object mapping parameter names to values.
     */
-    function showLoadFailureMessage(message) {
+    function showLoadFailureMessage(key, params) {
         d3.select("body")
           .append("h1")
-          .text("SplitsBrowser \u2013 Error");
+          .text(getMessage("LoadFailedHeader"));
           
        d3.select("body")
          .append("p")
-         .text(message);
+         .text(getMessageWithFormatting(key, params));
     }
     
     /**
@@ -441,7 +441,7 @@
                 eventData = SplitsBrowser.Input.parseEventData(data);
             } catch (e) {
                 if (e.name === "InvalidData") {
-                    showLoadFailureMessage("Sorry, it wasn't possible to read in the results data, as the data appears to be invalid: '" + e.message + "'.");
+                    showLoadFailureMessage("LoadFailedInvalidData", {"$$MESSAGE$$": e.message});
                     return;
                 } else {
                     throw e;
@@ -449,7 +449,7 @@
             }
             
             if (eventData === null) {
-                showLoadFailureMessage("Sorry, it wasn't possible to read in the results data.  The data doesn't appear to be in any recognised format.");
+                showLoadFailureMessage("LoadFailedUnrecognisedData", {});
             } else {
                 var viewer = new Viewer();
                 viewer.buildUi();
@@ -457,7 +457,7 @@
                 viewer.selectClasses([0]);
             }
         } else {
-            showLoadFailureMessage("Sorry, it wasn't possible to read in the results data.  Status: " + status);
+            showLoadFailureMessage("LoadFailedStatusNotSuccess", {"$$STATUS$$": status});
         }
     }
     
@@ -468,7 +468,7 @@
     * @param {String} errorThrown - The error message returned from the server.
     */
     function readEventDataError(jqXHR, textStatus, errorThrown) {
-        showLoadFailureMessage("Sorry, it wasn't possible to load the results data.  The message returned from the server was '" + errorThrown + "'.");
+        showLoadFailureMessage("LoadFailedReadError", {"$$ERROR$$": errorThrown});
     }
 
     /**

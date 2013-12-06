@@ -32,55 +32,55 @@
 
     SplitsBrowser.Model.ChartTypes = {
         SplitsGraph: {
-            name: "Splits graph",
+            nameKey: "SplitsGraphChartType",
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
-            yAxisLabel: "Time loss (min)",
+            yAxisLabelKey: "SplitsGraphYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1
         },
         RaceGraph: {
-            name: "Race graph",
+            nameKey: "RaceGraphChartType",
             dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
-            yAxisLabel: "Time",
+            yAxisLabelKey: "RaceGraphYAxisLabel",
             isRaceGraph: true,
             isResultsTable: false,
             minViewableControl: 0
         },
         PositionAfterLeg: {
-            name: "Position after leg",
+            nameKey:  "PositionAfterLegChartType",
             dataSelector: function (comp) { return comp.cumRanks; },
             skipStart: true,
-            yAxisLabel: "Position",
+            yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1
         },
         SplitPosition: {
-            name: "Split position",
+            nameKey: "SplitPositionChartType",
             dataSelector: function (comp) { return comp.splitRanks; },
             skipStart: true,
-            yAxisLabel: "Position",
+            yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1
         },
         PercentBehind: {
-            name: "Percent behind",
+            nameKey: "PercentBehindChartType",
             dataSelector: function (comp, referenceCumTimes) { return comp.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
             skipStart: false,
-            yAxisLabel: "Percent behind",
+            yAxisLabelKey: "PercentBehindYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1
         },
         ResultsTable: {
-            name: "Results table",
+            nameKey: "ResultsTableChartType",
             dataSelector: null,
             skipStart: false,
-            yAxisLabel: null,
+            yAxisLabelKey: null,
             isRaceGraph: false,
             isResultsTable: true,
             minViewableControl: 1

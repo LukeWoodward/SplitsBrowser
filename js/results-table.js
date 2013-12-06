@@ -23,6 +23,8 @@
     
     var formatTime = SplitsBrowser.formatTime;
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
+    var getMessage = SplitsBrowser.getMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
     var NON_BREAKING_SPACE_CHAR = "\u00a0";
 
@@ -64,18 +66,29 @@
     * Populates the contents of the table with the age-class data.
     */
     ResultsTable.prototype.populateTable = function () {
-        var headerText = this.ageClass.name + ", " + this.ageClass.numControls + " control" + ((this.ageClass.numControls === 1) ? "" : "s");
+        var headerText = this.ageClass.name + ", ";
+        if (this.ageClass.numControls === 1) {
+            headerText += getMessage("ResultsTableHeaderSingleControl");
+        } else {
+            headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": this.ageClass.numControls});
+        }
+
         var course = this.ageClass.course;
         if (course.length !== null) {
-            headerText += ", " + course.length.toFixed(1) + "km";
+            headerText += ", " + getMessageWithFormatting("ResultsTableHeaderCourseLength", {"$$DISTANCE$$": course.length.toFixed(1)});
         }
         if (course.climb !== null) {
-            headerText += ", " + course.climb + "m";
+            headerText += ", " + getMessageWithFormatting("ResultsTableHeaderClimb", {"$$CLIMB$$": course.climb});
         }
         
         this.headerSpan.text(headerText);
         
-        var headerCellData = ["#", "Name", "Time"].concat(d3.range(1, this.ageClass.numControls + 1)).concat(["Finish"]);
+        var headerCellData = [
+            getMessage("ResultsTableHeaderControlNumber"),
+            getMessage("ResultsTableHeaderName"),
+            getMessage("ResultsTableHeaderTime")
+        ].concat(d3.range(1, this.ageClass.numControls + 1)).concat([getMessage("FinishName")]);
+        
         var headerCells = this.table.select("thead tr")
                                     .selectAll("th")
                                     .data(headerCellData);
@@ -106,7 +119,7 @@
             var tableRow = tableBody.append("tr");
             var numberCell = tableRow.append("td");
             if (competitor.isNonCompetitive) {
-                numberCell.text("n/c");
+                numberCell.text(getMessage("NonCompetitiveShort"));
                 nonCompCount += 1;
             } else if (competitor.completed()) {
                 if (index === 0 || competitors[index - 1].totalTime !== competitor.totalTime) {
@@ -117,7 +130,7 @@
             }
             
             addCell(tableRow, competitor.name, competitor.club);
-            addCell(tableRow, (competitor.completed()) ? formatTime(competitor.totalTime) : "mp", NON_BREAKING_SPACE_CHAR, "time");
+            addCell(tableRow, (competitor.completed()) ? formatTime(competitor.totalTime) : getMessage("MispunchedShort"), NON_BREAKING_SPACE_CHAR, "time");
             
             d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
                 addCell(tableRow, formatTime(competitor.getCumulativeTimeTo(controlNum)), formatTime(competitor.getSplitTimeTo(controlNum)), "time");

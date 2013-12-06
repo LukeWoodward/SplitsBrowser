@@ -21,9 +21,22 @@
 (function (){
     "use strict";
     
+    var getMessage = SplitsBrowser.getMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    
     var ALL_COMPARISON_OPTIONS = [
-        { name: "Winner", selector: function (ageClassSet) { return ageClassSet.getWinnerCumTimes(); }, requiresWinner: true },
-        { name: "Fastest time", selector: function (ageClassSet) { return ageClassSet.getFastestCumTimes(); }, requiresWinner: false }
+        {
+            nameKey: "CompareWithWinner",
+            selector: function (ageClassSet) { return ageClassSet.getWinnerCumTimes(); },
+            requiresWinner: true,
+            percentage: ""
+        },
+        {
+            nameKey: "CompareWithFastestTime",
+            selector: function (ageClassSet) { return ageClassSet.getFastestCumTimes(); },
+            requiresWinner: false,
+            percentage: ""
+        }
     ];
     
     // All 'Fastest time + N %' values (not including zero).
@@ -31,13 +44,19 @@
     
     FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
         ALL_COMPARISON_OPTIONS.push({
-            name: "Fastest time + " + percent + "%",
+            nameKey: "CompareWithFastestTimePlusPercentage",
             selector: function (ageClassSet) { return ageClassSet.getFastestCumTimesPlusPercentage(percent); },
-            requiresWinner: false
+            requiresWinner: false, 
+            percentage: percent
         });
     });
     
-    ALL_COMPARISON_OPTIONS.push({ name: "Any runner...", requiresWinner: true });
+    ALL_COMPARISON_OPTIONS.push({
+        nameKey: "CompareWithAnyRunner",
+        selector: null,
+        requiresWinner: true,
+        percentage: ""
+    });
     
     // Default selected index of the comparison function.
     var DEFAULT_COMPARISON_INDEX = 1; // 1 = fastest time.
@@ -69,7 +88,7 @@
         
         span.append("span")
             .classed("comparisonSelectorLabel", true)
-            .text("Compare with ");
+            .text(getMessage("ComparisonSelectorLabel"));
 
         var outerThis = this;
         this.dropDown = span.append("select")
@@ -83,7 +102,7 @@
         optionsList.enter().append("option");
         
         optionsList.attr("value", function (_opt, index) { return index.toString(); })
-                   .text(function (opt) { return opt.name; });
+                   .text(function (opt) { return getMessageWithFormatting(opt.nameKey, {"$$PERCENT$$": opt.percentage}); });
                    
         optionsList.exit().remove();
         
@@ -93,7 +112,7 @@
         
         this.runnerSpan.append("span")
                        .classed("comparisonSelectorLabel", true)
-                       .text("Runner: ");
+                       .text(getMessage("CompareWithAnyRunnerLabel"));
         
         this.runnerDropDown = this.runnerSpan.append("select")
                                              .attr("id", RUNNER_SELECTOR_ID)
@@ -203,7 +222,7 @@
         var option = ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex];
         if (!this.hasWinner && option.requiresWinner) {
             // No winner on this course means you can't select this option.
-            this.alerter("Cannot compare against '" + option.name + "' because no competitors in this class complete the course.");
+            this.alerter(getMessageWithFormatting("CannotCompareAsNoWinner", {"$$OPTION$$": getMessage(option.nameKey)}));
             this.dropDown.selectedIndex = this.previousSelectedIndex;
         } else {
             this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? "" : "none");

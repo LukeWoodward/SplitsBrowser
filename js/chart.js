@@ -74,6 +74,8 @@
     
     var isNotNull = SplitsBrowser.isNotNull;
     var formatTime = SplitsBrowser.formatTime;
+    var getMessage = SplitsBrowser.getMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
     var ChartPopup = SplitsBrowser.Controls.ChartPopup;
     
@@ -215,7 +217,7 @@
             return {time: comp.split, name: comp.name, highlight: false};
         });
         
-        return {title: "Selected classes", data: data, placeholder: "No competitors completed this course"};
+        return {title: getMessage("SelectedClassesPopupHeader"), data: data, placeholder: getMessage("SelectedClassesPopupPlaceholder")};
     };
     
     /**
@@ -229,7 +231,10 @@
         var startCode = course.getControlCode(this.currentControlIndex - 1);
         var endCode = course.getControlCode(this.currentControlIndex);
         
-        var title = "Fastest leg-time " + ((startCode === START) ? "Start" : startCode) + " to " + ((endCode === FINISH) ? "Finish" : endCode);
+        var startControl = (startCode === START) ? getMessage("StartName") : startCode;
+        var endControl = (endCode === FINISH) ? getMessage("FinishName") : endCode;
+        
+        var title = getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": startControl, "$$END$$": endControl});
         
         var primaryClass = this.ageClassSet.getPrimaryClassName();
         var data = this.eventData.getFastestSplitsForLeg(startCode, endCode)
@@ -261,16 +266,20 @@
         var primaryClass = this.ageClassSet.getPrimaryClassName();
         var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}; });
         
-        var title = formatTime(intervalStart) + " - " + formatTime(intervalEnd) + ": ";
+        var controlName;
         if (controlCode === START) {
-            title += "Start";
+            controlName = getMessage("StartName");
         } else if (controlCode === FINISH) {
-            title += "Finish";
+            controlName = getMessage("FinishName");
         } else {
-            title += "Control " + controlCode;
+            controlName = getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
         }
         
-        return {title: title, data: competitorData, placeholder: "No competitors."};
+        var title = getMessageWithFormatting(
+            "NearbyCompetitorsPopupHeader",
+            {"$$START$$": formatTime(intervalStart), "$$END$$": formatTime(intervalEnd), "$$CONTROL$$": controlName});
+        
+        return {title: title, data: competitorData, placeholder: getMessage("NoNearbyCompetitors")};
     };
 
     /**
@@ -527,15 +536,13 @@
     * top X-axis.
     *
     * The function returned is suitable for use with the D3 axis.tickFormat method.
-    * This label is "S" for index 0 (the start), "F" for the finish, and
-    * the control number for intermediate controls.
     *
     * @returns {function} Tick-formatting function.
     */
     Chart.prototype.getTickFormatter = function () {
         var outerThis = this;
         return function (value, idx) {
-            return (idx === 0) ? "S" : ((idx === outerThis.numControls + 1) ? "F" : idx.toString());
+            return (idx === 0) ? getMessage("StartNameShort") : ((idx === outerThis.numControls + 1) ? getMessage("FinishNameShort") : idx.toString());
         };
     };
 
@@ -792,7 +799,7 @@
                      .attr("x", 60)
                      .attr("y", -5)
                      .style("text-anchor", "start")
-                     .text("Time (min)");
+                     .text(getMessage("LowerXAxisChartLabel"));
     };
     
     /**
@@ -1109,7 +1116,7 @@
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
-        this.drawAxes(chartType.yAxisLabel, chartData);
+        this.drawAxes(getMessage(chartType.yAxisLabelKey), chartData);
         this.drawChartLines(chartData);
         this.drawCompetitorLegendLabels(chartData);
         this.removeControlLine();
