@@ -225,7 +225,7 @@
             this.alerter(getMessageWithFormatting("CannotCompareAsNoWinner", {"$$OPTION$$": getMessage(option.nameKey)}));
             this.dropDown.selectedIndex = this.previousSelectedIndex;
         } else {
-            this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? "" : "none");
+            this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? null : "none");
             this.currentRunnerIndex = (this.runnerDropDown.options.length === 0) ? 0 : parseInt(this.runnerDropDown.options[runnerDropdownSelectedIndex].value, 10);
             this.previousSelectedIndex = this.dropDown.selectedIndex;
             this.changeHandlers.forEach(function (handler) { handler(this.getComparisonFunction()); }, this);

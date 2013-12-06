@@ -2526,7 +2526,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         
         if (otherClassIndexes.length > 0) {
             this.otherClassesSelector.style("display", "inline-block");
-            this.otherClassesCombiningLabel.style("display", "");
+            this.otherClassesCombiningLabel.style("display", null);
         } else {
             this.otherClassesSelector.style("display", "none");
             this.otherClassesCombiningLabel.style("display", "none");
@@ -2547,7 +2547,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     */
     ClassSelector.prototype.showHideClassSelector = function () {
         if (this.otherClassesEnabled) {
-            this.otherClassesList.style("display", (this.otherClassesList.style("display") === "none") ? "" : "none");
+            this.otherClassesList.style("display", (this.otherClassesList.style("display") === "none") ? null : "none");
         }
     };
     
@@ -2778,7 +2778,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             this.alerter(getMessageWithFormatting("CannotCompareAsNoWinner", {"$$OPTION$$": getMessage(option.nameKey)}));
             this.dropDown.selectedIndex = this.previousSelectedIndex;
         } else {
-            this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? "" : "none");
+            this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? null : "none");
             this.currentRunnerIndex = (this.runnerDropDown.options.length === 0) ? 0 : parseInt(this.runnerDropDown.options[runnerDropdownSelectedIndex].value, 10);
             this.previousSelectedIndex = this.dropDown.selectedIndex;
             this.changeHandlers.forEach(function (handler) { handler(this.getComparisonFunction()); }, this);
@@ -3082,7 +3082,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @param {Object} location - The location of the chart popup.
     */
     ChartPopup.prototype.show = function (location) {
-        this.popupDiv.style("display", "");
+        this.popupDiv.style("display", null);
         this.shown = true;
         this.setLocation(location);
     };
@@ -4389,7 +4389,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Shows the table of results.
     */
     ResultsTable.prototype.show = function () {
-        this.div.style("display", "");
+        this.div.style("display", null);
         this.adjustTableCellWidths();
     };
     
@@ -4765,12 +4765,12 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
             this.resultsTable.show();
         } else {
             this.resultsTable.hide();
-            this.mainPanel.style("display", "");
+            this.mainPanel.style("display", null);
         }
         
         this.updateControlEnabledness();
         
-        this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "" : "none");
+        this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? null : "none");
         
         this.drawChart();
     };
@@ -4806,7 +4806,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     function showLoadFailureMessage(key, params) {
         d3.select("body")
           .append("h1")
-          .text(getMessage("LoadFailedHeader"));//  "SplitsBrowser \u2013 Error");
+          .text(getMessage("LoadFailedHeader"));
           
        d3.select("body")
          .append("p")

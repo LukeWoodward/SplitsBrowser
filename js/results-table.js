@@ -162,7 +162,7 @@
     * Shows the table of results.
     */
     ResultsTable.prototype.show = function () {
-        this.div.style("display", "");
+        this.div.style("display", null);
         this.adjustTableCellWidths();
     };
     

@@ -145,7 +145,7 @@
     * @param {Object} location - The location of the chart popup.
     */
     ChartPopup.prototype.show = function (location) {
-        this.popupDiv.style("display", "");
+        this.popupDiv.style("display", null);
         this.shown = true;
         this.setLocation(location);
     };

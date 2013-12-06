@@ -213,7 +213,7 @@
         
         if (otherClassIndexes.length > 0) {
             this.otherClassesSelector.style("display", "inline-block");
-            this.otherClassesCombiningLabel.style("display", "");
+            this.otherClassesCombiningLabel.style("display", null);
         } else {
             this.otherClassesSelector.style("display", "none");
             this.otherClassesCombiningLabel.style("display", "none");
@@ -234,7 +234,7 @@
     */
     ClassSelector.prototype.showHideClassSelector = function () {
         if (this.otherClassesEnabled) {
-            this.otherClassesList.style("display", (this.otherClassesList.style("display") === "none") ? "" : "none");
+            this.otherClassesList.style("display", (this.otherClassesList.style("display") === "none") ? null : "none");
         }
     };
     

@@ -380,12 +380,12 @@
             this.resultsTable.show();
         } else {
             this.resultsTable.hide();
-            this.mainPanel.style("display", "");
+            this.mainPanel.style("display", null);
         }
         
         this.updateControlEnabledness();
         
-        this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "" : "none");
+        this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? null : "none");
         
         this.drawChart();
     };
