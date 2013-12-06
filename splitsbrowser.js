@@ -3944,7 +3944,9 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
                   .attr("stroke", function (selCompIdx) { return colours[outerThis.selectedIndexes[selCompIdx] % colours.length]; })
                   .attr("class", function (selCompIdx) { return "graphLine competitor" + outerThis.selectedIndexes[selCompIdx]; })
                   .on("mouseenter", function (selCompIdx) { outerThis.highlight(outerThis.selectedIndexes[selCompIdx]); })
-                  .on("mouseleave", function () { outerThis.unhighlight(); });
+                  .on("mouseleave", function () { outerThis.unhighlight(); })
+                  .append("title")
+                  .text(function (selCompIdx) { return chartData.competitorNames[selCompIdx]; });
 
         graphLines.exit().remove();
     };
