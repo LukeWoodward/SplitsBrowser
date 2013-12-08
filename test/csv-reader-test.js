@@ -94,6 +94,19 @@
         assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
     });
 
+    QUnit.test("Can parse a single class with a single valid competitor when file has LF line-endings", function (assert) {
+        var csvData = "Example, 4\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23";
+        var actualEvent = parseEventData(csvData);
+        var expectedClass = new AgeClass("Example", 4, [
+            fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23])
+        ]);
+        
+        var expectedCourse = new Course("Example", [expectedClass], null, null, null);
+        expectedClass.setCourse(expectedCourse);
+        
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+    });
+
     QUnit.test("Can parse a single class with a single valid competitor and an empty class", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n\r\nEmpty, 6\r\n";
         var actualEvent = parseEventData(csvData);
@@ -170,6 +183,28 @@
     QUnit.test("Can parse two classes each with two valid competitors", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\nFred,Baker,DEF,12:12,02:42,01:51,04:00,01:31,00:30\r\n\r\n" + 
                       "Another example class, 5\r\nJane,Palmer,GHI,11:22,02:50,01:44,03:29,01:40,03:09,00:28\r\nFaye,Claidey,JKL,10:58,02:55,02:00,03:48,01:49,03:32,00:37";
+        var actualEvent = parseEventData(csvData);
+        var expectedClasses = [
+            new AgeClass("Example", 4, [
+                fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23]),
+                fromSplitTimes(2, "Fred", "Baker", "DEF", 12 * 3600 + 12 * 60, [162, 111, 240, 91, 30])]),
+            new AgeClass("Another example class", 5, [
+                fromSplitTimes(1, "Jane", "Palmer", "GHI", 11 * 3600 + 22 * 60, [170, 104, 209, 100, 189, 28]),
+                fromSplitTimes(2, "Faye", "Claidey", "JKL", 10 * 3600 + 58 * 60, [175, 120, 228, 109, 212, 37])])];
+                
+        var expectedCourses = [
+            new Course("Example", [expectedClasses[0]], null, null, null),
+            new Course("Another example class", [expectedClasses[1]], null, null, null)];
+            
+        expectedClasses[0].setCourse(expectedCourses[0]);
+        expectedClasses[1].setCourse(expectedCourses[1]);
+                
+        assert.deepEqual(actualEvent, new Event(expectedClasses, expectedCourses));
+    });
+
+    QUnit.test("Can parse two classes each with two valid competitors using LF line-endings", function (assert) {
+        var csvData = "Example, 4\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\nFred,Baker,DEF,12:12,02:42,01:51,04:00,01:31,00:30\n\n" + 
+                      "Another example class, 5\nJane,Palmer,GHI,11:22,02:50,01:44,03:29,01:40,03:09,00:28\nFaye,Claidey,JKL,10:58,02:55,02:00,03:48,01:49,03:32,00:37";
         var actualEvent = parseEventData(csvData);
         var expectedClasses = [
             new AgeClass("Example", 4, [

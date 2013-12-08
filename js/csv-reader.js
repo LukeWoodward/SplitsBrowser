@@ -62,7 +62,7 @@
     * @return {SplitsBrowser.Model.AgeClass} Parsed class data.
     */
     function parseAgeClass (ageClass) {
-        var lines = ageClass.split("\r\n").filter(isTrue);
+        var lines = ageClass.split(/\r?\n/).filter(isTrue);
         if (lines.length === 0) {
             throwInvalidData("parseAgeClass got an empty list of lines");
         }
@@ -92,7 +92,7 @@
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */
     function parseEventData (eventData) {
-        var classSections = eventData.split("\r\n\r\n").map($.trim).filter(isTrue);
+        var classSections = eventData.split(/\r?\n\r?\n/).map($.trim).filter(isTrue);
        
         var classes = classSections.map(parseAgeClass);
         

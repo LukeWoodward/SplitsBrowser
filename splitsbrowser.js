@@ -1696,7 +1696,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @return {SplitsBrowser.Model.AgeClass} Parsed class data.
     */
     function parseAgeClass (ageClass) {
-        var lines = ageClass.split("\r\n").filter(isTrue);
+        var lines = ageClass.split(/\r?\n/).filter(isTrue);
         if (lines.length === 0) {
             throwInvalidData("parseAgeClass got an empty list of lines");
         }
@@ -1726,7 +1726,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */
     function parseEventData (eventData) {
-        var classSections = eventData.split("\r\n\r\n").map($.trim).filter(isTrue);
+        var classSections = eventData.split(/\r?\n\r?\n/).map($.trim).filter(isTrue);
        
         var classes = classSections.map(parseAgeClass);
         
@@ -4475,7 +4475,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.referenceCumTimes = null;
         this.fastestCumTimes = null;
         this.previousCompetitorList = [];
-        this.topDivHeight = (topDiv) ? $(topDiv).height() : 0;
+        this.topDivHeight = (topDiv && $(topDiv).length > 0) ? $(topDiv).height() : 0;
         
         this.isChartEnabled = false;
 
