@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
+var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
 
 
 (function () {
@@ -4514,6 +4514,33 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
         this.topPanel = body.append("div");
                            
         var outerThis = this;
+        
+        var logoSvg = this.topPanel.append("svg");
+
+        logoSvg.style("width", "18px")
+               .style("height", "18px")
+               .style("margin-bottom", "-3px")
+               .style("margin-right", "20px");
+         
+        logoSvg.append("polygon")
+               .attr("points", "0,18 18,0 18,18")
+               .attr("fill", "red");
+               
+        logoSvg.append("polyline")
+               .attr("points", "0,0 0,18 18,18 18,0 0,0")
+               .attr("stroke", "black")
+               .attr("fill", "none");
+               
+        logoSvg.append("polyline")
+               .attr("points", "1,12 5,8 8,14 17,11")
+               .attr("fill", "none")
+               .attr("stroke", "blue")
+               .attr("stroke-width", "2");
+                                   
+        logoSvg.selectAll("*")
+               .append("title")
+               .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": SplitsBrowser.Version}));
+        
         this.classSelector = new ClassSelector(this.topPanel.node());
         if (this.classes !== null) {
             this.classSelector.setClasses(this.classes);

@@ -20,6 +20,8 @@
  */
 SplitsBrowser.Messages = {
 
+    ApplicationVersion: "SplitsBrowser - Version $$VERSION$$",
+    
     MispunchedShort: "mp",
     NonCompetitiveShort: "n/c",
     
