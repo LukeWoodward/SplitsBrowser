@@ -20,3 +20,8 @@
 *.PDF	 diff=astextplain
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
+
+# Test data files other than the catalog should be left as they are and not be
+# subject to line-ending normalisation.
+testdata/*              binary
+testdata/catalog.html   text diff
