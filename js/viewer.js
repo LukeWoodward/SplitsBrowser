@@ -99,21 +99,22 @@
     };
 
     /**
-    * Construct the UI inside the HTML body.
+    * Draws the logo in the top panel.
     */
-    Viewer.prototype.buildUi = function () {
-        var body = d3.select("body");
-        
-        this.topPanel = body.append("div");
-                           
-        var outerThis = this;
-        
+    Viewer.prototype.drawLogo = function () {
         var logoSvg = this.topPanel.append("svg");
 
         logoSvg.style("width", "18px")
                .style("height", "18px")
                .style("margin-bottom", "-3px")
                .style("margin-right", "20px");
+               
+        logoSvg.append("rect")
+               .attr("x", "0")
+               .attr("y", "0")
+               .attr("width", "18")
+               .attr("height", "18")
+               .attr("fill", "white");
          
         logoSvg.append("polygon")
                .attr("points", "0,18 18,0 18,18")
@@ -133,40 +134,60 @@
         logoSvg.selectAll("*")
                .append("title")
                .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": SplitsBrowser.Version}));
-        
+    };
+
+    /**
+    * Adds a spacer between controls on the top row.
+    */
+    Viewer.prototype.addSpacer = function () {
+        this.topPanel.append("span").classed("topRowSpacer", true);    
+    };
+    
+    /**
+    * Adds the class selector control to the top panel.
+    */
+    Viewer.prototype.addClassSelector = function () {
         this.classSelector = new ClassSelector(this.topPanel.node());
         if (this.classes !== null) {
             this.classSelector.setClasses(this.classes);
         }
-        
-        this.topPanel.append("span").classed("topRowSpacer", true);
-        
+    };
+    
+    /**
+    * Adds the chart-type selector to the top panel.
+    */
+    Viewer.prototype.addChartTypeSelector = function () {
         var types = SplitsBrowser.Model.ChartTypes;
         var chartTypes = [types.SplitsGraph, types.RaceGraph, types.PositionAfterLeg,
                           types.SplitPosition, types.PercentBehind, types.ResultsTable];
         
         this.chartTypeSelector = new ChartTypeSelector(this.topPanel.node(), chartTypes);
         
-        this.chartType = this.chartTypeSelector.getChartType();
-        
-        this.topPanel.append("span").classed("topRowSpacer", true);
-        
+        this.chartType = this.chartTypeSelector.getChartType();    
+    };
+    
+    /**
+    * Adds the comparison selector to the top panel.
+    */
+    Viewer.prototype.addComparisonSelector = function () {
         this.comparisonSelector = new ComparisonSelector(this.topPanel.node(), function (message) { alert(message); });
         if (this.classes !== null) {
             this.comparisonSelector.setClasses(this.classes);
         }
         
-        this.comparisonFunction = this.comparisonSelector.getComparisonFunction();
-        
-        this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
-        
-        this.mainPanel = body.append("div");
-        
+        this.comparisonFunction = this.comparisonSelector.getComparisonFunction();    
+    };
+    
+    /**
+    * Adds the list of competitors, and the buttons, to the page.
+    */
+    Viewer.prototype.addCompetitorList = function () {
         this.competitorListContainer = this.mainPanel.append("div")
                                                      .attr("id", COMPETITOR_LIST_CONTAINER_ID);
                                                
         this.buttonsPanel = this.competitorListContainer.append("div");
-                     
+                           
+        var outerThis = this;
         this.allButton = this.buttonsPanel.append("button")
                                           .text(getMessage("SelectAllCompetitors"))
                                           .style("width", "50%")
@@ -186,15 +207,35 @@
                                                       .style("display", "none");
 
         this.competitorListBox = new CompetitorListBox(this.competitorListContainer.node());
+    };
+
+    /**
+    * Construct the UI inside the HTML body.
+    */
+    Viewer.prototype.buildUi = function () {
+        var body = d3.select("body");
+        
+        this.topPanel = body.append("div");
+        
+        this.drawLogo();
+        this.addClassSelector();
+        this.addSpacer();
+        this.addChartTypeSelector();
+        this.addSpacer();
+        this.addComparisonSelector();
+        
+        this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
+        
+        this.mainPanel = body.append("div");
+        this.addCompetitorList();
         this.chart = new Chart(this.mainPanel.node());
         
         this.resultsTable = new ResultsTable(body.node());
         this.resultsTable.hide();
         
+        var outerThis = this;
         this.classSelector.registerChangeHandler(function (indexes) { outerThis.selectClasses(indexes); });
-        
         this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartType(chartType); });
-        
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
            
         $(window).resize(function () { outerThis.handleWindowResize(); });
