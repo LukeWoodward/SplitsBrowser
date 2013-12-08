@@ -3288,7 +3288,7 @@ var SplitsBrowser = { Model: {}, Input: {}, Controls: {} };
     * Shows the chart, after it has been hidden.
     */
     Chart.prototype.show = function () {
-        this.svg.style("position", "static")
+        this.svg.style("position", null)
                 .style("left", null);
     };
     
