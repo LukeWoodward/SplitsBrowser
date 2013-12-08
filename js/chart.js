@@ -825,19 +825,20 @@
                                 .interpolate("linear");
             }
         };
-
+        
         var graphLines = this.svgGroup.selectAll("path.graphLine")
                                       .data(d3.range(this.numLines));
 
         graphLines.enter()
-                  .append("path");
+                  .append("path")
+                  .append("title");
 
         graphLines.attr("d", function (selCompIdx) { return lineFunctionGenerator(selCompIdx)(chartData.dataColumns); })
                   .attr("stroke", function (selCompIdx) { return colours[outerThis.selectedIndexes[selCompIdx] % colours.length]; })
                   .attr("class", function (selCompIdx) { return "graphLine competitor" + outerThis.selectedIndexes[selCompIdx]; })
                   .on("mouseenter", function (selCompIdx) { outerThis.highlight(outerThis.selectedIndexes[selCompIdx]); })
                   .on("mouseleave", function () { outerThis.unhighlight(); })
-                  .append("title")
+                  .select("title")
                   .text(function (selCompIdx) { return chartData.competitorNames[selCompIdx]; });
 
         graphLines.exit().remove();
