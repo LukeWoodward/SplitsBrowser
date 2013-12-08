@@ -54,8 +54,11 @@
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
     * @constructor
+    * @param {String|HTMLElement|undefined} - Optional HTML element that forms
+    *     a 'banner' across the top of the page.  This can be specified by a
+    *     CSS selector or the HTML element itself.
     */
-    var Viewer = function () {
+    var Viewer = function (topDiv) {
     
         this.eventData = null;
         this.classes = null;
@@ -65,6 +68,7 @@
         this.referenceCumTimes = null;
         this.fastestCumTimes = null;
         this.previousCompetitorList = [];
+        this.topDivHeight = (topDiv && $(topDiv).length > 0) ? $(topDiv).height() : 0;
         
         this.isChartEnabled = false;
 
@@ -228,7 +232,7 @@
         var EXTRA_WRAP_PREVENTION_SPACE = 1;
         
         var bodyWidth = $(window).width() - horzMargin;
-        var bodyHeight = $(window).height() - vertMargin;
+        var bodyHeight = $(window).height() - vertMargin - this.topDivHeight;
 
         $("body").width(bodyWidth).height(bodyHeight);
         
@@ -433,8 +437,11 @@
     * data and starting SplitsBrowser.
     * @param {String} data - The data returned from the AJAX request.
     * @param {String} status - The status of the request.
+    * @param {String|HTMLElement|undefined} - Optional HTML element that forms
+    *     a 'banner' across the top of the page.  This can be specified by a
+    *     CSS selector or the HTML element itself.
     */
-    function readEventData(data, status) {
+    function readEventData(data, status, topDiv) {
         if (status === "success") {
             var eventData;
             try {
@@ -451,7 +458,7 @@
             if (eventData === null) {
                 showLoadFailureMessage("LoadFailedUnrecognisedData", {});
             } else {
-                var viewer = new Viewer();
+                var viewer = new Viewer(topDiv);
                 viewer.buildUi();
                 viewer.setEvent(eventData);
                 viewer.selectClasses([0]);
@@ -474,12 +481,15 @@
     /**
     * Loads the event data in the given URL and starts SplitsBrowser.
     * @param {String} eventUrl - The URL that points to the event data to load.
+    * @param {String|HTMLElement|undefined} - Optional HTML element that forms
+    *     a 'banner' across the top of the page.  This can be specified by a
+    *     CSS selector or the HTML element itself.
     */
-    SplitsBrowser.loadEvent = function (eventUrl) {
+    SplitsBrowser.loadEvent = function (eventUrl, topDiv) {
         $.ajax({
             url: eventUrl,
             data: "",
-            success: readEventData,
+            success: function (data, status) { readEventData(data, status, topDiv); },
             dataType: "text",
             error: readEventDataError
         });
