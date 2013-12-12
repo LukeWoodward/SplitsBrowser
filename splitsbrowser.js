@@ -4512,24 +4512,24 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     Viewer.prototype.drawLogo = function () {
         var logoSvg = this.topPanel.append("svg");
 
-        logoSvg.style("width", "18px")
-               .style("height", "18px")
+        logoSvg.style("width", "19px")
+               .style("height", "19px")
                .style("margin-bottom", "-3px")
                .style("margin-right", "20px");
                
         logoSvg.append("rect")
                .attr("x", "0")
                .attr("y", "0")
-               .attr("width", "18")
-               .attr("height", "18")
+               .attr("width", "19")
+               .attr("height", "19")
                .attr("fill", "white");
          
         logoSvg.append("polygon")
-               .attr("points", "0,18 18,0 18,18")
+               .attr("points", "0,19 19,0 19,19")
                .attr("fill", "red");
                
         logoSvg.append("polyline")
-               .attr("points", "0,0 0,18 18,18 18,0 0,0")
+               .attr("points", "0.5,0.5 0.5,18.5 18.5,18.5 18.5,0.5 0.5,0.5")
                .attr("stroke", "black")
                .attr("fill", "none");
                
