@@ -216,6 +216,7 @@ pip-log.txt
 
 
 data
+stuff
 node_modules
 d3*.js
 jquery*.js
