@@ -1,5 +1,5 @@
 ﻿/*
- *  SplitsBrowser CSV - Reads in 'EMIT' CSV result data files.
+ *  SplitsBrowser CSV - Reads in CSV result data files.
  *  
  *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
