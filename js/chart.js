@@ -165,6 +165,8 @@
         
         var handlers = {"mousemove": mousemoveHandler, "mousedown": mousedownHandler, "mouseup": mouseupHandler};
         this.popup = new ChartPopup(parent, handlers);
+        
+        $(document).mouseup(function () { outerThis.popup.hide(); });
     };
     
     /**
