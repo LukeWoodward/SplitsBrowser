@@ -103,4 +103,36 @@
                  {name: competitor1.name, className: ageClass1.name, time: competitor1Time}]);
     });
     
+    QUnit.test("Returns empty array of next controls for control that does not exist in any course", function (assert) {
+        var course1 = new Course("Test course 1", [], null, null, ["235", "212", "189", "214"]);
+        var course2 = new Course("Test course 2", [], null, null, ["226", "212", "189", "211"]);
+    
+        var event = new Event([], [course1, course2]);
+        assert.deepEqual(event.getNextControlsAfter("999"), []);
+    });
+    
+    QUnit.test("Returns single-element array of next controls for control that exists only in one course", function (assert) {
+        var course1 = new Course("Test course 1", [], null, null, ["235", "212", "189", "214"]);
+        var course2 = new Course("Test course 2", [], null, null, ["226", "212", "189", "211"]);
+    
+        var event = new Event([], [course1, course2]);
+        assert.deepEqual(event.getNextControlsAfter("226"), [{course: course2, nextControls: ["212"]}]);
+    });
+    
+    QUnit.test("Returns two-element array of next controls for control that exists in both courses", function (assert) {
+        var course1 = new Course("Test course 1", [], null, null, ["235", "212", "189", "214"]);
+        var course2 = new Course("Test course 2", [], null, null, ["226", "212", "189", "211"]);
+    
+        var event = new Event([], [course1, course2]);
+        assert.deepEqual(event.getNextControlsAfter("189"), [{course: course1, nextControls: ["214"]}, {course: course2, nextControls: ["211"]}]);
+    });
+    
+    QUnit.test("Returns two-element array of next controls after the start", function (assert) {
+        var course1 = new Course("Test course 1", [], null, null, ["235", "212", "189", "214"]);
+        var course2 = new Course("Test course 2", [], null, null, ["226", "212", "189", "211"]);
+    
+        var event = new Event([], [course1, course2]);
+        assert.deepEqual(event.getNextControlsAfter(Course.START), [{course: course1, nextControls: ["235"]}, {course: course2, nextControls: ["226"]}]);
+    });
+    
 })();

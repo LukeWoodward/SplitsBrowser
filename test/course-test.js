@@ -274,4 +274,59 @@
             [{name: competitor2.name, time: expectedTime, className: ageClass2.name}]);
     });
     
+    QUnit.test("Course with no controls does not have a control", function (assert) {
+        var course = new Course("Test course", [], null, null, null);
+        assert.ok(!course.hasControl("235"));
+    });
+    
+    QUnit.test("Course with controls does not have a control not on that course", function (assert) {
+        var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
+        assert.ok(!course.hasControl("999"));
+    });
+    
+    QUnit.test("Course with controls does have a control on that course", function (assert) {
+        var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
+        assert.ok(course.hasControl("235"));
+    });
+    
+    QUnit.test("Cannot return next control on course that has no controls", function (assert) {
+        var course = new Course("Test course", [], null, null, null);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            course.getNextControls("235");
+        });
+    });
+    
+    QUnit.test("Cannot return next control after finish on course that has controls", function (assert) {
+        var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            course.getNextControls(Course.FINISH);
+        });
+    });
+    
+    QUnit.test("Cannot return next control after control not on course", function (assert) {
+        var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            course.getNextControls("999");
+        });
+    });
+    
+    QUnit.test("Can return next control after start as first control", function (assert) {
+        var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
+        assert.deepEqual(course.getNextControls(Course.START), ["235"]);
+    });
+    
+    QUnit.test("Can return next control after intermediate control", function (assert) {
+        var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
+        assert.deepEqual(course.getNextControls("212"), ["189"]);
+    });
+    
+    QUnit.test("Can return next control after last control as the finish", function (assert) {
+        var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
+        assert.deepEqual(course.getNextControls("189"), [Course.FINISH]);
+    });    
+    
+    QUnit.test("Can return next controls after intermediate control that appears more than once ", function (assert) {
+        var course = new Course("Test course", [], null, null, ["235", "212", "189", "212", "197"]);
+        assert.deepEqual(course.getNextControls("212"), ["189", "197"]);
+    });
 })();

@@ -21,6 +21,8 @@
 (function () {
     "use strict";
     
+    var Course = SplitsBrowser.Model.Course;
+    
     /**
     * Contains all of the data for an event.
     * @param {Array} classes - Array of AgeClass objects representing all of
@@ -82,6 +84,21 @@
         competitors.sort(function (a, b) { return d3.ascending(a.time, b.time); });
         
         return competitors;
+    };
+    
+    /**
+    * Returns the list of controls that follow after a given control.
+    * @param {String} controlCode - The code for the control.
+    * @return {Array} Array of objects for each course using that control,
+    *    with each object listing course name and next control.
+    */
+    Event.prototype.getNextControlsAfter = function (controlCode) {
+        var courses = this.courses;
+        if (controlCode !== Course.START) {
+            courses = courses.filter(function (course) { return course.hasControl(controlCode); });
+        }
+        
+        return courses.map(function (course) { return {course: course, nextControls: course.getNextControls(controlCode)}; });
     };
     
     SplitsBrowser.Model.Event = Event;

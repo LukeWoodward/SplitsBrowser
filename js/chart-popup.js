@@ -22,6 +22,9 @@
     "use strict";
     
     var formatTime = SplitsBrowser.formatTime;
+    var getMessage = SplitsBrowser.getMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    var Course = SplitsBrowser.Model.Course;
     
     /**
     * Creates a ChartPopup control.
@@ -38,15 +41,27 @@
                      .style("display", "none")
                      .style("position", "absolute");
                      
-        this.popupDivHeader = this.popupDiv.append("div")
-                                           .classed("chartPopupHeader", true)
-                                           .append("span");
+        this.dataHeader = this.popupDiv.append("div")
+                                       .classed("chartPopupHeader", true)
+                                       .classed("data", true)
+                                       .append("span");
                                            
-        var popupDivTableContainer = this.popupDiv.append("div")
-                                                  .classed("chartPopupTableContainer", true);
+        this.nextControlHeader = this.popupDiv.append("div")
+                                              .classed("chartPopupHeader", true)
+                                              .classed("nextControls", true)
+                                              .append("span");
+                                           
+        var tableContainer = this.popupDiv.append("div")
+                                              .classed("chartPopupTableContainer", true);
                                                   
                                            
-        this.popupDivTable = popupDivTableContainer.append("table");
+        this.dataTable = tableContainer.append("table")
+                                       .classed("data", true);
+        
+        this.nextControlsTable = tableContainer.append("table")
+                                               .classed("nextControls", true);
+                                              
+        this.popupDiv.selectAll(".nextControls").style("display", "none");
 
         // At this point we need to pass through mouse events to the parent.
         // This is solely for the benefit of IE < 11, as IE11 and other
@@ -98,10 +113,10 @@
     * @param {boolean} includeClassNames - Whether to include class names.
     */
     ChartPopup.prototype.setData = function (competitorData, includeClassNames) {
-        this.popupDivHeader.text(competitorData.title);
+        this.dataHeader.text(competitorData.title);
         
-        var rows = this.popupDivTable.selectAll("tr")
-                                     .data(competitorData.data);
+        var rows = this.dataTable.selectAll("tr")
+                                 .data(competitorData.data);
                                      
         rows.enter().append("tr");
         
@@ -117,10 +132,50 @@
         rows.exit().remove();
         
         if (competitorData.data.length === 0 && competitorData.placeholder !== null) {
-            this.popupDivTable.append("tr")
-                              .append("td")
-                              .text(competitorData.placeholder);
+            this.dataTable.append("tr")
+                          .append("td")
+                          .text(competitorData.placeholder);
         }
+    };
+    
+    /**
+    * Sets the next-controls data.
+    *
+    * The next-controls data should be an object that contains two properties:
+    * * thisControl - The 'current' control.
+    * * nextControls - Array of objects, each with 'course' and 'nextControl'
+    *   properties.
+    *
+    * @param {Object} nextControlsData - The next-controls data.
+    */
+    ChartPopup.prototype.setNextControlData = function (nextControlsData) {
+        if (nextControlsData.thisControl === Course.START) {
+            this.nextControlHeader.text(getMessage("StartName"));
+        } else {
+            this.nextControlHeader.text(getMessageWithFormatting("ControlName", {"$$CODE$$": nextControlsData.thisControl}));
+        }
+        
+        var rows = this.nextControlsTable.selectAll("tr")
+                                         .data(nextControlsData.nextControls);
+        rows.enter().append("tr");
+        
+        rows.selectAll("td").remove();
+        rows.append("td").text(function (nextControlData) { return nextControlData.course.name; });
+        rows.append("td").text("-->");
+        rows.append("td").text(function (nextControlData) { return nextControlData.nextControls; });
+        
+        rows.exit().remove();
+    };
+    
+    /**
+    * Sets whether the popup is showing the next-controls information instead
+    * of the other data.
+    * @param {boolean} showNextControls - True to show the next controls, false
+    *    to show the other data.
+    */
+    ChartPopup.prototype.setShowNextControls = function (showNextControls) {
+        this.popupDiv.selectAll(".data").style("display", (showNextControls) ? "none" : null);
+        this.popupDiv.selectAll(".nextControls").style("display", (showNextControls) ? null : "none");
     };
     
     /**

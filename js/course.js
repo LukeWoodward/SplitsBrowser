@@ -270,5 +270,55 @@
         return matchingCompetitors;
     };
     
+    /**
+    * Returns whether the course has the given control.
+    * @param {String} controlCode - The code of the control.
+    * @return {boolean} True if the course has the control, false if the
+    *     course doesn't, or doesn't have any controls at all.
+    */
+    Course.prototype.hasControl = function (controlCode) {
+        return this.controls !== null && this.controls.indexOf(controlCode) > -1;
+    };
+    
+    /**
+    * Returns the control code(s) of the control(s) after the one with the
+    * given code.
+    *
+    * Controls can appear multiple times in a course.  If a control appears
+    * multiple times, there will be multiple next controls.  As a result
+    * @param {String} controlCode - The code of the control.
+    * @return {Array} The code of the next control
+    */
+    Course.prototype.getNextControls = function (controlCode) {
+        if (this.controls === null) {
+            throwInvalidData("Course has no controls");
+        } else if (controlCode === FINISH) {
+            throwInvalidData("Cannot fetch next control after the finish");
+        } else if (controlCode === START) {
+            return [this.controls[0]];
+        } else {
+            var lastControlIdx = -1;
+            var nextControls = [];
+            do {
+                var controlIdx = this.controls.indexOf(controlCode, lastControlIdx + 1);
+                if (controlIdx === -1) {
+                    break;
+                } else if (controlIdx === this.controls.length - 1) {
+                    nextControls.push(FINISH);
+                } else {
+                    nextControls.push(this.controls[controlIdx + 1]);
+                }
+                
+                lastControlIdx = controlIdx;
+            } while (true); // Loop exits when broken.
+            
+            if (nextControls.length === 0) {
+                throwInvalidData("Control '" + controlCode + "' not found on course " + this.name);
+            } else {
+                return nextControls;
+            }
+        }
+    };  
+    
     SplitsBrowser.Model.Course = Course;
 })();

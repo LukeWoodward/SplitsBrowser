@@ -1327,11 +1327,63 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         return matchingCompetitors;
     };
     
+    /**
+    * Returns whether the course has the given control.
+    * @param {String} controlCode - The code of the control.
+    * @return {boolean} True if the course has the control, false if the
+    *     course doesn't, or doesn't have any controls at all.
+    */
+    Course.prototype.hasControl = function (controlCode) {
+        return this.controls !== null && this.controls.indexOf(controlCode) > -1;
+    };
+    
+    /**
+    * Returns the control code(s) of the control(s) after the one with the
+    * given code.
+    *
+    * Controls can appear multiple times in a course.  If a control appears
+    * multiple times, there will be multiple next controls.  As a result
+    * @param {String} controlCode - The code of the control.
+    * @return {Array} The code of the next control
+    */
+    Course.prototype.getNextControls = function (controlCode) {
+        if (this.controls === null) {
+            throwInvalidData("Course has no controls");
+        } else if (controlCode === FINISH) {
+            throwInvalidData("Cannot fetch next control after the finish");
+        } else if (controlCode === START) {
+            return [this.controls[0]];
+        } else {
+            var lastControlIdx = -1;
+            var nextControls = [];
+            do {
+                var controlIdx = this.controls.indexOf(controlCode, lastControlIdx + 1);
+                if (controlIdx === -1) {
+                    break;
+                } else if (controlIdx === this.controls.length - 1) {
+                    nextControls.push(FINISH);
+                } else {
+                    nextControls.push(this.controls[controlIdx + 1]);
+                }
+                
+                lastControlIdx = controlIdx;
+            } while (true); // Loop exits when broken.
+            
+            if (nextControls.length === 0) {
+                throwInvalidData("Control '" + controlCode + "' not found on course " + this.name);
+            } else {
+                return nextControls;
+            }
+        }
+    };  
+    
     SplitsBrowser.Model.Course = Course;
 })();
 
 (function () {
     "use strict";
+    
+    var Course = SplitsBrowser.Model.Course;
     
     /**
     * Contains all of the data for an event.
@@ -1394,6 +1446,21 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         competitors.sort(function (a, b) { return d3.ascending(a.time, b.time); });
         
         return competitors;
+    };
+    
+    /**
+    * Returns the list of controls that follow after a given control.
+    * @param {String} controlCode - The code for the control.
+    * @return {Array} Array of objects for each course using that control,
+    *    with each object listing course name and next control.
+    */
+    Event.prototype.getNextControlsAfter = function (controlCode) {
+        var courses = this.courses;
+        if (controlCode !== Course.START) {
+            courses = courses.filter(function (course) { return course.hasControl(controlCode); });
+        }
+        
+        return courses.map(function (course) { return {course: course, nextControls: course.getNextControls(controlCode)}; });
     };
     
     SplitsBrowser.Model.Event = Event;
@@ -2979,6 +3046,9 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     "use strict";
     
     var formatTime = SplitsBrowser.formatTime;
+    var getMessage = SplitsBrowser.getMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    var Course = SplitsBrowser.Model.Course;
     
     /**
     * Creates a ChartPopup control.
@@ -2995,15 +3065,27 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
                      .style("display", "none")
                      .style("position", "absolute");
                      
-        this.popupDivHeader = this.popupDiv.append("div")
-                                           .classed("chartPopupHeader", true)
-                                           .append("span");
+        this.dataHeader = this.popupDiv.append("div")
+                                       .classed("chartPopupHeader", true)
+                                       .classed("data", true)
+                                       .append("span");
                                            
-        var popupDivTableContainer = this.popupDiv.append("div")
-                                                  .classed("chartPopupTableContainer", true);
+        this.nextControlHeader = this.popupDiv.append("div")
+                                              .classed("chartPopupHeader", true)
+                                              .classed("nextControls", true)
+                                              .append("span");
+                                           
+        var tableContainer = this.popupDiv.append("div")
+                                              .classed("chartPopupTableContainer", true);
                                                   
                                            
-        this.popupDivTable = popupDivTableContainer.append("table");
+        this.dataTable = tableContainer.append("table")
+                                       .classed("data", true);
+        
+        this.nextControlsTable = tableContainer.append("table")
+                                               .classed("nextControls", true);
+                                              
+        this.popupDiv.selectAll(".nextControls").style("display", "none");
 
         // At this point we need to pass through mouse events to the parent.
         // This is solely for the benefit of IE < 11, as IE11 and other
@@ -3055,10 +3137,10 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     * @param {boolean} includeClassNames - Whether to include class names.
     */
     ChartPopup.prototype.setData = function (competitorData, includeClassNames) {
-        this.popupDivHeader.text(competitorData.title);
+        this.dataHeader.text(competitorData.title);
         
-        var rows = this.popupDivTable.selectAll("tr")
-                                     .data(competitorData.data);
+        var rows = this.dataTable.selectAll("tr")
+                                 .data(competitorData.data);
                                      
         rows.enter().append("tr");
         
@@ -3074,10 +3156,50 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         rows.exit().remove();
         
         if (competitorData.data.length === 0 && competitorData.placeholder !== null) {
-            this.popupDivTable.append("tr")
-                              .append("td")
-                              .text(competitorData.placeholder);
+            this.dataTable.append("tr")
+                          .append("td")
+                          .text(competitorData.placeholder);
         }
+    };
+    
+    /**
+    * Sets the next-controls data.
+    *
+    * The next-controls data should be an object that contains two properties:
+    * * thisControl - The 'current' control.
+    * * nextControls - Array of objects, each with 'course' and 'nextControl'
+    *   properties.
+    *
+    * @param {Object} nextControlsData - The next-controls data.
+    */
+    ChartPopup.prototype.setNextControlData = function (nextControlsData) {
+        if (nextControlsData.thisControl === Course.START) {
+            this.nextControlHeader.text(getMessage("StartName"));
+        } else {
+            this.nextControlHeader.text(getMessageWithFormatting("ControlName", {"$$CODE$$": nextControlsData.thisControl}));
+        }
+        
+        var rows = this.nextControlsTable.selectAll("tr")
+                                         .data(nextControlsData.nextControls);
+        rows.enter().append("tr");
+        
+        rows.selectAll("td").remove();
+        rows.append("td").text(function (nextControlData) { return nextControlData.course.name; });
+        rows.append("td").text("-->");
+        rows.append("td").text(function (nextControlData) { return nextControlData.nextControls; });
+        
+        rows.exit().remove();
+    };
+    
+    /**
+    * Sets whether the popup is showing the next-controls information instead
+    * of the other data.
+    * @param {boolean} showNextControls - True to show the next controls, false
+    *    to show the other data.
+    */
+    ChartPopup.prototype.setShowNextControls = function (showNextControls) {
+        this.popupDiv.selectAll(".data").style("display", (showNextControls) ? "none" : null);
+        this.popupDiv.selectAll(".nextControls").style("display", (showNextControls) ? null : "none");
     };
     
     /**
@@ -3185,6 +3307,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
+    var Course = SplitsBrowser.Model.Course;
     var ChartPopup = SplitsBrowser.Controls.ChartPopup;
     
     /**
@@ -3391,6 +3514,67 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         
         return {title: title, data: competitorData, placeholder: getMessage("NoNearbyCompetitors")};
     };
+        
+    /**
+    * Compares two course names.
+    * @param {String} name1 - One course name to compare.
+    * @param {String} name2 - The other course name to compare.
+    * @return {Number} Comparison result: -1 if name1 < name2, 1 if
+    *     name1 > name2 and 0 if name1 === name2.
+    */
+    function compareCourseNames(name1, name2) {
+        if (name1 === name2) {
+            return 0;
+        } else if (name1 === "" || name2 === "" || name1[0] !== name2[0]) {
+            return (name1 < name2) ? -1 : 1;
+        } else {
+            // Both courses begin with the same letter.
+            var regexResult = /^[^0-9]+/.exec(name1);
+            if (regexResult !== null && regexResult.length > 0) {
+                // regexResult should be a 1-element array.
+                var result = regexResult[0];
+                if (0 < result.length && result.length < name1.length && name2.substring(0, result.length) === result) {
+                    var num1 = parseInt(name1.substring(result.length), 10);
+                    var num2 = parseInt(name2.substring(result.length), 10);
+                    if (!isNaN(num1) && !isNaN(num2)) {
+                        return num1 - num2;
+                    }
+                }
+            }
+            
+            return (name1 < name2) ? -1 : 1;
+        }
+    }
+    
+    /**
+    * Tidy next-control data, by joining up multiple controls into one string,
+    * and substituting the display-name of the finish if necessary.
+    * @param {Array} nextControls - Array of next-control information objects.
+    * @return {String} Next-control information containing joined-up control names.
+    */
+    function tidyNextControlsList(nextControls) {
+        return nextControls.map(function (nextControlRec) {
+            var codes = nextControlRec.nextControls.slice(0);
+            if (codes[codes.length - 1] === Course.FINISH) {
+                codes[codes.length - 1] = getMessage("FinishName");
+            }
+            
+            return {course: nextControlRec.course, nextControls: codes.join(", ")};
+        });
+    }
+    
+    /**
+    * Returns next-control data to show on the chart popup.
+    * @return {Array} Array of next-control data.
+    */
+    Chart.prototype.getNextControlData = function () {
+        var course = this.ageClassSet.getCourse();
+        var controlIdx = Math.min(this.currentControlIndex, course.controls.length);
+        var controlCode = course.getControlCode(controlIdx);
+        var nextControls = this.eventData.getNextControlsAfter(controlCode);
+        nextControls.sort(function (c1, c2) { return compareCourseNames(c1.course.name, c2.course.name); });
+        return {thisControl: controlCode, nextControls: tidyNextControlsList(nextControls) };
+    };
 
     /**
     * Handle the mouse entering the chart.
@@ -3495,9 +3679,39 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
             }
             
             if (showPopup) {
-                this.popupUpdateFunc();
+                this.updatePopupContents(event);
                 this.popup.show(this.getPopupLocation(event));
             }
+        }
+    };
+    
+    /**
+    * Updates the chart popup with the contents it should contain.
+    *
+    * If the current course has control data, and the cursor is above the top
+    * X-axis, control information is shown instead of whatever other data would
+    * be being shown.
+    *
+    * @param {jQuery.event} event - jQuery mouse-move event.
+    */
+    Chart.prototype.updatePopupContents = function (event) {
+        var yOffset = event.pageY - $(this.svg.node()).offset().top;
+        var showNextControls = this.hasControls && yOffset < MARGIN.top;
+        if (showNextControls) {
+            this.updateNextControlInformation();
+        } else {
+            this.popupUpdateFunc();
+        }
+        
+        this.popup.setShowNextControls(showNextControls);
+    };
+    
+    /**
+    * Updates the next-control information.
+    */
+    Chart.prototype.updateNextControlInformation = function () {
+        if (this.hasControls) {
+            this.popup.setNextControlData(this.getNextControlData());
         }
     };
 
@@ -3532,7 +3746,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         var yOffset = event.pageY - offset.top;
         
         if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - MARGIN.right && 
-            MARGIN.top <= yOffset && yOffset < svgNodeAsJQuery.height() - MARGIN.bottom) {
+            yOffset < svgNodeAsJQuery.height() - MARGIN.bottom) {
             // In the chart.
             // Get the time offset that the mouse is currently over.
             var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
@@ -3566,7 +3780,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
                     this.setCurrentChartTime(event);
                 }
                 
-                this.popupUpdateFunc();
+                this.updatePopupContents(event);
                 this.popup.setLocation(this.getPopupLocation(event));
             }
             

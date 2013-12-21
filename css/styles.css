@@ -268,10 +268,10 @@ div.warningPanel
 }
 
 /*
-Disable text selection on SVG text, or on the popup, as it causes unsightly
-selection during dragging.  Non-standard CSS here, but that's all we can do.
+Disable text selection, as it causes unsightly selection during dragging.
+Non-standard CSS here, but that's all we can do.
 */
-svg, div.chartPopup
+body
 {
   -moz-user-select: none;
   -webkit-user-select: none;

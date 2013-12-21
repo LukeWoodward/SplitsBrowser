@@ -77,6 +77,7 @@
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
+    var Course = SplitsBrowser.Model.Course;
     var ChartPopup = SplitsBrowser.Controls.ChartPopup;
     
     /**
@@ -283,6 +284,67 @@
         
         return {title: title, data: competitorData, placeholder: getMessage("NoNearbyCompetitors")};
     };
+        
+    /**
+    * Compares two course names.
+    * @param {String} name1 - One course name to compare.
+    * @param {String} name2 - The other course name to compare.
+    * @return {Number} Comparison result: -1 if name1 < name2, 1 if
+    *     name1 > name2 and 0 if name1 === name2.
+    */
+    function compareCourseNames(name1, name2) {
+        if (name1 === name2) {
+            return 0;
+        } else if (name1 === "" || name2 === "" || name1[0] !== name2[0]) {
+            return (name1 < name2) ? -1 : 1;
+        } else {
+            // Both courses begin with the same letter.
+            var regexResult = /^[^0-9]+/.exec(name1);
+            if (regexResult !== null && regexResult.length > 0) {
+                // regexResult should be a 1-element array.
+                var result = regexResult[0];
+                if (0 < result.length && result.length < name1.length && name2.substring(0, result.length) === result) {
+                    var num1 = parseInt(name1.substring(result.length), 10);
+                    var num2 = parseInt(name2.substring(result.length), 10);
+                    if (!isNaN(num1) && !isNaN(num2)) {
+                        return num1 - num2;
+                    }
+                }
+            }
+            
+            return (name1 < name2) ? -1 : 1;
+        }
+    }
+    
+    /**
+    * Tidy next-control data, by joining up multiple controls into one string,
+    * and substituting the display-name of the finish if necessary.
+    * @param {Array} nextControls - Array of next-control information objects.
+    * @return {String} Next-control information containing joined-up control names.
+    */
+    function tidyNextControlsList(nextControls) {
+        return nextControls.map(function (nextControlRec) {
+            var codes = nextControlRec.nextControls.slice(0);
+            if (codes[codes.length - 1] === Course.FINISH) {
+                codes[codes.length - 1] = getMessage("FinishName");
+            }
+            
+            return {course: nextControlRec.course, nextControls: codes.join(", ")};
+        });
+    }
+    
+    /**
+    * Returns next-control data to show on the chart popup.
+    * @return {Array} Array of next-control data.
+    */
+    Chart.prototype.getNextControlData = function () {
+        var course = this.ageClassSet.getCourse();
+        var controlIdx = Math.min(this.currentControlIndex, course.controls.length);
+        var controlCode = course.getControlCode(controlIdx);
+        var nextControls = this.eventData.getNextControlsAfter(controlCode);
+        nextControls.sort(function (c1, c2) { return compareCourseNames(c1.course.name, c2.course.name); });
+        return {thisControl: controlCode, nextControls: tidyNextControlsList(nextControls) };
+    };
 
     /**
     * Handle the mouse entering the chart.
@@ -387,9 +449,39 @@
             }
             
             if (showPopup) {
-                this.popupUpdateFunc();
+                this.updatePopupContents(event);
                 this.popup.show(this.getPopupLocation(event));
             }
+        }
+    };
+    
+    /**
+    * Updates the chart popup with the contents it should contain.
+    *
+    * If the current course has control data, and the cursor is above the top
+    * X-axis, control information is shown instead of whatever other data would
+    * be being shown.
+    *
+    * @param {jQuery.event} event - jQuery mouse-move event.
+    */
+    Chart.prototype.updatePopupContents = function (event) {
+        var yOffset = event.pageY - $(this.svg.node()).offset().top;
+        var showNextControls = this.hasControls && yOffset < MARGIN.top;
+        if (showNextControls) {
+            this.updateNextControlInformation();
+        } else {
+            this.popupUpdateFunc();
+        }
+        
+        this.popup.setShowNextControls(showNextControls);
+    };
+    
+    /**
+    * Updates the next-control information.
+    */
+    Chart.prototype.updateNextControlInformation = function () {
+        if (this.hasControls) {
+            this.popup.setNextControlData(this.getNextControlData());
         }
     };
 
@@ -424,7 +516,7 @@
         var yOffset = event.pageY - offset.top;
         
         if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - MARGIN.right && 
-            MARGIN.top <= yOffset && yOffset < svgNodeAsJQuery.height() - MARGIN.bottom) {
+            yOffset < svgNodeAsJQuery.height() - MARGIN.bottom) {
             // In the chart.
             // Get the time offset that the mouse is currently over.
             var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
@@ -458,7 +550,7 @@
                     this.setCurrentChartTime(event);
                 }
                 
-                this.popupUpdateFunc();
+                this.updatePopupContents(event);
                 this.popup.setLocation(this.getPopupLocation(event));
             }
             
