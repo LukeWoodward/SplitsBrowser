@@ -69,7 +69,7 @@
         var course1 = new Course("Test course", ageClassSet1.ageClasses, null, null, ["235", "189", "212"]);
         ageClassSet1.ageClasses.forEach(function (ageClass) { ageClass.setCourse(course1); });
 
-        var ageClassSet2 = new AgeClassSet([new AgeClass("Test class 2", 3, [fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [75, 242, 200])])]);
+        var ageClassSet2 = new AgeClassSet([new AgeClass("Test class 2", 3, [fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [75, 242, 200, 157])])]);
         var course2 = new Course("Test course 2", ageClassSet2.ageClasses, null, null, ["235", "189", "212"]);
         ageClassSet2.ageClasses[0].setCourse(course2);
         

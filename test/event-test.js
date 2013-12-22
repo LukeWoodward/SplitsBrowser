@@ -36,6 +36,10 @@
         return fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
+    function getCompetitor2WithExtraSplit() {
+        return fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 157, 100]);
+    }
+    
     QUnit.test("Returns empty list of fastest splits to a leg if the event has no competitors", function (assert) {
         var event = new Event([], []);
         assert.deepEqual(event.getFastestSplitsForLeg("235", "212"), []);
@@ -58,7 +62,7 @@
     
     QUnit.test("Returns list of fastest splits to a leg if the event has two courses with competitors in each on that leg, sorted into split order", function (assert) {
         var competitor1 = getCompetitor1();
-        var competitor2 = getCompetitor2();
+        var competitor2 = getCompetitor2WithExtraSplit();
         var ageClass1 = new AgeClass("Test class 1", 3, [competitor1]);
         var ageClass2 = new AgeClass("Test class 2", 4, [competitor2]);
         var course1 = new Course("Test course 1", [ageClass1], null, null, ["235", "212", "189"]);
@@ -89,7 +93,7 @@
     
     QUnit.test("Returns list of competitors visiting a control during an interval if the event has two courses and with one class each with competitors visiting that control, with competitors sorted in order of time", function (assert) {
         var competitor1 = getCompetitor1();
-        var competitor2 = getCompetitor2();
+        var competitor2 = getCompetitor2WithExtraSplit();
         var ageClass1 = new AgeClass("Test class 1", 3, [competitor1]);
         var ageClass2 = new AgeClass("Test class 2", 4, [competitor2]);
         var course1 = new Course("Test course 1", [ageClass1], null, null, ["235", "212", "189"]);

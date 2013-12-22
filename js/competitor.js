@@ -168,6 +168,7 @@
         this.cumTimes = cumTimes;
         this.splitRanks = null;
         this.cumRanks = null;
+        this.timeLosses = null;
 
         this.name = forename + " " + surname;
         this.totalTime = (this.cumTimes.indexOf(null) > -1) ? null : this.cumTimes[this.cumTimes.length - 1];
@@ -304,6 +305,17 @@
     };
     
     /**
+    * Returns the time loss of the competitor at the given control, or null if
+    * time losses cannot be calculated for the competitor or have not yet been
+    * calculated.
+    * @param {Number} controlIndex - Index of the control.
+    * @return {Number|null} Time loss in seconds, or null.
+    */
+    Competitor.prototype.getTimeLossAt = function (controlIndex) {
+        return (controlIndex === 0 || this.timeLosses === null) ? null : this.timeLosses[controlIndex - 1];
+    };
+    
+    /**
     * Returns all of the competitor's cumulative time splits.
     * @return {Array} The cumulative split times in seconds for the competitor.
     */
@@ -372,6 +384,45 @@
         });
         
         return percentsBehind;
+    };
+    
+    /**
+    * Determines the time losses for this competitor.
+    * @param {Array} fastestSplitTimes - Array of fastest split times.
+    */
+    Competitor.prototype.determineTimeLosses = function (fastestSplitTimes) {
+        if (this.completed()) {
+            if (fastestSplitTimes.length !== this.splitTimes.length) {
+                throwInvalidData("Cannot determine time loss of competitor with " + this.splitTimes.length + " split times using " + fastestSplitTimes.length + " fastest splits");
+            } else if (fastestSplitTimes.indexOf(null) >= 0) {
+                throwInvalidData("Cannot determine time loss of competitor when there is a null value in the fastest splits");
+            }
+            
+            // We use the same algorithm for calculating time loss as the
+            // original, with a simplification: we calculate split ratios
+            // (split[i] / fastest[i]) rather than time loss rates
+            // (split[i] - fastest[i])/fastest[i].  A control's split ratio
+            // is its time loss rate plus 1.  Not subtracting one at the start
+            // means that we then don't have to add it back on at the end.
+            
+            var splitRatios = this.splitTimes.map(function (splitTime, index) {
+                return splitTime / fastestSplitTimes[index];
+            });
+            
+            splitRatios.sort(d3.ascending);
+            
+            var medianSplitRatio;
+            if (splitRatios.length % 2 === 1) {
+                medianSplitRatio = splitRatios[(splitRatios.length - 1) / 2];
+            } else {
+                var midpt = splitRatios.length / 2;
+                medianSplitRatio = (splitRatios[midpt - 1] + splitRatios[midpt]) / 2;
+            }
+            
+            this.timeLosses = this.splitTimes.map(function (splitTime, index) {
+                return Math.round(splitTime - fastestSplitTimes[index] * medianSplitRatio);
+            });
+        }
     };
     
     /**

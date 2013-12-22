@@ -29,7 +29,7 @@
 
     var LABEL_ID_PREFIX = "statisticCheckbox";
 
-    var STATISTIC_NAME_KEYS = ["StatisticsTotalTimeKey", "StatisticsSplitTimeKey", "StatisticsBehindFastestKey"];
+    var STATISTIC_NAME_KEYS = ["StatisticsTotalTimeKey", "StatisticsSplitTimeKey", "StatisticsBehindFastestKey", "StatisticsTimeLossKey"];
 
     /**
     * Control that contains a number of checkboxes for enabling and/or disabling

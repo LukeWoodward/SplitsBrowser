@@ -36,8 +36,14 @@
         this.competitors = competitors;
         this.course = null;
         
+        var fastestSplitTimes = d3.range(1, numControls + 2).map(function (controlIdx) {
+            var splitRec = this.getFastestSplitTo(controlIdx);
+            return (splitRec === null) ? null : splitRec.split;
+        }, this);
+        
         this.competitors.forEach(function (comp) {
             comp.setClassName(this.name);
+            comp.determineTimeLosses(fastestSplitTimes);
         }, this);
     };
     
@@ -81,7 +87,7 @@
     */
     AgeClass.prototype.getFastestSplitTo = function (controlIdx) {
         if (typeof controlIdx !== "number" || controlIdx < 1 || controlIdx > this.numControls + 1) {
-            throwInvalidData("Cannot return splits to leg '" + this.numControls + "' in a course with " + this.numControls + " control(s)");
+            throwInvalidData("Cannot return splits to leg '" + controlIdx + "' in a course with " + this.numControls + " control(s)");
         }
     
         var fastestSplit = null;

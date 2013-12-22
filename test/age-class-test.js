@@ -193,5 +193,23 @@
     QUnit.test("Age class with two competitors mispunching different controls has splits for all controls", function (assert) {
         var ageClass = new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControl3(), getCompetitor2WithNullSplitForControl2()]);
         assert.deepEqual(ageClass.getControlsWithNoSplits(), []);
-    });    
+    });
+
+    QUnit.test("Can determine time-loss data for valid competitors in age-class", function (assert) {
+        var ageClass = getTestAgeClass();
+        ageClass.competitors.forEach(function (comp) {
+            [1, 2, 3, 4].forEach(function (controlIdx) {
+                assert.ok(comp.getTimeLossAt(controlIdx) !== null, "Time-loss for competitor '" + comp.name + "' at control '" + controlIdx + "' should not be null");
+            });
+        });
+    });
+
+    QUnit.test("Can determine as all-null time-loss data for age-class with two competitors mispunching the same control", function (assert) {
+        var ageClass = new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControl3(), getCompetitor2WithNullSplitForControl3()]);
+        ageClass.competitors.forEach(function (comp) {
+            [1, 2, 3, 4].forEach(function (controlIdx) {
+                assert.strictEqual(comp.getTimeLossAt(controlIdx), null, "Time-loss for competitor '" + comp.name + "' at control '" + controlIdx + "' should be null");
+            });
+        });
+    });
 })();

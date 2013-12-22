@@ -486,6 +486,20 @@
         var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - fastestSplit; });
         return timesBehind;
     };
+
+    /**
+    * Returns an array of the the time losses of the selected competitors at
+    * the given control.
+    * @param {Number} controlIndex - Index of the given control.
+    * @param {Array} indexes - Array of indexes of selected competitors.
+    * @return {Array} Array of times in seconds that the given competitors are
+    *     deemed to have lost at the given control.
+    */
+    Chart.prototype.getTimeLosses = function (controlIndex, indexes) {
+        var selectedCompetitors = indexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
+        var timeLosses = selectedCompetitors.map(function (comp) { return comp.getTimeLossAt(controlIndex); });
+        return timeLosses;
+    };
     
     /**
     * Updates the statistics text shown after the competitors.
@@ -512,6 +526,12 @@
             if (this.visibleStatistics[2]) {
                 var timesBehind = this.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                 labelTexts = d3.zip(labelTexts, timesBehind)
+                               .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
+            }
+             
+            if (this.visibleStatistics[3]) {
+                var timeLosses = this.getTimeLosses(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
+                labelTexts = d3.zip(labelTexts, timeLosses)
                                .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
             }
         }
@@ -641,6 +661,22 @@
     };
 
     /**
+    * Return the maximum width of the behind-fastest time shown to the right of
+    * each competitor 
+    * @returns {Number} Maximum width of behind-fastest time rank text, in pixels.
+    */
+    Chart.prototype.getMaxTimeLossWidth = function() {
+        var maxTime = 0;
+        
+        for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
+            var times = this.getTimeLosses(controlIndex, this.selectedIndexes);
+            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+        }
+        
+        return this.getTextWidth(SPACER + formatTime(maxTime));
+    };
+
+    /**
     * Determines the maximum width of the statistics text at the end of the competitor.
     * @returns {Number} Maximum width of the statistics text, in pixels.
     */
@@ -654,6 +690,9 @@
         }
         if (this.visibleStatistics[2]) {
             maxWidth += this.getMaxTimeBehindFastestWidth();
+        }
+        if (this.visibleStatistics[3]) {
+            maxWidth += this.getMaxTimeLossWidth();
         }
         
         return maxWidth;

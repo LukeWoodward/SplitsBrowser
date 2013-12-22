@@ -390,6 +390,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         this.cumTimes = cumTimes;
         this.splitRanks = null;
         this.cumRanks = null;
+        this.timeLosses = null;
 
         this.name = forename + " " + surname;
         this.totalTime = (this.cumTimes.indexOf(null) > -1) ? null : this.cumTimes[this.cumTimes.length - 1];
@@ -526,6 +527,17 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Returns the time loss of the competitor at the given control, or null if
+    * time losses cannot be calculated for the competitor or have not yet been
+    * calculated.
+    * @param {Number} controlIndex - Index of the control.
+    * @return {Number|null} Time loss in seconds, or null.
+    */
+    Competitor.prototype.getTimeLossAt = function (controlIndex) {
+        return (controlIndex === 0 || this.timeLosses === null) ? null : this.timeLosses[controlIndex - 1];
+    };
+    
+    /**
     * Returns all of the competitor's cumulative time splits.
     * @return {Array} The cumulative split times in seconds for the competitor.
     */
@@ -597,6 +609,45 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Determines the time losses for this competitor.
+    * @param {Array} fastestSplitTimes - Array of fastest split times.
+    */
+    Competitor.prototype.determineTimeLosses = function (fastestSplitTimes) {
+        if (this.completed()) {
+            if (fastestSplitTimes.length !== this.splitTimes.length) {
+                throwInvalidData("Cannot determine time loss of competitor with " + this.splitTimes.length + " split times using " + fastestSplitTimes.length + " fastest splits");
+            } else if (fastestSplitTimes.indexOf(null) >= 0) {
+                throwInvalidData("Cannot determine time loss of competitor when there is a null value in the fastest splits");
+            }
+            
+            // We use the same algorithm for calculating time loss as the
+            // original, with a simplification: we calculate split ratios
+            // (split[i] / fastest[i]) rather than time loss rates
+            // (split[i] - fastest[i])/fastest[i].  A control's split ratio
+            // is its time loss rate plus 1.  Not subtracting one at the start
+            // means that we then don't have to add it back on at the end.
+            
+            var splitRatios = this.splitTimes.map(function (splitTime, index) {
+                return splitTime / fastestSplitTimes[index];
+            });
+            
+            splitRatios.sort(d3.ascending);
+            
+            var medianSplitRatio;
+            if (splitRatios.length % 2 === 1) {
+                medianSplitRatio = splitRatios[(splitRatios.length - 1) / 2];
+            } else {
+                var midpt = splitRatios.length / 2;
+                medianSplitRatio = (splitRatios[midpt - 1] + splitRatios[midpt]) / 2;
+            }
+            
+            this.timeLosses = this.splitTimes.map(function (splitTime, index) {
+                return Math.round(splitTime - fastestSplitTimes[index] * medianSplitRatio);
+            });
+        }
+    };
+    
+    /**
     * Returns whether this competitor 'crosses' another.  Two competitors are
     * considered to have crossed if their chart lines on the Race Graph cross.
     * @param {Competitor} other - The competitor to compare against.
@@ -650,8 +701,14 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         this.competitors = competitors;
         this.course = null;
         
+        var fastestSplitTimes = d3.range(1, numControls + 2).map(function (controlIdx) {
+            var splitRec = this.getFastestSplitTo(controlIdx);
+            return (splitRec === null) ? null : splitRec.split;
+        }, this);
+        
         this.competitors.forEach(function (comp) {
             comp.setClassName(this.name);
+            comp.determineTimeLosses(fastestSplitTimes);
         }, this);
     };
     
@@ -695,7 +752,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     */
     AgeClass.prototype.getFastestSplitTo = function (controlIdx) {
         if (typeof controlIdx !== "number" || controlIdx < 1 || controlIdx > this.numControls + 1) {
-            throwInvalidData("Cannot return splits to leg '" + this.numControls + "' in a course with " + this.numControls + " control(s)");
+            throwInvalidData("Cannot return splits to leg '" + controlIdx + "' in a course with " + this.numControls + " control(s)");
         }
     
         var fastestSplit = null;
@@ -2887,7 +2944,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
 
     var LABEL_ID_PREFIX = "statisticCheckbox";
 
-    var STATISTIC_NAME_KEYS = ["StatisticsTotalTimeKey", "StatisticsSplitTimeKey", "StatisticsBehindFastestKey"];
+    var STATISTIC_NAME_KEYS = ["StatisticsTotalTimeKey", "StatisticsSplitTimeKey", "StatisticsBehindFastestKey", "StatisticsTimeLossKey"];
 
     /**
     * Control that contains a number of checkboxes for enabling and/or disabling
@@ -3855,6 +3912,20 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - fastestSplit; });
         return timesBehind;
     };
+
+    /**
+    * Returns an array of the the time losses of the selected competitors at
+    * the given control.
+    * @param {Number} controlIndex - Index of the given control.
+    * @param {Array} indexes - Array of indexes of selected competitors.
+    * @return {Array} Array of times in seconds that the given competitors are
+    *     deemed to have lost at the given control.
+    */
+    Chart.prototype.getTimeLosses = function (controlIndex, indexes) {
+        var selectedCompetitors = indexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
+        var timeLosses = selectedCompetitors.map(function (comp) { return comp.getTimeLossAt(controlIndex); });
+        return timeLosses;
+    };
     
     /**
     * Updates the statistics text shown after the competitors.
@@ -3881,6 +3952,12 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
             if (this.visibleStatistics[2]) {
                 var timesBehind = this.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                 labelTexts = d3.zip(labelTexts, timesBehind)
+                               .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
+            }
+             
+            if (this.visibleStatistics[3]) {
+                var timeLosses = this.getTimeLosses(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
+                labelTexts = d3.zip(labelTexts, timeLosses)
                                .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
             }
         }
@@ -4010,6 +4087,22 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     };
 
     /**
+    * Return the maximum width of the behind-fastest time shown to the right of
+    * each competitor 
+    * @returns {Number} Maximum width of behind-fastest time rank text, in pixels.
+    */
+    Chart.prototype.getMaxTimeLossWidth = function() {
+        var maxTime = 0;
+        
+        for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
+            var times = this.getTimeLosses(controlIndex, this.selectedIndexes);
+            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+        }
+        
+        return this.getTextWidth(SPACER + formatTime(maxTime));
+    };
+
+    /**
     * Determines the maximum width of the statistics text at the end of the competitor.
     * @returns {Number} Maximum width of the statistics text, in pixels.
     */
@@ -4023,6 +4116,9 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         }
         if (this.visibleStatistics[2]) {
             maxWidth += this.getMaxTimeBehindFastestWidth();
+        }
+        if (this.visibleStatistics[3]) {
+            maxWidth += this.getMaxTimeLossWidth();
         }
         
         return maxWidth;

@@ -313,6 +313,69 @@
         });
     });
     
+    QUnit.test("Can determine time losses of competitor with even number of splits", function (assert) {
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [96, 221, 184, 100]);
+        var fastestSplits = [65, 209, 184, 97];
+        competitor.determineTimeLosses(fastestSplits);
+        assert.strictEqual(competitor.getTimeLossAt(0), null);
+        
+        // Split ratios are 1.4769, 1.05742, 1, 1.03093
+        // median is 1.04417
+        // expected times are therefore 67.8711, 218.232, 192.1277, 101.2847
+        // time losses are then  28.1288, 2.7680, -8.1277, -1.2847
+        
+        assert.strictEqual(competitor.getTimeLossAt(1), 28);
+        assert.strictEqual(competitor.getTimeLossAt(2), 3);
+        assert.strictEqual(competitor.getTimeLossAt(3), -8);
+        assert.strictEqual(competitor.getTimeLossAt(4), -1);
+    });
+    
+    QUnit.test("Can determine time losses of competitor with odd number of splits", function (assert) {
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [96, 221, 100]);
+        var fastestSplits = [65, 209, 97];
+        competitor.determineTimeLosses(fastestSplits);
+        assert.strictEqual(competitor.getTimeLossAt(0), null);
+        
+        // Split ratios are 1.4769, 1.05742, 1.03093
+        // median is 1.05742
+        // expected times are therefore 68.7321, 211, 192.1277, 102.5694
+        // time losses are then 27.2679, 0, -2.5694
+        
+        assert.strictEqual(competitor.getTimeLossAt(1), 27);
+        assert.strictEqual(competitor.getTimeLossAt(2), 0);
+        assert.strictEqual(competitor.getTimeLossAt(3), -3);
+    });
+    
+    QUnit.test("Cannot determine time losses of competitor when given wrong number of reference splits", function (assert) {
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [96, 221, 184, 100]);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            competitor.determineTimeLosses([65, 209, 97]);
+        });
+    });
+    
+    QUnit.test("Cannot determine time losses of competitor when given split times with null value", function (assert) {
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [96, 221, 184, 100]);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            competitor.determineTimeLosses([65, 209, null, 97]);
+        });
+    });
+    
+    QUnit.test("Can determine time losses as all null if competitor mispunches", function (assert) {
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [96, 221, null, 100]);
+        competitor.determineTimeLosses([65, 209, 184, 97]);
+        for (var controlIdx = 0; controlIdx <= 4; controlIdx += 1) {
+            assert.strictEqual(competitor.getTimeLossAt(controlIdx), null);
+        }
+    });
+    
+    QUnit.test("Can determine time losses as all null if competitor mispunches even if fastest times also have null in them", function (assert) {
+        var competitor = fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [96, 221, null, 100]);
+        competitor.determineTimeLosses([65, 209, null, 97]);
+        for (var controlIdx = 0; controlIdx <= 4; controlIdx += 1) {
+            assert.strictEqual(competitor.getTimeLossAt(controlIdx), null);
+        }
+    });
+    
     QUnit.test("Cannot determine that a competitor crosses another one with a different number of controls", function (assert) {
         var competitor1 = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 421]);
         var competitor2 = fromCumTimes(2, "Fred", "Baker", "DEF", 12 * 3600, [0, 71, 218, 379, 440, 491]);

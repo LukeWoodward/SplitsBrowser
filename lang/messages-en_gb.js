@@ -75,6 +75,7 @@ SplitsBrowser.Messages = {
     StatisticsTotalTimeKey: "Total time",
     StatisticsSplitTimeKey: "Split time",
     StatisticsBehindFastestKey: "Behind fastest",
+    StatisticsTimeLossKey: "Time loss",
     
     ResultsTableHeaderSingleControl: "1 control",
     ResultsTableHeaderMultipleControls: "$$NUM$$ controls",
