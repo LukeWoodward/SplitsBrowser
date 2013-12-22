@@ -143,6 +143,7 @@
         rows.enter().append("tr");
         
         rows.selectAll("td").remove();
+        rows.classed("highlighted", false);
         rows.append("td").text(function (nextControlData) { return nextControlData.course.name; });
         rows.append("td").text("-->");
         rows.append("td").text(function (nextControlData) { return nextControlData.nextControls; });
