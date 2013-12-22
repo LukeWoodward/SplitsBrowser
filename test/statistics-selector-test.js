@@ -40,7 +40,7 @@
 
     QUnit.test("All statistics disabled by default", function (assert) {
         var selector = new Selector(d3.select("#qunit-fixture").node());
-        assert.deepEqual(selector.getVisibleStatistics(), [false, false, false, false]);
+        assert.deepEqual(selector.getVisibleStatistics(), {TotalTime: false, SplitTime: false, BehindFastest: false, TimeLoss: false});
     });
 
     QUnit.test("Can register change handler and have it called", function (assert) {
@@ -51,7 +51,7 @@
         
         var checkboxes = $("#qunit-fixture input");
         $(checkboxes[0]).prop("checked", true).change();
-        assert.deepEqual(lastVisibleStats, [true, false, false, false]);
+        assert.deepEqual(lastVisibleStats, {TotalTime: true, SplitTime: false, BehindFastest: false, TimeLoss: false});
         assert.strictEqual(1, callCount);
     });
 
@@ -65,7 +65,7 @@
         var checkboxes = $("#qunit-fixture input");
         $(checkboxes[1]).prop("checked", true).change();
         
-        assert.deepEqual(lastVisibleStats, [false, true, false, false]);
+        assert.deepEqual(lastVisibleStats, {TotalTime: false, SplitTime: true, BehindFastest: false, TimeLoss: false});
         assert.strictEqual(1, callCount);
     });
 
@@ -87,9 +87,10 @@
         var checkboxes = $("#qunit-fixture input");
         $(checkboxes[2]).prop("checked", true).change();
         
-        assert.deepEqual(lastVisibleStats, [false, false, true, false]);
+        var expectedStats = {TotalTime: false, SplitTime: false, BehindFastest: true, TimeLoss: false};
+        assert.deepEqual(lastVisibleStats, expectedStats);
         assert.strictEqual(1, callCount);
-        assert.deepEqual(lastVisibleStats2, [false, false, true, false]);
+        assert.deepEqual(lastVisibleStats2, expectedStats);
         assert.strictEqual(1, callCount2); 
     });
 
@@ -99,14 +100,16 @@
         
         selector.registerChangeHandler(testChangeHandler);
         
+        
         var checkboxes = $("#qunit-fixture input");
-        $(checkboxes[0]).prop("checked", true).change();
-        assert.deepEqual(lastVisibleStats, [true, false, false, false]);
+        $(checkboxes[3]).prop("checked", true).change();
+        var expectedResult = {TotalTime: false, SplitTime: false, BehindFastest: false, TimeLoss: true};
+        assert.deepEqual(lastVisibleStats, expectedResult);
         assert.strictEqual(1, callCount);
         
         selector.deregisterChangeHandler(testChangeHandler);
         $(checkboxes[2]).prop("checked", true).change();
-        assert.deepEqual(lastVisibleStats, [true, false, false, false]);
+        assert.deepEqual(lastVisibleStats, expectedResult);
         assert.strictEqual(1, callCount);
     });
 

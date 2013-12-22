@@ -29,9 +29,9 @@
 
     var LABEL_ID_PREFIX = "statisticCheckbox";
 
+    var STATISTIC_KEYS = ["TotalTime", "SplitTime", "BehindFastest", "TimeLoss"];
+
     var STATISTIC_NAME_KEYS = ["StatisticsTotalTime", "StatisticsSplitTime", "StatisticsBehindFastest", "StatisticsTimeLoss"];
-    
-    
 
     /**
     * Control that contains a number of checkboxes for enabling and/or disabling
@@ -109,7 +109,12 @@
     * @returns {Array} Array of booleans corresponding to enabled statistics.
     */
     StatisticsSelector.prototype.getVisibleStatistics = function () {
-        return this.span.selectAll("input")[0].map(function (checkbox) { return checkbox.checked; });
+        var visibleStats = {};
+        this.span.selectAll("input")[0].forEach(function (checkbox, index) {
+            visibleStats[STATISTIC_KEYS[index]] = checkbox.checked;
+        });
+        
+        return visibleStats;
     };
 
     /**

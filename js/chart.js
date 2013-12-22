@@ -509,27 +509,27 @@
         var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, comp.getSuffix()); });
         
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
-            if (this.visibleStatistics[0]) {
+            if (this.visibleStatistics.TotalTime) {
                 var cumTimes = selectedCompetitors.map(function (comp) { return comp.getCumulativeTimeTo(this.currentControlIndex); }, this);
                 var cumRanks = selectedCompetitors.map(function (comp) { return comp.getCumulativeRankTo(this.currentControlIndex); }, this);
                 labelTexts = d3.zip(labelTexts, cumTimes, cumRanks)
                                .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
             }
                            
-            if (this.visibleStatistics[1]) {
+            if (this.visibleStatistics.SplitTime) {
                 var splitTimes = selectedCompetitors.map(function (comp) { return comp.getSplitTimeTo(this.currentControlIndex); }, this);
                 var splitRanks = selectedCompetitors.map(function (comp) { return comp.getSplitRankTo(this.currentControlIndex); }, this);
                 labelTexts = d3.zip(labelTexts, splitTimes, splitRanks)
                                .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
             }
              
-            if (this.visibleStatistics[2]) {
+            if (this.visibleStatistics.BehindFastest) {
                 var timesBehind = this.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                 labelTexts = d3.zip(labelTexts, timesBehind)
                                .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
             }
              
-            if (this.visibleStatistics[3]) {
+            if (this.visibleStatistics.TimeLoss) {
                 var timeLosses = this.getTimeLosses(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                 labelTexts = d3.zip(labelTexts, timeLosses)
                                .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
@@ -682,16 +682,16 @@
     */
     Chart.prototype.determineMaxStatisticTextWidth = function() {
         var maxWidth = 0;
-        if (this.visibleStatistics[0]) {
+        if (this.visibleStatistics.TotalTime) {
             maxWidth += this.getMaxCumulativeTimeAndRankTextWidth();
         }
-        if (this.visibleStatistics[1]) {
+        if (this.visibleStatistics.SplitTime) {
             maxWidth += this.getMaxSplitTimeAndRankTextWidth();
         }
-        if (this.visibleStatistics[2]) {
+        if (this.visibleStatistics.BehindFastest) {
             maxWidth += this.getMaxTimeBehindFastestWidth();
         }
-        if (this.visibleStatistics[3]) {
+        if (this.visibleStatistics.TimeLoss) {
             maxWidth += this.getMaxTimeLossWidth();
         }
         
