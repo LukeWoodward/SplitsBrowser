@@ -2944,7 +2944,9 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
 
     var LABEL_ID_PREFIX = "statisticCheckbox";
 
-    var STATISTIC_NAME_KEYS = ["StatisticsTotalTimeKey", "StatisticsSplitTimeKey", "StatisticsBehindFastestKey", "StatisticsTimeLossKey"];
+    var STATISTIC_NAME_KEYS = ["StatisticsTotalTime", "StatisticsSplitTime", "StatisticsBehindFastest", "StatisticsTimeLoss"];
+    
+    
 
     /**
     * Control that contains a number of checkboxes for enabling and/or disabling

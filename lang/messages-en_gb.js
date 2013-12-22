@@ -72,10 +72,10 @@ SplitsBrowser.Messages = {
     // chosen because the course has no winner.
     CannotCompareAsNoWinner: "Cannot compare against '$$OPTION$$' because no competitors in this class complete the course.",
     
-    StatisticsTotalTimeKey: "Total time",
-    StatisticsSplitTimeKey: "Split time",
-    StatisticsBehindFastestKey: "Behind fastest",
-    StatisticsTimeLossKey: "Time loss",
+    StatisticsTotalTime: "Total time",
+    StatisticsSplitTime: "Split time",
+    StatisticsBehindFastest: "Behind fastest",
+    StatisticsTimeLoss: "Time loss",
     
     ResultsTableHeaderSingleControl: "1 control",
     ResultsTableHeaderMultipleControls: "$$NUM$$ controls",
