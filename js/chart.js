@@ -367,8 +367,6 @@
         } else {
             this.popupUpdateFunc();
         }
-        
-        this.popup.setShowNextControls(showNextControls);
     };
     
     /**

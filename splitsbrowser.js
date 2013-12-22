@@ -3230,23 +3230,13 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
                      
         this.dataHeader = this.popupDiv.append("div")
                                        .classed("chartPopupHeader", true)
-                                       .classed("data", true)
                                        .append("span");
-                                           
-        this.nextControlHeader = this.popupDiv.append("div")
-                                              .classed("chartPopupHeader", true)
-                                              .classed("nextControls", true)
-                                              .append("span");
                                            
         var tableContainer = this.popupDiv.append("div")
                                               .classed("chartPopupTableContainer", true);
                                                   
                                            
-        this.dataTable = tableContainer.append("table")
-                                       .classed("data", true);
-        
-        this.nextControlsTable = tableContainer.append("table")
-                                               .classed("nextControls", true);
+        this.dataTable = tableContainer.append("table");
                                               
         this.popupDiv.selectAll(".nextControls").style("display", "none");
 
@@ -3336,10 +3326,10 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     * @param {Object} nextControlsData - The next-controls data.
     */
     ChartPopup.prototype.setNextControlData = function (nextControlsData) {
-        this.nextControlHeader.text(nextControlsData.thisControl);
+        this.dataHeader.text(nextControlsData.thisControl);
         
-        var rows = this.nextControlsTable.selectAll("tr")
-                                         .data(nextControlsData.nextControls);
+        var rows = this.dataTable.selectAll("tr")
+                                 .data(nextControlsData.nextControls);
         rows.enter().append("tr");
         
         rows.selectAll("td").remove();
@@ -3348,17 +3338,6 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         rows.append("td").text(function (nextControlData) { return nextControlData.nextControls; });
         
         rows.exit().remove();
-    };
-    
-    /**
-    * Sets whether the popup is showing the next-controls information instead
-    * of the other data.
-    * @param {boolean} showNextControls - True to show the next controls, false
-    *    to show the other data.
-    */
-    ChartPopup.prototype.setShowNextControls = function (showNextControls) {
-        this.popupDiv.selectAll(".data").style("display", (showNextControls) ? "none" : null);
-        this.popupDiv.selectAll(".nextControls").style("display", (showNextControls) ? null : "none");
     };
     
     /**
@@ -3756,8 +3735,6 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         } else {
             this.popupUpdateFunc();
         }
-        
-        this.popup.setShowNextControls(showNextControls);
     };
     
     /**
