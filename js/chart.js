@@ -32,9 +32,6 @@
     // X-offset in pixels between the mouse and the popup that opens.
     var CHART_POPUP_X_OFFSET = 10;
     
-    // The maximum number of fastest splits to show when the popup is open.
-    var MAX_FASTEST_SPLITS = 10;
-    
     // Margins on the four sides of the chart.
     var MARGIN = {
         top: 18, // Needs to be high enough not to obscure the upper X-axis.
@@ -48,10 +45,6 @@
     // Minimum distance between a Y-axis tick label and a competitor's start
     // time, in pixels.
     var MIN_COMPETITOR_TICK_MARK_DISTANCE = 10;
-
-    // Width of the time interval, in seconds, when viewing nearby competitors
-    // at a control on the race graph.
-    var RACE_GRAPH_COMPETITOR_WINDOW = 240;
     
     // The number that identifies the left mouse button in a jQuery event.
     var JQUERY_EVENT_LEFT_BUTTON = 1;
@@ -69,15 +62,11 @@
     ];
 
     // 'Imports'.
-    var START = SplitsBrowser.Model.Course.START;
-    var FINISH = SplitsBrowser.Model.Course.FINISH;
-    
     var isNotNull = SplitsBrowser.isNotNull;
     var formatTime = SplitsBrowser.formatTime;
     var getMessage = SplitsBrowser.getMessage;
-    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
-    var Course = SplitsBrowser.Model.Course;
+    var ChartPopupData = SplitsBrowser.Model.ChartPopupData;
     var ChartPopup = SplitsBrowser.Controls.ChartPopup;
     
     /**
@@ -213,14 +202,7 @@
     * @return {Array} Array of fastest-split data.
     */
     Chart.prototype.getFastestSplitsPopupData = function () {
-        // There's no split to the start, so if the current control is the
-        // start, show the statistics for control 1 instead.
-        var data = this.ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, this.currentControlIndex);
-        data = data.map(function (comp) {
-            return {time: comp.split, name: comp.name, highlight: false};
-        });
-        
-        return {title: getMessage("SelectedClassesPopupHeader"), data: data, placeholder: getMessage("SelectedClassesPopupPlaceholder")};
+        return ChartPopupData.getFastestSplitsPopupData(this.ageClassSet, this.currentControlIndex);
     };
     
     /**
@@ -230,20 +212,7 @@
     *     array of data to show within it.
     */
     Chart.prototype.getFastestSplitsForCurrentLegPopupData = function () {
-        var course = this.ageClassSet.getCourse();
-        var startCode = course.getControlCode(this.currentControlIndex - 1);
-        var endCode = course.getControlCode(this.currentControlIndex);
-        
-        var startControl = (startCode === START) ? getMessage("StartName") : startCode;
-        var endControl = (endCode === FINISH) ? getMessage("FinishName") : endCode;
-        
-        var title = getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": startControl, "$$END$$": endControl});
-        
-        var primaryClass = this.ageClassSet.getPrimaryClassName();
-        var data = this.eventData.getFastestSplitsForLeg(startCode, endCode)
-                                 .map(function (row) { return { name: row.name, className: row.className, time: row.split, highlight: (row.className === primaryClass)}; });
-        
-        return {title: title, data: data, placeholder: null};
+        return ChartPopupData.getFastestSplitsForLegPopupData(this.ageClassSet, this.eventData, this.currentControlIndex);
     };
     
     /**
@@ -261,89 +230,15 @@
     * @return {Array} Array of competitor data.
     */
     Chart.prototype.getCompetitorsVisitingCurrentControlPopupData = function () {
-        var controlCode = this.ageClassSet.getCourse().getControlCode(this.currentControlIndex);
-        var intervalStart = this.currentChartTime - RACE_GRAPH_COMPETITOR_WINDOW / 2;
-        var intervalEnd = this.currentChartTime + RACE_GRAPH_COMPETITOR_WINDOW / 2;
-        var competitors = this.eventData.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
-            
-        var primaryClass = this.ageClassSet.getPrimaryClassName();
-        var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}; });
-        
-        var controlName;
-        if (controlCode === START) {
-            controlName = getMessage("StartName");
-        } else if (controlCode === FINISH) {
-            controlName = getMessage("FinishName");
-        } else {
-            controlName = getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
-        }
-        
-        var title = getMessageWithFormatting(
-            "NearbyCompetitorsPopupHeader",
-            {"$$START$$": formatTime(intervalStart), "$$END$$": formatTime(intervalEnd), "$$CONTROL$$": controlName});
-        
-        return {title: title, data: competitorData, placeholder: getMessage("NoNearbyCompetitors")};
+        return ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(this.ageClassSet, this.eventData, this.currentControlIndex, this.currentChartTime);
     };
-        
-    /**
-    * Compares two course names.
-    * @param {String} name1 - One course name to compare.
-    * @param {String} name2 - The other course name to compare.
-    * @return {Number} Comparison result: -1 if name1 < name2, 1 if
-    *     name1 > name2 and 0 if name1 === name2.
-    */
-    function compareCourseNames(name1, name2) {
-        if (name1 === name2) {
-            return 0;
-        } else if (name1 === "" || name2 === "" || name1[0] !== name2[0]) {
-            return (name1 < name2) ? -1 : 1;
-        } else {
-            // Both courses begin with the same letter.
-            var regexResult = /^[^0-9]+/.exec(name1);
-            if (regexResult !== null && regexResult.length > 0) {
-                // regexResult should be a 1-element array.
-                var result = regexResult[0];
-                if (0 < result.length && result.length < name1.length && name2.substring(0, result.length) === result) {
-                    var num1 = parseInt(name1.substring(result.length), 10);
-                    var num2 = parseInt(name2.substring(result.length), 10);
-                    if (!isNaN(num1) && !isNaN(num2)) {
-                        return num1 - num2;
-                    }
-                }
-            }
-            
-            return (name1 < name2) ? -1 : 1;
-        }
-    }
-    
-    /**
-    * Tidy next-control data, by joining up multiple controls into one string,
-    * and substituting the display-name of the finish if necessary.
-    * @param {Array} nextControls - Array of next-control information objects.
-    * @return {String} Next-control information containing joined-up control names.
-    */
-    function tidyNextControlsList(nextControls) {
-        return nextControls.map(function (nextControlRec) {
-            var codes = nextControlRec.nextControls.slice(0);
-            if (codes[codes.length - 1] === Course.FINISH) {
-                codes[codes.length - 1] = getMessage("FinishName");
-            }
-            
-            return {course: nextControlRec.course, nextControls: codes.join(", ")};
-        });
-    }
     
     /**
     * Returns next-control data to show on the chart popup.
     * @return {Array} Array of next-control data.
     */
     Chart.prototype.getNextControlData = function () {
-        var course = this.ageClassSet.getCourse();
-        var controlIdx = Math.min(this.currentControlIndex, course.controls.length);
-        var controlCode = course.getControlCode(controlIdx);
-        var nextControls = this.eventData.getNextControlsAfter(controlCode);
-        nextControls.sort(function (c1, c2) { return compareCourseNames(c1.course.name, c2.course.name); });
-        return {thisControl: controlCode, nextControls: tidyNextControlsList(nextControls) };
+        return ChartPopupData.getNextControlData(this.ageClassSet.getCourse(), this.eventData, this.currentControlIndex);
     };
 
     /**

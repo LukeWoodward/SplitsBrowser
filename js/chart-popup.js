@@ -22,9 +22,6 @@
     "use strict";
     
     var formatTime = SplitsBrowser.formatTime;
-    var getMessage = SplitsBrowser.getMessage;
-    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
-    var Course = SplitsBrowser.Model.Course;
     
     /**
     * Creates a ChartPopup control.
@@ -149,11 +146,7 @@
     * @param {Object} nextControlsData - The next-controls data.
     */
     ChartPopup.prototype.setNextControlData = function (nextControlsData) {
-        if (nextControlsData.thisControl === Course.START) {
-            this.nextControlHeader.text(getMessage("StartName"));
-        } else {
-            this.nextControlHeader.text(getMessageWithFormatting("ControlName", {"$$CODE$$": nextControlsData.thisControl}));
-        }
+        this.nextControlHeader.text(nextControlsData.thisControl);
         
         var rows = this.nextControlsTable.selectAll("tr")
                                          .data(nextControlsData.nextControls);
