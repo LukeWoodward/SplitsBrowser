@@ -124,8 +124,14 @@
         this.isMouseIn = false;
         
         // The position the mouse cursor is currently over, or null for not over
-        // the charts.
+        // the charts.  This index is constrained by the minimum control that a
+        // chart type specifies.
         this.currentControlIndex = null;
+        
+        // The position the mouse cursor is currently over, or null for not over
+        // the charts.  Unlike this.currentControlIndex, this index is not
+        // constrained by the minimum control that a chart type specifies.
+        this.actualControlIndex = null;
         
         this.controlLine = null;
 
@@ -238,7 +244,7 @@
     * @return {Array} Array of next-control data.
     */
     Chart.prototype.getNextControlData = function () {
-        return ChartPopupData.getNextControlData(this.ageClassSet.getCourse(), this.eventData, this.currentControlIndex);
+        return ChartPopupData.getNextControlData(this.ageClassSet.getCourse(), this.eventData, this.actualControlIndex);
     };
 
     /**
@@ -423,19 +429,17 @@
             if (bisectIndex >= this.referenceCumTimes.length) {
                 // Off the right-hand end, use the finish.
                 controlIndex = this.numControls + 1;
-            } else if (bisectIndex <= this.minViewableControl) {
-                // Before the minimum viewable control, so use that.
-                controlIndex = this.minViewableControl;
             } else {
                 var diffToNext = Math.abs(this.referenceCumTimes[bisectIndex] - chartX);
                 var diffToPrev = Math.abs(chartX - this.referenceCumTimes[bisectIndex - 1]);
                 controlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
             }
             
-            if (this.currentControlIndex === null || this.currentControlIndex !== controlIndex) {
+            if (this.actualControlIndex === null || this.actualControlIndex !== controlIndex) {
                 // The control line has appeared for ths first time or has moved, so redraw it.
                 this.removeControlLine();
-                this.drawControlLine(controlIndex);
+                this.actualControlIndex = controlIndex;
+                this.drawControlLine(Math.max(this.minViewableControl, controlIndex));
             }
             
             if (this.popup.isShown() && this.currentControlIndex !== null) {
@@ -460,6 +464,7 @@
     */
     Chart.prototype.removeControlLine = function() {
         this.currentControlIndex = null;
+        this.actualControlIndex = null;
         this.updateCompetitorStatistics();
         if (this.controlLine !== null) {
             d3.select(this.controlLine).remove();
