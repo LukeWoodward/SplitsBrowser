@@ -5003,6 +5003,13 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
            
         $(window).resize(function () { outerThis.handleWindowResize(); });
+        
+        // Disable text selection anywhere.
+        // This is for the benefit of IE9, which doesn't support the
+        // -ms-user-select CSS style.  IE10, IE11 do support -ms-user-select
+        // and other browsers have their own vendor-specific CSS styles for
+        // this, and in these browsers this event handler never gets called.
+        $("body").bind("selectstart", function () { return false; });
     };
 
     /**
