@@ -227,7 +227,8 @@
         
         this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
         
-        this.mainPanel = body.append("div");
+        this.mainPanel = body.append("div")
+                             .style("clear", "both");
         this.addCompetitorList();
         this.chart = new Chart(this.mainPanel.node());
         
