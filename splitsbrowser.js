@@ -2489,31 +2489,33 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         this.changeHandlers = [];
         this.otherClassesEnabled = true;
         
-        var span = d3.select(parent).append("span");
-        span.text(getMessage("ClassSelectorLabel"));
+        var div = d3.select(parent).append("div")
+                                   .style("float", "left");
+                                   
+        div.text(getMessage("ClassSelectorLabel"));
         
         var outerThis = this;
-        this.dropDown = span.append("select").node();
+        this.dropDown = div.append("select").node();
         $(this.dropDown).bind("change", function() {
             outerThis.updateOtherClasses();
             outerThis.onSelectionChanged();
         });
         
-        this.otherClassesCombiningLabel = span.append("span")
-                                              .classed("otherClassCombining", true)
-                                              .style("display", "none")
-                                              .text(getMessage("AdditionalClassSelectorLabel"));
+        this.otherClassesCombiningLabel = div.append("span")
+                                             .classed("otherClassCombining", true)
+                                             .style("display", "none")
+                                             .text(getMessage("AdditionalClassSelectorLabel"));
         
-        this.otherClassesSelector = span.append("div")
-                                   .classed("otherClassSelector", true)
-                                   .style("display", "none");
+        this.otherClassesSelector = div.append("div")
+                                       .classed("otherClassSelector", true)
+                                       .style("display", "none");
                                    
         this.otherClassesSpan = this.otherClassesSelector.append("span");
         
         this.otherClassesList = d3.select(parent).append("div")
-                                                .classed("otherClassList", true)
-                                                .style("position", "absolute")
-                                                .style("display", "none");
+                                                 .classed("otherClassList", true)
+                                                 .style("position", "absolute")
+                                                 .style("display", "none");
                                    
         this.otherClassesSelector.on("click", function () { outerThis.showHideClassSelector(); });
          
@@ -4870,7 +4872,8 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     * Draws the logo in the top panel.
     */
     Viewer.prototype.drawLogo = function () {
-        var logoSvg = this.topPanel.append("svg");
+        var logoSvg = this.topPanel.append("svg")
+                                   .style("float", "left");
 
         logoSvg.style("width", "19px")
                .style("height", "19px")

@@ -102,7 +102,8 @@
     * Draws the logo in the top panel.
     */
     Viewer.prototype.drawLogo = function () {
-        var logoSvg = this.topPanel.append("svg");
+        var logoSvg = this.topPanel.append("svg")
+                                   .style("float", "left");
 
         logoSvg.style("width", "19px")
                .style("height", "19px")
