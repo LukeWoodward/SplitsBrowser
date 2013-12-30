@@ -169,9 +169,13 @@
     * Hides the chart.
     */
     Chart.prototype.hide = function () {
+        // Note that we don't use display: none to hide the chart.
+        // While the chart is hidden, the sizes of various text strings are
+        // determined.  Firefox gives you an NS_ERROR_FAILURE message if the
+        // element you're trying to compute the size of, or an ancestor of it,
+        // has display: none.        
         this.svg.style("position", "absolute")
                 .style("left", "-9999px");
-        
     };
     
     /**

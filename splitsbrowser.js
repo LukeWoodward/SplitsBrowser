@@ -3602,9 +3602,13 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     * Hides the chart.
     */
     Chart.prototype.hide = function () {
+        // Note that we don't use display: none to hide the chart.
+        // While the chart is hidden, the sizes of various text strings are
+        // determined.  Firefox gives you an NS_ERROR_FAILURE message if the
+        // element you're trying to compute the size of, or an ancestor of it,
+        // has display: none.        
         this.svg.style("position", "absolute")
                 .style("left", "-9999px");
-        
     };
     
     /**
@@ -5032,6 +5036,8 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     Viewer.prototype.selectCrossingRunners = function () {
         this.selection.selectCrossingRunners(this.ageClassSet.allCompetitors); 
         if (this.selection.isSingleRunnerSelected()) {
+            // Only a single runner is still selected, so nobody crossed the
+            // selected runner.
             var competitorName = this.ageClassSet.allCompetitors[this.currentIndexes[0]].name;
             alert(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
         }
@@ -5081,7 +5087,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         // If the competitor list gets wider, the new competitor list and the
         // old chart may be too wide together, and so the chart wraps onto a
         // new line.  Even after shrinking the chart back down, there still
-        // might not be enough horizontal space, because of the horizontal
+        // might not be enough horizontal space, because of the vertical
         // scrollbar.  So, hide the chart now, and re-show it later once we
         // know what size it should have.
         this.chart.hide();

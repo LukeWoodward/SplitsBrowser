@@ -268,6 +268,8 @@
     Viewer.prototype.selectCrossingRunners = function () {
         this.selection.selectCrossingRunners(this.ageClassSet.allCompetitors); 
         if (this.selection.isSingleRunnerSelected()) {
+            // Only a single runner is still selected, so nobody crossed the
+            // selected runner.
             var competitorName = this.ageClassSet.allCompetitors[this.currentIndexes[0]].name;
             alert(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
         }
@@ -317,7 +319,7 @@
         // If the competitor list gets wider, the new competitor list and the
         // old chart may be too wide together, and so the chart wraps onto a
         // new line.  Even after shrinking the chart back down, there still
-        // might not be enough horizontal space, because of the horizontal
+        // might not be enough horizontal space, because of the vertical
         // scrollbar.  So, hide the chart now, and re-show it later once we
         // know what size it should have.
         this.chart.hide();
