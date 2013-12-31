@@ -28,7 +28,8 @@
     var chartTypes = [
         SplitsBrowser.Model.ChartTypes.SplitsGraph,
         SplitsBrowser.Model.ChartTypes.RaceGraph,
-        SplitsBrowser.Model.ChartTypes.PositionAfterLeg];
+        SplitsBrowser.Model.ChartTypes.PositionAfterLeg
+    ];
     
     var lastChartTypeName = null;
     var callCount = 0;

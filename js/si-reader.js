@@ -102,7 +102,7 @@
     */
     Reader.prototype.checkHeader = function() {
         if (this.lines.length <= 1) {
-             throwWrongFileFormat("No data found to read");
+            throwWrongFileFormat("No data found to read");
         }
         
         var headers = this.lines[0].split(";");

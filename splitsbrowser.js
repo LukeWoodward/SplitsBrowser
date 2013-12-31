@@ -511,7 +511,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     *      given control.
     */
     Competitor.prototype.getSplitRankTo = function (controlIndex) {
-       return (controlIndex === 0) ? null : this.splitRanks[controlIndex - 1];
+        return (controlIndex === 0) ? null : this.splitRanks[controlIndex - 1];
     };
     
     /**
@@ -675,9 +675,9 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
                     afterOther = true;
                 }
             }
-         }
+        }
          
-         return beforeOther && afterOther;
+        return beforeOther && afterOther;
     };
     
     SplitsBrowser.Model.Competitor = Competitor;
@@ -1959,7 +1959,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     */
     Reader.prototype.checkHeader = function() {
         if (this.lines.length <= 1) {
-             throwWrongFileFormat("No data found to read");
+            throwWrongFileFormat("No data found to read");
         }
         
         var headers = this.lines[0].split(";");
@@ -2333,7 +2333,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     var PARSERS = [
         SplitsBrowser.Input.CSV.parseEventData,
         SplitsBrowser.Input.SI.parseEventData
-   ];
+    ];
     
     /**
     * Attempts to parse the given event data, which may be of any of the
@@ -4213,7 +4213,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
                     var nearestOffset = d3.min(startTimes.map(function (startTime) { return Math.abs(yScale(startTime) - yScale(time)); }));
                     return (nearestOffset >= MIN_COMPETITOR_TICK_MARK_DISTANCE) ? formatTime(Math.round(time * 60)) : "";
                 };
-           }
+            }
         } else {
             // Use the default d3 tick formatter.
             return null;
@@ -5276,9 +5276,9 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
           .append("h1")
           .text(getMessage("LoadFailedHeader"));
           
-       d3.select("body")
-         .append("p")
-         .text(getMessageWithFormatting(key, params));
+        d3.select("body")
+          .append("p")
+          .text(getMessageWithFormatting(key, params));
     }
     
     /**

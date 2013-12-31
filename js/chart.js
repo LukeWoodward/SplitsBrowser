@@ -778,7 +778,7 @@
                     var nearestOffset = d3.min(startTimes.map(function (startTime) { return Math.abs(yScale(startTime) - yScale(time)); }));
                     return (nearestOffset >= MIN_COMPETITOR_TICK_MARK_DISTANCE) ? formatTime(Math.round(time * 60)) : "";
                 };
-           }
+            }
         } else {
             // Use the default d3 tick formatter.
             return null;

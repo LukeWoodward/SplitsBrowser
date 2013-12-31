@@ -187,14 +187,18 @@
         var expectedClasses = [
             new AgeClass("Example", 4, [
                 fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23]),
-                fromSplitTimes(2, "Fred", "Baker", "DEF", 12 * 3600 + 12 * 60, [162, 111, 240, 91, 30])]),
+                fromSplitTimes(2, "Fred", "Baker", "DEF", 12 * 3600 + 12 * 60, [162, 111, 240, 91, 30])
+            ]),
             new AgeClass("Another example class", 5, [
                 fromSplitTimes(1, "Jane", "Palmer", "GHI", 11 * 3600 + 22 * 60, [170, 104, 209, 100, 189, 28]),
-                fromSplitTimes(2, "Faye", "Claidey", "JKL", 10 * 3600 + 58 * 60, [175, 120, 228, 109, 212, 37])])];
+                fromSplitTimes(2, "Faye", "Claidey", "JKL", 10 * 3600 + 58 * 60, [175, 120, 228, 109, 212, 37])
+            ])
+        ];
                 
         var expectedCourses = [
             new Course("Example", [expectedClasses[0]], null, null, null),
-            new Course("Another example class", [expectedClasses[1]], null, null, null)];
+            new Course("Another example class", [expectedClasses[1]], null, null, null)
+        ];
             
         expectedClasses[0].setCourse(expectedCourses[0]);
         expectedClasses[1].setCourse(expectedCourses[1]);
@@ -209,14 +213,18 @@
         var expectedClasses = [
             new AgeClass("Example", 4, [
                 fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23]),
-                fromSplitTimes(2, "Fred", "Baker", "DEF", 12 * 3600 + 12 * 60, [162, 111, 240, 91, 30])]),
+                fromSplitTimes(2, "Fred", "Baker", "DEF", 12 * 3600 + 12 * 60, [162, 111, 240, 91, 30])
+            ]),
             new AgeClass("Another example class", 5, [
                 fromSplitTimes(1, "Jane", "Palmer", "GHI", 11 * 3600 + 22 * 60, [170, 104, 209, 100, 189, 28]),
-                fromSplitTimes(2, "Faye", "Claidey", "JKL", 10 * 3600 + 58 * 60, [175, 120, 228, 109, 212, 37])])];
+                fromSplitTimes(2, "Faye", "Claidey", "JKL", 10 * 3600 + 58 * 60, [175, 120, 228, 109, 212, 37])
+            ])
+        ];
                 
         var expectedCourses = [
             new Course("Example", [expectedClasses[0]], null, null, null),
-            new Course("Another example class", [expectedClasses[1]], null, null, null)];
+            new Course("Another example class", [expectedClasses[1]], null, null, null)
+        ];
             
         expectedClasses[0].setCourse(expectedCourses[0]);
         expectedClasses[1].setCourse(expectedCourses[1]);

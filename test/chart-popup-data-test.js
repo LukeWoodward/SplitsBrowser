@@ -153,9 +153,9 @@
         
         var expectedData = {
             title: getMessageWithFormatting("NearbyCompetitorsPopupHeader", {
-                    "$$START$$": formatTime(testTime - 120),
-                    "$$END$$": formatTime(testTime + 120),
-                    "$$CONTROL$$": getMessageWithFormatting("ControlName", {"$$CODE$$": "189"})
+                "$$START$$": formatTime(testTime - 120),
+                "$$END$$": formatTime(testTime + 120),
+                "$$CONTROL$$": getMessageWithFormatting("ControlName", {"$$CODE$$": "189"})
             }),
             data: [
                 { className: "Test class", highlight: true, name: "FirstName1 Surname1", time: 36623 },
@@ -180,9 +180,9 @@
         
         var expectedData = {
             title: getMessageWithFormatting("NearbyCompetitorsPopupHeader", {
-                    "$$START$$": formatTime(testTime - 120),
-                    "$$END$$": formatTime(testTime + 120),
-                    "$$CONTROL$$": getMessage("StartName")
+                "$$START$$": formatTime(testTime - 120),
+                "$$END$$": formatTime(testTime + 120),
+                "$$CONTROL$$": getMessage("StartName")
             }),
             data: [
                 { className: "Test class", highlight: true, name: "FirstName5 Surname5", time: 36635 },
@@ -207,9 +207,9 @@
         
         var expectedData = {
             title: getMessageWithFormatting("NearbyCompetitorsPopupHeader", {
-                    "$$START$$": formatTime(testTime - 120),
-                    "$$END$$": formatTime(testTime + 120),
-                    "$$CONTROL$$": getMessage("FinishName")
+                "$$START$$": formatTime(testTime - 120),
+                "$$END$$": formatTime(testTime + 120),
+                "$$CONTROL$$": getMessage("FinishName")
             }),
             data: [
                 { className: "Test class", highlight: true, name: "FirstName8 Surname8", time: 37661 },

@@ -87,6 +87,7 @@ module.exports = function(grunt) {
         es3: true,
         forin: true,
         immed: true,
+        indent: 4,
         globals: {
           "$": false,
           d3: false,

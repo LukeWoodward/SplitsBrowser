@@ -25,7 +25,7 @@
     var PARSERS = [
         SplitsBrowser.Input.CSV.parseEventData,
         SplitsBrowser.Input.SI.parseEventData
-   ];
+    ];
     
     /**
     * Attempts to parse the given event data, which may be of any of the

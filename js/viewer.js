@@ -506,9 +506,9 @@
           .append("h1")
           .text(getMessage("LoadFailedHeader"));
           
-       d3.select("body")
-         .append("p")
-         .text(getMessageWithFormatting(key, params));
+        d3.select("body")
+          .append("p")
+          .text(getMessageWithFormatting(key, params));
     }
     
     /**

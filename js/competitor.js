@@ -289,7 +289,7 @@
     *      given control.
     */
     Competitor.prototype.getSplitRankTo = function (controlIndex) {
-       return (controlIndex === 0) ? null : this.splitRanks[controlIndex - 1];
+        return (controlIndex === 0) ? null : this.splitRanks[controlIndex - 1];
     };
     
     /**
@@ -453,9 +453,9 @@
                     afterOther = true;
                 }
             }
-         }
+        }
          
-         return beforeOther && afterOther;
+        return beforeOther && afterOther;
     };
     
     SplitsBrowser.Model.Competitor = Competitor;
