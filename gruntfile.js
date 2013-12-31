@@ -59,7 +59,10 @@ module.exports = function(grunt) {
     },    
     uglify: {
       options: {
-        preserveComments: "some"
+        preserveComments: "some",
+        beautify: {
+          ascii_only: true
+        }
       },
       dist: {
         files: {
@@ -72,7 +75,7 @@ module.exports = function(grunt) {
       minified: ['qunit-tests-min.html']
     },
     jshint: {
-      files: ['gruntfile.js', 'js/*.js', 'test/*-test.js'],
+      files: ['js/*.js', 'test/*-test.js'],
       options: {
         // options here to override JSHint defaults
         plusplus: true,
