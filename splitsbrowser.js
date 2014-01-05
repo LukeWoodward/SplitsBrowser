@@ -4281,18 +4281,20 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         var lineFunctionGenerator = function (selCompIdx) {
             if (chartData.dataColumns.every(function (col) { return col.ys[selCompIdx] === null; })) {
                 // This competitor's entire row is null, so there's no data to
-                // draw.  d3 will report an error ('Error parsing d=""') if no
-                // points on the line are defined, as will happen in this case,
-                // so we substitute some dummy data instead.
-                return d3.svg.line().x(-10000)
-                                    .y(-10000);
+                // draw.  WebKit will report an error ('Error parsing d=""') if
+                // no points on the line are defined, as will happen in this
+                // case, so we substitute a single zero point instead.
+                return d3.svg.line()
+                             .x(0)
+                             .y(0)
+                             .defined(function (d, i) { return i === 0; });
             }
             else {
                 return d3.svg.line()
-                                .x(function (d) { return outerThis.xScale(d.x); })
-                                .y(function (d) { return outerThis.yScale(d.ys[selCompIdx]); })
-                                .defined(function (d) { return d.ys[selCompIdx] !== null; })
-                                .interpolate("linear");
+                             .x(function (d) { return outerThis.xScale(d.x); })
+                             .y(function (d) { return outerThis.yScale(d.ys[selCompIdx]); })
+                             .defined(function (d) { return d.ys[selCompIdx] !== null; })
+                             .interpolate("linear");
             }
         };
         
