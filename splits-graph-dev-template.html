@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="utf-8">
+ <link rel="stylesheet" type="text/css" href="css/styles.css">
+ <title>SplitsBrowser test</title>
+ <script type="text/javascript" src="modernizr-2.7.1-svg.min.js"></script>
+ <script type="text/javascript">
+  if (!Modernizr.svg) {
+    document.location = "unsupported-browser.html";
+  }
+ </script> 
+ <script type="text/javascript" src="jquery-2.0.3.js"></script>
+ <script type="text/javascript" src="d3.v3.js"></script>
+
+ <script type="text/javascript" src="js/core.js"></script>
+ <script type="text/javascript" src="js/messages.js"></script>
+ <script type="text/javascript" src="js/util.js"></script>
+ <script type="text/javascript" src="js/time.js"></script>
+ <script type="text/javascript" src="js/competitor.js"></script>
+ <script type="text/javascript" src="js/age-class.js"></script>
+ <script type="text/javascript" src="js/age-class-set.js"></script>
+ <script type="text/javascript" src="js/course.js"></script>
+ <script type="text/javascript" src="js/event.js"></script>
+ <script type="text/javascript" src="js/chart-types.js"></script>
+ <script type="text/javascript" src="js/csv-reader.js"></script>
+ <script type="text/javascript" src="js/si-reader.js"></script>
+ <script type="text/javascript" src="js/input.js"></script>
+ <script type="text/javascript" src="js/chart-popup-data.js"></script>
+ <script type="text/javascript" src="js/chart-popup.js"></script>
+ <script type="text/javascript" src="js/chart.js"></script>
+ <script type="text/javascript" src="js/competitor-selection.js"></script>
+ <script type="text/javascript" src="js/statistics-selector.js"></script>
+ <script type="text/javascript" src="js/class-selector.js"></script>
+ <script type="text/javascript" src="js/competitor-listbox.js"></script>
+ <script type="text/javascript" src="js/comparison-selector.js"></script>
+ <script type="text/javascript" src="js/chart-type-selector.js"></script>
+ <script type="text/javascript" src="js/results-table.js"></script>
+ <script type="text/javascript" src="js/viewer.js"></script>
+ 
+ <script type="text/javascript" src="lang/messages-en_gb.js"></script>
+</head>
+<body>
+ <script type="text/javascript">
+  SplitsBrowser.loadEvent('url/to/some/data');
+ </script>
+ <noscript>
+  <h1>SplitsBrowser &ndash; JavaScript is disabled</h1>
+
+  <p>Your browser or is set to disable JavaScript.</p>
+  
+  <p>SplitsBrowser cannot run if JavaScript is not enabled.  Please enable JavaScript in your browser.</p>
+ </noscript>
+</body>
+</html>
