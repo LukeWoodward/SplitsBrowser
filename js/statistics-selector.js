@@ -29,9 +29,15 @@
 
     var LABEL_ID_PREFIX = "statisticCheckbox";
 
-    var STATISTIC_KEYS = ["TotalTime", "SplitTime", "BehindFastest", "TimeLoss"];
+    // Internal names of the statistics.
+    var STATISTIC_NAMES = ["TotalTime", "SplitTime", "BehindFastest", "TimeLoss"];
 
+    // Message keys for the labels of the four checkboxes.
     var STATISTIC_NAME_KEYS = ["StatisticsTotalTime", "StatisticsSplitTime", "StatisticsBehindFastest", "StatisticsTimeLoss"];
+    
+    // Names of statistics that are selected by default when the application
+    // starts.
+    var DEFAULT_SELECTED_STATISTICS = ["SplitTime", "TimeLoss"];
 
     /**
     * Control that contains a number of checkboxes for enabling and/or disabling
@@ -44,23 +50,33 @@
                                      .attr("id", STATISTIC_SELECTOR_ID);   
 
         var childSpans = this.span.selectAll("span")
-                                  .data(STATISTIC_NAME_KEYS)
+                                  .data(STATISTIC_NAMES)
                                   .enter()
                                   .append("span");
          
         childSpans.append("input")
+                  .attr("id", function(name) { return LABEL_ID_PREFIX + name; }) 
                   .attr("type", "checkbox")
-                  .attr("id", function(val, index) { return LABEL_ID_PREFIX + index; });
+                  .attr("checked", function (name) { return (DEFAULT_SELECTED_STATISTICS.indexOf(name) >= 0) ? "checked" : null; });
                   
         childSpans.append("label")
-                  .attr("for", function(val, index) { return LABEL_ID_PREFIX + index; })
+                  .attr("for", function(name) { return LABEL_ID_PREFIX + name; })
                   .classed("statisticsSelectorLabel", true)
-                  .text(function(nameKey) { return getMessage(nameKey); });
+                  .text(function (name, index) { return getMessage(STATISTIC_NAME_KEYS[index]); });
         
         var outerThis = this;
         $("input", this.span.node()).bind("change", function () { return outerThis.onCheckboxChanged(); });
                    
         this.handlers = [];
+    };
+    
+    /**
+    * Deselects all checkboxes.
+    * 
+    * This method is intended only for test purposes.
+    */
+    StatisticsSelector.prototype.clearAll = function () {
+        this.span.selectAll("input").attr("checked", null);
     };
 
     /**
@@ -111,7 +127,7 @@
     StatisticsSelector.prototype.getVisibleStatistics = function () {
         var visibleStats = {};
         this.span.selectAll("input")[0].forEach(function (checkbox, index) {
-            visibleStats[STATISTIC_KEYS[index]] = checkbox.checked;
+            visibleStats[STATISTIC_NAMES[index]] = checkbox.checked;
         });
         
         return visibleStats;

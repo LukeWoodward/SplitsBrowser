@@ -38,14 +38,16 @@
         callCount = 0;
     };
 
-    QUnit.test("All statistics disabled by default", function (assert) {
+    QUnit.test("All statistics disabled by clearAll method", function (assert) {
         var selector = new Selector(d3.select("#qunit-fixture").node());
+        selector.clearAll();
         assert.deepEqual(selector.getVisibleStatistics(), {TotalTime: false, SplitTime: false, BehindFastest: false, TimeLoss: false});
     });
 
     QUnit.test("Can register change handler and have it called", function (assert) {
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
+        selector.clearAll();
         
         selector.registerChangeHandler(testChangeHandler);
         
@@ -58,6 +60,7 @@
     QUnit.test("Can register change handler twice and have it called only once", function (assert) {
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
+        selector.clearAll();
         
         selector.registerChangeHandler(testChangeHandler);
         selector.registerChangeHandler(testChangeHandler);
@@ -72,6 +75,7 @@
     QUnit.test("Can register two change handlers and have them both called", function (assert) {
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
+        selector.clearAll();
         
         var lastVisibleStats2 = null;
         var callCount2 = 0;
@@ -97,9 +101,9 @@
     QUnit.test("Can deregister change handler and have it no longer called", function (assert) {
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
+        selector.clearAll();
         
         selector.registerChangeHandler(testChangeHandler);
-        
         
         var checkboxes = $("#qunit-fixture input");
         $(checkboxes[3]).prop("checked", true).change();
@@ -116,6 +120,7 @@
     QUnit.test("Can deregister change handler that was never registered without error", function () {
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
+        selector.clearAll();
         
         selector.deregisterChangeHandler(testChangeHandler);
         
