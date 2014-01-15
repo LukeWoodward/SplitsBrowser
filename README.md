@@ -1,21 +1,19 @@
 What is SplitsBrowser?
-----------------------
+======================
 
 This is an attempt to port the existing SplitsBrowser Java applet (available at
-http://www.splitsbrowser.org.uk/) to HTML5/JavaScript/CSS.
+http://www.splitsbrowser.org.uk/) to HTML5/JavaScript/CSS/SVG.
 
-What is it?
------------
-
-SplitsBrowser is a way of viewing orienteering results.
+SplitsBrowser is tool to view and analyse orienteering results.  It plots a
+graph that shows you where on your course you were faster or slower than others
+and at which controls you lost time.
 
 Why write it?
 -------------
-The main reason was to replace the existing SplitsBrowser Java applet.  There
-are a number of issues with the way this works:
 
-* You need to install Java for the SplitsBrowser Java applet to work.  No such
-  requirement is true for SplitsBrowser - all you need is a modern web browser.
+SplitsBrowser was originally a Java applet.  This presents a number of issues:
+
+* You need to install Java.
   
 * You also need to keep Java updated.  Some browsers can refuse to run the
   applet if Java on your computer is out of date.
@@ -25,30 +23,34 @@ are a number of issues with the way this works:
   plugin to achieve the functionality of drawing graphs on the screen.
 
 * There have been a number of security incidents involving Java, and various
-  agencies have recommended that Java be disabled.  See, for example,
+  agencies have recommended that Java plugins in browsers be disabled.  See,
+  for example,
   
   http://www.forbes.com/sites/eliseackerman/2013/01/11/us-department-of-homeland-security-calls-on-computer-users-to-disable-java/
 
 * It seemed a fun thing to do, and I could learn how to use the JavaScript
   data-visualisation library D3 (http://d3js.org).
-  
 
+SplitsBrowser requires JavaScript to be enabled in your browser, but so do many
+other websites these days.  It doesn't require any browser plugins.
+  
+  
 What web browsers work with SplitsBrowser?
 ------------------------------------------
 
 SplitsBrowser depends on D3 (http://d3js.org), and as such it supports the same
-browsers as D3 (https://github.com/mbostock/d3/wiki#browser-support).  It
-requires one of the following web browsers:
+browsers as D3 (https://github.com/mbostock/d3/wiki#browser-support).
 
-* Mozilla Firefox (latest version)
-* Google Chrome (latest version)
-* Internet Explorer 9 or later.
-* Safari ?
+SplitsBrowser works with 'modern' browsers such as the latest Firefox, Chrome
+or Opera, or Internet Explorer 9 or earlier.  It will not work in Internet
+Explorer 8 or earlier.
 
-SplitsBrowser requires that JavaScript is enabled in your browser.
+It may also work on Safari on Mac, or on tablet browsers.  I haven't tested it,
+on these platforms, though.
 
 
-Acknowledgements:
------------------
-* Original SplitsBrowser developers.
-* Mike Bostock for D3.
+What licence is SplitsBrowser released under?
+---------------------------------------------
+
+SplitsBrowser is released under version 2 of the GPL.  The Java applet is
+released under the same license.
