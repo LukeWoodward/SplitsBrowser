@@ -47,10 +47,3 @@ Explorer 8 or earlier.
 
 It may also work on Safari on Mac, or on tablet browsers.  I haven't tested it,
 on these platforms, though.
-
-
-What licence is SplitsBrowser released under?
----------------------------------------------
-
-SplitsBrowser is released under version 2 of the GPL.  The Java applet is
-released under the same license.
