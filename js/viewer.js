@@ -122,7 +122,7 @@
                .attr("fill", "red");
                
         logoSvg.append("polyline")
-               .attr("points", "0.5,0.5 0.5,18.5 18.5,18.5 18.5,0.5 0.5,0.5")
+               .attr("points", "0.5,0.5 0.5,18.5 18.5,18.5 18.5,0.5 0.5,0.5 0.5,18.5")
                .attr("stroke", "black")
                .attr("fill", "none");
                
