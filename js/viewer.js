@@ -307,8 +307,8 @@
         
         // Extra amount subtracted off of the width of the chart in order to
         // prevent wrapping, in units of pixels.
-        // 1 for the benefit of IE; Firefox, Chrome and Opera work with 0.
-        var EXTRA_WRAP_PREVENTION_SPACE = 1;
+        // 2 to prevent wrapping when zoomed out to 33% in Chrome.
+        var EXTRA_WRAP_PREVENTION_SPACE = 2;
         
         var bodyWidth = $(window).width() - horzMargin;
         var bodyHeight = $(window).height() - vertMargin - this.topDivHeight;
