@@ -84,16 +84,17 @@
         this.hasWinner = false;
         this.previousSelectedIndex = -1;
         
-        var span = d3.select(parent).append("span");
+        var div = d3.select(parent).append("div")
+                                   .attr("id", "comparisonSelectorContainer");
         
-        span.append("span")
-            .classed("comparisonSelectorLabel", true)
-            .text(getMessage("ComparisonSelectorLabel"));
+        div.append("span")
+           .classed("comparisonSelectorLabel", true)
+           .text(getMessage("ComparisonSelectorLabel"));
 
         var outerThis = this;
-        this.dropDown = span.append("select")
-                            .attr("id", COMPARISON_SELECTOR_ID)
-                            .node();
+        this.dropDown = div.append("select")
+                           .attr("id", COMPARISON_SELECTOR_ID)
+                           .node();
                             
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
 
@@ -106,17 +107,19 @@
                    
         optionsList.exit().remove();
         
-        this.runnerSpan = d3.select(parent).append("span")
-                                           .style("display", "none")
-                                           .style("padding-left", "20px");
+        this.runnerDiv = d3.select(parent).append("div")
+                                          .attr("id", "runnerSelectorContainer")
+                                          .style("display", "none")
+                                          .style("padding-left", "20px");
         
-        this.runnerSpan.append("span")
-                       .classed("comparisonSelectorLabel", true)
-                       .text(getMessage("CompareWithAnyRunnerLabel"));
+        this.runnerDiv.append("span")
+                      .classed("comparisonSelectorLabel", true)
+                      .text(getMessage("CompareWithAnyRunnerLabel"));
         
-        this.runnerDropDown = this.runnerSpan.append("select")
-                                             .attr("id", RUNNER_SELECTOR_ID)
-                                             .node();
+        this.runnerDropDown = this.runnerDiv.append("select")
+                                            .attr("id", RUNNER_SELECTOR_ID)
+                                            .node();
+                                            
         $(this.runnerDropDown).bind("change", function () { outerThis.onSelectionChanged(); });
         
         this.dropDown.selectedIndex = DEFAULT_COMPARISON_INDEX;
@@ -225,7 +228,7 @@
             this.alerter(getMessageWithFormatting("CannotCompareAsNoWinner", {"$$OPTION$$": getMessage(option.nameKey)}));
             this.dropDown.selectedIndex = this.previousSelectedIndex;
         } else {
-            this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? null : "none");
+            this.runnerDiv.style("display", (this.isAnyRunnerSelected()) ? null : "none");
             this.currentRunnerIndex = (this.runnerDropDown.options.length === 0) ? 0 : parseInt(this.runnerDropDown.options[runnerDropdownSelectedIndex].value, 10);
             this.previousSelectedIndex = this.dropDown.selectedIndex;
             this.changeHandlers.forEach(function (handler) { handler(this.getComparisonFunction()); }, this);

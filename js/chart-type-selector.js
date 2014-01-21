@@ -32,10 +32,13 @@
         this.changeHandlers = [];
         this.chartTypes = chartTypes;
         
-        var span = d3.select(parent).append("span");
-        span.text(getMessage("ChartTypeSelectorLabel"));
+        var div = d3.select(parent).append("div")
+                                    .attr("id", "chartTypeSelector");
+        div.append("span")
+           .text(getMessage("ChartTypeSelectorLabel"));
+           
         var outerThis = this;
-        this.dropDown = span.append("select").node();
+        this.dropDown = div.append("select").node();
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
         
         var optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);

@@ -2783,16 +2783,17 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         this.hasWinner = false;
         this.previousSelectedIndex = -1;
         
-        var span = d3.select(parent).append("span");
+        var div = d3.select(parent).append("div")
+                                   .attr("id", "comparisonSelectorContainer");
         
-        span.append("span")
-            .classed("comparisonSelectorLabel", true)
-            .text(getMessage("ComparisonSelectorLabel"));
+        div.append("span")
+           .classed("comparisonSelectorLabel", true)
+           .text(getMessage("ComparisonSelectorLabel"));
 
         var outerThis = this;
-        this.dropDown = span.append("select")
-                            .attr("id", COMPARISON_SELECTOR_ID)
-                            .node();
+        this.dropDown = div.append("select")
+                           .attr("id", COMPARISON_SELECTOR_ID)
+                           .node();
                             
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
 
@@ -2805,17 +2806,19 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
                    
         optionsList.exit().remove();
         
-        this.runnerSpan = d3.select(parent).append("span")
-                                           .style("display", "none")
-                                           .style("padding-left", "20px");
+        this.runnerDiv = d3.select(parent).append("div")
+                                          .attr("id", "runnerSelectorContainer")
+                                          .style("display", "none")
+                                          .style("padding-left", "20px");
         
-        this.runnerSpan.append("span")
-                       .classed("comparisonSelectorLabel", true)
-                       .text(getMessage("CompareWithAnyRunnerLabel"));
+        this.runnerDiv.append("span")
+                      .classed("comparisonSelectorLabel", true)
+                      .text(getMessage("CompareWithAnyRunnerLabel"));
         
-        this.runnerDropDown = this.runnerSpan.append("select")
-                                             .attr("id", RUNNER_SELECTOR_ID)
-                                             .node();
+        this.runnerDropDown = this.runnerDiv.append("select")
+                                            .attr("id", RUNNER_SELECTOR_ID)
+                                            .node();
+                                            
         $(this.runnerDropDown).bind("change", function () { outerThis.onSelectionChanged(); });
         
         this.dropDown.selectedIndex = DEFAULT_COMPARISON_INDEX;
@@ -2924,7 +2927,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
             this.alerter(getMessageWithFormatting("CannotCompareAsNoWinner", {"$$OPTION$$": getMessage(option.nameKey)}));
             this.dropDown.selectedIndex = this.previousSelectedIndex;
         } else {
-            this.runnerSpan.style("display", (this.isAnyRunnerSelected()) ? null : "none");
+            this.runnerDiv.style("display", (this.isAnyRunnerSelected()) ? null : "none");
             this.currentRunnerIndex = (this.runnerDropDown.options.length === 0) ? 0 : parseInt(this.runnerDropDown.options[runnerDropdownSelectedIndex].value, 10);
             this.previousSelectedIndex = this.dropDown.selectedIndex;
             this.changeHandlers.forEach(function (handler) { handler(this.getComparisonFunction()); }, this);
@@ -3076,10 +3079,13 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         this.changeHandlers = [];
         this.chartTypes = chartTypes;
         
-        var span = d3.select(parent).append("span");
-        span.text(getMessage("ChartTypeSelectorLabel"));
+        var div = d3.select(parent).append("div")
+                                    .attr("id", "chartTypeSelector");
+        div.append("span")
+           .text(getMessage("ChartTypeSelectorLabel"));
+           
         var outerThis = this;
-        this.dropDown = span.append("select").node();
+        this.dropDown = div.append("select").node();
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
         
         var optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);
@@ -4910,7 +4916,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
                .attr("fill", "red");
                
         logoSvg.append("polyline")
-               .attr("points", "0.5,0.5 0.5,18.5 18.5,18.5 18.5,0.5 0.5,0.5")
+               .attr("points", "0.5,0.5 0.5,18.5 18.5,18.5 18.5,0.5 0.5,0.5 0.5,18.5")
                .attr("stroke", "black")
                .attr("fill", "none");
                
@@ -4929,7 +4935,7 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
     * Adds a spacer between controls on the top row.
     */
     Viewer.prototype.addSpacer = function () {
-        this.topPanel.append("span").classed("topRowSpacer", true);    
+        this.topPanel.append("div").classed("topRowSpacer", true);    
     };
     
     /**
@@ -5014,9 +5020,14 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         this.addComparisonSelector();
         
         this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
+
+        // Add an empty div to clear the floating divs and ensure that the
+        // top panel 'contains' all of its children.
+        this.topPanel.append("div")
+                     .style("clear", "both");
         
-        this.mainPanel = body.append("div")
-                             .style("clear", "both");
+        this.mainPanel = body.append("div");
+                             
         this.addCompetitorList();
         this.chart = new Chart(this.mainPanel.node());
         
@@ -5095,8 +5106,8 @@ var SplitsBrowser = { Version: "3.0.0", Model: {}, Input: {}, Controls: {} };
         
         // Extra amount subtracted off of the width of the chart in order to
         // prevent wrapping, in units of pixels.
-        // 1 for the benefit of IE; Firefox, Chrome and Opera work with 0.
-        var EXTRA_WRAP_PREVENTION_SPACE = 1;
+        // 2 to prevent wrapping when zoomed out to 33% in Chrome.
+        var EXTRA_WRAP_PREVENTION_SPACE = 2;
         
         var bodyWidth = $(window).width() - horzMargin;
         var bodyHeight = $(window).height() - vertMargin - this.topDivHeight;

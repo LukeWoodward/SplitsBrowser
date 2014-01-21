@@ -141,7 +141,7 @@
     * Adds a spacer between controls on the top row.
     */
     Viewer.prototype.addSpacer = function () {
-        this.topPanel.append("span").classed("topRowSpacer", true);    
+        this.topPanel.append("div").classed("topRowSpacer", true);    
     };
     
     /**
@@ -226,9 +226,14 @@
         this.addComparisonSelector();
         
         this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
+
+        // Add an empty div to clear the floating divs and ensure that the
+        // top panel 'contains' all of its children.
+        this.topPanel.append("div")
+                     .style("clear", "both");
         
-        this.mainPanel = body.append("div")
-                             .style("clear", "both");
+        this.mainPanel = body.append("div");
+                             
         this.addCompetitorList();
         this.chart = new Chart(this.mainPanel.node());
         
