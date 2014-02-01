@@ -265,9 +265,9 @@
         selection.toggle(1);
         
         var competitors = [
-            fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301]),
-            fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561]),
-            fromCumTimes(3, "Bill", "Baker", "GHI", 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381])
+            fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301]),
+            fromCumTimes(2, "Fred Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561]),
+            fromCumTimes(3, "Bill Baker", "GHI", 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381])
         ];
         
         selection.registerChangeHandler(testHandler);
@@ -278,7 +278,7 @@
 
     QUnit.test("Cannot migrate from an old list of competitors that isn't an array", function (assert) {
         var selection = new CompetitorSelection(2);
-        var newCompetitors = [fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301])];
+        var newCompetitors = [fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301])];
         SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate("this is not an array", newCompetitors);
         });
@@ -286,8 +286,8 @@
 
     QUnit.test("Cannot migrate from an old list of competitors that doesn't match the previous count", function (assert) {
         var selection = new CompetitorSelection(2);
-        var oldCompetitors = [fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
-        var newCompetitors = [fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301])];
+        var oldCompetitors = [fromCumTimes(2, "Fred Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
+        var newCompetitors = [fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301])];
         SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate(oldCompetitors, newCompetitors);
         });
@@ -295,7 +295,7 @@
 
     QUnit.test("Cannot migrate to a new list of competitors that isn't an array", function (assert) {
         var selection = new CompetitorSelection(2);
-        var oldCompetitors = [fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
+        var oldCompetitors = [fromCumTimes(2, "Fred Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
         SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate(oldCompetitors, "this is not an array");
         });
@@ -303,7 +303,7 @@
 
     QUnit.test("Cannot migrate to an empty new list of competitors", function (assert) {
         var selection = new CompetitorSelection(2);
-        var oldCompetitors = [fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
+        var oldCompetitors = [fromCumTimes(2, "Fred Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
         SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate(oldCompetitors, []);
         });
@@ -311,10 +311,10 @@
 
     QUnit.test("Can migrate to new list of competitors", function (assert) {
         reset();
-        var competitor1 = fromCumTimes(1, "John", "Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301]);
-        var competitor2 = fromCumTimes(2, "Fred", "Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561]);
-        var competitor3 = fromCumTimes(3, "Bill", "Baker", "GHI", 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381]);
-        var competitor4 = fromCumTimes(4, "Tony", "Giles", "JKL", 10 * 3600 + 2 * 60, [0, 78, 188, 252, 406]);
+        var competitor1 = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301]);
+        var competitor2 = fromCumTimes(2, "Fred Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561]);
+        var competitor3 = fromCumTimes(3, "Bill Baker", "GHI", 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381]);
+        var competitor4 = fromCumTimes(4, "Tony Giles", "JKL", 10 * 3600 + 2 * 60, [0, 78, 188, 252, 406]);
         var oldCompetitors = [competitor2, competitor1, competitor3];
         var newCompetitors = [competitor1, competitor2, competitor4];
         var selection = new CompetitorSelection(oldCompetitors.length);

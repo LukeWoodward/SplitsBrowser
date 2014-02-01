@@ -36,63 +36,63 @@
     var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
     
     function getCompetitor1() {
-        return fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
     }
     
     function getFasterCompetitor1() {
-        return fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
     function getCompetitor1WithNullSplitForControl2() {
-        return fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, null, 184, 100]);
+        return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, null, 184, 100]);
     }
     
     function getCompetitor1WithNullSplitForControl3() {
-        return fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, null, 100]);
+        return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, null, 100]);
     }
     
     function getCompetitor1WithNullFinishSplit() {
-        return fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, null]);
+        return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, 184, null]);
     }
     
     function getCompetitor1WithSameControl2SplitAsThatOfCompetitor2() {
-        return fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [65, 197, 209, 100]);
+        return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 197, 209, 100]);
     }
     
     function getCompetitor2() {
-        return fromSplitTimes(2, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        return fromSplitTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
     function getCompetitor2WithNullSplitForControl2() {
-        return fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, null, 212, 106]);
+        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, null, 212, 106]);
     }
     
     function getCompetitor2WithNullSplitForControl3() {
-        return fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
+        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
     }
     
     function getCompetitor2WithNullFinishSplit() {
-        return fromSplitTimes(2, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, null]);
+        return fromSplitTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, null]);
     }
     
     function getCompetitor3() {
-        return fromSplitTimes(3, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);    
+        return fromSplitTimes(3, "Bill Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);    
     }
     
     function getCompetitor3WithSameTotalTimeAsCompetitor1() {
-        return fromSplitTimes(3, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, 109]);
+        return fromSplitTimes(3, "Bill Baker", "GHI", 11 * 3600, [78, 209, 199, 109]);
     }
     
     function getCompetitor3WithNullSplitForControl2() {
-        return fromSplitTimes(3, "Bill", "Baker", "GHI", 11 * 3600, [78, null, 199, 117]);
+        return fromSplitTimes(3, "Bill Baker", "GHI", 11 * 3600, [78, null, 199, 117]);
     }
     
     function getCompetitor3WithNullSplitForControl3() {
-        return fromSplitTimes(3, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, null, 117]);
+        return fromSplitTimes(3, "Bill Baker", "GHI", 11 * 3600, [78, 209, null, 117]);
     }
     
     function getCompetitor3WithNullFinishSplit() {
-        return fromSplitTimes(3, "Bill", "Baker", "GHI", 11 * 3600, [78, 209, 199, null]);
+        return fromSplitTimes(3, "Bill Baker", "GHI", 11 * 3600, [78, 209, 199, null]);
     }
     
     QUnit.test("Cannot create an AgeClassSet from an empty array of of age classes", function (assert) {
@@ -150,7 +150,7 @@
     });
     
     QUnit.test("Cannot create an AgeClassSet from two age classes with different numbers of controls", function (assert) {
-        var competitor2 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 108]);
+        var competitor2 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 108]);
         var ageClass1 = new AgeClass("Test", 3, [getCompetitor1()]);
         var ageClass2 = new AgeClass("Test", 4, [competitor2]);
         SplitsBrowserTest.assertInvalidData(assert, function () {
@@ -319,9 +319,9 @@
     });
     
     QUnit.test("Can compute ranks when there are three competitors specified by cumulative times with one missing split times", function (assert) {
-        var competitor1 = fromCumTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
-        var competitor2 = fromCumTimes(2, "John", "Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100]);
-        var competitor3 = fromCumTimes(2, "Bill", "Baker", "GHI", 11 * 3600, [0, 78, null,     78 + 209 + 199, 78 + 209 + 199 + 117]);
+        var competitor1 = fromCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor2 = fromCumTimes(2, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100]);
+        var competitor3 = fromCumTimes(2, "Bill Baker", "GHI", 11 * 3600, [0, 78, null,     78 + 209 + 199, 78 + 209 + 199 + 117]);
         new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         assertSplitAndCumulativeRanks(assert, competitor1, [3, 1, 2, 2], [3, 1, 1, 2]);

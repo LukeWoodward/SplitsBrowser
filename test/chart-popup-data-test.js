@@ -37,7 +37,7 @@
     function getTestAgeClassSet() {
         var competitors = d3.range(0, 11).map(function (num) {
             var timeOffset = (num * 7) % 11;
-            return fromSplitTimes(1, "FirstName" + num, "Surname" + num, "Club" + num, 10 * 3600 + 127 * num, [65 + 10 * timeOffset, 221 + 20 * timeOffset, 209 + 15 * timeOffset, 100 + 5 * timeOffset]);
+            return fromSplitTimes(1, "Name" + num, "Club" + num, 10 * 3600 + 127 * num, [65 + 10 * timeOffset, 221 + 20 * timeOffset, 209 + 15 * timeOffset, 100 + 5 * timeOffset]);
         });
     
         return new AgeClassSet([new AgeClass("Test class", 3, competitors)]);
@@ -55,7 +55,7 @@
                 // so we multiply by 8 to reverse the effect of
                 // multiplying by 7 modulo 11.
                 var compIndex = (num * 8) % 11;
-                return { name: "FirstName" + compIndex + " Surname" + compIndex, time: 221 + num * 20, highlight: false };
+                return { name: "Name" + compIndex, time: 221 + num * 20, highlight: false };
             }),
             placeholder: getMessage("SelectedClassesPopupPlaceholder")
         };
@@ -69,7 +69,7 @@
         var course1 = new Course("Test course", ageClassSet1.ageClasses, null, null, ["235", "189", "212"]);
         ageClassSet1.ageClasses.forEach(function (ageClass) { ageClass.setCourse(course1); });
 
-        var ageClassSet2 = new AgeClassSet([new AgeClass("Test class 2", 3, [fromSplitTimes(1, "John", "Smith", "ABC", 10 * 3600, [75, 242, 200, 157])])]);
+        var ageClassSet2 = new AgeClassSet([new AgeClass("Test class 2", 3, [fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [75, 242, 200, 157])])]);
         var course2 = new Course("Test course 2", ageClassSet2.ageClasses, null, null, ["235", "189", "212"]);
         ageClassSet2.ageClasses[0].setCourse(course2);
         
@@ -81,7 +81,7 @@
             data: [{
                 className: "Test class",
                 highlight: true,
-                name: "FirstName0 Surname0",
+                name: "Name0",
                 time: 221
             },
             {
@@ -110,7 +110,7 @@
             data: [{
                 className: "Test class",
                 highlight: true,
-                name: "FirstName0 Surname0",
+                name: "Name0",
                 time: 65
             }],
             placeholder: null
@@ -133,7 +133,7 @@
             data: [{
                 className: "Test class",
                 highlight: true,
-                name: "FirstName0 Surname0",
+                name: "Name0",
                 time: 100
             }],
             placeholder: null
@@ -158,8 +158,8 @@
                 "$$CONTROL$$": getMessageWithFormatting("ControlName", {"$$CODE$$": "189"})
             }),
             data: [
-                { className: "Test class", highlight: true, name: "FirstName1 Surname1", time: 36623 },
-                { className: "Test class", highlight: true, name: "FirstName2 Surname2", time: 36630 }
+                { className: "Test class", highlight: true, name: "Name1", time: 36623 },
+                { className: "Test class", highlight: true, name: "Name2", time: 36630 }
             ],
             placeholder: getMessage("NoNearbyCompetitors")
         };
@@ -185,8 +185,8 @@
                 "$$CONTROL$$": getMessage("StartName")
             }),
             data: [
-                { className: "Test class", highlight: true, name: "FirstName5 Surname5", time: 36635 },
-                { className: "Test class", highlight: true, name: "FirstName6 Surname6", time: 36762 }
+                { className: "Test class", highlight: true, name: "Name5", time: 36635 },
+                { className: "Test class", highlight: true, name: "Name6", time: 36762 }
             ],
             placeholder: getMessage("NoNearbyCompetitors")
         };
@@ -212,8 +212,8 @@
                 "$$CONTROL$$": getMessage("FinishName")
             }),
             data: [
-                { className: "Test class", highlight: true, name: "FirstName8 Surname8", time: 37661 },
-                { className: "Test class", highlight: true, name: "FirstName7 Surname7", time: 37734 }
+                { className: "Test class", highlight: true, name: "Name8", time: 37661 },
+                { className: "Test class", highlight: true, name: "Name7", time: 37734 }
             ],
             placeholder: getMessage("NoNearbyCompetitors")
         };

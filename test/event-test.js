@@ -29,15 +29,15 @@
     module("Event");
     
     function getCompetitor1() {
-        return fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
     function getCompetitor2() {
-        return fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
     function getCompetitor2WithExtraSplit() {
-        return fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 157, 100]);
+        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 157, 100]);
     }
     
     QUnit.test("Returns empty list of fastest splits to a leg if the event has no competitors", function (assert) {

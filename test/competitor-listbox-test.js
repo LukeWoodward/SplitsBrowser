@@ -39,9 +39,9 @@
         var parent = d3.select("div#qunit-fixture").node();
         
         var compList = [
-            fromSplitTimes(1, "A", "B", "CDO", 10 * 3600, [13, 86, 35]),
-            fromSplitTimes(2, "E", "F", "GHO", 10 * 3600 + 16, [15, 79, 41]),
-            fromSplitTimes(3, "I", "J", "KLO", 10 * 3600 + 33, [18, 81, 37])
+            fromSplitTimes(1, "A B", "CDO", 10 * 3600, [13, 86, 35]),
+            fromSplitTimes(2, "E F", "GHO", 10 * 3600 + 16, [15, 79, 41]),
+            fromSplitTimes(3, "I J", "KLO", 10 * 3600 + 33, [18, 81, 37])
         ];
         
         var selection = new CompetitorSelection(compList.length);

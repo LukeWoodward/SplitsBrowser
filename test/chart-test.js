@@ -32,7 +32,7 @@
         name: "dummy",
         dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
         skipStart: false,
-        yAxisLabel: "dummy axis label",
+        yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: false
     };
     
@@ -40,7 +40,7 @@
         name: "dummy skip",
         dataSelector: function (comp) { return comp.splitRanks; },
         skipStart: true,
-        yAxisLabel: "dummy axis label",
+        yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: false
     };
 
@@ -48,7 +48,7 @@
         name: "dummy race graph",
         dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
         skipStart: false,
-        yAxisLabel: "dummy axis label",
+        yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: true
     };
 
@@ -105,8 +105,8 @@
     * Creates and returns a AgeClassSet object populated with test data.
     */
     function getTestAgeClassSetAndEvent() {
-        var competitor1 = fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-        var competitor2 = fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
         var ageClassSet = new AgeClassSet([ageClass]);
         var course = new Course("Test course", [ageClass], null, null, null);

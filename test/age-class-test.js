@@ -27,27 +27,27 @@
     module("Age-class");
     
     function getCompetitor1() {
-        return fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
     function getCompetitor1WithNullSplitForControls1And3() {
-        return fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [null, 197, null, 106]);
+        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [null, 197, null, 106]);
     }
     
     function getCompetitor1WithNullSplitForControl3() {
-        return fromSplitTimes(1, "Fred", "Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
+        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
     }
     
     function getCompetitor2() {
-        return fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
     function getCompetitor2WithNullSplitForControl2() {
-        return fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, null, 184, 100]);
+        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, null, 184, 100]);
     }
     
     function getCompetitor2WithNullSplitForControl3() {
-        return fromSplitTimes(2, "John", "Smith", "ABC", 10 * 3600, [65, 221, null, 100]);
+        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, null, 100]);
     }
     
     function getTestAgeClass() {

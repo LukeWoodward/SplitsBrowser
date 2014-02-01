@@ -50,7 +50,7 @@
             if (splitTimes.indexOf(0) >= 0) {
                 throwInvalidData("Zero split times are not permitted - found one or more zero splits for competitor '" + forename + " " + surname + "'");
             }
-            return Competitor.fromSplitTimes(index + 1, forename, surname, club, startTime, splitTimes);
+            return Competitor.fromSplitTimes(index + 1, forename + " " + surname, club, startTime, splitTimes);
         } else {
             throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor in class with " + controlCount + " controls, got " + (parts.length) + " instead.");
         }

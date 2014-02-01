@@ -209,8 +209,7 @@
         assert.deepEqual(course.controls, ["208", "227", "212"]);
         
         var competitor = eventData.classes[0].competitors[0];
-        assert.strictEqual(competitor.forename, "John", "Should read correct forename");
-        assert.strictEqual(competitor.surname, "Smith", "Should read correct surname");
+        assert.strictEqual(competitor.name, "John Smith", "Should read correct name");
         assert.strictEqual(competitor.club, "ABC", "Should read correct club");
         assert.strictEqual(competitor.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
@@ -232,7 +231,7 @@
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
     });
     
-    QUnit.test("Can parse a string that contains a single competitor's data with a missed control and remove the trailing 'mp' from the surname", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with a missed control and remove the trailing 'mp' from the name", function (assert) {
         var comp = getCompetitor1();
         comp.surname = "Smith mp";
         comp.placing = "mp";
@@ -244,11 +243,11 @@
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
         
         var competitor = eventData.classes[0].competitors[0];
-        assert.strictEqual(competitor.surname, "Smith", "Should read correct surname without 'mp' suffix");
+        assert.strictEqual(competitor.name, "John Smith", "Should read correct name without 'mp' suffix");
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
     });
     
-    QUnit.test("Can parse a string that contains a single competitor's data and remove the trailing 'n/c' from the surname", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data and remove the trailing 'n/c' from the name", function (assert) {
         var comp = getCompetitor1();
         comp.surname = "Smith n/c";
         comp.placing = "n/c";
@@ -258,7 +257,7 @@
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
         
         var competitor = eventData.classes[0].competitors[0];
-        assert.strictEqual(competitor.surname, "Smith", "Should read correct surname without 'n/c' suffix");
+        assert.strictEqual(competitor.name, "John Smith", "Should read correct name without 'n/c' suffix");
         assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
         assert.ok(competitor.isNonCompetitive, "Competitor should be marked as non-competitive");
     });
@@ -271,8 +270,7 @@
         assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
         assert.strictEqual(eventData.classes[0].competitors.length, 2, "Two competitors should have been read");
         
-        assert.strictEqual(eventData.classes[0].competitors[0].forename, "John", "Should read correct forename for first competitor");
-        assert.strictEqual(eventData.classes[0].competitors[1].forename, "Fred", "Should read correct forename for second competitor");
+        assert.strictEqual(eventData.classes[0].competitors[0].name, "John Smith", "Should read correct name for first competitor");
         assert.strictEqual(eventData.classes[0].course, eventData.courses[0], "Course should be set on the class");
         assert.deepEqual(eventData.courses[0].controls, ["208", "227", "212"]);
     });
@@ -288,8 +286,8 @@
         assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
         assert.strictEqual(eventData.classes[0].competitors.length, 2, "Two competitors should have been read");
         
-        assert.strictEqual(eventData.classes[0].competitors[0].forename, "John", "Should read correct forename for first competitor");
-        assert.strictEqual(eventData.classes[0].competitors[1].forename, "Fred", "Should read correct forename for second competitor");
+        assert.strictEqual(eventData.classes[0].competitors[0].name, "John Smith", "Should read correct name for first competitor");
+        assert.strictEqual(eventData.classes[0].competitors[1].name, "Fred Baker", "Should read correct name for second competitor");
         
         assert.strictEqual(eventData.courses.length, 1, "There should be one element in the courses array");
         assert.strictEqual(eventData.courses[0].name, "Test course 1", "The course name should be the first course");
@@ -308,8 +306,8 @@
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "First class should have two competitors");
         assert.strictEqual(eventData.classes[1].competitors.length, 1, "Second class should have two competitors");
         
-        assert.strictEqual(eventData.classes[0].competitors[0].forename, "John", "Should read correct forename for first competitor");
-        assert.strictEqual(eventData.classes[1].competitors[0].forename, "Fred", "Should read correct forename for second competitor");
+        assert.strictEqual(eventData.classes[0].competitors[0].name, "John Smith", "Should read correct name for first competitor");
+        assert.strictEqual(eventData.classes[1].competitors[0].name, "Fred Baker", "Should read correct name for second competitor");
         
         assert.strictEqual(eventData.courses.length, 1, "There should be one element in the courses array");
         assert.strictEqual(eventData.courses[0].name, "Test course", "The course name should be correct");
@@ -336,8 +334,8 @@
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "First class should have two competitors");
         assert.strictEqual(eventData.classes[1].competitors.length, 2, "Second class should have two competitors");
         
-        assert.strictEqual(eventData.classes[0].competitors[0].forename, "John", "Should read correct forename for competitor in first class");
-        assert.strictEqual(eventData.classes[1].competitors[0].forename, "Fred", "Should read correct forename for first competitor in second class");
+        assert.strictEqual(eventData.classes[0].competitors[0].name, "John Smith", "Should read correct name for competitor in first class");
+        assert.strictEqual(eventData.classes[1].competitors[0].name, "Fred Baker", "Should read correct name for first competitor in second class");
         
         assert.strictEqual(eventData.courses.length, 1, "There should be one element in the courses array");
         assert.strictEqual(eventData.courses[0].name, "Test course 1", "The course name should be correct");
@@ -368,8 +366,8 @@
         assert.strictEqual(eventData.classes[1].numControls, 4, "Second class should have four controls");
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read for the first class");
         assert.strictEqual(eventData.classes[1].competitors.length, 1, "One competitor should have been read for the second class");
-        assert.strictEqual(eventData.classes[0].competitors[0].forename, "John", "Should read correct forename for competitor on first class");
-        assert.strictEqual(eventData.classes[1].competitors[0].forename, "Fred", "Should read correct forename for competitor on second class");
+        assert.strictEqual(eventData.classes[0].competitors[0].name, "John Smith", "Should read correct name for competitor on first class");
+        assert.strictEqual(eventData.classes[1].competitors[0].name, "Fred Baker", "Should read correct name for competitor on second class");
         
         assert.strictEqual(eventData.courses.length, 2, "There should be two elements in the courses array");
         assert.ok(eventData.courses[0] instanceof Course, "First array element should be a Course object");
@@ -403,8 +401,8 @@
         assert.ok(eventData.classes[1] instanceof AgeClass, "Second array element should be an AgeClass object");
         assert.strictEqual(eventData.classes[0].name, "Test class 1", "First class should be first class alphabetically");
         assert.strictEqual(eventData.classes[1].name, "Test class 2", "Second class should be second class alphabetically");
-        assert.strictEqual(eventData.classes[0].competitors[0].forename, "Fred", "Should read correct forename for competitor on first class");
-        assert.strictEqual(eventData.classes[1].competitors[0].forename, "John", "Should read correct forename for competitor on second class");
+        assert.strictEqual(eventData.classes[0].competitors[0].name, "Fred Baker", "Should read correct name for competitor on first class");
+        assert.strictEqual(eventData.classes[1].competitors[0].name, "John Smith", "Should read correct name for competitor on second class");
         
         assert.strictEqual(eventData.courses.length, 2, "There should be two elements in the courses array");
         assert.ok(eventData.courses[0] instanceof Course, "First array element should be a Course object");
@@ -432,8 +430,8 @@
         assert.ok(eventData.classes[1] instanceof AgeClass, "Second array element should be an AgeClass object");
         assert.strictEqual(eventData.classes[0].name, "Test class 1", "First class should be first class alphabetically");
         assert.strictEqual(eventData.classes[1].name, "Test class 2", "Second class should be second class alphabetically");
-        assert.strictEqual(eventData.classes[0].competitors[0].forename, "Fred", "Should read correct forename for competitor on first class");
-        assert.strictEqual(eventData.classes[1].competitors[0].forename, "John", "Should read correct forename for competitor on second class");
+        assert.strictEqual(eventData.classes[0].competitors[0].name, "Fred Baker", "Should read correct name for competitor on first class");
+        assert.strictEqual(eventData.classes[1].competitors[0].name, "John Smith", "Should read correct name for competitor on second class");
         
         assert.strictEqual(eventData.courses.length, 2, "There should be two elements in the courses array");
         assert.ok(eventData.courses[0] instanceof Course, "First array element should be a Course object");

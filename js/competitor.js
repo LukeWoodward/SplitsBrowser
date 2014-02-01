@@ -143,22 +143,20 @@
     *
     * @constructor
     * @param {Number} order - The position of the competitor within the list of results.
-    * @param {string} forename - The forename of the competitor.
-    * @param {string} surname - The surname of the competitor.
-    * @param {string} club - The name of the competitor's club.
-    * @param {string} startTime - The competitor's start time.
+    * @param {String} name - The name of the competitor.
+    * @param {String} club - The name of the competitor's club.
+    * @param {String} startTime - The competitor's start time.
     * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
     */
-    var Competitor = function (order, forename, surname, club, startTime, splitTimes, cumTimes) {
+    var Competitor = function (order, name, club, startTime, splitTimes, cumTimes) {
 
         if (typeof order !== NUMBER_TYPE) {
             throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
         }
 
         this.order = order;
-        this.forename = forename;
-        this.surname = surname;
+        this.name = name;
         this.club = club;
         this.startTime = startTime;
         this.isNonCompetitive = false;
@@ -170,7 +168,6 @@
         this.cumRanks = null;
         this.timeLosses = null;
 
-        this.name = forename + " " + surname;
         this.totalTime = (this.cumTimes.indexOf(null) > -1) ? null : this.cumTimes[this.cumTimes.length - 1];
     };
     
@@ -200,15 +197,14 @@
     * as it has been known for them to be given not in the correct order.
     *
     * @param {Number} order - The position of the competitor within the list of results.
-    * @param {string} forename - The forename of the competitor.
-    * @param {string} surname - The surname of the competitor.
-    * @param {string} club - The name of the competitor's club.
+    * @param {String} name - The name of the competitor.
+    * @param {String} club - The name of the competitor's club.
     * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
     */
-    Competitor.fromSplitTimes = function (order, forename, surname, club, startTime, splitTimes) {
+    Competitor.fromSplitTimes = function (order, name, club, startTime, splitTimes) {
         var cumTimes = cumTimesFromSplitTimes(splitTimes);
-        return new Competitor(order, forename, surname, club, startTime, splitTimes, cumTimes);
+        return new Competitor(order, name, club, startTime, splitTimes, cumTimes);
     };
     
     /**
@@ -222,15 +218,14 @@
     * as it has been known for them to be given not in the correct order.
     *
     * @param {Number} order - The position of the competitor within the list of results.
-    * @param {string} forename - The forename of the competitor.
-    * @param {string} surname - The surname of the competitor.
-    * @param {string} club - The name of the competitor's club.
+    * @param {String} name - The name of the competitor.
+    * @param {String} club - The name of the competitor's club.
     * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
     */
-    Competitor.fromCumTimes = function (order, forename, surname, club, startTime, cumTimes) {
+    Competitor.fromCumTimes = function (order, name, club, startTime, cumTimes) {
         var splitTimes = splitTimesFromCumTimes(cumTimes);
-        return new Competitor(order, forename, surname, club, startTime, splitTimes, cumTimes);
+        return new Competitor(order, name, club, startTime, splitTimes, cumTimes);
     };
     
     /**

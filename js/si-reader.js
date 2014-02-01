@@ -64,8 +64,6 @@
         }
     }
     
-    SplitsBrowser.Input.SI = {};
-    
     /**
     * Constructs an SI-format data reader.
     *
@@ -73,7 +71,7 @@
     * @constructor
     * @param {String} data - The SI data to read in.
     */
-    SplitsBrowser.Input.SI.Reader = function (data) {
+    var Reader = function (data) {
         this.data = data;
         
         // Map that associates classes to all of the competitors running on
@@ -93,8 +91,6 @@
         // ignored, as are competitors that have no times at all.
         this.anyCompetitors = false;
     };
-    
-    var Reader = SplitsBrowser.Input.SI.Reader;
 
     /**
     * Checks that the data read in contains a header that suggests it is
@@ -230,7 +226,7 @@
         }
         
         var order = this.ageClasses.get(className).competitors.length + 1;
-        var competitor = Competitor.fromCumTimes(order, forename, surname, club, startTime, cumTimes);
+        var competitor = Competitor.fromCumTimes(order, forename + " " + surname, club, startTime, cumTimes);
         if (isPlacingNonNumeric && competitor.completed()) {
             // Competitor has completed the course but has no placing.
             // Assume that they are non-competitive.
@@ -457,6 +453,8 @@
         var courses = this.determineCourses(classes);
         return new Event(classes, courses);
     };
+    
+    SplitsBrowser.Input.SI = {};
     
     /**
     * Parse 'SI' data read from a semicolon-separated data string.
