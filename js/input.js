@@ -24,7 +24,8 @@
     // All the parsers for parsing event data that are known about.
     var PARSERS = [
         SplitsBrowser.Input.CSV.parseEventData,
-        SplitsBrowser.Input.SI.parseEventData
+        SplitsBrowser.Input.SI.parseEventData,
+        SplitsBrowser.Input.SIHtml.parseEventData
     ];
     
     /**
