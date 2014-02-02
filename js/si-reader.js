@@ -260,16 +260,13 @@
         var numControls = this.getNumControls(row);
         
         var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
-        if (cumTimes.some(function (time) { return (time !== null && time !== 0); })) {
-            // This competitor has at least one cumulative split, so add them.
-            this.anyCompetitors = true;
-            
-            this.createAgeClassIfNecessary(row, numControls);
-            this.createCourseIfNecessary(row, numControls);
-            this.createClassCoursePairIfNecessary(row);
-            
-            this.addCompetitor(row, cumTimes);
-        }
+        this.anyCompetitors = true;
+        
+        this.createAgeClassIfNecessary(row, numControls);
+        this.createCourseIfNecessary(row, numControls);
+        this.createClassCoursePairIfNecessary(row);
+        
+        this.addCompetitor(row, cumTimes);
     };
     
     /**
