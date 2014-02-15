@@ -94,9 +94,9 @@
         var htmlSelect = htmlSelectSelection.node();
         $(htmlSelect).val(2).change();
         
-        assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The fourth chart type should have been selected");
+        assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The third chart type should have been selected");
         assert.strictEqual(callCount, 1, "One change should have been recorded");
-        assert.strictEqual(lastChartTypeName2, chartTypes[2].name, "The fourth chart type should have been selected");
+        assert.strictEqual(lastChartTypeName2, chartTypes[2].name, "The third chart type should have been selected");
         assert.strictEqual(callCount2, 1, "One change should have been recorded");
     });
 
@@ -112,7 +112,7 @@
 
         $(htmlSelect).val(2).change();
         
-        assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The fourth chart type should have been selected");
+        assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The third chart type should have been selected");
         assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
