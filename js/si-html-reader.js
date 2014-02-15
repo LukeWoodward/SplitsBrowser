@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser SI HTML - Reads in HTML-format 'SI' results data files.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -34,7 +34,7 @@
     // Regexps to help with parsing.
     var HTML_TAG_STRIP_REGEXP = /<[^>]+>/g;
     var DISTANCE_FIND_REGEXP = /([0-9.]+)\s*(?:Km|km)/;
-    var CLIMB_FIND_REGEXP = /(\d+)\s*(?:Cm|Hm|hm|m)"/;
+    var CLIMB_FIND_REGEXP = /(\d+)\s*(?:Cm|Hm|hm|m)/;
     
     /**
     * Returns whether the given string is nonempty.
@@ -123,7 +123,7 @@
     * @return {Array} Array of strings of text inside <td> elements.
     */
     function getTableDataBits(text) {
-        return getHtmlStrippedRegexMatches(/<td[^>]*>(.*?)<\/td>/g, text);
+        return getHtmlStrippedRegexMatches(/<td[^>]*>(.*?)<\/td>/g, text).map($.trim);
     }
     
     /**
@@ -737,10 +737,10 @@
         
         var competitive = hasNumber(firstLineBits[0]);
         var name = firstLineBits[2];
-        var totalTime = firstLineBits[3];
+        var totalTime = firstLineBits[(this.currentCourseHasClass) ? 4 : 3];
         var club = secondLineBits[2];
         
-        var className = (this.currentCourseHasClass && name !== "") ? firstLineBits[4] : null;
+        var className = (this.currentCourseHasClass && name !== "") ? firstLineBits[3] : null;
         
         var cumulativeTimes = this.readCompetitorSplitDataLine(firstLine);
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
@@ -934,11 +934,15 @@
         var newCourses = [];
         var ageClasses = [];
         
+        var competitorsHaveClasses = this.courses.every(function (course) {
+            return course.competitors.every(function (competitor) { return isNotNull(competitor.className); });
+        });
+        
         this.courses.forEach(function (course) {
             // Firstly, sort competitors by class.
             var classToCompetitorsMap = d3.map();
             course.competitors.forEach(function (competitor) {
-                var className = (classesUniqueWithinCourses) ? competitor.className : course.name;
+                var className = (competitorsHaveClasses && classesUniqueWithinCourses) ? competitor.className : course.name;
                 if (classToCompetitorsMap.has(className)) {
                     classToCompetitorsMap.get(className).push(competitor);
                 } else {
@@ -1011,7 +1015,7 @@
     * @return {String} The text with normalised line-endings.
     */
     function normaliseLineEndings(data) {
-        return data.replace(/\r\n/g, "\n").replace(/\r/g, "");
+        return data.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
     }
     
     var RECOGNIZER_CLASSES = [OldHtmlFormatRecognizer, NewHtmlFormatRecognizer];
