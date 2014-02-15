@@ -100,7 +100,6 @@
         assert.strictEqual(callCount2, 1, "One change should have been recorded");
     });
 
-
     QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", function(assert) {
         resetLastChartType();
         var selector = createSelector();
@@ -115,5 +114,47 @@
         
         assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The fourth chart type should have been selected");
         assert.strictEqual(callCount, 1, "One change should have been recorded");
+    });
+
+    QUnit.test("Race graph notifier function called and selection reverted if notifier set", function(assert) {
+        resetLastChartType();
+        var selector = createSelector();
+        selector.registerChangeHandler(handleChartTypeChanged);
+        
+        var notifierCalled = false;
+        selector.setRaceGraphDisabledNotifier(function () { notifierCalled = true; });
+        
+        var htmlSelectSelection = d3.select("#qunit-fixture select");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
+        var htmlSelect = htmlSelectSelection.node();
+
+        $(htmlSelect).val(1).change();
+        
+        assert.ok(notifierCalled, "Notifier function should have been called");
+        assert.strictEqual(lastChartTypeName, chartTypes[0].name, "The first chart type should have been selected");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
+    });
+
+    QUnit.test("Race graph notifier function called and selection reverted to previous selection if notifier set", function(assert) {
+        resetLastChartType();
+        var selector = createSelector();
+        selector.registerChangeHandler(handleChartTypeChanged);
+        
+        var notifierCalled = false;
+        selector.setRaceGraphDisabledNotifier(function () { notifierCalled = true; });
+        
+        var htmlSelectSelection = d3.select("#qunit-fixture select");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
+        var htmlSelect = htmlSelectSelection.node();
+
+        $(htmlSelect).val(2).change();
+        
+        assert.ok(!notifierCalled, "Notifier function should not have been called");
+        assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The third chart type should have been selected");
+        
+        $(htmlSelect).val(1).change();
+        
+        assert.ok(notifierCalled, "Notifier function should have been called");
+        assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The third chart type should still be selected");
     });
 })();

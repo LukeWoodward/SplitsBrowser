@@ -136,6 +136,31 @@
         assertSplitTimes(assert, competitor, [65, null, null, null, null, 184, 100]);
         assert.ok(!competitor.completed(), "Competitor should be marked as not completing the course");
     });
+    
+    QUnit.test("Competitor with start time but all-null splits is not lacking a start time", function (assert) {
+        var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [null, null, null, null]);
+        assert.ok(!competitor.lacksStartTime());
+    });
+        
+    QUnit.test("Competitor with start time and splits is not lacking a start time", function (assert) {
+        var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        assert.ok(!competitor.lacksStartTime());
+    });
+        
+    QUnit.test("Competitor with no start time nor any splits is not lacking a start time", function (assert) {
+        var competitor = fromSplitTimes(1, "John Smith", "ABC", null, [null, null, null, null]);
+        assert.ok(!competitor.lacksStartTime());
+    });
+        
+    QUnit.test("Competitor with no start time but all splits is lacking a start time", function (assert) {
+        var competitor = fromSplitTimes(1, "John Smith", "ABC", null, [65, 221, 184, 100]);
+        assert.ok(competitor.lacksStartTime());
+    });
+        
+    QUnit.test("Competitor with no start time but some splits is lacking a start time", function (assert) {
+        var competitor = fromSplitTimes(1, "John Smith", "ABC", null, [65, null, null, 100]);
+        assert.ok(competitor.lacksStartTime());
+    });
 
     QUnit.test("Can determine total time of a competitor that punches all controls", function (assert) {
         var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);

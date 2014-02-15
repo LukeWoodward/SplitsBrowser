@@ -89,6 +89,7 @@ SplitsBrowser.Messages = {
     // Alert message shown when you click 'Crossing runners' but there are no
     // crossing runners to show.
     RaceGraphNoCrossingRunners: "$$NAME$$ has no crossing runners.",
+    RaceGraphDisabledAsStartTimesMissing: "The Race Graph cannot be shown because the start times of the competitors are missing.",
 
     NoSplitsForControl: "Cannot draw a graph because no competitor has recorded a split time for control $$CONTROL$$.",
     NoSplitsForControlTryOtherClasses: "Cannot draw a graph because no competitor has recorded a split time for control $$CONTROL$$.  Try selecting some other classes.",

@@ -23,6 +23,7 @@
 
     var NUMBER_TYPE = typeof 0;
     
+    var isNotNull = SplitsBrowser.isNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var getMessage = SplitsBrowser.getMessage;
 
@@ -316,6 +317,20 @@
     */
     Competitor.prototype.getAllCumulativeTimes = function () {
         return this.cumTimes;
+    };
+    
+    /**
+    * Returns whether this competitor is missing a start time.
+    * 
+    * The competitor is missing its start time if it doesn't have a start time
+    * and it also has at least one split.  (A competitor that has no start time
+    * and no splits either didn't start the race.)
+    *
+    * @return {boolean} True if the competitor doesn't have a start time, false
+    *     if they do, or if they have no other splits.
+    */
+    Competitor.prototype.lacksStartTime = function () {
+        return this.startTime === null && this.splitTimes.some(isNotNull);
     };
     
     /**

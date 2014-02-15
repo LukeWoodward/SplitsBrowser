@@ -87,6 +87,23 @@
     };
     
     /**
+    * Pops up an alert box informing the user that the race graph cannot be
+    * chosen as the start times are missing.
+    */ 
+    function alertRaceGraphDisabledAsStartTimesMissing() {
+        alert(getMessage("RaceGraphDisabledAsStartTimesMissing"));
+    }
+    
+    /**
+    * Enables or disables the race graph option in the chart type selector
+    * depending on whether all visible competitors have start times.
+    */
+    Viewer.prototype.enableOrDisableRaceGraph = function () {
+        var anyStartTimesMissing = this.ageClassSet.allCompetitors.some(function (competitor) { return competitor.lacksStartTime(); });
+        this.chartTypeSelector.setRaceGraphDisabledNotifier((anyStartTimesMissing) ? alertRaceGraphDisabledAsStartTimesMissing : null);
+    };
+    
+    /**
     * Sets the classes that the viewer can view.
     * @param {SplitsBrowser.Model.Event} eventData - All event data loaded.
     */
@@ -445,6 +462,7 @@
         this.drawChart();
         this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
+        this.enableOrDisableRaceGraph();
     };
     
     /**
