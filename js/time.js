@@ -58,7 +58,7 @@
             result += "0";
         }
         
-        result += secs;
+        result += Math.round(secs);
         
         return result;
     };
