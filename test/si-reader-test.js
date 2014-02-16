@@ -260,6 +260,18 @@
         assert.strictEqual(eventData.classes[0].course, course, "Class should refer to its course");
     });
     
+    // This can happen in Internet Explorer if you specify the character set
+    // wrong, in particular if you specify the character set as UTF-8 when it
+    // should be ISO-8859-1.  IE makes a poor job of recovering from a single
+    // byte outside the US-ASCII range (which doesn't happen in UTF-8), and
+    // this can include swallowing up the following semicolon.
+    QUnit.test("Cannot parse a string where the club name has corrupted the following semicolon", function (assert) {
+        var competitor = getCompetitor1();
+        var siData = HEADER_44 + generateRow(competitor, getControls1(), ROW_TEMPLATE_46);
+        siData = siData.replace(competitor.club + ";", competitor.club.substring(0, 2) + "\uFFFD");
+        runInvalidDataTest(assert, siData, "data where the club name has corrupted the following semicolon");
+    });
+    
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control", function (assert) {
         var comp = getCompetitor1();
         comp.placing = "mp";

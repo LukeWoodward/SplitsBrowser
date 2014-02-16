@@ -2000,11 +2000,14 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
     /**
     * Returns the number of controls to expect on the given line.
     * @param {Array} row - Array of row data items.
+    * @param {Number} lineNumber - The line number of the line.
     * @return {Number} Number of controls read.
     */
-    Reader.prototype.getNumControls = function (row) {
+    Reader.prototype.getNumControls = function (row, lineNumber) {
         var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
-        if (this.ageClasses.has(className)) {
+        if ($.trim(className) === "") {
+            throwInvalidData("Line " + lineNumber + " does not contain a class for the competitor");
+        } else if (this.ageClasses.has(className)) {
             return this.ageClasses.get(className).numControls;
         } else {
             return parseInt(row[this.control1Index + COLUMN_OFFSETS.CONTROL_COUNT], 10);
@@ -2159,7 +2162,7 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
             throwInvalidData("Too few items on line " + lineNumber + " of the input file: expected at least " + MIN_CONTROLS_OFFSET + ", got " + row.length);
         }
         
-        var numControls = this.getNumControls(row);
+        var numControls = this.getNumControls(row, lineNumber);
         
         var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
         this.anyCompetitors = true;
