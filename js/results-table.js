@@ -87,7 +87,18 @@
             getMessage("ResultsTableHeaderControlNumber"),
             getMessage("ResultsTableHeaderName"),
             getMessage("ResultsTableHeaderTime")
-        ].concat(d3.range(1, this.ageClass.numControls + 1)).concat([getMessage("FinishName")]);
+        ];
+        
+        var controls = this.ageClass.course.controls;
+        if (controls === null) {
+            headerCellData = headerCellData.concat(d3.range(1, this.ageClass.numControls + 1));
+        } else {
+            headerCellData = headerCellData.concat(controls.map(function (control, index) {
+                return (index + 1) + NON_BREAKING_SPACE_CHAR + "(" + control + ")";
+            }));
+        }
+            
+        headerCellData.push(getMessage("FinishName"));
         
         var headerCells = this.table.select("thead tr")
                                     .selectAll("th")

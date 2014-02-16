@@ -33,7 +33,7 @@
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
         
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140));
+        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(ageClass);
@@ -42,11 +42,34 @@
         var table = d3.select("table.resultsTable");
         assert.strictEqual(table.selectAll("thead").size(), 1);
         assert.strictEqual(table.selectAll("thead tr").size(), 1);
-        assert.strictEqual(table.selectAll("thead tr th").size(), 7);
+        var tableHeaders = table.selectAll("thead tr th");
+        assert.strictEqual(tableHeaders.size(), 7);
+        assert.strictEqual(tableHeaders[0][3].innerHTML, "1");
+        assert.strictEqual(tableHeaders[0][4].innerHTML, "2");
+        assert.strictEqual(tableHeaders[0][5].innerHTML, "3");        
         assert.strictEqual(table.selectAll("tbody").size(), 1);
         assert.strictEqual(table.selectAll("tbody tr").size(), 2);
         assert.strictEqual(table.selectAll("tbody tr:first-child td").size(), 7);
         assert.strictEqual(table.selectAll("tbody tr:last-child td").size(), 7);    
+    });
+    
+    QUnit.test("Can create a results table with two competitors finishing and with control codes", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
+        var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
+        var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
+        
+        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, ["138", "152", "141"]));
+        
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(ageClass);
+        
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
+        var table = d3.select("table.resultsTable");
+        var tableHeaders = table.selectAll("thead tr th");
+        assert.strictEqual(tableHeaders.size(), 7);
+        assert.strictEqual(tableHeaders[0][3].innerHTML, "1&nbsp;(138)");
+        assert.strictEqual(tableHeaders[0][4].innerHTML, "2&nbsp;(152)");
+        assert.strictEqual(tableHeaders[0][5].innerHTML, "3&nbsp;(141)");
     });
     
     QUnit.test("Can create a results table with one competitor not finishing sorted to the bottom", function (assert) {
@@ -54,7 +77,7 @@
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
 
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140));
+        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(ageClass);
@@ -70,7 +93,7 @@
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
 
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140));
+        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(ageClass);
@@ -85,7 +108,7 @@
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
         
-        ageClass.setCourse(new Course("Test", [ageClass], null, null));
+        ageClass.setCourse(new Course("Test", [ageClass], null, null, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(ageClass);
