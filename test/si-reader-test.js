@@ -26,11 +26,19 @@
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
-    // Header line.
-    var HEADER = "Stno;SI card;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
+    // Header line when control 1 is in column 46.
+    var HEADER_46 = "Stno;SI card;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls.
-    var ROW_TEMPLATE = "0;1;2;surname;forename;5;6;7;8;start;10;time;12;13;14;club;16;17;ageClass;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;course;distance;climb;numControls;placing;44;45";
+    var ROW_TEMPLATE_46 = "0;1;2;surname;forename;5;6;7;8;start;10;time;12;13;14;club;16;17;ageClass;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;course;distance;climb;numControls;placing;44;45";
+    
+    // Header line when control 1 is in column 44.
+    // Compared to the variant above, this line has no 'S' column and has the
+    // 'First name' and 'Surname' columns merged into one.
+    var HEADER_44 = "Stno;SI card;Database Id;Name;YB;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
+    
+    // Template for the row data that precedes the controls.
+    var ROW_TEMPLATE_44 = "0;1;2;name;4;5;6;start;8;time;10;11;12;club;14;15;ageClass;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;course;distance;climb;numControls;placing;42;43";
     
     /**
     * Generates a row of data for an SI-format file.
@@ -38,10 +46,16 @@
     *     keys.
     * @param {Array} controls - Array of objects, each of which contains a code
     *     and a time.
+    * @param {String} template - String template that describes how to generate
+    *     the row.
     * @return {String} Row of data.
     */
-    function generateRow(data, controls) {
-        var row = ROW_TEMPLATE;
+    function generateRow(data, controls, template) {
+        if (typeof template === "undefined") {
+            throw new Error("No template given");
+        }
+        
+        var row = template;
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
                 row = row.replace(key, data[key]);
@@ -175,16 +189,16 @@
         runInvalidDataTest(assert, "", "an empty string", "WrongFileFormat");
     });
     
-    QUnit.test("Cannot parse a string that contains only the headers", function (assert) {
-        runInvalidDataTest(assert, HEADER, "data with a header row only", "InvalidData");
+    QUnit.test("Cannot parse a string that contains only the HEADER_46s", function (assert) {
+        runInvalidDataTest(assert, HEADER_46, "data with a HEADER_46 row only", "InvalidData");
     });
     
-    QUnit.test("Cannot parse a string that contains only the headers and blank lines", function (assert) {
-        runInvalidDataTest(assert, HEADER + "\r\n\r\n\r\n", "data with a header row and blank lines only", "InvalidData");
+    QUnit.test("Cannot parse a string that contains only the HEADER_46s and blank lines", function (assert) {
+        runInvalidDataTest(assert, HEADER_46 + "\r\n\r\n\r\n", "data with a HEADER_46 row and blank lines only", "InvalidData");
     });
     
-    QUnit.test("Cannot parse a string that contains only the headers and a junk line that happens to contain a semicolon", function (assert) {
-        runInvalidDataTest(assert, HEADER + "\r\nrubbish;more rubbish\r\n", "data with a junk second line");
+    QUnit.test("Cannot parse a string that contains only the HEADER_46s and a junk line that happens to contain a semicolon", function (assert) {
+        runInvalidDataTest(assert, HEADER_46 + "\r\nrubbish;more rubbish\r\n", "data with a junk second line");
     });
     
     QUnit.test("Cannot parse a string that is not semicolon-delimited data", function (assert) {
@@ -192,7 +206,36 @@
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data", function (assert) {
-        var eventData = parseEventData(HEADER + generateRow(getCompetitor1(), getControls1()));
+        var eventData = parseEventData(HEADER_46 + generateRow(getCompetitor1(), getControls1(), ROW_TEMPLATE_46));
+        assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.ok(eventData.classes[0] instanceof AgeClass, "Class element should be an AgeClass object");
+        assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
+        assert.strictEqual(eventData.classes[0].name, "Test class", "Class should have correct name");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+        
+        assert.strictEqual(eventData.courses.length, 1, "There should be one course");
+        var course = eventData.courses[0];
+        assert.strictEqual(course.name, "Test course", "Course name should be correct");
+        assert.strictEqual(course.length, 4.1, "Course length should be correct");
+        assert.strictEqual(course.climb, 140, "Course climb should be correct");
+        assert.deepEqual(course.classes, [eventData.classes[0]], "The one class in the course should be the one course");
+        assert.deepEqual(course.controls, ["208", "227", "212"]);
+        
+        var competitor = eventData.classes[0].competitors[0];
+        assert.strictEqual(competitor.name, "John Smith", "Should read correct name");
+        assert.strictEqual(competitor.club, "ABC", "Should read correct club");
+        assert.strictEqual(competitor.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
+        assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
+        
+        assert.strictEqual(eventData.classes[0].course, course, "Class should refer to its course");
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor's data in column-44 variation", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.name = competitor1.forename + " " + competitor1.surname;
+        
+        var eventData = parseEventData(HEADER_44 + generateRow(competitor1, getControls1(), ROW_TEMPLATE_44));
         assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.ok(eventData.classes[0] instanceof AgeClass, "Class element should be an AgeClass object");
@@ -222,7 +265,7 @@
         comp.placing = "mp";
         var controls = getControls1();
         controls[1].time = "-----";
-        var eventData = parseEventData(HEADER + generateRow(comp, controls));
+        var eventData = parseEventData(HEADER_46 + generateRow(comp, controls, ROW_TEMPLATE_46));
         assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
@@ -237,7 +280,7 @@
         comp.placing = "mp";
         var controls = getControls1();
         controls[1].time = "-----";
-        var eventData = parseEventData(HEADER + generateRow(comp, controls));
+        var eventData = parseEventData(HEADER_46 + generateRow(comp, controls, ROW_TEMPLATE_46));
         assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
@@ -251,7 +294,7 @@
         var comp = getCompetitor1();
         comp.surname = "Smith n/c";
         comp.placing = "n/c";
-        var eventData = parseEventData(HEADER + generateRow(comp, getControls1()));
+        var eventData = parseEventData(HEADER_46 + generateRow(comp, getControls1(), ROW_TEMPLATE_46 ));
         assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
@@ -263,7 +306,7 @@
     });
     
     QUnit.test("Can parse a string that contains two competitors in the same class and course", function (assert) {
-        var eventData = parseEventData(HEADER + generateRow(getCompetitor1(), getControls1()) + generateRow(getCompetitor2(), getControls2()));
+        var eventData = parseEventData(HEADER_46 + generateRow(getCompetitor1(), getControls1(), ROW_TEMPLATE_46) + generateRow(getCompetitor2(), getControls2(), ROW_TEMPLATE_46));
         
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.ok(eventData.classes[0] instanceof AgeClass, "Array element should be an AgeClass object");
@@ -280,7 +323,7 @@
         comp1.course = "Test course 1";
         var comp2 = getCompetitor2();
         comp2.course = "Test course 2";
-        var eventData = parseEventData(HEADER + generateRow(comp1, getControls1()) + generateRow(comp2, getControls2()));
+        var eventData = parseEventData(HEADER_46 + generateRow(comp1, getControls1(), ROW_TEMPLATE_46) + generateRow(comp2, getControls2(), ROW_TEMPLATE_46));
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.ok(eventData.classes[0] instanceof AgeClass, "Array element should be an AgeClass object");
         assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
@@ -301,7 +344,7 @@
         comp1.ageClass = "Test class 1";
         var comp2 = getCompetitor2();
         comp2.ageClass = "Test class 2";
-        var eventData = parseEventData(HEADER + generateRow(comp1, getControls1()) + generateRow(comp2, getControls2()));
+        var eventData = parseEventData(HEADER_46 + generateRow(comp1, getControls1(), ROW_TEMPLATE_46) + generateRow(comp2, getControls2(), ROW_TEMPLATE_46));
         assert.strictEqual(eventData.classes.length, 2, "There should be two classes");
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "First class should have two competitors");
         assert.strictEqual(eventData.classes[1].competitors.length, 1, "Second class should have two competitors");
@@ -328,7 +371,7 @@
         comp3.ageClass = "Test class 2";
         comp3.course = "Test course 2";
         
-        var dataString = HEADER + generateRow(comp1, getControls1()) + generateRow(comp2, getControls2()) + generateRow(comp3, getControls3());
+        var dataString = HEADER_46 + generateRow(comp1, getControls1(), ROW_TEMPLATE_46) + generateRow(comp2, getControls2(), ROW_TEMPLATE_46) + generateRow(comp3, getControls3(), ROW_TEMPLATE_46);
         var eventData = parseEventData(dataString);
         assert.strictEqual(eventData.classes.length, 2, "There should be two classes");
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "First class should have two competitors");
@@ -358,7 +401,7 @@
         comp2.climb = "155";
         comp2.time = "10:19";
         
-        var eventData = parseEventData(HEADER + generateRow(comp1, getControls1()) + generateRow(comp2, getLongerControls2()));
+        var eventData = parseEventData(HEADER_46 + generateRow(comp1, getControls1(), ROW_TEMPLATE_46) + generateRow(comp2, getLongerControls2(), ROW_TEMPLATE_46));
         assert.strictEqual(eventData.classes.length, 2, "There should be two classes");
         assert.ok(eventData.classes[0] instanceof AgeClass, "First array element should be an AgeClass object");
         assert.ok(eventData.classes[1] instanceof AgeClass, "Second array element should be an AgeClass object");
@@ -395,7 +438,7 @@
         comp2.ageClass = "Test class 1";
         comp2.course = "Test course 2";
         var controls2 = [{code: "208", time: "02:01"}, {code: "222", time: "04:06"}, {code: "219", time: "06:37"}, {code: "213", time: "09:10"}];
-        var eventData = parseEventData(HEADER + generateRow(comp1, getControls1()) + generateRow(comp2, controls2));
+        var eventData = parseEventData(HEADER_46 + generateRow(comp1, getControls1(), ROW_TEMPLATE_46) + generateRow(comp2, controls2, ROW_TEMPLATE_46));
         assert.strictEqual(eventData.classes.length, 2, "There should be two elements in the classes array");
         assert.ok(eventData.classes[0] instanceof AgeClass, "First array element should be an AgeClass object");
         assert.ok(eventData.classes[1] instanceof AgeClass, "Second array element should be an AgeClass object");
@@ -424,7 +467,7 @@
         comp2.ageClass = "Test class 1";
         comp2.course = "Test course 2";
         var controls2 = [{code: "208", time: "02:01"}, {code: "222", time: "04:06"}, {code: "219", time: "06:37"}, {code: "213", time: "09:10"}];
-        var eventData = parseEventData(HEADER + generateRow(comp1, getControls1()) + generateRow(comp2, controls2));
+        var eventData = parseEventData(HEADER_46 + generateRow(comp1, getControls1(), ROW_TEMPLATE_46) + generateRow(comp2, controls2, ROW_TEMPLATE_46));
         assert.strictEqual(eventData.classes.length, 2, "There should be two elements in the classes array");
         assert.ok(eventData.classes[0] instanceof AgeClass, "First array element should be an AgeClass object");
         assert.ok(eventData.classes[1] instanceof AgeClass, "Second array element should be an AgeClass object");
@@ -449,6 +492,6 @@
     QUnit.test("Cannot parse a line that purports to contain data for more controls than it actually contains", function (assert) {
         var comp1 = getCompetitor1();
         comp1.numControls = "4";
-        runInvalidDataTest(assert, HEADER + generateRow(comp1, getControls1()), "Line with too few controls");
+        runInvalidDataTest(assert, HEADER_46 + generateRow(comp1, getControls1(), ROW_TEMPLATE_46), "Line with too few controls");
     });    
 })();

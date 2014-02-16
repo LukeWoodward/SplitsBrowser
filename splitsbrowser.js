@@ -1897,23 +1897,21 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
-    // Indexes into the columns.
-    var COLUMN_INDEXES = {
-        SURNAME: 3,
-        FORENAME: 4,
-        START: 9,
-        TIME: 11,
-        CLUB: 15,
-        AGE_CLASS: 18,
-        COURSE: 39,
-        DISTANCE: 40,
-        CLIMB: 41,
-        CONTROL_COUNT: 42,
-        PLACING: 43
+    // Indexes of the various columns relative to the column for control-1.
+    var COLUMN_OFFSETS = {
+        START: -37,
+        TIME: -35,
+        CLUB: -31,
+        AGE_CLASS: -28,
+        COURSE: -7,
+        DISTANCE: -6,
+        CLIMB: -5,
+        CONTROL_COUNT: -4,
+        PLACING: -3
     };
     
-    // Index of the first column of control-specific data.
-    var CONTROLS_OFFSET = 46;
+    // Minimum control offset.
+    var MIN_CONTROLS_OFFSET = 37;
     
     /**
     * Checks that two consecutive cumulative times are in strictly ascending
@@ -1957,6 +1955,10 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
         // Whether any competitors have been read in at all.  Blank lines are
         // ignored, as are competitors that have no times at all.
         this.anyCompetitors = false;
+        
+        // The column index that contains the control numbers for control 1.
+        // This is used to determine where various columns are.
+        this.control1Index = null;
     };
 
     /**
@@ -1972,6 +1974,27 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
         if (headers.length <= 1) {
             throwWrongFileFormat("Data appears not to be in the SI CSV format");
         }
+        
+        if (headers.length <= MIN_CONTROLS_OFFSET) {
+            throwWrongFileFormat("Too few header columns for the SI CSV format");
+        }
+        
+        // Look for two column headers that both end with 1, such as Control1
+        // and Punch1.
+        var endsWithOne = /1$/;
+        for (var index = MIN_CONTROLS_OFFSET; index + 1 < headers.length; index += 1) {
+            if (endsWithOne.test(headers[index]) && endsWithOne.test(headers[index + 1])) {
+                this.control1Index = index;
+                break;
+            }
+        }
+        
+        var supportedControl1Indexes = [44, 46];
+        if (this.control1Index === null) {
+            throwInvalidData("Unable to find index of control 1 in SI CSV data");
+        } else if (supportedControl1Indexes.indexOf(this.control1Index) < 0) {
+            throwInvalidData("Unsupported index of control 1: " + this.control1Index);
+        }
     };
     
     /**
@@ -1980,11 +2003,11 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
     * @return {Number} Number of controls read.
     */
     Reader.prototype.getNumControls = function (row) {
-        var className = row[COLUMN_INDEXES.AGE_CLASS];
+        var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
         if (this.ageClasses.has(className)) {
             return this.ageClasses.get(className).numControls;
         } else {
-            return parseInt(row[COLUMN_INDEXES.CONTROL_COUNT], 10);
+            return parseInt(row[this.control1Index + COLUMN_OFFSETS.CONTROL_COUNT], 10);
         }    
     };
     
@@ -1998,7 +2021,7 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
         
         // Check that the row is long enough for all of the control data,
         // given that we now know how many controls it should contain.
-        if (row.length <= CONTROLS_OFFSET + 1 + 2 * (numControls - 1)) {
+        if (row.length <= this.control1Index + 1 + 2 * (numControls - 1)) {
             throwInvalidData("Line " + lineNumber + " reports " + numControls + " controls but there aren't enough data values in the row for this many controls");
         }
         
@@ -2006,7 +2029,7 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
         var lastCumTime = 0;
         
         for (var controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
-            var cumTimeStr = row[CONTROLS_OFFSET + 1 + 2 * controlIdx];
+            var cumTimeStr = row[this.control1Index + 1 + 2 * controlIdx];
             var cumTime = parseTime(cumTimeStr);
             verifyCumulativeTimesInOrder(lastCumTime, cumTime);
             
@@ -2016,7 +2039,7 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
             }
         }
         
-        var totalTime = parseTime(row[COLUMN_INDEXES.TIME]);
+        var totalTime = parseTime(row[this.control1Index + COLUMN_OFFSETS.TIME]);
         verifyCumulativeTimesInOrder(lastCumTime, totalTime);
         cumTimes.push(totalTime);
     
@@ -2030,7 +2053,7 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
     * @param {Number} numControls - The number of controls to read.
     */
     Reader.prototype.createAgeClassIfNecessary = function (row, numControls) {
-        var className = row[COLUMN_INDEXES.AGE_CLASS];
+        var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
         if (!this.ageClasses.has(className)) {
             this.ageClasses.set(className, { numControls: numControls, competitors: [] });
         }
@@ -2044,12 +2067,12 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
     */
     Reader.prototype.createCourseIfNecessary = function (row, numControls) {
 
-        var courseName = row[COLUMN_INDEXES.COURSE];
+        var courseName = row[this.control1Index + COLUMN_OFFSETS.COURSE];
         if (!this.courseDetails.has(courseName)) {
-            var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[CONTROLS_OFFSET + 2 * controlIdx]; });
+            var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[this.control1Index + 2 * controlIdx]; }, this);
             this.courseDetails.set(courseName, {
-                length: parseFloat(row[COLUMN_INDEXES.DISTANCE]) || null,
-                climb: parseInt(row[COLUMN_INDEXES.CLIMB], 10) || null,
+                length: parseFloat(row[this.control1Index + COLUMN_OFFSETS.DISTANCE]) || null,
+                climb: parseInt(row[this.control1Index + COLUMN_OFFSETS.CLIMB], 10) || null,
                 controls: controlNums
             });
         }
@@ -2061,8 +2084,8 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
     * @param {Array} row - Array of row data items.
     */
     Reader.prototype.createClassCoursePairIfNecessary = function (row) {
-        var className = row[COLUMN_INDEXES.AGE_CLASS];
-        var courseName = row[COLUMN_INDEXES.COURSE];
+        var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
+        var courseName = row[this.control1Index + COLUMN_OFFSETS.COURSE];
         
         if (!this.classCoursePairs.some(function (pair) { return pair[0] === className && pair[1] === courseName; })) {
             this.classCoursePairs.push([className, courseName]);
@@ -2077,23 +2100,35 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
     */
     Reader.prototype.addCompetitor = function (row, cumTimes) {
     
-        var className = row[COLUMN_INDEXES.AGE_CLASS];
-        
-        var forename = row[COLUMN_INDEXES.FORENAME];
-        var surname = row[COLUMN_INDEXES.SURNAME];
-        var club = row[COLUMN_INDEXES.CLUB];
-        var startTime = parseTime(row[COLUMN_INDEXES.START]);
-        
-        // Some surnames have their placing appended to them, if their placing
-        // isn't a number (e.g. mp, n/c).  If so, remove this.
-        var placing = row[COLUMN_INDEXES.PLACING];
+        var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
+        var placing = row[this.control1Index + COLUMN_OFFSETS.PLACING];
+        var club = row[this.control1Index + COLUMN_OFFSETS.CLUB];
+        var startTime = parseTime(row[this.control1Index + COLUMN_OFFSETS.START]);
+
         var isPlacingNonNumeric = isNaN(parseInt(placing, 10));
-        if (isPlacingNonNumeric && surname.substring(surname.length - placing.length) === placing) {
-            surname = $.trim(surname.substring(0, surname.length - placing.length));
+        
+        var name;
+        if (this.control1Index === 46) {
+            var forename = row[4];
+            var surname = row[3];
+        
+            // Some surnames have their placing appended to them, if their placing
+            // isn't a number (e.g. mp, n/c).  If so, remove this.
+            if (isPlacingNonNumeric && surname.substring(surname.length - placing.length) === placing) {
+                surname = $.trim(surname.substring(0, surname.length - placing.length));
+            }
+            
+            name = forename + " " + surname;
+            
+        } else if (this.control1Index === 44) {
+            name = row[3];
+        } else {
+            // Reader should have thrown an error elsewhere if this has happened.
+            throw new Error("Unrecognised control-1 index: " + this.control1Index);
         }
         
         var order = this.ageClasses.get(className).competitors.length + 1;
-        var competitor = Competitor.fromCumTimes(order, forename + " " + surname, club, startTime, cumTimes);
+        var competitor = Competitor.fromCumTimes(order, name, club, startTime, cumTimes);
         if (isPlacingNonNumeric && competitor.completed()) {
             // Competitor has completed the course but has no placing.
             // Assume that they are non-competitive.
@@ -2120,8 +2155,8 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
         
         // Check the row is long enough to have all the data besides the
         // controls data.
-        if (row.length < CONTROLS_OFFSET) {
-            throwInvalidData("Too few items on line " + lineNumber + " of the input file: expected at least " + CONTROLS_OFFSET + ", got " + row.length);
+        if (row.length < MIN_CONTROLS_OFFSET) {
+            throwInvalidData("Too few items on line " + lineNumber + " of the input file: expected at least " + MIN_CONTROLS_OFFSET + ", got " + row.length);
         }
         
         var numControls = this.getNumControls(row);
