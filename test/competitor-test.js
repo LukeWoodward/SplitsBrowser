@@ -337,6 +337,14 @@
             competitor.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes);
         });
     });
+
+    QUnit.test("Can determine the percentages a competitor is behind reference data, with a null percentage for a zero split", function (assert) {
+
+        var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        var referenceCumTimes = [0, 61, 61 + 193, 61 + 193, 61 + 193 + 176 + 103];
+        var expectedPercentagesBehind = [0, 100 * (65 - 61) / 61, 100 * (221 - 193) / 193, null, 100 * (100 - 176 - 103) / (103 + 176)];
+        assert.deepEqual(competitor.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes), expectedPercentagesBehind);
+    });
     
     QUnit.test("Can determine time losses of competitor with even number of splits", function (assert) {
         var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [96, 221, 184, 100]);

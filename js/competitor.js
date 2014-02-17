@@ -389,7 +389,11 @@
                 percentsBehind.push(null);
             } else {
                 var referenceSplit = referenceCumTimes[index + 1] - referenceCumTimes[index];
-                percentsBehind.push(100 * (splitTime - referenceSplit) / referenceSplit);
+                if (referenceSplit > 0) {
+                    percentsBehind.push(100 * (splitTime - referenceSplit) / referenceSplit);
+                } else {
+                    percentsBehind.push(null);
+                }
             }
         });
         
