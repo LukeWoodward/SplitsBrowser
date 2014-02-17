@@ -21,9 +21,9 @@
 (function () {
     "use strict";
     
+    var isNotNull = SplitsBrowser.isNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
-    var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
     var AgeClass = SplitsBrowser.Model.AgeClass;
@@ -45,22 +45,6 @@
     
     // Minimum control offset.
     var MIN_CONTROLS_OFFSET = 37;
-    
-    /**
-    * Checks that two consecutive cumulative times are in strictly ascending
-    * order, and throws an exception if not.  The previous time should not be
-    * null, but the next time may, and no exception will be thrown in this
-    * case.
-    * @param {Number} prevTime - The previous cumulative time, in seconds.
-    * @param {Number} nextTime - The next cumulative time, in seconds.
-    */
-    function verifyCumulativeTimesInOrder(prevTime, nextTime) {
-        if (nextTime !== null && nextTime <= prevTime) {
-            throwInvalidData("Cumulative times must be strictly ascending: read " +
-                    formatTime(prevTime) + " and " + formatTime(nextTime) +
-                    " in that order");
-        }
-    }
     
     /**
     * Constructs an SI-format data reader.
@@ -162,21 +146,15 @@
         }
         
         var cumTimes = [0];
-        var lastCumTime = 0;
         
         for (var controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
             var cumTimeStr = row[this.control1Index + 1 + 2 * controlIdx];
             var cumTime = parseTime(cumTimeStr);
-            verifyCumulativeTimesInOrder(lastCumTime, cumTime);
-            
             cumTimes.push(cumTime);
-            if (cumTime !== null) {
-                lastCumTime = cumTime;
-            }
         }
         
         var totalTime = parseTime(row[this.control1Index + COLUMN_OFFSETS.TIME]);
-        verifyCumulativeTimesInOrder(lastCumTime, totalTime);
+        
         cumTimes.push(totalTime);
     
         return cumTimes;
@@ -298,13 +276,17 @@
         var numControls = this.getNumControls(row, lineNumber);
         
         var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
-        this.anyCompetitors = true;
-        
-        this.createAgeClassIfNecessary(row, numControls);
-        this.createCourseIfNecessary(row, numControls);
-        this.createClassCoursePairIfNecessary(row);
-        
-        this.addCompetitor(row, cumTimes);
+        if (cumTimes.filter(isNotNull).length === 2 && cumTimes[cumTimes.length - 1] === 0) {
+            // Ignore this competitor; they have no time and no splits.
+        } else {
+            this.anyCompetitors = true;
+            
+            this.createAgeClassIfNecessary(row, numControls);
+            this.createCourseIfNecessary(row, numControls);
+            this.createClassCoursePairIfNecessary(row);
+            
+            this.addCompetitor(row, cumTimes);
+        }
     };
     
     /**

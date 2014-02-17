@@ -24,7 +24,6 @@
     var isNotNull = SplitsBrowser.isNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
-    var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
     var AgeClass = SplitsBrowser.Model.AgeClass;
@@ -279,19 +278,6 @@
     * @return {Competitor} Converted competitor object.
     */
     CompetitorParseRecord.prototype.toCompetitor = function (order) {
-        var lastCumTime = 0;
-        this.cumTimes.forEach(function (cumTime) {
-            if (cumTime !== null) {
-                if (cumTime <= lastCumTime) {
-                    throwInvalidData("Cumulative times must be strictly ascending: read " +
-                        formatTime(lastCumTime) + " and " + formatTime(cumTime) +
-                        " in that order");
-                }
-
-                lastCumTime = cumTime;
-            }
-        });
-        
         // Prepend a zero cumulative time.
         var cumTimes = [0].concat(this.cumTimes);
         
