@@ -24,6 +24,7 @@
     var isNotNull = SplitsBrowser.isNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var parseFloatOfUnknownLocale = SplitsBrowser.parseFloatOfUnknownLocale;
 
     module("Utilities - isNotNull");
 
@@ -60,4 +61,24 @@
             assert.strictEqual(e.message, "Test message", "Exception message should be the test message in the function call");
         }
     });
+    
+    module("Utilities - parseFloatOfUnknownLocale");
+    
+    QUnit.test("Can parse number with no decimal separator", function (assert) {
+        assert.strictEqual(parseFloatOfUnknownLocale("17"), 17);
+    });
+    
+    QUnit.test("Can parse number with dot as decimal separator", function (assert) {
+        assert.strictEqual(parseFloatOfUnknownLocale("6.8"), 6.8);
+    });
+    
+    QUnit.test("Can parse number with comma as decimal separator", function (assert) {
+        assert.strictEqual(parseFloatOfUnknownLocale("9,4"), 9.4);
+    });
+    
+    QUnit.test("Attempting to parse invalid number returns NaN, as does parseFloat", function (assert) {
+        // Can't do a straightforward comparison as NaN !== NaN.
+        assert.ok(isNaN(parseFloat("nonsense")), "parseFloat should return NaN");
+        assert.ok(isNaN(parseFloatOfUnknownLocale("nonsense")), "parseFloatOfUnknownLocale should also return NaN");
+    });    
 })();

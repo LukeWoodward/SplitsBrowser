@@ -23,6 +23,7 @@
     
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var parseFloatOfUnknownLocale = SplitsBrowser.parseFloatOfUnknownLocale;
     var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
@@ -207,7 +208,7 @@
         if (!this.courseDetails.has(courseName)) {
             var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[this.control1Index + 2 * controlIdx]; }, this);
             this.courseDetails.set(courseName, {
-                length: parseFloat(row[this.control1Index + COLUMN_OFFSETS.DISTANCE]) || null,
+                length: parseFloatOfUnknownLocale(row[this.control1Index + COLUMN_OFFSETS.DISTANCE]) || null,
                 climb: parseInt(row[this.control1Index + COLUMN_OFFSETS.CLIMB], 10) || null,
                 controls: controlNums
             });

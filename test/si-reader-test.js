@@ -231,6 +231,15 @@
         assert.strictEqual(eventData.classes[0].course, course, "Class should refer to its course");
     });
     
+    QUnit.test("Can parse a string that contains a single competitor's data with the course distance having a comma as the decimal separator", function (assert) {
+        var competitor = getCompetitor1();
+        competitor.distance = "4,1";
+        var eventData = parseEventData(HEADER_46 + generateRow(competitor, getControls1(), ROW_TEMPLATE_46));
+        assert.strictEqual(eventData.courses.length, 1, "There should be one course");
+        var course = eventData.courses[0];
+        assert.strictEqual(course.length, 4.1, "Course length should be correct");
+    });
+    
     QUnit.test("Can parse a string that contains a single competitor's data in column-44 variation", function (assert) {
         var competitor1 = getCompetitor1();
         competitor1.name = competitor1.forename + " " + competitor1.surname;

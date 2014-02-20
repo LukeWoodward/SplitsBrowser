@@ -89,4 +89,15 @@
     SplitsBrowser.throwWrongFileFormat = function (message) {
         throw new WrongFileFormat(message);
     };
+    
+    /**
+    * Parse a floating-point number using either a comma or a dot as the
+    * decimal separator.
+    * @param {String} stringValue - The string value to parse as a number.
+    * @return {Number} The parsed float value.
+    */
+    SplitsBrowser.parseFloatOfUnknownLocale = function (stringValue) {
+        return parseFloat(stringValue.replace(",", "."));
+    };
+    
 })();

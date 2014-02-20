@@ -175,6 +175,17 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.throwWrongFileFormat = function (message) {
         throw new WrongFileFormat(message);
     };
+    
+    /**
+    * Parse a floating-point number using either a comma or a dot as the
+    * decimal separator.
+    * @param {String} stringValue - The string value to parse as a number.
+    * @return {Number} The parsed float value.
+    */
+    SplitsBrowser.parseFloatOfUnknownLocale = function (stringValue) {
+        return parseFloat(stringValue.replace(",", "."));
+    };
+    
 })();
 
 
@@ -1890,6 +1901,7 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
     
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var parseFloatOfUnknownLocale = SplitsBrowser.parseFloatOfUnknownLocale;
     var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
@@ -2074,7 +2086,7 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
         if (!this.courseDetails.has(courseName)) {
             var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[this.control1Index + 2 * controlIdx]; }, this);
             this.courseDetails.set(courseName, {
-                length: parseFloat(row[this.control1Index + COLUMN_OFFSETS.DISTANCE]) || null,
+                length: parseFloatOfUnknownLocale(row[this.control1Index + COLUMN_OFFSETS.DISTANCE]) || null,
                 climb: parseInt(row[this.control1Index + COLUMN_OFFSETS.CLIMB], 10) || null,
                 controls: controlNums
             });
@@ -2375,6 +2387,7 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
     var isNotNull = SplitsBrowser.isNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var parseFloatOfUnknownLocale = SplitsBrowser.parseFloatOfUnknownLocale;
     var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
@@ -2384,7 +2397,7 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
 
     // Regexps to help with parsing.
     var HTML_TAG_STRIP_REGEXP = /<[^>]+>/g;
-    var DISTANCE_FIND_REGEXP = /([0-9.]+)\s*(?:Km|km)/;
+    var DISTANCE_FIND_REGEXP = /([0-9.,]+)\s*(?:Km|km)/;
     var CLIMB_FIND_REGEXP = /(\d+)\s*(?:Cm|Hm|hm|m)/;
     
     /**
@@ -2511,7 +2524,7 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
         if (distanceMatch === null) {
             return null;
         } else {
-            return parseFloat(distanceMatch[1]);
+            return parseFloatOfUnknownLocale(distanceMatch[1]);
         }
     }
     

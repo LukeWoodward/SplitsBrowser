@@ -24,6 +24,7 @@
     var isNotNull = SplitsBrowser.isNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var parseFloatOfUnknownLocale = SplitsBrowser.parseFloatOfUnknownLocale;
     var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
@@ -33,7 +34,7 @@
 
     // Regexps to help with parsing.
     var HTML_TAG_STRIP_REGEXP = /<[^>]+>/g;
-    var DISTANCE_FIND_REGEXP = /([0-9.]+)\s*(?:Km|km)/;
+    var DISTANCE_FIND_REGEXP = /([0-9.,]+)\s*(?:Km|km)/;
     var CLIMB_FIND_REGEXP = /(\d+)\s*(?:Cm|Hm|hm|m)/;
     
     /**
@@ -160,7 +161,7 @@
         if (distanceMatch === null) {
             return null;
         } else {
-            return parseFloat(distanceMatch[1]);
+            return parseFloatOfUnknownLocale(distanceMatch[1]);
         }
     }
     
