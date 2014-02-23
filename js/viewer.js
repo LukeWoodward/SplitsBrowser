@@ -560,6 +560,7 @@
             if (eventData === null) {
                 showLoadFailureMessage("LoadFailedUnrecognisedData", {});
             } else {
+                eventData.determineTimeLosses();
                 var viewer = new Viewer(topDiv);
                 viewer.buildUi();
                 viewer.setEvent(eventData);

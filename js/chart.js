@@ -62,9 +62,10 @@
     ];
 
     // 'Imports'.
-    var isNotNull = SplitsBrowser.isNotNull;
     var formatTime = SplitsBrowser.formatTime;
     var getMessage = SplitsBrowser.getMessage;
+    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
     
     var ChartPopupData = SplitsBrowser.Model.ChartPopupData;
     var ChartPopup = SplitsBrowser.Controls.ChartPopup;
@@ -77,7 +78,16 @@
     * @returns Time and rank formatted as a string.
     */
     function formatTimeAndRank(time, rank) {
-        return SPACER + formatTime(time) + " (" + ((rank === null) ? "-" : rank) + ")";
+        var rankStr;
+        if (rank === null) {
+            rankStr = "-";
+        } else if (isNaNStrict(rank)) {
+            rankStr = "?";
+        } else {
+            rankStr = rank.toString();
+        }
+        
+        return SPACER + formatTime(time) + " (" + rankStr + ")";
     }
     
     /**
@@ -603,6 +613,18 @@
     };
 
     /**
+    * Returns the maximum value from the given array, not including any null or
+    * NaN values.  If the array contains no non-null, non-NaN values, zero is
+    * returned.
+    * @param {Array} values - Array of values.
+    * @return {Number} Maximum non-null or NaN value.
+    */    
+    function maxNonNullNorNaNValue(values) {
+        var nonNullNorNaNValues = values.filter(isNotNullNorNaN);
+        return (nonNullNorNaNValues.length > 0) ? d3.max(nonNullNorNaNValues) : 0;
+    }
+
+    /**
     * Return the maximum width of a piece of time and rank text shown to the right
     * of each competitor 
     * @param {string} timeFuncName - Name of the function to call to get the time
@@ -619,10 +641,10 @@
         
         d3.range(1, this.numControls + 2).forEach(function (controlIndex) {
             var times = selectedCompetitors.map(function (comp) { return comp[timeFuncName](controlIndex); });
-            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+            maxTime = Math.max(maxTime, maxNonNullNorNaNValue(times));
             
             var ranks = selectedCompetitors.map(function (comp) { return comp[rankFuncName](controlIndex); });
-            maxRank = Math.max(maxRank, d3.max(ranks.filter(isNotNull)));
+            maxRank = Math.max(maxRank, maxNonNullNorNaNValue(ranks));
         });
         
         var text = formatTimeAndRank(maxTime, maxRank);
@@ -658,7 +680,7 @@
         
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
             var times = this.getTimesBehindFastest(controlIndex, this.selectedIndexes);
-            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+            maxTime = Math.max(maxTime, maxNonNullNorNaNValue(times));
         }
         
         return this.getTextWidth(SPACER + formatTime(maxTime));
@@ -670,14 +692,19 @@
     * @returns {Number} Maximum width of behind-fastest time rank text, in pixels.
     */
     Chart.prototype.getMaxTimeLossWidth = function() {
-        var maxTime = 0;
-        
+        var maxTimeLoss = 0;
+        var minTimeLoss = 0;
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
-            var times = this.getTimeLosses(controlIndex, this.selectedIndexes);
-            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+            var timeLosses = this.getTimeLosses(controlIndex, this.selectedIndexes);
+            var nonNullTimeLosses = timeLosses.filter(isNotNullNorNaN);
+            if (nonNullTimeLosses.length > 0) {
+                maxTimeLoss = Math.max(maxTimeLoss, d3.max(nonNullTimeLosses));
+                minTimeLoss = Math.min(minTimeLoss, d3.min(nonNullTimeLosses));
+            }
         }
         
-        return this.getTextWidth(SPACER + formatTime(maxTime));
+        return Math.max(this.getTextWidth(SPACER + formatTime(maxTimeLoss)),
+                        this.getTextWidth(SPACER + formatTime(minTimeLoss)));
     };
 
     /**
@@ -858,7 +885,7 @@
                 return d3.svg.line()
                              .x(function (d) { return outerThis.xScale(d.x); })
                              .y(function (d) { return outerThis.yScale(d.ys[selCompIdx]); })
-                             .defined(function (d) { return d.ys[selCompIdx] !== null; })
+                             .defined(function (d) { return isNotNullNorNaN(d.ys[selCompIdx]); })
                              .interpolate("linear");
             }
         };
@@ -994,7 +1021,7 @@
                 return {
                     label: formatNameAndSuffix(name, this.ageClassSet.allCompetitors[competitorIndex].getSuffix()),
                     textHeight: textHeight,
-                    y: (finishColumn.ys[i] === null) ? null : this.yScale(finishColumn.ys[i]),
+                    y: (isNotNullNorNaN(finishColumn.ys[i])) ? this.yScale(finishColumn.ys[i]) : null,
                     colour: colours[competitorIndex % colours.length],
                     index: competitorIndex
                 };

@@ -36,6 +36,18 @@
     };
     
     /**
+    * Determines time losses for each competitor in each class.
+    * 
+    * This method should be called after reading in the event data but before
+    * attempting to plot it.
+    */
+    Event.prototype.determineTimeLosses = function () {
+        this.classes.forEach(function (ageClass) {
+            ageClass.determineTimeLosses();
+        });
+    };
+    
+    /**
     * Returns the fastest splits for each class on a given leg.
     *
     * The fastest splits are returned as an array of objects, where each object

@@ -21,6 +21,7 @@
 (function () {
     "use strict";
       
+    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData; 
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
     
@@ -56,7 +57,7 @@
     */
     function getRanks(sourceData) {
         // First, sort the source data, removing nulls.
-        var sortedData = sourceData.filter(function (x) { return x !== null; });
+        var sortedData = sourceData.filter(isNotNullNorNaN);
         sortedData.sort(d3.ascending);
         
         // Now construct a map that maps from source value to rank.
@@ -69,7 +70,7 @@
         
         // Finally, build and return the list of ranks.
         var ranks = sourceData.map(function(value) {
-            return (value === null) ? null : rankMap.get(value);
+            return isNotNullNorNaN(value) ? rankMap.get(value) : value;
         });
         
         return ranks;
@@ -188,7 +189,7 @@
             var fastestForThisControl = null;
             for (var competitorIdx = 0; competitorIdx < this.allCompetitors.length; competitorIdx += 1) {
                 var thisTime = this.allCompetitors[competitorIdx].getSplitTimeTo(controlIdx);
-                if (thisTime !== null && (fastestForThisControl === null || thisTime < fastestForThisControl)) {
+                if (isNotNullNorNaN(thisTime) && (fastestForThisControl === null || thisTime < fastestForThisControl)) {
                     fastestForThisControl = thisTime;
                 }
             }

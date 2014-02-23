@@ -21,6 +21,7 @@
 (function () {
     "use strict";
     
+    var isNotNull = SplitsBrowser.isNotNull;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var Event = SplitsBrowser.Model.Event;
     var AgeClass = SplitsBrowser.Model.AgeClass;
@@ -139,4 +140,19 @@
         assert.deepEqual(event.getNextControlsAfter(Course.START), [{course: course1, nextControls: ["235"]}, {course: course2, nextControls: ["226"]}]);
     });
     
+    QUnit.test("Determines time losses in each class when asked to do so", function (assert) {
+        var competitor1 = getCompetitor1();
+        var competitor2 = getCompetitor2();
+        var ageClass1 = new AgeClass("Test class 1", 3, [competitor1]);
+        var ageClass2 = new AgeClass("Test class 2", 3, [competitor2]);
+        var course1 = new Course("Test course 1", [ageClass1], null, null, ["235", "212", "189"]);
+        var course2 = new Course("Test course 2", [ageClass2], null, null, ["226", "212", "189"]);
+    
+        var event = new Event([ageClass1, ageClass2], [course1, course2]);
+        assert.strictEqual(competitor1.getTimeLossAt(2), null);
+        assert.strictEqual(competitor2.getTimeLossAt(2), null);
+        event.determineTimeLosses();
+        assert.ok(isNotNull(competitor1.getTimeLossAt(2)));
+        assert.ok(isNotNull(competitor2.getTimeLossAt(2)));
+    });
 })();

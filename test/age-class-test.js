@@ -22,6 +22,7 @@
     "use strict";
 
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     
     module("Age-class");
@@ -36,6 +37,12 @@
     
     function getCompetitor1WithNullSplitForControl3() {
         return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
+    }
+    
+    function getCompetitor1WithNaNSplitForControl3() {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 - 30, 81 + 197 + 212 + 106]);
+        competitor.setCleanedCumulativeTimes([0, 81, 81 + 197, NaN, 81 + 197 + 212 + 106]);
+        return competitor;
     }
     
     function getCompetitor2() {
@@ -88,6 +95,12 @@
         var competitor1 = getCompetitor1();
         var ageClass = new AgeClass("Test class name", 3, [competitor1, getCompetitor2WithNullSplitForControl3()]);
         assert.deepEqual(ageClass.getFastestSplitTo(3), {name: competitor1.name, split: 212});
+    });
+    
+    QUnit.test("Can return fastest split for a control ignoring NaN times", function (assert) {
+        var competitor2 = getCompetitor2();
+        var ageClass = new AgeClass("Test class name", 3, [getCompetitor1WithNaNSplitForControl3(), competitor2]);
+        assert.deepEqual(ageClass.getFastestSplitTo(3), {name: competitor2.name, split: 184});
     });
     
     QUnit.test("Returns null fastest split for a control that all competitors mispunched", function (assert) {
@@ -197,6 +210,7 @@
 
     QUnit.test("Can determine time-loss data for valid competitors in age-class", function (assert) {
         var ageClass = getTestAgeClass();
+        ageClass.determineTimeLosses();
         ageClass.competitors.forEach(function (comp) {
             [1, 2, 3, 4].forEach(function (controlIdx) {
                 assert.ok(comp.getTimeLossAt(controlIdx) !== null, "Time-loss for competitor '" + comp.name + "' at control '" + controlIdx + "' should not be null");
@@ -206,6 +220,7 @@
 
     QUnit.test("Can determine as all-null time-loss data for age-class with two competitors mispunching the same control", function (assert) {
         var ageClass = new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControl3(), getCompetitor2WithNullSplitForControl3()]);
+        ageClass.determineTimeLosses();
         ageClass.competitors.forEach(function (comp) {
             [1, 2, 3, 4].forEach(function (controlIdx) {
                 assert.strictEqual(comp.getTimeLossAt(controlIdx), null, "Time-loss for competitor '" + comp.name + "' at control '" + controlIdx + "' should be null");

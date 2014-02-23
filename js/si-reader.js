@@ -25,7 +25,7 @@
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseTime = SplitsBrowser.parseTime;
-    var Competitor = SplitsBrowser.Model.Competitor;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -242,7 +242,7 @@
         }
         
         var order = this.ageClasses.get(className).competitors.length + 1;
-        var competitor = Competitor.fromCumTimes(order, name, club, startTime, cumTimes);
+        var competitor = fromOriginalCumTimes(order, name, club, startTime, cumTimes);
         if (isPlacingNonNumeric && competitor.completed()) {
             // Competitor has completed the course but has no placing.
             // Assume that they are non-competitive.

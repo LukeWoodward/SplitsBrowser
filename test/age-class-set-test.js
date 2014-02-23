@@ -29,10 +29,12 @@
         skipStart: false
     };
     
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
     
     function getCompetitor1() {
@@ -45,6 +47,12 @@
     
     function getCompetitor1WithNullSplitForControl2() {
         return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, null, 184, 100]);
+    }
+    
+    function getCompetitor1WithDubiousSplitForControl2() {
+        var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        competitor.setCleanedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        return competitor;
     }
     
     function getCompetitor1WithNullSplitForControl3() {
@@ -221,16 +229,30 @@
         assert.deepEqual(ageClassSet.getFastestCumTimes(), [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 106],
                             "Fastest cumulative times should be made up of fastest splits where not null");
     });
+
+    QUnit.test("Fastest cumulative times on single-class set should be made up of fastest split times ignoring dubious splits", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor1WithDubiousSplitForControl2(), getCompetitor2()])]);
+        assert.deepEqual(ageClassSet.getFastestCumTimes(), [0, 65, 65 + 197, 65 + 197 + 212, 65 + 197 + 212 + 100],
+                            "Fastest cumulative times should be made up of fastest splits where not NaN");
+    });
     
     function assertSplitRanks(assert, competitor, expectedSplitRanks) {
         expectedSplitRanks.forEach(function (splitRank, index) {
-            assert.strictEqual(competitor.getSplitRankTo(index + 1), splitRank);
+            if (isNaNStrict(splitRank)) {
+                assert.ok(isNaNStrict(competitor.getSplitRankTo(index + 1)));
+            } else {
+                assert.strictEqual(competitor.getSplitRankTo(index + 1), splitRank);
+            }
         });
     }
     
     function assertCumulativeRanks(assert, competitor, expectedCumulativeRanks) {
         expectedCumulativeRanks.forEach(function (cumulativeRank, index) {
-            assert.strictEqual(competitor.getCumulativeRankTo(index + 1), cumulativeRank);
+            if (isNaNStrict(cumulativeRank)) {
+                assert.ok(isNaNStrict(competitor.getCumulativeRankTo(index + 1)));
+            } else {
+                assert.strictEqual(competitor.getCumulativeRankTo(index + 1), cumulativeRank);
+            }
         });
     }
     
@@ -331,6 +353,19 @@
         // mispunches they no don't have a cumulative rank from that point
         // onwards.
         assertSplitAndCumulativeRanks(assert, competitor3, [2, null, null, 3], [2, null, null, null]);
+    });
+    
+    QUnit.test("Can compute ranks when there are three competitors specified by cumulative times with one having a dubious split time", function (assert) {
+        var competitor1 = fromCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor2 = fromCumTimes(2, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100]);
+        var competitor3 = fromOriginalCumTimes(2, "Bill Baker", "GHI", 11 * 3600, [0, 78, 78 - 30, 78 + 209 + 199, 78 + 209 + 199 + 117]);
+        competitor3.setCleanedCumulativeTimes([0, 78, NaN, 78 + 209 + 199, 78 + 209 + 199 + 117]);
+        new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
+        
+        assertSplitAndCumulativeRanks(assert, competitor1, [3, 1, 2, 2], [3, 1, 2, 2]);
+        assertSplitAndCumulativeRanks(assert, competitor2, [1, 2, 1, 1], [1, 2, 3, 1]);
+        
+        assertSplitAndCumulativeRanks(assert, competitor3, [2, NaN, NaN, 3], [2, NaN, 1, 3]);
     });
     
     QUnit.test("Can get fastest two splits to control 3 from single-class set with three competitors", function (assert) {

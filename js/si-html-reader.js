@@ -25,7 +25,7 @@
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseTime = SplitsBrowser.parseTime;
-    var Competitor = SplitsBrowser.Model.Competitor;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -282,7 +282,7 @@
         var cumTimes = [0].concat(this.cumTimes);
         
         // The null is for the start time.
-        var competitor = Competitor.fromCumTimes(order, this.name, this.club, null, cumTimes);
+        var competitor = fromOriginalCumTimes(order, this.name, this.club, null, cumTimes);
         if (competitor.completed() && !this.competitive) {
             competitor.setNonCompetitive();
         }

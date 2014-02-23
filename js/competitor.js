@@ -24,6 +24,7 @@
     var NUMBER_TYPE = typeof 0;
     
     var isNotNull = SplitsBrowser.isNotNull;
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var getMessage = SplitsBrowser.getMessage;
 
@@ -138,19 +139,25 @@
     * sort.  However, it is not strictly the finishing order of the competitors,
     * as it has been known for them to be given not in the correct order.
     *
+    * The split and cumulative times passed here should be the 'original' times,
+    * before any attempt is made to repair the data.
+    *
     * It is not recommended to use this constructor directly.  Instead, use one of
-    * the factory methods fromSplitTimes or fromCumTimes to pass in either the
-    * split or cumulative times and have the other calculated.
+    * the factory methods fromSplitTimes, fromCumTimes or fromOriginalCumTimes to
+    * pass in either the split or cumulative times and have the other calculated.
     *
     * @constructor
-    * @param {Number} order - The position of the competitor within the list of results.
+    * @param {Number} order - The position of the competitor within the list of
+    *     results.
     * @param {String} name - The name of the competitor.
     * @param {String} club - The name of the competitor's club.
-    * @param {String} startTime - The competitor's start time.
-    * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
-    * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
+    * @param {String} originalStartTime - The competitor's start time.
+    * @param {Array} originalSplitTimes - Array of split times, as numbers,
+    *      with nulls for missed controls.
+    * @param {Array} originalCumTimes - Array of cumulative split times, as
+    *     numbers, with nulls for missed controls.
     */
-    var Competitor = function (order, name, club, startTime, splitTimes, cumTimes) {
+    var Competitor = function (order, name, club, startTime, originalSplitTimes, originalCumTimes) {
 
         if (typeof order !== NUMBER_TYPE) {
             throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
@@ -163,13 +170,15 @@
         this.isNonCompetitive = false;
         this.className = null;
         
-        this.splitTimes = splitTimes;
-        this.cumTimes = cumTimes;
+        this.originalSplitTimes = originalSplitTimes;
+        this.originalCumTimes = originalCumTimes;
+        this.splitTimes = null;
+        this.cumTimes = null;
         this.splitRanks = null;
         this.cumRanks = null;
         this.timeLosses = null;
 
-        this.totalTime = (this.cumTimes.indexOf(null) > -1) ? null : this.cumTimes[this.cumTimes.length - 1];
+        this.totalTime = (originalCumTimes === null || originalCumTimes.indexOf(null) > -1) ? null : originalCumTimes[originalCumTimes.length - 1];
     };
     
     /**
@@ -205,18 +214,49 @@
     */
     Competitor.fromSplitTimes = function (order, name, club, startTime, splitTimes) {
         var cumTimes = cumTimesFromSplitTimes(splitTimes);
-        return new Competitor(order, name, club, startTime, splitTimes, cumTimes);
+        var competitor = new Competitor(order, name, club, startTime, splitTimes, cumTimes);
+        competitor.splitTimes = splitTimes;
+        competitor.cumTimes = cumTimes;
+        return competitor;
     };
     
     /**
     * Create and return a Competitor object where the competitor's times are given
-    * as a list of cumulative split times.
+    * as a list of cumulative times.
     *
     * The first parameter (order) merely stores the order in which the competitor
     * appears in the given list of results.  Its sole use is to stabilise sorts of
     * competitors, as JavaScript's sort() method is not guaranteed to be a stable
     * sort.  However, it is not strictly the finishing order of the competitors,
     * as it has been known for them to be given not in the correct order.
+    *
+    * This method does not assume that the data given is 'clean'.  This function
+    * should therefore be used to create a competitor if the data may need to be
+    * repaired.
+    *
+    * @param {Number} order - The position of the competitor within the list of results.
+    * @param {String} name - The name of the competitor.
+    * @param {String} club - The name of the competitor's club.
+    * @param {Number} startTime - The competitor's start time, as seconds past midnight.
+    * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
+    */
+    Competitor.fromOriginalCumTimes = function (order, name, club, startTime, cumTimes) {
+        var splitTimes = splitTimesFromCumTimes(cumTimes);
+        return new Competitor(order, name, club, startTime, splitTimes, cumTimes);
+    };
+    
+    /**
+    * Create and return a Competitor object where the competitor's times are given
+    * as a list of cumulative times.
+    *
+    * The first parameter (order) merely stores the order in which the competitor
+    * appears in the given list of results.  Its sole use is to stabilise sorts of
+    * competitors, as JavaScript's sort() method is not guaranteed to be a stable
+    * sort.  However, it is not strictly the finishing order of the competitors,
+    * as it has been known for them to be given not in the correct order.
+    *
+    * This method assumes that the data given is 'clean', and that no repair to
+    * the data will be necessary before it can be viewed.
     *
     * @param {Number} order - The position of the competitor within the list of results.
     * @param {String} name - The name of the competitor.
@@ -225,8 +265,20 @@
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
     */
     Competitor.fromCumTimes = function (order, name, club, startTime, cumTimes) {
-        var splitTimes = splitTimesFromCumTimes(cumTimes);
-        return new Competitor(order, name, club, startTime, splitTimes, cumTimes);
+        var competitor = Competitor.fromOriginalCumTimes(order, name, club, startTime, cumTimes);
+        competitor.splitTimes = competitor.originalSplitTimes;
+        competitor.cumTimes = competitor.originalCumTimes;
+        return competitor;
+    };
+    
+    /**
+    * Sets the 'cleaned' cumulative times for a competitor.  This also
+    * calculates the cleaned split times.
+    * @param {Array} cumTimes - The 'cleaned' cumulative times.
+    */
+    Competitor.prototype.setCleanedCumulativeTimes = function (cumTimes) {
+        this.cumTimes = cumTimes;
+        this.splitTimes = splitTimesFromCumTimes(cumTimes);
     };
     
     /**
@@ -255,8 +307,11 @@
     * Returns the competitor's split to the given control.  If the control
     * index given is zero (i.e. the start), zero is returned.  If the
     * competitor has no time recorded for that control, null is returned.
+    * If the value is missing, because the value read from the file was
+    * invalid, NaN is returned.
+    * 
     * @param {Number} controlIndex - Index of the control (0 = start).
-    * @return {Number} The split time in seconds for the competitor to the
+    * @return {Number|null} The split time in seconds for the competitor to the
     *      given control.
     */
     Competitor.prototype.getSplitTimeTo = function (controlIndex) {
@@ -264,16 +319,45 @@
     };
     
     /**
+    * Returns the competitor's 'original' split to the given control.  This is
+    * always the value read from the source data file, or derived directly from
+    * this data, before any attempt was made to repair the competitor's data.
+    * 
+    * If the control index given is zero (i.e. the start), zero is returned.
+    * If the competitor has no time recorded for that control, null is
+    * returned.
+    * @param {Number} controlIndex - Index of the control (0 = start).
+    * @return {Number|null} The split time in seconds for the competitor to the
+    *      given control.
+    */
+    Competitor.prototype.getOriginalSplitTimeTo = function (controlIndex) {
+        return (controlIndex === 0) ? 0 : this.originalSplitTimes[controlIndex - 1];
+    };
+    
+    /**
     * Returns the competitor's cumulative split to the given control.  If the
     * control index given is zero (i.e. the start), zero is returned.   If the
     * competitor has no cumulative time recorded for that control, null is
-    * returned.
+    * returned.  If the competitor recorded a time, but the time was deemed to
+    * be invalid, NaN will be returned.
     * @param {Number} controlIndex - Index of the control (0 = start).
     * @return {Number} The cumulative split time in seconds for the competitor
     *      to the given control.
     */
     Competitor.prototype.getCumulativeTimeTo = function (controlIndex) {
         return this.cumTimes[controlIndex];
+    };
+    
+    /**
+    * Returns the 'original' cumulative time the competitor took to the given
+    * control.  This is always the value read from the source data file, before
+    * any attempt was made to repair the competitor's data.
+    * @param {Number} controlIndex - Index of the control (0 = start).
+    * @return {Number} The cumulative split time in seconds for the competitor
+    *      to the given control.
+    */
+    Competitor.prototype.getOriginalCumulativeTimeTo = function (controlIndex) {
+        return this.originalCumTimes[controlIndex];
     };
     
     /**
@@ -317,6 +401,14 @@
     */
     Competitor.prototype.getAllCumulativeTimes = function () {
         return this.cumTimes;
+    };
+    
+    /**
+    * Returns all of the competitor's cumulative time splits.
+    * @return {Array} The cumulative split times in seconds for the competitor.
+    */
+    Competitor.prototype.getAllOriginalCumulativeTimes = function () {
+        return this.originalCumTimes;
     };
     
     /**
@@ -410,32 +502,40 @@
                 throwInvalidData("Cannot determine time loss of competitor with " + this.splitTimes.length + " split times using " + fastestSplitTimes.length + " fastest splits");
             } else if (fastestSplitTimes.indexOf(null) >= 0) {
                 throwInvalidData("Cannot determine time loss of competitor when there is a null value in the fastest splits");
+            }  else if (fastestSplitTimes.some(isNaNStrict)) {
+                throwInvalidData("Cannot determine time loss of competitor when there is a NaN value in the fastest splits");
             }
             
-            // We use the same algorithm for calculating time loss as the
-            // original, with a simplification: we calculate split ratios
-            // (split[i] / fastest[i]) rather than time loss rates
-            // (split[i] - fastest[i])/fastest[i].  A control's split ratio
-            // is its time loss rate plus 1.  Not subtracting one at the start
-            // means that we then don't have to add it back on at the end.
-            
-            var splitRatios = this.splitTimes.map(function (splitTime, index) {
-                return splitTime / fastestSplitTimes[index];
-            });
-            
-            splitRatios.sort(d3.ascending);
-            
-            var medianSplitRatio;
-            if (splitRatios.length % 2 === 1) {
-                medianSplitRatio = splitRatios[(splitRatios.length - 1) / 2];
+            if (this.splitTimes.some(isNaNStrict)) {
+                // Competitor has some invalid splits.  Unfortunately this
+                // means we cannot sensibly calculate the time losses.
+                this.timeLosses = this.splitTimes.map(function () { return NaN; });
             } else {
-                var midpt = splitRatios.length / 2;
-                medianSplitRatio = (splitRatios[midpt - 1] + splitRatios[midpt]) / 2;
+                // We use the same algorithm for calculating time loss as the
+                // original, with a simplification: we calculate split ratios
+                // (split[i] / fastest[i]) rather than time loss rates
+                // (split[i] - fastest[i])/fastest[i].  A control's split ratio
+                // is its time loss rate plus 1.  Not subtracting one at the start
+                // means that we then don't have to add it back on at the end.
+                
+                var splitRatios = this.splitTimes.map(function (splitTime, index) {
+                    return splitTime / fastestSplitTimes[index];
+                });
+                
+                splitRatios.sort(d3.ascending);
+                
+                var medianSplitRatio;
+                if (splitRatios.length % 2 === 1) {
+                    medianSplitRatio = splitRatios[(splitRatios.length - 1) / 2];
+                } else {
+                    var midpt = splitRatios.length / 2;
+                    medianSplitRatio = (splitRatios[midpt - 1] + splitRatios[midpt]) / 2;
+                }
+                
+                this.timeLosses = this.splitTimes.map(function (splitTime, index) {
+                    return Math.round(splitTime - fastestSplitTimes[index] * medianSplitRatio);
+                });
             }
-            
-            this.timeLosses = this.splitTimes.map(function (splitTime, index) {
-                return Math.round(splitTime - fastestSplitTimes[index] * medianSplitRatio);
-            });
         }
     };
     

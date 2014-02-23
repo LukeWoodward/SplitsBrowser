@@ -21,6 +21,7 @@
 (function (){
     "use strict";
 
+    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     
     /**
@@ -35,16 +36,23 @@
         this.numControls = numControls;
         this.competitors = competitors;
         this.course = null;
-        
-        var fastestSplitTimes = d3.range(1, numControls + 2).map(function (controlIdx) {
+        this.competitors.forEach(function (comp) {
+            comp.setClassName(name);
+        });
+    };
+     
+    /**
+    * Determines the time losses for the competitors in this age class.
+    */
+    AgeClass.prototype.determineTimeLosses = function () {
+        var fastestSplitTimes = d3.range(1, this.numControls + 2).map(function (controlIdx) {
             var splitRec = this.getFastestSplitTo(controlIdx);
             return (splitRec === null) ? null : splitRec.split;
         }, this);
         
         this.competitors.forEach(function (comp) {
-            comp.setClassName(this.name);
             comp.determineTimeLosses(fastestSplitTimes);
-        }, this);
+        });
     };
     
     /**
@@ -94,7 +102,7 @@
         var fastestCompetitor = null;
         this.competitors.forEach(function (comp) {
             var compSplit = comp.getSplitTimeTo(controlIdx);
-            if (compSplit !== null) {
+            if (isNotNullNorNaN(compSplit)) {
                 if (fastestSplit === null || compSplit < fastestSplit) {
                     fastestSplit = compSplit;
                     fastestCompetitor = comp;

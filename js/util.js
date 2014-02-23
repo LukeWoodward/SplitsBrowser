@@ -34,10 +34,32 @@
     * @returns True if the value is not null, false otherwise.
     */
     SplitsBrowser.isNotNull = function (x) { return x !== null; };
-
+    
+    /**
+    * Returns whether the value given is the numeric value NaN.
+    *
+    * This differs from the JavaScript built-in function isNaN, in that isNaN
+    * attempts to convert the value to a number first, with non-numeric strings
+    * being converted to NaN.  So isNaN("abc") will be true, even though "abc"
+    * isn't NaN.  This function only returns true if you actually pass it NaN,
+    * rather than any value that fails to convert to a number.
+    *
+    * @param {Any} x - Any input value.
+    * @return True if x is NaN, false if x is any other value.
+    */
+    SplitsBrowser.isNaNStrict = function (x) { return x !== x; };
+    
+    /**
+    * Returns whether the value given is neither null nor NaN.
+    * @param {Number|null} value - A value to test.
+    * @return {boolean} false if the value given is null or NaN, true
+    *     otherwise.
+    */
+    SplitsBrowser.isNotNullNorNaN = function (x) { return x !== null && x === x; };
+    
     /**
     * Exception object raised if invalid data is passed.
-    * @constructor.
+    * @constructor
     * @param {string} message - The exception detail message.
     */
     var InvalidData = function (message) {
