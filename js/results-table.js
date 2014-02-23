@@ -111,11 +111,17 @@
         var tableBody = this.table.select("tbody");
         tableBody.selectAll("tr").remove();
         
-        function addCell(tableRow, topLine, bottomLine, cssClass) {
+        function addCell(tableRow, topLine, bottomLine, cssClass, cumDubious, splitDubious) {
             var cell = tableRow.append("td");
-            cell.append("span").text(topLine);
+            cell.append("span")
+                .classed("dubious", cumDubious)
+                .text(topLine);
+
             cell.append("br");
-            cell.append("span").text(bottomLine);
+            cell.append("span")
+                .classed("dubious", splitDubious)
+                .text(bottomLine);
+                
             if (cssClass) {
                 cell.classed(cssClass, true);
             }
@@ -140,11 +146,13 @@
                 numberCell.text(rank);
             }
             
-            addCell(tableRow, competitor.name, competitor.club);
-            addCell(tableRow, (competitor.completed()) ? formatTime(competitor.totalTime) : getMessage("MispunchedShort"), NON_BREAKING_SPACE_CHAR, "time");
+            addCell(tableRow, competitor.name, competitor.club, false, false);
+            addCell(tableRow, (competitor.completed()) ? formatTime(competitor.totalTime) : getMessage("MispunchedShort"), NON_BREAKING_SPACE_CHAR, "time", false, false);
             
             d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
-                addCell(tableRow, formatTime(competitor.getCumulativeTimeTo(controlNum)), formatTime(competitor.getSplitTimeTo(controlNum)), "time");
+                var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
+                var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
+                addCell(tableRow, formatTime(competitor.getOriginalCumulativeTimeTo(controlNum)), formatTime(competitor.getOriginalSplitTimeTo(controlNum)), "time", isCumDubious, isSplitDubious);
             });
         }, this);
     };

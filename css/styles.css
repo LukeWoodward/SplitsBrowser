@@ -264,6 +264,12 @@ span.resultsTableHeader
     text-align: right;
 }
 
+.resultsTable tbody td.time span.dubious
+{
+    font-style: italic;
+    color: #CCCCCC;
+}
+
 div.warningPanel
 {
     position: absolute;

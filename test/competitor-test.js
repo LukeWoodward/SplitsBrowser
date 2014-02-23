@@ -151,7 +151,7 @@
         assert.ok(!competitor.completed(), "Competitor should be marked as not completing the course");
     });
 
-    QUnit.test("Can create a competitor from original cumulative times and determine original split times with final times not shown", function (assert) {
+    QUnit.test("Can create a competitor from original cumulative times and determine original split times with final times still null", function (assert) {
         var cumTimes = [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100];
         var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, cumTimes);
         assertOriginalCumulativeTimes(assert, competitor, cumTimes);
@@ -161,11 +161,11 @@
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), cumTimes);
     });
 
-    QUnit.test("Can create a competitor from original cumulative times, set cleaned times with NaNs replacing dubious splits", function (assert) {
+    QUnit.test("Can create a competitor from original cumulative times and set repaired times with NaNs replacing dubious splits", function (assert) {
         var cumTimes = [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100];
         var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, cumTimes);
         
-        competitor.setCleanedCumulativeTimes([0, 65, 65 + 221, NaN, 65 + 221 + 184 + 100]);
+        competitor.setRepairedCumulativeTimes([0, 65, 65 + 221, NaN, 65 + 221 + 184 + 100]);
         
         assert.strictEqual(competitor.getCumulativeTimeTo(0), 0);
         assert.strictEqual(competitor.getCumulativeTimeTo(1), 65);
@@ -178,6 +178,31 @@
         assert.strictEqual(competitor.getSplitTimeTo(2), 221);
         assert.ok(isNaN(competitor.getSplitTimeTo(3)));
         assert.ok(isNaN(competitor.getSplitTimeTo(4)));
+    });
+
+    QUnit.test("Competitor created from ascending cumulative times has no dubious cumulative nor split times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        for (var control = 0; control < 5; control += 1) {
+            assert.ok(!competitor.isCumulativeTimeDubious(control));
+            assert.ok(!competitor.isSplitTimeDubious(control));
+        }
+    });
+
+    QUnit.test("Competitor created from split times has no dubious cumulative nor split times", function (assert) {
+        var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        for (var control = 0; control < 5; control += 1) {
+            assert.ok(!competitor.isCumulativeTimeDubious(control));
+            assert.ok(!competitor.isSplitTimeDubious(control));
+        }
+    });
+
+    QUnit.test("Competitor created with dubious cumulative time has one dubious cumulative time and two dubious split times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 0, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        competitor.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        for (var control = 0; control < 5; control += 1) {
+            assert.strictEqual(competitor.isCumulativeTimeDubious(control), (control === 2));
+            assert.strictEqual(competitor.isSplitTimeDubious(control), (control === 2 || control === 3));
+        }
     });
     
     QUnit.test("Competitor with start time but all-null splits is not lacking a start time", function (assert) {
@@ -443,9 +468,9 @@
         });
     });
     
-    QUnit.test("Can determine time losses as all NaN if competitor has NaN cleaned split", function (assert) {
+    QUnit.test("Can determine time losses as all NaN if competitor has NaN repaired split", function (assert) {
         var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 96, 96 + 221, 96 + 221 + 184, 96 + 221 + 184 + 100]);
-        competitor.setCleanedCumulativeTimes([0, 96, 96 + 221, NaN, 96 + 221 + 184 + 100]);
+        competitor.setRepairedCumulativeTimes([0, 96, 96 + 221, NaN, 96 + 221 + 184 + 100]);
         var fastestSplits = [65, 209, 184, 97];
         competitor.determineTimeLosses(fastestSplits);
         

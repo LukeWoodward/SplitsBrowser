@@ -230,9 +230,9 @@
     * sort.  However, it is not strictly the finishing order of the competitors,
     * as it has been known for them to be given not in the correct order.
     *
-    * This method does not assume that the data given is 'clean'.  This function
-    * should therefore be used to create a competitor if the data may need to be
-    * repaired.
+    * This method does not assume that the data given has been 'repaired'.  This
+    * function should therefore be used to create a competitor if the data may
+    * later need to be repaired.
     *
     * @param {Number} order - The position of the competitor within the list of results.
     * @param {String} name - The name of the competitor.
@@ -255,8 +255,8 @@
     * sort.  However, it is not strictly the finishing order of the competitors,
     * as it has been known for them to be given not in the correct order.
     *
-    * This method assumes that the data given is 'clean', and that no repair to
-    * the data will be necessary before it can be viewed.
+    * This method assumes that the data given has been repaired, so it is ready
+    * to be viewed.
     *
     * @param {Number} order - The position of the competitor within the list of results.
     * @param {String} name - The name of the competitor.
@@ -272,11 +272,11 @@
     };
     
     /**
-    * Sets the 'cleaned' cumulative times for a competitor.  This also
-    * calculates the cleaned split times.
-    * @param {Array} cumTimes - The 'cleaned' cumulative times.
+    * Sets the 'repaired' cumulative times for a competitor.  This also
+    * calculates the repaired split times.
+    * @param {Array} cumTimes - The 'repaired' cumulative times.
     */
-    Competitor.prototype.setCleanedCumulativeTimes = function (cumTimes) {
+    Competitor.prototype.setRepairedCumulativeTimes = function (cumTimes) {
         this.cumTimes = cumTimes;
         this.splitTimes = splitTimesFromCumTimes(cumTimes);
     };
@@ -335,6 +335,17 @@
     };
     
     /**
+    * Returns whether the control with the given index is deemed to have a
+    * dubious split time.
+    * @param {Number} controlIndex - The index of the control.
+    * @return {boolean} True if the split time to the given control is dubious,
+    *     false if not.
+    */
+    Competitor.prototype.isSplitTimeDubious = function (controlIndex) {
+        return (controlIndex > 0 && this.originalSplitTimes[controlIndex - 1] !== this.splitTimes[controlIndex - 1]);
+    };
+    
+    /**
     * Returns the competitor's cumulative split to the given control.  If the
     * control index given is zero (i.e. the start), zero is returned.   If the
     * competitor has no cumulative time recorded for that control, null is
@@ -358,6 +369,17 @@
     */
     Competitor.prototype.getOriginalCumulativeTimeTo = function (controlIndex) {
         return this.originalCumTimes[controlIndex];
+    };
+    
+    /**
+    * Returns whether the control with the given index is deemed to have a
+    * dubious cumulative time.
+    * @param {Number} controlIndex - The index of the control.
+    * @return {boolean} True if the cumulative time to the given control is
+    *     dubious, false if not.
+    */
+    Competitor.prototype.isCumulativeTimeDubious = function (controlIndex) {
+        return this.originalCumTimes[controlIndex] !== this.cumTimes[controlIndex];
     };
     
     /**

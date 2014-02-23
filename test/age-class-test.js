@@ -41,7 +41,7 @@
     
     function getCompetitor1WithNaNSplitForControl3() {
         var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 - 30, 81 + 197 + 212 + 106]);
-        competitor.setCleanedCumulativeTimes([0, 81, 81 + 197, NaN, 81 + 197 + 212 + 106]);
+        competitor.setRepairedCumulativeTimes([0, 81, 81 + 197, NaN, 81 + 197 + 212 + 106]);
         return competitor;
     }
     
