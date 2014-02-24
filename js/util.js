@@ -20,6 +20,10 @@
  */
 (function () {
     "use strict";
+    
+    // Minimum length of a course that is considered to be given in metres as
+    // opposed to kilometres.
+    var MIN_COURSE_LENGTH_METRES = 500;
 
     /**
      * Utility function used with filters that simply returns the object given.
@@ -91,13 +95,21 @@
     };
     
     /**
-    * Parse a floating-point number using either a comma or a dot as the
-    * decimal separator.
-    * @param {String} stringValue - The string value to parse as a number.
-    * @return {Number} The parsed float value.
+    * Parses a course length.
+    *
+    * This can be specified as a decimal number of kilometres or metres, with
+    * either a full stop or a comma as the decimal separator.
+    *
+    * @param {String} stringValue - The course length to parse, as a string.
+    * @return {Number} The parsed course length.
     */
-    SplitsBrowser.parseFloatOfUnknownLocale = function (stringValue) {
-        return parseFloat(stringValue.replace(",", "."));
+    SplitsBrowser.parseCourseLength = function (stringValue) {
+        var courseLength = parseFloat(stringValue.replace(",", "."));
+        if (courseLength >= MIN_COURSE_LENGTH_METRES) {
+            courseLength /= 1000;
+        }
+        
+        return courseLength;
     };
     
 })();

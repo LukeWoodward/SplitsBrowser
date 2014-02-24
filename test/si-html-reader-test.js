@@ -487,6 +487,16 @@
             false);
     });
     
+    QUnit.test("Can parse an event with an empty course with length specified in metres in all formats", function (assert) {
+        runHtmlFormatParseTest(
+            [{headerDetails: ["Test course 1", "2700", ""], controlsLines: [["138", "152", "141"]], competitors: []}],
+            function (eventData, formatName) {
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
+                assertCourse(assert, eventData.courses[0], {name: "Test course 1", length: 2.7, climb: null});
+            },
+            false);
+    });
+    
     QUnit.test("Can parse an event with an empty course with climb but no length in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "", "35"], controlsLines: [["138", "152", "141"]], competitors: []}],

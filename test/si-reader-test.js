@@ -30,7 +30,8 @@
     var HEADER_46 = "Stno;SI card;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls.
-    var ROW_TEMPLATE_46 = "0;1;2;surname;forename;5;6;7;8;start;10;time;12;13;14;club;16;17;ageClass;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;course;distance;climb;numControls;placing;44;45";
+    // x44 stops the 44 in column 44 being identified as a control code.
+    var ROW_TEMPLATE_46 = "0;1;2;surname;forename;5;6;7;8;start;10;time;12;13;14;club;16;17;ageClass;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;course;distance;climb;numControls;placing;x44;45";
     
     // Header line when control 1 is in column 44.
     // Compared to the variant above, this line has no 'S' column and has the
@@ -38,7 +39,7 @@
     var HEADER_44 = "Stno;SI card;Database Id;Name;YB;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls.
-    var ROW_TEMPLATE_44 = "0;1;2;name;4;5;6;start;8;time;10;11;12;club;14;15;ageClass;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;course;distance;climb;numControls;placing;42;43";
+    var ROW_TEMPLATE_44 = "0;1;2;name;4;5;6;start;8;time;10;11;12;club;14;15;ageClass;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;course;distance;climb;numControls;placing;x42;43";
     
     /**
     * Generates a row of data for an SI-format file.
@@ -238,6 +239,42 @@
         assert.strictEqual(eventData.courses.length, 1, "There should be one course");
         var course = eventData.courses[0];
         assert.strictEqual(course.length, 4.1, "Course length should be correct");
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor's data with the course distance in metres", function (assert) {
+        var competitor = getCompetitor1();
+        competitor.distance = "4100";
+        var eventData = parseEventData(HEADER_46 + generateRow(competitor, getControls1(), ROW_TEMPLATE_46));
+        assert.strictEqual(eventData.courses.length, 1, "There should be one course");
+        var course = eventData.courses[0];
+        assert.strictEqual(course.length, 4.1, "Course length should be correct");
+    });
+    
+    QUnit.test("Can parse a string that contains a single valid competitor's data with the placing empty", function (assert) {
+        var competitor = getCompetitor1();
+        competitor.placing = "";
+        var eventData = parseEventData(HEADER_46 + generateRow(competitor, getControls1(), ROW_TEMPLATE_46));
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
+        assert.ok(!eventData.classes[0].competitors[0].isNonCompetitive);
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor's data with the last two controls missing", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.placing = "";
+        var eventDataStr = HEADER_46 + generateRow(competitor1, getControls1(), ROW_TEMPLATE_46);
+        
+        // Chop off the last two control codes and times.
+        for (var i = 0; i < 4; i += 1) {
+            eventDataStr = eventDataStr.substring(0, eventDataStr.lastIndexOf(";"));
+        }
+        
+        var eventData = parseEventData(eventDataStr);
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
+        var competitor = eventData.classes[0].competitors[0];
+        assert.ok(!competitor.completed());
+        assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, null, null, 393]);
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data in column-44 variation", function (assert) {
@@ -508,11 +545,4 @@
         assert.strictEqual(eventData.classes[0].course, eventData.courses[1], "Second course should be set on the first class");
         assert.strictEqual(eventData.classes[1].course, eventData.courses[0], "First course should be set on the second class");
     });
-    
-    
-    QUnit.test("Cannot parse a line that purports to contain data for more controls than it actually contains", function (assert) {
-        var comp1 = getCompetitor1();
-        comp1.numControls = "4";
-        runInvalidDataTest(assert, HEADER_46 + generateRow(comp1, getControls1(), ROW_TEMPLATE_46), "Line with too few controls");
-    });    
 })();

@@ -24,7 +24,7 @@
     var isNotNull = SplitsBrowser.isNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
-    var parseFloatOfUnknownLocale = SplitsBrowser.parseFloatOfUnknownLocale;
+    var parseCourseLength = SplitsBrowser.parseCourseLength;
     var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
@@ -161,7 +161,7 @@
         if (distanceMatch === null) {
             return null;
         } else {
-            return parseFloatOfUnknownLocale(distanceMatch[1]);
+            return parseCourseLength(distanceMatch[1]);
         }
     }
     

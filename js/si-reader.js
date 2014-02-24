@@ -23,7 +23,7 @@
     
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
-    var parseFloatOfUnknownLocale = SplitsBrowser.parseFloatOfUnknownLocale;
+    var parseCourseLength = SplitsBrowser.parseCourseLength;
     var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
@@ -109,19 +109,22 @@
             throwWrongFileFormat("Data appears not to be in the SI CSV format");
         }
         
-        if (headers.length <= MIN_CONTROLS_OFFSET) {
-            throwWrongFileFormat("Too few header columns for the SI CSV format");
+        var firstLine = this.lines[1].split(";");
+        
+        var endPos = firstLine.length - 1;
+        while (endPos > 0 && $.trim(firstLine[endPos]) === "") {
+            endPos -= 1;
         }
         
-        // Look for two column headers that both end with 1, such as Control1
-        // and Punch1.
-        var endsWithOne = /1$/;
-        for (var index = MIN_CONTROLS_OFFSET; index + 1 < headers.length; index += 1) {
-            if (endsWithOne.test(headers[index]) && endsWithOne.test(headers[index + 1])) {
-                this.control1Index = index;
-                break;
-            }
+        // The last empty item should be the time.
+        var controlCodeColumn = endPos - 1;
+        var digitsOnly = /^\d+$/;
+        while (controlCodeColumn >= 2 && digitsOnly.test(firstLine[controlCodeColumn - 2])) { 
+            // There's another control code before this one.
+            controlCodeColumn -= 2;
         }
+        
+        this.control1Index = controlCodeColumn;
         
         var supportedControl1Indexes = [44, 46];
         if (this.control1Index === null) {
@@ -156,18 +159,13 @@
     */
     Reader.prototype.readCumulativeTimes = function (row, lineNumber, numControls) {
         
-        // Check that the row is long enough for all of the control data,
-        // given that we now know how many controls it should contain.
-        if (row.length <= this.control1Index + 1 + 2 * (numControls - 1)) {
-            throwInvalidData("Line " + lineNumber + " reports " + numControls + " controls but there aren't enough data values in the row for this many controls");
-        }
-        
         var cumTimes = [0];
         var lastCumTime = 0;
         
         for (var controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
-            var cumTimeStr = row[this.control1Index + 1 + 2 * controlIdx];
-            var cumTime = parseTime(cumTimeStr);
+            var cellIndex = this.control1Index + 1 + 2 * controlIdx;
+            var cumTime = (cellIndex < row.length) ? parseTime(row[cellIndex]) : null;
+                
             verifyCumulativeTimesInOrder(lastCumTime, cumTime);
             
             cumTimes.push(cumTime);
@@ -208,7 +206,7 @@
         if (!this.courseDetails.has(courseName)) {
             var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[this.control1Index + 2 * controlIdx]; }, this);
             this.courseDetails.set(courseName, {
-                length: parseFloatOfUnknownLocale(row[this.control1Index + COLUMN_OFFSETS.DISTANCE]) || null,
+                length: parseCourseLength(row[this.control1Index + COLUMN_OFFSETS.DISTANCE]) || null, 
                 climb: parseInt(row[this.control1Index + COLUMN_OFFSETS.CLIMB], 10) || null,
                 controls: controlNums
             });
@@ -242,7 +240,7 @@
         var club = row[this.control1Index + COLUMN_OFFSETS.CLUB];
         var startTime = parseTime(row[this.control1Index + COLUMN_OFFSETS.START]);
 
-        var isPlacingNonNumeric = isNaN(parseInt(placing, 10));
+        var isPlacingNonNumeric = (placing !== "" && isNaN(parseInt(placing, 10)));
         
         var name;
         if (this.control1Index === 46) {

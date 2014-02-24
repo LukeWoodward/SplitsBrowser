@@ -39,7 +39,7 @@
     });
     
     QUnit.test("Can read in 'SI' semicolon-delimited data", function (assert) { 
-        var siData = SI_HEADER + "0;1;2;Smith;John;5;6;7;8;11:27:45;10;06:33;12;13;14;ABC;16;17;Test class;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;Test course;4.1;140;3;1;44;45;208;01:50;227;03:38;212;06:02";
+        var siData = SI_HEADER + "0;1;2;Smith;John;5;6;7;8;11:27:45;10;06:33;12;13;14;ABC;16;17;Test class;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;Test course;4.1;140;3;1;x44;45;208;01:50;227;03:38;212;06:02";
         var eventData = parseEventData(siData);
         assert.ok(eventData instanceof Event, "An event should be returned");
         assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
