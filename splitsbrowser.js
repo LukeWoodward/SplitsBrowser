@@ -1923,7 +1923,6 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
     
     // Indexes of the various columns relative to the column for control-1.
     var COLUMN_OFFSETS = {
-        START: -37,
         TIME: -35,
         CLUB: -31,
         AGE_CLASS: -28,
@@ -1931,7 +1930,8 @@ var SplitsBrowser = { Version: "3.1.0", Model: {}, Input: {}, Controls: {} };
         DISTANCE: -6,
         CLIMB: -5,
         CONTROL_COUNT: -4,
-        PLACING: -3
+        PLACING: -3,
+        START: -2
     };
     
     // Minimum control offset.
