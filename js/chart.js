@@ -761,16 +761,33 @@
     * between controls.
     */
     Chart.prototype.drawBackgroundRectangles = function () {
-        var rects = this.svgGroup.selectAll("rect")
-                                 .data(d3.range(this.numControls + 1));
+        
+        // We can't guarantee that the reference cumulative times are in
+        // ascending order, but we need such a list of times in order to draw
+        // the rectangles.  So, sort the reference cumulative times.
+        var refCumTimesSorted = this.referenceCumTimes.slice(0);
+        refCumTimesSorted.sort(d3.ascending);
+        
+        // Now remove any duplicate times.
+        var index = 1;
+        while (index < refCumTimesSorted.length) {
+            if (refCumTimesSorted[index] === refCumTimesSorted[index - 1]) {
+                refCumTimesSorted.splice(index, 1);
+            } else {
+                index += 1;
+            }
+        }
 
         var outerThis = this;
-
+        
+        var rects = this.svgGroup.selectAll("rect")
+                                 .data(d3.range(refCumTimesSorted.length - 1));
+        
         rects.enter().append("rect");
 
-        rects.attr("x", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index]); })
+        rects.attr("x", function (index) { return outerThis.xScale(refCumTimesSorted[index]); })
              .attr("y", 0)
-             .attr("width", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index + 1] - outerThis.referenceCumTimes[index]); })
+             .attr("width", function (index) { return outerThis.xScale(refCumTimesSorted[index + 1]) - outerThis.xScale(refCumTimesSorted[index]); })
              .attr("height", this.contentHeight)
              .attr("class", function (index) { return (index % 2 === 0) ? "background1" : "background2"; });
 
