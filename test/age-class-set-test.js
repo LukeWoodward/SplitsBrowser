@@ -83,6 +83,14 @@
         return fromSplitTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, null]);
     }
     
+    function getCompetitor2WithFinishCumTimeNotTheLargest() {
+        return fromCumTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 - 73]);
+    }
+    
+    function getCompetitor2WithFirstControlLargerThanAllOthers() {
+        return fromCumTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 4103, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+    }
+    
     function getCompetitor3() {
         return fromSplitTimes(3, "Bill Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);    
     }
@@ -489,6 +497,53 @@
             ],
             xExtent: [0, 65 + 197 + 184 + 100],
             yExtent: [0, 50],
+            numControls: 3,
+            competitorNames: ["John Smith", "Fred Brown"]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+    QUnit.test("Can return chart data for two competitors in same class with correct X-extent when one competitor has cumulative times not in order", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getFasterCompetitor1(), getCompetitor2WithFinishCumTimeNotTheLargest()])]);
+        var fastestTime = ageClassSet.getFastestCumTimes();
+
+        var chartData = ageClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 0, ys: [0, 0] },
+                { x: 65, ys: [16, 0] },
+                { x: 65 + 197, ys: [16, 24] },
+                { x: 65 + 197 + 184, ys: [44, 24] },
+                { x: 65 + 197 + 184 - 73, ys: [44, 197] }
+            ],
+            xExtent: [0, 65 + 197 + 184],
+            yExtent: [0, 197],
+            numControls: 3,
+            competitorNames: ["Fred Brown", "John Smith"]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+    QUnit.test("Can return chart data for two competitors in same class with correct X-extent when one competitor has the first cumulative time larger than all others", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getFasterCompetitor1(), getCompetitor2WithFirstControlLargerThanAllOthers()])]);
+
+        var fastestTime = ageClassSet.getFastestCumTimes();
+
+        var chartData = ageClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 0, ys: [0, 0] },
+                { x: 65, ys: [0, 4038] },
+                { x: 65 + (81 + 197 - 4103), ys: [4046, 4038] },
+                { x: 65 + (81 + 197 - 4103) + 184, ys: [4046, 4066] },
+                { x: 65 + (81 + 197 - 4103) + 184 + 100, ys: [4046, 4072] }
+            ],
+            xExtent: [65 + (81 + 197 - 4103), 65],
+            yExtent: [0, 4072],
             numControls: 3,
             competitorNames: ["John Smith", "Fred Brown"]
         };

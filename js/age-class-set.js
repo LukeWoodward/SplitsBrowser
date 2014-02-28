@@ -311,7 +311,8 @@
         var competitorData = this.allCompetitors.map(function (comp) { return chartType.dataSelector(comp, referenceCumTimes); });
         var selectedCompetitorData = currentIndexes.map(function (index) { return competitorData[index]; });
 
-        var xMax = referenceCumTimes[referenceCumTimes.length - 1];
+        var xMin = d3.min(referenceCumTimes);
+        var xMax = d3.max(referenceCumTimes);
         var yMin;
         var yMax;
         if (currentIndexes.length === 0) {
@@ -339,7 +340,7 @@
             dataColumns: zippedData.map(function (data) { return { x: data[0], ys: data[1] }; }),
             competitorNames: competitorNames,
             numControls: this.numControls,
-            xExtent: [0, xMax],
+            xExtent: [xMin, xMax],
             yExtent: [yMin, yMax]
         };
     };
