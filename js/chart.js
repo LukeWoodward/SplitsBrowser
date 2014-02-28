@@ -129,6 +129,8 @@
         // they appear in the list of labels.
         this.selectedIndexesOrderedByLastYValue = [];
         this.referenceCumTimes = [];
+        this.referenceCumTimesSorted = [];
+        this.referenceCumTimeIndexes = [];
         this.fastestCumTimes = [];
         
         this.isMouseIn = false;
@@ -433,24 +435,27 @@
             // In the chart.
             // Get the time offset that the mouse is currently over.
             var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
-            var bisectIndex = d3.bisect(this.referenceCumTimes, chartX);
+            var bisectIndex = d3.bisect(this.referenceCumTimesSorted, chartX);
             
             // bisectIndex is the index at which to insert chartX into
             // referenceCumTimes in order to keep the array sorted.  So if
             // this index is N, the mouse is between N - 1 and N.  Find
             // which is nearer.
-            var controlIndex;
-            if (bisectIndex >= this.referenceCumTimes.length) {
-                // Off the right-hand end, use the finish.
-                controlIndex = this.numControls + 1;
+            var sortedControlIndex;
+            if (bisectIndex >= this.referenceCumTimesSorted.length) {
+                // Off the right-hand end, use the last control (usually the
+                // finish).
+                sortedControlIndex = this.referenceCumTimesSorted.length - 1;
             } else {
-                var diffToNext = Math.abs(this.referenceCumTimes[bisectIndex] - chartX);
-                var diffToPrev = Math.abs(chartX - this.referenceCumTimes[bisectIndex - 1]);
-                controlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
+                var diffToNext = Math.abs(this.referenceCumTimesSorted[bisectIndex] - chartX);
+                var diffToPrev = Math.abs(chartX - this.referenceCumTimesSorted[bisectIndex - 1]);
+                sortedControlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
             }
             
+            var controlIndex = this.referenceCumTimeIndexes[sortedControlIndex];
+            
             if (this.actualControlIndex === null || this.actualControlIndex !== controlIndex) {
-                // The control line has appeared for ths first time or has moved, so redraw it.
+                // The control line has appeared for the first time or has moved, so redraw it.
                 this.removeControlLine();
                 this.actualControlIndex = controlIndex;
                 this.drawControlLine(Math.max(this.minViewableControl, controlIndex));
@@ -1163,6 +1168,32 @@
     };
     
     /**
+    * Sorts the reference cumulative times, and creates a list of the sorted
+    * reference cumulative times and their indexes into the actual list of
+    * reference cumulative times.
+    *
+    * This sorted list is used by the chart to find which control the cursor
+    * is closest to.
+    */
+    Chart.prototype.sortReferenceCumTimes = function () {
+        // Put together a map that maps cumulative times to the first split to
+        // register that time.
+        var cumTimesToControlIndex = d3.map();
+        this.referenceCumTimes.forEach(function (cumTime, index) {
+            if (!cumTimesToControlIndex.has(cumTime)) {
+                cumTimesToControlIndex.set(cumTime, index);
+            }
+        });
+        
+        this.referenceCumTimesSorted = 
+            cumTimesToControlIndex.keys().map(function (cumTime) { return parseInt(cumTime, 10); })
+                                         .sort(d3.ascending);
+
+        this.referenceCumTimeIndexes = this.referenceCumTimesSorted.map(function (cumTime) { return cumTimesToControlIndex.get(cumTime); });
+    };
+
+    
+    /**
     * Draws the chart.
     * @param {object} data - Object that contains various chart data.  This
     *     must contain the following properties:
@@ -1196,6 +1227,7 @@
         
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
         this.maxStartTimeLabelWidth = (this.isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
+        this.sortReferenceCumTimes();
         this.clearWarningPanel();
         this.adjustContentSize();
         this.createScales(chartData);
