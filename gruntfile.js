@@ -40,6 +40,7 @@ module.exports = function(grunt) {
                       'js/event.js',
                       'js/chart-types.js',
                       'js/competitor-selection.js',
+                      'js/data-repair.js',
                       'js/csv-reader.js',
                       'js/si-reader.js',
                       'js/si-html-reader.js',

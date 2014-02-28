@@ -38,6 +38,7 @@
     var CompetitorListBox = SplitsBrowser.Controls.CompetitorListBox;
     var Chart = SplitsBrowser.Controls.Chart;
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
+    var repairEventData = SplitsBrowser.DataRepair.repairEventData;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
@@ -560,7 +561,12 @@
             if (eventData === null) {
                 showLoadFailureMessage("LoadFailedUnrecognisedData", {});
             } else {
+                if (eventData.needsRepair()) {
+                    repairEventData(eventData);
+                }
+                
                 eventData.determineTimeLosses();
+                
                 var viewer = new Viewer(topDiv);
                 viewer.buildUi();
                 viewer.setEvent(eventData);

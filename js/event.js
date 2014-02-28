@@ -48,6 +48,23 @@
     };
     
     /**
+    * Returns whether the event data needs any repairing.
+    *
+    * The event data needs repairing if any competitors are missing their
+    * 'repaired' cumulative times.
+    *
+    * @return {boolean} True if the event data needs repairing, false
+    *     otherwise.
+    */
+    Event.prototype.needsRepair = function () {
+        return this.classes.some(function (ageClass) {
+            return ageClass.competitors.some(function (competitor) {
+                return (competitor.getAllCumulativeTimes() === null);
+            });
+        });
+    };
+    
+    /**
     * Returns the fastest splits for each class on a given leg.
     *
     * The fastest splits are returned as an array of objects, where each object

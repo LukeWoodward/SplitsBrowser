@@ -23,6 +23,7 @@
     
     var isNotNull = SplitsBrowser.isNotNull;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var Event = SplitsBrowser.Model.Event;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
@@ -155,4 +156,23 @@
         assert.ok(isNotNull(competitor1.getTimeLossAt(2)));
         assert.ok(isNotNull(competitor2.getTimeLossAt(2)));
     });
+    
+    QUnit.test("Event that does not need repairing reports that it doesn't", function (assert) {
+        var competitor = getCompetitor1();
+        var ageClass = new AgeClass("Test class", 3, [competitor]);
+        var course = new Course("Test course", [ageClass], null, null, ["235", "212", "189"]);
+    
+        var event = new Event([ageClass], [course]);
+        assert.ok(!event.needsRepair());
+    });
+    
+    QUnit.test("Event that does need repairing reports that it does", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 0, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var ageClass = new AgeClass("Test class", 3, [competitor]);
+        var course = new Course("Test course", [ageClass], null, null, ["235", "212", "189"]);
+    
+        var event = new Event([ageClass], [course]);
+        assert.ok(event.needsRepair());
+    });
+    
 })();
