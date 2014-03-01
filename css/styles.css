@@ -146,7 +146,13 @@ text.startLabel.selected
     font-weight: bold;
 }
 
-path.graphLine.selected, line.competitorLegendLine.selected
+line.aroundDubiousTimes 
+{
+    stroke-width: 2;
+    stroke-dasharray: 10, 5;
+}
+
+path.graphLine.selected, line.competitorLegendLine.selected, line.aroundDubiousTimes.selected
 {
     stroke-width: 6;
 }

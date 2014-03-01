@@ -26,7 +26,15 @@
     var _DUMMY_CHART_TYPE = {
         name: "dummy",
         dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
-        skipStart: false
+        skipStart: false,
+        indexesAroundDubiousTimesFunc: function (comp) { return comp.getControlIndexesAroundDubiousCumulativeTimes(); }
+    };
+    
+    var DUMMY_CHART_TYPE_SKIP = {
+        name: "dummy",
+        dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
+        skipStart: true,
+        indexesAroundDubiousTimesFunc: function (comp) { return comp.getControlIndexesAroundDubiousCumulativeTimes(); }    
     };
     
     var isNaNStrict = SplitsBrowser.isNaNStrict;
@@ -498,7 +506,55 @@
             xExtent: [0, 65 + 197 + 184 + 100],
             yExtent: [0, 50],
             numControls: 3,
-            competitorNames: ["John Smith", "Fred Brown"]
+            competitorNames: ["John Smith", "Fred Brown"],
+            dubiousTimesInfo: []
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+    QUnit.test("Can return chart data for two competitors where one of them has a dubious split", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor1WithDubiousSplitForControl2(), getCompetitor2()])]);
+        var fastestTime = ageClassSet.getFastestCumTimes();
+
+        var chartData = ageClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 0, ys: [0, 0] },
+                { x: 65, ys: [0, 16] },
+                { x: 65 + 197, ys: [NaN, 16] },
+                { x: 65 + 197 + 212, ys: [-4, 16] },
+                { x: 65 + 197 + 212 + 100, ys: [-4, 22] }
+            ],
+            xExtent: [0, 65 + 197 + 212 + 100],
+            yExtent: [-4, 22],
+            numControls: 3,
+            competitorNames: ["John Smith", "Fred Brown"],
+            dubiousTimesInfo: [{competitor: 0, start: 1, end: 3}]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+    QUnit.test("Can return chart data for two competitors where one of them has a dubious split and chart type has skip-start", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor1WithDubiousSplitForControl2(), getCompetitor2()])]);
+        var fastestTime = ageClassSet.getFastestCumTimes();
+
+        var chartData = ageClassSet.getChartData(fastestTime, [0, 1], DUMMY_CHART_TYPE_SKIP);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 65, ys: [0, 0] },
+                { x: 65 + 197, ys: [0, 16] },
+                { x: 65 + 197 + 212, ys: [NaN, 16] },
+                { x: 65 + 197 + 212 + 100, ys: [-4, 16] }
+            ],
+            xExtent: [0, 65 + 197 + 212 + 100],
+            yExtent: [-4, 22],
+            numControls: 3,
+            competitorNames: ["John Smith", "Fred Brown"],
+            dubiousTimesInfo: [{competitor: 0, start: 0, end: 2}]
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -521,7 +577,8 @@
             xExtent: [0, 65 + 197 + 184],
             yExtent: [0, 197],
             numControls: 3,
-            competitorNames: ["Fred Brown", "John Smith"]
+            competitorNames: ["Fred Brown", "John Smith"],
+            dubiousTimesInfo: []
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -545,7 +602,8 @@
             xExtent: [65 + (81 + 197 - 4103), 65],
             yExtent: [0, 4072],
             numControls: 3,
-            competitorNames: ["John Smith", "Fred Brown"]
+            competitorNames: ["John Smith", "Fred Brown"],
+            dubiousTimesInfo: []
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -568,7 +626,8 @@
             xExtent: [0, 65 + 197 + 184 + 100],
             yExtent: [0, 50],
             numControls: 3,
-            competitorNames: ["John Smith", "Fred Brown"]
+            competitorNames: ["John Smith", "Fred Brown"],
+            dubiousTimesInfo: []
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -591,7 +650,8 @@
             xExtent: [0, 65 + 197 + 184 + 100],
             yExtent: [0, 24],
             numControls: 3,
-            competitorNames: ["John Smith"]
+            competitorNames: ["John Smith"],
+            dubiousTimesInfo: []
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -614,7 +674,8 @@
             xExtent: [0, 65 + 197 + 184 + 100],
             yExtent: [0, 50],
             numControls: 3,
-            competitorNames: ["Fred Brown"]
+            competitorNames: ["Fred Brown"],
+            dubiousTimesInfo: []
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -631,7 +692,8 @@
             xExtent: [0, 65 + 197 + 184 + 100],
             yExtent: chartData.yExtent, // Deliberately set this equal, we'll test it later.
             numControls: 3,
-            competitorNames: []
+            competitorNames: [],
+            dubiousTimesInfo: []
         };
 
         assert.deepEqual(chartData, expectedChartData);

@@ -551,4 +551,120 @@
         var competitor2 = fromCumTimes(2, "Fred Baker", "DEF", 10 * 3600 - 60, [0, 65, 221, null, 521]);
         assert.ok(!competitor1.crosses(competitor2), "Competitors should not cross");
     });
+    
+    QUnit.test("Competitor with no dubious times has no indexes around dubious cumulative times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 521]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousCumulativeTimes(), []);
+    });
+    
+    QUnit.test("Competitor with single dubious cumulative time not at the end has indexes around it", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, NaN, 384, 521]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousCumulativeTimes(), [{start: 1, end: 3}]);
+    });
+    
+    QUnit.test("Competitor with consecutive pair of dubious cumulative times not at the end has indexes around it", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, NaN, NaN, 521]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousCumulativeTimes(), [{start: 1, end: 4}]);
+    });    
+    
+    QUnit.test("Competitor with two non-consecutive dubious cumulative times not at the end has separate indexes around them", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, NaN, 221, NaN, 521]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousCumulativeTimes(), [{start: 0, end: 2}, {start: 2, end: 4}]);
+    });    
+    
+    QUnit.test("Competitor with dubious cumulative time at at the end has no index for it", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 221, 384, NaN]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousCumulativeTimes(), []);
+    });    
+    
+    QUnit.test("Competitor with two non-consecutive dubious cumulative times, one at the end has only an index for the one not at the end", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, NaN, 221, 384, NaN]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousCumulativeTimes(), [{start: 0, end: 2}]);
+    });    
+    
+    QUnit.test("Competitor with single dubious cumulative time followed by a null has no indexes", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, NaN, null, 521]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousCumulativeTimes(), []);
+    });
+    
+    QUnit.test("Competitor with single dubious cumulative time preceded by a null has no indexes", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, null, NaN, 384, 521]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousCumulativeTimes(), []);
+    });
+
+    QUnit.test("Competitor with single dubious cumulative time with a null time two controls before has a pair of indexes", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, null, 221, NaN, 521]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousCumulativeTimes(), [{start: 2, end: 4}]);
+    });
+
+    QUnit.test("Competitor with single dubious cumulative time with a null time two controls after has a pair of indexes", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, NaN, 221, null, 521]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousCumulativeTimes(), [{start: 0, end: 2}]);
+    });
+        
+    QUnit.test("Competitor with no dubious times has no indexes around dubious split times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 521, 588, 655]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), []);
+    });
+    
+    QUnit.test("Competitor with single dubious cumulative time not at the end has indexes around the two split times it makes dubious", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, NaN, 384, 521, 588, 655]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), [{start: 1, end: 4}]);
+    });
+    
+    QUnit.test("Competitor with consecutive pair of dubious cumulative times not at the end has indexes around it", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, NaN, NaN, 521, 588, 655]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), [{start: 1, end: 5}]);
+    });    
+    
+    QUnit.test("Competitor with two non dubious cumulative times with one non-dubious value between them has one pair of indexes around them", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, NaN, 221, NaN, 521, 588, 655]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), [{start: 0, end: 5}]);
+    });    
+    
+    QUnit.test("Competitor with two non dubious cumulative times with two non-dubious values between them has two pair of indexes, one around each pair of dubious split times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, NaN, 221, 384, NaN, 588, 655]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), [{start: 0, end: 3}, {start: 3, end: 6}]);
+    });    
+    
+    QUnit.test("Competitor with dubious final cumulative time only has no indexes around it", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 521, 588, NaN]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), []);
+    });
+    
+    QUnit.test("Competitor with dubious penultimate cumulative time only has no indexes around it", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 521, NaN, 655]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), []);
+    });
+    
+    QUnit.test("Competitor with single dubious cumulative time not at the end with null immediately before the dubious split has no indexes", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, null, NaN, 521, 588, 655]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), []);
+    });
+    
+    QUnit.test("Competitor with single dubious cumulative time not at the end with null immediately after the dubious split has no indexes", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, NaN, null, 521, 588, 655]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), []);
+    });
+    
+    QUnit.test("Competitor with single dubious cumulative time not at the end with null two controls before the dubious split has no indexes", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, null, 384, NaN, 588, 655]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), []);
+    });
+    
+    QUnit.test("Competitor with single dubious cumulative time not at the end with null two controls after the dubious split has no indexes", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, NaN, 384, null, 588, 655]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), []);
+    });
+    
+    QUnit.test("Competitor with single dubious cumulative time not at the end with null three controls after the dubious split has a pair of indexes", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, null, 221, 384, NaN, 588, 655]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), [{start: 3, end: 6}]);
+    });
+    
+    QUnit.test("Competitor with single dubious cumulative time not at the end with null three controls after the dubious split has a pair of indexes", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, NaN, 384, 512, null, 655]);
+        assert.deepEqual(competitor.getControlIndexesAroundDubiousSplitTimes(), [{start: 1, end: 4}]);
+    });
+    
 })();

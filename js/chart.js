@@ -928,6 +928,26 @@
                   .text(function (selCompIdx) { return chartData.competitorNames[selCompIdx]; });
 
         graphLines.exit().remove();
+        
+        var dubiousSplitLines = this.svgGroup.selectAll("line.aroundDubiousTimes")
+                                             .data(chartData.dubiousTimesInfo);
+                     
+        dubiousSplitLines.enter()
+                         .append("line")
+                         .append("title");
+                     
+        dubiousSplitLines.attr("x1", function (dubiousTimeInfo) { return outerThis.xScale(chartData.dataColumns[dubiousTimeInfo.start].x); })
+                         .attr("y1", function (dubiousTimeInfo) { return outerThis.yScale(chartData.dataColumns[dubiousTimeInfo.start].ys[dubiousTimeInfo.competitor]); })
+                         .attr("x2", function (dubiousTimeInfo) { return outerThis.xScale(chartData.dataColumns[dubiousTimeInfo.end].x); })
+                         .attr("y2", function (dubiousTimeInfo) { return outerThis.yScale(chartData.dataColumns[dubiousTimeInfo.end].ys[dubiousTimeInfo.competitor]); })
+                         .attr("stroke", function (dubiousTimeInfo) { return colours[outerThis.selectedIndexes[dubiousTimeInfo.competitor] % colours.length]; })
+                         .attr("class", function (dubiousTimeInfo) { return "aroundDubiousTimes competitor" + outerThis.selectedIndexes[dubiousTimeInfo.competitor]; })
+                         .on("mouseenter", function (dubiousTimeInfo) { outerThis.highlight(outerThis.selectedIndexes[dubiousTimeInfo.competitor]); })
+                         .on("mouseleave", function () { outerThis.unhighlight(); })
+                         .select("title")
+                         .text(function (dubiousTimeInfo) { return chartData.competitorNames[dubiousTimeInfo.competitor]; });
+                        
+        dubiousSplitLines.exit().remove();
     };
 
     /**
@@ -939,6 +959,7 @@
         this.svg.selectAll("line.competitorLegendLine.competitor" + competitorIdx).classed("selected", true);
         this.svg.selectAll("text.competitorLabel.competitor" + competitorIdx).classed("selected", true);
         this.svg.selectAll("text.startLabel.competitor" + competitorIdx).classed("selected", true);
+        this.svg.selectAll("line.aroundDubiousTimes.competitor" + competitorIdx).classed("selected", true);
     };
 
     /**
@@ -949,6 +970,7 @@
         this.svg.selectAll("line.competitorLegendLine.selected").classed("selected", false);
         this.svg.selectAll("text.competitorLabel.selected").classed("selected", false);
         this.svg.selectAll("text.startLabel.selected").classed("selected", false);
+        this.svg.selectAll("line.aroundDubiousTimes.selected").classed("selected", false);
     };
 
     /**

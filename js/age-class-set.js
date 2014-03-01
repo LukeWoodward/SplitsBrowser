@@ -331,6 +331,15 @@
             // make sure that they're not equal.
             yMax = yMin + 1;
         }
+        
+        var dubiousTimesInfo = [];
+        var controlIndexAdjust = (chartType.skipStart) ? 1 : 0;
+        currentIndexes.forEach(function (competitorIndex, selCompIdx) {
+            var indexesAroundDubious = chartType.indexesAroundDubiousTimesFunc(this.allCompetitors[competitorIndex]);
+            indexesAroundDubious.forEach(function (indexPair) {
+                dubiousTimesInfo.push({competitor: selCompIdx, start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust});
+            });
+        }, this);
 
         var cumulativeTimesByControl = d3.transpose(selectedCompetitorData);
         var xData = (chartType.skipStart) ? referenceCumTimes.slice(1) : referenceCumTimes;
@@ -341,7 +350,8 @@
             competitorNames: competitorNames,
             numControls: this.numControls,
             xExtent: [xMin, xMax],
-            yExtent: [yMin, yMax]
+            yExtent: [yMin, yMax],
+            dubiousTimesInfo: dubiousTimesInfo
         };
     };
     

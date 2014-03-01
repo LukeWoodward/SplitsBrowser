@@ -594,5 +594,55 @@
         return beforeOther && afterOther;
     };
     
+    /**
+    * Returns an array of objects that record the indexes around which times in
+    * the given array are NaN.
+    * @param {Array} times - Array of time values.
+    * @return {Array} Array of objects that 
+    */
+    function getIndexesAroundDubiousTimes(times) {
+        var dubiousTimeInfo = [];
+        var startIndex = 1;
+        while (startIndex + 1 < times.length) {
+            if (isNaNStrict(times[startIndex])) {
+                var endIndex = startIndex;
+                while (endIndex + 1 < times.length && isNaNStrict(times[endIndex + 1])) {
+                    endIndex += 1;
+                }
+                
+                if (endIndex + 1 < times.length && times[startIndex - 1] !== null && times[endIndex + 1] !== null) {
+                    dubiousTimeInfo.push({start: startIndex - 1, end: endIndex + 1});
+                }
+                
+                startIndex = endIndex + 1;
+                
+            } else {
+                startIndex += 1;
+            }
+        }
+        
+        return dubiousTimeInfo;
+    }
+    
+    /**
+    * Returns an array of objects that list the controls around those that have
+    * dubious cumulative times.
+    * @return {Array} Array of objects that detail the start and end indexes
+    *     around dubious cumulative times.
+    */
+    Competitor.prototype.getControlIndexesAroundDubiousCumulativeTimes = function () {
+        return getIndexesAroundDubiousTimes(this.cumTimes);
+    };
+    
+    /**
+    * Returns an array of objects that list the controls around those that have
+    * dubious cumulative times.
+    * @return {Array} Array of objects that detail the start and end indexes
+    *     around dubious cumulative times.
+    */
+    Competitor.prototype.getControlIndexesAroundDubiousSplitTimes = function () {
+        return getIndexesAroundDubiousTimes([0].concat(this.splitTimes));
+    };
+    
     SplitsBrowser.Model.Competitor = Competitor;
 })();

@@ -23,17 +23,24 @@
 
     var Chart = SplitsBrowser.Controls.Chart;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
+    var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
+    
+    function getIndexesAroundDubiousCumTimes(competitor) {
+        return competitor.getControlIndexesAroundDubiousCumulativeTimes();
+    }
 
     var DUMMY_CHART_TYPE_NO_SKIP = {
         name: "dummy",
         dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
         skipStart: false,
         yAxisLabelKey: "SplitsGraphYAxisLabel",
-        isRaceGraph: false
+        isRaceGraph: false,
+        indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumTimes
     };
     
     var DUMMY_CHART_TYPE_SKIP = {
@@ -41,7 +48,8 @@
         dataSelector: function (comp) { return comp.splitRanks; },
         skipStart: true,
         yAxisLabelKey: "SplitsGraphYAxisLabel",
-        isRaceGraph: false
+        isRaceGraph: false,
+        indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumTimes
     };
 
     var DUMMY_CHART_TYPE_RACE_GRAPH = {
@@ -49,7 +57,8 @@
         dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
         skipStart: false,
         yAxisLabelKey: "SplitsGraphYAxisLabel",
-        isRaceGraph: true
+        isRaceGraph: true,
+        indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumTimes
     };
 
     var TEXT_WIDTHS = {
@@ -102,12 +111,20 @@
     module("Chart");
     
     /**
-    * Creates and returns a AgeClassSet object populated with test data.
+    * Creates and returns a AgeClassSet object and event object populated with
+    * test data.  If no value is provided for the optional competitors parameter,
+    * a list of two competitors is used as a default.
+    * @param {Array} competitors - Optional array of competitors.
+    * @return {Object} Object containing an age-class set and event data.
     */
-    function getTestAgeClassSetAndEvent() {
-        var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-        var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
-        var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
+    function getTestAgeClassSetAndEvent(competitors) {
+        if (typeof competitors === "undefined") {
+            var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+            var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+            competitors = [competitor1, competitor2];
+        }
+        
+        var ageClass = new AgeClass("Test", 3, competitors);
         var ageClassSet = new AgeClassSet([ageClass]);
         var course = new Course("Test course", [ageClass], null, null, null);
         ageClass.setCourse(course);
@@ -115,8 +132,14 @@
         return {ageClassSet: ageClassSet, eventData: eventData};
     }
     
-    function runChartCreationTest(chartType) {
-        var ageClassSetAndEvent = getTestAgeClassSetAndEvent();
+    /**
+    * Runs a test for creating a chart.  The test doesn't make any assertions;
+    * it just checks that the chart gets created successfully.
+    * @param {Object} chartType - The chart type.
+    * @param {Array} competitors - Optional array of competitors.
+    */
+    function runChartCreationTest(chartType, competitors) {
+        var ageClassSetAndEvent = getTestAgeClassSetAndEvent(competitors);
         var fastestCumTimes = ageClassSetAndEvent.ageClassSet.getFastestCumTimes();
         var chart = createTestChart(chartType);
         var data = {
@@ -156,6 +179,17 @@
         var chart = createTestChart(DUMMY_CHART_TYPE_NO_SKIP);
         chart.clearAndShowWarning("This is a test message");
         expect(0);
+    });
+    
+    QUnit.test("Can create a chart with dubious info", function () {
+        var competitors = [
+            fromCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]),
+            fromOriginalCumTimes(2, "John Smith", "ABC", 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100])
+        ];
+        
+        competitors[1].setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        
+        runChartCreationTest(DUMMY_CHART_TYPE_NO_SKIP);
     });
     
 })();
