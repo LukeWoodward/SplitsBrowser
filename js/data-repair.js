@@ -29,6 +29,22 @@
     };
     
     /**
+    * Remove, by setting to NaN, any cumulative time that is equal to the
+    * previous cumulative time.
+    * @param {Array} cumTimes - Array of cumulative times.
+    */
+    Repairer.prototype.removeCumulativeTimesEqualToPrevious = function (cumTimes) {
+        var lastCumTime = cumTimes[0];
+        for (var index = 1; index < cumTimes.length; index += 1) {
+            if (cumTimes[index] !== null && cumTimes[index] === lastCumTime) {
+                cumTimes[index] = NaN;
+            } else {
+                lastCumTime = cumTimes[index];
+            }
+        }
+    };
+    
+    /**
     * Attempts to repair the cumulative times for a competitor.  The repaired
     * cumulative times are written back into the competitor.
     *
@@ -36,7 +52,10 @@
     *     wish to repair.
     */
     Repairer.prototype.repairCompetitor = function (competitor) {
-        var cumTimes = competitor.originalCumTimes;
+        var cumTimes = competitor.originalCumTimes.slice(0);
+        
+        this.removeCumulativeTimesEqualToPrevious(cumTimes);
+        
         competitor.setRepairedCumulativeTimes(cumTimes);
     };
     

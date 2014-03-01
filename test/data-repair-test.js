@@ -21,19 +21,42 @@
 (function () {
     "use strict";
 
+    module("Data Repair");
+    
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
-    QUnit.test("Can repair competitor with ascending split times leaving them in ascending order", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+    function wrapInEventAndRepair(competitor) {
         var ageClass = new AgeClass("Test class", 3, [competitor]);
-        var course = new Course("Test course", [ageClass], null, null, ["235", "212", "189"]);
-    
+        var course = new Course("Test course", [ageClass], null, null, null);
         var eventData = new Event([ageClass], [course]);
         repairEventData(eventData);
-        assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);        
+    }
+    
+    QUnit.test("Can repair competitor with ascending cumulative times leaving them in ascending order", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndRepair(competitor);
+        assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);    
+    });
+    
+    QUnit.test("Can repair competitor by setting second equal cumulative time to NaN", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndRepair(competitor);
+        SplitsBrowserTest.assertStrictEqualArrays(assert, competitor.cumTimes, [0, 81, 81 + 197, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);        
+    });
+    
+    QUnit.test("Can repair competitor by setting second and third equal cumulative time to NaN", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndRepair(competitor);
+        SplitsBrowserTest.assertStrictEqualArrays(assert, competitor.cumTimes, [0, 81, 81 + 197, NaN, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);        
+    });
+    
+    QUnit.test("Can repair competitor with multiple missed splits by doing nothing", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, null, 81 + 197 + 212 + 106]);
+        wrapInEventAndRepair(competitor);
+        assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });
 })();
