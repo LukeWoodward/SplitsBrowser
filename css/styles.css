@@ -259,6 +259,11 @@ span.resultsTableHeader
     font-weight: bold;
 }
 
+.resultsTable tbody td
+{
+    white-space: nowrap;
+}
+
 .resultsTable tbody td.time
 {
     text-align: right;
