@@ -21,7 +21,6 @@
 (function () {
     "use strict";
     
-    var isNotNull = SplitsBrowser.isNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseTime = SplitsBrowser.parseTime;
@@ -276,17 +275,13 @@
         var numControls = this.getNumControls(row, lineNumber);
         
         var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
-        if (cumTimes.filter(isNotNull).length === 2 && cumTimes[cumTimes.length - 1] === 0) {
-            // Ignore this competitor; they have no time and no splits.
-        } else {
-            this.anyCompetitors = true;
-            
-            this.createAgeClassIfNecessary(row, numControls);
-            this.createCourseIfNecessary(row, numControls);
-            this.createClassCoursePairIfNecessary(row);
-            
-            this.addCompetitor(row, cumTimes);
-        }
+        this.anyCompetitors = true;
+        
+        this.createAgeClassIfNecessary(row, numControls);
+        this.createCourseIfNecessary(row, numControls);
+        this.createClassCoursePairIfNecessary(row);
+        
+        this.addCompetitor(row, cumTimes);
     };
     
     /**
