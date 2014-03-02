@@ -102,8 +102,9 @@ SplitsBrowser.Messages = {
     SelectedClassesPopupHeader: "Selected classes",
     
     // Placeholder text shown when the Selected classes dialog is empty,
-    // because no competitors completed the course.
-    SelectedClassesPopupPlaceholder: "No competitors completed this course",
+    // because no competitors registered a split for the control, or those
+    // that did only registered a dubious split.
+    SelectedClassesPopupPlaceholder: "No competitors",
     
     // Header for the 'Fastest leg time' popup dialog.
     FastestLegTimePopupHeader: "Fastest leg-time $$START$$ to $$END$$",
