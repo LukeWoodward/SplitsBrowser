@@ -121,7 +121,6 @@
         this.isPopupOpen = false;
         this.popupUpdateFunc = null;
         this.maxStartTimeLabelWidth = 0;
-        this.warningPanel = null;
         
         this.mouseOutTimeout = null;
         
@@ -268,15 +267,13 @@
     * @param {jQuery.event} event - jQuery event object.
     */
     Chart.prototype.onMouseEnter = function (event) {
-        if (this.warningPanel === null) {
-            if (this.mouseOutTimeout !== null) {
-                clearTimeout(this.mouseOutTimeout);
-                this.mouseOutTimeout = null;
-            }
-            
-            this.isMouseIn = true;
-            this.updateControlLineLocation(event);            
+        if (this.mouseOutTimeout !== null) {
+            clearTimeout(this.mouseOutTimeout);
+            this.mouseOutTimeout = null;
         }
+        
+        this.isMouseIn = true;
+        this.updateControlLineLocation(event);            
     };
 
     /**
@@ -284,7 +281,7 @@
     * @param {jQuery.event} event - jQuery event object.
     */
     Chart.prototype.onMouseMove = function (event) {
-        if (this.isMouseIn && this.xScale !== null && this.warningPanel === null) {
+        if (this.isMouseIn && this.xScale !== null) {
             this.updateControlLineLocation(event);
         }
     };
@@ -293,27 +290,25 @@
     * Handle the mouse leaving the chart.
     */
     Chart.prototype.onMouseLeave = function () {
-        if (this.warningPanel === null) {
-            var outerThis = this;
-            // Check that the mouse hasn't entered the popup.
-            // It seems that the mouseleave event for the chart is sent before the
-            // mouseenter event for the popup, so we use a timeout to check a short
-            // time later whether the mouse has left the chart and the popup.
-            // This is only necessary for IE9 and IE10; other browsers support
-            // "pointer-events: none" in CSS so the popup never gets any mouse
-            // events.
-            
-            // Note that we keep a reference to the 'timeout', so that we can
-            // clear it if the mouse subsequently re-enters.  This happens a lot
-            // more often than might be expected for a function with a timeout of
-            // only a single millisecond.
-            this.mouseOutTimeout = setTimeout(function() {
-                if (!outerThis.popup.isMouseIn()) {
-                    outerThis.isMouseIn = false;
-                    outerThis.removeControlLine();
-                }
-            }, 1);
-        }
+        var outerThis = this;
+        // Check that the mouse hasn't entered the popup.
+        // It seems that the mouseleave event for the chart is sent before the
+        // mouseenter event for the popup, so we use a timeout to check a short
+        // time later whether the mouse has left the chart and the popup.
+        // This is only necessary for IE9 and IE10; other browsers support
+        // "pointer-events: none" in CSS so the popup never gets any mouse
+        // events.
+        
+        // Note that we keep a reference to the 'timeout', so that we can
+        // clear it if the mouse subsequently re-enters.  This happens a lot
+        // more often than might be expected for a function with a timeout of
+        // only a single millisecond.
+        this.mouseOutTimeout = setTimeout(function() {
+            if (!outerThis.popup.isMouseIn()) {
+                outerThis.isMouseIn = false;
+                outerThis.removeControlLine();
+            }
+        }, 1);
     };
     
     /**
@@ -321,23 +316,19 @@
     * @param {jQuery.Event} event - jQuery event object.
     */
     Chart.prototype.onMouseDown = function (event) {
-        if (this.warningPanel === null) {
-            var outerThis = this;
-            // Use a timeout to open the dialog as we require other events
-            // (mouseover in particular) to be processed first, and the precise
-            // order of these events is not consistent between browsers.
-            setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
-        }
+        var outerThis = this;
+        // Use a timeout to open the dialog as we require other events
+        // (mouseover in particular) to be processed first, and the precise
+        // order of these events is not consistent between browsers.
+        setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
     };
     
     /**
     * Handles a mouse button being pressed over the chart.
     */
     Chart.prototype.onMouseUp = function (event) {
-        if (this.warningPanel === null) {
-            this.popup.hide();
-            event.preventDefault();
-        }
+        this.popup.hide();
+        event.preventDefault();
     };
     
     /**
@@ -1160,32 +1151,6 @@
     };
     
     /**
-    * Removes the warning panel, if it is still shown.
-    */
-    Chart.prototype.clearWarningPanel = function () {
-        if (this.warningPanel !== null) {
-            this.warningPanel.remove();
-            this.warningPanel = null;
-        }
-    };
-    
-    /**
-    * Shows a warning panel over the chart, with the given message.
-    * @param message The message to show.
-    */
-    Chart.prototype.showWarningPanel = function (message) {
-        this.clearWarningPanel();
-        this.warningPanel = d3.select(this.parent).append("div")
-                                                  .classed("warningPanel", true);
-        this.warningPanel.text(message);
-        
-        var panelWidth = $(this.warningPanel.node()).width();
-        var panelHeight = $(this.warningPanel.node()).height();
-        this.warningPanel.style("left", (($(this.parent).width() - panelWidth) / 2) + "px")
-                         .style("top", ((this.overallHeight - panelHeight) / 2) + "px");
-    };
-    
-    /**
     * Sorts the reference cumulative times, and creates a list of the sorted
     * reference cumulative times and their indexes into the actual list of
     * reference cumulative times.
@@ -1246,7 +1211,6 @@
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
         this.maxStartTimeLabelWidth = (this.isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
         this.sortReferenceCumTimes();
-        this.clearWarningPanel();
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
@@ -1259,32 +1223,6 @@
         } else {
             this.removeCompetitorStartTimeLabels();
         }
-    };
-    
-    /**
-    * Clears the chart and shows a warning message instead.
-    * @param {String} message - The text of the warning message to show.
-    */
-    Chart.prototype.clearAndShowWarning = function (message) {
-        this.numControls = 0;
-        this.numLines = 0;
-        
-        var dummyChartData = {
-            dataColumns: [],
-            competitorNames: [],
-            numControls: 0,
-            xExtent: [0, 3600],
-            yExtent: [0, 1]
-        };
-        
-        this.maxStatisticTextWidth = 0;
-        this.maxStartTimeWidth = 0;
-        this.clearGraph();
-        this.adjustContentSize();
-        this.referenceCumTimes = [0];
-        this.createScales(dummyChartData);
-        this.drawAxes("", dummyChartData);
-        this.showWarningPanel(message);
     };
     
     SplitsBrowser.Controls.Chart = Chart;

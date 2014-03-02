@@ -216,17 +216,6 @@ div.competitor.selected
     color: white;
 }
 
-div.competitor.disabled
-{
-    color: #999999;
-}
-
-div.competitor.selected.disabled
-{
-    background-color: #9dc3cc;
-    color: white;
-}
-
 #chartTypeSelector, #comparisonSelectorContainer, #runnerSelectorContainer
 {
     float: left;

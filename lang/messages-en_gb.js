@@ -90,9 +90,6 @@ SplitsBrowser.Messages = {
     // crossing runners to show.
     RaceGraphNoCrossingRunners: "$$NAME$$ has no crossing runners.",
     RaceGraphDisabledAsStartTimesMissing: "The Race Graph cannot be shown because the start times of the competitors are missing.",
-
-    NoSplitsForControl: "Cannot draw a graph because no competitor has recorded a split time for control $$CONTROL$$.",
-    NoSplitsForControlTryOtherClasses: "Cannot draw a graph because no competitor has recorded a split time for control $$CONTROL$$.  Try selecting some other classes.",
     
     LoadFailedHeader: "SplitsBrowser \u2013 Error",
     LoadFailedInvalidData: "Sorry, it wasn't possible to read in the results data, as the data appears to be invalid: '$$MESSAGE$$'.",

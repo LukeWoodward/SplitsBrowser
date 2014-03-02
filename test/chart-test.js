@@ -175,12 +175,6 @@
         runChartCreationTest(DUMMY_CHART_TYPE_RACE_GRAPH);
     });
     
-    QUnit.test("Can create a chart with only a warning label shown", function () {
-        var chart = createTestChart(DUMMY_CHART_TYPE_NO_SKIP);
-        chart.clearAndShowWarning("This is a test message");
-        expect(0);
-    });
-    
     QUnit.test("Can create a chart with dubious info", function () {
         var competitors = [
             fromCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]),

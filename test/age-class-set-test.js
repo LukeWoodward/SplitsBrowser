@@ -83,10 +83,6 @@
         return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, null, 212, 106]);
     }
     
-    function getCompetitor2WithNullSplitForControl3() {
-        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
-    }
-    
     function getCompetitor2WithNullFinishSplit() {
         return fromSplitTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, null]);
     }
@@ -731,40 +727,5 @@
         SplitsBrowserTest.assertException(assert, "TypeError", function () {
             ageClassSet.getChartData([0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100], _DUMMY_CHART_TYPE);
         });
-    });
-    
-    QUnit.test("Age-class set with a single class with splits for all controls has splits for all controls", function (assert) {
-        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor1()])]);
-        assert.deepEqual(ageClassSet.getControlsWithNoSplits(), []);
-    });
-    
-    QUnit.test("Age-class set with a single class missing a split for control 3 is also missing a split for the same control", function (assert) {
-        var ageClassSet =  new AgeClassSet([new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControl3()])]);
-        assert.deepEqual(ageClassSet.getControlsWithNoSplits(), [3]);
-    });
-    
-    QUnit.test("Age-class set with one class having splits for all controls and one class having a missing split has splits for all controls", function (assert) {
-        var ageClassSet = new AgeClassSet([
-            new AgeClass("Test class 1", 3, [getCompetitor1()]),
-            new AgeClass("Test class 2", 3, [getCompetitor2WithNullSplitForControl3()])
-        ]);
-        assert.deepEqual(ageClassSet.getControlsWithNoSplits(), []);
-    });
-    
-    QUnit.test("Age-class set with two classes, each of which contains no splits for control 3 also does not have a split for control 3", function (assert) {
-        var ageClassSet = new AgeClassSet([
-            new AgeClass("Test class 1", 3, [getCompetitor1WithNullSplitForControl3()]),
-            new AgeClass("Test class 2", 3, [getCompetitor2WithNullSplitForControl3()])
-        ]);
-        assert.deepEqual(ageClassSet.getControlsWithNoSplits(), [3]);
-    });
-    
-    QUnit.test("Age-class set with two competitors mispunching different controls has splits for all controls", function (assert) {
-        var ageClassSet = new AgeClassSet([
-            new AgeClass("Test class 1", 3, [getCompetitor1WithNullSplitForControl3()]),
-            new AgeClass("Test class 2", 3, [getCompetitor2WithNullSplitForControl2()])
-        ]);
-        assert.deepEqual(ageClassSet.getControlsWithNoSplits(), []);
-    });
-    
+    });    
 })();

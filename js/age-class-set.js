@@ -148,30 +148,6 @@
     AgeClassSet.prototype.getFastestCumTimes = function () {
         return this.getFastestCumTimesPlusPercentage(0);
     };
-
-    /**
-    * Returns an array of controls that no competitor in any of the age-classes
-    * in this set punched.
-    * @return {Array} Array of control numbers of controls that no competitor
-    *     punched.
-    */
-    AgeClassSet.prototype.getControlsWithNoSplits = function () {
-        var controlsWithNoSplits = this.ageClasses[0].getControlsWithNoSplits();
-        for (var classIndex = 1; classIndex < this.ageClasses.length && controlsWithNoSplits.length > 0; classIndex += 1) {
-            var thisClassControlsWithNoSplits = this.ageClasses[classIndex].getControlsWithNoSplits();
-            
-            var controlIdx = 0;
-            while (controlIdx < controlsWithNoSplits.length) {
-                if (thisClassControlsWithNoSplits.indexOf(controlsWithNoSplits[controlIdx]) >= 0) {
-                    controlIdx += 1;
-                } else {
-                    controlsWithNoSplits.splice(controlIdx, 1);
-                }
-            }
-        }
-        
-        return controlsWithNoSplits;
-    };
     
     /**
     * Return a list of objects that describe when the given array of times has

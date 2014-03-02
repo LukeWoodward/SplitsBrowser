@@ -71,19 +71,7 @@
     AgeClass.prototype.setCourse = function (course) {
         this.course = course;
     };
-    
-    /**
-    * Returns the controls that all competitors in this class failed to punch.
-    *
-    * @return {Array} Array of numbers of controls that all competitors in this
-    *     class failed to punch.
-    */
-    AgeClass.prototype.getControlsWithNoSplits = function () {
-        return d3.range(1, this.numControls + 1).filter(function (controlNum) {
-            return this.competitors.every(function (competitor) { return competitor.getSplitTimeTo(controlNum) === null; });
-        }, this);
-    };
-    
+
     /**
     * Returns the fastest split time recorded by competitors in this class.  If
     * no fastest split time is recorded (e.g. because all competitors

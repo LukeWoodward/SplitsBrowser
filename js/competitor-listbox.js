@@ -34,19 +34,9 @@
         this.parent = parent;
         this.handler = null;
         this.competitorSelection = null;
-        this.isEnabled = true;
 
         this.listDiv = d3.select(parent).append("div")
                                         .attr("id", COMPETITOR_LIST_ID);
-    };
-    
-    /**
-    * Sets whether this competitor list-box is enabled.
-    * @param {boolean} isEnabled - Whether this list-box is enabled.
-    */
-    CompetitorListBox.prototype.setEnabled = function (isEnabled) {
-        this.isEnabled = isEnabled;
-        this.listDiv.selectAll("div.competitor").classed("disabled", !isEnabled);
     };
 
     /**
@@ -72,9 +62,7 @@
     * Toggle the selectedness of a competitor.
     */
     CompetitorListBox.prototype.toggleCompetitor = function (index) {
-        if (this.isEnabled) {
-            this.competitorSelection.toggle(index);
-        }
+        this.competitorSelection.toggle(index);
     };
 
     /**

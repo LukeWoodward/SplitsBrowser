@@ -71,8 +71,6 @@
         this.previousCompetitorList = [];
         this.topDivHeight = (topDiv && $(topDiv).length > 0) ? $(topDiv).height() : 0;
         
-        this.isChartEnabled = false;
-
         this.selection = null;
         this.ageClassSet = null;
         this.classSelector = null;
@@ -397,19 +395,11 @@
         
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
-        var missedControls = this.ageClassSet.getControlsWithNoSplits();
-        this.isChartEnabled = (missedControls.length === 0);
         this.updateControlEnabledness();
-        if (this.isChartEnabled) {
-            this.referenceCumTimes = this.comparisonFunction(this.ageClassSet);
-            this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
-            this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
-            this.redrawChart();
-        } else {
-            var showAddendum = (this.ageClassSet.getCourse().getNumClasses() > this.ageClassSet.getNumClasses());
-            var message = getMessageWithFormatting((showAddendum) ? "NoSplitsForControlTryOtherClasses" : "NoSplitsForControl", {"$$CONTROL$$": missedControls[0]});
-            this.chart.clearAndShowWarning(message);
-        }
+        this.referenceCumTimes = this.comparisonFunction(this.ageClassSet);
+        this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
+        this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+        this.redrawChart();
     };
 
     /**
@@ -431,7 +421,7 @@
     * Redraw the chart, possibly using new data.
     */
     Viewer.prototype.redraw = function () {
-        if (!this.chartType.isResultsTable && this.isChartEnabled) {
+        if (!this.chartType.isResultsTable) {
             this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
             this.redrawChart();
         }
@@ -502,11 +492,8 @@
     */
     Viewer.prototype.updateControlEnabledness = function () {
         this.classSelector.setOtherClassesEnabled(!this.chartType.isResultsTable);
-        this.comparisonSelector.setEnabled(this.isChartEnabled && !this.chartType.isResultsTable);
-        this.statisticsSelector.setEnabled(this.isChartEnabled && !this.chartType.isResultsTable);
-        this.competitorListBox.setEnabled(this.isChartEnabled);
-        enableControl(this.allButton, this.isChartEnabled);
-        enableControl(this.noneButton, this.isChartEnabled);
+        this.comparisonSelector.setEnabled(!this.chartType.isResultsTable);
+        this.statisticsSelector.setEnabled(!this.chartType.isResultsTable);
         this.enableOrDisableCrossingRunnersButton();
     };
     
@@ -514,7 +501,7 @@
     * Enables or disables the crossing-runners button as appropriate.
     */
     Viewer.prototype.enableOrDisableCrossingRunnersButton = function () {
-        enableControl(this.crossingRunnersButton, this.isChartEnabled && this.selection.isSingleRunnerSelected());
+        enableControl(this.crossingRunnersButton, this.selection.isSingleRunnerSelected());
     };
     
     SplitsBrowser.Viewer = Viewer;

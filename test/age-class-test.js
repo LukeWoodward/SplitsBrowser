@@ -31,10 +31,6 @@
         return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
-    function getCompetitor1WithNullSplitForControls1And3() {
-        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [null, 197, null, 106]);
-    }
-    
     function getCompetitor1WithNullSplitForControl3() {
         return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
     }
@@ -47,10 +43,6 @@
     
     function getCompetitor2() {
         return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
-    }
-    
-    function getCompetitor2WithNullSplitForControl2() {
-        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, null, 184, 100]);
     }
     
     function getCompetitor2WithNullSplitForControl3() {
@@ -176,36 +168,6 @@
     QUnit.test("Can return empty list of competitors visiting the finish if the time interval doesn't include any of their finishing times", function (assert) {
         var ageClass = getTestAgeClass();
         assert.deepEqual(ageClass.getCompetitorsAtControlInTimeRange(4, 10 * 3600 - 2, 10 * 3600 - 1), []);
-    });
-    
-    QUnit.test("Age class with a valid competitor has splits for all controls", function (assert) {
-        var ageClass = getTestAgeClass();
-        assert.deepEqual(ageClass.getControlsWithNoSplits(), []);
-    });
-    
-    QUnit.test("Age class with a single mispunching competitor does not have splits for the missed control", function (assert) {
-        var ageClass = new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControl3()]);
-        assert.deepEqual(ageClass.getControlsWithNoSplits(), [3]);
-    });
-    
-    QUnit.test("Age class with a single competitor mispunching two controls does not have splits for the missed controls", function (assert) {
-        var ageClass = new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControls1And3()]);
-        assert.deepEqual(ageClass.getControlsWithNoSplits(), [1, 3]);
-    });
-    
-    QUnit.test("Age class with a valid competitor and mispunching competitor has splits for all controls", function (assert) {
-        var ageClass = new AgeClass("Test class", 3, [getCompetitor1(), getCompetitor2WithNullSplitForControl3()]);
-        assert.deepEqual(ageClass.getControlsWithNoSplits(), []);
-    });
-    
-    QUnit.test("Age class with two competitors mispunching the same control does not have splits for all controls", function (assert) {
-        var ageClass = new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControl3(), getCompetitor2WithNullSplitForControl3()]);
-        assert.deepEqual(ageClass.getControlsWithNoSplits(), [3]);
-    });
-    
-    QUnit.test("Age class with two competitors mispunching different controls has splits for all controls", function (assert) {
-        var ageClass = new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControl3(), getCompetitor2WithNullSplitForControl2()]);
-        assert.deepEqual(ageClass.getControlsWithNoSplits(), []);
     });
 
     QUnit.test("Can determine time-loss data for valid competitors in age-class", function (assert) {
