@@ -522,14 +522,12 @@
         if (this.completed()) {
             if (fastestSplitTimes.length !== this.splitTimes.length) {
                 throwInvalidData("Cannot determine time loss of competitor with " + this.splitTimes.length + " split times using " + fastestSplitTimes.length + " fastest splits");
-            } else if (fastestSplitTimes.indexOf(null) >= 0) {
-                throwInvalidData("Cannot determine time loss of competitor when there is a null value in the fastest splits");
             }  else if (fastestSplitTimes.some(isNaNStrict)) {
                 throwInvalidData("Cannot determine time loss of competitor when there is a NaN value in the fastest splits");
             }
             
             if (this.splitTimes.some(isNaNStrict)) {
-                // Competitor has some invalid splits.  Unfortunately this
+                // Competitor has some dubious times.  Unfortunately this
                 // means we cannot sensibly calculate the time losses.
                 this.timeLosses = this.splitTimes.map(function () { return NaN; });
             } else {

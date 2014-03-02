@@ -454,13 +454,6 @@
         });
     });
     
-    QUnit.test("Cannot determine time losses of competitor when given split times with null value", function (assert) {
-        var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [96, 221, 184, 100]);
-        SplitsBrowserTest.assertInvalidData(assert, function () {
-            competitor.determineTimeLosses([65, 209, null, 97]);
-        });
-    });
-    
     QUnit.test("Cannot determine time losses of competitor when given split times with NaN value", function (assert) {
         var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [96, 221, 184, 100]);
         SplitsBrowserTest.assertInvalidData(assert, function () {
@@ -475,6 +468,17 @@
         competitor.determineTimeLosses(fastestSplits);
         
         for (var control = 1; control < 5; control += 1) {
+            var timeLoss = competitor.getTimeLossAt(control);
+            assert.ok(isNaNStrict(timeLoss), "Time loss at control " + control + " should be NaN, but got " + timeLoss);
+        }
+    });
+    
+    QUnit.test("Can determine as all-NaN time losses of competitor when given fastest-split times with null value", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 96, 96 + 221, 96 + 221 + 184, 96 + 221 + 184 + 100]);
+        competitor.setRepairedCumulativeTimes([0, 96, 96 + 221, NaN, 96 + 221 + 184 + 100]);
+        competitor.determineTimeLosses([65, 209, null, 97]);
+        
+        for (var control = 1; control <= 4; control += 1) {
             var timeLoss = competitor.getTimeLossAt(control);
             assert.ok(isNaNStrict(timeLoss), "Time loss at control " + control + " should be NaN, but got " + timeLoss);
         }
