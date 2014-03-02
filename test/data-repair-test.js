@@ -96,39 +96,6 @@
         assert.deepEqual(competitor.cumTimes, [0, 81, null, null, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     });
 
-    QUnit.test("Can adjust slightly negative finish time of competitor by adding a whole number of minutes to it", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 - 87]);
-        wrapInEventAndRepair([competitor]);
-        assert.deepEqual(competitor.cumTimes, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 - 87 + 120]);
-    });
-
-    QUnit.test("Can adjust slightly negative finish time of two competitors by adding the same whole number of minutes to their finish cumulative times", function (assert) {
-        var competitor1 = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 - 11]);
-        var competitor2 = fromOriginalCumTimes(2, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 - 87]);
-        wrapInEventAndRepair([competitor1, competitor2]);
-        assert.deepEqual(competitor1.cumTimes, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 - 11 + 120]);
-        assert.deepEqual(competitor2.cumTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 - 87 + 120]);
-    });
-
-    QUnit.test("Can adjust negative finish time of exactly two minutes by adding three minutes to it", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 - 120]);
-        wrapInEventAndRepair([competitor]);
-        assert.deepEqual(competitor.cumTimes, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 - 120 + 180]);
-    });
-
-    QUnit.test("Does not adjust wildly negative finish time of competitor", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 1]);
-        wrapInEventAndRepair([competitor]);
-        assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
-    });
-
-    QUnit.test("Does not adjust wildly negative finish time of one competitors even if other competitor's finish split is not wildly negative", function (assert) {
-        var competitor1 = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 1]);
-        var competitor2 = fromOriginalCumTimes(2, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 - 87]);
-        wrapInEventAndRepair([competitor1, competitor2]);
-        assert.deepEqual(competitor1.cumTimes, competitor1.originalCumTimes);
-        assert.deepEqual(competitor2.cumTimes, competitor2.originalCumTimes);
-    });
 
     QUnit.test("Removes ridiculously low finish time of competitor if competitor mispunched but punches the last control and the finish", function (assert) {
         var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 1]);
