@@ -23,6 +23,10 @@
     
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
+
+    // Maximum number of minutes added to finish splits to ensure that all
+    // competitors have sensible finish splits.
+    var MAX_FINISH_SPLIT_MINS_ADDED = 5;
     
     /**
     * Construct a Repairer, for repairing some data.
@@ -161,6 +165,48 @@
     };
     
     /**
+    * Attempt to repair course finish times.
+    *
+    * If the finish splits are currently negative, but no further negative than
+    * a certain limit, a few whole minutes will be added to make the finish
+    * splits positive.
+    *
+    * @param {Course} course - The course to repair finish times within.
+    */
+    Repairer.prototype.repairCourseFinishTimes = function (course) {
+        var maxFinishSplitDeficit = null;
+        course.classes.forEach(function (ageClass) {
+            ageClass.competitors.forEach(function (competitor) {
+                var penultCumTime = competitor.cumTimes[competitor.cumTimes.length - 2];
+                var ultCumTime = competitor.cumTimes[competitor.cumTimes.length - 1];
+                if (penultCumTime !== null && ultCumTime !== null && penultCumTime >= ultCumTime) {
+                    var deficit = penultCumTime - ultCumTime;
+                    if (maxFinishSplitDeficit === null || maxFinishSplitDeficit < deficit) {
+                        maxFinishSplitDeficit = deficit;
+                    }
+                }
+            }, this);
+        }, this);
+         
+        if (maxFinishSplitDeficit !== null && maxFinishSplitDeficit < 60 * MAX_FINISH_SPLIT_MINS_ADDED) {
+            // Determine the number of whole minutes in the maximum deficit,
+            // and then add one to ensure the finish splits go positive.
+            var timeToAdd = (Math.floor(maxFinishSplitDeficit / 60) + 1) * 60;
+            
+            // Add this time to each competitor on the course.
+            course.classes.forEach(function (ageClass) {
+                ageClass.competitors.forEach(function (competitor) {
+                    var cumTimes = competitor.cumTimes;
+                    var lastSplit = cumTimes[cumTimes.length - 1];
+                    cumTimes = cumTimes.slice(0, cumTimes.length - 1);
+                    cumTimes.push(lastSplit + timeToAdd);
+                    competitor.setRepairedCumulativeTimes(cumTimes);
+                });
+            });
+        }
+    };
+    
+    /**
     * Attempt to repair all of the data within a course.
     * @param {Course} The course whose data we wish to repair.
     */
@@ -170,6 +216,8 @@
                 this.repairCompetitor(competitor);
             }, this);
         }, this);
+        
+        this.repairCourseFinishTimes(course);
     };
     
     /**
