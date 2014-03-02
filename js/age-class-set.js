@@ -332,12 +332,11 @@
             yMax = yMin + 1;
         }
         
-        var dubiousTimesInfo = [];
+        
         var controlIndexAdjust = (chartType.skipStart) ? 1 : 0;
-        currentIndexes.forEach(function (competitorIndex, selCompIdx) {
-            var indexesAroundDubious = chartType.indexesAroundDubiousTimesFunc(this.allCompetitors[competitorIndex]);
-            indexesAroundDubious.forEach(function (indexPair) {
-                dubiousTimesInfo.push({competitor: selCompIdx, start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust});
+        var dubiousTimesInfo = currentIndexes.map(function (competitorIndex) {
+            return chartType.indexesAroundDubiousTimesFunc(this.allCompetitors[competitorIndex]).map(function (indexPair) {
+                return { start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust };
             });
         }, this);
 

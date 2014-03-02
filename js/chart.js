@@ -912,42 +912,38 @@
             }
         };
         
-        var graphLines = this.svgGroup.selectAll("path.graphLine")
-                                      .data(d3.range(this.numLines));
-
-        graphLines.enter()
-                  .append("path")
-                  .append("title");
-
-        graphLines.attr("d", function (selCompIdx) { return lineFunctionGenerator(selCompIdx)(chartData.dataColumns); })
-                  .attr("stroke", function (selCompIdx) { return colours[outerThis.selectedIndexes[selCompIdx] % colours.length]; })
-                  .attr("class", function (selCompIdx) { return "graphLine competitor" + outerThis.selectedIndexes[selCompIdx]; })
-                  .on("mouseenter", function (selCompIdx) { outerThis.highlight(outerThis.selectedIndexes[selCompIdx]); })
-                  .on("mouseleave", function () { outerThis.unhighlight(); })
-                  .select("title")
-                  .text(function (selCompIdx) { return chartData.competitorNames[selCompIdx]; });
-
-        graphLines.exit().remove();
+        this.svgGroup.selectAll("path.graphLine").remove();
         
-        var dubiousSplitLines = this.svgGroup.selectAll("line.aroundDubiousTimes")
-                                             .data(chartData.dubiousTimesInfo);
-                     
-        dubiousSplitLines.enter()
-                         .append("line")
-                         .append("title");
-                     
-        dubiousSplitLines.attr("x1", function (dubiousTimeInfo) { return outerThis.xScale(chartData.dataColumns[dubiousTimeInfo.start].x); })
-                         .attr("y1", function (dubiousTimeInfo) { return outerThis.yScale(chartData.dataColumns[dubiousTimeInfo.start].ys[dubiousTimeInfo.competitor]); })
-                         .attr("x2", function (dubiousTimeInfo) { return outerThis.xScale(chartData.dataColumns[dubiousTimeInfo.end].x); })
-                         .attr("y2", function (dubiousTimeInfo) { return outerThis.yScale(chartData.dataColumns[dubiousTimeInfo.end].ys[dubiousTimeInfo.competitor]); })
-                         .attr("stroke", function (dubiousTimeInfo) { return colours[outerThis.selectedIndexes[dubiousTimeInfo.competitor] % colours.length]; })
-                         .attr("class", function (dubiousTimeInfo) { return "aroundDubiousTimes competitor" + outerThis.selectedIndexes[dubiousTimeInfo.competitor]; })
-                         .on("mouseenter", function (dubiousTimeInfo) { outerThis.highlight(outerThis.selectedIndexes[dubiousTimeInfo.competitor]); })
-                         .on("mouseleave", function () { outerThis.unhighlight(); })
-                         .select("title")
-                         .text(function (dubiousTimeInfo) { return chartData.competitorNames[dubiousTimeInfo.competitor]; });
-                        
-        dubiousSplitLines.exit().remove();
+        this.svgGroup.selectAll("line.aroundDubiousTimes").remove();
+        
+        d3.range(this.numLines).forEach(function (selCompIdx) {
+            var strokeColour = colours[this.selectedIndexes[selCompIdx] % colours.length];
+            var highlighter = function () { outerThis.highlight(outerThis.selectedIndexes[selCompIdx]); };
+            var unhighlighter = function () { outerThis.unhighlight(); };
+            
+            this.svgGroup.append("path")
+                         .attr("d", lineFunctionGenerator(selCompIdx)(chartData.dataColumns))
+                         .attr("stroke", strokeColour)
+                         .attr("class", "graphLine competitor" + this.selectedIndexes[selCompIdx])
+                         .on("mouseenter", highlighter)
+                         .on("mouseleave", unhighlighter)
+                         .append("title")
+                         .text(chartData.competitorNames[selCompIdx]);
+                         
+            chartData.dubiousTimesInfo[selCompIdx].forEach(function (dubiousTimeInfo) {
+                this.svgGroup.append("line")
+                             .attr("x1", this.xScale(chartData.dataColumns[dubiousTimeInfo.start].x))
+                             .attr("y1", this.yScale(chartData.dataColumns[dubiousTimeInfo.start].ys[selCompIdx]))
+                             .attr("x2", this.xScale(chartData.dataColumns[dubiousTimeInfo.end].x))
+                             .attr("y2", this.yScale(chartData.dataColumns[dubiousTimeInfo.end].ys[selCompIdx]))
+                             .attr("stroke", strokeColour)
+                             .attr("class", "aroundDubiousTimes competitor" + this.selectedIndexes[selCompIdx])
+                             .on("mouseenter", highlighter)
+                             .on("mouseleave", unhighlighter)
+                             .append("title")
+                             .text(chartData.competitorNames[selCompIdx]);
+            }, this);
+        }, this);
     };
 
     /**

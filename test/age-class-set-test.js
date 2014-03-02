@@ -507,7 +507,7 @@
             yExtent: [0, 50],
             numControls: 3,
             competitorNames: ["John Smith", "Fred Brown"],
-            dubiousTimesInfo: []
+            dubiousTimesInfo: [[], []]
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -531,7 +531,7 @@
             yExtent: [-4, 22],
             numControls: 3,
             competitorNames: ["John Smith", "Fred Brown"],
-            dubiousTimesInfo: [{competitor: 0, start: 1, end: 3}]
+            dubiousTimesInfo: [[{start: 1, end: 3}], []]
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -554,7 +554,7 @@
             yExtent: [-4, 22],
             numControls: 3,
             competitorNames: ["John Smith", "Fred Brown"],
-            dubiousTimesInfo: [{competitor: 0, start: 0, end: 2}]
+            dubiousTimesInfo: [[{start: 0, end: 2}], []]
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -578,7 +578,7 @@
             yExtent: [0, 197],
             numControls: 3,
             competitorNames: ["Fred Brown", "John Smith"],
-            dubiousTimesInfo: []
+            dubiousTimesInfo: [[], []]
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -603,7 +603,7 @@
             yExtent: [0, 4072],
             numControls: 3,
             competitorNames: ["John Smith", "Fred Brown"],
-            dubiousTimesInfo: []
+            dubiousTimesInfo: [[], []]
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -627,7 +627,7 @@
             yExtent: [0, 50],
             numControls: 3,
             competitorNames: ["John Smith", "Fred Brown"],
-            dubiousTimesInfo: []
+            dubiousTimesInfo: [[], []]
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -651,13 +651,13 @@
             yExtent: [0, 24],
             numControls: 3,
             competitorNames: ["John Smith"],
-            dubiousTimesInfo: []
+            dubiousTimesInfo: [[]]
         };
 
         assert.deepEqual(chartData, expectedChartData);
     });
 
-    QUnit.test("Can return chart data for second competitor only as columns", function (assert) {
+    QUnit.test("Can return chart data for second competitor only", function (assert) {
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getFasterCompetitor1(), getCompetitor2()])]);
         var fastestTime = ageClassSet.getFastestCumTimes();
 
@@ -675,7 +675,7 @@
             yExtent: [0, 50],
             numControls: 3,
             competitorNames: ["Fred Brown"],
-            dubiousTimesInfo: []
+            dubiousTimesInfo: [[]]
         };
 
         assert.deepEqual(chartData, expectedChartData);
