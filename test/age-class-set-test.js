@@ -214,14 +214,25 @@
         assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], "John Smith (second competitor) from the second course should be the winner");
     });
 
-    QUnit.test("Fastest cumulative times on age-class set with no competitors is null", function (assert) {
+    QUnit.test("Fastest cumulative times on age-class set with no competitors should have backpopulated dummy cumulative times", function (assert) {
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [])]);
-        assert.strictEqual(ageClassSet.getFastestCumTimes(), null, "Empty age-class set should have null fastest time");
+        assert.deepEqual(ageClassSet.getFastestCumTimes(), [0, 180, 360, 540, 600], "Empty age-class set should have dummy fastest times");
     });
 
-    QUnit.test("Fastest cumulative times on age-class set with one control mispunched by everyone is null", function (assert) {
+    QUnit.test("Fastest cumulative times on age-class set when both competitors have dubious time at one control has backpopulated value for missing control", function (assert) {
+        var competitor1 = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65, 65 + 221 + 209, 65 + 221 + 209 + 100]);
+        competitor1.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 209, 65 + 221 + 209 + 100]);
+        var competitor2 = fromOriginalCumTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30, [0, 81, 81, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        competitor2.setRepairedCumulativeTimes([0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
+        
+        assert.deepEqual(ageClassSet.getFastestCumTimes(), [0, 65, 65 + (197 + 212)/2, 65 + 197 + 212, 65 + 197 + 212 + 100],
+                    "Class with one control mispunched by all should have dummy value for missing control");
+    });
+
+    QUnit.test("Fastest cumulative times on age-class set with one control mispunched by all has dummy fastest split for missing control", function (assert) {
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor1WithNullSplitForControl2(), getCompetitor2WithNullSplitForControl2()])]);
-        assert.strictEqual(ageClassSet.getFastestCumTimes(), null, "Class with one control mispunched by all should have null fastest time");
+        assert.deepEqual(ageClassSet.getFastestCumTimes(), [0, 65, 245, 429, 529], "Class with one control mispunched by all should have dummy value for missing control");
     });
 
     QUnit.test("Fastest cumulative times on a single-class set should be made up of fastest times", function (assert) {

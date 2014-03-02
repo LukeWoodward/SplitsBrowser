@@ -20,7 +20,8 @@
  */
 (function () {
     "use strict";
-      
+    
+    var isNotNull = SplitsBrowser.isNotNull;
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData; 
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
@@ -171,6 +172,36 @@
         
         return controlsWithNoSplits;
     };
+    
+    /**
+    * Return a list of objects that describe when the given array of times has
+    * null or NaN values.  This does not include trailing null or NaN values.
+    * @param {Array} times - Array of times, which may include NaNs and nulls.
+    * @return {Array} Array of objects that describes when the given array has
+    *    ranges of null and/or NaN values.
+    */
+    function getBlankRanges(times) {
+        var blankRangeInfo = [];
+        var startIndex = 1;
+        while (startIndex + 1 < times.length) {
+            if (isNotNullNorNaN(times[startIndex])) {
+                startIndex += 1;
+            } else {
+                var endIndex = startIndex;
+                while (endIndex + 1 < times.length && !isNotNullNorNaN(times[endIndex + 1])) {
+                    endIndex += 1;
+                }
+                
+                if (endIndex + 1 < times.length) {
+                    blankRangeInfo.push({start: startIndex - 1, end: endIndex + 1});
+                }
+                
+                startIndex = endIndex + 1;
+            }
+        }
+        
+        return blankRangeInfo;
+    }
 
     /**
     * Return the imaginary competitor who recorded the fastest time on each leg
@@ -182,9 +213,12 @@
     *           fastest time, if any, after adding a percentage.
     */
     AgeClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
+    
         var ratio = 1 + percent / 100;
-        var fastestCumTimes = new Array(this.numControls + 1);
-        fastestCumTimes[0] = 0;
+        
+        var fastestSplits = new Array(this.numControls + 1);
+        fastestSplits[0] = 0;
+        
         for (var controlIdx = 1; controlIdx <= this.numControls + 1; controlIdx += 1) {
             var fastestForThisControl = null;
             for (var competitorIdx = 0; competitorIdx < this.allCompetitors.length; competitorIdx += 1) {
@@ -194,13 +228,79 @@
                 }
             }
             
-            if (fastestForThisControl === null) {
-                // No fastest time recorded for this control.
-                return null;
-            } else {
-                fastestCumTimes[controlIdx] = fastestCumTimes[controlIdx - 1] + fastestForThisControl * ratio;
+            fastestSplits[controlIdx] = fastestForThisControl;
+        }
+     
+        if (!fastestSplits.every(isNotNull)) {
+            // We don't have fastest splits for every control, so there was one
+            // control that either nobody punched or everybody had a dubious
+            // split for.
+            
+            // Find the blank-ranges of the fastest times.
+            var fastestBlankRanges = getBlankRanges(fastestSplits);
+            
+            // Find all blank-ranges of competitors.
+            var allCompetitorBlankRanges = [];
+            this.allCompetitors.forEach(function (competitor) {
+                var competitorBlankRanges = getBlankRanges(competitor.getAllCumulativeTimes());
+                competitorBlankRanges.forEach(function (range) {
+                    allCompetitorBlankRanges.push({
+                        start: range.start,
+                        end: range.end,
+                        size: range.end - range.start,
+                        overallSplit: competitor.getCumulativeTimeTo(range.end) - competitor.getCumulativeTimeTo(range.start)
+                    });
+                });
+            });
+            
+            // Now, for each blank range of the fastest times, find the
+            // size of the smallest competitor blank range that covers it,
+            // and then the fastest split among those competitors.
+            fastestBlankRanges.forEach(function (fastestRange) {
+                var coveringCompetitorRanges = allCompetitorBlankRanges.filter(function (compRange) {
+                    return compRange.start <= fastestRange.start && fastestRange.end <= compRange.end + 1;
+                });
+                
+                var minSize = null;
+                var minOverallSplit = null;
+                coveringCompetitorRanges.forEach(function (coveringRange) {
+                    if (minSize === null || coveringRange.size < minSize) {
+                        minSize = coveringRange.size;
+                        minOverallSplit = null;
+                    }
+                    
+                    if (minOverallSplit === null || coveringRange.overallSplit < minOverallSplit) {
+                        minOverallSplit = coveringRange.overallSplit;
+                    }
+                });
+                
+                // Assume that the fastest competitor across the range had
+                // equal splits for all controls on the range.  This won't
+                // always make sense but it's the best we can do.
+                if (minSize !== null && minOverallSplit !== null) {
+                    for (var index = fastestRange.start + 1; index < fastestRange.end; index += 1) {
+                        fastestSplits[index] = minOverallSplit / minSize;
+                    }
+                }
+            });
+        }
+                
+        if (!fastestSplits.every(isNotNull)) {
+            // Could happen if the competitors are created from split times and
+            // the splits are not complete, and also if nobody punches the
+            // final few controls.  Set any remaining missing splits to 3
+            // minutes for intermediate controls and 1 minute for the finish.
+            for (var index = 0; index < fastestSplits.length; index += 1) {
+                if (fastestSplits[index] === null) {
+                    fastestSplits[index] = (index === fastestSplits.length - 1) ? 60 : 180;
+                }
             }
         }
+        
+        var fastestCumTimes = new Array(this.numControls + 1);
+        fastestSplits.forEach(function (fastestSplit, index) {
+            fastestCumTimes[index] = (index === 0) ? 0 : fastestCumTimes[index - 1] + fastestSplit * ratio;
+        });
 
         return fastestCumTimes;
     };
