@@ -30,7 +30,7 @@
     var Event = SplitsBrowser.Model.Event;
     
     function wrapInEventAndRepair(competitor) {
-        var ageClass = new AgeClass("Test class", 3, [competitor]);
+        var ageClass = new AgeClass("Test class", competitor.originalCumTimes.length - 2, [competitor]);
         var course = new Course("Test course", [ageClass], null, null, null);
         var eventData = new Event([ageClass], [course]);
         repairEventData(eventData);
@@ -58,5 +58,41 @@
         var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, null, 81 + 197 + 212 + 106]);
         wrapInEventAndRepair(competitor);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
+    });
+
+    QUnit.test("Can repair competitor with absurdly high cumulative time by removing the offending time", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndRepair(competitor);
+        assert.deepEqual(competitor.cumTimes, [0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+    });
+
+    QUnit.test("Can repair competitor with multiple absurdly high cumulative times by removing the offending times", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndRepair(competitor);
+        assert.deepEqual(competitor.cumTimes, [0, 81, NaN, 81 + 197, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+    });
+
+    QUnit.test("Can repair competitor with absurdly high cumulative time followed by nulls by removing the offending time", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, null, null, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndRepair(competitor);
+        assert.deepEqual(competitor.cumTimes, [0, 81, NaN, null, null, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+    });
+
+    QUnit.test("Can repair competitor with absurdly low cumulative time by removing the offending time", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndRepair(competitor);
+        assert.deepEqual(competitor.cumTimes, [0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+    });
+
+    QUnit.test("Can repair competitor with multiple absurdly low cumulative times by removing the offending times", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197, 1, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndRepair(competitor);
+        assert.deepEqual(competitor.cumTimes, [0, 81, NaN, 81 + 197, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+    });
+
+    QUnit.test("Can repair competitor with absurdly low cumulative time preceded by nulls by removing the offending time", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, null, 1, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndRepair(competitor);
+        assert.deepEqual(competitor.cumTimes, [0, 81, null, null, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     });
 })();
