@@ -63,6 +63,18 @@
         return competitor;
     }
     
+    function getCompetitor1WithDubiousFinishTime() {
+        var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184]);
+        competitor.setRepairedCumulativeTimes([0, 65, 65 + 221, 65 + 221 + 184, NaN]);
+        return competitor;
+    }
+    
+    function getCompetitor1WithDubiousTimeToLastControlAndFinish() {
+        var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221, 65 + 221]);
+        competitor.setRepairedCumulativeTimes([0, 65, 65 + 221, NaN, NaN]);
+        return competitor;
+    }
+    
     function getCompetitor1WithNullSplitForControl3() {
         return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, null, 100]);
     }
@@ -209,6 +221,24 @@
         var winTimes = ageClassSet.getWinnerCumTimes();
         assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], "John Smith (second competitor) from the second course should be the winner");
     });
+    
+    QUnit.test("Cumulative times of the winner of a class containing only a single competitor with a dubious cumulative time include a filled gap", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [getCompetitor1WithDubiousSplitForControl2()])]);
+        var winTimes = ageClassSet.getWinnerCumTimes();
+        assert.deepEqual(winTimes, [0, 65, 65 + (221 + 184) / 2, 65 + 221 + 184, 65 + 221 + 184 + 100], "Cumulative times should have filled-in gap");
+    });
+    
+    QUnit.test("Cumulative times of the winner of a class containing only a single competitor with a dubious finish time include a filled gap", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [getCompetitor1WithDubiousFinishTime()])]);
+        var winTimes = ageClassSet.getWinnerCumTimes();
+        assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 60], "Cumulative times should have filled-in time to finish");
+    });
+    
+    QUnit.test("Cumulative times of the winner of a class containing only a single competitor with dubious times to the last control and finish include a filled gap", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [getCompetitor1WithDubiousTimeToLastControlAndFinish()])]);
+        var winTimes = ageClassSet.getWinnerCumTimes();
+        assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 180, 65 + 221 + 180 + 60], "Cumulative times should have filled-in time to last control and finish");
+    });
 
     QUnit.test("Fastest cumulative times on age-class set with no competitors should have backpopulated dummy cumulative times", function (assert) {
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [])]);
@@ -222,7 +252,7 @@
         competitor2.setRepairedCumulativeTimes([0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
         
-        assert.deepEqual(ageClassSet.getFastestCumTimes(), [0, 65, 65 + (197 + 212)/2, 65 + 197 + 212, 65 + 197 + 212 + 100],
+        assert.deepEqual(ageClassSet.getFastestCumTimes(), [0, 65, 65 + (197 + 212) / 2, 65 + 197 + 212, 65 + 197 + 212 + 100],
                     "Class with one control mispunched by all should have dummy value for missing control");
     });
 
@@ -257,6 +287,36 @@
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor1WithDubiousSplitForControl2(), getCompetitor2()])]);
         assert.deepEqual(ageClassSet.getFastestCumTimes(), [0, 65, 65 + 197, 65 + 197 + 212, 65 + 197 + 212 + 100],
                             "Fastest cumulative times should be made up of fastest splits where not NaN");
+    });
+    
+    QUnit.test("Cumulative times of the second competitor in a single-class set are those of the second competitor", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor2(), getFasterCompetitor1()])]);
+        var competitorTimes = ageClassSet.getCumulativeTimesForCompetitor(1);
+        assert.deepEqual(competitorTimes, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], "Fred Brown (first competitor) should be the second competitor");
+    });
+
+    QUnit.test("Cumulative times of the second competitor of a multiple-class set are those of the second competitor", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [getCompetitor2()]), new AgeClass("Test 2", 3, [getFasterCompetitor1()])]);
+        var competitorTimes = ageClassSet.getCumulativeTimesForCompetitor(1);
+        assert.deepEqual(competitorTimes, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], "Fred Brown (first competitor) from the first course should be the second competitor");
+    });
+    
+    QUnit.test("Cumulative times of the competitor in a class containing only a single competitor with a dubious cumulative time include a filled gap", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [getCompetitor1WithDubiousSplitForControl2()])]);
+        var competitorTimes = ageClassSet.getCumulativeTimesForCompetitor(0);
+        assert.deepEqual(competitorTimes, [0, 65, 65 + (221 + 184) / 2, 65 + 221 + 184, 65 + 221 + 184 + 100], "Cumulative times should have filled-in gap");
+    });
+    
+    QUnit.test("Cumulative times of the competitor in a class containing only a single competitor with a dubious finish time include a filled gap", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [getCompetitor1WithDubiousFinishTime()])]);
+        var competitorTimes = ageClassSet.getCumulativeTimesForCompetitor(0);
+        assert.deepEqual(competitorTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 60], "Cumulative times should have filled-in time to finish include a filled gap");
+    });
+    
+    QUnit.test("Cumulative times of the competitor in a class containing only a single competitor with dubious times to the last control and finish have the gap filled", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test 1", 3, [getCompetitor1WithDubiousTimeToLastControlAndFinish()])]);
+        var competitorTimes = ageClassSet.getCumulativeTimesForCompetitor(0);
+        assert.deepEqual(competitorTimes, [0, 65, 65 + 221, 65 + 221 + 180, 65 + 221 + 180 + 60], "Cumulative times should have filled-in time to last control and finish");
     });
     
     function assertSplitRanks(assert, competitor, expectedSplitRanks) {

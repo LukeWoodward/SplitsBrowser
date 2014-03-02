@@ -22,6 +22,7 @@
     "use strict";
     
     var isNotNull = SplitsBrowser.isNotNull;
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData; 
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
@@ -122,33 +123,7 @@
     AgeClassSet.prototype.getNumClasses = function () {
         return this.ageClasses.length;
     };
-    
-    /**
-    * Returns an array of the cumulative times of the winner of the set of age
-    * classes.
-    * @return {Array} Array of the winner's cumulative times.
-    */
-    AgeClassSet.prototype.getWinnerCumTimes = function () {
-        if (this.allCompetitors.length === 0) {
-            return null;
-        }
-        
-        var firstCompetitor = this.allCompetitors[0];
-        return (firstCompetitor.completed()) ? firstCompetitor.cumTimes : null;
-    };
 
-    /**
-    * Return the imaginary competitor who recorded the fastest time on each leg
-    * of the class.
-    * If at least one control has no competitors recording a time for it, null
-    * is returned.
-    * @returns {Array|null} Cumulative splits of the imaginary competitor with
-    *           fastest time, if any.
-    */
-    AgeClassSet.prototype.getFastestCumTimes = function () {
-        return this.getFastestCumTimesPlusPercentage(0);
-    };
-    
     /**
     * Return a list of objects that describe when the given array of times has
     * null or NaN values.  This does not include trailing null or NaN values.
@@ -179,6 +154,65 @@
         return blankRangeInfo;
     }
 
+    /**
+    * Fill in any NaN values in the given list of cumulative times by doing
+    * a linear interpolation on the missing values.
+    * @param {Array} cumTimes - Array of cumulative times.
+    * @return {Array} Array of cumulative times with NaNs replaced.
+    */
+    var fillBlankRangesInCumulativeTimes = function (cumTimes) {
+        cumTimes = cumTimes.slice(0);
+        var blankRanges = getBlankRanges(cumTimes);
+        for (var rangeIndex = 0; rangeIndex < blankRanges.length; rangeIndex += 1) {
+            var range = blankRanges[rangeIndex];
+            var timeBefore = cumTimes[range.start];
+            var timeAfter = cumTimes[range.end];
+            var avgTimePerControl = (timeAfter - timeBefore) / (range.end - range.start);
+            for (var index = range.start + 1; index < range.end; index += 1) {
+                cumTimes[index] = timeBefore + (index - range.start) * avgTimePerControl;
+            }
+        }
+        
+        var lastNaNTimeIndex = cumTimes.length;
+        while (lastNaNTimeIndex >= 0 && isNaNStrict(cumTimes[lastNaNTimeIndex - 1])) {
+            lastNaNTimeIndex -= 1;
+        }
+        
+        if (lastNaNTimeIndex > 0) {
+            for (var timeIndex = lastNaNTimeIndex; timeIndex < cumTimes.length; timeIndex += 1) {
+                cumTimes[timeIndex] = cumTimes[timeIndex - 1] + ((timeIndex === cumTimes.length - 1) ? 60 : 180);
+            }
+        }
+        
+        return cumTimes;
+    };
+    
+    /**
+    * Returns an array of the cumulative times of the winner of the set of age
+    * classes.
+    * @return {Array} Array of the winner's cumulative times.
+    */
+    AgeClassSet.prototype.getWinnerCumTimes = function () {
+        if (this.allCompetitors.length === 0) {
+            return null;
+        }
+        
+        var firstCompetitor = this.allCompetitors[0];
+        return (firstCompetitor.completed()) ? fillBlankRangesInCumulativeTimes(firstCompetitor.cumTimes) : null;
+    };
+
+    /**
+    * Return the imaginary competitor who recorded the fastest time on each leg
+    * of the class.
+    * If at least one control has no competitors recording a time for it, null
+    * is returned.
+    * @returns {Array|null} Cumulative splits of the imaginary competitor with
+    *           fastest time, if any.
+    */
+    AgeClassSet.prototype.getFastestCumTimes = function () {
+        return this.getFastestCumTimesPlusPercentage(0);
+    };
+    
     /**
     * Return the imaginary competitor who recorded the fastest time on each leg
     * of the given classes, with a given percentage of their time added.
@@ -280,7 +314,17 @@
 
         return fastestCumTimes;
     };
-    
+
+    /**
+    * Returns the cumulative times for the competitor with the given index,
+    * with any runs of blanks filled in.
+    * @param {Number} competitorIndex - The index of the competitor.
+    * @return {Array} Array of cumulative times.
+    */
+    AgeClassSet.prototype.getCumulativeTimesForCompetitor = function (competitorIndex) {
+        return fillBlankRangesInCumulativeTimes(this.allCompetitors[competitorIndex].getAllCumulativeTimes());
+    };
+
     /**
     * Compute the ranks of each competitor within their class.
     */
