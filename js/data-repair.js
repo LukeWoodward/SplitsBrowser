@@ -148,6 +148,23 @@
     };
     
     /**
+    * Removes the finish cumulative time from a competitor if it is absurd.
+    *
+    * It is absurd if it is less than the time at the previous control by at
+    * least the maximum amount of time that can be added to finish splits.
+    * 
+    * @param {Array} cumTimes - The cumulative times to perhaps remove the
+    *     finish split from.
+    */
+    Repairer.prototype.removeFinishTimeIfAbsurd = function (cumTimes) {
+        var finishTime = cumTimes[cumTimes.length - 1];
+        var lastControlTime = cumTimes[cumTimes.length - 2];
+        if (isNotNullNorNaN(finishTime) && isNotNullNorNaN(lastControlTime) && finishTime <= lastControlTime - MAX_FINISH_SPLIT_MINS_ADDED * 60) {
+            cumTimes[cumTimes.length - 1] = NaN;
+        }
+    };
+    
+    /**
     * Attempts to repair the cumulative times for a competitor.  The repaired
     * cumulative times are written back into the competitor.
     *
@@ -160,6 +177,10 @@
         this.removeCumulativeTimesEqualToPrevious(cumTimes);
         
         cumTimes = this.removeCumulativeTimesCausingNegativeSplits(cumTimes);
+        
+        if (!competitor.completed()) {
+            this.removeFinishTimeIfAbsurd(cumTimes);
+        }
         
         competitor.setRepairedCumulativeTimes(cumTimes);
     };
