@@ -520,6 +520,16 @@
         var fastestSplits = ageClassSet.getFastestSplitsTo(2, 3);
         assert.deepEqual(fastestSplits, [{split: 212, name: competitor2.name}]);
     });
+    
+    QUnit.test("When getting fastest three splits to control 2 from single-class set with three competitors with one having a dubious split then competitor with dubious split omitted", function (assert) {
+        var competitor1 = getCompetitor1WithDubiousSplitForControl2();
+        var competitor2 = getCompetitor2();
+        var competitor3 = getCompetitor3();
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2, competitor3])]);
+        
+        var fastestSplits = ageClassSet.getFastestSplitsTo(3, 2);
+        assert.deepEqual(fastestSplits, [{split: 197, name: competitor2.name}, {split: 209, name: competitor3.name}]);
+    });
 
     /**
     * Asserts that attempting to get the fastest splits of the given competitors

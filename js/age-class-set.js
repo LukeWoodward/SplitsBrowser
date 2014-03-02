@@ -397,7 +397,7 @@
                 return (compASplit === compBSplit) ? d3.ascending(compA.totalTime, compB.totalTime) : d3.ascending(compASplit, compBSplit);
             };
             
-            var competitors = this.allCompetitors.filter(function (comp) { return comp.completed(); });
+            var competitors = this.allCompetitors.filter(function (comp) { return comp.completed() && !isNaNStrict(comp.getSplitTimeTo(controlIdx)); });
             competitors.sort(comparator);
             var results = [];
             for (var i = 0; i < competitors.length && i < numSplits; i += 1) {
