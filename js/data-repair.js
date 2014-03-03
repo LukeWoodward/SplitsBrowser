@@ -125,16 +125,30 @@
             
             var progress = false;
             
-            for (var attempt = 1; attempt <= 2; attempt += 1) {
-                // 1 = remove second, 2 = remove first.
+            for (var attempt = 1; attempt <= 3; attempt += 1) {
+                // 1 = remove second, 2 = remove first, 3 = remove first and the one before.
                 var adjustedCumTimes = cumTimes.slice();
-                adjustedCumTimes[(attempt === 1) ? second : first] = NaN;
-                var nextNonAscIndexes = getFirstNonAscendingIndexes(adjustedCumTimes);
-                if (nextNonAscIndexes === null || nextNonAscIndexes.first > second) {
-                    progress = true;
-                    cumTimes = adjustedCumTimes;
-                    nonAscIndexes = nextNonAscIndexes;
-                    break;
+                
+                if (attempt === 3 && (first === 1 || !isNotNullNorNaN(cumTimes[first - 1]))) {
+                    // Can't remove first and the one before because there
+                    // isn't a time before or it's already blank.
+                } else {
+                    if (attempt === 1) {
+                        adjustedCumTimes[second] = NaN;
+                    } else if (attempt === 2) {
+                        adjustedCumTimes[first] = NaN;
+                    } else if (attempt === 3) {
+                        adjustedCumTimes[first] = NaN;
+                        adjustedCumTimes[first - 1] = NaN;
+                    }
+                    
+                    var nextNonAscIndexes = getFirstNonAscendingIndexes(adjustedCumTimes);
+                    if (nextNonAscIndexes === null || nextNonAscIndexes.first > second) {
+                        progress = true;
+                        cumTimes = adjustedCumTimes;
+                        nonAscIndexes = nextNonAscIndexes;
+                        break;
+                    }
                 }
             }
             

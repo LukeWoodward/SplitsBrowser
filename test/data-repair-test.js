@@ -96,7 +96,6 @@
         assert.deepEqual(competitor.cumTimes, [0, 81, null, null, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     });
 
-
     QUnit.test("Removes ridiculously low finish time of competitor if competitor mispunched but punches the last control and the finish", function (assert) {
         var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 1]);
         wrapInEventAndRepair([competitor]);
@@ -111,6 +110,18 @@
 
     QUnit.test("Does not remove ridiculously low finish time from mispunching competitor if they did not punch the last control", function (assert) {
         var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, null, 1]);
+        wrapInEventAndRepair([competitor]);
+        assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
+    });
+    
+    QUnit.test("Can repair competitor with two consecutive absurdly high cumulative times by removing them", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 5000, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndRepair([competitor]);
+        assert.deepEqual(competitor.cumTimes, [0, NaN, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+    });
+    
+    QUnit.test("Does not repair competitor with two absurdly high cumulative times separated only by a missing split", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 5000, null, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         wrapInEventAndRepair([competitor]);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });
