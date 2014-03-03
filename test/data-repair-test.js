@@ -24,16 +24,25 @@
     module("Data Repair");
     
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
+    var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
-    function wrapInEventAndRepair(competitors) {
+    function wrapInEvent(competitors) {
         var ageClass = new AgeClass("Test class", competitors[0].originalCumTimes.length - 2, competitors);
         var course = new Course("Test course", [ageClass], null, null, null);
         var eventData = new Event([ageClass], [course]);
-        repairEventData(eventData);
+        return eventData;
+    }
+    
+    function wrapInEventAndRepair(competitors) {
+        repairEventData(wrapInEvent(competitors));
+    }
+    
+    function wrapInEventAndTransfer(competitors) {
+        transferCompetitorData(wrapInEvent(competitors));
     }
     
     QUnit.test("Can repair competitor with ascending cumulative times leaving them in ascending order", function (assert) {
@@ -123,6 +132,36 @@
     QUnit.test("Does not repair competitor with two absurdly high cumulative times separated only by a missing split", function (assert) {
         var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 5000, null, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         wrapInEventAndRepair([competitor]);
+        assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
+    });
+    
+    QUnit.test("Can transfer competitor with ascending cumulative times leaving them in ascending order", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndTransfer([competitor]);
+        assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
+    });
+
+    QUnit.test("Can transfer competitor data with absurdly high cumulative time by leaving it as it is", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndTransfer([competitor]);
+        assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
+    });
+
+    QUnit.test("Can transfer competitor data with absurdly low cumulative time by leaving it as it is", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndTransfer([competitor]);
+        assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
+    });
+
+    QUnit.test("Can transfer competitor data with ridiculously low finish time by leaving it as it is", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 1]);
+        wrapInEventAndTransfer([competitor]);
+        assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
+    });
+    
+    QUnit.test("Can transfer competitor data with two consecutive absurdly high cumulative times by leaving them as they are", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 5000, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        wrapInEventAndTransfer([competitor]);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });
     

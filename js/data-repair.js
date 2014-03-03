@@ -209,5 +209,24 @@
         eventData.courses.forEach(repairCourse);
     }
     
-    SplitsBrowser.DataRepair = { repairEventData: repairEventData };
+    /**
+    * Transfer the 'original' data for each competitor to the 'final' data.
+    *
+    * This is used if the input data has been read in a format that requires
+    * the data to be checked, but the user has opted not to perform any such
+    * reparations and wishes to view the 
+    * @param {Event} eventData - The event data to repair.
+    */
+    function transferCompetitorData(eventData) {
+        eventData.classes.forEach(function (ageClass) {
+            ageClass.competitors.forEach(function (competitor) {
+                competitor.setRepairedCumulativeTimes(competitor.getAllOriginalCumulativeTimes());
+            });
+        });
+    }
+    
+    SplitsBrowser.DataRepair = {
+        repairEventData: repairEventData,
+        transferCompetitorData: transferCompetitorData
+    };
 })();
