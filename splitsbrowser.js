@@ -1836,7 +1836,14 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
             var forename = parts.shift();
             var surname = parts.shift();
             var club = parts.shift();
-            var startTime = parseTime(parts.shift()) * 60;
+            var startTimeStr = parts.shift();
+            var startTime = parseTime(startTimeStr);
+            if (!startTimeStr.match(/^\d+:\d\d:\d\d$/)) {
+                // Start time given in hours and minutes instead of hours,
+                // minutes and seconds.
+                startTime *= 60;
+            }
+            
             var splitTimes = parts.map(parseTime);
             if (splitTimes.indexOf(0) >= 0) {
                 throwInvalidData("Zero split times are not permitted - found one or more zero splits for competitor '" + forename + " " + surname + "'");
