@@ -81,7 +81,7 @@ span.comparisonSelectorLabel.disabled
     color: #999999;
 }
 
-label.statisticsSelectorLabel.disabled
+label.statisticsSelectorLabel.disabled, label.originalDataSelectorLabel.disabled
 {
     color: #999999;
 }
@@ -216,7 +216,7 @@ div.competitor.selected
     color: white;
 }
 
-#chartTypeSelector, #comparisonSelectorContainer, #runnerSelectorContainer
+#chartTypeSelector, #comparisonSelectorContainer, #runnerSelectorContainer, #originalDataSelectorContainer
 {
     float: left;
 }
@@ -226,14 +226,14 @@ div.competitor.selected
     float: right;
 }
 
-#statisticSelector label
+#statisticSelector label, #originalDataSelectorContainer label
 {
     vertical-align: middle;
     margin-left: 3px;
     margin-right: 10px;
 }
 
-#statisticSelector input
+#statisticSelector input, #originalDataSelectorContainer input
 {
     vertical-align: middle;
 }

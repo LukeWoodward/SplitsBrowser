@@ -50,6 +50,7 @@ module.exports = function(grunt) {
                       'js/comparison-selector.js',
                       'js/statistics-selector.js',
                       'js/chart-type-selector.js',
+                      'js/original-data-selector.js',
                       'js/chart-popup-data.js',
                       'js/chart-popup.js',
                       'js/chart.js',

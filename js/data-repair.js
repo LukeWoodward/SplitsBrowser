@@ -29,6 +29,13 @@
     var MAX_FINISH_SPLIT_MINS_ADDED = 5;
     
     /**
+     * Construct a Repairer, for repairing some data.
+    */
+    var Repairer = function () {
+        this.madeAnyChanges = false;
+    };
+
+   /**
     * Returns the positions at which the first pair of non-ascending cumulative
     * times are found.  This is returned as an object with 'first' and 'second'
     * properties.
@@ -69,16 +76,17 @@
     * previous cumulative time.
     * @param {Array} cumTimes - Array of cumulative times.
     */
-    function removeCumulativeTimesEqualToPrevious(cumTimes) {
+    Repairer.prototype.removeCumulativeTimesEqualToPrevious = function (cumTimes) {
         var lastCumTime = cumTimes[0];
         for (var index = 1; index < cumTimes.length; index += 1) {
             if (cumTimes[index] !== null && cumTimes[index] === lastCumTime) {
                 cumTimes[index] = NaN;
+                this.madeAnyChanges = true;
             } else {
                 lastCumTime = cumTimes[index];
             }
         }
-    }
+    };
     
     /**
     * Remove from the cumulative times given any individual times that cause
@@ -92,7 +100,7 @@
     * @return {Array} Array of cumulaive times with perhaps some cumulative
     *     times taken out.
     */
-    function removeCumulativeTimesCausingNegativeSplits(cumTimes) {
+    Repairer.prototype.removeCumulativeTimesCausingNegativeSplits = function (cumTimes) {
 
         var nonAscIndexes = getFirstNonAscendingIndexes(cumTimes);
         while (nonAscIndexes !== null && nonAscIndexes.second + 1 < cumTimes.length) {
@@ -139,6 +147,7 @@
                     if (nextNonAscIndexes === null || nextNonAscIndexes.first > second) {
                         progress = true;
                         cumTimes = adjustedCumTimes;
+                        this.madeAnyChanges = true;
                         nonAscIndexes = nextNonAscIndexes;
                         break;
                     }
@@ -151,7 +160,7 @@
         }
     
         return cumTimes;
-    }
+    };
     
     /**
     * Removes the finish cumulative time from a competitor if it is absurd.
@@ -162,13 +171,14 @@
     * @param {Array} cumTimes - The cumulative times to perhaps remove the
     *     finish split from.
     */
-    function removeFinishTimeIfAbsurd(cumTimes) {
+    Repairer.prototype.removeFinishTimeIfAbsurd = function (cumTimes) {
         var finishTime = cumTimes[cumTimes.length - 1];
         var lastControlTime = cumTimes[cumTimes.length - 2];
         if (isNotNullNorNaN(finishTime) && isNotNullNorNaN(lastControlTime) && finishTime <= lastControlTime - MAX_FINISH_SPLIT_MINS_ADDED * 60) {
             cumTimes[cumTimes.length - 1] = NaN;
+            this.madeAnyChanges = true;
         }
-    }
+    };
     
     /**
     * Attempts to repair the cumulative times for a competitor.  The repaired
@@ -177,36 +187,52 @@
     * @param {Competitor} competitor - Competitor whose cumulative times we
     *     wish to repair.
     */
-    function repairCompetitor(competitor) {
+    Repairer.prototype.repairCompetitor = function (competitor) {
         var cumTimes = competitor.originalCumTimes.slice(0);
         
-        removeCumulativeTimesEqualToPrevious(cumTimes);
+        this.removeCumulativeTimesEqualToPrevious(cumTimes);
         
-        cumTimes = removeCumulativeTimesCausingNegativeSplits(cumTimes);
+        cumTimes = this.removeCumulativeTimesCausingNegativeSplits(cumTimes);
         
         if (!competitor.completed()) {
-            removeFinishTimeIfAbsurd(cumTimes);
+            this.removeFinishTimeIfAbsurd(cumTimes);
         }
         
         competitor.setRepairedCumulativeTimes(cumTimes);
-    }
+    };
     
     /**
     * Attempt to repair all of the data within a course.
     * @param {Course} The course whose data we wish to repair.
     */
-    function repairCourse(course) {
+    Repairer.prototype.repairCourse = function (course) {
         course.classes.forEach(function (ageClass) {
-            ageClass.competitors.forEach(repairCompetitor);
-        });
-    }
+            ageClass.competitors.forEach(function (competitor) {
+                this.repairCompetitor(competitor);
+            }, this);
+        }, this);
+    };
     
     /**
     * Attempt to carry out repairs to the data in an event.
     * @param {Event} eventData - The event data to repair.
     */
+    Repairer.prototype.repairEventData = function (eventData) {
+        eventData.courses.forEach(function (course) {
+            this.repairCourse(course);
+        }, this);
+    };
+    
+    /**
+    * Attempt to carry out repairs to the data in an event.
+    * @param {Event} eventData - The event data to repair.
+    * @return {boolean} True if the repairer made any changes to the data,
+    *     false if it did not.
+    */
     function repairEventData(eventData) {
-        eventData.courses.forEach(repairCourse);
+        var repairer = new Repairer();
+        repairer.repairEventData(eventData);
+        return repairer.madeAnyChanges;
     }
     
     /**

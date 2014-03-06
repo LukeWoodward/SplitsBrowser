@@ -72,6 +72,11 @@ SplitsBrowser.Messages = {
     // chosen because the course has no winner.
     CannotCompareAsNoWinner: "Cannot compare against '$$OPTION$$' because no competitors in this class complete the course.",
     
+    // Label of checkbox that shows the original data as opposed to the
+    // 'repaired' data.  This only appears if data that needs repair has been
+    // loaded.
+    ShowOriginalData: "Show original data",
+    
     StatisticsTotalTime: "Total time",
     StatisticsSplitTime: "Split time",
     StatisticsBehindFastest: "Behind fastest",

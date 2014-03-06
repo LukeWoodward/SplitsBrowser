@@ -34,11 +34,13 @@
     var ClassSelector = SplitsBrowser.Controls.ClassSelector;
     var ChartTypeSelector = SplitsBrowser.Controls.ChartTypeSelector;
     var ComparisonSelector = SplitsBrowser.Controls.ComparisonSelector;
+    var OriginalDataSelector = SplitsBrowser.Controls.OriginalDataSelector;
     var StatisticsSelector = SplitsBrowser.Controls.StatisticsSelector;
     var CompetitorListBox = SplitsBrowser.Controls.CompetitorListBox;
     var Chart = SplitsBrowser.Controls.Chart;
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
+    var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
@@ -69,11 +71,14 @@
         this.referenceCumTimes = null;
         this.fastestCumTimes = null;
         this.previousCompetitorList = [];
+        this.isOriginalDataSelectorToBeAdded = false;
         this.topDivHeight = (topDiv && $(topDiv).length > 0) ? $(topDiv).height() : 0;
         
         this.selection = null;
         this.ageClassSet = null;
         this.classSelector = null;
+        this.comparisonSelector = null;
+        this.originalDataSelector = null;
         this.statisticsSelector = null;
         this.competitorListBox = null;
         this.chart = null;
@@ -100,6 +105,14 @@
     Viewer.prototype.enableOrDisableRaceGraph = function () {
         var anyStartTimesMissing = this.ageClassSet.allCompetitors.some(function (competitor) { return competitor.lacksStartTime(); });
         this.chartTypeSelector.setRaceGraphDisabledNotifier((anyStartTimesMissing) ? alertRaceGraphDisabledAsStartTimesMissing : null);
+    };
+    
+    /**
+    * Tells the the viewer to include the original-data selector hwhen it
+    * builds the UI.
+    */
+    Viewer.prototype.showOriginalDataSelector = function () {
+        this.isOriginalDataSelectorToBeAdded = true;
     };
     
     /**
@@ -196,6 +209,25 @@
     };
     
     /**
+    * Adds a checkbox to select the 'original' data or data after SplitsBrowser
+    * has attempted to repair it.
+    */
+    Viewer.prototype.addOriginalDataSelector = function () {
+        var outerThis = this;
+        var showOriginalData = function () {
+            transferCompetitorData(outerThis.eventData);
+            outerThis.drawChart();
+        };
+        
+        var showRepairedData = function () {
+            repairEventData(outerThis.eventData);
+            outerThis.drawChart();
+        };
+        
+        this.originalDataSelector = new OriginalDataSelector(this.topPanel, showOriginalData, showRepairedData);
+    };
+    
+    /**
     * Adds the list of competitors, and the buttons, to the page.
     */
     Viewer.prototype.addCompetitorList = function () {
@@ -240,6 +272,10 @@
         this.addChartTypeSelector();
         this.addSpacer();
         this.addComparisonSelector();
+        if (this.isOriginalDataSelectorToBeAdded) {
+            this.addSpacer();
+            this.addOriginalDataSelector();
+        }
         
         this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
 
@@ -494,6 +530,9 @@
         this.classSelector.setOtherClassesEnabled(!this.chartType.isResultsTable);
         this.comparisonSelector.setEnabled(!this.chartType.isResultsTable);
         this.statisticsSelector.setEnabled(!this.chartType.isResultsTable);
+        if (this.originalDataSelector !== null) {
+            this.originalDataSelector.setEnabled(!this.chartType.isResultsTable);
+        }
         this.enableOrDisableCrossingRunnersButton();
     };
     
@@ -548,13 +587,18 @@
             if (eventData === null) {
                 showLoadFailureMessage("LoadFailedUnrecognisedData", {});
             } else {
+                var anyChangesMade = false;
                 if (eventData.needsRepair()) {
-                    repairEventData(eventData);
+                    anyChangesMade = repairEventData(eventData);
                 }
                 
                 eventData.determineTimeLosses();
                 
                 var viewer = new Viewer(topDiv);
+                if (anyChangesMade) {
+                    viewer.showOriginalDataSelector();
+                }
+                
                 viewer.buildUi();
                 viewer.setEvent(eventData);
                 viewer.selectClasses([0]);
@@ -566,7 +610,7 @@
     
     /**
     * Handles the failure to read an event.
-    * @param {jQuery.jqXHR} jqXHR - jQuery jqHXR object.
+    * @param {jQuery.jqXHR} jqXHR - jQuery jqXHR object.
     * @param {String} textStatus - The text status of the request.
     * @param {String} errorThrown - The error message returned from the server.
     */
