@@ -78,7 +78,7 @@
     */
     Repairer.prototype.removeCumulativeTimesEqualToPrevious = function (cumTimes) {
         var lastCumTime = cumTimes[0];
-        for (var index = 1; index < cumTimes.length; index += 1) {
+        for (var index = 1; index + 1 < cumTimes.length; index += 1) {
             if (cumTimes[index] !== null && cumTimes[index] === lastCumTime) {
                 cumTimes[index] = NaN;
                 this.madeAnyChanges = true;

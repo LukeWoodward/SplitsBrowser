@@ -81,6 +81,13 @@
         assert.ok(!hasDubiousData);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });
+    
+    QUnit.test("Can repair competitor with finish time equal to last control by doing nothing", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212]);
+        var hasDubiousData = wrapInEventAndRepair([competitor]);
+        assert.ok(!hasDubiousData);
+        SplitsBrowserTest.assertStrictEqualArrays(assert, competitor.cumTimes, competitor.originalCumTimes);        
+    });
 
     QUnit.test("Can repair competitor with absurdly high cumulative time by removing the offending time", function (assert) {
         var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106]);
