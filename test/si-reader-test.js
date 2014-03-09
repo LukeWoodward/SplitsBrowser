@@ -273,7 +273,7 @@
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
         var competitor = eventData.classes[0].competitors[0];
         assert.ok(!competitor.completed());
-        assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, null, null, 393]);
+        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, null, null, 393]);
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data in column-44 variation", function (assert) {

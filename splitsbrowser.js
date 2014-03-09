@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
+var SplitsBrowser = { Version: "3.2.0", Model: {}, Input: {}, Controls: {} };
 
 
 (function () {
@@ -124,10 +124,32 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * @returns True if the value is not null, false otherwise.
     */
     SplitsBrowser.isNotNull = function (x) { return x !== null; };
-
+    
+    /**
+    * Returns whether the value given is the numeric value NaN.
+    *
+    * This differs from the JavaScript built-in function isNaN, in that isNaN
+    * attempts to convert the value to a number first, with non-numeric strings
+    * being converted to NaN.  So isNaN("abc") will be true, even though "abc"
+    * isn't NaN.  This function only returns true if you actually pass it NaN,
+    * rather than any value that fails to convert to a number.
+    *
+    * @param {Any} x - Any input value.
+    * @return True if x is NaN, false if x is any other value.
+    */
+    SplitsBrowser.isNaNStrict = function (x) { return x !== x; };
+    
+    /**
+    * Returns whether the value given is neither null nor NaN.
+    * @param {Number|null} value - A value to test.
+    * @return {boolean} false if the value given is null or NaN, true
+    *     otherwise.
+    */
+    SplitsBrowser.isNotNullNorNaN = function (x) { return x !== null && x === x; };
+    
     /**
     * Exception object raised if invalid data is passed.
-    * @constructor.
+    * @constructor
     * @param {string} message - The exception detail message.
     */
     var InvalidData = function (message) {
@@ -206,6 +228,8 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
 
     SplitsBrowser.NULL_TIME_PLACEHOLDER = "-----";
     
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
+    
     /**
     * Formats a time period given as a number of seconds as a string in the form
     *  [-][h:]mm:ss.
@@ -216,6 +240,8 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         
         if (seconds === null) {
             return SplitsBrowser.NULL_TIME_PLACEHOLDER;
+        } else if (isNaNStrict(seconds)) {
+            return "???";
         }
     
         var result = "";
@@ -269,6 +295,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     var NUMBER_TYPE = typeof 0;
     
     var isNotNull = SplitsBrowser.isNotNull;
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var getMessage = SplitsBrowser.getMessage;
 
@@ -383,19 +410,25 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * sort.  However, it is not strictly the finishing order of the competitors,
     * as it has been known for them to be given not in the correct order.
     *
+    * The split and cumulative times passed here should be the 'original' times,
+    * before any attempt is made to repair the data.
+    *
     * It is not recommended to use this constructor directly.  Instead, use one of
-    * the factory methods fromSplitTimes or fromCumTimes to pass in either the
-    * split or cumulative times and have the other calculated.
+    * the factory methods fromSplitTimes, fromCumTimes or fromOriginalCumTimes to
+    * pass in either the split or cumulative times and have the other calculated.
     *
     * @constructor
-    * @param {Number} order - The position of the competitor within the list of results.
+    * @param {Number} order - The position of the competitor within the list of
+    *     results.
     * @param {String} name - The name of the competitor.
     * @param {String} club - The name of the competitor's club.
-    * @param {String} startTime - The competitor's start time.
-    * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
-    * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
+    * @param {String} originalStartTime - The competitor's start time.
+    * @param {Array} originalSplitTimes - Array of split times, as numbers,
+    *      with nulls for missed controls.
+    * @param {Array} originalCumTimes - Array of cumulative split times, as
+    *     numbers, with nulls for missed controls.
     */
-    var Competitor = function (order, name, club, startTime, splitTimes, cumTimes) {
+    var Competitor = function (order, name, club, startTime, originalSplitTimes, originalCumTimes) {
 
         if (typeof order !== NUMBER_TYPE) {
             throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
@@ -408,13 +441,15 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         this.isNonCompetitive = false;
         this.className = null;
         
-        this.splitTimes = splitTimes;
-        this.cumTimes = cumTimes;
+        this.originalSplitTimes = originalSplitTimes;
+        this.originalCumTimes = originalCumTimes;
+        this.splitTimes = null;
+        this.cumTimes = null;
         this.splitRanks = null;
         this.cumRanks = null;
         this.timeLosses = null;
 
-        this.totalTime = (this.cumTimes.indexOf(null) > -1) ? null : this.cumTimes[this.cumTimes.length - 1];
+        this.totalTime = (originalCumTimes === null || originalCumTimes.indexOf(null) > -1) ? null : originalCumTimes[originalCumTimes.length - 1];
     };
     
     /**
@@ -450,18 +485,49 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     */
     Competitor.fromSplitTimes = function (order, name, club, startTime, splitTimes) {
         var cumTimes = cumTimesFromSplitTimes(splitTimes);
-        return new Competitor(order, name, club, startTime, splitTimes, cumTimes);
+        var competitor = new Competitor(order, name, club, startTime, splitTimes, cumTimes);
+        competitor.splitTimes = splitTimes;
+        competitor.cumTimes = cumTimes;
+        return competitor;
     };
     
     /**
     * Create and return a Competitor object where the competitor's times are given
-    * as a list of cumulative split times.
+    * as a list of cumulative times.
     *
     * The first parameter (order) merely stores the order in which the competitor
     * appears in the given list of results.  Its sole use is to stabilise sorts of
     * competitors, as JavaScript's sort() method is not guaranteed to be a stable
     * sort.  However, it is not strictly the finishing order of the competitors,
     * as it has been known for them to be given not in the correct order.
+    *
+    * This method does not assume that the data given has been 'repaired'.  This
+    * function should therefore be used to create a competitor if the data may
+    * later need to be repaired.
+    *
+    * @param {Number} order - The position of the competitor within the list of results.
+    * @param {String} name - The name of the competitor.
+    * @param {String} club - The name of the competitor's club.
+    * @param {Number} startTime - The competitor's start time, as seconds past midnight.
+    * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
+    */
+    Competitor.fromOriginalCumTimes = function (order, name, club, startTime, cumTimes) {
+        var splitTimes = splitTimesFromCumTimes(cumTimes);
+        return new Competitor(order, name, club, startTime, splitTimes, cumTimes);
+    };
+    
+    /**
+    * Create and return a Competitor object where the competitor's times are given
+    * as a list of cumulative times.
+    *
+    * The first parameter (order) merely stores the order in which the competitor
+    * appears in the given list of results.  Its sole use is to stabilise sorts of
+    * competitors, as JavaScript's sort() method is not guaranteed to be a stable
+    * sort.  However, it is not strictly the finishing order of the competitors,
+    * as it has been known for them to be given not in the correct order.
+    *
+    * This method assumes that the data given has been repaired, so it is ready
+    * to be viewed.
     *
     * @param {Number} order - The position of the competitor within the list of results.
     * @param {String} name - The name of the competitor.
@@ -470,8 +536,20 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
     */
     Competitor.fromCumTimes = function (order, name, club, startTime, cumTimes) {
-        var splitTimes = splitTimesFromCumTimes(cumTimes);
-        return new Competitor(order, name, club, startTime, splitTimes, cumTimes);
+        var competitor = Competitor.fromOriginalCumTimes(order, name, club, startTime, cumTimes);
+        competitor.splitTimes = competitor.originalSplitTimes;
+        competitor.cumTimes = competitor.originalCumTimes;
+        return competitor;
+    };
+    
+    /**
+    * Sets the 'repaired' cumulative times for a competitor.  This also
+    * calculates the repaired split times.
+    * @param {Array} cumTimes - The 'repaired' cumulative times.
+    */
+    Competitor.prototype.setRepairedCumulativeTimes = function (cumTimes) {
+        this.cumTimes = cumTimes;
+        this.splitTimes = splitTimesFromCumTimes(cumTimes);
     };
     
     /**
@@ -500,8 +578,11 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * Returns the competitor's split to the given control.  If the control
     * index given is zero (i.e. the start), zero is returned.  If the
     * competitor has no time recorded for that control, null is returned.
+    * If the value is missing, because the value read from the file was
+    * invalid, NaN is returned.
+    * 
     * @param {Number} controlIndex - Index of the control (0 = start).
-    * @return {Number} The split time in seconds for the competitor to the
+    * @return {Number|null} The split time in seconds for the competitor to the
     *      given control.
     */
     Competitor.prototype.getSplitTimeTo = function (controlIndex) {
@@ -509,16 +590,67 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Returns the competitor's 'original' split to the given control.  This is
+    * always the value read from the source data file, or derived directly from
+    * this data, before any attempt was made to repair the competitor's data.
+    * 
+    * If the control index given is zero (i.e. the start), zero is returned.
+    * If the competitor has no time recorded for that control, null is
+    * returned.
+    * @param {Number} controlIndex - Index of the control (0 = start).
+    * @return {Number|null} The split time in seconds for the competitor to the
+    *      given control.
+    */
+    Competitor.prototype.getOriginalSplitTimeTo = function (controlIndex) {
+        return (controlIndex === 0) ? 0 : this.originalSplitTimes[controlIndex - 1];
+    };
+    
+    /**
+    * Returns whether the control with the given index is deemed to have a
+    * dubious split time.
+    * @param {Number} controlIndex - The index of the control.
+    * @return {boolean} True if the split time to the given control is dubious,
+    *     false if not.
+    */
+    Competitor.prototype.isSplitTimeDubious = function (controlIndex) {
+        return (controlIndex > 0 && this.originalSplitTimes[controlIndex - 1] !== this.splitTimes[controlIndex - 1]);
+    };
+    
+    /**
     * Returns the competitor's cumulative split to the given control.  If the
     * control index given is zero (i.e. the start), zero is returned.   If the
     * competitor has no cumulative time recorded for that control, null is
-    * returned.
+    * returned.  If the competitor recorded a time, but the time was deemed to
+    * be invalid, NaN will be returned.
     * @param {Number} controlIndex - Index of the control (0 = start).
     * @return {Number} The cumulative split time in seconds for the competitor
     *      to the given control.
     */
     Competitor.prototype.getCumulativeTimeTo = function (controlIndex) {
         return this.cumTimes[controlIndex];
+    };
+    
+    /**
+    * Returns the 'original' cumulative time the competitor took to the given
+    * control.  This is always the value read from the source data file, before
+    * any attempt was made to repair the competitor's data.
+    * @param {Number} controlIndex - Index of the control (0 = start).
+    * @return {Number} The cumulative split time in seconds for the competitor
+    *      to the given control.
+    */
+    Competitor.prototype.getOriginalCumulativeTimeTo = function (controlIndex) {
+        return this.originalCumTimes[controlIndex];
+    };
+    
+    /**
+    * Returns whether the control with the given index is deemed to have a
+    * dubious cumulative time.
+    * @param {Number} controlIndex - The index of the control.
+    * @return {boolean} True if the cumulative time to the given control is
+    *     dubious, false if not.
+    */
+    Competitor.prototype.isCumulativeTimeDubious = function (controlIndex) {
+        return this.originalCumTimes[controlIndex] !== this.cumTimes[controlIndex];
     };
     
     /**
@@ -562,6 +694,14 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     */
     Competitor.prototype.getAllCumulativeTimes = function () {
         return this.cumTimes;
+    };
+    
+    /**
+    * Returns all of the competitor's cumulative time splits.
+    * @return {Array} The cumulative split times in seconds for the competitor.
+    */
+    Competitor.prototype.getAllOriginalCumulativeTimes = function () {
+        return this.originalCumTimes;
     };
     
     /**
@@ -634,7 +774,11 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
                 percentsBehind.push(null);
             } else {
                 var referenceSplit = referenceCumTimes[index + 1] - referenceCumTimes[index];
-                percentsBehind.push(100 * (splitTime - referenceSplit) / referenceSplit);
+                if (referenceSplit > 0) {
+                    percentsBehind.push(100 * (splitTime - referenceSplit) / referenceSplit);
+                } else {
+                    percentsBehind.push(null);
+                }
             }
         });
         
@@ -649,34 +793,40 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         if (this.completed()) {
             if (fastestSplitTimes.length !== this.splitTimes.length) {
                 throwInvalidData("Cannot determine time loss of competitor with " + this.splitTimes.length + " split times using " + fastestSplitTimes.length + " fastest splits");
-            } else if (fastestSplitTimes.indexOf(null) >= 0) {
-                throwInvalidData("Cannot determine time loss of competitor when there is a null value in the fastest splits");
+            }  else if (fastestSplitTimes.some(isNaNStrict)) {
+                throwInvalidData("Cannot determine time loss of competitor when there is a NaN value in the fastest splits");
             }
             
-            // We use the same algorithm for calculating time loss as the
-            // original, with a simplification: we calculate split ratios
-            // (split[i] / fastest[i]) rather than time loss rates
-            // (split[i] - fastest[i])/fastest[i].  A control's split ratio
-            // is its time loss rate plus 1.  Not subtracting one at the start
-            // means that we then don't have to add it back on at the end.
-            
-            var splitRatios = this.splitTimes.map(function (splitTime, index) {
-                return splitTime / fastestSplitTimes[index];
-            });
-            
-            splitRatios.sort(d3.ascending);
-            
-            var medianSplitRatio;
-            if (splitRatios.length % 2 === 1) {
-                medianSplitRatio = splitRatios[(splitRatios.length - 1) / 2];
+            if (this.splitTimes.some(isNaNStrict)) {
+                // Competitor has some dubious times.  Unfortunately this
+                // means we cannot sensibly calculate the time losses.
+                this.timeLosses = this.splitTimes.map(function () { return NaN; });
             } else {
-                var midpt = splitRatios.length / 2;
-                medianSplitRatio = (splitRatios[midpt - 1] + splitRatios[midpt]) / 2;
+                // We use the same algorithm for calculating time loss as the
+                // original, with a simplification: we calculate split ratios
+                // (split[i] / fastest[i]) rather than time loss rates
+                // (split[i] - fastest[i])/fastest[i].  A control's split ratio
+                // is its time loss rate plus 1.  Not subtracting one at the start
+                // means that we then don't have to add it back on at the end.
+                
+                var splitRatios = this.splitTimes.map(function (splitTime, index) {
+                    return splitTime / fastestSplitTimes[index];
+                });
+                
+                splitRatios.sort(d3.ascending);
+                
+                var medianSplitRatio;
+                if (splitRatios.length % 2 === 1) {
+                    medianSplitRatio = splitRatios[(splitRatios.length - 1) / 2];
+                } else {
+                    var midpt = splitRatios.length / 2;
+                    medianSplitRatio = (splitRatios[midpt - 1] + splitRatios[midpt]) / 2;
+                }
+                
+                this.timeLosses = this.splitTimes.map(function (splitTime, index) {
+                    return Math.round(splitTime - fastestSplitTimes[index] * medianSplitRatio);
+                });
             }
-            
-            this.timeLosses = this.splitTimes.map(function (splitTime, index) {
-                return Math.round(splitTime - fastestSplitTimes[index] * medianSplitRatio);
-            });
         }
     };
     
@@ -713,12 +863,63 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         return beforeOther && afterOther;
     };
     
+    /**
+    * Returns an array of objects that record the indexes around which times in
+    * the given array are NaN.
+    * @param {Array} times - Array of time values.
+    * @return {Array} Array of objects that 
+    */
+    function getIndexesAroundDubiousTimes(times) {
+        var dubiousTimeInfo = [];
+        var startIndex = 1;
+        while (startIndex + 1 < times.length) {
+            if (isNaNStrict(times[startIndex])) {
+                var endIndex = startIndex;
+                while (endIndex + 1 < times.length && isNaNStrict(times[endIndex + 1])) {
+                    endIndex += 1;
+                }
+                
+                if (endIndex + 1 < times.length && times[startIndex - 1] !== null && times[endIndex + 1] !== null) {
+                    dubiousTimeInfo.push({start: startIndex - 1, end: endIndex + 1});
+                }
+                
+                startIndex = endIndex + 1;
+                
+            } else {
+                startIndex += 1;
+            }
+        }
+        
+        return dubiousTimeInfo;
+    }
+    
+    /**
+    * Returns an array of objects that list the controls around those that have
+    * dubious cumulative times.
+    * @return {Array} Array of objects that detail the start and end indexes
+    *     around dubious cumulative times.
+    */
+    Competitor.prototype.getControlIndexesAroundDubiousCumulativeTimes = function () {
+        return getIndexesAroundDubiousTimes(this.cumTimes);
+    };
+    
+    /**
+    * Returns an array of objects that list the controls around those that have
+    * dubious cumulative times.
+    * @return {Array} Array of objects that detail the start and end indexes
+    *     around dubious cumulative times.
+    */
+    Competitor.prototype.getControlIndexesAroundDubiousSplitTimes = function () {
+        return getIndexesAroundDubiousTimes([0].concat(this.splitTimes));
+    };
+    
     SplitsBrowser.Model.Competitor = Competitor;
 })();
 
 (function (){
     "use strict";
 
+    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     
     /**
@@ -733,16 +934,32 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         this.numControls = numControls;
         this.competitors = competitors;
         this.course = null;
-        
-        var fastestSplitTimes = d3.range(1, numControls + 2).map(function (controlIdx) {
+        this.hasDubiousData = false;
+        this.competitors.forEach(function (comp) {
+            comp.setClassName(name);
+        });
+    };
+    
+    /**
+    * Records that this age-class has competitor data that SplitsBrowser has
+    * deduced as dubious.
+    */
+    AgeClass.prototype.recordHasDubiousData = function () {
+        this.hasDubiousData = true;
+    };
+     
+    /**
+    * Determines the time losses for the competitors in this age class.
+    */
+    AgeClass.prototype.determineTimeLosses = function () {
+        var fastestSplitTimes = d3.range(1, this.numControls + 2).map(function (controlIdx) {
             var splitRec = this.getFastestSplitTo(controlIdx);
             return (splitRec === null) ? null : splitRec.split;
         }, this);
         
         this.competitors.forEach(function (comp) {
-            comp.setClassName(this.name);
             comp.determineTimeLosses(fastestSplitTimes);
-        }, this);
+        });
     };
     
     /**
@@ -761,19 +978,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     AgeClass.prototype.setCourse = function (course) {
         this.course = course;
     };
-    
-    /**
-    * Returns the controls that all competitors in this class failed to punch.
-    *
-    * @return {Array} Array of numbers of controls that all competitors in this
-    *     class failed to punch.
-    */
-    AgeClass.prototype.getControlsWithNoSplits = function () {
-        return d3.range(1, this.numControls + 1).filter(function (controlNum) {
-            return this.competitors.every(function (competitor) { return competitor.getSplitTimeTo(controlNum) === null; });
-        }, this);
-    };
-    
+
     /**
     * Returns the fastest split time recorded by competitors in this class.  If
     * no fastest split time is recorded (e.g. because all competitors
@@ -792,7 +997,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         var fastestCompetitor = null;
         this.competitors.forEach(function (comp) {
             var compSplit = comp.getSplitTimeTo(controlIdx);
-            if (compSplit !== null) {
+            if (isNotNullNorNaN(compSplit)) {
                 if (fastestSplit === null || compSplit < fastestSplit) {
                     fastestSplit = compSplit;
                     fastestCompetitor = comp;
@@ -839,7 +1044,10 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
 
 (function () {
     "use strict";
-      
+    
+    var isNotNull = SplitsBrowser.isNotNull;
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
+    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData; 
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
     
@@ -875,7 +1083,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     */
     function getRanks(sourceData) {
         // First, sort the source data, removing nulls.
-        var sortedData = sourceData.filter(function (x) { return x !== null; });
+        var sortedData = sourceData.filter(isNotNullNorNaN);
         sortedData.sort(d3.ascending);
         
         // Now construct a map that maps from source value to rank.
@@ -888,7 +1096,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         
         // Finally, build and return the list of ranks.
         var ranks = sourceData.map(function(value) {
-            return (value === null) ? null : rankMap.get(value);
+            return isNotNullNorNaN(value) ? rankMap.get(value) : value;
         });
         
         return ranks;
@@ -941,6 +1149,79 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Returns whether any of the age-classes within this set have data that
+    * SplitsBrowser can identify as dubious.
+    * @return {boolean} True if any of the age-classes within this set contain
+    *     dubious data, false if none of them do.
+    */
+    AgeClassSet.prototype.hasDubiousData = function () {
+        return this.ageClasses.some(function (ageClass) { return ageClass.hasDubiousData; });
+    };
+
+    /**
+    * Return a list of objects that describe when the given array of times has
+    * null or NaN values.  This does not include trailing null or NaN values.
+    * @param {Array} times - Array of times, which may include NaNs and nulls.
+    * @return {Array} Array of objects that describes when the given array has
+    *    ranges of null and/or NaN values.
+    */
+    function getBlankRanges(times) {
+        var blankRangeInfo = [];
+        var startIndex = 1;
+        while (startIndex + 1 < times.length) {
+            if (isNotNullNorNaN(times[startIndex])) {
+                startIndex += 1;
+            } else {
+                var endIndex = startIndex;
+                while (endIndex + 1 < times.length && !isNotNullNorNaN(times[endIndex + 1])) {
+                    endIndex += 1;
+                }
+                
+                if (endIndex + 1 < times.length) {
+                    blankRangeInfo.push({start: startIndex - 1, end: endIndex + 1});
+                }
+                
+                startIndex = endIndex + 1;
+            }
+        }
+        
+        return blankRangeInfo;
+    }
+
+    /**
+    * Fill in any NaN values in the given list of cumulative times by doing
+    * a linear interpolation on the missing values.
+    * @param {Array} cumTimes - Array of cumulative times.
+    * @return {Array} Array of cumulative times with NaNs replaced.
+    */
+    var fillBlankRangesInCumulativeTimes = function (cumTimes) {
+        cumTimes = cumTimes.slice(0);
+        var blankRanges = getBlankRanges(cumTimes);
+        for (var rangeIndex = 0; rangeIndex < blankRanges.length; rangeIndex += 1) {
+            var range = blankRanges[rangeIndex];
+            var timeBefore = cumTimes[range.start];
+            var timeAfter = cumTimes[range.end];
+            var avgTimePerControl = (timeAfter - timeBefore) / (range.end - range.start);
+            for (var index = range.start + 1; index < range.end; index += 1) {
+                cumTimes[index] = timeBefore + (index - range.start) * avgTimePerControl;
+            }
+        }
+        
+        var lastNaNTimeIndex = cumTimes.length;
+        while (lastNaNTimeIndex >= 0 && isNaNStrict(cumTimes[lastNaNTimeIndex - 1])) {
+            lastNaNTimeIndex -= 1;
+        }
+        
+        if (lastNaNTimeIndex > 0) {
+            for (var timeIndex = lastNaNTimeIndex; timeIndex < cumTimes.length; timeIndex += 1) {
+                cumTimes[timeIndex] = cumTimes[timeIndex - 1] + ((timeIndex === cumTimes.length - 1) ? 60 : 180);
+            }
+        }
+        
+        return cumTimes;
+    };
+    
+    /**
     * Returns an array of the cumulative times of the winner of the set of age
     * classes.
     * @return {Array} Array of the winner's cumulative times.
@@ -951,7 +1232,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         }
         
         var firstCompetitor = this.allCompetitors[0];
-        return (firstCompetitor.completed()) ? firstCompetitor.cumTimes : null;
+        return (firstCompetitor.completed()) ? fillBlankRangesInCumulativeTimes(firstCompetitor.cumTimes) : null;
     };
 
     /**
@@ -965,31 +1246,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     AgeClassSet.prototype.getFastestCumTimes = function () {
         return this.getFastestCumTimesPlusPercentage(0);
     };
-
-    /**
-    * Returns an array of controls that no competitor in any of the age-classes
-    * in this set punched.
-    * @return {Array} Array of control numbers of controls that no competitor
-    *     punched.
-    */
-    AgeClassSet.prototype.getControlsWithNoSplits = function () {
-        var controlsWithNoSplits = this.ageClasses[0].getControlsWithNoSplits();
-        for (var classIndex = 1; classIndex < this.ageClasses.length && controlsWithNoSplits.length > 0; classIndex += 1) {
-            var thisClassControlsWithNoSplits = this.ageClasses[classIndex].getControlsWithNoSplits();
-            
-            var controlIdx = 0;
-            while (controlIdx < controlsWithNoSplits.length) {
-                if (thisClassControlsWithNoSplits.indexOf(controlsWithNoSplits[controlIdx]) >= 0) {
-                    controlIdx += 1;
-                } else {
-                    controlsWithNoSplits.splice(controlIdx, 1);
-                }
-            }
-        }
-        
-        return controlsWithNoSplits;
-    };
-
+    
     /**
     * Return the imaginary competitor who recorded the fastest time on each leg
     * of the given classes, with a given percentage of their time added.
@@ -1000,29 +1257,108 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     *           fastest time, if any, after adding a percentage.
     */
     AgeClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
+    
         var ratio = 1 + percent / 100;
-        var fastestCumTimes = new Array(this.numControls + 1);
-        fastestCumTimes[0] = 0;
+        
+        var fastestSplits = new Array(this.numControls + 1);
+        fastestSplits[0] = 0;
+        
         for (var controlIdx = 1; controlIdx <= this.numControls + 1; controlIdx += 1) {
             var fastestForThisControl = null;
             for (var competitorIdx = 0; competitorIdx < this.allCompetitors.length; competitorIdx += 1) {
                 var thisTime = this.allCompetitors[competitorIdx].getSplitTimeTo(controlIdx);
-                if (thisTime !== null && (fastestForThisControl === null || thisTime < fastestForThisControl)) {
+                if (isNotNullNorNaN(thisTime) && (fastestForThisControl === null || thisTime < fastestForThisControl)) {
                     fastestForThisControl = thisTime;
                 }
             }
             
-            if (fastestForThisControl === null) {
-                // No fastest time recorded for this control.
-                return null;
-            } else {
-                fastestCumTimes[controlIdx] = fastestCumTimes[controlIdx - 1] + fastestForThisControl * ratio;
+            fastestSplits[controlIdx] = fastestForThisControl;
+        }
+     
+        if (!fastestSplits.every(isNotNull)) {
+            // We don't have fastest splits for every control, so there was one
+            // control that either nobody punched or everybody had a dubious
+            // split for.
+            
+            // Find the blank-ranges of the fastest times.
+            var fastestBlankRanges = getBlankRanges(fastestSplits);
+            
+            // Find all blank-ranges of competitors.
+            var allCompetitorBlankRanges = [];
+            this.allCompetitors.forEach(function (competitor) {
+                var competitorBlankRanges = getBlankRanges(competitor.getAllCumulativeTimes());
+                competitorBlankRanges.forEach(function (range) {
+                    allCompetitorBlankRanges.push({
+                        start: range.start,
+                        end: range.end,
+                        size: range.end - range.start,
+                        overallSplit: competitor.getCumulativeTimeTo(range.end) - competitor.getCumulativeTimeTo(range.start)
+                    });
+                });
+            });
+            
+            // Now, for each blank range of the fastest times, find the
+            // size of the smallest competitor blank range that covers it,
+            // and then the fastest split among those competitors.
+            fastestBlankRanges.forEach(function (fastestRange) {
+                var coveringCompetitorRanges = allCompetitorBlankRanges.filter(function (compRange) {
+                    return compRange.start <= fastestRange.start && fastestRange.end <= compRange.end + 1;
+                });
+                
+                var minSize = null;
+                var minOverallSplit = null;
+                coveringCompetitorRanges.forEach(function (coveringRange) {
+                    if (minSize === null || coveringRange.size < minSize) {
+                        minSize = coveringRange.size;
+                        minOverallSplit = null;
+                    }
+                    
+                    if (minOverallSplit === null || coveringRange.overallSplit < minOverallSplit) {
+                        minOverallSplit = coveringRange.overallSplit;
+                    }
+                });
+                
+                // Assume that the fastest competitor across the range had
+                // equal splits for all controls on the range.  This won't
+                // always make sense but it's the best we can do.
+                if (minSize !== null && minOverallSplit !== null) {
+                    for (var index = fastestRange.start + 1; index < fastestRange.end; index += 1) {
+                        fastestSplits[index] = minOverallSplit / minSize;
+                    }
+                }
+            });
+        }
+                
+        if (!fastestSplits.every(isNotNull)) {
+            // Could happen if the competitors are created from split times and
+            // the splits are not complete, and also if nobody punches the
+            // final few controls.  Set any remaining missing splits to 3
+            // minutes for intermediate controls and 1 minute for the finish.
+            for (var index = 0; index < fastestSplits.length; index += 1) {
+                if (fastestSplits[index] === null) {
+                    fastestSplits[index] = (index === fastestSplits.length - 1) ? 60 : 180;
+                }
             }
         }
+        
+        var fastestCumTimes = new Array(this.numControls + 1);
+        fastestSplits.forEach(function (fastestSplit, index) {
+            fastestCumTimes[index] = (index === 0) ? 0 : fastestCumTimes[index - 1] + fastestSplit * ratio;
+        });
 
         return fastestCumTimes;
     };
-    
+
+    /**
+    * Returns the cumulative times for the competitor with the given index,
+    * with any runs of blanks filled in.
+    * @param {Number} competitorIndex - The index of the competitor.
+    * @return {Array} Array of cumulative times.
+    */
+    AgeClassSet.prototype.getCumulativeTimesForCompetitor = function (competitorIndex) {
+        return fillBlankRangesInCumulativeTimes(this.allCompetitors[competitorIndex].getAllCumulativeTimes());
+    };
+
     /**
     * Compute the ranks of each competitor within their class.
     */
@@ -1095,7 +1431,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
                 return (compASplit === compBSplit) ? d3.ascending(compA.totalTime, compB.totalTime) : d3.ascending(compASplit, compBSplit);
             };
             
-            var competitors = this.allCompetitors.filter(function (comp) { return comp.completed(); });
+            var competitors = this.allCompetitors.filter(function (comp) { return comp.completed() && !isNaNStrict(comp.getSplitTimeTo(controlIdx)); });
             competitors.sort(comparator);
             var results = [];
             for (var i = 0; i < competitors.length && i < numSplits; i += 1) {
@@ -1129,7 +1465,8 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         var competitorData = this.allCompetitors.map(function (comp) { return chartType.dataSelector(comp, referenceCumTimes); });
         var selectedCompetitorData = currentIndexes.map(function (index) { return competitorData[index]; });
 
-        var xMax = referenceCumTimes[referenceCumTimes.length - 1];
+        var xMin = d3.min(referenceCumTimes);
+        var xMax = d3.max(referenceCumTimes);
         var yMin;
         var yMax;
         if (currentIndexes.length === 0) {
@@ -1148,6 +1485,14 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
             // make sure that they're not equal.
             yMax = yMin + 1;
         }
+        
+        
+        var controlIndexAdjust = (chartType.skipStart) ? 1 : 0;
+        var dubiousTimesInfo = currentIndexes.map(function (competitorIndex) {
+            return chartType.indexesAroundDubiousTimesFunc(this.allCompetitors[competitorIndex]).map(function (indexPair) {
+                return { start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust };
+            });
+        }, this);
 
         var cumulativeTimesByControl = d3.transpose(selectedCompetitorData);
         var xData = (chartType.skipStart) ? referenceCumTimes.slice(1) : referenceCumTimes;
@@ -1157,8 +1502,9 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
             dataColumns: zippedData.map(function (data) { return { x: data[0], ys: data[1] }; }),
             competitorNames: competitorNames,
             numControls: this.numControls,
-            xExtent: [0, xMax],
-            yExtent: [yMin, yMax]
+            xExtent: [xMin, xMax],
+            yExtent: [yMin, yMax],
+            dubiousTimesInfo: dubiousTimesInfo
         };
     };
     
@@ -1488,6 +1834,35 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Determines time losses for each competitor in each class.
+    * 
+    * This method should be called after reading in the event data but before
+    * attempting to plot it.
+    */
+    Event.prototype.determineTimeLosses = function () {
+        this.classes.forEach(function (ageClass) {
+            ageClass.determineTimeLosses();
+        });
+    };
+    
+    /**
+    * Returns whether the event data needs any repairing.
+    *
+    * The event data needs repairing if any competitors are missing their
+    * 'repaired' cumulative times.
+    *
+    * @return {boolean} True if the event data needs repairing, false
+    *     otherwise.
+    */
+    Event.prototype.needsRepair = function () {
+        return this.classes.some(function (ageClass) {
+            return ageClass.competitors.some(function (competitor) {
+                return (competitor.getAllCumulativeTimes() === null);
+            });
+        });
+    };
+    
+    /**
     * Returns the fastest splits for each class on a given leg.
     *
     * The fastest splits are returned as an array of objects, where each object
@@ -1567,6 +1942,26 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     function secondsToMinutes(seconds) { 
         return (seconds === null) ? null : seconds / 60;
     }
+    
+    /**
+    * Returns indexes around the given competitor's dubious cumulative times.
+    * @param {Competitor} competitor - The competitor to get the indexes for.
+    * @return {Array} Array of objects containing indexes around dubious
+    *     cumulative times.
+    */
+    function getIndexesAroundDubiousCumulativeTimes(competitor) {
+        return competitor.getControlIndexesAroundDubiousCumulativeTimes();
+    }
+    
+    /**
+    * Returns indexes around the given competitor's dubious split times.
+    * @param {Competitor} competitor - The competitor to get the indexes for.
+    * @return {Array} Array of objects containing indexes around dubious split
+    *     times.
+    */
+    function getIndexesAroundDubiousSplitTimes(competitor) {
+        return competitor.getControlIndexesAroundDubiousSplitTimes();
+    }
 
     SplitsBrowser.Model.ChartTypes = {
         SplitsGraph: {
@@ -1576,7 +1971,8 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
             yAxisLabelKey: "SplitsGraphYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
-            minViewableControl: 1
+            minViewableControl: 1,
+            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumulativeTimes
         },
         RaceGraph: {
             nameKey: "RaceGraphChartType",
@@ -1585,7 +1981,8 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
             yAxisLabelKey: "RaceGraphYAxisLabel",
             isRaceGraph: true,
             isResultsTable: false,
-            minViewableControl: 0
+            minViewableControl: 0,
+            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumulativeTimes
         },
         PositionAfterLeg: {
             nameKey:  "PositionAfterLegChartType",
@@ -1594,7 +1991,8 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
             yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
-            minViewableControl: 1
+            minViewableControl: 1,
+            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumulativeTimes
         },
         SplitPosition: {
             nameKey: "SplitPositionChartType",
@@ -1603,7 +2001,8 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
             yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
-            minViewableControl: 1
+            minViewableControl: 1,
+            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousSplitTimes
         },
         PercentBehind: {
             nameKey: "PercentBehindChartType",
@@ -1612,7 +2011,8 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
             yAxisLabelKey: "PercentBehindYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
-            minViewableControl: 1
+            minViewableControl: 1,
+            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousSplitTimes
         },
         ResultsTable: {
             nameKey: "ResultsTableChartType",
@@ -1621,7 +2021,8 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
             yAxisLabelKey: null,
             isRaceGraph: false,
             isResultsTable: true,
-            minViewableControl: 1
+            minViewableControl: 1,
+            indexesAroundDubiousTimesFunc: null
         }
     };
 })();
@@ -1812,6 +2213,245 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
 (function () {
     "use strict";
     
+    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
+    var throwInvalidData = SplitsBrowser.throwInvalidData;
+
+    // Maximum number of minutes added to finish splits to ensure that all
+    // competitors have sensible finish splits.
+    var MAX_FINISH_SPLIT_MINS_ADDED = 5;
+    
+    /**
+     * Construct a Repairer, for repairing some data.
+    */
+    var Repairer = function () {
+        this.madeAnyChanges = false;
+    };
+
+   /**
+    * Returns the positions at which the first pair of non-ascending cumulative
+    * times are found.  This is returned as an object with 'first' and 'second'
+    * properties.
+    *
+    * If the entire array of cumulative times is strictly ascending, this
+    * returns null.
+    * 
+    * @param {Array} cumTimes - Array of cumulative times.
+    * @return {Object|null} Object containing indexes of non-ascending entries,
+    *     or null if none found.
+    */
+    function getFirstNonAscendingIndexes(cumTimes) {
+        if (cumTimes.length === 0 || cumTimes[0] !== 0) {
+            throwInvalidData("cumulative times array does not start with a zero cumulative time");
+        }
+        
+        var lastNumericTimeIndex = 0;
+        
+        for (var index = 1; index < cumTimes.length; index += 1) {
+            var time = cumTimes[index];
+            if (isNotNullNorNaN(time)) {
+                // This entry is numeric.
+                if (time <= cumTimes[lastNumericTimeIndex]) {
+                    return {first: lastNumericTimeIndex, second: index};
+                }
+                
+                lastNumericTimeIndex = index;
+            }
+        }
+        
+        // If we get here, the entire array is in strictly-ascending order.
+        return null;
+    }
+    
+    
+    /**
+    * Remove, by setting to NaN, any cumulative time that is equal to the
+    * previous cumulative time.
+    * @param {Array} cumTimes - Array of cumulative times.
+    */
+    Repairer.prototype.removeCumulativeTimesEqualToPrevious = function (cumTimes) {
+        var lastCumTime = cumTimes[0];
+        for (var index = 1; index + 1 < cumTimes.length; index += 1) {
+            if (cumTimes[index] !== null && cumTimes[index] === lastCumTime) {
+                cumTimes[index] = NaN;
+                this.madeAnyChanges = true;
+            } else {
+                lastCumTime = cumTimes[index];
+            }
+        }
+    };
+    
+    /**
+    * Remove from the cumulative times given any individual times that cause
+    * negative splits and whose removal leaves all of the remaining splits in
+    * strictly-ascending order.
+    *
+    * This method does not compare the last two cumulative times, so if the 
+    * finish time is not after the last control time, no changes will be made.
+    *
+    * @param {Array} cumTimes - Array of cumulative times.
+    * @return {Array} Array of cumulaive times with perhaps some cumulative
+    *     times taken out.
+    */
+    Repairer.prototype.removeCumulativeTimesCausingNegativeSplits = function (cumTimes) {
+
+        var nonAscIndexes = getFirstNonAscendingIndexes(cumTimes);
+        while (nonAscIndexes !== null && nonAscIndexes.second + 1 < cumTimes.length) {
+            
+            // So, we have a pair of cumulative times that are not in strict
+            // ascending order, with the second one not being the finish.  If
+            // the second time is not the finish cumulative time for a
+            // completing competitor, try the following in order until we get a
+            // list of cumulative times in ascending order:
+            // * Remove the second cumulative time,
+            // * Remove the first cumulative time.
+            // If one of these allows us to push the next non-ascending indexes
+            // beyond the second, remove the offending time and keep going.  By
+            // 'remove' we mean 'replace with NaN'.
+            //
+            // We don't want to remove the finish time for a competitor as that
+            // removes their total time as well.  If the competitor didn't
+            // complete the course, then we're not so bothered; they've
+            // mispunched so they don't have a total time anyway.
+            
+            var first = nonAscIndexes.first;
+            var second = nonAscIndexes.second;
+            
+            var progress = false;
+            
+            for (var attempt = 1; attempt <= 3; attempt += 1) {
+                // 1 = remove second, 2 = remove first, 3 = remove first and the one before.
+                var adjustedCumTimes = cumTimes.slice();
+                
+                if (attempt === 3 && (first === 1 || !isNotNullNorNaN(cumTimes[first - 1]))) {
+                    // Can't remove first and the one before because there
+                    // isn't a time before or it's already blank.
+                } else {
+                    if (attempt === 1) {
+                        adjustedCumTimes[second] = NaN;
+                    } else if (attempt === 2) {
+                        adjustedCumTimes[first] = NaN;
+                    } else if (attempt === 3) {
+                        adjustedCumTimes[first] = NaN;
+                        adjustedCumTimes[first - 1] = NaN;
+                    }
+                    
+                    var nextNonAscIndexes = getFirstNonAscendingIndexes(adjustedCumTimes);
+                    if (nextNonAscIndexes === null || nextNonAscIndexes.first > second) {
+                        progress = true;
+                        cumTimes = adjustedCumTimes;
+                        this.madeAnyChanges = true;
+                        nonAscIndexes = nextNonAscIndexes;
+                        break;
+                    }
+                }
+            }
+            
+            if (!progress) {
+                break;
+            }
+        }
+    
+        return cumTimes;
+    };
+    
+    /**
+    * Removes the finish cumulative time from a competitor if it is absurd.
+    *
+    * It is absurd if it is less than the time at the previous control by at
+    * least the maximum amount of time that can be added to finish splits.
+    * 
+    * @param {Array} cumTimes - The cumulative times to perhaps remove the
+    *     finish split from.
+    */
+    Repairer.prototype.removeFinishTimeIfAbsurd = function (cumTimes) {
+        var finishTime = cumTimes[cumTimes.length - 1];
+        var lastControlTime = cumTimes[cumTimes.length - 2];
+        if (isNotNullNorNaN(finishTime) && isNotNullNorNaN(lastControlTime) && finishTime <= lastControlTime - MAX_FINISH_SPLIT_MINS_ADDED * 60) {
+            cumTimes[cumTimes.length - 1] = NaN;
+            this.madeAnyChanges = true;
+        }
+    };
+    
+    /**
+    * Attempts to repair the cumulative times for a competitor.  The repaired
+    * cumulative times are written back into the competitor.
+    *
+    * @param {Competitor} competitor - Competitor whose cumulative times we
+    *     wish to repair.
+    */
+    Repairer.prototype.repairCompetitor = function (competitor) {
+        var cumTimes = competitor.originalCumTimes.slice(0);
+        
+        this.removeCumulativeTimesEqualToPrevious(cumTimes);
+        
+        cumTimes = this.removeCumulativeTimesCausingNegativeSplits(cumTimes);
+        
+        if (!competitor.completed()) {
+            this.removeFinishTimeIfAbsurd(cumTimes);
+        }
+        
+        competitor.setRepairedCumulativeTimes(cumTimes);
+    };
+    
+    /**
+    * Attempt to repair all of the data within an age class.
+    * @param {AgeClass} The age class whose data we wish to repair.
+    */
+    Repairer.prototype.repairAgeClass = function (ageClass) {
+        this.madeAnyChanges = false;
+        ageClass.competitors.forEach(function (competitor) {
+            this.repairCompetitor(competitor);
+        }, this);
+        
+        if (this.madeAnyChanges) {
+            ageClass.recordHasDubiousData();
+        }
+    };
+    
+    /**
+    * Attempt to carry out repairs to the data in an event.
+    * @param {Event} eventData - The event data to repair.
+    */
+    Repairer.prototype.repairEventData = function (eventData) {
+        eventData.classes.forEach(function (ageClass) {
+            this.repairAgeClass(ageClass);
+        }, this);
+    };
+    
+    /**
+    * Attempt to carry out repairs to the data in an event.
+    * @param {Event} eventData - The event data to repair.
+    */
+    function repairEventData(eventData) {
+        var repairer = new Repairer();
+        repairer.repairEventData(eventData);
+    }
+    
+    /**
+    * Transfer the 'original' data for each competitor to the 'final' data.
+    *
+    * This is used if the input data has been read in a format that requires
+    * the data to be checked, but the user has opted not to perform any such
+    * reparations and wishes to view the 
+    * @param {Event} eventData - The event data to repair.
+    */
+    function transferCompetitorData(eventData) {
+        eventData.classes.forEach(function (ageClass) {
+            ageClass.competitors.forEach(function (competitor) {
+                competitor.setRepairedCumulativeTimes(competitor.getAllOriginalCumulativeTimes());
+            });
+        });
+    }
+    
+    SplitsBrowser.DataRepair = {
+        repairEventData: repairEventData,
+        transferCompetitorData: transferCompetitorData
+    };
+})();
+
+(function () {
+    "use strict";
+    
     var isTrue = SplitsBrowser.isTrue;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
@@ -1921,9 +2561,8 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
-    var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
-    var Competitor = SplitsBrowser.Model.Competitor;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -1943,22 +2582,6 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     
     // Minimum control offset.
     var MIN_CONTROLS_OFFSET = 37;
-    
-    /**
-    * Checks that two consecutive cumulative times are in strictly ascending
-    * order, and throws an exception if not.  The previous time should not be
-    * null, but the next time may, and no exception will be thrown in this
-    * case.
-    * @param {Number} prevTime - The previous cumulative time, in seconds.
-    * @param {Number} nextTime - The next cumulative time, in seconds.
-    */
-    function verifyCumulativeTimesInOrder(prevTime, nextTime) {
-        if (nextTime !== null && nextTime <= prevTime) {
-            throwInvalidData("Cumulative times must be strictly ascending: read " +
-                    formatTime(prevTime) + " and " + formatTime(nextTime) +
-                    " in that order");
-        }
-    }
     
     /**
     * Constructs an SI-format data reader.
@@ -2057,22 +2680,16 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     Reader.prototype.readCumulativeTimes = function (row, lineNumber, numControls) {
         
         var cumTimes = [0];
-        var lastCumTime = 0;
         
         for (var controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
             var cellIndex = this.control1Index + 1 + 2 * controlIdx;
-            var cumTime = (cellIndex < row.length) ? parseTime(row[cellIndex]) : null;
-                
-            verifyCumulativeTimesInOrder(lastCumTime, cumTime);
-            
+            var cumTimeStr = (cellIndex < row.length) ? row[cellIndex] : null;
+            var cumTime = (cumTimeStr === null) ? null : parseTime(cumTimeStr);
             cumTimes.push(cumTime);
-            if (cumTime !== null) {
-                lastCumTime = cumTime;
-            }
         }
         
         var totalTime = parseTime(row[this.control1Index + COLUMN_OFFSETS.TIME]);
-        verifyCumulativeTimesInOrder(lastCumTime, totalTime);
+        
         cumTimes.push(totalTime);
     
         return cumTimes;
@@ -2160,7 +2777,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         }
         
         var order = this.ageClasses.get(className).competitors.length + 1;
-        var competitor = Competitor.fromCumTimes(order, name, club, startTime, cumTimes);
+        var competitor = fromOriginalCumTimes(order, name, club, startTime, cumTimes);
         if (isPlacingNonNumeric && competitor.completed()) {
             // Competitor has completed the course but has no placing.
             // Assume that they are non-competitive.
@@ -2405,9 +3022,8 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
-    var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
-    var Competitor = SplitsBrowser.Model.Competitor;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -2660,24 +3276,11 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * @return {Competitor} Converted competitor object.
     */
     CompetitorParseRecord.prototype.toCompetitor = function (order) {
-        var lastCumTime = 0;
-        this.cumTimes.forEach(function (cumTime) {
-            if (cumTime !== null) {
-                if (cumTime <= lastCumTime) {
-                    throwInvalidData("Cumulative times must be strictly ascending: read " +
-                        formatTime(lastCumTime) + " and " + formatTime(cumTime) +
-                        " in that order");
-                }
-
-                lastCumTime = cumTime;
-            }
-        });
-        
         // Prepend a zero cumulative time.
         var cumTimes = [0].concat(this.cumTimes);
         
         // The null is for the start time.
-        var competitor = Competitor.fromCumTimes(order, this.name, this.club, null, cumTimes);
+        var competitor = fromOriginalCumTimes(order, this.name, this.club, null, cumTimes);
         if (competitor.completed() && !this.competitive) {
             competitor.setNonCompetitive();
         }
@@ -3482,19 +4085,9 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         this.parent = parent;
         this.handler = null;
         this.competitorSelection = null;
-        this.isEnabled = true;
 
         this.listDiv = d3.select(parent).append("div")
                                         .attr("id", COMPETITOR_LIST_ID);
-    };
-    
-    /**
-    * Sets whether this competitor list-box is enabled.
-    * @param {boolean} isEnabled - Whether this list-box is enabled.
-    */
-    CompetitorListBox.prototype.setEnabled = function (isEnabled) {
-        this.isEnabled = isEnabled;
-        this.listDiv.selectAll("div.competitor").classed("disabled", !isEnabled);
     };
 
     /**
@@ -3520,9 +4113,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * Toggle the selectedness of a competitor.
     */
     CompetitorListBox.prototype.toggleCompetitor = function (index) {
-        if (this.isEnabled) {
-            this.competitorSelection.toggle(index);
-        }
+        this.competitorSelection.toggle(index);
     };
 
     /**
@@ -4016,7 +4607,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     ComparisonSelector.prototype.getComparisonFunction = function () {
         if (this.isAnyRunnerSelected()) {
             var outerThis = this;
-            return function (ageClassSet) { return ageClassSet.allCompetitors[outerThis.currentRunnerIndex].getAllCumulativeTimes(); };
+            return function (ageClassSet) { return ageClassSet.getCumulativeTimesForCompetitor(outerThis.currentRunnerIndex); };
         } else {
             return ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
         }
@@ -4257,6 +4848,90 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     SplitsBrowser.Controls.ChartTypeSelector = ChartTypeSelector;
 })();
 
+
+(function () {
+    "use strict";
+    
+    // ID of the div used to contain the object.
+    // Must match the name defined in styles.css.
+    var CONTAINER_DIV_ID = "originalDataSelectorContainer";
+    
+    var getMessage = SplitsBrowser.getMessage;
+    
+    /**
+    * Constructs a new OriginalDataSelector object.
+    * @constructor
+    * @param {d3.selection} parent - d3 selection containing the parent to
+    *     insert the selector into.
+    * @param {Function} showOriginalData - Function to call when original data
+    *     is to be shown.
+    * @param {Function} showRepairedData - Function to call when repaired data
+    *     is to be shown.
+    */
+    var OriginalDataSelector = function (parent, showOriginalData, showRepairedData) {
+        this.parent = parent;
+        this.showRepairedData = showRepairedData;
+        this.showOriginalData = showOriginalData;
+
+        var checkboxId = "originalDataCheckbox";
+        this.containerDiv = parent.append("div")
+                                  .attr("id", CONTAINER_DIV_ID);
+
+        this.containerDiv.append("div").classed("topRowSpacer", true);    
+        
+        var span = this.containerDiv.append("span");
+        
+        var outerThis = this;
+        this.checkbox = span.append("input")
+                            .attr("type", "checkbox")
+                            .attr("id", checkboxId)
+                            .on("click", function() { outerThis.showOriginalOrRepairedData(); })
+                            .node();
+                                 
+        span.append("label")
+            .attr("for", checkboxId)
+            .classed("originalDataSelectorLabel", true)
+            .text(getMessage("ShowOriginalData"));
+            
+        this.containerDiv.attr("title", getMessage("ShowOriginalDataTooltip"));
+    };
+
+    /**
+    * Shows original or repaired data depending on whether the checkbox is
+    * checked.
+    */
+    OriginalDataSelector.prototype.showOriginalOrRepairedData = function () {
+        if (this.checkbox.checked) {
+            this.showOriginalData();
+        } else {
+            this.showRepairedData();
+        }
+    };
+    
+    /**
+    * Sets whether this original-data selector should be visible.
+    * @param {boolean} isVisible - True if the original-data selector should be
+    *     visible, false if it should be hidden.
+    */
+    OriginalDataSelector.prototype.setVisible = function (isVisible) {
+        this.containerDiv.style("display", (isVisible) ? null : "none");
+    };
+    
+    /**
+    * Sets whether the control is enabled.
+    * @param {boolean} isEnabled - True if the control is enabled, false if
+    *      disabled.
+    */
+    OriginalDataSelector.prototype.setEnabled = function (isEnabled) {
+        this.parent.selectAll("label.originalDataSelectorLabel")
+                   .classed("disabled", !isEnabled);
+                              
+        this.checkbox.disabled = !isEnabled;
+    };
+    
+    SplitsBrowser.Controls.OriginalDataSelector = OriginalDataSelector;
+
+})();
 
 (function () {
     "use strict";
@@ -4647,9 +5322,10 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     ];
 
     // 'Imports'.
-    var isNotNull = SplitsBrowser.isNotNull;
     var formatTime = SplitsBrowser.formatTime;
     var getMessage = SplitsBrowser.getMessage;
+    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
     
     var ChartPopupData = SplitsBrowser.Model.ChartPopupData;
     var ChartPopup = SplitsBrowser.Controls.ChartPopup;
@@ -4662,7 +5338,16 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * @returns Time and rank formatted as a string.
     */
     function formatTimeAndRank(time, rank) {
-        return SPACER + formatTime(time) + " (" + ((rank === null) ? "-" : rank) + ")";
+        var rankStr;
+        if (rank === null) {
+            rankStr = "-";
+        } else if (isNaNStrict(rank)) {
+            rankStr = "?";
+        } else {
+            rankStr = rank.toString();
+        }
+        
+        return SPACER + formatTime(time) + " (" + rankStr + ")";
     }
     
     /**
@@ -4696,7 +5381,6 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         this.isPopupOpen = false;
         this.popupUpdateFunc = null;
         this.maxStartTimeLabelWidth = 0;
-        this.warningPanel = null;
         
         this.mouseOutTimeout = null;
         
@@ -4704,6 +5388,8 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         // they appear in the list of labels.
         this.selectedIndexesOrderedByLastYValue = [];
         this.referenceCumTimes = [];
+        this.referenceCumTimesSorted = [];
+        this.referenceCumTimeIndexes = [];
         this.fastestCumTimes = [];
         
         this.isMouseIn = false;
@@ -4841,15 +5527,13 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * @param {jQuery.event} event - jQuery event object.
     */
     Chart.prototype.onMouseEnter = function (event) {
-        if (this.warningPanel === null) {
-            if (this.mouseOutTimeout !== null) {
-                clearTimeout(this.mouseOutTimeout);
-                this.mouseOutTimeout = null;
-            }
-            
-            this.isMouseIn = true;
-            this.updateControlLineLocation(event);            
+        if (this.mouseOutTimeout !== null) {
+            clearTimeout(this.mouseOutTimeout);
+            this.mouseOutTimeout = null;
         }
+        
+        this.isMouseIn = true;
+        this.updateControlLineLocation(event);            
     };
 
     /**
@@ -4857,7 +5541,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * @param {jQuery.event} event - jQuery event object.
     */
     Chart.prototype.onMouseMove = function (event) {
-        if (this.isMouseIn && this.xScale !== null && this.warningPanel === null) {
+        if (this.isMouseIn && this.xScale !== null) {
             this.updateControlLineLocation(event);
         }
     };
@@ -4866,27 +5550,25 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * Handle the mouse leaving the chart.
     */
     Chart.prototype.onMouseLeave = function () {
-        if (this.warningPanel === null) {
-            var outerThis = this;
-            // Check that the mouse hasn't entered the popup.
-            // It seems that the mouseleave event for the chart is sent before the
-            // mouseenter event for the popup, so we use a timeout to check a short
-            // time later whether the mouse has left the chart and the popup.
-            // This is only necessary for IE9 and IE10; other browsers support
-            // "pointer-events: none" in CSS so the popup never gets any mouse
-            // events.
-            
-            // Note that we keep a reference to the 'timeout', so that we can
-            // clear it if the mouse subsequently re-enters.  This happens a lot
-            // more often than might be expected for a function with a timeout of
-            // only a single millisecond.
-            this.mouseOutTimeout = setTimeout(function() {
-                if (!outerThis.popup.isMouseIn()) {
-                    outerThis.isMouseIn = false;
-                    outerThis.removeControlLine();
-                }
-            }, 1);
-        }
+        var outerThis = this;
+        // Check that the mouse hasn't entered the popup.
+        // It seems that the mouseleave event for the chart is sent before the
+        // mouseenter event for the popup, so we use a timeout to check a short
+        // time later whether the mouse has left the chart and the popup.
+        // This is only necessary for IE9 and IE10; other browsers support
+        // "pointer-events: none" in CSS so the popup never gets any mouse
+        // events.
+        
+        // Note that we keep a reference to the 'timeout', so that we can
+        // clear it if the mouse subsequently re-enters.  This happens a lot
+        // more often than might be expected for a function with a timeout of
+        // only a single millisecond.
+        this.mouseOutTimeout = setTimeout(function() {
+            if (!outerThis.popup.isMouseIn()) {
+                outerThis.isMouseIn = false;
+                outerThis.removeControlLine();
+            }
+        }, 1);
     };
     
     /**
@@ -4894,23 +5576,19 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * @param {jQuery.Event} event - jQuery event object.
     */
     Chart.prototype.onMouseDown = function (event) {
-        if (this.warningPanel === null) {
-            var outerThis = this;
-            // Use a timeout to open the dialog as we require other events
-            // (mouseover in particular) to be processed first, and the precise
-            // order of these events is not consistent between browsers.
-            setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
-        }
+        var outerThis = this;
+        // Use a timeout to open the dialog as we require other events
+        // (mouseover in particular) to be processed first, and the precise
+        // order of these events is not consistent between browsers.
+        setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
     };
     
     /**
     * Handles a mouse button being pressed over the chart.
     */
     Chart.prototype.onMouseUp = function (event) {
-        if (this.warningPanel === null) {
-            this.popup.hide();
-            event.preventDefault();
-        }
+        this.popup.hide();
+        event.preventDefault();
     };
     
     /**
@@ -5008,24 +5686,27 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
             // In the chart.
             // Get the time offset that the mouse is currently over.
             var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
-            var bisectIndex = d3.bisect(this.referenceCumTimes, chartX);
+            var bisectIndex = d3.bisect(this.referenceCumTimesSorted, chartX);
             
             // bisectIndex is the index at which to insert chartX into
             // referenceCumTimes in order to keep the array sorted.  So if
             // this index is N, the mouse is between N - 1 and N.  Find
             // which is nearer.
-            var controlIndex;
-            if (bisectIndex >= this.referenceCumTimes.length) {
-                // Off the right-hand end, use the finish.
-                controlIndex = this.numControls + 1;
+            var sortedControlIndex;
+            if (bisectIndex >= this.referenceCumTimesSorted.length) {
+                // Off the right-hand end, use the last control (usually the
+                // finish).
+                sortedControlIndex = this.referenceCumTimesSorted.length - 1;
             } else {
-                var diffToNext = Math.abs(this.referenceCumTimes[bisectIndex] - chartX);
-                var diffToPrev = Math.abs(chartX - this.referenceCumTimes[bisectIndex - 1]);
-                controlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
+                var diffToNext = Math.abs(this.referenceCumTimesSorted[bisectIndex] - chartX);
+                var diffToPrev = Math.abs(chartX - this.referenceCumTimesSorted[bisectIndex - 1]);
+                sortedControlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
             }
             
+            var controlIndex = this.referenceCumTimeIndexes[sortedControlIndex];
+            
             if (this.actualControlIndex === null || this.actualControlIndex !== controlIndex) {
-                // The control line has appeared for ths first time or has moved, so redraw it.
+                // The control line has appeared for the first time or has moved, so redraw it.
                 this.removeControlLine();
                 this.actualControlIndex = controlIndex;
                 this.drawControlLine(Math.max(this.minViewableControl, controlIndex));
@@ -5188,6 +5869,18 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     };
 
     /**
+    * Returns the maximum value from the given array, not including any null or
+    * NaN values.  If the array contains no non-null, non-NaN values, zero is
+    * returned.
+    * @param {Array} values - Array of values.
+    * @return {Number} Maximum non-null or NaN value.
+    */    
+    function maxNonNullNorNaNValue(values) {
+        var nonNullNorNaNValues = values.filter(isNotNullNorNaN);
+        return (nonNullNorNaNValues.length > 0) ? d3.max(nonNullNorNaNValues) : 0;
+    }
+
+    /**
     * Return the maximum width of a piece of time and rank text shown to the right
     * of each competitor 
     * @param {string} timeFuncName - Name of the function to call to get the time
@@ -5204,10 +5897,10 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         
         d3.range(1, this.numControls + 2).forEach(function (controlIndex) {
             var times = selectedCompetitors.map(function (comp) { return comp[timeFuncName](controlIndex); });
-            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+            maxTime = Math.max(maxTime, maxNonNullNorNaNValue(times));
             
             var ranks = selectedCompetitors.map(function (comp) { return comp[rankFuncName](controlIndex); });
-            maxRank = Math.max(maxRank, d3.max(ranks.filter(isNotNull)));
+            maxRank = Math.max(maxRank, maxNonNullNorNaNValue(ranks));
         });
         
         var text = formatTimeAndRank(maxTime, maxRank);
@@ -5243,7 +5936,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
             var times = this.getTimesBehindFastest(controlIndex, this.selectedIndexes);
-            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+            maxTime = Math.max(maxTime, maxNonNullNorNaNValue(times));
         }
         
         return this.getTextWidth(SPACER + formatTime(maxTime));
@@ -5255,14 +5948,19 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * @returns {Number} Maximum width of behind-fastest time rank text, in pixels.
     */
     Chart.prototype.getMaxTimeLossWidth = function() {
-        var maxTime = 0;
-        
+        var maxTimeLoss = 0;
+        var minTimeLoss = 0;
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
-            var times = this.getTimeLosses(controlIndex, this.selectedIndexes);
-            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+            var timeLosses = this.getTimeLosses(controlIndex, this.selectedIndexes);
+            var nonNullTimeLosses = timeLosses.filter(isNotNullNorNaN);
+            if (nonNullTimeLosses.length > 0) {
+                maxTimeLoss = Math.max(maxTimeLoss, d3.max(nonNullTimeLosses));
+                minTimeLoss = Math.min(minTimeLoss, d3.min(nonNullTimeLosses));
+            }
         }
         
-        return this.getTextWidth(SPACER + formatTime(maxTime));
+        return Math.max(this.getTextWidth(SPACER + formatTime(maxTimeLoss)),
+                        this.getTextWidth(SPACER + formatTime(minTimeLoss)));
     };
 
     /**
@@ -5319,16 +6017,33 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * between controls.
     */
     Chart.prototype.drawBackgroundRectangles = function () {
-        var rects = this.svgGroup.selectAll("rect")
-                                 .data(d3.range(this.numControls + 1));
+        
+        // We can't guarantee that the reference cumulative times are in
+        // ascending order, but we need such a list of times in order to draw
+        // the rectangles.  So, sort the reference cumulative times.
+        var refCumTimesSorted = this.referenceCumTimes.slice(0);
+        refCumTimesSorted.sort(d3.ascending);
+        
+        // Now remove any duplicate times.
+        var index = 1;
+        while (index < refCumTimesSorted.length) {
+            if (refCumTimesSorted[index] === refCumTimesSorted[index - 1]) {
+                refCumTimesSorted.splice(index, 1);
+            } else {
+                index += 1;
+            }
+        }
 
         var outerThis = this;
-
+        
+        var rects = this.svgGroup.selectAll("rect")
+                                 .data(d3.range(refCumTimesSorted.length - 1));
+        
         rects.enter().append("rect");
 
-        rects.attr("x", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index]); })
+        rects.attr("x", function (index) { return outerThis.xScale(refCumTimesSorted[index]); })
              .attr("y", 0)
-             .attr("width", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index + 1] - outerThis.referenceCumTimes[index]); })
+             .attr("width", function (index) { return outerThis.xScale(refCumTimesSorted[index + 1]) - outerThis.xScale(refCumTimesSorted[index]); })
              .attr("height", this.contentHeight)
              .attr("class", function (index) { return (index % 2 === 0) ? "background1" : "background2"; });
 
@@ -5443,27 +6158,43 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
                 return d3.svg.line()
                              .x(function (d) { return outerThis.xScale(d.x); })
                              .y(function (d) { return outerThis.yScale(d.ys[selCompIdx]); })
-                             .defined(function (d) { return d.ys[selCompIdx] !== null; })
+                             .defined(function (d) { return isNotNullNorNaN(d.ys[selCompIdx]); })
                              .interpolate("linear");
             }
         };
         
-        var graphLines = this.svgGroup.selectAll("path.graphLine")
-                                      .data(d3.range(this.numLines));
-
-        graphLines.enter()
-                  .append("path")
-                  .append("title");
-
-        graphLines.attr("d", function (selCompIdx) { return lineFunctionGenerator(selCompIdx)(chartData.dataColumns); })
-                  .attr("stroke", function (selCompIdx) { return colours[outerThis.selectedIndexes[selCompIdx] % colours.length]; })
-                  .attr("class", function (selCompIdx) { return "graphLine competitor" + outerThis.selectedIndexes[selCompIdx]; })
-                  .on("mouseenter", function (selCompIdx) { outerThis.highlight(outerThis.selectedIndexes[selCompIdx]); })
-                  .on("mouseleave", function () { outerThis.unhighlight(); })
-                  .select("title")
-                  .text(function (selCompIdx) { return chartData.competitorNames[selCompIdx]; });
-
-        graphLines.exit().remove();
+        this.svgGroup.selectAll("path.graphLine").remove();
+        
+        this.svgGroup.selectAll("line.aroundDubiousTimes").remove();
+        
+        d3.range(this.numLines).forEach(function (selCompIdx) {
+            var strokeColour = colours[this.selectedIndexes[selCompIdx] % colours.length];
+            var highlighter = function () { outerThis.highlight(outerThis.selectedIndexes[selCompIdx]); };
+            var unhighlighter = function () { outerThis.unhighlight(); };
+            
+            this.svgGroup.append("path")
+                         .attr("d", lineFunctionGenerator(selCompIdx)(chartData.dataColumns))
+                         .attr("stroke", strokeColour)
+                         .attr("class", "graphLine competitor" + this.selectedIndexes[selCompIdx])
+                         .on("mouseenter", highlighter)
+                         .on("mouseleave", unhighlighter)
+                         .append("title")
+                         .text(chartData.competitorNames[selCompIdx]);
+                         
+            chartData.dubiousTimesInfo[selCompIdx].forEach(function (dubiousTimeInfo) {
+                this.svgGroup.append("line")
+                             .attr("x1", this.xScale(chartData.dataColumns[dubiousTimeInfo.start].x))
+                             .attr("y1", this.yScale(chartData.dataColumns[dubiousTimeInfo.start].ys[selCompIdx]))
+                             .attr("x2", this.xScale(chartData.dataColumns[dubiousTimeInfo.end].x))
+                             .attr("y2", this.yScale(chartData.dataColumns[dubiousTimeInfo.end].ys[selCompIdx]))
+                             .attr("stroke", strokeColour)
+                             .attr("class", "aroundDubiousTimes competitor" + this.selectedIndexes[selCompIdx])
+                             .on("mouseenter", highlighter)
+                             .on("mouseleave", unhighlighter)
+                             .append("title")
+                             .text(chartData.competitorNames[selCompIdx]);
+            }, this);
+        }, this);
     };
 
     /**
@@ -5475,6 +6206,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         this.svg.selectAll("line.competitorLegendLine.competitor" + competitorIdx).classed("selected", true);
         this.svg.selectAll("text.competitorLabel.competitor" + competitorIdx).classed("selected", true);
         this.svg.selectAll("text.startLabel.competitor" + competitorIdx).classed("selected", true);
+        this.svg.selectAll("line.aroundDubiousTimes.competitor" + competitorIdx).classed("selected", true);
     };
 
     /**
@@ -5485,6 +6217,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         this.svg.selectAll("line.competitorLegendLine.selected").classed("selected", false);
         this.svg.selectAll("text.competitorLabel.selected").classed("selected", false);
         this.svg.selectAll("text.startLabel.selected").classed("selected", false);
+        this.svg.selectAll("line.aroundDubiousTimes.selected").classed("selected", false);
     };
 
     /**
@@ -5579,7 +6312,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
                 return {
                     label: formatNameAndSuffix(name, this.ageClassSet.allCompetitors[competitorIndex].getSuffix()),
                     textHeight: textHeight,
-                    y: (finishColumn.ys[i] === null) ? null : this.yScale(finishColumn.ys[i]),
+                    y: (isNotNullNorNaN(finishColumn.ys[i])) ? this.yScale(finishColumn.ys[i]) : null,
                     colour: colours[competitorIndex % colours.length],
                     index: competitorIndex
                 };
@@ -5678,30 +6411,30 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
-    * Removes the warning panel, if it is still shown.
+    * Sorts the reference cumulative times, and creates a list of the sorted
+    * reference cumulative times and their indexes into the actual list of
+    * reference cumulative times.
+    *
+    * This sorted list is used by the chart to find which control the cursor
+    * is closest to.
     */
-    Chart.prototype.clearWarningPanel = function () {
-        if (this.warningPanel !== null) {
-            this.warningPanel.remove();
-            this.warningPanel = null;
-        }
-    };
-    
-    /**
-    * Shows a warning panel over the chart, with the given message.
-    * @param message The message to show.
-    */
-    Chart.prototype.showWarningPanel = function (message) {
-        this.clearWarningPanel();
-        this.warningPanel = d3.select(this.parent).append("div")
-                                                  .classed("warningPanel", true);
-        this.warningPanel.text(message);
+    Chart.prototype.sortReferenceCumTimes = function () {
+        // Put together a map that maps cumulative times to the first split to
+        // register that time.
+        var cumTimesToControlIndex = d3.map();
+        this.referenceCumTimes.forEach(function (cumTime, index) {
+            if (!cumTimesToControlIndex.has(cumTime)) {
+                cumTimesToControlIndex.set(cumTime, index);
+            }
+        });
         
-        var panelWidth = $(this.warningPanel.node()).width();
-        var panelHeight = $(this.warningPanel.node()).height();
-        this.warningPanel.style("left", (($(this.parent).width() - panelWidth) / 2) + "px")
-                         .style("top", ((this.overallHeight - panelHeight) / 2) + "px");
+        this.referenceCumTimesSorted = 
+            cumTimesToControlIndex.keys().map(function (cumTime) { return parseInt(cumTime, 10); })
+                                         .sort(d3.ascending);
+
+        this.referenceCumTimeIndexes = this.referenceCumTimesSorted.map(function (cumTime) { return cumTimesToControlIndex.get(cumTime); });
     };
+
     
     /**
     * Draws the chart.
@@ -5737,7 +6470,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
         this.maxStartTimeLabelWidth = (this.isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
-        this.clearWarningPanel();
+        this.sortReferenceCumTimes();
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
@@ -5750,32 +6483,6 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         } else {
             this.removeCompetitorStartTimeLabels();
         }
-    };
-    
-    /**
-    * Clears the chart and shows a warning message instead.
-    * @param {String} message - The text of the warning message to show.
-    */
-    Chart.prototype.clearAndShowWarning = function (message) {
-        this.numControls = 0;
-        this.numLines = 0;
-        
-        var dummyChartData = {
-            dataColumns: [],
-            competitorNames: [],
-            numControls: 0,
-            xExtent: [0, 3600],
-            yExtent: [0, 1]
-        };
-        
-        this.maxStatisticTextWidth = 0;
-        this.maxStartTimeWidth = 0;
-        this.clearGraph();
-        this.adjustContentSize();
-        this.referenceCumTimes = [0];
-        this.createScales(dummyChartData);
-        this.drawAxes("", dummyChartData);
-        this.showWarningPanel(message);
     };
     
     SplitsBrowser.Controls.Chart = Chart;
@@ -5875,11 +6582,17 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         var tableBody = this.table.select("tbody");
         tableBody.selectAll("tr").remove();
         
-        function addCell(tableRow, topLine, bottomLine, cssClass) {
+        function addCell(tableRow, topLine, bottomLine, cssClass, cumDubious, splitDubious) {
             var cell = tableRow.append("td");
-            cell.append("span").text(topLine);
+            cell.append("span")
+                .classed("dubious", cumDubious)
+                .text(topLine);
+
             cell.append("br");
-            cell.append("span").text(bottomLine);
+            cell.append("span")
+                .classed("dubious", splitDubious)
+                .text(bottomLine);
+                
             if (cssClass) {
                 cell.classed(cssClass, true);
             }
@@ -5904,11 +6617,13 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
                 numberCell.text(rank);
             }
             
-            addCell(tableRow, competitor.name, competitor.club);
-            addCell(tableRow, (competitor.completed()) ? formatTime(competitor.totalTime) : getMessage("MispunchedShort"), NON_BREAKING_SPACE_CHAR, "time");
+            addCell(tableRow, competitor.name, competitor.club, false, false);
+            addCell(tableRow, (competitor.completed()) ? formatTime(competitor.totalTime) : getMessage("MispunchedShort"), NON_BREAKING_SPACE_CHAR, "time", false, false);
             
             d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
-                addCell(tableRow, formatTime(competitor.getCumulativeTimeTo(controlNum)), formatTime(competitor.getSplitTimeTo(controlNum)), "time");
+                var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
+                var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
+                addCell(tableRow, formatTime(competitor.getOriginalCumulativeTimeTo(controlNum)), formatTime(competitor.getOriginalSplitTimeTo(controlNum)), "time", isCumDubious, isSplitDubious);
             });
         }, this);
     };
@@ -5967,10 +6682,13 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     var ClassSelector = SplitsBrowser.Controls.ClassSelector;
     var ChartTypeSelector = SplitsBrowser.Controls.ChartTypeSelector;
     var ComparisonSelector = SplitsBrowser.Controls.ComparisonSelector;
+    var OriginalDataSelector = SplitsBrowser.Controls.OriginalDataSelector;
     var StatisticsSelector = SplitsBrowser.Controls.StatisticsSelector;
     var CompetitorListBox = SplitsBrowser.Controls.CompetitorListBox;
     var Chart = SplitsBrowser.Controls.Chart;
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
+    var repairEventData = SplitsBrowser.DataRepair.repairEventData;
+    var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
@@ -6003,11 +6721,11 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         this.previousCompetitorList = [];
         this.topDivHeight = (topDiv && $(topDiv).length > 0) ? $(topDiv).height() : 0;
         
-        this.isChartEnabled = false;
-
         this.selection = null;
         this.ageClassSet = null;
         this.classSelector = null;
+        this.comparisonSelector = null;
+        this.originalDataSelector = null;
         this.statisticsSelector = null;
         this.competitorListBox = null;
         this.chart = null;
@@ -6130,6 +6848,27 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Adds a checkbox to select the 'original' data or data after SplitsBrowser
+    * has attempted to repair it.
+    */
+    Viewer.prototype.addOriginalDataSelector = function () {
+        var outerThis = this;
+        var showOriginalData = function () {
+            transferCompetitorData(outerThis.eventData);
+            outerThis.eventData.determineTimeLosses();
+            outerThis.drawChart();
+        };
+        
+        var showRepairedData = function () {
+            repairEventData(outerThis.eventData);
+            outerThis.eventData.determineTimeLosses();
+            outerThis.drawChart();
+        };
+        
+        this.originalDataSelector = new OriginalDataSelector(this.topPanel, showOriginalData, showRepairedData);
+    };
+    
+    /**
     * Adds the list of competitors, and the buttons, to the page.
     */
     Viewer.prototype.addCompetitorList = function () {
@@ -6174,6 +6913,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         this.addChartTypeSelector();
         this.addSpacer();
         this.addComparisonSelector();
+        this.addOriginalDataSelector();
         
         this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
 
@@ -6329,19 +7069,11 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
-        var missedControls = this.ageClassSet.getControlsWithNoSplits();
-        this.isChartEnabled = (missedControls.length === 0);
         this.updateControlEnabledness();
-        if (this.isChartEnabled) {
-            this.referenceCumTimes = this.comparisonFunction(this.ageClassSet);
-            this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
-            this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
-            this.redrawChart();
-        } else {
-            var showAddendum = (this.ageClassSet.getCourse().getNumClasses() > this.ageClassSet.getNumClasses());
-            var message = getMessageWithFormatting((showAddendum) ? "NoSplitsForControlTryOtherClasses" : "NoSplitsForControl", {"$$CONTROL$$": missedControls[0]});
-            this.chart.clearAndShowWarning(message);
-        }
+        this.referenceCumTimes = this.comparisonFunction(this.ageClassSet);
+        this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
+        this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+        this.redrawChart();
     };
 
     /**
@@ -6363,7 +7095,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * Redraw the chart, possibly using new data.
     */
     Viewer.prototype.redraw = function () {
-        if (!this.chartType.isResultsTable && this.isChartEnabled) {
+        if (!this.chartType.isResultsTable) {
             this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
             this.redrawChart();
         }
@@ -6396,6 +7128,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
         this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
         this.enableOrDisableRaceGraph();
+        this.originalDataSelector.setVisible(this.ageClassSet.hasDubiousData());
     };
     
     /**
@@ -6434,11 +7167,9 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     */
     Viewer.prototype.updateControlEnabledness = function () {
         this.classSelector.setOtherClassesEnabled(!this.chartType.isResultsTable);
-        this.comparisonSelector.setEnabled(this.isChartEnabled && !this.chartType.isResultsTable);
-        this.statisticsSelector.setEnabled(this.isChartEnabled && !this.chartType.isResultsTable);
-        this.competitorListBox.setEnabled(this.isChartEnabled);
-        enableControl(this.allButton, this.isChartEnabled);
-        enableControl(this.noneButton, this.isChartEnabled);
+        this.comparisonSelector.setEnabled(!this.chartType.isResultsTable);
+        this.statisticsSelector.setEnabled(!this.chartType.isResultsTable);
+        this.originalDataSelector.setEnabled(!this.chartType.isResultsTable);
         this.enableOrDisableCrossingRunnersButton();
     };
     
@@ -6446,7 +7177,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     * Enables or disables the crossing-runners button as appropriate.
     */
     Viewer.prototype.enableOrDisableCrossingRunnersButton = function () {
-        enableControl(this.crossingRunnersButton, this.isChartEnabled && this.selection.isSingleRunnerSelected());
+        enableControl(this.crossingRunnersButton, this.selection.isSingleRunnerSelected());
     };
     
     SplitsBrowser.Viewer = Viewer;
@@ -6493,6 +7224,12 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
             if (eventData === null) {
                 showLoadFailureMessage("LoadFailedUnrecognisedData", {});
             } else {
+                if (eventData.needsRepair()) {
+                    repairEventData(eventData);
+                }
+                
+                eventData.determineTimeLosses();
+                
                 var viewer = new Viewer(topDiv);
                 viewer.buildUi();
                 viewer.setEvent(eventData);
@@ -6505,7 +7242,7 @@ var SplitsBrowser = { Version: "3.1.1", Model: {}, Input: {}, Controls: {} };
     
     /**
     * Handles the failure to read an event.
-    * @param {jQuery.jqXHR} jqXHR - jQuery jqHXR object.
+    * @param {jQuery.jqXHR} jqXHR - jQuery jqXHR object.
     * @param {String} textStatus - The text status of the request.
     * @param {String} errorThrown - The error message returned from the server.
     */
