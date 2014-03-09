@@ -26,7 +26,7 @@
     var parseCourseLength = SplitsBrowser.parseCourseLength;
     var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
-    var Competitor = SplitsBrowser.Model.Competitor;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -46,22 +46,6 @@
     
     // Minimum control offset.
     var MIN_CONTROLS_OFFSET = 37;
-    
-    /**
-    * Checks that two consecutive cumulative times are in strictly ascending
-    * order, and throws an exception if not.  The previous time should not be
-    * null, but the next time may, and no exception will be thrown in this
-    * case.
-    * @param {Number} prevTime - The previous cumulative time, in seconds.
-    * @param {Number} nextTime - The next cumulative time, in seconds.
-    */
-    function verifyCumulativeTimesInOrder(prevTime, nextTime) {
-        if (nextTime !== null && nextTime <= prevTime) {
-            throwInvalidData("Cumulative times must be strictly ascending: read " +
-                    formatTime(prevTime) + " and " + formatTime(nextTime) +
-                    " in that order");
-        }
-    }
     
     /**
     * Constructs an SI-format data reader.
@@ -160,22 +144,16 @@
     Reader.prototype.readCumulativeTimes = function (row, lineNumber, numControls) {
         
         var cumTimes = [0];
-        var lastCumTime = 0;
         
         for (var controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
             var cellIndex = this.control1Index + 1 + 2 * controlIdx;
-            var cumTime = (cellIndex < row.length) ? parseTime(row[cellIndex]) : null;
-                
-            verifyCumulativeTimesInOrder(lastCumTime, cumTime);
-            
+            var cumTimeStr = (cellIndex < row.length) ? row[cellIndex] : null;
+            var cumTime = (cumTimeStr === null) ? null : parseTime(cumTimeStr);
             cumTimes.push(cumTime);
-            if (cumTime !== null) {
-                lastCumTime = cumTime;
-            }
         }
         
         var totalTime = parseTime(row[this.control1Index + COLUMN_OFFSETS.TIME]);
-        verifyCumulativeTimesInOrder(lastCumTime, totalTime);
+        
         cumTimes.push(totalTime);
     
         return cumTimes;
@@ -263,7 +241,7 @@
         }
         
         var order = this.ageClasses.get(className).competitors.length + 1;
-        var competitor = Competitor.fromCumTimes(order, name, club, startTime, cumTimes);
+        var competitor = fromOriginalCumTimes(order, name, club, startTime, cumTimes);
         if (isPlacingNonNumeric && competitor.completed()) {
             // Competitor has completed the course but has no placing.
             // Assume that they are non-competitive.

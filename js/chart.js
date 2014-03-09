@@ -62,9 +62,10 @@
     ];
 
     // 'Imports'.
-    var isNotNull = SplitsBrowser.isNotNull;
     var formatTime = SplitsBrowser.formatTime;
     var getMessage = SplitsBrowser.getMessage;
+    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
     
     var ChartPopupData = SplitsBrowser.Model.ChartPopupData;
     var ChartPopup = SplitsBrowser.Controls.ChartPopup;
@@ -77,7 +78,16 @@
     * @returns Time and rank formatted as a string.
     */
     function formatTimeAndRank(time, rank) {
-        return SPACER + formatTime(time) + " (" + ((rank === null) ? "-" : rank) + ")";
+        var rankStr;
+        if (rank === null) {
+            rankStr = "-";
+        } else if (isNaNStrict(rank)) {
+            rankStr = "?";
+        } else {
+            rankStr = rank.toString();
+        }
+        
+        return SPACER + formatTime(time) + " (" + rankStr + ")";
     }
     
     /**
@@ -111,7 +121,6 @@
         this.isPopupOpen = false;
         this.popupUpdateFunc = null;
         this.maxStartTimeLabelWidth = 0;
-        this.warningPanel = null;
         
         this.mouseOutTimeout = null;
         
@@ -119,6 +128,8 @@
         // they appear in the list of labels.
         this.selectedIndexesOrderedByLastYValue = [];
         this.referenceCumTimes = [];
+        this.referenceCumTimesSorted = [];
+        this.referenceCumTimeIndexes = [];
         this.fastestCumTimes = [];
         
         this.isMouseIn = false;
@@ -256,15 +267,13 @@
     * @param {jQuery.event} event - jQuery event object.
     */
     Chart.prototype.onMouseEnter = function (event) {
-        if (this.warningPanel === null) {
-            if (this.mouseOutTimeout !== null) {
-                clearTimeout(this.mouseOutTimeout);
-                this.mouseOutTimeout = null;
-            }
-            
-            this.isMouseIn = true;
-            this.updateControlLineLocation(event);            
+        if (this.mouseOutTimeout !== null) {
+            clearTimeout(this.mouseOutTimeout);
+            this.mouseOutTimeout = null;
         }
+        
+        this.isMouseIn = true;
+        this.updateControlLineLocation(event);            
     };
 
     /**
@@ -272,7 +281,7 @@
     * @param {jQuery.event} event - jQuery event object.
     */
     Chart.prototype.onMouseMove = function (event) {
-        if (this.isMouseIn && this.xScale !== null && this.warningPanel === null) {
+        if (this.isMouseIn && this.xScale !== null) {
             this.updateControlLineLocation(event);
         }
     };
@@ -281,27 +290,25 @@
     * Handle the mouse leaving the chart.
     */
     Chart.prototype.onMouseLeave = function () {
-        if (this.warningPanel === null) {
-            var outerThis = this;
-            // Check that the mouse hasn't entered the popup.
-            // It seems that the mouseleave event for the chart is sent before the
-            // mouseenter event for the popup, so we use a timeout to check a short
-            // time later whether the mouse has left the chart and the popup.
-            // This is only necessary for IE9 and IE10; other browsers support
-            // "pointer-events: none" in CSS so the popup never gets any mouse
-            // events.
-            
-            // Note that we keep a reference to the 'timeout', so that we can
-            // clear it if the mouse subsequently re-enters.  This happens a lot
-            // more often than might be expected for a function with a timeout of
-            // only a single millisecond.
-            this.mouseOutTimeout = setTimeout(function() {
-                if (!outerThis.popup.isMouseIn()) {
-                    outerThis.isMouseIn = false;
-                    outerThis.removeControlLine();
-                }
-            }, 1);
-        }
+        var outerThis = this;
+        // Check that the mouse hasn't entered the popup.
+        // It seems that the mouseleave event for the chart is sent before the
+        // mouseenter event for the popup, so we use a timeout to check a short
+        // time later whether the mouse has left the chart and the popup.
+        // This is only necessary for IE9 and IE10; other browsers support
+        // "pointer-events: none" in CSS so the popup never gets any mouse
+        // events.
+        
+        // Note that we keep a reference to the 'timeout', so that we can
+        // clear it if the mouse subsequently re-enters.  This happens a lot
+        // more often than might be expected for a function with a timeout of
+        // only a single millisecond.
+        this.mouseOutTimeout = setTimeout(function() {
+            if (!outerThis.popup.isMouseIn()) {
+                outerThis.isMouseIn = false;
+                outerThis.removeControlLine();
+            }
+        }, 1);
     };
     
     /**
@@ -309,23 +316,19 @@
     * @param {jQuery.Event} event - jQuery event object.
     */
     Chart.prototype.onMouseDown = function (event) {
-        if (this.warningPanel === null) {
-            var outerThis = this;
-            // Use a timeout to open the dialog as we require other events
-            // (mouseover in particular) to be processed first, and the precise
-            // order of these events is not consistent between browsers.
-            setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
-        }
+        var outerThis = this;
+        // Use a timeout to open the dialog as we require other events
+        // (mouseover in particular) to be processed first, and the precise
+        // order of these events is not consistent between browsers.
+        setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
     };
     
     /**
     * Handles a mouse button being pressed over the chart.
     */
     Chart.prototype.onMouseUp = function (event) {
-        if (this.warningPanel === null) {
-            this.popup.hide();
-            event.preventDefault();
-        }
+        this.popup.hide();
+        event.preventDefault();
     };
     
     /**
@@ -423,24 +426,27 @@
             // In the chart.
             // Get the time offset that the mouse is currently over.
             var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
-            var bisectIndex = d3.bisect(this.referenceCumTimes, chartX);
+            var bisectIndex = d3.bisect(this.referenceCumTimesSorted, chartX);
             
             // bisectIndex is the index at which to insert chartX into
             // referenceCumTimes in order to keep the array sorted.  So if
             // this index is N, the mouse is between N - 1 and N.  Find
             // which is nearer.
-            var controlIndex;
-            if (bisectIndex >= this.referenceCumTimes.length) {
-                // Off the right-hand end, use the finish.
-                controlIndex = this.numControls + 1;
+            var sortedControlIndex;
+            if (bisectIndex >= this.referenceCumTimesSorted.length) {
+                // Off the right-hand end, use the last control (usually the
+                // finish).
+                sortedControlIndex = this.referenceCumTimesSorted.length - 1;
             } else {
-                var diffToNext = Math.abs(this.referenceCumTimes[bisectIndex] - chartX);
-                var diffToPrev = Math.abs(chartX - this.referenceCumTimes[bisectIndex - 1]);
-                controlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
+                var diffToNext = Math.abs(this.referenceCumTimesSorted[bisectIndex] - chartX);
+                var diffToPrev = Math.abs(chartX - this.referenceCumTimesSorted[bisectIndex - 1]);
+                sortedControlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
             }
             
+            var controlIndex = this.referenceCumTimeIndexes[sortedControlIndex];
+            
             if (this.actualControlIndex === null || this.actualControlIndex !== controlIndex) {
-                // The control line has appeared for ths first time or has moved, so redraw it.
+                // The control line has appeared for the first time or has moved, so redraw it.
                 this.removeControlLine();
                 this.actualControlIndex = controlIndex;
                 this.drawControlLine(Math.max(this.minViewableControl, controlIndex));
@@ -603,6 +609,18 @@
     };
 
     /**
+    * Returns the maximum value from the given array, not including any null or
+    * NaN values.  If the array contains no non-null, non-NaN values, zero is
+    * returned.
+    * @param {Array} values - Array of values.
+    * @return {Number} Maximum non-null or NaN value.
+    */    
+    function maxNonNullNorNaNValue(values) {
+        var nonNullNorNaNValues = values.filter(isNotNullNorNaN);
+        return (nonNullNorNaNValues.length > 0) ? d3.max(nonNullNorNaNValues) : 0;
+    }
+
+    /**
     * Return the maximum width of a piece of time and rank text shown to the right
     * of each competitor 
     * @param {string} timeFuncName - Name of the function to call to get the time
@@ -619,10 +637,10 @@
         
         d3.range(1, this.numControls + 2).forEach(function (controlIndex) {
             var times = selectedCompetitors.map(function (comp) { return comp[timeFuncName](controlIndex); });
-            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+            maxTime = Math.max(maxTime, maxNonNullNorNaNValue(times));
             
             var ranks = selectedCompetitors.map(function (comp) { return comp[rankFuncName](controlIndex); });
-            maxRank = Math.max(maxRank, d3.max(ranks.filter(isNotNull)));
+            maxRank = Math.max(maxRank, maxNonNullNorNaNValue(ranks));
         });
         
         var text = formatTimeAndRank(maxTime, maxRank);
@@ -658,7 +676,7 @@
         
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
             var times = this.getTimesBehindFastest(controlIndex, this.selectedIndexes);
-            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+            maxTime = Math.max(maxTime, maxNonNullNorNaNValue(times));
         }
         
         return this.getTextWidth(SPACER + formatTime(maxTime));
@@ -670,14 +688,19 @@
     * @returns {Number} Maximum width of behind-fastest time rank text, in pixels.
     */
     Chart.prototype.getMaxTimeLossWidth = function() {
-        var maxTime = 0;
-        
+        var maxTimeLoss = 0;
+        var minTimeLoss = 0;
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
-            var times = this.getTimeLosses(controlIndex, this.selectedIndexes);
-            maxTime = Math.max(maxTime, d3.max(times.filter(isNotNull)));
+            var timeLosses = this.getTimeLosses(controlIndex, this.selectedIndexes);
+            var nonNullTimeLosses = timeLosses.filter(isNotNullNorNaN);
+            if (nonNullTimeLosses.length > 0) {
+                maxTimeLoss = Math.max(maxTimeLoss, d3.max(nonNullTimeLosses));
+                minTimeLoss = Math.min(minTimeLoss, d3.min(nonNullTimeLosses));
+            }
         }
         
-        return this.getTextWidth(SPACER + formatTime(maxTime));
+        return Math.max(this.getTextWidth(SPACER + formatTime(maxTimeLoss)),
+                        this.getTextWidth(SPACER + formatTime(minTimeLoss)));
     };
 
     /**
@@ -734,16 +757,33 @@
     * between controls.
     */
     Chart.prototype.drawBackgroundRectangles = function () {
-        var rects = this.svgGroup.selectAll("rect")
-                                 .data(d3.range(this.numControls + 1));
+        
+        // We can't guarantee that the reference cumulative times are in
+        // ascending order, but we need such a list of times in order to draw
+        // the rectangles.  So, sort the reference cumulative times.
+        var refCumTimesSorted = this.referenceCumTimes.slice(0);
+        refCumTimesSorted.sort(d3.ascending);
+        
+        // Now remove any duplicate times.
+        var index = 1;
+        while (index < refCumTimesSorted.length) {
+            if (refCumTimesSorted[index] === refCumTimesSorted[index - 1]) {
+                refCumTimesSorted.splice(index, 1);
+            } else {
+                index += 1;
+            }
+        }
 
         var outerThis = this;
-
+        
+        var rects = this.svgGroup.selectAll("rect")
+                                 .data(d3.range(refCumTimesSorted.length - 1));
+        
         rects.enter().append("rect");
 
-        rects.attr("x", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index]); })
+        rects.attr("x", function (index) { return outerThis.xScale(refCumTimesSorted[index]); })
              .attr("y", 0)
-             .attr("width", function (index) { return outerThis.xScale(outerThis.referenceCumTimes[index + 1] - outerThis.referenceCumTimes[index]); })
+             .attr("width", function (index) { return outerThis.xScale(refCumTimesSorted[index + 1]) - outerThis.xScale(refCumTimesSorted[index]); })
              .attr("height", this.contentHeight)
              .attr("class", function (index) { return (index % 2 === 0) ? "background1" : "background2"; });
 
@@ -858,27 +898,43 @@
                 return d3.svg.line()
                              .x(function (d) { return outerThis.xScale(d.x); })
                              .y(function (d) { return outerThis.yScale(d.ys[selCompIdx]); })
-                             .defined(function (d) { return d.ys[selCompIdx] !== null; })
+                             .defined(function (d) { return isNotNullNorNaN(d.ys[selCompIdx]); })
                              .interpolate("linear");
             }
         };
         
-        var graphLines = this.svgGroup.selectAll("path.graphLine")
-                                      .data(d3.range(this.numLines));
-
-        graphLines.enter()
-                  .append("path")
-                  .append("title");
-
-        graphLines.attr("d", function (selCompIdx) { return lineFunctionGenerator(selCompIdx)(chartData.dataColumns); })
-                  .attr("stroke", function (selCompIdx) { return colours[outerThis.selectedIndexes[selCompIdx] % colours.length]; })
-                  .attr("class", function (selCompIdx) { return "graphLine competitor" + outerThis.selectedIndexes[selCompIdx]; })
-                  .on("mouseenter", function (selCompIdx) { outerThis.highlight(outerThis.selectedIndexes[selCompIdx]); })
-                  .on("mouseleave", function () { outerThis.unhighlight(); })
-                  .select("title")
-                  .text(function (selCompIdx) { return chartData.competitorNames[selCompIdx]; });
-
-        graphLines.exit().remove();
+        this.svgGroup.selectAll("path.graphLine").remove();
+        
+        this.svgGroup.selectAll("line.aroundDubiousTimes").remove();
+        
+        d3.range(this.numLines).forEach(function (selCompIdx) {
+            var strokeColour = colours[this.selectedIndexes[selCompIdx] % colours.length];
+            var highlighter = function () { outerThis.highlight(outerThis.selectedIndexes[selCompIdx]); };
+            var unhighlighter = function () { outerThis.unhighlight(); };
+            
+            this.svgGroup.append("path")
+                         .attr("d", lineFunctionGenerator(selCompIdx)(chartData.dataColumns))
+                         .attr("stroke", strokeColour)
+                         .attr("class", "graphLine competitor" + this.selectedIndexes[selCompIdx])
+                         .on("mouseenter", highlighter)
+                         .on("mouseleave", unhighlighter)
+                         .append("title")
+                         .text(chartData.competitorNames[selCompIdx]);
+                         
+            chartData.dubiousTimesInfo[selCompIdx].forEach(function (dubiousTimeInfo) {
+                this.svgGroup.append("line")
+                             .attr("x1", this.xScale(chartData.dataColumns[dubiousTimeInfo.start].x))
+                             .attr("y1", this.yScale(chartData.dataColumns[dubiousTimeInfo.start].ys[selCompIdx]))
+                             .attr("x2", this.xScale(chartData.dataColumns[dubiousTimeInfo.end].x))
+                             .attr("y2", this.yScale(chartData.dataColumns[dubiousTimeInfo.end].ys[selCompIdx]))
+                             .attr("stroke", strokeColour)
+                             .attr("class", "aroundDubiousTimes competitor" + this.selectedIndexes[selCompIdx])
+                             .on("mouseenter", highlighter)
+                             .on("mouseleave", unhighlighter)
+                             .append("title")
+                             .text(chartData.competitorNames[selCompIdx]);
+            }, this);
+        }, this);
     };
 
     /**
@@ -890,6 +946,7 @@
         this.svg.selectAll("line.competitorLegendLine.competitor" + competitorIdx).classed("selected", true);
         this.svg.selectAll("text.competitorLabel.competitor" + competitorIdx).classed("selected", true);
         this.svg.selectAll("text.startLabel.competitor" + competitorIdx).classed("selected", true);
+        this.svg.selectAll("line.aroundDubiousTimes.competitor" + competitorIdx).classed("selected", true);
     };
 
     /**
@@ -900,6 +957,7 @@
         this.svg.selectAll("line.competitorLegendLine.selected").classed("selected", false);
         this.svg.selectAll("text.competitorLabel.selected").classed("selected", false);
         this.svg.selectAll("text.startLabel.selected").classed("selected", false);
+        this.svg.selectAll("line.aroundDubiousTimes.selected").classed("selected", false);
     };
 
     /**
@@ -994,7 +1052,7 @@
                 return {
                     label: formatNameAndSuffix(name, this.ageClassSet.allCompetitors[competitorIndex].getSuffix()),
                     textHeight: textHeight,
-                    y: (finishColumn.ys[i] === null) ? null : this.yScale(finishColumn.ys[i]),
+                    y: (isNotNullNorNaN(finishColumn.ys[i])) ? this.yScale(finishColumn.ys[i]) : null,
                     colour: colours[competitorIndex % colours.length],
                     index: competitorIndex
                 };
@@ -1093,30 +1151,30 @@
     };
     
     /**
-    * Removes the warning panel, if it is still shown.
+    * Sorts the reference cumulative times, and creates a list of the sorted
+    * reference cumulative times and their indexes into the actual list of
+    * reference cumulative times.
+    *
+    * This sorted list is used by the chart to find which control the cursor
+    * is closest to.
     */
-    Chart.prototype.clearWarningPanel = function () {
-        if (this.warningPanel !== null) {
-            this.warningPanel.remove();
-            this.warningPanel = null;
-        }
-    };
-    
-    /**
-    * Shows a warning panel over the chart, with the given message.
-    * @param message The message to show.
-    */
-    Chart.prototype.showWarningPanel = function (message) {
-        this.clearWarningPanel();
-        this.warningPanel = d3.select(this.parent).append("div")
-                                                  .classed("warningPanel", true);
-        this.warningPanel.text(message);
+    Chart.prototype.sortReferenceCumTimes = function () {
+        // Put together a map that maps cumulative times to the first split to
+        // register that time.
+        var cumTimesToControlIndex = d3.map();
+        this.referenceCumTimes.forEach(function (cumTime, index) {
+            if (!cumTimesToControlIndex.has(cumTime)) {
+                cumTimesToControlIndex.set(cumTime, index);
+            }
+        });
         
-        var panelWidth = $(this.warningPanel.node()).width();
-        var panelHeight = $(this.warningPanel.node()).height();
-        this.warningPanel.style("left", (($(this.parent).width() - panelWidth) / 2) + "px")
-                         .style("top", ((this.overallHeight - panelHeight) / 2) + "px");
+        this.referenceCumTimesSorted = 
+            cumTimesToControlIndex.keys().map(function (cumTime) { return parseInt(cumTime, 10); })
+                                         .sort(d3.ascending);
+
+        this.referenceCumTimeIndexes = this.referenceCumTimesSorted.map(function (cumTime) { return cumTimesToControlIndex.get(cumTime); });
     };
+
     
     /**
     * Draws the chart.
@@ -1152,7 +1210,7 @@
         
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
         this.maxStartTimeLabelWidth = (this.isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
-        this.clearWarningPanel();
+        this.sortReferenceCumTimes();
         this.adjustContentSize();
         this.createScales(chartData);
         this.drawBackgroundRectangles();
@@ -1165,32 +1223,6 @@
         } else {
             this.removeCompetitorStartTimeLabels();
         }
-    };
-    
-    /**
-    * Clears the chart and shows a warning message instead.
-    * @param {String} message - The text of the warning message to show.
-    */
-    Chart.prototype.clearAndShowWarning = function (message) {
-        this.numControls = 0;
-        this.numLines = 0;
-        
-        var dummyChartData = {
-            dataColumns: [],
-            competitorNames: [],
-            numControls: 0,
-            xExtent: [0, 3600],
-            yExtent: [0, 1]
-        };
-        
-        this.maxStatisticTextWidth = 0;
-        this.maxStartTimeWidth = 0;
-        this.clearGraph();
-        this.adjustContentSize();
-        this.referenceCumTimes = [0];
-        this.createScales(dummyChartData);
-        this.drawAxes("", dummyChartData);
-        this.showWarningPanel(message);
     };
     
     SplitsBrowser.Controls.Chart = Chart;

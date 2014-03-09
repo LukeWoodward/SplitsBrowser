@@ -23,6 +23,7 @@
     
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
     
@@ -117,4 +118,31 @@
         expect(0);
     });
     
+    QUnit.test("Can create a results table with one competitor with suspicious times appropriately classed", function (assert) {
+        var competitor1 = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 65, 65 + 0, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        competitor1.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        var ageClass = new AgeClass("Test", 3, [competitor1]);
+        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(ageClass);
+        
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
+        var table = d3.select("table.resultsTable").node();
+        assert.strictEqual($("tbody", table).length, 1);
+        assert.strictEqual($("tbody tr", table).length, 1);
+        var tableCells = $("tbody tr td", table);
+        assert.strictEqual(tableCells.length, 7);
+        
+        for (var cellIndex = 0; cellIndex < 7; cellIndex += 1) {
+            var cell = tableCells[cellIndex];
+            
+            // Cell index 4 is control 2, and index 5 is control 3.
+            // As the cumulative time to control 2 is NaN, this cumulative time
+            // should be regarded as dubious, as should the split times to it
+            // and away from it.
+            assert.strictEqual($("span:first-child", cell).hasClass("dubious"), (cellIndex === 4));
+            assert.strictEqual($("span:last-child", cell).hasClass("dubious"), (cellIndex === 4 || cellIndex === 5));
+        }
+    });
 })();

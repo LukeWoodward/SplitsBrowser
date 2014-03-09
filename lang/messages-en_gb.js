@@ -72,6 +72,17 @@ SplitsBrowser.Messages = {
     // chosen because the course has no winner.
     CannotCompareAsNoWinner: "Cannot compare against '$$OPTION$$' because no competitors in this class complete the course.",
     
+    // Label of checkbox that shows the original data as opposed to the
+    // 'repaired' data.  This only appears if data that needs repair has been
+    // loaded.
+    ShowOriginalData: "Show original data",
+  
+    // Tooltip of 'Show original' checkbox.  This appears when SplitsBrowser
+    // deduces that some of the cumulatives times in the data shown are
+    // unrealistic.
+    ShowOriginalDataTooltip: "SplitsBrowser has removed some of the times from the data in the selected class(es), believing these times to be unrealistic.  " +
+                             "Use this checkbox to control whether the amended or original data is plotted.",
+    
     StatisticsTotalTime: "Total time",
     StatisticsSplitTime: "Split time",
     StatisticsBehindFastest: "Behind fastest",
@@ -90,9 +101,6 @@ SplitsBrowser.Messages = {
     // crossing runners to show.
     RaceGraphNoCrossingRunners: "$$NAME$$ has no crossing runners.",
     RaceGraphDisabledAsStartTimesMissing: "The Race Graph cannot be shown because the start times of the competitors are missing.",
-
-    NoSplitsForControl: "Cannot draw a graph because no competitor has recorded a split time for control $$CONTROL$$.",
-    NoSplitsForControlTryOtherClasses: "Cannot draw a graph because no competitor has recorded a split time for control $$CONTROL$$.  Try selecting some other classes.",
     
     LoadFailedHeader: "SplitsBrowser \u2013 Error",
     LoadFailedInvalidData: "Sorry, it wasn't possible to read in the results data, as the data appears to be invalid: '$$MESSAGE$$'.",
@@ -105,8 +113,9 @@ SplitsBrowser.Messages = {
     SelectedClassesPopupHeader: "Selected classes",
     
     // Placeholder text shown when the Selected classes dialog is empty,
-    // because no competitors completed the course.
-    SelectedClassesPopupPlaceholder: "No competitors completed this course",
+    // because no competitors registered a split for the control, or those
+    // that did only registered a dubious split.
+    SelectedClassesPopupPlaceholder: "No competitors",
     
     // Header for the 'Fastest leg time' popup dialog.
     FastestLegTimePopupHeader: "Fastest leg-time $$START$$ to $$END$$",

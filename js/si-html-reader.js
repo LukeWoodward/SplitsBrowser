@@ -27,7 +27,7 @@
     var parseCourseLength = SplitsBrowser.parseCourseLength;
     var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
-    var Competitor = SplitsBrowser.Model.Competitor;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -280,24 +280,11 @@
     * @return {Competitor} Converted competitor object.
     */
     CompetitorParseRecord.prototype.toCompetitor = function (order) {
-        var lastCumTime = 0;
-        this.cumTimes.forEach(function (cumTime) {
-            if (cumTime !== null) {
-                if (cumTime <= lastCumTime) {
-                    throwInvalidData("Cumulative times must be strictly ascending: read " +
-                        formatTime(lastCumTime) + " and " + formatTime(cumTime) +
-                        " in that order");
-                }
-
-                lastCumTime = cumTime;
-            }
-        });
-        
         // Prepend a zero cumulative time.
         var cumTimes = [0].concat(this.cumTimes);
         
         // The null is for the start time.
-        var competitor = Competitor.fromCumTimes(order, this.name, this.club, null, cumTimes);
+        var competitor = fromOriginalCumTimes(order, this.name, this.club, null, cumTimes);
         if (competitor.completed() && !this.competitive) {
             competitor.setNonCompetitive();
         }

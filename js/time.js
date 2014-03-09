@@ -23,6 +23,8 @@
 
     SplitsBrowser.NULL_TIME_PLACEHOLDER = "-----";
     
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
+    
     /**
     * Formats a time period given as a number of seconds as a string in the form
     *  [-][h:]mm:ss.
@@ -33,6 +35,8 @@
         
         if (seconds === null) {
             return SplitsBrowser.NULL_TIME_PLACEHOLDER;
+        } else if (isNaNStrict(seconds)) {
+            return "???";
         }
     
         var result = "";

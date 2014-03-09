@@ -226,7 +226,7 @@
         assert.strictEqual(competitor.name, "John Smith", "Should read correct name");
         assert.strictEqual(competitor.club, "ABC", "Should read correct club");
         assert.strictEqual(competitor.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
-        assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
+        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
         
         assert.strictEqual(eventData.classes[0].course, course, "Class should refer to its course");
     });
@@ -300,7 +300,7 @@
         assert.strictEqual(competitor.name, "John Smith", "Should read correct name");
         assert.strictEqual(competitor.club, "ABC", "Should read correct club");
         assert.strictEqual(competitor.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
-        assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
+        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
         
         assert.strictEqual(eventData.classes[0].course, course, "Class should refer to its course");
     });
@@ -328,7 +328,7 @@
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
         
         var competitor = eventData.classes[0].competitors[0];
-        assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
+        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control and remove the trailing 'mp' from the name", function (assert) {
@@ -344,7 +344,7 @@
         
         var competitor = eventData.classes[0].competitors[0];
         assert.strictEqual(competitor.name, "John Smith", "Should read correct name without 'mp' suffix");
-        assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
+        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data and remove the trailing 'n/c' from the name", function (assert) {
@@ -358,7 +358,7 @@
         
         var competitor = eventData.classes[0].competitors[0];
         assert.strictEqual(competitor.name, "John Smith", "Should read correct name without 'n/c' suffix");
-        assert.deepEqual(competitor.getAllCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
+        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
         assert.ok(competitor.isNonCompetitive, "Competitor should be marked as non-competitive");
     });
     

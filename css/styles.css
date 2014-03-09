@@ -81,7 +81,7 @@ span.comparisonSelectorLabel.disabled
     color: #999999;
 }
 
-label.statisticsSelectorLabel.disabled
+label.statisticsSelectorLabel.disabled, label.originalDataSelectorLabel.disabled
 {
     color: #999999;
 }
@@ -146,7 +146,13 @@ text.startLabel.selected
     font-weight: bold;
 }
 
-path.graphLine.selected, line.competitorLegendLine.selected
+line.aroundDubiousTimes 
+{
+    stroke-width: 2;
+    stroke-dasharray: 6, 3;
+}
+
+path.graphLine.selected, line.competitorLegendLine.selected, line.aroundDubiousTimes.selected
 {
     stroke-width: 6;
 }
@@ -210,18 +216,7 @@ div.competitor.selected
     color: white;
 }
 
-div.competitor.disabled
-{
-    color: #999999;
-}
-
-div.competitor.selected.disabled
-{
-    background-color: #9dc3cc;
-    color: white;
-}
-
-#chartTypeSelector, #comparisonSelectorContainer, #runnerSelectorContainer
+#chartTypeSelector, #comparisonSelectorContainer, #runnerSelectorContainer, #originalDataSelectorContainer
 {
     float: left;
 }
@@ -231,14 +226,14 @@ div.competitor.selected.disabled
     float: right;
 }
 
-#statisticSelector label
+#statisticSelector label, #originalDataSelectorContainer label
 {
     vertical-align: middle;
     margin-left: 3px;
     margin-right: 10px;
 }
 
-#statisticSelector input
+#statisticSelector input, #originalDataSelectorContainer input
 {
     vertical-align: middle;
 }
@@ -259,9 +254,20 @@ span.resultsTableHeader
     font-weight: bold;
 }
 
+.resultsTable tbody td
+{
+    white-space: nowrap;
+}
+
 .resultsTable tbody td.time
 {
     text-align: right;
+}
+
+.resultsTable tbody td.time span.dubious
+{
+    font-style: italic;
+    color: #CCCCCC;
 }
 
 div.warningPanel

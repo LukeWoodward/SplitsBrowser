@@ -130,33 +130,4 @@
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 2);
         assert.ok(!listboxAndSelection.selection.isSelected(2));
     });
-
-    QUnit.test("Can create a listbox and disable it, and disable all competitors", function (assert) {
-
-        var listboxAndSelection = createSampleListbox([], false);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.disabled").size(), 0);
-        listboxAndSelection.listbox.setEnabled(false);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.disabled").size(), 3);
-    });
-
-    QUnit.test("Can create a listbox, disable it and reenable it, with all competitors re-enabled afterwards", function (assert) {
-
-        var listboxAndSelection = createSampleListbox([], false);
-        listboxAndSelection.listbox.setEnabled(false);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.disabled").size(), 3);
-        listboxAndSelection.listbox.setEnabled(true);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.disabled").size(), 0);
-    });
-
-    QUnit.test("Can create a listbox, disable it, and then click without changing selection", function (assert) {
-
-        var listboxAndSelection = createSampleListbox([], false);
-        listboxAndSelection.listbox.setEnabled(false);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 0);
-        
-        $($("div#qunit-fixture div.competitor")[2]).click();
-        
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 0);
-        assert.ok(!listboxAndSelection.selection.isSelected(2));
-    });
 })();

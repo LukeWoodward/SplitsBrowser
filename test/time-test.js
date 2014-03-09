@@ -29,6 +29,10 @@
         assert.strictEqual(formatTime(null), SplitsBrowser.NULL_TIME_PLACEHOLDER);
     });
 
+    QUnit.test("Can format a NaN number of seconds ", function(assert) {
+        assert.strictEqual(formatTime(NaN), "???");
+    });
+
     QUnit.test("Can format zero seconds as a string ", function(assert) {
         assert.strictEqual(formatTime(0), "00:00");
     });

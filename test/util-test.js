@@ -22,6 +22,8 @@
     "use strict";
 
     var isNotNull = SplitsBrowser.isNotNull;
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
+    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
@@ -35,7 +37,39 @@
     QUnit.test("A not-null value is not null", function (assert) {
         assert.ok(isNotNull("this is not null"));
     });
+    
+    module("Utilities - isNaNStrict");
+    
+    QUnit.test("NaN is strictly NaN", function (assert) {
+        assert.ok(isNaNStrict(NaN));
+    });
+    
+    QUnit.test("Zero is not strictly NaN", function (assert) {
+        assert.ok(!isNaNStrict(0));
+    });
+    
+    QUnit.test("A string that cannot be converted to a number is not strictly NaN", function (assert) {
+        assert.ok(!isNaNStrict("xyz"));
+    });
 
+    module("Utilities - isNotNullNorNaN");
+
+    QUnit.test("null is not not-null-nor-NaN", function (assert) {
+        assert.ok(!isNotNullNorNaN(null));
+    });
+
+    QUnit.test("NaN is not not-null-nor-NaN", function (assert) {
+        assert.ok(!isNotNullNorNaN(NaN));
+    });
+
+    QUnit.test("A finite numeric value is not not null nor NaN", function (assert) {
+        assert.ok(isNotNullNorNaN(3));
+    });
+
+    QUnit.test("A non-numeric value is not not null nor NaN", function (assert) {
+        assert.ok(isNotNullNorNaN("abc"));
+    });
+    
     module("Utilities - throwInvalidData");
 
     QUnit.test("throwInvalidData throws an InvalidData exception", function (assert) {

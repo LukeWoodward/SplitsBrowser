@@ -29,6 +29,26 @@
     function secondsToMinutes(seconds) { 
         return (seconds === null) ? null : seconds / 60;
     }
+    
+    /**
+    * Returns indexes around the given competitor's dubious cumulative times.
+    * @param {Competitor} competitor - The competitor to get the indexes for.
+    * @return {Array} Array of objects containing indexes around dubious
+    *     cumulative times.
+    */
+    function getIndexesAroundDubiousCumulativeTimes(competitor) {
+        return competitor.getControlIndexesAroundDubiousCumulativeTimes();
+    }
+    
+    /**
+    * Returns indexes around the given competitor's dubious split times.
+    * @param {Competitor} competitor - The competitor to get the indexes for.
+    * @return {Array} Array of objects containing indexes around dubious split
+    *     times.
+    */
+    function getIndexesAroundDubiousSplitTimes(competitor) {
+        return competitor.getControlIndexesAroundDubiousSplitTimes();
+    }
 
     SplitsBrowser.Model.ChartTypes = {
         SplitsGraph: {
@@ -38,7 +58,8 @@
             yAxisLabelKey: "SplitsGraphYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
-            minViewableControl: 1
+            minViewableControl: 1,
+            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumulativeTimes
         },
         RaceGraph: {
             nameKey: "RaceGraphChartType",
@@ -47,7 +68,8 @@
             yAxisLabelKey: "RaceGraphYAxisLabel",
             isRaceGraph: true,
             isResultsTable: false,
-            minViewableControl: 0
+            minViewableControl: 0,
+            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumulativeTimes
         },
         PositionAfterLeg: {
             nameKey:  "PositionAfterLegChartType",
@@ -56,7 +78,8 @@
             yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
-            minViewableControl: 1
+            minViewableControl: 1,
+            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumulativeTimes
         },
         SplitPosition: {
             nameKey: "SplitPositionChartType",
@@ -65,7 +88,8 @@
             yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
-            minViewableControl: 1
+            minViewableControl: 1,
+            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousSplitTimes
         },
         PercentBehind: {
             nameKey: "PercentBehindChartType",
@@ -74,7 +98,8 @@
             yAxisLabelKey: "PercentBehindYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
-            minViewableControl: 1
+            minViewableControl: 1,
+            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousSplitTimes
         },
         ResultsTable: {
             nameKey: "ResultsTableChartType",
@@ -83,7 +108,8 @@
             yAxisLabelKey: null,
             isRaceGraph: false,
             isResultsTable: true,
-            minViewableControl: 1
+            minViewableControl: 1,
+            indexesAroundDubiousTimesFunc: null
         }
     };
 })();

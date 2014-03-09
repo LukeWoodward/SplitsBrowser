@@ -21,7 +21,9 @@
 (function () {
     "use strict";
     
+    var isNotNull = SplitsBrowser.isNotNull;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var Event = SplitsBrowser.Model.Event;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
@@ -137,6 +139,40 @@
     
         var event = new Event([], [course1, course2]);
         assert.deepEqual(event.getNextControlsAfter(Course.START), [{course: course1, nextControls: ["235"]}, {course: course2, nextControls: ["226"]}]);
+    });
+    
+    QUnit.test("Determines time losses in each class when asked to do so", function (assert) {
+        var competitor1 = getCompetitor1();
+        var competitor2 = getCompetitor2();
+        var ageClass1 = new AgeClass("Test class 1", 3, [competitor1]);
+        var ageClass2 = new AgeClass("Test class 2", 3, [competitor2]);
+        var course1 = new Course("Test course 1", [ageClass1], null, null, ["235", "212", "189"]);
+        var course2 = new Course("Test course 2", [ageClass2], null, null, ["226", "212", "189"]);
+    
+        var event = new Event([ageClass1, ageClass2], [course1, course2]);
+        assert.strictEqual(competitor1.getTimeLossAt(2), null);
+        assert.strictEqual(competitor2.getTimeLossAt(2), null);
+        event.determineTimeLosses();
+        assert.ok(isNotNull(competitor1.getTimeLossAt(2)));
+        assert.ok(isNotNull(competitor2.getTimeLossAt(2)));
+    });
+    
+    QUnit.test("Event that does not need repairing reports that it doesn't", function (assert) {
+        var competitor = getCompetitor1();
+        var ageClass = new AgeClass("Test class", 3, [competitor]);
+        var course = new Course("Test course", [ageClass], null, null, ["235", "212", "189"]);
+    
+        var event = new Event([ageClass], [course]);
+        assert.ok(!event.needsRepair());
+    });
+    
+    QUnit.test("Event that does need repairing reports that it does", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 0, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var ageClass = new AgeClass("Test class", 3, [competitor]);
+        var course = new Course("Test course", [ageClass], null, null, ["235", "212", "189"]);
+    
+        var event = new Event([ageClass], [course]);
+        assert.ok(event.needsRepair());
     });
     
 })();

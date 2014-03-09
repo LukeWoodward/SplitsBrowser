@@ -21,6 +21,7 @@
 (function (){
     "use strict";
 
+    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     
     /**
@@ -35,16 +36,32 @@
         this.numControls = numControls;
         this.competitors = competitors;
         this.course = null;
-        
-        var fastestSplitTimes = d3.range(1, numControls + 2).map(function (controlIdx) {
+        this.hasDubiousData = false;
+        this.competitors.forEach(function (comp) {
+            comp.setClassName(name);
+        });
+    };
+    
+    /**
+    * Records that this age-class has competitor data that SplitsBrowser has
+    * deduced as dubious.
+    */
+    AgeClass.prototype.recordHasDubiousData = function () {
+        this.hasDubiousData = true;
+    };
+     
+    /**
+    * Determines the time losses for the competitors in this age class.
+    */
+    AgeClass.prototype.determineTimeLosses = function () {
+        var fastestSplitTimes = d3.range(1, this.numControls + 2).map(function (controlIdx) {
             var splitRec = this.getFastestSplitTo(controlIdx);
             return (splitRec === null) ? null : splitRec.split;
         }, this);
         
         this.competitors.forEach(function (comp) {
-            comp.setClassName(this.name);
             comp.determineTimeLosses(fastestSplitTimes);
-        }, this);
+        });
     };
     
     /**
@@ -63,19 +80,7 @@
     AgeClass.prototype.setCourse = function (course) {
         this.course = course;
     };
-    
-    /**
-    * Returns the controls that all competitors in this class failed to punch.
-    *
-    * @return {Array} Array of numbers of controls that all competitors in this
-    *     class failed to punch.
-    */
-    AgeClass.prototype.getControlsWithNoSplits = function () {
-        return d3.range(1, this.numControls + 1).filter(function (controlNum) {
-            return this.competitors.every(function (competitor) { return competitor.getSplitTimeTo(controlNum) === null; });
-        }, this);
-    };
-    
+
     /**
     * Returns the fastest split time recorded by competitors in this class.  If
     * no fastest split time is recorded (e.g. because all competitors
@@ -94,7 +99,7 @@
         var fastestCompetitor = null;
         this.competitors.forEach(function (comp) {
             var compSplit = comp.getSplitTimeTo(controlIdx);
-            if (compSplit !== null) {
+            if (isNotNullNorNaN(compSplit)) {
                 if (fastestSplit === null || compSplit < fastestSplit) {
                     fastestSplit = compSplit;
                     fastestCompetitor = comp;

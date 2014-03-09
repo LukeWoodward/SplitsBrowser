@@ -23,6 +23,7 @@
     
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
@@ -138,6 +139,29 @@
         ALL_CHART_TYPES.forEach(function (chartType) {
             assert.strictEqual(chartType.minViewableControl, (chartType === ChartTypes.RaceGraph) ? 0 : 1);
         });
+    });
+   
+    QUnit.test("All chart types except the results table have the correct dubious-indexes function", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 96, 96, 96 + 221 + 184, 96 + 221 + 184 + 100]);
+        competitor.setRepairedCumulativeTimes([0, 96, NaN, 96 + 221 + 184, 96 + 221 + 184 + 100]);
+
+        ALL_CHART_TYPES.forEach(function (chartType) {
+            if (chartType !== ChartTypes.ResultsTable) {
+                assert.strictEqual(typeof chartType.indexesAroundDubiousTimesFunc, "function");
+                var expectedDubiousTimeInfo;
+                if (chartType === ChartTypes.SplitsGraph || chartType === ChartTypes.RaceGraph || chartType === ChartTypes.PositionAfterLeg) {
+                    expectedDubiousTimeInfo = [{start: 1, end: 3}];
+                } else if (chartType === ChartTypes.SplitPosition || chartType === ChartTypes.PercentBehind) {
+                    expectedDubiousTimeInfo = [{start: 1, end: 4}];
+                } else {
+                    assert.ok(false, "Unrecognised chart type: '" + chartType.nameKey + "'");
+                }
+                
+                assert.deepEqual(chartType.indexesAroundDubiousTimesFunc(competitor), expectedDubiousTimeInfo, "Dubious-time info for " + chartType.nameKey + " should be correct");
+            }
+        });
+        
+        assert.strictEqual(ChartTypes.ResultsTable.indexesAroundDubiousTimesFunc, null);
     });
     
 })();

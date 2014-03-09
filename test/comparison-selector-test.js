@@ -60,7 +60,8 @@
             allCompetitors: competitors,
             getWinnerCumTimes: function () { return _WINNER; },
             getFastestCumTimes: function () { return _FASTEST_TIME; },
-            getFastestCumTimesPlusPercentage: function(percent) { return _FASTEST_TIME + ":" + percent; }
+            getFastestCumTimesPlusPercentage: function(percent) { return _FASTEST_TIME + ":" + percent; },
+            getCumulativeTimesForCompetitor: function (index) { return competitors[index].getAllCumulativeTimes(); }
         };
     }
     

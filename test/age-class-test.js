@@ -22,6 +22,7 @@
     "use strict";
 
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     
     module("Age-class");
@@ -30,20 +31,18 @@
         return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
-    function getCompetitor1WithNullSplitForControls1And3() {
-        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [null, 197, null, 106]);
-    }
-    
     function getCompetitor1WithNullSplitForControl3() {
         return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
     }
     
-    function getCompetitor2() {
-        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+    function getCompetitor1WithNaNSplitForControl3() {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 - 30, 81 + 197 + 212 + 106]);
+        competitor.setRepairedCumulativeTimes([0, 81, 81 + 197, NaN, 81 + 197 + 212 + 106]);
+        return competitor;
     }
     
-    function getCompetitor2WithNullSplitForControl2() {
-        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, null, 184, 100]);
+    function getCompetitor2() {
+        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
     function getCompetitor2WithNullSplitForControl3() {
@@ -62,6 +61,17 @@
     QUnit.test("Non-empty age class is not empty", function (assert) {
         var ageClass = new AgeClass("Test class name", 3, [getCompetitor1()]);
         assert.ok(!ageClass.isEmpty(), "Non-empty age class should not be empty");
+    });
+    
+    QUnit.test("Age class initially created without any competitor data considered as dubious", function (assert) {
+        var ageClass = getTestAgeClass();
+        assert.ok(!ageClass.hasDubiousData, "Original-data option should not be availabl");
+    });
+    
+    QUnit.test("Age class that has recorded that it has dubious data reports itself as so", function (assert) {
+        var ageClass = getTestAgeClass();
+        ageClass.recordHasDubiousData();
+        assert.ok(ageClass.hasDubiousData, "Original-data option should be available");
     });
     
     QUnit.test("Creating a class with competitors sets the class name in each competitor", function (assert) {
@@ -88,6 +98,12 @@
         var competitor1 = getCompetitor1();
         var ageClass = new AgeClass("Test class name", 3, [competitor1, getCompetitor2WithNullSplitForControl3()]);
         assert.deepEqual(ageClass.getFastestSplitTo(3), {name: competitor1.name, split: 212});
+    });
+    
+    QUnit.test("Can return fastest split for a control ignoring NaN times", function (assert) {
+        var competitor2 = getCompetitor2();
+        var ageClass = new AgeClass("Test class name", 3, [getCompetitor1WithNaNSplitForControl3(), competitor2]);
+        assert.deepEqual(ageClass.getFastestSplitTo(3), {name: competitor2.name, split: 184});
     });
     
     QUnit.test("Returns null fastest split for a control that all competitors mispunched", function (assert) {
@@ -164,39 +180,10 @@
         var ageClass = getTestAgeClass();
         assert.deepEqual(ageClass.getCompetitorsAtControlInTimeRange(4, 10 * 3600 - 2, 10 * 3600 - 1), []);
     });
-    
-    QUnit.test("Age class with a valid competitor has splits for all controls", function (assert) {
-        var ageClass = getTestAgeClass();
-        assert.deepEqual(ageClass.getControlsWithNoSplits(), []);
-    });
-    
-    QUnit.test("Age class with a single mispunching competitor does not have splits for the missed control", function (assert) {
-        var ageClass = new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControl3()]);
-        assert.deepEqual(ageClass.getControlsWithNoSplits(), [3]);
-    });
-    
-    QUnit.test("Age class with a single competitor mispunching two controls does not have splits for the missed controls", function (assert) {
-        var ageClass = new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControls1And3()]);
-        assert.deepEqual(ageClass.getControlsWithNoSplits(), [1, 3]);
-    });
-    
-    QUnit.test("Age class with a valid competitor and mispunching competitor has splits for all controls", function (assert) {
-        var ageClass = new AgeClass("Test class", 3, [getCompetitor1(), getCompetitor2WithNullSplitForControl3()]);
-        assert.deepEqual(ageClass.getControlsWithNoSplits(), []);
-    });
-    
-    QUnit.test("Age class with two competitors mispunching the same control does not have splits for all controls", function (assert) {
-        var ageClass = new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControl3(), getCompetitor2WithNullSplitForControl3()]);
-        assert.deepEqual(ageClass.getControlsWithNoSplits(), [3]);
-    });
-    
-    QUnit.test("Age class with two competitors mispunching different controls has splits for all controls", function (assert) {
-        var ageClass = new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControl3(), getCompetitor2WithNullSplitForControl2()]);
-        assert.deepEqual(ageClass.getControlsWithNoSplits(), []);
-    });
 
     QUnit.test("Can determine time-loss data for valid competitors in age-class", function (assert) {
         var ageClass = getTestAgeClass();
+        ageClass.determineTimeLosses();
         ageClass.competitors.forEach(function (comp) {
             [1, 2, 3, 4].forEach(function (controlIdx) {
                 assert.ok(comp.getTimeLossAt(controlIdx) !== null, "Time-loss for competitor '" + comp.name + "' at control '" + controlIdx + "' should not be null");
@@ -206,6 +193,7 @@
 
     QUnit.test("Can determine as all-null time-loss data for age-class with two competitors mispunching the same control", function (assert) {
         var ageClass = new AgeClass("Test class", 3, [getCompetitor1WithNullSplitForControl3(), getCompetitor2WithNullSplitForControl3()]);
+        ageClass.determineTimeLosses();
         ageClass.competitors.forEach(function (comp) {
             [1, 2, 3, 4].forEach(function (controlIdx) {
                 assert.strictEqual(comp.getTimeLossAt(controlIdx), null, "Time-loss for competitor '" + comp.name + "' at control '" + controlIdx + "' should be null");
