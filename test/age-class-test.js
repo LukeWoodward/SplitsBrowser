@@ -63,6 +63,17 @@
         assert.ok(!ageClass.isEmpty(), "Non-empty age class should not be empty");
     });
     
+    QUnit.test("Age class initially created without any competitor data considered as dubious", function (assert) {
+        var ageClass = getTestAgeClass();
+        assert.ok(!ageClass.hasDubiousData, "Original-data option should not be availabl");
+    });
+    
+    QUnit.test("Age class that has recorded that it has dubious data reports itself as so", function (assert) {
+        var ageClass = getTestAgeClass();
+        ageClass.recordHasDubiousData();
+        assert.ok(ageClass.hasDubiousData, "Original-data option should be available");
+    });
+    
     QUnit.test("Creating a class with competitors sets the class name in each competitor", function (assert) {
         var competitor1 = getCompetitor1();
         var competitor2 = getCompetitor2();

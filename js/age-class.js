@@ -36,9 +36,18 @@
         this.numControls = numControls;
         this.competitors = competitors;
         this.course = null;
+        this.hasDubiousData = false;
         this.competitors.forEach(function (comp) {
             comp.setClassName(name);
         });
+    };
+    
+    /**
+    * Records that this age-class has competitor data that SplitsBrowser has
+    * deduced as dubious.
+    */
+    AgeClass.prototype.recordHasDubiousData = function () {
+        this.hasDubiousData = true;
     };
      
     /**

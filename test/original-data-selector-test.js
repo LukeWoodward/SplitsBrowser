@@ -78,4 +78,19 @@
         assert.strictEqual(repairedDataCalls, false, "showRepairedData should not have been called");
     });
     
+    QUnit.test("When selector is hidden, checkbox is no longer visible", function (assert) {
+        var parent = d3.select("#qunit-fixture");
+        var selector = new OriginalDataSelector(parent, showOriginalData, showRepairedData);
+        selector.setVisible(false);
+        assert.ok(!$("input[type=checkbox]", parent.node()).is(":visible"), "Selector should not be visible when set to not be visible");
+    });
+    
+    QUnit.test("When selector is hidden and shown, checkbox is visible once again", function (assert) {
+        var parent = d3.select("#qunit-fixture");
+        var selector = new OriginalDataSelector(parent, showOriginalData, showRepairedData);
+        selector.setVisible(false);
+        selector.setVisible(true);
+        assert.ok($("input[type=checkbox]", parent.node()).is(":visible"), "Selector should be visible when set to be visible");
+    });
+    
 })();

@@ -202,15 +202,18 @@
     };
     
     /**
-    * Attempt to repair all of the data within a course.
-    * @param {Course} The course whose data we wish to repair.
+    * Attempt to repair all of the data within an age class.
+    * @param {AgeClass} The age class whose data we wish to repair.
     */
-    Repairer.prototype.repairCourse = function (course) {
-        course.classes.forEach(function (ageClass) {
-            ageClass.competitors.forEach(function (competitor) {
-                this.repairCompetitor(competitor);
-            }, this);
+    Repairer.prototype.repairAgeClass = function (ageClass) {
+        this.madeAnyChanges = false;
+        ageClass.competitors.forEach(function (competitor) {
+            this.repairCompetitor(competitor);
         }, this);
+        
+        if (this.madeAnyChanges) {
+            ageClass.recordHasDubiousData();
+        }
     };
     
     /**
@@ -218,21 +221,18 @@
     * @param {Event} eventData - The event data to repair.
     */
     Repairer.prototype.repairEventData = function (eventData) {
-        eventData.courses.forEach(function (course) {
-            this.repairCourse(course);
+        eventData.classes.forEach(function (ageClass) {
+            this.repairAgeClass(ageClass);
         }, this);
     };
     
     /**
     * Attempt to carry out repairs to the data in an event.
     * @param {Event} eventData - The event data to repair.
-    * @return {boolean} True if the repairer made any changes to the data,
-    *     false if it did not.
     */
     function repairEventData(eventData) {
         var repairer = new Repairer();
         repairer.repairEventData(eventData);
-        return repairer.madeAnyChanges;
     }
     
     /**

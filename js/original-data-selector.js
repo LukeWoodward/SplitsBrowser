@@ -43,10 +43,12 @@
         this.showOriginalData = showOriginalData;
 
         var checkboxId = "originalDataCheckbox";
-        var containerDiv = parent.append("div")
-                                 .attr("id", CONTAINER_DIV_ID);
+        this.containerDiv = parent.append("div")
+                                  .attr("id", CONTAINER_DIV_ID);
 
-        var span = containerDiv.append("span");
+        this.containerDiv.append("div").classed("topRowSpacer", true);    
+        
+        var span = this.containerDiv.append("span");
         
         var outerThis = this;
         this.checkbox = span.append("input")
@@ -71,6 +73,15 @@
         } else {
             this.showRepairedData();
         }
+    };
+    
+    /**
+    * Sets whether this original-data selector should be visible.
+    * @param {boolean} isVisible - True if the original-data selector should be
+    *     visible, false if it should be hidden.
+    */
+    OriginalDataSelector.prototype.setVisible = function (isVisible) {
+        this.containerDiv.style("display", (isVisible) ? null : "none");
     };
     
     /**

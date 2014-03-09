@@ -123,6 +123,16 @@
     AgeClassSet.prototype.getNumClasses = function () {
         return this.ageClasses.length;
     };
+    
+    /**
+    * Returns whether any of the age-classes within this set have data that
+    * SplitsBrowser can identify as dubious.
+    * @return {boolean} True if any of the age-classes within this set contain
+    *     dubious data, false if none of them do.
+    */
+    AgeClassSet.prototype.hasDubiousData = function () {
+        return this.ageClasses.some(function (ageClass) { return ageClass.hasDubiousData; });
+    };
 
     /**
     * Return a list of objects that describe when the given array of times has

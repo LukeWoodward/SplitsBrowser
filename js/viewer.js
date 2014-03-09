@@ -71,7 +71,6 @@
         this.referenceCumTimes = null;
         this.fastestCumTimes = null;
         this.previousCompetitorList = [];
-        this.isOriginalDataSelectorToBeAdded = false;
         this.topDivHeight = (topDiv && $(topDiv).length > 0) ? $(topDiv).height() : 0;
         
         this.selection = null;
@@ -105,14 +104,6 @@
     Viewer.prototype.enableOrDisableRaceGraph = function () {
         var anyStartTimesMissing = this.ageClassSet.allCompetitors.some(function (competitor) { return competitor.lacksStartTime(); });
         this.chartTypeSelector.setRaceGraphDisabledNotifier((anyStartTimesMissing) ? alertRaceGraphDisabledAsStartTimesMissing : null);
-    };
-    
-    /**
-    * Tells the the viewer to include the original-data selector hwhen it
-    * builds the UI.
-    */
-    Viewer.prototype.showOriginalDataSelector = function () {
-        this.isOriginalDataSelectorToBeAdded = true;
     };
     
     /**
@@ -272,10 +263,7 @@
         this.addChartTypeSelector();
         this.addSpacer();
         this.addComparisonSelector();
-        if (this.isOriginalDataSelectorToBeAdded) {
-            this.addSpacer();
-            this.addOriginalDataSelector();
-        }
+        this.addOriginalDataSelector();
         
         this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
 
@@ -490,6 +478,7 @@
         this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
         this.enableOrDisableRaceGraph();
+        this.originalDataSelector.setVisible(this.ageClassSet.hasDubiousData());
     };
     
     /**
@@ -530,9 +519,7 @@
         this.classSelector.setOtherClassesEnabled(!this.chartType.isResultsTable);
         this.comparisonSelector.setEnabled(!this.chartType.isResultsTable);
         this.statisticsSelector.setEnabled(!this.chartType.isResultsTable);
-        if (this.originalDataSelector !== null) {
-            this.originalDataSelector.setEnabled(!this.chartType.isResultsTable);
-        }
+        this.originalDataSelector.setEnabled(!this.chartType.isResultsTable);
         this.enableOrDisableCrossingRunnersButton();
     };
     
@@ -587,18 +574,13 @@
             if (eventData === null) {
                 showLoadFailureMessage("LoadFailedUnrecognisedData", {});
             } else {
-                var anyChangesMade = false;
                 if (eventData.needsRepair()) {
-                    anyChangesMade = repairEventData(eventData);
+                    repairEventData(eventData);
                 }
                 
                 eventData.determineTimeLosses();
                 
                 var viewer = new Viewer(topDiv);
-                if (anyChangesMade) {
-                    viewer.showOriginalDataSelector();
-                }
-                
                 viewer.buildUi();
                 viewer.setEvent(eventData);
                 viewer.selectClasses([0]);

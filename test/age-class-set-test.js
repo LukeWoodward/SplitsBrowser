@@ -202,6 +202,26 @@
         assert.strictEqual(ageClassSet.getWinnerCumTimes(), null, "There should be no winner if there are no competitors");
     });
 
+    QUnit.test("Age-class set made up of age class without dubious data that should itself not have dubious data", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [])]);
+        assert.ok(!ageClassSet.hasDubiousData());
+    });
+
+    QUnit.test("Age-class set made up of age class with dubious data should also have dubious data", function (assert) {
+        var ageClass = new AgeClass("Test", 3, []);
+        ageClass.recordHasDubiousData();
+        var ageClassSet = new AgeClassSet([ageClass]);
+        assert.ok(ageClassSet.hasDubiousData());
+    });
+
+    QUnit.test("Age-class set made up of two age classes, one with dubious data and one without, should have dubious data", function (assert) {
+        var ageClass1 = new AgeClass("Test 1", 3, []);
+        ageClass1.recordHasDubiousData();
+        var ageClass2 = new AgeClass("Test 2", 3, []);
+        var ageClassSet = new AgeClassSet([ageClass1, ageClass2]);
+        assert.ok(ageClassSet.hasDubiousData());
+    });
+
     QUnit.test("Cumulative times of the winner of an age-class set with only mispunchers is null", function (assert) {
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [
             getCompetitor1WithNullFinishSplit(),
