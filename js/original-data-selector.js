@@ -61,6 +61,8 @@
             .attr("for", checkboxId)
             .classed("originalDataSelectorLabel", true)
             .text(getMessage("ShowOriginalData"));
+            
+        this.containerDiv.attr("title", getMessage("ShowOriginalDataTooltip"));
     };
 
     /**

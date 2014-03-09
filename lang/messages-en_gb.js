@@ -76,6 +76,12 @@ SplitsBrowser.Messages = {
     // 'repaired' data.  This only appears if data that needs repair has been
     // loaded.
     ShowOriginalData: "Show original data",
+  
+    // Tooltip of 'Show original' checkbox.  This appears when SplitsBrowser
+    // deduces that some of the cumulatives times in the data shown are
+    // unrealistic.
+    ShowOriginalDataTooltip: "SplitsBrowser has removed some of the times from the data in the selected class(es), believing these times to be unrealistic.  " +
+                             "Use this checkbox to control whether the amended or original data is plotted.",
     
     StatisticsTotalTime: "Total time",
     StatisticsSplitTime: "Split time",
