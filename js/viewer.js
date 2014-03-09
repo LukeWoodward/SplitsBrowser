@@ -207,11 +207,13 @@
         var outerThis = this;
         var showOriginalData = function () {
             transferCompetitorData(outerThis.eventData);
+            outerThis.eventData.determineTimeLosses();
             outerThis.drawChart();
         };
         
         var showRepairedData = function () {
             repairEventData(outerThis.eventData);
+            outerThis.eventData.determineTimeLosses();
             outerThis.drawChart();
         };
         
