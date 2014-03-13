@@ -189,15 +189,15 @@
         runInvalidDataTest(assert, "", "an empty string", "WrongFileFormat");
     });
     
-    QUnit.test("Cannot parse a string that contains only the HEADER_46s", function (assert) {
-        runInvalidDataTest(assert, HEADER_46, "data with a HEADER_46 row only", "InvalidData");
+    QUnit.test("Cannot parse a string that contains only the headers", function (assert) {
+        runInvalidDataTest(assert, HEADER_46, "data with a header row only", "InvalidData");
     });
     
-    QUnit.test("Cannot parse a string that contains only the HEADER_46s and blank lines", function (assert) {
-        runInvalidDataTest(assert, HEADER_46 + "\r\n\r\n\r\n", "data with a HEADER_46 row and blank lines only", "InvalidData");
+    QUnit.test("Cannot parse a string that contains only the headers and blank lines", function (assert) {
+        runInvalidDataTest(assert, HEADER_46 + "\r\n\r\n\r\n", "data with a header row and blank lines only", "InvalidData");
     });
     
-    QUnit.test("Cannot parse a string that contains only the HEADER_46s and a junk line that happens to contain a semicolon", function (assert) {
+    QUnit.test("Cannot parse a string that contains only the headers and a junk line that happens to contain a semicolon", function (assert) {
         runInvalidDataTest(assert, HEADER_46 + "\r\nrubbish;more rubbish\r\n", "data with a junk second line");
     });
     
