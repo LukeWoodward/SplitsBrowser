@@ -46,6 +46,15 @@
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");
     });
     
+    QUnit.test("Can read in 'SI' comma-delimited data", function (assert) { 
+        var siData = SI_HEADER + "0;1;2;Smith;John;5;6;7;8;11:27:45;10;06:33;12;13;14;ABC;16;17;Test class;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;Test course;4.1;140;3;1;x44;45;208;01:50;227;03:38;212;06:02";
+        siData = siData.replace(/;/g, ",");
+        var eventData = parseEventData(siData);
+        assert.ok(eventData instanceof Event, "An event should be returned");
+        assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
+        assert.strictEqual(eventData.courses.length, 1, "One course should be read in");
+    });
+    
     QUnit.test("Can read in SI HTML preformatted data", function (assert) {
         var siHtmlData = '<html><head></head><body>\n<pre>\n<font size="2"><b>   Test course 1 (2)</b></font><font size="2"><b>   2.7 km     35 m</b></font>\n' +
             '<font size="2"><b> </b></font><font size="2"><b> </b></font><font size="2"><b> </b></font><font size="2"><b>   </b></font>   1(138)     2(152)     3(141)    F  \n' +

@@ -190,15 +190,15 @@
     });
     
     QUnit.test("Cannot parse a string that contains only the headers", function (assert) {
-        runInvalidDataTest(assert, HEADER_46, "data with a header row only", "InvalidData");
+        runInvalidDataTest(assert, HEADER_46, "data with a header row only", "WrongFileFormat");
     });
     
     QUnit.test("Cannot parse a string that contains only the headers and blank lines", function (assert) {
-        runInvalidDataTest(assert, HEADER_46 + "\r\n\r\n\r\n", "data with a header row and blank lines only", "InvalidData");
+        runInvalidDataTest(assert, HEADER_46 + "\r\n\r\n\r\n", "data with a header row and blank lines only", "WrongFileFormat");
     });
     
     QUnit.test("Cannot parse a string that contains only the headers and a junk line that happens to contain a semicolon", function (assert) {
-        runInvalidDataTest(assert, HEADER_46 + "\r\nrubbish;more rubbish\r\n", "data with a junk second line");
+        runInvalidDataTest(assert, HEADER_46 + "\r\nrubbish;more rubbish\r\n", "data with a junk second line", "WrongFileFormat");
     });
     
     QUnit.test("Cannot parse a string that is not semicolon-delimited data", function (assert) {
@@ -315,6 +315,48 @@
         var siData = HEADER_44 + generateRow(competitor, getControls1(), ROW_TEMPLATE_46);
         siData = siData.replace(competitor.club + ";", competitor.club.substring(0, 2) + "\uFFFD");
         runInvalidDataTest(assert, siData, "data where the club name has corrupted the following semicolon");
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor's data with commas as column separators", function (assert) {
+        var eventDataStr = HEADER_46 + generateRow(getCompetitor1(), getControls1(), ROW_TEMPLATE_46);
+        eventDataStr = eventDataStr.replace(/;/g, ",");
+        var eventData = parseEventData(eventDataStr);
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+    });
+
+    QUnit.test("Can parse a string that contains a single competitor's data with tabs as column separators", function (assert) {
+        var eventDataStr = HEADER_46 + generateRow(getCompetitor1(), getControls1(), ROW_TEMPLATE_46);
+        eventDataStr = eventDataStr.replace(/;/g, "\t");
+        var eventData = parseEventData(eventDataStr);
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+    });
+
+    QUnit.test("Can parse a string that contains a single competitor's data with backslash characters as column separators", function (assert) {
+        var eventDataStr = HEADER_46 + generateRow(getCompetitor1(), getControls1(), ROW_TEMPLATE_46);
+        eventDataStr = eventDataStr.replace(/;/g, "\\");
+        var eventData = parseEventData(eventDataStr);
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+    });
+
+    QUnit.test("Cannot parse a string that contains a single competitor's data with closing braces as column separators", function (assert) {
+        var eventDataStr = HEADER_46 + generateRow(getCompetitor1(), getControls1(), ROW_TEMPLATE_46);
+        eventDataStr = eventDataStr.replace(/;/g, "}");
+        runInvalidDataTest(assert, eventDataStr, "data with an unrecognised delimiter", "WrongFileFormat");
+    });
+
+    QUnit.test("Cannot parse file that contains comma-separated numbers", function (assert) {
+        var line1 = "";
+        var line2 = "";
+        for (var i = 0; i < 50; i += 1) {
+            line1 += "X,";
+            line2 += Math.round((1 + Math.sin(i * i)) * 232) + ",";
+        }
+        
+        var eventDataStr = line1 + "X\n" + line2 + "0\n";
+        runInvalidDataTest(assert, eventDataStr, "an empty string", "WrongFileFormat");
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control", function (assert) {

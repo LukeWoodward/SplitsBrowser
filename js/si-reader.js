@@ -30,6 +30,8 @@
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
+    var DELIMITERS = [";", ",", "\t", "\\"];
+    
     // Indexes of the various columns relative to the column for control-1.
     var COLUMN_OFFSETS = {
         TIME: -35,
@@ -79,20 +81,37 @@
     };
 
     /**
-    * Checks that the data read in contains a header that suggests it is
-    * SI-format data.
+    * Identifies the delimiter character that delimits the columns of data.
+    * @return {String} The delimiter character identified.
     */
-    Reader.prototype.checkHeader = function() {
+    Reader.prototype.identifyDelimiter = function () {
         if (this.lines.length <= 1) {
             throwWrongFileFormat("No data found to read");
         }
         
-        var headers = this.lines[0].split(";");
-        if (headers.length <= 1) {
-            throwWrongFileFormat("Data appears not to be in the SI CSV format");
+        var firstDataLine = this.lines[1];
+        for (var i = 0; i < DELIMITERS.length; i += 1) {
+            var delimiter = DELIMITERS[i];
+            if (firstDataLine.split(delimiter).length > MIN_CONTROLS_OFFSET) {
+                return delimiter;
+            }
         }
         
-        var firstLine = this.lines[1].split(";");
+        throwWrongFileFormat("Data appears not to be in the SI CSV format");
+    };
+    
+    /**
+    * Identifies which variation on the SI CSV format we are parsing.
+    *
+    * At present, the only variations supported are 44-column and 46-column.
+    * In both cases, the numbers count the columns before the controls data.
+    *
+    * @param {String} delimiter - The character used to delimit the columns of
+    *     data.
+    */
+    Reader.prototype.identifyFormatVariation = function (delimiter) {
+        
+        var firstLine = this.lines[1].split(delimiter);
         
         var endPos = firstLine.length - 1;
         while (endPos > 0 && $.trim(firstLine[endPos]) === "") {
@@ -110,10 +129,12 @@
         this.control1Index = controlCodeColumn;
         
         var supportedControl1Indexes = [44, 46];
+        
+        var throwException = (delimiter === ",") ? throwWrongFileFormat : throwInvalidData;
         if (this.control1Index === null) {
-            throwInvalidData("Unable to find index of control 1 in SI CSV data");
+            throwException("Unable to find index of control 1 in SI CSV data");
         } else if (supportedControl1Indexes.indexOf(this.control1Index) < 0) {
-            throwInvalidData("Unsupported index of control 1: " + this.control1Index);
+            throwException("Unsupported index of control 1: " + this.control1Index);
         }
     };
     
@@ -255,15 +276,17 @@
     * @param {String} line - The line to parse.
     * @param {Number} lineNumber - The number of the line (used in error
     *     messages).
+    * @param {String} delimiter - The character used to delimit the columns of
+    *     data.
     */
-    Reader.prototype.readLine = function (line, lineNumber) {
+    Reader.prototype.readLine = function (line, lineNumber, delimiter) {
     
         if ($.trim(line) === "") {
             // Skip this blank line.
             return;
         }
     
-        var row = line.split(";");
+        var row = line.split(delimiter);
         
         // Check the row is long enough to have all the data besides the
         // controls data.
@@ -447,13 +470,15 @@
         
         this.lines = this.data.split(/\r?\n/);
         
-        this.checkHeader();
+        var delimiter = this.identifyDelimiter();
+        
+        this.identifyFormatVariation(delimiter);
         
         // Discard the header row.
         this.lines.shift();
         
         this.lines.forEach(function (line, lineIndex) {
-            this.readLine(line, lineIndex + 1);
+            this.readLine(line, lineIndex + 1, delimiter);
         }, this);
         
         if (!this.anyCompetitors) {
