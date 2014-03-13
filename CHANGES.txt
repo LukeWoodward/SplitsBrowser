@@ -4,3 +4,4 @@ SplitsBrowser changelog:
 3.1.0:  Add support for SI HTML files.
 3.1.1:  Add support for 44-column SI CSV files (including those used by helga-o.com).
 3.2.0:  Tolerate input data files with cumulative times not always strictly ascending.
+3.2.1:  Support SI CSV files with delimiters other than semicolons.
