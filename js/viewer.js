@@ -26,10 +26,6 @@
     // comes in while a previous event is waiting, the previous event is
     // cancelled.)
     var RESIZE_DELAY_MS = 100;
-
-    // ID of the div that contains the competitor list.
-    // Must match that used in styles.css.
-    var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
     
     var ClassSelector = SplitsBrowser.Controls.ClassSelector;
     var ChartTypeSelector = SplitsBrowser.Controls.ChartTypeSelector;
@@ -43,16 +39,6 @@
     var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
-    
-    /**
-    * Enables or disables a control, by setting or clearing an HTML "disabled"
-    * attribute as necessary.
-    * @param {d3.selection} control - d3 selection containing the control.
-    * @param {boolean} isEnabled - Whether the control is enabled.
-    */
-    function enableControl(control, isEnabled) {
-        control.node().disabled = !isEnabled;
-    }
     
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
@@ -88,6 +74,19 @@
         
         this.currentResizeTimeout = null;
     };
+    
+    /**
+    * Pops up an alert box with the given message.
+    *
+    * The viewer passes this function to various controls so that they can pop
+    * up an alert box in normal use and call some other function during
+    * testing.
+    *    
+    * @param {String} message - The message to show.
+    */
+    function alerter(message) {
+        alert(message);
+    }
     
     /**
     * Pops up an alert box informing the user that the race graph cannot be
@@ -191,7 +190,7 @@
     * Adds the comparison selector to the top panel.
     */
     Viewer.prototype.addComparisonSelector = function () {
-        this.comparisonSelector = new ComparisonSelector(this.topPanel.node(), function (message) { alert(message); });
+        this.comparisonSelector = new ComparisonSelector(this.topPanel.node(), alerter);
         if (this.classes !== null) {
             this.comparisonSelector.setClasses(this.classes);
         }
@@ -224,31 +223,7 @@
     * Adds the list of competitors, and the buttons, to the page.
     */
     Viewer.prototype.addCompetitorList = function () {
-        this.competitorListContainer = this.mainPanel.append("div")
-                                                     .attr("id", COMPETITOR_LIST_CONTAINER_ID);
-                                               
-        this.buttonsPanel = this.competitorListContainer.append("div");
-                           
-        var outerThis = this;
-        this.allButton = this.buttonsPanel.append("button")
-                                          .text(getMessage("SelectAllCompetitors"))
-                                          .style("width", "50%")
-                                          .on("click", function () { outerThis.selectAll(); });
-                        
-        this.noneButton = this.buttonsPanel.append("button")
-                                           .text(getMessage("SelectNoCompetitors"))
-                                           .style("width", "50%")
-                                           .on("click", function () { outerThis.selectNone(); });
-                        
-        this.buttonsPanel.append("br");
-                        
-        this.crossingRunnersButton = this.buttonsPanel.append("button")
-                                                      .text(getMessage("SelectCrossingRunners"))
-                                                      .style("width", "100%")
-                                                      .on("click", function () { outerThis.selectCrossingRunners(); })
-                                                      .style("display", "none");
-
-        this.competitorListBox = new CompetitorListBox(this.competitorListContainer.node());
+        this.competitorListBox = new CompetitorListBox(this.mainPanel.node(), alerter);
     };
 
     /**
@@ -295,33 +270,6 @@
         // and other browsers have their own vendor-specific CSS styles for
         // this, and in these browsers this event handler never gets called.
         $("body").bind("selectstart", function () { return false; });
-    };
-
-    /**
-    * Select all of the competitors.
-    */
-    Viewer.prototype.selectAll = function () {
-        this.selection.selectAll();
-    };
-
-    /**
-    * Select none of the competitors.
-    */
-    Viewer.prototype.selectNone = function () {
-        this.selection.selectNone();
-    };
-
-    /**
-    * Select all of the competitors that cross the unique selected competitor.
-    */
-    Viewer.prototype.selectCrossingRunners = function () {
-        this.selection.selectCrossingRunners(this.ageClassSet.allCompetitors); 
-        if (this.selection.isSingleRunnerSelected()) {
-            // Only a single runner is still selected, so nobody crossed the
-            // selected runner.
-            var competitorName = this.ageClassSet.allCompetitors[this.currentIndexes[0]].name;
-            alert(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
-        }
     };
 
     /**
@@ -381,7 +329,7 @@
         this.chart.setSize(chartWidth, chartHeight);
         this.chart.show();
         
-        $(this.competitorListContainer.node()).height(bodyHeight - $(this.buttonsPanel.node()).height() - topPanelHeight);    
+        this.competitorListBox.setHeight(bodyHeight - topPanelHeight);
     };
     
     /**
@@ -408,7 +356,7 @@
         
         this.selectionChangeHandler = function (indexes) {
             outerThis.currentIndexes = indexes;
-            outerThis.enableOrDisableCrossingRunnersButton();
+            outerThis.competitorListBox.enableOrDisableCrossingRunnersButton();
             outerThis.redraw();
         };
 
@@ -509,7 +457,7 @@
         
         this.updateControlEnabledness();
         
-        this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? null : "none");
+        this.competitorListBox.setChartType(chartType);
         
         this.drawChart();
     };
@@ -522,14 +470,7 @@
         this.comparisonSelector.setEnabled(!this.chartType.isResultsTable);
         this.statisticsSelector.setEnabled(!this.chartType.isResultsTable);
         this.originalDataSelector.setEnabled(!this.chartType.isResultsTable);
-        this.enableOrDisableCrossingRunnersButton();
-    };
-    
-    /**
-    * Enables or disables the crossing-runners button as appropriate.
-    */
-    Viewer.prototype.enableOrDisableCrossingRunnersButton = function () {
-        enableControl(this.crossingRunnersButton, this.selection.isSingleRunnerSelected());
+        this.competitorListBox.enableOrDisableCrossingRunnersButton();
     };
     
     SplitsBrowser.Viewer = Viewer;

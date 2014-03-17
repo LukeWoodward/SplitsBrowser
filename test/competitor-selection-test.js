@@ -247,16 +247,33 @@
         assert.ok(!selection.isSingleRunnerSelected(), "A single runner should not be selected if there are no competitors selected");
     });
 
-    QUnit.test("A single runner is selected if one runners is selected", function (assert) {
+    QUnit.test("A single runner is selected if one runner is selected", function (assert) {
         var selection = new CompetitorSelection(3);
         selection.toggle(2);
         assert.ok(selection.isSingleRunnerSelected(), "A single runner should be selected if there one competitor is selected");
     });
 
-    QUnit.test("A single runner is selected if one runners is selected", function (assert) {
+    QUnit.test("A single runner is not selected if all runners are selected", function (assert) {
         var selection = new CompetitorSelection(3);
         selection.selectAll();
         assert.ok(!selection.isSingleRunnerSelected(), "A single runner should not be selected if all competitors are selected");
+    });
+
+    QUnit.test("Cannot get single runner index if no runners are selected", function (assert) {
+        var selection = new CompetitorSelection(3);
+        assert.strictEqual(selection.getSingleRunnerIndex(), null);
+    });
+
+    QUnit.test("Can get single runner index if one runner is selected", function (assert) {
+        var selection = new CompetitorSelection(3);
+        selection.toggle(2);
+        assert.strictEqual(selection.getSingleRunnerIndex(), 2);
+    });
+
+    QUnit.test("A single runner is selected if one runners is selected", function (assert) {
+        var selection = new CompetitorSelection(3);
+        selection.selectAll();
+        assert.strictEqual(selection.getSingleRunnerIndex(), null);
     });
 
     QUnit.test("If a single runner is selected, when crossing competitors are selected, then one other competitor is selected", function (assert) {

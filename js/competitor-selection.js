@@ -60,6 +60,18 @@
     CompetitorSelection.prototype.isSingleRunnerSelected = function () {
         return this.currentIndexes.length === 1;
     };
+    
+    /**
+    * Returns the index of the single selected competitor.
+    *
+    * If no competitors, or more than two competitors, are selected, null is
+    * returned
+    *
+    * @return {Number|null} Index of the single selected competitor, or null.
+    */
+    CompetitorSelection.prototype.getSingleRunnerIndex = function () {
+        return (this.isSingleRunnerSelected()) ? this.currentIndexes[0] : null;
+    };
 
     /**
     * Given that a single runner is selected, select also all of the runners
