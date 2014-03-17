@@ -32,7 +32,7 @@
     var ComparisonSelector = SplitsBrowser.Controls.ComparisonSelector;
     var OriginalDataSelector = SplitsBrowser.Controls.OriginalDataSelector;
     var StatisticsSelector = SplitsBrowser.Controls.StatisticsSelector;
-    var CompetitorListBox = SplitsBrowser.Controls.CompetitorListBox;
+    var CompetitorList = SplitsBrowser.Controls.CompetitorList;
     var Chart = SplitsBrowser.Controls.Chart;
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
@@ -65,7 +65,7 @@
         this.comparisonSelector = null;
         this.originalDataSelector = null;
         this.statisticsSelector = null;
-        this.competitorListBox = null;
+        this.competitorList = null;
         this.chart = null;
         this.topPanel = null;
         this.mainPanel = null;
@@ -223,7 +223,7 @@
     * Adds the list of competitors, and the buttons, to the page.
     */
     Viewer.prototype.addCompetitorList = function () {
-        this.competitorListBox = new CompetitorListBox(this.mainPanel.node(), alerter);
+        this.competitorList = new CompetitorList(this.mainPanel.node(), alerter);
     };
 
     /**
@@ -321,15 +321,15 @@
         // know what size it should have.
         this.chart.hide();
         
-        this.competitorListBox.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
+        this.competitorList.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
         
-        var chartWidth = bodyWidth - this.competitorListBox.width() - EXTRA_WRAP_PREVENTION_SPACE;
+        var chartWidth = bodyWidth - this.competitorList.width() - EXTRA_WRAP_PREVENTION_SPACE;
         var chartHeight = bodyHeight - topPanelHeight;
 
         this.chart.setSize(chartWidth, chartHeight);
         this.chart.show();
         
-        this.competitorListBox.setHeight(bodyHeight - topPanelHeight);
+        this.competitorList.setHeight(bodyHeight - topPanelHeight);
     };
     
     /**
@@ -356,7 +356,7 @@
         
         this.selectionChangeHandler = function (indexes) {
             outerThis.currentIndexes = indexes;
-            outerThis.competitorListBox.enableOrDisableCrossingRunnersButton();
+            outerThis.competitorList.enableOrDisableCrossingRunnersButton();
             outerThis.redraw();
         };
 
@@ -409,7 +409,7 @@
     
         if (this.selection === null) {
             this.selection = new SplitsBrowser.Model.CompetitorSelection(0);
-            this.competitorListBox.setSelection(this.selection);
+            this.competitorList.setSelection(this.selection);
         } else {
             if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
                 // The 'primary' class hasn't changed, only the 'other' ones.
@@ -457,7 +457,7 @@
         
         this.updateControlEnabledness();
         
-        this.competitorListBox.setChartType(chartType);
+        this.competitorList.setChartType(chartType);
         
         this.drawChart();
     };
@@ -470,7 +470,7 @@
         this.comparisonSelector.setEnabled(!this.chartType.isResultsTable);
         this.statisticsSelector.setEnabled(!this.chartType.isResultsTable);
         this.originalDataSelector.setEnabled(!this.chartType.isResultsTable);
-        this.competitorListBox.enableOrDisableCrossingRunnersButton();
+        this.competitorList.enableOrDisableCrossingRunnersButton();
     };
     
     SplitsBrowser.Viewer = Viewer;

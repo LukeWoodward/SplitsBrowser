@@ -1,5 +1,5 @@
 ﻿/*
- *  SplitsBrowser CompetitorListBox - Lists the competitors down the left side.
+ *  SplitsBrowser CompetitorList - Lists the competitors down the left side.
  *  
  *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
@@ -34,10 +34,10 @@
     /**
     * Object that controls a list of competitors from which the user can select.
     * @constructor
-    * @param {HTMLElement} parent - Parent element to add this listbox to.
+    * @param {HTMLElement} parent - Parent element to add this list to.
     * @param {Function} alerter - Function to call to issue an alert message.
     */
-    var CompetitorListBox = function (parent, alerter) {
+    var CompetitorList = function (parent, alerter) {
         this.parent = parent;
         this.alerter = alerter;
         this.handler = null;
@@ -84,39 +84,39 @@
     };
 
     /**
-    * Returns the width of the listbox, in pixels.
-    * @returns {Number} Width of the listbox.
+    * Returns the width of the list, in pixels.
+    * @returns {Number} Width of the list.
     */
-    CompetitorListBox.prototype.width = function () {
+    CompetitorList.prototype.width = function () {
         return $(this.listDiv.node()).width();
     };
     
     /**
-    * Sets the overall height of the competitor listbox.
+    * Sets the overall height of the competitor list.
     * @param {Number} height - The height of the control, in pixels.
     */
-    CompetitorListBox.prototype.setHeight = function (height) {
+    CompetitorList.prototype.setHeight = function (height) {
         $(this.listDiv.node()).height(height - $(this.buttonsPanel.node()).height());
     };
 
     /**
     * Select all of the competitors.
     */
-    CompetitorListBox.prototype.selectAll = function () {
+    CompetitorList.prototype.selectAll = function () {
         this.competitorSelection.selectAll();
     };
 
     /**
     * Select none of the competitors.
     */
-    CompetitorListBox.prototype.selectNone = function () {
+    CompetitorList.prototype.selectNone = function () {
         this.competitorSelection.selectNone();
     };
 
     /**
     * Select all of the competitors that cross the unique selected competitor.
     */
-    CompetitorListBox.prototype.selectCrossingRunners = function () {
+    CompetitorList.prototype.selectCrossingRunners = function () {
         this.competitorSelection.selectCrossingRunners(this.allCompetitors); 
         if (this.competitorSelection.isSingleRunnerSelected()) {
             // Only a single runner is still selected, so nobody crossed the
@@ -129,7 +129,7 @@
     /**
     * Enables or disables the crossing-runners button as appropriate.
     */
-    CompetitorListBox.prototype.enableOrDisableCrossingRunnersButton = function () {
+    CompetitorList.prototype.enableOrDisableCrossingRunnersButton = function () {
         this.crossingRunnersButton.node().disabled = !this.competitorSelection.isSingleRunnerSelected();
     };
     
@@ -138,7 +138,7 @@
     * hide the Crossing Runners button.
     * @param {Object} chartType - The chart type selected.
     */
-    CompetitorListBox.prototype.setChartType = function (chartType) {
+    CompetitorList.prototype.setChartType = function (chartType) {
         this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "block" : "none");    
     };
 
@@ -146,7 +146,7 @@
     * Handles a change to the selection of competitors, by highlighting all
     * those selected and unhighlighting all those no longer selected.
     */
-    CompetitorListBox.prototype.selectionChanged = function () {
+    CompetitorList.prototype.selectionChanged = function () {
         var outerThis = this;
         this.listDiv.selectAll("div.competitor")
                     .data(d3.range(this.competitorSelection.count))
@@ -156,7 +156,7 @@
     /**
     * Toggle the selectedness of a competitor.
     */
-    CompetitorListBox.prototype.toggleCompetitor = function (index) {
+    CompetitorList.prototype.toggleCompetitor = function (index) {
         this.competitorSelection.toggle(index);
     };
 
@@ -183,7 +183,7 @@
     * @param {boolean} hasMultipleClasses - Whether the list of competitors is
     *      made up from those in multiple classes.
     */
-    CompetitorListBox.prototype.setCompetitorList = function (competitors, multipleClasses) {
+    CompetitorList.prototype.setCompetitorList = function (competitors, multipleClasses) {
         // Note that we use jQuery's click event handling here instead of d3's,
         // as d3's doesn't seem to work in PhantomJS.
         $("div.competitor").off("click");
@@ -220,7 +220,7 @@
     * Sets the competitor selection object.
     * @param {SplitsBrowser.Controls.CompetitorSelection} selection - Competitor selection.
     */
-    CompetitorListBox.prototype.setSelection = function (selection) {
+    CompetitorList.prototype.setSelection = function (selection) {
         if (this.competitorSelection !== null) {
             this.competitorSelection.deregisterChangeHandler(this.handler);
         }
@@ -235,7 +235,7 @@
     /**
     * Handles a key-up event in the filter textbox.
     */
-    CompetitorListBox.prototype.onFilterKeyUp = function () {
+    CompetitorList.prototype.onFilterKeyUp = function () {
         var currentFilterString = this.filter.node().value;
         if (currentFilterString !== this.lastFilterString) {
             var normedFilter = normaliseName(currentFilterString);
@@ -247,5 +247,5 @@
         }
     };
     
-    SplitsBrowser.Controls.CompetitorListBox = CompetitorListBox;
+    SplitsBrowser.Controls.CompetitorList = CompetitorList;
 })();
