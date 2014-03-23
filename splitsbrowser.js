@@ -6758,7 +6758,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.fastestCumTimes = null;
         this.previousCompetitorList = [];
         
-        this.topDivHeight = (options && options.topDiv && $(options.topDiv).length > 0) ? $(options.topDiv).height() : 0;
+        this.topBarHeight = (options && options.topBar && $(options.topBar).length > 0) ? $(options.topBar).height() : 0;
         
         this.selection = null;
         this.ageClassSet = null;
@@ -7066,7 +7066,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         var EXTRA_WRAP_PREVENTION_SPACE = 2;
         
         var bodyWidth = $(window).width() - horzMargin;
-        var bodyHeight = $(window).height() - vertMargin - this.topDivHeight;
+        var bodyHeight = $(window).height() - vertMargin - this.topBarHeight;
 
         $("body").width(bodyWidth).height(bodyHeight);
         
@@ -7291,9 +7291,9 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                 }
                 
                 if (typeof options === "string") {
-                    // Deprecated; support the top-div specified only as a
+                    // Deprecated; support the top-bar specified only as a
                     // string.
-                    options = {topDiv: options};
+                    options = {topBar: options};
                 }
                 
                 eventData.determineTimeLosses();
