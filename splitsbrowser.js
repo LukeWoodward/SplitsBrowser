@@ -59,6 +59,18 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Attempts to get a message, returning a default string if it does not
+    * exist.
+    * @param {String} key - The key of the message.
+    * @param {String} defaultValue - Value to be used 
+    * @return {String} The message with the given key, if the key exists,
+    *     otherwise the default value.
+    */
+    SplitsBrowser.tryGetMessage = function (key, defaultValue) {
+        return (SplitsBrowser.Messages && SplitsBrowser.Messages.hasOwnProperty(key)) ? SplitsBrowser.getMessage(key) : defaultValue;
+    };
+    
+    /**
     * Returns the message with the given key.
     * @param {String} key - The key of the message.
     * @return {String} The message with the given key, or a placeholder string
@@ -6715,6 +6727,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
     var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
     var getMessage = SplitsBrowser.getMessage;
+    var tryGetMessage = SplitsBrowser.tryGetMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     
     /**
@@ -6730,11 +6743,11 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
     * @constructor
-    * @param {String|HTMLElement|undefined} - Optional HTML element that forms
-    *     a 'banner' across the top of the page.  This can be specified by a
-    *     CSS selector or the HTML element itself.
+    * @param {Object|undefined} options - Optional object containing various
+    *     options to SplitsBrowser.
     */
-    var Viewer = function (topDiv) {
+    var Viewer = function (options) {
+        this.options = options;
     
         this.eventData = null;
         this.classes = null;
@@ -6744,7 +6757,8 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.referenceCumTimes = null;
         this.fastestCumTimes = null;
         this.previousCompetitorList = [];
-        this.topDivHeight = (topDiv && $(topDiv).length > 0) ? $(topDiv).height() : 0;
+        
+        this.topDivHeight = (options && options.topDiv && $(options.topDiv).length > 0) ? $(options.topDiv).height() : 0;
         
         this.selection = null;
         this.ageClassSet = null;
@@ -6836,6 +6850,23 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     Viewer.prototype.addSpacer = function () {
         this.topPanel.append("div").classed("topRowSpacer", true);    
     };
+    
+    /**
+    * Adds a country flag to the top panel.
+    */
+    Viewer.prototype.addCountryFlag = function () {
+        var flagImage = this.topPanel.append("img")
+                                     .attr("id", "flagImage")
+                                     .attr("src", this.options.flagImageURL)
+                                     .attr("alt", tryGetMessage("Language", ""))
+                                     .attr("title", tryGetMessage("Language", ""));
+        if (this.options.hasOwnProperty("flagImageWidth")) {
+            flagImage.attr("width", this.options.flagImageWidth);
+        }
+        if (this.options.hasOwnProperty("flagImageHeight")) {
+            flagImage.attr("height", this.options.flagImageHeight);
+        }
+    }; 
     
     /**
     * Adds the class selector control to the top panel.
@@ -6933,6 +6964,10 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.topPanel = body.append("div");
         
         this.drawLogo();
+        if (this.options && this.options.flagImageURL) {
+            this.addCountryFlag();
+        }
+        
         this.addClassSelector();
         this.addSpacer();
         this.addChartTypeSelector();
@@ -7228,11 +7263,13 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * data and starting SplitsBrowser.
     * @param {String} data - The data returned from the AJAX request.
     * @param {String} status - The status of the request.
-    * @param {String|HTMLElement|undefined} - Optional HTML element that forms
-    *     a 'banner' across the top of the page.  This can be specified by a
-    *     CSS selector or the HTML element itself.
+    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    *     containing various options to SplitsBrowser.  It can also be used for
+    *     an HTML element that forms a 'banner' across the top of the page.
+    *     This element can be specified by a CSS selector for the element, or
+    *     the HTML element itself, although this behaviour is deprecated.
     */
-    function readEventData(data, status, topDiv) {
+    function readEventData(data, status, options) {
         if (status === "success") {
             var eventData;
             try {
@@ -7253,9 +7290,15 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                     repairEventData(eventData);
                 }
                 
+                if (typeof options === "string") {
+                    // Deprecated; support the top-div specified only as a
+                    // string.
+                    options = {topDiv: options};
+                }
+                
                 eventData.determineTimeLosses();
                 
-                var viewer = new Viewer(topDiv);
+                var viewer = new Viewer(options);
                 viewer.buildUi();
                 viewer.setEvent(eventData);
                 viewer.selectClasses([0]);
@@ -7278,15 +7321,17 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**
     * Loads the event data in the given URL and starts SplitsBrowser.
     * @param {String} eventUrl - The URL that points to the event data to load.
-    * @param {String|HTMLElement|undefined} - Optional HTML element that forms
-    *     a 'banner' across the top of the page.  This can be specified by a
-    *     CSS selector or the HTML element itself.
+    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    *     containing various options to SplitsBrowser.  It can also be used for
+    *     an HTML element that forms a 'banner' across the top of the page.
+    *     This element can be specified by a CSS selector for the element, or
+    *     the HTML element itself, although this behaviour is deprecated.
     */
-    SplitsBrowser.loadEvent = function (eventUrl, topDiv) {
+    SplitsBrowser.loadEvent = function (eventUrl, options) {
         $.ajax({
             url: eventUrl,
             data: "",
-            success: function (data, status) { readEventData(data, status, topDiv); },
+            success: function (data, status) { readEventData(data, status, options); },
             dataType: "text",
             error: readEventDataError
         });

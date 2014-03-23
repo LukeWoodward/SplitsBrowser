@@ -1,7 +1,7 @@
 ﻿/*
  *  Messages - UK English messages for SplitsBrowser
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 SplitsBrowser.Messages = {
 
     ApplicationVersion: "SplitsBrowser - Version $$VERSION$$",
+    Language: "English",
     
     MispunchedShort: "mp",
     NonCompetitiveShort: "n/c",
