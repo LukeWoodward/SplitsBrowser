@@ -343,4 +343,73 @@
         assert.deepEqual(lastIndexes, [0]);
         assert.strictEqual(callCount, 1);
     });
+    
+    QUnit.test("Can bulk-select an empty list of competitors without firing change handlers", function (assert) {
+        reset();
+        var selection = new CompetitorSelection(5);
+        selection.registerChangeHandler(testHandler);        
+        selection.bulkSelect([]);
+        assert.strictEqual(callCount, 0);
+    });
+    
+    QUnit.test("Can bulk-select three competitors when none originally selected, firing change handlers once", function (assert) {
+        reset();
+        var selection = new CompetitorSelection(5);
+        selection.registerChangeHandler(testHandler);        
+        selection.bulkSelect([1, 3, 4]);
+        assert.deepEqual(lastIndexes, [1, 3, 4]);
+        assert.strictEqual(callCount, 1);
+    });
+    
+    QUnit.test("Can bulk-select three competitors in the wrong order when none originally selected, firing change handlers once", function (assert) {
+        reset();
+        var selection = new CompetitorSelection(5);
+        selection.registerChangeHandler(testHandler);        
+        selection.bulkSelect([4, 3, 1]);
+        assert.deepEqual(lastIndexes, [1, 3, 4]);
+        assert.strictEqual(callCount, 1);
+    });
+    
+    QUnit.test("Can bulk-select three competitors when two originally selected, with correct list of last indexes and firing change handlers once", function (assert) {
+        reset();
+        var selection = new CompetitorSelection(5);
+        selection.toggle(1);
+        selection.toggle(4);
+        selection.registerChangeHandler(testHandler);        
+        selection.bulkSelect([1, 3, 4]);
+        assert.deepEqual(lastIndexes, [1, 3, 4]);
+        assert.strictEqual(callCount, 1);
+    });
+    
+    QUnit.test("Bulk-selecting three competitors when all three originally selected does not fire change handlers", function (assert) {
+        reset();
+        var selection = new CompetitorSelection(5);
+        selection.toggle(1);
+        selection.toggle(3);
+        selection.toggle(4);
+        selection.registerChangeHandler(testHandler);        
+        selection.bulkSelect([1, 3, 4]);
+        assert.strictEqual(callCount, 0);
+    });
+
+    QUnit.test("Cannot bulk-select when one of the entries in the list is not a number", function (assert) {
+        var selection = new CompetitorSelection(5);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            selection.bulkSelect([1, "This is not a number", 4]);
+        });
+    });
+
+    QUnit.test("Cannot bulk-select when one of the entries in the list is a negative number", function (assert) {
+        var selection = new CompetitorSelection(5);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            selection.bulkSelect([1, -1, 4]);
+        });
+    });
+
+    QUnit.test("Cannot bulk-select when one of the entries in the list is too large", function (assert) {
+        var selection = new CompetitorSelection(5);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            selection.bulkSelect([1, 5, 4]);
+        });
+    });
 })();

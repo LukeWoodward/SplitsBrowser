@@ -25,6 +25,9 @@
     // Must match that used in styles.css.
     var COMPETITOR_LIST_ID = "competitorList";
     
+    // The number that identifies the left mouse button in a jQuery event.
+    var JQUERY_EVENT_LEFT_BUTTON = 1;
+    
     // ID of the container that contains the list and the filter textbox.
     var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
     
@@ -45,6 +48,10 @@
         this.lastFilterString = "";
         this.allCompetitors = [];
         this.normedNames = [];
+        this.dragging = false;
+        this.dragStartX = null;
+        this.dragStartY = null;
+        this.dragStartCompetitorIndex = null;
         
         this.containerDiv = d3.select(parent).append("div")
                                              .attr("id", COMPETITOR_LIST_CONTAINER_ID);
@@ -81,6 +88,118 @@
                                       
         this.listDiv = this.containerDiv.append("div")
                                         .attr("id", COMPETITOR_LIST_ID);
+                                        
+        this.dragDiv = this.listDiv.append("div")
+                                   .attr("id", "dragDiv")
+                                   .style("display", "none")
+                                   .style("position", "absolute")
+                                   .style("z-index", "100");
+                                        
+        $(this.listDiv.node()).mousedown(function (evt) { outerThis.startDrag(evt); })
+                              .mousemove(function (evt) { outerThis.mouseMove(evt); })
+                              .mouseup(function (evt) { outerThis.stopDrag(evt); });
+                              
+        $(document).mouseup(function (evt) { outerThis.stopDrag(evt); });
+    };
+    
+    /**
+    * Updates the position of the drag rectangle.
+    * @param {Number} currentX - The current mouse X coordinate, relative to
+    *     the page.
+    * @param {Number} currentY - The current mouse Y coordinate, relative to
+    *     the page.
+    */
+    CompetitorList.prototype.updateDragRectangle = function (currentX, currentY) {
+        var xOffset = Math.min(currentX, this.dragStartX);
+        var yOffset = Math.min(currentY, this.dragStartY);
+        var width = Math.abs(currentX - this.dragStartX) + 1;
+        var height = Math.abs(currentY - this.dragStartY) + 1;
+        this.dragDiv.style("left", xOffset + "px")
+                    .style("top", yOffset + "px")
+                    .style("width", width + "px")
+                    .style("height", height + "px");
+    };
+    
+    /**
+    * Handles the start of a drag over the list of competitors.
+    * @param {jQuery.eventObject} evt - jQuery event object.
+    */
+    CompetitorList.prototype.startDrag = function (evt) {
+        if (evt.which === JQUERY_EVENT_LEFT_BUTTON) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            this.dragStartX = evt.pageX;
+            this.dragStartY = evt.pageY;
+            this.dragDiv.style("display", null);
+            this.dragStartCompetitorIndex = $("div.competitor").index(evt.currentTarget);
+            this.updateDragRectangle(this.dragStartX, this.dragStartY);
+            this.dragging = true;
+        }
+    };
+    
+    /**
+    * Handles the movement of the mouse over the list of competitors.
+    * @param {jQuery.eventObject} evt - jQuery event object.
+    */
+    CompetitorList.prototype.mouseMove = function (evt) {
+        if (this.dragging) {
+            this.updateDragRectangle(evt.pageX, evt.pageY);
+            evt.stopPropagation();
+        }
+    };
+
+    /**
+    * Handles the end of a drag in the competitor list.
+    * @param {jQuery.eventObject} evt - jQuery event object.
+    */
+    CompetitorList.prototype.stopDrag = function (evt) {
+        if (!this.dragging) {
+            // This handler is wired up to mouseUp on the entire document, in
+            // order to cancel the drag if it is let go away from the list.  If
+            // we're not dragging then we have a mouse-up after a mouse-down
+            // somewhere outside of this competitor list.  Ignore it.
+            return;
+        }
+        
+        if (evt.currentTarget === this.dragDiv.node()) {
+            // Event target is the dragging rubber-band div (IE9/10 only - on
+            // other browsers the CSS property pointer-events: none prevents
+            // this div from receiving mouse events).  Ignore it and let the
+            // event propagate.
+            return;
+        }
+        
+        evt.stopPropagation();
+        var competitors = $("div.competitor");
+        var startIndex = this.dragStartCompetitorIndex;
+        var endIndex = competitors.index(evt.currentTarget);
+        this.dragging = false;
+        this.dragDiv.style("display", "none");
+        this.dragStartX = null;
+        this.dragStartY = null;
+        this.dragStartCompetitorIndex = null;
+        if (evt.currentTarget === document) {
+            // Drag ended outside the list, so do nothing further.
+        } else if (startIndex === endIndex) {
+            // Do nothing; the user clicked on a competitor, or dragged
+            // entirely outside the list.
+        } else {
+            if (startIndex === -1) {
+                startIndex = competitors.length - 1;
+            }
+            
+            if (endIndex === -1) {
+                endIndex = competitors.length - 1;
+            }
+            
+            var minIndex = Math.min(startIndex, endIndex);
+            var maxIndex = Math.max(startIndex, endIndex);
+            var selectedIndexes = d3.range(minIndex, maxIndex + 1).filter(function (index) {
+                return $(competitors[index]).is(":visible");
+            });
+            
+            this.competitorSelection.bulkSelect(selectedIndexes);
+        }
     };
 
     /**
@@ -206,11 +325,15 @@
         
         competitorDivs.append("span")
                       .classed("nonfinisher", function (comp) { return !comp.completed(); })
-                      .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });        
+                      .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });
 
         competitorDivs.exit().remove();
         
         var outerThis = this;
+        $("div.competitor").mousedown(function (evt) { outerThis.startDrag(evt); })
+                           .mousemove(function (evt) { outerThis.mouseMove(evt); })
+                           .mouseup(function (evt) { outerThis.stopDrag(evt); });
+        
         $("div.competitor").each(function (index, div) {
             $(div).on("click", function () { outerThis.toggleCompetitor(index); });
         });

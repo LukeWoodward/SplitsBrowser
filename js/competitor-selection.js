@@ -174,6 +174,29 @@
     };
     
     /**
+    * Selects a number of competitors, firing the change handlers once at the
+    * end if any indexes were added.
+    * @param {Array} indexes - Array of indexes of competitors to select.
+    */
+    CompetitorSelection.prototype.bulkSelect = function (indexes) {
+        if (indexes.some(function (index) {
+            return (typeof index !== NUMBER_TYPE || index < 0 || index >= this.count);
+        }, this)) {
+            throwInvalidData("Indexes not all numeric and in range");
+        }
+        
+        // Remove from the set of indexes given any that are already selected.
+        var currentIndexSet = d3.set(this.currentIndexes);
+        indexes = indexes.filter(function (index) { return !currentIndexSet.has(index); });
+        
+        if (indexes.length > 0) {
+            this.currentIndexes = this.currentIndexes.concat(indexes);
+            this.currentIndexes.sort(d3.ascending);
+            this.fireChangeHandlers();
+        }
+    };
+    
+    /**
     * Migrates the selected competitors from one list to another.
     *
     * After the migration, any competitors in the old list that were selected

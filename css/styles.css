@@ -96,6 +96,13 @@ span.competitorClassLabel
     padding-right: 10px;
 }
 
+div#dragDiv
+{
+    border: 1px dashed black;
+    background-color: transparent;
+    pointer-events: none;
+}
+
 svg text
 {
     font: 10px sans-serif;
