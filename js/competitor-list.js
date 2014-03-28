@@ -84,7 +84,16 @@
                                        .attr("type", "text")
                                        .attr("placeholder", "Filter");
 
-        this.filter.on("keyup", function () { outerThis.onFilterKeyUp(); });
+        // Update the filtered list of competitors on any change to the
+        // contents of the filter textbox.  The last two are for the benefit of
+        // IE9 which doesn't fire the input event upon text being deleted via
+        // selection or the X button at the right.  Instead, we use delayed
+        // updates to filter on key-up and mouse-up, which I believe *should*
+        // catch every change.  It's not a problem to update the filter too
+        // often: if the filter text hasn't changed, nothing happens.
+        this.filter.on("input", function () { outerThis.updateFilter(); })
+                   .on("keyup", function () { outerThis.updateFilterDelayed(); })
+                   .on("mouseup", function () { outerThis.updateFilterDelayed(); });
                                       
         this.listDiv = this.containerDiv.append("div")
                                         .attr("id", COMPETITOR_LIST_ID);
@@ -356,9 +365,9 @@
     };
     
     /**
-    * Handles a key-up event in the filter textbox.
+    * Updates the filtering following a change in the filter text input.
     */
-    CompetitorList.prototype.onFilterKeyUp = function () {
+    CompetitorList.prototype.updateFilter = function () {
         var currentFilterString = this.filter.node().value;
         if (currentFilterString !== this.lastFilterString) {
             var normedFilter = normaliseName(currentFilterString);
@@ -368,6 +377,15 @@
             
             this.lastFilterString = currentFilterString;
         }
+    };
+    
+    /**
+    * Updates the filtering following a change in the filter text input
+    * in a short whiie.
+    */
+    CompetitorList.prototype.updateFilterDelayed = function () {
+        var outerThis = this;
+        setTimeout(function () { outerThis.updateFilter(); }, 1);
     };
     
     SplitsBrowser.Controls.CompetitorList = CompetitorList;

@@ -264,11 +264,10 @@
            
         $(window).resize(function () { outerThis.handleWindowResize(); });
         
-        // Disable text selection anywhere.
-        // This is for the benefit of IE9, which doesn't support the
-        // -ms-user-select CSS style.  IE10, IE11 do support -ms-user-select
-        // and other browsers have their own vendor-specific CSS styles for
-        // this, and in these browsers this event handler never gets called.
+        // Disable text selection anywhere other than text inputs.
+        // This is mainly for the benefit of IE9, which doesn't support any
+        // -*-user-select CSS style.
+        $("input:text").bind("selectstart", function (evt) { evt.stopPropagation(); });
         $("body").bind("selectstart", function () { return false; });
     };
 

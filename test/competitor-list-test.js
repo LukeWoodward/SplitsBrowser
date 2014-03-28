@@ -239,7 +239,7 @@
         var listAndSelection = createSampleListForRaceGraph([], false);
             
         $("div#qunit-fixture input:text").val("John");
-        listAndSelection.list.onFilterKeyUp();
+        listAndSelection.list.updateFilter();
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 0), "Only the first competitor should be visible");
@@ -250,7 +250,7 @@
         var listAndSelection = createSampleListForRaceGraph([], false);
             
         $("div#qunit-fixture input:text").val("joHn");
-        listAndSelection.list.onFilterKeyUp();
+        listAndSelection.list.updateFilter();
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 0), "Only the first competitor should be visible");
@@ -261,7 +261,7 @@
         var listAndSelection = createSampleListForRaceGraph([], false);
             
         $("div#qunit-fixture input:text").val("OConnor");
-        listAndSelection.list.onFilterKeyUp();
+        listAndSelection.list.updateFilter();
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 1), "Only the second competitor should be visible");
@@ -272,7 +272,7 @@
         var listAndSelection = createSampleListForRaceGraph([], false);
             
         $("div#qunit-fixture input:text").val("son");
-        listAndSelection.list.onFilterKeyUp();
+        listAndSelection.list.updateFilter();
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 0 || i === 2), "Only the first and third competitors should be visible: this is competitor " + i);
@@ -283,7 +283,7 @@
         var listAndSelection = createSampleListForRaceGraph([], false);
             
         $("div#qunit-fixture input:text").val("xxxxxx");
-        listAndSelection.list.onFilterKeyUp();
+        listAndSelection.list.updateFilter();
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), false, "No competitors should be visible");
@@ -294,7 +294,7 @@
         var listAndSelection = createSampleListForRaceGraph([], false);
             
         $("div#qunit-fixture input:text").val("");
-        listAndSelection.list.onFilterKeyUp();
+        listAndSelection.list.updateFilter();
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), true, "No competitors should be visible");
