@@ -25,8 +25,12 @@
     // Must match that used in styles.css.
     var COMPETITOR_LIST_ID = "competitorList";
     
-    // The number that identifies the left mouse button in a jQuery event.
-    var JQUERY_EVENT_LEFT_BUTTON = 1;
+    // The number that identifies the left mouse button.
+    var LEFT_BUTTON = 1;
+    
+    // Dummy index used to represent the mouse being let go off the bottom of
+    // the list of competitors.
+    var CONTAINER_COMPETITOR_INDEX = -1;
     
     // ID of the container that contains the list and the filter textbox.
     var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
@@ -49,9 +53,9 @@
         this.allCompetitors = [];
         this.normedNames = [];
         this.dragging = false;
-        this.dragStartX = null;
-        this.dragStartY = null;
         this.dragStartCompetitorIndex = null;
+        this.currentDragCompetitorIndex = null;
+        this.allCompetitorDivs = [];
         
         this.containerDiv = d3.select(parent).append("div")
                                              .attr("id", COMPETITOR_LIST_CONTAINER_ID);
@@ -98,70 +102,96 @@
         this.listDiv = this.containerDiv.append("div")
                                         .attr("id", COMPETITOR_LIST_ID);
                                         
-        this.dragDiv = this.listDiv.append("div")
-                                   .attr("id", "dragDiv")
-                                   .style("display", "none")
-                                   .style("position", "absolute")
-                                   .style("z-index", "100");
-                                        
-        $(this.listDiv.node()).mousedown(function (evt) { outerThis.startDrag(evt); })
-                              .mousemove(function (evt) { outerThis.mouseMove(evt); })
-                              .mouseup(function (evt) { outerThis.stopDrag(evt); });
+        this.listDiv.on("mousedown", function () { outerThis.startDrag(CONTAINER_COMPETITOR_INDEX); })
+                    .on("mousemove", function () { outerThis.mouseMove(CONTAINER_COMPETITOR_INDEX); })
+                    .on("mouseup", function () { outerThis.stopDrag(); });
                               
-        $(document).mouseup(function (evt) { outerThis.stopDrag(evt); });
+        d3.select(document).on("mouseup", function () { outerThis.stopDrag(); });
     };
     
     /**
-    * Updates the position of the drag rectangle.
-    * @param {Number} currentX - The current mouse X coordinate, relative to
-    *     the page.
-    * @param {Number} currentY - The current mouse Y coordinate, relative to
-    *     the page.
+    * Returns whether the current mouse event is off the bottom of the list of
+    * competitor divs.
+    * @return {boolean} True if the mouse is below the last visible div, false
+    *     if not.
     */
-    CompetitorList.prototype.updateDragRectangle = function (currentX, currentY) {
-        var xOffset = Math.min(currentX, this.dragStartX);
-        var yOffset = Math.min(currentY, this.dragStartY);
-        var width = Math.abs(currentX - this.dragStartX) + 1;
-        var height = Math.abs(currentY - this.dragStartY) + 1;
-        this.dragDiv.style("left", xOffset + "px")
-                    .style("top", yOffset + "px")
-                    .style("width", width + "px")
-                    .style("height", height + "px");
+    CompetitorList.prototype.isMouseOffBottomOfCompetitorList = function () {
+        return d3.mouse(this.lastVisibleDiv)[1] >= $(this.lastVisibleDiv).height();
     };
     
     /**
     * Handles the start of a drag over the list of competitors.
-    * @param {jQuery.eventObject} evt - jQuery event object.
+    * @param {Number} index - Index of the competitor div that the drag started
+    *     over, or COMPETITOR_CONTAINER_INDEX if below the list of competitors.
     */
-    CompetitorList.prototype.startDrag = function (evt) {
-        if (evt.which === JQUERY_EVENT_LEFT_BUTTON) {
-            evt.preventDefault();
-            evt.stopPropagation();
-            this.dragStartX = evt.pageX;
-            this.dragStartY = evt.pageY;
-            this.dragDiv.style("display", null);
-            this.dragStartCompetitorIndex = $("div.competitor").index(evt.currentTarget);
-            this.updateDragRectangle(this.dragStartX, this.dragStartY);
+    CompetitorList.prototype.startDrag = function (index) {
+        if (d3.event.which === LEFT_BUTTON) {
+            this.dragStartCompetitorIndex = index;
+            this.currentDragCompetitorIndex = index;
+            this.allCompetitorDivs = $("div.competitor");
+            var visibleDivs = this.allCompetitorDivs.filter(":visible");
+            this.lastVisibleDiv = visibleDivs[visibleDivs.length - 1];
+            if (index === CONTAINER_COMPETITOR_INDEX) {
+                // Drag not starting on one of the competitors.
+                if (!this.isMouseOffBottomOfCompetitorList()) {
+                    // User has started the drag in the scrollbar.  Ignore it.
+                    return;
+                }
+            } else {
+                d3.select(this.allCompetitorDivs[index]).classed("dragSelected", true);
+            }
+            
+            d3.event.stopPropagation();
             this.dragging = true;
         }
     };
     
     /**
-    * Handles the movement of the mouse over the list of competitors.
-    * @param {jQuery.eventObject} evt - jQuery event object.
+    * Handles a mouse-move event. by adjust the range of dragged competitors to
+    * include the current index.
+    * @param {Number} dragIndex - The index to which the drag has now moved.
     */
-    CompetitorList.prototype.mouseMove = function (evt) {
+    CompetitorList.prototype.mouseMove = function (dragIndex) {
         if (this.dragging) {
-            this.updateDragRectangle(evt.pageX, evt.pageY);
-            evt.stopPropagation();
+            d3.event.stopPropagation();
+            if (dragIndex !== this.currentDragCompetitorIndex) {
+                d3.selectAll("div.competitor.dragSelected").classed("dragSelected", false);
+                
+                if (this.dragStartCompetitorIndex === CONTAINER_COMPETITOR_INDEX && dragIndex === CONTAINER_COMPETITOR_INDEX) {
+                    // Drag is currently all off the list, so do nothing further.
+                    return;
+                } else if (dragIndex === CONTAINER_COMPETITOR_INDEX && !this.isMouseOffBottomOfCompetitorList()) {
+                    // Drag currently goes onto the div's scrollbar.
+                    return;
+                }
+                
+                var leastIndex, greatestIndex;
+                if (this.dragStartCompetitorIndex === CONTAINER_COMPETITOR_INDEX || dragIndex === CONTAINER_COMPETITOR_INDEX) {
+                    // One of the ends is off the bottom.
+                    leastIndex = this.dragStartCompetitorIndex + dragIndex - CONTAINER_COMPETITOR_INDEX;
+                    greatestIndex = this.allCompetitorDivs.length - 1;
+                } else {
+                    leastIndex = Math.min(this.dragStartCompetitorIndex, dragIndex);
+                    greatestIndex  = Math.max(this.dragStartCompetitorIndex, dragIndex);
+                }
+                
+                var selectedCompetitors = [];
+                for (var index = leastIndex; index <= greatestIndex; index += 1) {
+                    if (this.allCompetitorDivs[index].style.display !== "none") {
+                        selectedCompetitors.push(this.allCompetitorDivs[index]);
+                    }
+                }
+                
+                d3.selectAll(selectedCompetitors).classed("dragSelected", true);
+                this.currentDragCompetitorIndex = dragIndex;
+            }
         }
     };
 
     /**
     * Handles the end of a drag in the competitor list.
-    * @param {jQuery.eventObject} evt - jQuery event object.
     */
-    CompetitorList.prototype.stopDrag = function (evt) {
+    CompetitorList.prototype.stopDrag = function () {
         if (!this.dragging) {
             // This handler is wired up to mouseUp on the entire document, in
             // order to cancel the drag if it is let go away from the list.  If
@@ -170,45 +200,32 @@
             return;
         }
         
-        if (evt.currentTarget === this.dragDiv.node()) {
-            // Event target is the dragging rubber-band div (IE9/10 only - on
-            // other browsers the CSS property pointer-events: none prevents
-            // this div from receiving mouse events).  Ignore it and let the
-            // event propagate.
-            return;
+        this.dragging = false;
+        
+        var selectedCompetitorIndexes = [];
+        for (var index = 0; index < this.allCompetitorDivs.size(); index += 1) {
+            if ($(this.allCompetitorDivs[index]).hasClass("dragSelected")) {
+                selectedCompetitorIndexes.push(index);
+            }
         }
         
-        evt.stopPropagation();
-        var competitors = $("div.competitor");
-        var startIndex = this.dragStartCompetitorIndex;
-        var endIndex = competitors.index(evt.currentTarget);
-        this.dragging = false;
-        this.dragDiv.style("display", "none");
-        this.dragStartX = null;
-        this.dragStartY = null;
-        this.dragStartCompetitorIndex = null;
-        if (evt.currentTarget === document) {
-            // Drag ended outside the list, so do nothing further.
-        } else if (startIndex === endIndex) {
-            // Do nothing; the user clicked on a competitor, or dragged
-            // entirely outside the list.
+        d3.selectAll("div.competitor.dragSelected").classed("dragSelected", false);
+        
+        if (d3.event.currentTarget === document) {
+            // Drag ended outside the list.
+        } else if (this.currentDragCompetitorIndex === CONTAINER_COMPETITOR_INDEX && !this.isMouseOffBottomOfCompetitorList()) {
+            // Drag ended in the scrollbar.
+        } else if (selectedCompetitorIndexes.length === 1) {
+            // User clicked, or maybe dragged within the same competitor.
+            this.toggleCompetitor(selectedCompetitorIndexes[0]);
         } else {
-            if (startIndex === -1) {
-                startIndex = competitors.length - 1;
-            }
-            
-            if (endIndex === -1) {
-                endIndex = competitors.length - 1;
-            }
-            
-            var minIndex = Math.min(startIndex, endIndex);
-            var maxIndex = Math.max(startIndex, endIndex);
-            var selectedIndexes = d3.range(minIndex, maxIndex + 1).filter(function (index) {
-                return $(competitors[index]).is(":visible");
-            });
-            
-            this.competitorSelection.bulkSelect(selectedIndexes);
+            this.competitorSelection.bulkSelect(selectedCompetitorIndexes);
         }
+        
+        this.dragStartCompetitorIndex = null;
+        this.currentDragCompetitorIndex = null;
+        
+        d3.event.stopPropagation();
     };
 
     /**
@@ -312,10 +329,6 @@
     *      made up from those in multiple classes.
     */
     CompetitorList.prototype.setCompetitorList = function (competitors, multipleClasses) {
-        // Note that we use jQuery's click event handling here instead of d3's,
-        // as d3's doesn't seem to work in PhantomJS.
-        $("div.competitor").off("click");
-        
         this.allCompetitors = competitors;
         this.normedNames = competitors.map(function (comp) { return normaliseName(comp.name); });
         
@@ -339,13 +352,9 @@
         competitorDivs.exit().remove();
         
         var outerThis = this;
-        $("div.competitor").mousedown(function (evt) { outerThis.startDrag(evt); })
-                           .mousemove(function (evt) { outerThis.mouseMove(evt); })
-                           .mouseup(function (evt) { outerThis.stopDrag(evt); });
-        
-        $("div.competitor").each(function (index, div) {
-            $(div).on("click", function () { outerThis.toggleCompetitor(index); });
-        });
+        competitorDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
+                      .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })
+                      .on("mouseup", function () { outerThis.stopDrag(); });
     };
 
     /**

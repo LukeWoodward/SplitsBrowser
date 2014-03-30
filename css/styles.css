@@ -96,13 +96,6 @@ span.competitorClassLabel
     padding-right: 10px;
 }
 
-div#dragDiv
-{
-    border: 1px dashed black;
-    background-color: transparent;
-    pointer-events: none;
-}
-
 svg text
 {
     font: 10px sans-serif;
@@ -217,7 +210,7 @@ div.competitor
     padding: 2px;
 }
 
-div.competitor.selected 
+div.competitor.selected, div.competitor.dragSelected
 {
     background-color: #286880;
     color: white;
