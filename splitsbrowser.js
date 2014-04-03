@@ -2069,6 +2069,18 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     CompetitorSelection.prototype.isSingleRunnerSelected = function () {
         return this.currentIndexes.length === 1;
     };
+    
+    /**
+    * Returns the index of the single selected competitor.
+    *
+    * If no competitors, or more than two competitors, are selected, null is
+    * returned
+    *
+    * @return {Number|null} Index of the single selected competitor, or null.
+    */
+    CompetitorSelection.prototype.getSingleRunnerIndex = function () {
+        return (this.isSingleRunnerSelected()) ? this.currentIndexes[0] : null;
+    };
 
     /**
     * Given that a single runner is selected, select also all of the runners
@@ -2167,6 +2179,29 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
             }
         } else {
             throwInvalidData("Index is not a number");
+        }
+    };
+    
+    /**
+    * Selects a number of competitors, firing the change handlers once at the
+    * end if any indexes were added.
+    * @param {Array} indexes - Array of indexes of competitors to select.
+    */
+    CompetitorSelection.prototype.bulkSelect = function (indexes) {
+        if (indexes.some(function (index) {
+            return (typeof index !== NUMBER_TYPE || index < 0 || index >= this.count);
+        }, this)) {
+            throwInvalidData("Indexes not all numeric and in range");
+        }
+        
+        // Remove from the set of indexes given any that are already selected.
+        var currentIndexSet = d3.set(this.currentIndexes);
+        indexes = indexes.filter(function (index) { return !currentIndexSet.has(index); });
+        
+        if (indexes.length > 0) {
+            this.currentIndexes = this.currentIndexes.concat(indexes);
+            this.currentIndexes.sort(d3.ascending);
+            this.fireChangeHandlers();
         }
     };
     
@@ -4100,34 +4135,274 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     // ID of the competitor list div.
     // Must match that used in styles.css.
     var COMPETITOR_LIST_ID = "competitorList";
+    
+    // The number that identifies the left mouse button.
+    var LEFT_BUTTON = 1;
+    
+    // Dummy index used to represent the mouse being let go off the bottom of
+    // the list of competitors.
+    var CONTAINER_COMPETITOR_INDEX = -1;
+    
+    // ID of the container that contains the list and the filter textbox.
+    var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
+    
+    var getMessage = SplitsBrowser.getMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
 
     /**
     * Object that controls a list of competitors from which the user can select.
     * @constructor
-    * @param {HTMLElement} parent - Parent element to add this listbox to.
+    * @param {HTMLElement} parent - Parent element to add this list to.
+    * @param {Function} alerter - Function to call to issue an alert message.
     */
-    var CompetitorListBox = function (parent) {
+    var CompetitorList = function (parent, alerter) {
         this.parent = parent;
+        this.alerter = alerter;
         this.handler = null;
         this.competitorSelection = null;
+        this.lastFilterString = "";
+        this.allCompetitors = [];
+        this.normedNames = [];
+        this.dragging = false;
+        this.dragStartCompetitorIndex = null;
+        this.currentDragCompetitorIndex = null;
+        this.allCompetitorDivs = [];
+        
+        this.containerDiv = d3.select(parent).append("div")
+                                             .attr("id", COMPETITOR_LIST_CONTAINER_ID);
+                                               
+        this.buttonsPanel = this.containerDiv.append("div");
+                           
+        var outerThis = this;
+        this.allButton = this.buttonsPanel.append("button")
+                                          .attr("id", "selectAllCompetitors")
+                                          .text(getMessage("SelectAllCompetitors"))
+                                          .style("width", "50%")
+                                          .on("click", function () { outerThis.selectAll(); });
+                        
+        this.noneButton = this.buttonsPanel.append("button")
+                                           .attr("id", "selectNoCompetitors")
+                                           .text(getMessage("SelectNoCompetitors"))
+                                           .style("width", "50%")
+                                           .on("click", function () { outerThis.selectNone(); });
+                        
+        this.buttonsPanel.append("br");
+                        
+        this.crossingRunnersButton = this.buttonsPanel.append("button")
+                                                      .attr("id", "selectCrossingRunners")
+                                                      .text(getMessage("SelectCrossingRunners"))
+                                                      .style("width", "100%")
+                                                      .on("click", function () { outerThis.selectCrossingRunners(); })
+                                                      .style("display", "none");
+        
+        this.filter = this.buttonsPanel.append("input")
+                                       .attr("type", "text")
+                                       .attr("placeholder", "Filter");
 
-        this.listDiv = d3.select(parent).append("div")
+        // Update the filtered list of competitors on any change to the
+        // contents of the filter textbox.  The last two are for the benefit of
+        // IE9 which doesn't fire the input event upon text being deleted via
+        // selection or the X button at the right.  Instead, we use delayed
+        // updates to filter on key-up and mouse-up, which I believe *should*
+        // catch every change.  It's not a problem to update the filter too
+        // often: if the filter text hasn't changed, nothing happens.
+        this.filter.on("input", function () { outerThis.updateFilter(); })
+                   .on("keyup", function () { outerThis.updateFilterDelayed(); })
+                   .on("mouseup", function () { outerThis.updateFilterDelayed(); });
+                                      
+        this.listDiv = this.containerDiv.append("div")
                                         .attr("id", COMPETITOR_LIST_ID);
+                                        
+        this.listDiv.on("mousedown", function () { outerThis.startDrag(CONTAINER_COMPETITOR_INDEX); })
+                    .on("mousemove", function () { outerThis.mouseMove(CONTAINER_COMPETITOR_INDEX); })
+                    .on("mouseup", function () { outerThis.stopDrag(); });
+                              
+        d3.select(document).on("mouseup", function () { outerThis.stopDrag(); });
+    };
+    
+    /**
+    * Returns whether the current mouse event is off the bottom of the list of
+    * competitor divs.
+    * @return {boolean} True if the mouse is below the last visible div, false
+    *     if not.
+    */
+    CompetitorList.prototype.isMouseOffBottomOfCompetitorList = function () {
+        return d3.mouse(this.lastVisibleDiv)[1] >= $(this.lastVisibleDiv).height();
+    };
+    
+    /**
+    * Handles the start of a drag over the list of competitors.
+    * @param {Number} index - Index of the competitor div that the drag started
+    *     over, or COMPETITOR_CONTAINER_INDEX if below the list of competitors.
+    */
+    CompetitorList.prototype.startDrag = function (index) {
+        if (d3.event.which === LEFT_BUTTON) {
+            this.dragStartCompetitorIndex = index;
+            this.currentDragCompetitorIndex = index;
+            this.allCompetitorDivs = $("div.competitor");
+            var visibleDivs = this.allCompetitorDivs.filter(":visible");
+            this.lastVisibleDiv = visibleDivs[visibleDivs.length - 1];
+            if (index === CONTAINER_COMPETITOR_INDEX) {
+                // Drag not starting on one of the competitors.
+                if (!this.isMouseOffBottomOfCompetitorList()) {
+                    // User has started the drag in the scrollbar.  Ignore it.
+                    return;
+                }
+            } else {
+                d3.select(this.allCompetitorDivs[index]).classed("dragSelected", true);
+            }
+            
+            d3.event.stopPropagation();
+            this.dragging = true;
+        }
+    };
+    
+    /**
+    * Handles a mouse-move event. by adjust the range of dragged competitors to
+    * include the current index.
+    * @param {Number} dragIndex - The index to which the drag has now moved.
+    */
+    CompetitorList.prototype.mouseMove = function (dragIndex) {
+        if (this.dragging) {
+            d3.event.stopPropagation();
+            if (dragIndex !== this.currentDragCompetitorIndex) {
+                d3.selectAll("div.competitor.dragSelected").classed("dragSelected", false);
+                
+                if (this.dragStartCompetitorIndex === CONTAINER_COMPETITOR_INDEX && dragIndex === CONTAINER_COMPETITOR_INDEX) {
+                    // Drag is currently all off the list, so do nothing further.
+                    return;
+                } else if (dragIndex === CONTAINER_COMPETITOR_INDEX && !this.isMouseOffBottomOfCompetitorList()) {
+                    // Drag currently goes onto the div's scrollbar.
+                    return;
+                }
+                
+                var leastIndex, greatestIndex;
+                if (this.dragStartCompetitorIndex === CONTAINER_COMPETITOR_INDEX || dragIndex === CONTAINER_COMPETITOR_INDEX) {
+                    // One of the ends is off the bottom.
+                    leastIndex = this.dragStartCompetitorIndex + dragIndex - CONTAINER_COMPETITOR_INDEX;
+                    greatestIndex = this.allCompetitorDivs.length - 1;
+                } else {
+                    leastIndex = Math.min(this.dragStartCompetitorIndex, dragIndex);
+                    greatestIndex  = Math.max(this.dragStartCompetitorIndex, dragIndex);
+                }
+                
+                var selectedCompetitors = [];
+                for (var index = leastIndex; index <= greatestIndex; index += 1) {
+                    if (this.allCompetitorDivs[index].style.display !== "none") {
+                        selectedCompetitors.push(this.allCompetitorDivs[index]);
+                    }
+                }
+                
+                d3.selectAll(selectedCompetitors).classed("dragSelected", true);
+                this.currentDragCompetitorIndex = dragIndex;
+            }
+        }
     };
 
     /**
-    * Returns the width of the listbox, in pixels.
-    * @returns {Number} Width of the listbox.
+    * Handles the end of a drag in the competitor list.
     */
-    CompetitorListBox.prototype.width = function () {
+    CompetitorList.prototype.stopDrag = function () {
+        if (!this.dragging) {
+            // This handler is wired up to mouseUp on the entire document, in
+            // order to cancel the drag if it is let go away from the list.  If
+            // we're not dragging then we have a mouse-up after a mouse-down
+            // somewhere outside of this competitor list.  Ignore it.
+            return;
+        }
+        
+        this.dragging = false;
+        
+        var selectedCompetitorIndexes = [];
+        for (var index = 0; index < this.allCompetitorDivs.size(); index += 1) {
+            if ($(this.allCompetitorDivs[index]).hasClass("dragSelected")) {
+                selectedCompetitorIndexes.push(index);
+            }
+        }
+        
+        d3.selectAll("div.competitor.dragSelected").classed("dragSelected", false);
+        
+        if (d3.event.currentTarget === document) {
+            // Drag ended outside the list.
+        } else if (this.currentDragCompetitorIndex === CONTAINER_COMPETITOR_INDEX && !this.isMouseOffBottomOfCompetitorList()) {
+            // Drag ended in the scrollbar.
+        } else if (selectedCompetitorIndexes.length === 1) {
+            // User clicked, or maybe dragged within the same competitor.
+            this.toggleCompetitor(selectedCompetitorIndexes[0]);
+        } else {
+            this.competitorSelection.bulkSelect(selectedCompetitorIndexes);
+        }
+        
+        this.dragStartCompetitorIndex = null;
+        this.currentDragCompetitorIndex = null;
+        
+        d3.event.stopPropagation();
+    };
+
+    /**
+    * Returns the width of the list, in pixels.
+    * @returns {Number} Width of the list.
+    */
+    CompetitorList.prototype.width = function () {
         return $(this.listDiv.node()).width();
+    };
+    
+    /**
+    * Sets the overall height of the competitor list.
+    * @param {Number} height - The height of the control, in pixels.
+    */
+    CompetitorList.prototype.setHeight = function (height) {
+        $(this.listDiv.node()).height(height - $(this.buttonsPanel.node()).height());
+    };
+
+    /**
+    * Select all of the competitors.
+    */
+    CompetitorList.prototype.selectAll = function () {
+        this.competitorSelection.selectAll();
+    };
+
+    /**
+    * Select none of the competitors.
+    */
+    CompetitorList.prototype.selectNone = function () {
+        this.competitorSelection.selectNone();
+    };
+
+    /**
+    * Select all of the competitors that cross the unique selected competitor.
+    */
+    CompetitorList.prototype.selectCrossingRunners = function () {
+        this.competitorSelection.selectCrossingRunners(this.allCompetitors); 
+        if (this.competitorSelection.isSingleRunnerSelected()) {
+            // Only a single runner is still selected, so nobody crossed the
+            // selected runner.
+            var competitorName = this.allCompetitors[this.competitorSelection.getSingleRunnerIndex()].name;
+            this.alerter(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
+        }
+    };
+    
+    /**
+    * Enables or disables the crossing-runners button as appropriate.
+    */
+    CompetitorList.prototype.enableOrDisableCrossingRunnersButton = function () {
+        this.crossingRunnersButton.node().disabled = !this.competitorSelection.isSingleRunnerSelected();
+    };
+    
+    /**
+    * Sets the chart type, so that the competitor list knows whether to show or
+    * hide the Crossing Runners button.
+    * @param {Object} chartType - The chart type selected.
+    */
+    CompetitorList.prototype.setChartType = function (chartType) {
+        this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "block" : "none");    
     };
 
     /**
     * Handles a change to the selection of competitors, by highlighting all
     * those selected and unhighlighting all those no longer selected.
     */
-    CompetitorListBox.prototype.selectionChanged = function () {
+    CompetitorList.prototype.selectionChanged = function () {
         var outerThis = this;
         this.listDiv.selectAll("div.competitor")
                     .data(d3.range(this.competitorSelection.count))
@@ -4137,9 +4412,26 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**
     * Toggle the selectedness of a competitor.
     */
-    CompetitorListBox.prototype.toggleCompetitor = function (index) {
+    CompetitorList.prototype.toggleCompetitor = function (index) {
         this.competitorSelection.toggle(index);
     };
+
+    /**
+    * 'Normalise' a name or a search string into a common format.
+    *
+    * This is used before searching: a name matches a search string if the
+    * normalised name contains the normalised search string.
+    *
+    * At present, the normalisations carried out are:
+    * * Conversion to lower case
+    * * Removing all non-alphanumeric characters.
+    *
+    * @param {String} name - The name to normalise.
+    * @return {String} The normalised names.
+    */
+    function normaliseName(name) {
+        return name.toLowerCase().replace(/\W/g, "");
+    }
 
     /**
     * Sets the list of competitors.
@@ -4147,10 +4439,9 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {boolean} hasMultipleClasses - Whether the list of competitors is
     *      made up from those in multiple classes.
     */
-    CompetitorListBox.prototype.setCompetitorList = function (competitors, multipleClasses) {
-        // Note that we use jQuery's click event handling here instead of d3's,
-        // as d3's doesn't seem to work in PhantomJS.
-        $("div.competitor").off("click");
+    CompetitorList.prototype.setCompetitorList = function (competitors, multipleClasses) {
+        this.allCompetitors = competitors;
+        this.normedNames = competitors.map(function (comp) { return normaliseName(comp.name); });
         
         var competitorDivs = this.listDiv.selectAll("div.competitor").data(competitors);
 
@@ -4167,21 +4458,21 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         
         competitorDivs.append("span")
                       .classed("nonfinisher", function (comp) { return !comp.completed(); })
-                      .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });        
+                      .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });
 
         competitorDivs.exit().remove();
         
         var outerThis = this;
-        $("div.competitor").each(function (index, div) {
-            $(div).on("click", function () { outerThis.toggleCompetitor(index); });
-        });
+        competitorDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
+                      .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })
+                      .on("mouseup", function () { outerThis.stopDrag(); });
     };
 
     /**
     * Sets the competitor selection object.
     * @param {SplitsBrowser.Controls.CompetitorSelection} selection - Competitor selection.
     */
-    CompetitorListBox.prototype.setSelection = function (selection) {
+    CompetitorList.prototype.setSelection = function (selection) {
         if (this.competitorSelection !== null) {
             this.competitorSelection.deregisterChangeHandler(this.handler);
         }
@@ -4193,7 +4484,31 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.selectionChanged(d3.range(selection.count));
     };
     
-    SplitsBrowser.Controls.CompetitorListBox = CompetitorListBox;
+    /**
+    * Updates the filtering following a change in the filter text input.
+    */
+    CompetitorList.prototype.updateFilter = function () {
+        var currentFilterString = this.filter.node().value;
+        if (currentFilterString !== this.lastFilterString) {
+            var normedFilter = normaliseName(currentFilterString);
+            var outerThis = this;
+            this.listDiv.selectAll("div.competitor")
+                        .style("display", function (div, index) { return (outerThis.normedNames[index].indexOf(normedFilter) >= 0) ? null : "none"; });
+            
+            this.lastFilterString = currentFilterString;
+        }
+    };
+    
+    /**
+    * Updates the filtering following a change in the filter text input
+    * in a short whiie.
+    */
+    CompetitorList.prototype.updateFilterDelayed = function () {
+        var outerThis = this;
+        setTimeout(function () { outerThis.updateFilter(); }, 1);
+    };
+    
+    SplitsBrowser.Controls.CompetitorList = CompetitorList;
 })();
 
 
@@ -6699,33 +7014,19 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     // comes in while a previous event is waiting, the previous event is
     // cancelled.)
     var RESIZE_DELAY_MS = 100;
-
-    // ID of the div that contains the competitor list.
-    // Must match that used in styles.css.
-    var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
     
     var ClassSelector = SplitsBrowser.Controls.ClassSelector;
     var ChartTypeSelector = SplitsBrowser.Controls.ChartTypeSelector;
     var ComparisonSelector = SplitsBrowser.Controls.ComparisonSelector;
     var OriginalDataSelector = SplitsBrowser.Controls.OriginalDataSelector;
     var StatisticsSelector = SplitsBrowser.Controls.StatisticsSelector;
-    var CompetitorListBox = SplitsBrowser.Controls.CompetitorListBox;
+    var CompetitorList = SplitsBrowser.Controls.CompetitorList;
     var Chart = SplitsBrowser.Controls.Chart;
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
     var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
-    
-    /**
-    * Enables or disables a control, by setting or clearing an HTML "disabled"
-    * attribute as necessary.
-    * @param {d3.selection} control - d3 selection containing the control.
-    * @param {boolean} isEnabled - Whether the control is enabled.
-    */
-    function enableControl(control, isEnabled) {
-        control.node().disabled = !isEnabled;
-    }
     
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
@@ -6752,7 +7053,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.comparisonSelector = null;
         this.originalDataSelector = null;
         this.statisticsSelector = null;
-        this.competitorListBox = null;
+        this.competitorList = null;
         this.chart = null;
         this.topPanel = null;
         this.mainPanel = null;
@@ -6761,6 +7062,19 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         
         this.currentResizeTimeout = null;
     };
+    
+    /**
+    * Pops up an alert box with the given message.
+    *
+    * The viewer passes this function to various controls so that they can pop
+    * up an alert box in normal use and call some other function during
+    * testing.
+    *    
+    * @param {String} message - The message to show.
+    */
+    function alerter(message) {
+        alert(message);
+    }
     
     /**
     * Pops up an alert box informing the user that the race graph cannot be
@@ -6864,7 +7178,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * Adds the comparison selector to the top panel.
     */
     Viewer.prototype.addComparisonSelector = function () {
-        this.comparisonSelector = new ComparisonSelector(this.topPanel.node(), function (message) { alert(message); });
+        this.comparisonSelector = new ComparisonSelector(this.topPanel.node(), alerter);
         if (this.classes !== null) {
             this.comparisonSelector.setClasses(this.classes);
         }
@@ -6897,31 +7211,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * Adds the list of competitors, and the buttons, to the page.
     */
     Viewer.prototype.addCompetitorList = function () {
-        this.competitorListContainer = this.mainPanel.append("div")
-                                                     .attr("id", COMPETITOR_LIST_CONTAINER_ID);
-                                               
-        this.buttonsPanel = this.competitorListContainer.append("div");
-                           
-        var outerThis = this;
-        this.allButton = this.buttonsPanel.append("button")
-                                          .text(getMessage("SelectAllCompetitors"))
-                                          .style("width", "50%")
-                                          .on("click", function () { outerThis.selectAll(); });
-                        
-        this.noneButton = this.buttonsPanel.append("button")
-                                           .text(getMessage("SelectNoCompetitors"))
-                                           .style("width", "50%")
-                                           .on("click", function () { outerThis.selectNone(); });
-                        
-        this.buttonsPanel.append("br");
-                        
-        this.crossingRunnersButton = this.buttonsPanel.append("button")
-                                                      .text(getMessage("SelectCrossingRunners"))
-                                                      .style("width", "100%")
-                                                      .on("click", function () { outerThis.selectCrossingRunners(); })
-                                                      .style("display", "none");
-
-        this.competitorListBox = new CompetitorListBox(this.competitorListContainer.node());
+        this.competitorList = new CompetitorList(this.mainPanel.node(), alerter);
     };
 
     /**
@@ -6962,39 +7252,11 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
            
         $(window).resize(function () { outerThis.handleWindowResize(); });
         
-        // Disable text selection anywhere.
-        // This is for the benefit of IE9, which doesn't support the
-        // -ms-user-select CSS style.  IE10, IE11 do support -ms-user-select
-        // and other browsers have their own vendor-specific CSS styles for
-        // this, and in these browsers this event handler never gets called.
+        // Disable text selection anywhere other than text inputs.
+        // This is mainly for the benefit of IE9, which doesn't support any
+        // -*-user-select CSS style.
+        $("input:text").bind("selectstart", function (evt) { evt.stopPropagation(); });
         $("body").bind("selectstart", function () { return false; });
-    };
-
-    /**
-    * Select all of the competitors.
-    */
-    Viewer.prototype.selectAll = function () {
-        this.selection.selectAll();
-    };
-
-    /**
-    * Select none of the competitors.
-    */
-    Viewer.prototype.selectNone = function () {
-        this.selection.selectNone();
-    };
-
-    /**
-    * Select all of the competitors that cross the unique selected competitor.
-    */
-    Viewer.prototype.selectCrossingRunners = function () {
-        this.selection.selectCrossingRunners(this.ageClassSet.allCompetitors); 
-        if (this.selection.isSingleRunnerSelected()) {
-            // Only a single runner is still selected, so nobody crossed the
-            // selected runner.
-            var competitorName = this.ageClassSet.allCompetitors[this.currentIndexes[0]].name;
-            alert(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
-        }
     };
 
     /**
@@ -7046,15 +7308,15 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         // know what size it should have.
         this.chart.hide();
         
-        this.competitorListBox.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
+        this.competitorList.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
         
-        var chartWidth = bodyWidth - this.competitorListBox.width() - EXTRA_WRAP_PREVENTION_SPACE;
+        var chartWidth = bodyWidth - this.competitorList.width() - EXTRA_WRAP_PREVENTION_SPACE;
         var chartHeight = bodyHeight - topPanelHeight;
 
         this.chart.setSize(chartWidth, chartHeight);
         this.chart.show();
         
-        $(this.competitorListContainer.node()).height(bodyHeight - $(this.buttonsPanel.node()).height() - topPanelHeight);    
+        this.competitorList.setHeight(bodyHeight - topPanelHeight);
     };
     
     /**
@@ -7081,7 +7343,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         
         this.selectionChangeHandler = function (indexes) {
             outerThis.currentIndexes = indexes;
-            outerThis.enableOrDisableCrossingRunnersButton();
+            outerThis.competitorList.enableOrDisableCrossingRunnersButton();
             outerThis.redraw();
         };
 
@@ -7134,7 +7396,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     
         if (this.selection === null) {
             this.selection = new SplitsBrowser.Model.CompetitorSelection(0);
-            this.competitorListBox.setSelection(this.selection);
+            this.competitorList.setSelection(this.selection);
         } else {
             if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
                 // The 'primary' class hasn't changed, only the 'other' ones.
@@ -7182,7 +7444,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         
         this.updateControlEnabledness();
         
-        this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? null : "none");
+        this.competitorList.setChartType(chartType);
         
         this.drawChart();
     };
@@ -7195,14 +7457,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.comparisonSelector.setEnabled(!this.chartType.isResultsTable);
         this.statisticsSelector.setEnabled(!this.chartType.isResultsTable);
         this.originalDataSelector.setEnabled(!this.chartType.isResultsTable);
-        this.enableOrDisableCrossingRunnersButton();
-    };
-    
-    /**
-    * Enables or disables the crossing-runners button as appropriate.
-    */
-    Viewer.prototype.enableOrDisableCrossingRunnersButton = function () {
-        enableControl(this.crossingRunnersButton, this.selection.isSingleRunnerSelected());
+        this.competitorList.enableOrDisableCrossingRunnersButton();
     };
     
     SplitsBrowser.Viewer = Viewer;
