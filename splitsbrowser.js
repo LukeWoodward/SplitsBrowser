@@ -2206,6 +2206,35 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Deselects a number of competitors, firing the change handlers once at the
+    * end if any indexes were removed.
+    * @param {Array} indexes - Array of indexes of competitors to deselect.
+    */
+    CompetitorSelection.prototype.bulkDeselect = function (indexes) {
+        if (indexes.some(function (index) {
+            return (typeof index !== NUMBER_TYPE || index < 0 || index >= this.count);
+        }, this)) {
+            throwInvalidData("Indexes not all numeric and in range");
+        }
+        
+        // Remove from the set of indexes given any that are not already selected.
+        var currentIndexSet = d3.set(this.currentIndexes);
+        var anyRemoved = false;
+        for (var i = 0; i < indexes.length; i += 1) {
+            if (currentIndexSet.has(indexes[i])) {
+                currentIndexSet.remove(indexes[i]);
+                anyRemoved = true;
+            }
+        }
+        
+        if (anyRemoved) {
+            this.currentIndexes = currentIndexSet.values().map(function (index) { return parseInt(index, 10); });
+            this.currentIndexes.sort(d3.ascending);
+            this.fireChangeHandlers();
+        }
+    };
+    
+    /**
     * Migrates the selected competitors from one list to another.
     *
     * After the migration, any competitors in the old list that were selected
@@ -4167,6 +4196,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.dragStartCompetitorIndex = null;
         this.currentDragCompetitorIndex = null;
         this.allCompetitorDivs = [];
+        this.inverted = false;
         
         this.containerDiv = d3.select(parent).append("div")
                                              .attr("id", COMPETITOR_LIST_CONTAINER_ID);
@@ -4231,6 +4261,15 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Returns the name of the CSS class to apply to competitor divs currently
+    * part of the selection/deselection.
+    * @return {String} CSS class name;
+    */
+    CompetitorList.prototype.getDragClassName = function () {
+        return (this.inverted) ? "dragDeselected" : "dragSelected";
+    };
+    
+    /**
     * Handles the start of a drag over the list of competitors.
     * @param {Number} index - Index of the competitor div that the drag started
     *     over, or COMPETITOR_CONTAINER_INDEX if below the list of competitors.
@@ -4242,6 +4281,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
             this.allCompetitorDivs = $("div.competitor");
             var visibleDivs = this.allCompetitorDivs.filter(":visible");
             this.lastVisibleDiv = visibleDivs[visibleDivs.length - 1];
+            this.inverted = d3.event.shiftKey;
             if (index === CONTAINER_COMPETITOR_INDEX) {
                 // Drag not starting on one of the competitors.
                 if (!this.isMouseOffBottomOfCompetitorList()) {
@@ -4249,7 +4289,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                     return;
                 }
             } else {
-                d3.select(this.allCompetitorDivs[index]).classed("dragSelected", true);
+                d3.select(this.allCompetitorDivs[index]).classed(this.getDragClassName(), true);
             }
             
             d3.event.stopPropagation();
@@ -4266,7 +4306,8 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         if (this.dragging) {
             d3.event.stopPropagation();
             if (dragIndex !== this.currentDragCompetitorIndex) {
-                d3.selectAll("div.competitor.dragSelected").classed("dragSelected", false);
+                var dragClassName = this.getDragClassName();
+                d3.selectAll("div.competitor." + dragClassName).classed(dragClassName, false);
                 
                 if (this.dragStartCompetitorIndex === CONTAINER_COMPETITOR_INDEX && dragIndex === CONTAINER_COMPETITOR_INDEX) {
                     // Drag is currently all off the list, so do nothing further.
@@ -4293,7 +4334,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                     }
                 }
                 
-                d3.selectAll(selectedCompetitors).classed("dragSelected", true);
+                d3.selectAll(selectedCompetitors).classed(dragClassName, true);
                 this.currentDragCompetitorIndex = dragIndex;
             }
         }
@@ -4314,13 +4355,14 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.dragging = false;
         
         var selectedCompetitorIndexes = [];
+        var dragClassName = this.getDragClassName();
         for (var index = 0; index < this.allCompetitorDivs.size(); index += 1) {
-            if ($(this.allCompetitorDivs[index]).hasClass("dragSelected")) {
+            if ($(this.allCompetitorDivs[index]).hasClass(dragClassName)) {
                 selectedCompetitorIndexes.push(index);
             }
         }
         
-        d3.selectAll("div.competitor.dragSelected").classed("dragSelected", false);
+        d3.selectAll("div.competitor." + dragClassName).classed(dragClassName, false);
         
         if (d3.event.currentTarget === document) {
             // Drag ended outside the list.
@@ -4329,6 +4371,8 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         } else if (selectedCompetitorIndexes.length === 1) {
             // User clicked, or maybe dragged within the same competitor.
             this.toggleCompetitor(selectedCompetitorIndexes[0]);
+        } else if (this.inverted) {
+            this.competitorSelection.bulkDeselect(selectedCompetitorIndexes);
         } else {
             this.competitorSelection.bulkSelect(selectedCompetitorIndexes);
         }
