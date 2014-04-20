@@ -87,6 +87,18 @@
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");
     });
     
+    QUnit.test("Can read in alternative CSV data", function (assert) {
+        var alternativeCSVData = "RaceNumber,CardNumbers,MembershipNumbers,Name,AgeClass,Club,Country,CourseClass,StartTime,FinishTime,RaceTime,NonCompetitive," +
+                                 "Position,Status,Handicap,PenaltyScore,ManualScoreAdjust,FinalScore,HandicapTime,HandicapScore,AwardLevel,SiEntriesIDs,Eligibility," +
+                                 "NotUsed3,NotUsed4,NotUsed5,NotUsed6,NotUsed7,NotUsed8,NotUsed9,NotUsed10,NumSplits,ControlCode1,Split1,Points1,ControlCode2,Split2," +
+                                 "Points2,ControlCode3,Split3,Points3,ControlCode4,Split4,Points4,ControlCode5,Split5,Points5,ControlCode6,Split6,Points6\r\n" + 
+                                 ",,,John Smith,,TEST,,Course 1,10:38:00,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,152,01:12,,188,02:21,,163,03:06,,F1,03:22,,,,,,,,,\r\n";
+        var eventData = parseEventData(alternativeCSVData);
+        assert.ok(eventData instanceof Event, "An event should be returned");
+        assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
+        assert.strictEqual(eventData.courses.length, 1, "One course should be read in");
+    });
+    
     QUnit.test("Cannot read in invalid data", function (assert) {
         var invalidData = "This is not valid results data in any format";
         var result = parseEventData(invalidData);

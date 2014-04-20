@@ -25,7 +25,8 @@
     var PARSERS = [
         SplitsBrowser.Input.CSV.parseEventData,
         SplitsBrowser.Input.SI.parseEventData,
-        SplitsBrowser.Input.SIHtml.parseEventData
+        SplitsBrowser.Input.SIHtml.parseEventData,
+        SplitsBrowser.Input.AlternativeCSV.parseEventData
     ];
     
     /**
