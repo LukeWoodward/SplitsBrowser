@@ -7209,6 +7209,12 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.chartType = chartType;
         if (chartType.isResultsTable) {
             this.mainPanel.style("display", "none");
+            
+            // Remove any fixed width and height on the body, as we need the
+            // window to be able scroll if the results table is too wide or
+            // too tall.
+            d3.select("body").style("width", null).style("height", null);
+            
             this.resultsTable.show();
         } else {
             this.resultsTable.hide();

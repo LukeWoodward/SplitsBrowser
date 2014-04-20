@@ -524,6 +524,12 @@
         this.chartType = chartType;
         if (chartType.isResultsTable) {
             this.mainPanel.style("display", "none");
+            
+            // Remove any fixed width and height on the body, as we need the
+            // window to be able to scroll if the results table is too wide or
+            // too tall and also adjust size if one or both scrollbars appear.
+            d3.select("body").style("width", null).style("height", null);
+            
             this.resultsTable.show();
         } else {
             this.resultsTable.hide();
