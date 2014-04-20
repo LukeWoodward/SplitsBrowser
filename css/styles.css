@@ -216,6 +216,12 @@ div.competitor.selected, div.competitor.dragSelected
     color: white;
 }
 
+div.competitor.selected.dragDeselected
+{
+    background-color: transparent;
+    color: black;
+}
+
 #chartTypeSelector, #comparisonSelectorContainer, #runnerSelectorContainer, #originalDataSelectorContainer
 {
     float: left;

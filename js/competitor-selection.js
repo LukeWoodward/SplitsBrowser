@@ -197,6 +197,35 @@
     };
     
     /**
+    * Deselects a number of competitors, firing the change handlers once at the
+    * end if any indexes were removed.
+    * @param {Array} indexes - Array of indexes of competitors to deselect.
+    */
+    CompetitorSelection.prototype.bulkDeselect = function (indexes) {
+        if (indexes.some(function (index) {
+            return (typeof index !== NUMBER_TYPE || index < 0 || index >= this.count);
+        }, this)) {
+            throwInvalidData("Indexes not all numeric and in range");
+        }
+        
+        // Remove from the set of indexes given any that are not already selected.
+        var currentIndexSet = d3.set(this.currentIndexes);
+        var anyRemoved = false;
+        for (var i = 0; i < indexes.length; i += 1) {
+            if (currentIndexSet.has(indexes[i])) {
+                currentIndexSet.remove(indexes[i]);
+                anyRemoved = true;
+            }
+        }
+        
+        if (anyRemoved) {
+            this.currentIndexes = currentIndexSet.values().map(function (index) { return parseInt(index, 10); });
+            this.currentIndexes.sort(d3.ascending);
+            this.fireChangeHandlers();
+        }
+    };
+    
+    /**
     * Migrates the selected competitors from one list to another.
     *
     * After the migration, any competitors in the old list that were selected

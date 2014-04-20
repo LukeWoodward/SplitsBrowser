@@ -56,6 +56,7 @@
         this.dragStartCompetitorIndex = null;
         this.currentDragCompetitorIndex = null;
         this.allCompetitorDivs = [];
+        this.inverted = false;
         
         this.containerDiv = d3.select(parent).append("div")
                                              .attr("id", COMPETITOR_LIST_CONTAINER_ID);
@@ -120,6 +121,15 @@
     };
     
     /**
+    * Returns the name of the CSS class to apply to competitor divs currently
+    * part of the selection/deselection.
+    * @return {String} CSS class name;
+    */
+    CompetitorList.prototype.getDragClassName = function () {
+        return (this.inverted) ? "dragDeselected" : "dragSelected";
+    };
+    
+    /**
     * Handles the start of a drag over the list of competitors.
     * @param {Number} index - Index of the competitor div that the drag started
     *     over, or COMPETITOR_CONTAINER_INDEX if below the list of competitors.
@@ -131,6 +141,7 @@
             this.allCompetitorDivs = $("div.competitor");
             var visibleDivs = this.allCompetitorDivs.filter(":visible");
             this.lastVisibleDiv = visibleDivs[visibleDivs.length - 1];
+            this.inverted = d3.event.shiftKey;
             if (index === CONTAINER_COMPETITOR_INDEX) {
                 // Drag not starting on one of the competitors.
                 if (!this.isMouseOffBottomOfCompetitorList()) {
@@ -138,7 +149,7 @@
                     return;
                 }
             } else {
-                d3.select(this.allCompetitorDivs[index]).classed("dragSelected", true);
+                d3.select(this.allCompetitorDivs[index]).classed(this.getDragClassName(), true);
             }
             
             d3.event.stopPropagation();
@@ -155,7 +166,8 @@
         if (this.dragging) {
             d3.event.stopPropagation();
             if (dragIndex !== this.currentDragCompetitorIndex) {
-                d3.selectAll("div.competitor.dragSelected").classed("dragSelected", false);
+                var dragClassName = this.getDragClassName();
+                d3.selectAll("div.competitor." + dragClassName).classed(dragClassName, false);
                 
                 if (this.dragStartCompetitorIndex === CONTAINER_COMPETITOR_INDEX && dragIndex === CONTAINER_COMPETITOR_INDEX) {
                     // Drag is currently all off the list, so do nothing further.
@@ -182,7 +194,7 @@
                     }
                 }
                 
-                d3.selectAll(selectedCompetitors).classed("dragSelected", true);
+                d3.selectAll(selectedCompetitors).classed(dragClassName, true);
                 this.currentDragCompetitorIndex = dragIndex;
             }
         }
@@ -203,13 +215,14 @@
         this.dragging = false;
         
         var selectedCompetitorIndexes = [];
+        var dragClassName = this.getDragClassName();
         for (var index = 0; index < this.allCompetitorDivs.size(); index += 1) {
-            if ($(this.allCompetitorDivs[index]).hasClass("dragSelected")) {
+            if ($(this.allCompetitorDivs[index]).hasClass(dragClassName)) {
                 selectedCompetitorIndexes.push(index);
             }
         }
         
-        d3.selectAll("div.competitor.dragSelected").classed("dragSelected", false);
+        d3.selectAll("div.competitor." + dragClassName).classed(dragClassName, false);
         
         if (d3.event.currentTarget === document) {
             // Drag ended outside the list.
@@ -218,6 +231,8 @@
         } else if (selectedCompetitorIndexes.length === 1) {
             // User clicked, or maybe dragged within the same competitor.
             this.toggleCompetitor(selectedCompetitorIndexes[0]);
+        } else if (this.inverted) {
+            this.competitorSelection.bulkDeselect(selectedCompetitorIndexes);
         } else {
             this.competitorSelection.bulkSelect(selectedCompetitorIndexes);
         }

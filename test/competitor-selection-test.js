@@ -412,4 +412,88 @@
             selection.bulkSelect([1, 5, 4]);
         });
     });
+    
+    /**
+    * Creates and returns a CompetitorSelection object with all competitors
+    * selected
+    * @param {Number} count - The number of competitors to create.
+    * @return {CompetitorSelection} CompetitorSelection object with the given
+    *     number of competitors, all selected.
+    */
+    function createSelectionWithAllSelected(count) {
+        var selection = new CompetitorSelection(count);
+        for (var i = 0; i < count; i += 1) {
+            selection.toggle(i);
+        }
+        return selection;
+    }
+    
+    QUnit.test("Can bulk-deselect an empty list of competitors without firing change handlers", function (assert) {
+        reset();
+        var selection = createSelectionWithAllSelected(5);
+        selection.registerChangeHandler(testHandler);
+        selection.bulkDeselect([]);
+        assert.strictEqual(callCount, 0);
+    });
+    
+    QUnit.test("Can bulk-deselect three competitors when all were originally selected, firing change handlers once", function (assert) {
+        reset();
+        var selection = createSelectionWithAllSelected(5);
+        selection.registerChangeHandler(testHandler);
+        selection.bulkDeselect([1, 3, 4]);
+        assert.deepEqual(lastIndexes, [0, 2]);
+        assert.strictEqual(callCount, 1);
+    });
+    
+    QUnit.test("Can bulk-deselect three competitors in the wrong order when all were originally selected, firing change handlers once", function (assert) {
+        reset();
+        var selection = createSelectionWithAllSelected(5);
+        selection.registerChangeHandler(testHandler);        
+        selection.bulkDeselect([4, 3, 1]);
+        assert.deepEqual(lastIndexes, [0, 2]);
+        assert.strictEqual(callCount, 1);
+    });
+    
+    QUnit.test("Can bulk-deselect three competitors when two originally deselected, with correct list of last indexes and firing change handlers once", function (assert) {
+        reset();
+        var selection = createSelectionWithAllSelected(5);
+        selection.toggle(1);
+        selection.toggle(4);
+        selection.registerChangeHandler(testHandler);        
+        selection.bulkDeselect([1, 3, 4]);
+        assert.deepEqual(lastIndexes, [0, 2]);
+        assert.strictEqual(callCount, 1);
+    });
+    
+    QUnit.test("Bulk-deselecting three competitors when all three originally deselected does not fire change handlers", function (assert) {
+        reset();
+        var selection = createSelectionWithAllSelected(5);
+        selection.toggle(1);
+        selection.toggle(3);
+        selection.toggle(4);
+        selection.registerChangeHandler(testHandler);        
+        selection.bulkDeselect([1, 3, 4]);
+        assert.strictEqual(callCount, 0);
+    });
+
+    QUnit.test("Cannot bulk-deselect when one of the entries in the list is not a number", function (assert) {
+        var selection = createSelectionWithAllSelected(5);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            selection.bulkDeselect([1, "This is not a number", 4]);
+        });
+    });
+
+    QUnit.test("Cannot bulk-select when one of the entries in the list is a negative number", function (assert) {
+        var selection = createSelectionWithAllSelected(5);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            selection.bulkDeselect([1, -1, 4]);
+        });
+    });
+
+    QUnit.test("Cannot bulk-select when one of the entries in the list is too large", function (assert) {
+        var selection = createSelectionWithAllSelected(5);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            selection.bulkDeselect([1, 5, 4]);
+        });
+    });
 })();
