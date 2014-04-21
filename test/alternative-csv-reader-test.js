@@ -123,37 +123,36 @@
         return row.join(",") + "\r\n";
     }
     
-    
     module("Input.AlternativeCSV.TripleColumn");
     
     QUnit.test("Cannot parse an empty string", function (assert) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseTripleColumnEventData("");
-        }, "parsing an empty string");
+        }, "Should throw an exception for parsing an empty string");
     });
     
     QUnit.test("Cannot parse a string that contains only the headers", function (assert) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseTripleColumnEventData(TRIPLE_COLUMN_HEADER);
-        }, "parsing a string containing only the headers");
+        }, "Should throw an exception for parsing a string containing only the headers");
     });
     
     QUnit.test("Cannot parse a string that contains only the headers and blank lines", function (assert) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseTripleColumnEventData(TRIPLE_COLUMN_HEADER + "\r\n\r\n\r\n");
-        }, "parsing a string containing only the headers and blank lines");
+        }, "Should throw an exception for parsing a string containing only the headers and blank lines");
     });
     
     QUnit.test("Cannot parse a string that contains only the headers and blank lines", function (assert) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseTripleColumnEventData(TRIPLE_COLUMN_HEADER + "\r\n1,2,3,4,5");
-        }, "parsing a string containing only the headers and a too-short line");
+        }, "Should throw an exception for parsing a string containing only the headers and a too-short line");
     });
     
-    QUnit.test("Cannot parse a string that contains a line with a non-numeric control code", function (assert) {
+    QUnit.test("Cannot parse a string that contains a line with a non-alphanumeric control code", function (assert) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
-            parseTripleColumnEventData(TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Course 1", ["152", "INVALID", "188"], null, [null, null, null]));
-        }, "parsing a string containing a non-numeric control code");
+            parseTripleColumnEventData(TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Course 1", ["152", "IN:VA:LID", "188"], null, [null, null, null]));
+        }, "Should throw an exception for parsing a string containing a non-alphanumeric control code");
     });
     
     QUnit.test("Can parse a string that contains a single valid competitor", function (assert) {
@@ -206,6 +205,16 @@
         assert.strictEqual(eventData.courses.length, 1);
     });
     
+    QUnit.test("Can parse a string that contains a single valid competitor with alphanumeric but not numeric control code", function (assert) {
+        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Course 1", ["152", "ABC188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
+        data = data.replace(/,/g, ";");
+        var eventData = parseTripleColumnEventData(data);
+        assert.strictEqual(eventData.classes.length, 1);
+        assert.strictEqual(eventData.courses.length, 1);
+        var course = eventData.courses[0];
+        assert.deepEqual(course.controls, ["152", "ABC188", "163"]);
+    });
+    
     QUnit.test("Can parse a string that contains a single valid competitor with two names", function (assert) {
         var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith, Fred Baker", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
         var eventData = parseTripleColumnEventData(data);
@@ -248,7 +257,7 @@
                                      fabricateTripleColumnRow("Fred Baker", "ABCD", "Course 1", ["152", "188", "163", "186", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 257, 282]);
         SplitsBrowserTest.assertInvalidData(assert, function () {
             parseTripleColumnEventData(data);
-        }, "two competitors on the same course with different numbers of controls");
+        }, "Should throw an exception for two competitors on the same course with different numbers of controls");
     });
     
     QUnit.test("Can parse a string that contains a single competitor missing an intermediate control", function (assert) {
@@ -282,31 +291,31 @@
     QUnit.test("Cannot parse an empty string", function (assert) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseNamelessEventData("");
-        }, "parsing an empty string");
+        }, "Should throw an exception for parsing an empty string");
     });
     
     QUnit.test("Cannot parse a string that contains only the headers", function (assert) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseNamelessEventData(NAMELESS_HEADER);
-        }, "parsing a string containing only the headers");
+        }, "Should throw an exception for parsing a string containing only the headers");
     });
     
     QUnit.test("Cannot parse a string that contains only the headers and blank lines", function (assert) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseNamelessEventData(NAMELESS_HEADER + "\r\n\r\n\r\n");
-        }, "parsing a string containing only the headers and blank lines");
+        }, "Should throw an exception for parsing a string containing only the headers and blank lines");
     });
     
     QUnit.test("Cannot parse a string that contains only the headers and blank lines", function (assert) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseNamelessEventData(NAMELESS_HEADER + "\r\n1,2,3,4,5");
-        }, "parsing a string containing only the headers and a too-short line");
+        }, "Should throw an exception for parsing a string containing only the headers and a too-short line");
     });
     
-    QUnit.test("Cannot parse a string that contains a line with a non-numeric control code", function (assert) {
+    QUnit.test("Cannot parse a string that contains a line with a non-alphanumeric control code", function (assert) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
-            parseNamelessEventData(NAMELESS_HEADER + "\r\n" + fabricateNamelessRow("200971", "3621", "Course 1", 2.7, 150, ["152", "INVALID", "188"], 10 * 3600 + 38 * 60, 10 * 3600 + 59 * 60 + 14, 1, [72, 141, 186]));
-        }, "parsing a string containing a non-numeric control code");
+            parseNamelessEventData(NAMELESS_HEADER + "\r\n" + fabricateNamelessRow("200971", "3621", "Course 1", 2.7, 150, ["152", "IN:VAL:ID", "188"], 10 * 3600 + 38 * 60, 10 * 3600 + 59 * 60 + 14, 1, [72, 141, 186]));
+        }, "Should throw an exception for parsing a string containing a non-numeric control code");
     });
     
     QUnit.test("Can parse a string that contains a single valid competitor with all values", function (assert) {
@@ -367,6 +376,15 @@
         var eventData = parseNamelessEventData(data);
         assert.strictEqual(eventData.classes.length, 1);
         assert.strictEqual(eventData.courses.length, 1);
+    });
+    
+    QUnit.test("Can parse a string that contains a single valid competitor with alphanumeric but not numeric control code", function (assert) {
+        var data = NAMELESS_HEADER + "\r\n" + fabricateNamelessRow("200971", "3621", "Course 1", "2.7", "150", ["152", "ABC188", "163"], 10 * 3600 + 38 * 60, 10 * 3600 + 41 * 60 + 22, 1, [72, 141, 186]);
+        var eventData = parseNamelessEventData(data);
+        assert.strictEqual(eventData.classes.length, 1);
+        assert.strictEqual(eventData.courses.length, 1);
+        var course = eventData.courses[0];
+        assert.deepEqual(course.controls, ["152", "ABC188", "163"]);
     });
     
     QUnit.test("Can parse a string that contains two valid competitors on the same course", function (assert) {

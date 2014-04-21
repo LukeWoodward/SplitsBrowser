@@ -122,18 +122,19 @@
         // Now, find the last column with a control code in.  This should be
         // one of the last two columns.  (Normally, it will be the second last,
         // but if there is no last split recorded, it may be the last.)
-        var digitsOnly = /^\d+$/;
+        var controlCodeRegexp = /^[A-Za-z0-9]+$/;
+        
         var controlCodeColumn;
-        if (digitsOnly.test(firstLine[endPos - 1])) {
+        if (controlCodeRegexp.test(firstLine[endPos - 1])) {
             controlCodeColumn = endPos - 1;
-        } else if (digitsOnly.test(firstLine[endPos])) {
+        } else if (controlCodeRegexp.test(firstLine[endPos])) {
             // No split for the last control.
             controlCodeColumn = endPos;
         } else {
             throwWrongFileFormat("Could not find control number in last two columns of first data line");
         }
         
-        while (controlCodeColumn >= 2 && digitsOnly.test(firstLine[controlCodeColumn - 2])) { 
+        while (controlCodeColumn >= 2 && controlCodeRegexp.test(firstLine[controlCodeColumn - 2])) { 
             // There's another control code before this one.
             controlCodeColumn -= 2;
         }

@@ -467,6 +467,17 @@
             false);
     });
     
+    QUnit.test("Can parse an event with an empty course and non-numeric control code in all formats", function (assert) {
+        runHtmlFormatParseTest(
+            [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "ABC152", "141"]], competitors: []}],
+            function (eventData, formatName) {
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
+                assert.strictEqual(eventData.classes.length, 0, "No classes should have been read - " + formatName);
+                assertCourse(assert, eventData.courses[0], {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "ABC152", "141"]});
+            },
+            false);
+    });
+    
     QUnit.test("Can parse an event with an empty course with length but no climb in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", ""], controlsLines: [["138", "152", "141"]], competitors: []}],

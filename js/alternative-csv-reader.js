@@ -156,15 +156,15 @@
         trimTrailingEmptyCells(lineParts);
         adjustLinePartsForMultipleCompetitors(lineParts, format);
         
-        // Check that all control codes except perhaps the finish are numeric.
-        var digitsOnly = /^\d+$/;
+        // Check that all control codes except perhaps the finish are alphanumeric.
+        var controlCodeRegexp = /^[A-Za-z0-9]+$/;
         
         // Don't check that the control code for the finish is numeric if the
         // finish time is specified elsewhere.
         var terminationOffset = (format.finishTime === null) ? format.step : 0;
         
         for (var index = format.controlsOffset; index + terminationOffset < lineParts.length; index += format.step) {
-            if (!digitsOnly.test(lineParts[index])) {
+            if (!controlCodeRegexp.test(lineParts[index])) {
                 throwWrongFileFormat("Data appears not to be in an alternative CSV format - data in cell " + index + " of the first row ('" + lineParts[index] + "') is not an number");
             }
         }
