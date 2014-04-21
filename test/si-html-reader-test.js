@@ -196,7 +196,8 @@
     * optional and can be omitted.
     * 
     * @param {String|Number} posn - The position of the competitor.
-    * @param {String} startNum - The start number of the competitor.
+    * @param {String|null} startNum - The start number of the competitor, or
+    *     null to skip the first column.
     * @param {String} name - The name of the competitor.
     * @param {String} club - The name of the competitor's club.
     * @param {String} className - The name of the competitor's class, or "" to
@@ -211,8 +212,8 @@
             throw new Error("Cumulative times and split times must have the same length");
         }
     
-        var line1 = cellOld(posn) + cellOld(startNum) + cellOld(name) + className + cellOld(time);
-        var line2 = cellOld("") + cellOld("") + cellOld(club) + cellOld("");
+        var line1 = cellOld(posn) + ((startNum === null) ? "" : cellOld(startNum)) + cellOld(name) + className + cellOld(time);
+        var line2 = cellOld("") + ((startNum === null) ? "" : cellOld("")) + cellOld(club) + cellOld("");
         
         for (var index = 0; index < cumTimes.length; index += 1) {
             var splitTime = (cumTimes[index] === "-----") ? "" : splits[index];
@@ -842,6 +843,24 @@
         var eventData = parseEventData("<html><head></head><body>\n<pre>\n</pre>\n</body></html>");
         assert.strictEqual(eventData.courses.length, 0, "No courses should have been read");
         assert.strictEqual(eventData.classes.length, 0, "No classes should have been read");
+    });
+    
+    // Format-specific as handles a quirk of the old format.
+    QUnit.test("Can parse event data with a single course and single valid competitor with no start number", function (assert) {
+        var html = OLD_FORMAT.header +
+                   getCourseHeaderLineOld("Test course 1", "2.7", "35") +
+                   getControlsLineOld(["138", "152", "141"], 0, true) +
+                   getCompetitorLinesOld("1", null, "Test runner 1", "TEST", "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) +
+                   OLD_FORMAT.footer;
+        var eventData = parseEventData(html);
+        assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
+        assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
+        var ageClass = eventData.classes[0];
+        assert.strictEqual(ageClass.competitors.length, 1, "One competitor should should have been read");
+        assertCompetitor(assert, ageClass.competitors[0], {name: "Test runner 1", totalTime: 9 * 60 + 25,
+                                                           originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25],
+                                                           originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, 4 * 60 + 11, 1 * 60 + 12],
+                                                           isNonCompetitive: false, completed: true});
     });
     
     // Needs to remain format-specific as the newlines can only be inserted at specific locations.

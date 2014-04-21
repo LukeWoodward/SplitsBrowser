@@ -311,7 +311,13 @@
     * @constructor
     */
     var OldHtmlFormatRecognizer = function () {
-        // Intentionally empty.
+        // There exists variations of the format depending on what the second 
+        // <font> ... </font> element on each row contains.  It can be blank,
+        // contain a number (start number, perhaps?) or something else.
+        // If blank or containing a number, the competitor's name is in column
+        // 2 and there are four preceding columns.  Otherwise the competitor's
+        // name is in column 1 and there are three preceding columns.
+        this.precedingColumnCount = null;
     };
     
     /**
@@ -452,7 +458,7 @@
     * @return {Array} Array of times.
     */
     OldHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (line) {
-        for (var i = 0; i < 4; i += 1) {
+        for (var i = 0; i < this.precedingColumnCount; i += 1) {
             var closeFontPos = line.indexOf("</font>");
             line = line.substring(closeFontPos + "</font>".length);
         }
@@ -471,11 +477,18 @@
     OldHtmlFormatRecognizer.prototype.parseCompetitor = function (firstLine, secondLine) {
         var firstLineBits = getFontBits(firstLine);
         var secondLineBits = getFontBits(secondLine);
+        
+        if (this.precedingColumnCount === null) {
+            // If column 1 is blank or a number, we have four preceding
+            // columns.  Otherwise we have three.
+            var column1 = $.trim(firstLineBits[1]); 
+            this.precedingColumnCount = (column1.match(/^\d*$/)) ? 4 : 3;
+        }
 
         var competitive = hasNumber(firstLineBits[0]);
-        var name = $.trim(firstLineBits[2]);
-        var totalTime = $.trim(firstLineBits[3]);
-        var club = $.trim(secondLineBits[2]);
+        var name = $.trim(firstLineBits[this.precedingColumnCount - 2]);
+        var totalTime = $.trim(firstLineBits[this.precedingColumnCount - 1]);
+        var club = $.trim(secondLineBits[this.precedingColumnCount - 2]);
         
         var cumulativeTimes = this.readCompetitorSplitDataLine(firstLine);
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
@@ -491,12 +504,12 @@
         var className = null;
         if (name !== null && name !== "") {
             var lastCloseFontPos = -1;
-            for (var i = 0; i < 4; i += 1) {
+            for (var i = 0; i < this.precedingColumnCount; i += 1) {
                 lastCloseFontPos = firstLine.indexOf("</font>", lastCloseFontPos + 1);
             }
             
-            var firstLineUpToFourth = firstLine.substring(0, lastCloseFontPos + "</font>".length);
-            var firstLineMinusFonts = firstLineUpToFourth.replace(/<font[^>]*>(.*?)<\/font>/g, "");
+            var firstLineUpToLastPreceding = firstLine.substring(0, lastCloseFontPos + "</font>".length);
+            var firstLineMinusFonts = firstLineUpToLastPreceding.replace(/<font[^>]*>(.*?)<\/font>/g, "");
             var lineParts = splitByWhitespace(firstLineMinusFonts);
             if (lineParts.length > 0) {
                 className = lineParts[0];
