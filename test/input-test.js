@@ -87,16 +87,29 @@
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");
     });
     
-    QUnit.test("Can read in alternative CSV data", function (assert) {
-        var alternativeCSVData = "RaceNumber,CardNumbers,MembershipNumbers,Name,AgeClass,Club,Country,CourseClass,StartTime,FinishTime,RaceTime,NonCompetitive," +
-                                 "Position,Status,Handicap,PenaltyScore,ManualScoreAdjust,FinalScore,HandicapTime,HandicapScore,AwardLevel,SiEntriesIDs,Eligibility," +
-                                 "NotUsed3,NotUsed4,NotUsed5,NotUsed6,NotUsed7,NotUsed8,NotUsed9,NotUsed10,NumSplits,ControlCode1,Split1,Points1,ControlCode2,Split2," +
-                                 "Points2,ControlCode3,Split3,Points3,ControlCode4,Split4,Points4,ControlCode5,Split5,Points5,ControlCode6,Split6,Points6\r\n" + 
-                                 ",,,John Smith,,TEST,,Course 1,10:38:00,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,152,01:12,,188,02:21,,163,03:06,,F1,03:22,,,,,,,,,\r\n";
-        var eventData = parseEventData(alternativeCSVData);
+    QUnit.test("Can read in alternative CSV data in triple-column format", function (assert) {
+        var tripleColumnCSVData = "RaceNumber,CardNumbers,MembershipNumbers,Name,AgeClass,Club,Country,CourseClass,StartTime,FinishTime,RaceTime,NonCompetitive," +
+                                  "Position,Status,Handicap,PenaltyScore,ManualScoreAdjust,FinalScore,HandicapTime,HandicapScore,AwardLevel,SiEntriesIDs,Eligibility," +
+                                  "NotUsed3,NotUsed4,NotUsed5,NotUsed6,NotUsed7,NotUsed8,NotUsed9,NotUsed10,NumSplits,ControlCode1,Split1,Points1,ControlCode2,Split2," +
+                                  "Points2,ControlCode3,Split3,Points3,ControlCode4,Split4,Points4,ControlCode5,Split5,Points5,ControlCode6,Split6,Points6\r\n" + 
+                                  ",,,John Smith,,TEST,,Course 1,10:38:00,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,152,01:12,,188,02:21,,163,03:06,,F1,03:22,,,,,,,,,\r\n";
+        var eventData = parseEventData(tripleColumnCSVData);
         assert.ok(eventData instanceof Event, "An event should be returned");
         assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");
+    });
+    
+    QUnit.test("Can read in alternative CSV data in nameless format", function (assert) {
+        var namelessCSVData = "OE0014,Stno,XStno,Chipno,Database Id,Surname,First name,YB,S,Block,nc,Start,Finish,Time,Classifier,Credit -,Penalty +,Comment,Club no.," +
+                              "Cl.name,City,Nat,Location,Region,Cl. no.,Short,Long,Entry cl. No,Entry class (short),Entry class (long),Rank,Ranking points,Num1,Num2,Num3," +
+                              "Text1,Text2,Text3,Addr. surname,Addr. first name,Street,Line2,Zip,Addr. city,Phone,Mobile,Fax,EMail,Rented,Start fee,Paid,Team,Course no.," +
+                              "Course,km,m,Course controls,Place,Start punch,Finish punch,Control1,Punch1,Control2,Punch2,Control3,Punch3,Control4,Punch4,Control5,Punch5," +
+                              "Control6,Punch6\r\n" +
+                              ",,,200972,,,,,,,,,,,,,,,3621,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Course 1,2.7,150,3,1,10:38:00,10:41:22,152,01:12,188,02:21,163,03:06,,,,,,,,,,,\r\n";
+        var eventData = parseEventData(namelessCSVData);
+        assert.ok(eventData instanceof Event, "An event should be returned");
+        assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
+        assert.strictEqual(eventData.courses.length, 1, "One course should be read in");        
     });
     
     QUnit.test("Cannot read in invalid data", function (assert) {
