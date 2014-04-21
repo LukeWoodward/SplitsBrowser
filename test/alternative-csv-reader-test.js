@@ -206,6 +206,18 @@
         assert.strictEqual(eventData.courses.length, 1);
     });
     
+    QUnit.test("Can parse a string that contains a single valid competitor with two names", function (assert) {
+        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith, Fred Baker", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
+        var eventData = parseTripleColumnEventData(data);
+        assert.strictEqual(eventData.classes.length, 1);
+        
+        var ageClass = eventData.classes[0];
+        assert.strictEqual(ageClass.competitors.length, 1);
+        
+        var competitor = ageClass.competitors[0];
+        assert.strictEqual(competitor.name, "John Smith, Fred Baker");
+    });
+    
     QUnit.test("Can parse a string that contains two valid competitors on the same course", function (assert) {
         var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
                                      fabricateTripleColumnRow("Fred Baker", "ABCD", "Course 1", ["152", "188", "163", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 217]);

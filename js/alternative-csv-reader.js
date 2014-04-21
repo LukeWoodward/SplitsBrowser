@@ -57,7 +57,8 @@
         climb: null,
         controlCount: null,
         placing: null,
-        finishTime: null
+        finishTime: null,
+        allowMultipleCompetitorNames: true
     };
     
     var NAMELESS_CONTROLS_OFFSET = 60;
@@ -74,7 +75,8 @@
         climb: NAMELESS_CONTROLS_OFFSET - 5,
         controlCount: NAMELESS_CONTROLS_OFFSET - 4,
         placing: NAMELESS_CONTROLS_OFFSET - 3,
-        finishTime: NAMELESS_CONTROLS_OFFSET - 1
+        finishTime: NAMELESS_CONTROLS_OFFSET - 1,
+        allowMultipleCompetitorNames: false
     };
     
     // Supported delimiters.
@@ -92,6 +94,22 @@
         }
         
         array.splice(index + 1, array.length - index - 1);
+    }
+    
+    /**
+    * Some lines of some formats can have multiple delimited competitors, which
+    * will move the following columns out of their normal place.  Identify any
+    * such situations and merge them together.
+    * @param {Array} row - The row of data read from the file.
+    * @param {Object} format - The format of this CSV file.
+    */
+    function adjustLinePartsForMultipleCompetitors(row, format) {
+        if (format.allowMultipleCompetitorNames) {
+            while (row.length > format.name + 1 && row[format.name + 1].match(/^\s\S/)) {
+                row[format.name] += "," + row[format.name + 1];
+                row.splice(format.name + 1, 1);
+            }
+        }
     }
     
     /**
@@ -136,6 +154,7 @@
         
         var lineParts = lines[1].split(delimiter);
         trimTrailingEmptyCells(lineParts);
+        adjustLinePartsForMultipleCompetitors(lineParts, format);
         
         // Check that all control codes except perhaps the finish are numeric.
         var digitsOnly = /^\d+$/;
@@ -154,6 +173,7 @@
         for (var rowIndex = 1; rowIndex < lines.length; rowIndex += 1) {
             var row = lines[rowIndex].split(delimiter);
             trimTrailingEmptyCells(row);
+            adjustLinePartsForMultipleCompetitors(row, format);
             
             if (row.length < format.controlsOffset) {
                 // Probably a blank line.  Ignore it.
