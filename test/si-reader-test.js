@@ -146,6 +146,13 @@
     }
     
     /**
+    * Returns a list of test controls for competitor 1.
+    */
+    function getControls1WithBlankTimeForLast() {
+        return [{code: "208", time: "01:50"}, {code: "227", time: "03:38"}, {code: "212", time: ""}];
+    }
+    
+    /**
     * Returns a list of test controls for competitor 2.
     */ 
     function getControls2() {
@@ -274,6 +281,19 @@
         var competitor = eventData.classes[0].competitors[0];
         assert.ok(!competitor.completed());
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, null, null, 393]);
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor's data with a blank time for the last control", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.placing = "";
+        var eventDataStr = HEADER_46 + generateRow(competitor1, getControls1WithBlankTimeForLast(), ROW_TEMPLATE_46);
+        
+        var eventData = parseEventData(eventDataStr);
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
+        var competitor = eventData.classes[0].competitors[0];
+        assert.ok(!competitor.completed());
+        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, null, 393]);
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data in column-44 variation", function (assert) {

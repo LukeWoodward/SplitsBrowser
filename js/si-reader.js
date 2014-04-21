@@ -113,14 +113,26 @@
         
         var firstLine = this.lines[1].split(delimiter);
         
+        // Ignore trailing blanks.
         var endPos = firstLine.length - 1;
         while (endPos > 0 && $.trim(firstLine[endPos]) === "") {
             endPos -= 1;
         }
         
-        // The last empty item should be the time.
-        var controlCodeColumn = endPos - 1;
+        // Now, find the last column with a control code in.  This should be
+        // one of the last two columns.  (Normally, it will be the second last,
+        // but if there is no last split recorded, it may be the last.)
         var digitsOnly = /^\d+$/;
+        var controlCodeColumn;
+        if (digitsOnly.test(firstLine[endPos - 1])) {
+            controlCodeColumn = endPos - 1;
+        } else if (digitsOnly.test(firstLine[endPos])) {
+            // No split for the last control.
+            controlCodeColumn = endPos;
+        } else {
+            throwWrongFileFormat("Could not find control number in last two columns of first data line");
+        }
+        
         while (controlCodeColumn >= 2 && digitsOnly.test(firstLine[controlCodeColumn - 2])) { 
             // There's another control code before this one.
             controlCodeColumn -= 2;
