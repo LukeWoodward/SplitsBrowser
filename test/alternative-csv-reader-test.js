@@ -198,6 +198,14 @@
         assert.strictEqual(eventData.courses.length, 1);
     });
     
+    QUnit.test("Can parse a string that contains a single valid competitor with data delimited by semicolons", function (assert) {
+        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
+        data = data.replace(/,/g, ";");
+        var eventData = parseTripleColumnEventData(data);
+        assert.strictEqual(eventData.classes.length, 1);
+        assert.strictEqual(eventData.courses.length, 1);
+    });
+    
     QUnit.test("Can parse a string that contains two valid competitors on the same course", function (assert) {
         var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
                                      fabricateTripleColumnRow("Fred Baker", "ABCD", "Course 1", ["152", "188", "163", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 217]);
@@ -336,6 +344,14 @@
     QUnit.test("Can parse a string that contains a single valid competitor with CR line endings", function (assert) {
         var data = NAMELESS_HEADER + "\r\n" + fabricateNamelessRow("200971", "3621", "Course 1", "2.7", "150", ["152", "188", "163"], 10 * 3600 + 38 * 60, 10 * 3600 + 41 * 60 + 22, 1, [72, 141, 186]);
         data = data.replace(/\n/g, "");
+        var eventData = parseNamelessEventData(data);
+        assert.strictEqual(eventData.classes.length, 1);
+        assert.strictEqual(eventData.courses.length, 1);
+    });
+    
+    QUnit.test("Can parse a string that contains a single valid competitor with data delimited by semicolons", function (assert) {
+        var data = NAMELESS_HEADER + "\r\n" + fabricateNamelessRow("200971", "3621", "Course 1", "2.7", "150", ["152", "188", "163"], 10 * 3600 + 38 * 60, 10 * 3600 + 41 * 60 + 22, 1, [72, 141, 186]);
+        data = data.replace(/,/g, ";");
         var eventData = parseNamelessEventData(data);
         assert.strictEqual(eventData.classes.length, 1);
         assert.strictEqual(eventData.courses.length, 1);

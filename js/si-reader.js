@@ -130,11 +130,10 @@
         
         var supportedControl1Indexes = [44, 46];
         
-        var throwException = (delimiter === ",") ? throwWrongFileFormat : throwInvalidData;
         if (this.control1Index === null) {
-            throwException("Unable to find index of control 1 in SI CSV data");
+            throwWrongFileFormat("Unable to find index of control 1 in SI CSV data");
         } else if (supportedControl1Indexes.indexOf(this.control1Index) < 0) {
-            throwException("Unsupported index of control 1: " + this.control1Index);
+            throwWrongFileFormat("Unsupported index of control 1: " + this.control1Index);
         }
     };
     

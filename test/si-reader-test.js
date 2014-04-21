@@ -305,18 +305,6 @@
         assert.strictEqual(eventData.classes[0].course, course, "Class should refer to its course");
     });
     
-    // This can happen in Internet Explorer if you specify the character set
-    // wrong, in particular if you specify the character set as UTF-8 when it
-    // should be ISO-8859-1.  IE makes a poor job of recovering from a single
-    // byte outside the US-ASCII range (which doesn't happen in UTF-8), and
-    // this can include swallowing up the following semicolon.
-    QUnit.test("Cannot parse a string where the club name has corrupted the following semicolon", function (assert) {
-        var competitor = getCompetitor1();
-        var siData = HEADER_44 + generateRow(competitor, getControls1(), ROW_TEMPLATE_46);
-        siData = siData.replace(competitor.club + ";", competitor.club.substring(0, 2) + "\uFFFD");
-        runInvalidDataTest(assert, siData, "data where the club name has corrupted the following semicolon");
-    });
-    
     QUnit.test("Can parse a string that contains a single competitor's data with commas as column separators", function (assert) {
         var eventDataStr = HEADER_46 + generateRow(getCompetitor1(), getControls1(), ROW_TEMPLATE_46);
         eventDataStr = eventDataStr.replace(/;/g, ",");
@@ -393,7 +381,7 @@
         var comp = getCompetitor1();
         comp.surname = "Smith n/c";
         comp.placing = "n/c";
-        var eventData = parseEventData(HEADER_46 + generateRow(comp, getControls1(), ROW_TEMPLATE_46 ));
+        var eventData = parseEventData(HEADER_46 + generateRow(comp, getControls1(), ROW_TEMPLATE_46));
         assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");

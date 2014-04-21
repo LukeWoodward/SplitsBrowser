@@ -35,7 +35,7 @@
     // separate competitor, and includes course details such as name, controls
     // and possibly distance and climb.
     
-    // There are presently two variartions supported:
+    // There are presently two variations supported:
     // * one, distinguished by having three columns per control: control code,
     //   cumulative time and 'points'.  (Points is never used.)  Generally,
     //   these formats are quite sparse; many columns (e.g. club, placing,
@@ -77,6 +77,9 @@
         finishTime: NAMELESS_CONTROLS_OFFSET - 1
     };
     
+    // Supported delimiters.
+    var DELIMITERS = [",", ";"];
+    
     /**
     * Trim trailing empty-string entries from the given array.
     * The given array is mutated.
@@ -89,6 +92,25 @@
         }
         
         array.splice(index + 1, array.length - index - 1);
+    }
+    
+    /**
+    * Determine the delimiter used to delimit data.
+    * @param {String} firstDataLine - The first data line of the file.
+    * @return {String|null} The delimiter separating the data, or null if no
+    *    suitable delimiter was found.
+    */
+    function determineDelimiter(firstDataLine, format) {
+        for (var index = 0; index < DELIMITERS.length; index += 1) {
+            var delimiter = DELIMITERS[index];
+            var lineParts = firstDataLine.split(delimiter);
+            trimTrailingEmptyCells(lineParts);
+            if (lineParts.length > format.controlsOffset) {
+                return delimiter;
+            }
+        }
+        
+        return null;
     }
     
     /**
@@ -107,14 +129,12 @@
             throwWrongFileFormat("Data appears not to be in an alternative CSV format - too few lines");
         }
         
-        var firstDataLine = lines[1];
-        var lineParts = firstDataLine.split(",");
-        trimTrailingEmptyCells(lineParts);
-        
-        if (lineParts.length < format.controlsOffset) {
-            throwWrongFileFormat("Data appears not to be in an alternative CSV format - first data line has fewer than " + format.controlsOffset + " parts");
+        var delimiter = determineDelimiter(lines[1], format);
+        if (delimiter === null) {
+            throwWrongFileFormat("Data appears not to be in an alternative CSV format - first data line has fewer than " + format.controlsOffset + " parts when separated by any recognised delimiter");
         }
         
+        var lineParts = lines[1].split(delimiter);
         trimTrailingEmptyCells(lineParts);
         
         // Check that all control codes except perhaps the finish are numeric.
@@ -132,7 +152,7 @@
         
         var classes = d3.map();
         for (var rowIndex = 1; rowIndex < lines.length; rowIndex += 1) {
-            var row = lines[rowIndex].split(",");
+            var row = lines[rowIndex].split(delimiter);
             trimTrailingEmptyCells(row);
             
             if (row.length < format.controlsOffset) {
