@@ -69,7 +69,7 @@
         name: 3,
         club: 18,
         courseName:  NAMELESS_CONTROLS_OFFSET - 7,
-        startTime: NAMELESS_CONTROLS_OFFSET - 2,
+        startTime: 11,
         length: NAMELESS_CONTROLS_OFFSET - 6,
         climb: NAMELESS_CONTROLS_OFFSET - 5,
         controlCount: NAMELESS_CONTROLS_OFFSET - 4,

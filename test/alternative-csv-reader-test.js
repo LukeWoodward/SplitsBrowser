@@ -110,7 +110,7 @@
         row[55] = climb;
         row[56] = cumTimes.length;
         row[57] = placing;
-        row[58] = (startTime === null) ? "" : formatTime(startTime);
+        row[11] = (startTime === null) ? "" : formatTime(startTime);
         row[59] = (finishTime === null) ? "" :formatTime(finishTime);
         
         for (var controlIndex = 0; controlIndex < controls.length; controlIndex += 1) {
