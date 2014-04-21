@@ -480,6 +480,8 @@
         var cumulativeTimes = this.readCompetitorSplitDataLine(firstLine);
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
         cumulativeTimes = cumulativeTimes.map(parseTime);
+
+        removeExtraControls(cumulativeTimes, splitTimes);
         
         var nonZeroCumTimeCount = cumulativeTimes.filter(isNotNull).length;
         if (nonZeroCumTimeCount !== splitTimes.length) {
@@ -500,8 +502,6 @@
                 className = lineParts[0];
             }
         }
-        
-        removeExtraControls(cumulativeTimes, splitTimes);
         
         return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
     };
@@ -733,13 +733,13 @@
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
         cumulativeTimes = cumulativeTimes.map(parseTime);
         
+        removeExtraControls(cumulativeTimes, splitTimes);
+        
         var nonZeroCumTimeCount = cumulativeTimes.filter(isNotNull).length;
         
         if (nonZeroCumTimeCount !== splitTimes.length) {
             throwInvalidData("Cumulative and split times do not have the same length: " + nonZeroCumTimeCount + " cumulative times, " + splitTimes.length + " split times");
         }
-        
-        removeExtraControls(cumulativeTimes, splitTimes);
         
         return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
     };

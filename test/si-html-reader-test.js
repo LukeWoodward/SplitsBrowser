@@ -592,6 +592,20 @@
             false);
     });
     
+    // The zero split time with a decimal point turns up in event 6752.
+    QUnit.test("Can parse event data with a single course and single competitor ignoring extra control with invalid cumulative time in all formats", function (assert) {
+        runHtmlFormatParseTest(
+            [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
+                ["1", "165", "Test runner", "TEST", "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"],
+                    [{cumTime: "0.00", controlNum: "133"}]]
+            ]}],
+            function (eventData, formatName) {
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
+            },
+            false);
+    });
+    
     QUnit.test("Can parse event data with a single course and two competitors in the same class in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
