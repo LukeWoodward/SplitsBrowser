@@ -401,6 +401,15 @@
             parseNamelessEventData(data);
         }, "two competitors on the same course with different numbers of controls");
     });
+    
+    QUnit.test("Cannot parse a string that contains two competitors on the same course with one row too short", function (assert) {
+        var data = NAMELESS_HEADER + "\r\n" + fabricateNamelessRow("200971", "3621", "Course 1", "2.7", "150", ["152", "188", "163"], 10 * 3600 + 38 * 60, 10 * 3600 + 41 * 60 + 22, 1, [72, 141, 186]);
+        data = data.replace("163,03:06,","");
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            parseNamelessEventData(data);
+        }, "two competitors on the same course with different numbers of controls");
+    });
+    
     QUnit.test("Can parse a string that contains a single competitor missing an intermediate control", function (assert) {
         var data = NAMELESS_HEADER + "\r\n" + fabricateNamelessRow("200971", "3621", "Course 1", "2.7", "150", ["152", "188", "163"], 10 * 3600 + 38 * 60, 10 * 3600 + 41 * 60 + 22, "mp", [72, null, 186]);
         var eventData = parseNamelessEventData(data);

@@ -198,7 +198,11 @@
                 if (isNaNStrict(controlCount)) {
                     throwInvalidData("Control count '" + controlCount + "' is not a valid number");
                 }
+                
                 expectedRowLength = format.controlsOffset + row[format.controlCount] * format.step;
+                if (row.length < expectedRowLength) {
+                    throwInvalidData("Data in row " + rowIndex + " should have at least " + expectedRowLength + " parts but only has " + row.length);
+                }
             }
             
             var courseLength = (format.length === null) ? null : parseCourseLength(row[format.length]) || null;
