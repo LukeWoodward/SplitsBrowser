@@ -519,7 +519,6 @@
         return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
     };
     
-    
     /**
     * Constructs a recognizer for formatting the 'newer' format of SI HTML
     * event results data.
@@ -638,7 +637,7 @@
     * If so, it means the parser has finished processing the previous course
     * (if any), and can start a new course.
     *
-    * This recognizer treats a line that contains a table-data cell with I
+    * This recognizer treats a line that contains a table-data cell with ID
     * "header" as the first line of a course.
     *
     * @param {String} line - The line to check.
@@ -757,6 +756,231 @@
         return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
     };
     
+    /**
+    * Constructs a recognizer for formatting an HTML format supposedly from
+    * 'OEvent'.  The file contains exactly two tables, one of which contains
+    *
+    * Data in this format is contained within a single HTML table, with another
+    * table before it containing various (ignored) header information.
+    * @constructor
+    */
+    var OEventTabularHtmlFormatRecognizer = function () {
+        // Intentionally empty.
+    };
+
+    /**
+    * Returns whether this recognizer is likely to recognize the given HTML
+    * text and possibly be able to parse it.  If this method returns true, the
+    * parser will use this recognizer to attempt to parse the HTML.  If it
+    * returns false, the parser will not use this recognizer.  Other methods on
+    * this object can therefore assume that this method has returned true.
+    *
+    * As this recognizer is for recognizing HTML formatted in precisely two
+    * tables, it returns whether the number of HTML &lt;table&gt; tags is
+    * two.  If fewer than two tables are found, or more than two, this method
+    * returns false.
+    *
+    * @param {String} text - The entire input text read in.
+    * @return {boolean} True if the text contains precisely two HTML table
+    *     tags.
+    */ 
+    OEventTabularHtmlFormatRecognizer.prototype.isTextOfThisFormat = function (text) {
+        var table1Pos = text.indexOf("<table");
+        if (table1Pos >= 0) {
+            var table2Pos = text.indexOf("<table", table1Pos + 1);
+            if (table2Pos >= 0) {
+                var table3Pos = text.indexOf("<table", table2Pos + 1);
+                if (table3Pos < 0) {
+                    // Format characterised by precisely two tables.
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    };
+    
+    /**
+    * Performs some pre-processing on the text before it is read in.
+    *
+    * This recognizer performs a fair amount of pre-processing, to remove
+    * parts of the file we don't care about, and to reshape what there is left
+    * so that it is in a more suitable form to be parsed.
+    * 
+    * @param {String} text - The HTML text to preprocess.
+    * @return {String} The preprocessed text.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.preprocess = function (text) {
+        // Remove the first table.
+        var tableEndPos = text.indexOf("</table>");
+        if (tableEndPos === -1) {
+            throwInvalidData("Could not find any closing </table> tags");
+        }
+
+        text = text.substring(tableEndPos + "</table>".length);
+        
+        // Remove all rows that contain only a single non-breaking space.
+        text = text.replace(/<tr[^>]*><td colspan=[^>]*>&nbsp;<\/td><\/tr>/g, "");
+        
+        // Finally, remove the trailing </body> and </html> elements.
+        text = text.replace("</body>", "").replace("</html>", "");
+        
+        return $.trim(text);
+    };
+    
+    /**
+    * Returns whether the HTML parser can ignore the given line altogether.
+    *
+    * The parser will call this method with every line read in, apart from
+    * the second line of each pair of competitor data rows.  These are always
+    * assumed to be in pairs.
+    *
+    * This recognizer ignores blank lines. It also ignores any that contain
+    * opening or closing HTML table tags or horizontal-rule tags.
+    *
+    * @param {String} line - The line to check.
+    * @return {boolean} True if the line should be ignored, false if not.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.canIgnoreThisLine = function (line) {
+        return (line === "" || line.indexOf("<table") > -1 || line.indexOf("</table>") > -1 || line.indexOf("<hr>") > -1);
+    };
+    
+    /**
+    * Returns whether the given line is the first line of a course.
+    *
+    * If so, it means the parser has finished processing the previous course
+    * (if any), and can start a new course.
+    *
+    * This recognizer treats a line that contains a table-row cell with class
+    * "clubName" as the first line of a course.
+    *
+    * @param {String} line - The line to check.
+    * @return {boolean} True if this is the first line of a course, false
+    *     otherwise.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.isCourseHeaderLine = function (line) {
+        return line.indexOf('<tr class="clubName"') > -1;
+    };
+    
+    /**
+    * Parse a course header line and return the course name, distance and
+    * climb.
+    *
+    * This method can assume that the line given is a course header line.
+    *
+    * @param {String} line - The line to parse course details from.
+    * @return {Object} Object containing the parsed course details.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.parseCourseHeaderLine = function (line) {
+        var dataBits = getNonEmptyTableDataBits(line);
+        if (dataBits.length === 0) {
+            throwInvalidData("No parts found in course header line");
+        }
+            
+        var part = dataBits[0];
+        
+        var name, distance, climb;
+        var match = /^(.*?)\s+\((\d+)m,\s*(\d+)m\)$/.exec(part);
+        if (match === null) {
+            // Assume just course name.
+            name = part;
+            distance = null;
+            climb = null;
+        } else {
+            name = match[1];
+            distance = parseInt(match[2], 10) / 1000;
+            climb = parseInt(match[3], 10);
+        }
+                    
+        return {name: $.trim(name), distance: distance, climb: climb };
+    };
+
+    /**
+    * Parse control codes from the given line and return a list of them.
+    *
+    * This method can assume that the previous line was the course header or a
+    * previous control line.  It should also return null for the finish, which
+    * should have no code.  The finish is assumed to he the last.
+    *
+    * @param {String} line - The line to parse control codes from.
+    * @return {Array} Array of control codes.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.parseControlsLine = function (line) {
+        var bits = getNonEmptyTableDataBits(line);
+        return bits.map(function (bit) {
+            var dashPos = bit.indexOf("-");
+            return (dashPos === -1) ? null : bit.substring(dashPos + 1);
+        });
+    };
+    
+    /**
+    * Read either cumulative or split times from the given line of competitor
+    * data.
+    * (This method is not used by the parser, only elsewhere in the recognizer.)
+    * @param {Array} bits - Array of all contents of table elements.
+    * @return {Array} Array of times.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (bits) {
+        
+        var startPos = 4;
+        
+        // Discard the empty bits at the end.
+        var endPos = bits.length;
+        while (endPos > 0 && bits[endPos - 1] === "") {
+            endPos -= 1;
+        }
+        
+        // Alternate cells contain ranks, which we're not interested in.
+        var timeBits = [];
+        for (var index = startPos; index < endPos; index += 2) {
+            var bit = bits[index];
+            if (isNonEmpty(bit)) {
+                timeBits.push(bit);
+            }
+        }
+        
+        return timeBits;
+    };
+    
+    /**
+    * Parse two lines of competitor data into a CompetitorParseRecord object
+    * containing the data.
+    * @param {String} firstLine - The first line of competitor data.
+    * @param {String} secondLine - The second line of competitor data.
+    * @return {CompetitorParseRecord} The parsed competitor.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.parseCompetitor = function (firstLine, secondLine) {
+        var firstLineBits = getTableDataBits(firstLine);
+        var secondLineBits = getTableDataBits(secondLine);
+        
+        var competitive = hasNumber(firstLineBits[0]);
+        var name = firstLineBits[2];
+        var totalTime = firstLineBits[3];
+        var club = secondLineBits[2];
+        
+        // If there is any cumulative time with a blank corresponding split
+        // time, use a placeholder value for the split time.  Typically this
+        // happens when a competitor has punched one control but not the
+        // previous.
+        for (var index = 4; index < firstLineBits.length && index < secondLineBits.length; index += 2) {
+            if (firstLineBits[index] !== "" && secondLineBits[index] === "") {
+                secondLineBits[index] = "----";
+            }
+        }
+        
+        var cumulativeTimes = this.readCompetitorSplitDataLine(firstLineBits);
+        var splitTimes = this.readCompetitorSplitDataLine(secondLineBits);
+        cumulativeTimes = cumulativeTimes.map(parseTime);
+        
+        removeExtraControls(cumulativeTimes, splitTimes);
+        
+        if (cumulativeTimes.length !== splitTimes.length) {
+            throwInvalidData("Cumulative and split times do not have the same length: " + cumulativeTimes.length + " cumulative times, " + splitTimes.length + " split times");
+        }
+        
+        var className = null;
+        return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
+    };
 
     /**
     * Represents the partial result of parsing a course.
@@ -1018,7 +1242,7 @@
         return data.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
     }
     
-    var RECOGNIZER_CLASSES = [OldHtmlFormatRecognizer, NewHtmlFormatRecognizer];
+    var RECOGNIZER_CLASSES = [OldHtmlFormatRecognizer, NewHtmlFormatRecognizer, OEventTabularHtmlFormatRecognizer];
     
     SplitsBrowser.Input.SIHtml = {};
     

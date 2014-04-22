@@ -205,6 +205,7 @@
     * @param {Array} cumTimes - Array of cumulative times, as strings.
     * @param {Array} splits - Array of split times, as strings.
     * @param {Array} extras - Optional array of extra splits times.
+    * @return {String} Both lines concatenated together.
     */
     function getCompetitorLinesOld(posn, startNum, name, club, className, time, cumTimes, splits, extras) {
     
@@ -311,6 +312,7 @@
     * @param {Array} cumTimes - Array of cumulative times, as strings.
     * @param {Array} splits - Array of split times, as strings.
     * @param {Array} extras - Optional array of extra splits times.
+    * @return {String} Both lines concatenated together.
     */
     function getCompetitorLinesNew(posn, startNum, name, club, className, time, cumTimes, splits, extras) {
     
@@ -354,6 +356,125 @@
     
     var NEW_FORMAT_DATA_FOOTER = "</body>\n</html>\n";
     
+    //  OEvent tabular format.
+    
+    var OEVENT_FORMAT_HEADER = '<html>\n' +
+                               '<head>\n' + 
+                               '<META http-equiv="content-type" content="text/html" charset=utf-8>\n' +
+                               '<title>Title</title>\n' +
+                               '<STYLE type="text/css"></STYLE>\n' +
+                               '</head>\n' +
+                               '<body>\n' +
+                               '<table width="100%" class="header">\n<tr><td>Title</td></tr>\n</table>\n' +
+                               '<hr>\n' +
+                               '<table>\n';
+    
+    /**
+    * Returns a table cell in the OEvent tabular format.
+    * @param {String} contents - The contents of the cell.
+    * @return {String} The contents wrapped up in a table-data element.
+    */
+    function getCellOEventTabular(contents) {
+        return '<td  align="right>' + contents + '</td>';
+    }
+    
+    /**
+    * Returns a course header line for the OEvent tabular format.
+    * @param {String} name - The name of the course.
+    * @param {Number} length - The length of the course, in km.
+    * @param {Number} climb - The climb of the course, in km.
+    * @return {String} Course header line.
+    */
+    function getCourseHeaderOEventTabular(name, length, climb) {
+        var contents;
+        if (length === "" || climb === "") {
+            contents = name;
+        } else {
+            var lengthInMetres = Math.round(length * 1000);
+            contents = name + '    (' + lengthInMetres + 'm, ' + climb + 'm)';
+        }
+        return '<tr class="clubName"><td colspan="24">' + contents + '</td></tr>\n';
+    }
+    
+    /**
+    * Returns a line of the table that contains the controls.
+    * @param {Array} codes - Array of control code strings.
+    * @param {Number} offset - The offset to add to the control numbers.
+    * @param {boolean} includeFinish - True to include the finish, false to
+    *     not include it.
+    */
+    function getControlsLineOEventTabular(codes, offset, includeFinish) {
+        var emptyCell = getCellOEventTabular("");
+        var line = emptyCell + emptyCell + emptyCell + emptyCell;
+        for (var index = 0; index < codes.length; index += 1) {
+            line += getCellOEventTabular((index + 1 + offset) + "-" + codes[index]) + emptyCell;
+        }
+        
+        if (includeFinish) {
+            line += getCellOEventTabular("F") + emptyCell;
+        }
+        
+        return "<tr>" + line + "</tr>\n";
+    }
+    
+    /**
+    * Returns a pair of lines for one row competitor data in the OEvent tabular
+    * format.
+    * 
+    * For a continuation line, pass empty strings for the position, name, start
+    * number, club, class name and time.
+    *
+    * The arrays of cumulative and split times must have the same length.
+    *
+    * Each element in the array of extra controls should be an object
+    * containing the properties cumTime and controlNum.  The parameter is
+    * optional and can be omitted.
+    * 
+    * @param {String|Number} posn - The position of the competitor.
+    * @param {String} startNum - The start number of the competitor.
+    * @param {String} name - The name of the competitor.
+    * @param {String} club - The name of the competitor's club.
+    * @param {String} className - The name of the competitor's class, or "" to
+    *     default to course name.
+    * @param {Array} cumTimes - Array of cumulative times, as strings.
+    * @param {Array} splits - Array of split times, as strings.
+    * @param {Array} extras - Optional array of extra splits times.
+    * @return {String} Both lines concatenated together.
+    */
+    function getCompetitorLinesOEventTabular(posn, startNum, name, club, className, time, cumTimes, splits, extras) {
+    
+        if (cumTimes.length !== splits.length) {
+            throw new Error("Cumulative times and split times must have the same length");
+        }
+        
+        var emptyCell = getCellOEventTabular("");
+        var rankCell = getCellOEventTabular("(3)");
+        
+        var firstLine = "<tr>" + getCellOEventTabular((posn === "") ? "" : (posn + ".")) +
+                                 getCellOEventTabular(startNum) +
+                                 getCellOEventTabular(name) +
+                                 getCellOEventTabular(time);
+                                 
+        var secondLine = "<tr>" + emptyCell + emptyCell + getCellOEventTabular(club) + emptyCell;
+        
+        for (var index = 0; index < cumTimes.length; index += 1) {
+            var splitTime = (cumTimes[index] === "-----") ? "" : splits[index];
+            firstLine += getCellOEventTabular(cumTimes[index]) + ((cumTimes[index] === "-----") ? emptyCell : rankCell);
+            secondLine += getCellOEventTabular(splitTime) + ((splitTime === "") ? emptyCell : rankCell);
+        }
+        
+        if (extras) {
+            for (index = 0; index < extras.length; index += 1) {
+                firstLine += getCellOEventTabular(extras[index].cumTime) + emptyCell;
+                secondLine += getCellOEventTabular("*" + extras[index].controlNum) + emptyCell;
+            }
+        }
+        
+        firstLine += "</tr>\n";
+        secondLine += "</tr>\n";
+        return firstLine + secondLine;
+    }
+    
     var OLD_FORMAT = {
         name: "old format (preformatted)",
         header: "<html><head></head><body>\n<pre>\n",
@@ -380,7 +501,20 @@
         footer: "</body>\n</html>\n"
     };
     
-    var ALL_TEMPLATES = [OLD_FORMAT, NEW_FORMAT];
+    var OEVENT_FORMAT = {
+        name: "OEvent tabular format",
+        header: OEVENT_FORMAT_HEADER,
+        courseHeaderFunc: getCourseHeaderOEventTabular,
+        tableHeaderNoClass: "",
+        tableHeaderClass: "",
+        controlsLineFunc: getControlsLineOEventTabular,
+        competitorDataFunc: getCompetitorLinesOEventTabular,
+        mispuncherSeparator: "",
+        tableFooter: "",
+        footer: "</table>\n</body>\n</html>"
+    };
+    
+    var ALL_TEMPLATES = [OLD_FORMAT, NEW_FORMAT, OEVENT_FORMAT];
     
     /**
     * Generates HTML from a template and a list of course data.
@@ -422,20 +556,32 @@
     /**
     * Generates HTML using each available template, parses the resulting HTML,
     * and calls the given checking function on the result.
+    *
+    * The options supported are:
+    * * useClasses (boolean): True to use class names separate from course
+    *       names, false otherwise.  Defaults to false.
+    * * preprocessor (Function): Function used to preprocess the
+    *       HTML before it is parsed.  Defaults to no preprocessing.
+    * * templates (Array): Array of templates to use with this parser.
+    *       Defaults to all templates.
+    * If none of the above three options are required, the options object
+    * itself can be omitted.
+    *
     * @param {Array} courses - Array of course objects to generate the HTML
     *                          using.
     * @param {Function} checkFunc - Checking function called for each parsed
     *                               event data object.  It is passed the data,
     *                               and also the name of the template used.
-    * @param {boolean} useClasses - True to use classes, false not to.
-    * @param {Function} preprocessor - Optional function used to preprocess the
-    *                                  HTML before it is parsed.
+    * @param {Object} options - Options object, the contents of which are
+    *     described above.
     */
-    function runHtmlFormatParseTest(courses, checkFunc, useClasses, preprocessor) {
-        ALL_TEMPLATES.forEach(function (template) {
+    function runHtmlFormatParseTest(courses, checkFunc, options) {
+        var useClasses = (options && options.useClasses) || false;
+        var templates = (options && options.templates) || ALL_TEMPLATES;
+        templates.forEach(function (template) {
             var html = getHtmlFromTemplate(template, courses, useClasses);
-            if (preprocessor) {
-                html = preprocessor(html);
+            if (options && options.preprocessor) {
+                html = options.preprocessor(html);
             }
             var eventData = parseEventData(html);
             checkFunc(eventData, template.name);
@@ -464,8 +610,7 @@
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 0, "No classes should have been read - " + formatName);
                 assertCourse(assert, eventData.courses[0], {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "152", "141"]});
-            },
-            false);
+            });
     });
     
     QUnit.test("Can parse an event with an empty course and non-numeric control code in all formats", function (assert) {
@@ -475,48 +620,55 @@
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 0, "No classes should have been read - " + formatName);
                 assertCourse(assert, eventData.courses[0], {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "ABC152", "141"]});
-            },
-            false);
+            });
     });
     
-    QUnit.test("Can parse an event with an empty course with length but no climb in all formats", function (assert) {
+    QUnit.test("Can parse an event with an empty course with length but no climb in two formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", ""], controlsLines: [["138", "152", "141"]], competitors: []}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assertCourse(assert, eventData.courses[0], {name: "Test course 1", length: 2.7, climb: null});
             },
-            false);
+            // Don't run this on the OEvent format, it only supports both
+            // length and climb, or neither.
+            {templates: [OLD_FORMAT, NEW_FORMAT]});
     });
     
-    QUnit.test("Can parse an event with an empty course with length with comma as the decimal separator in all formats", function (assert) {
+    QUnit.test("Can parse an event with an empty course with length with comma as the decimal separator in two formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2,7", ""], controlsLines: [["138", "152", "141"]], competitors: []}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assertCourse(assert, eventData.courses[0], {name: "Test course 1", length: 2.7, climb: null});
             },
-            false);
+            // Don't run this on the OEvent format, as lengths are in metres
+            // and are never comma-separated.
+            {templates: [OLD_FORMAT, NEW_FORMAT]});
     });
     
-    QUnit.test("Can parse an event with an empty course with length specified in metres in all formats", function (assert) {
+    QUnit.test("Can parse an event with an empty course with length specified in metres in two formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2700", ""], controlsLines: [["138", "152", "141"]], competitors: []}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assertCourse(assert, eventData.courses[0], {name: "Test course 1", length: 2.7, climb: null});
             },
-            false);
+            // Don't run this on the OEvent format as lengths are already in
+            // metres.
+            {templates: [OLD_FORMAT, NEW_FORMAT]});
     });
     
-    QUnit.test("Can parse an event with an empty course with climb but no length in all formats", function (assert) {
+    QUnit.test("Can parse an event with an empty course with climb but no length in two formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "", "35"], controlsLines: [["138", "152", "141"]], competitors: []}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assertCourse(assert, eventData.courses[0], {name: "Test course 1", length: null, climb: 35});
             },
-            false);
+            // Don't run this on the OEvent format, it only supports both
+            // length and climb, or neither.
+            {templates: [OLD_FORMAT, NEW_FORMAT]});
     });
     
     QUnit.test("Can parse an event with an empty course with no climb nor length in all formats", function (assert) {
@@ -525,8 +677,7 @@
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assertCourse(assert, eventData.courses[0], {name: "Test course 1", length: null, climb: null});
-            },
-            false);
+            });
     });
     
     QUnit.test("Can parse event data with a single course and single competitor in all formats", function (assert) {
@@ -550,11 +701,10 @@
                 var course = eventData.courses[0];
                 assertCourse(assert, course, {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "152", "141"], classCount: 1});
                 assert.deepEqual(course.classes[0], ageClass);
-            },
-            false);
+            });
     });
     
-    QUnit.test("Can parse event data with a single course and single competitor in a different class in all formats", function (assert) {
+    QUnit.test("Can parse event data with a single course and single competitor in a different class in two formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
@@ -564,7 +714,9 @@
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
                 assert.strictEqual(eventData.classes[0].name, "Class1");
             },
-            true);
+            // Don't run this on the OEvent format as it doesn't (yet) support
+            // class names different from course names.
+            {useClasses: true, templates: [OLD_FORMAT, NEW_FORMAT]});
     });
     
     QUnit.test("Can parse event data with a single course and single competitor ignoring extra controls in all formats", function (assert) {
@@ -589,8 +741,7 @@
                 var course = eventData.courses[0];
                 assertCourse(assert, course, {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "152", "141"], classCount: 1});
                 assert.deepEqual(course.classes[0], ageClass);
-            },
-            false);
+            });
     });
     
     // The zero split time with a decimal point turns up in event 6752.
@@ -603,11 +754,10 @@
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
-            },
-            false);
+            });
     });
     
-    QUnit.test("Can parse event data with a single course and two competitors in the same class in all formats", function (assert) {
+    QUnit.test("Can parse event data with a single course and two competitors in the same class in two formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner 1", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]],
@@ -625,10 +775,12 @@
 
                 assert.strictEqual(eventData.courses[0].name, "Test course 1");            
             },
-            true);
+            // Don't run this on the OEvent format as it doesn't (yet) support
+            // class names different from course names.
+            {useClasses: true, templates: [OLD_FORMAT, NEW_FORMAT]});
     });
 
-    QUnit.test("Can parse event data with a single course and two competitors in different classes in all formats", function (assert) {
+    QUnit.test("Can parse event data with a single course and two competitors in different classes in two formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner 1", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]],
@@ -650,10 +802,12 @@
                 assertCompetitor(assert, ageClass1.competitors[0], {name: "Test runner 1", club: "TEST", totalTime: 9 * 60 + 25});
                 assertCompetitor(assert, ageClass2.competitors[0], {name: "Test runner 2", club: "ABCD", totalTime: 9 * 60 + 59});
             },
-            true);
+            // Don't run this on the OEvent format as it doesn't (yet) support
+            // class names different from course names.
+            {useClasses: true, templates: [OLD_FORMAT, NEW_FORMAT]});
     });
     
-    QUnit.test("Can parse event data with two courses and two competitors in different classes in all formats", function (assert) {
+    QUnit.test("Can parse event data with two courses and two competitors in different classes in two formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner 1", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
@@ -680,10 +834,12 @@
                 assert.strictEqual(ageClass1.competitors[0].name, "Test runner 1");
                 assert.strictEqual(ageClass2.competitors[0].name, "Test runner 2");
             },
-            true);
+            // Don't run this on the OEvent format as it doesn't (yet) support
+            // class names different from course names.
+            {useClasses: true, templates: [OLD_FORMAT, NEW_FORMAT]});
     });
     
-    QUnit.test("Can parse event data with a two competitors in the same class but different course using course names in all formats", function (assert) {
+    QUnit.test("Can parse event data with a two competitors in the same class but different course using course names in two formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner 1", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
@@ -698,7 +854,9 @@
                 assert.strictEqual(eventData.classes[0].name, "Test course 1");
                 assert.strictEqual(eventData.classes[1].name, "Test course 2");
             },
-            true);
+            // Don't run this on the OEvent format as it doesn't (yet) support
+            // class names different from course names.
+            {useClasses: true, templates: [OLD_FORMAT, NEW_FORMAT]});
     });
     
     QUnit.test("Can parse event data with a single course and single competitor with CRLF line endings in all formats", function (assert) {
@@ -712,8 +870,7 @@
                 assert.strictEqual(eventData.classes[0].competitors.length, 1);
                 assert.deepEqual(eventData.courses[0].classes.length, 1);
             },
-            false,
-            function (html) { return html.replace(/\n/g, "\r\n"); });
+            {preprocessor: function (html) { return html.replace(/\n/g, "\r\n"); }});
     });
     
     QUnit.test("Can parse event data with a single course and single competitor with CR line endings in all formats", function (assert) {
@@ -727,8 +884,7 @@
                 assert.strictEqual(eventData.classes[0].competitors.length, 1);
                 assert.deepEqual(eventData.courses[0].classes.length, 1);
             },
-            false,
-            function (html) { return html.replace(/\n/g, "\r"); });
+            {preprocessor: function (html) { return html.replace(/\n/g, "\r"); }});
     });
         
     QUnit.test("Can parse event data with a single course and single mispunching competitor in all formats", function (assert) {
@@ -745,8 +901,7 @@
                                                                    originalCumTimes: [0, 1 * 60 + 47, 4 * 60 + 2, null, 9 * 60 + 25],
                                                                    originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, null, null],
                                                                    isNonCompetitive: false, completed: false});
-            },
-            false);
+            });
     });
     
     QUnit.test("Can parse event data with a single course and single mispunching competitor with missing cumulative split for the finish in all formats", function (assert) {
@@ -763,8 +918,7 @@
                                                                    originalCumTimes: [0, 1 * 60 + 47, 4 * 60 + 2, null, null],
                                                                    originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, null, null],
                                                                    isNonCompetitive: false, completed: false});
-            },
-            false);
+            });
     });
     
     QUnit.test("Can parse event data with a single course and single non-competitive competitor in all formats", function (assert) {
@@ -781,8 +935,7 @@
                                                                    originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25],
                                                                    originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, 4 * 60 + 11, 1 * 60 + 12],
                                                                    isNonCompetitive: true, completed: true});
-            },
-            false);
+            });
     });
     
     QUnit.test("Can parse event data with a single course and single competitor with 2 lines' worth of controls in the old format", function (assert) {
@@ -806,8 +959,7 @@
                 var course = eventData.courses[0];
                 assertCourse(assert, course, {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "152", "141", "140", "154"], classCount: 1});
                 assert.deepEqual(course.classes[0], ageClass);
-            },
-            false);
+            });
     });
     
     QUnit.test("Cannot parse event data in each format where the competitor has the wrong number of cumulative times", function (assert) {
