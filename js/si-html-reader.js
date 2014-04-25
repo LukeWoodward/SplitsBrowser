@@ -760,7 +760,7 @@
     * @constructor
     */
     var OEventTabularHtmlFormatRecognizer = function () {
-        // Intentionally empty.
+        this.usesClasses = false;
     };
 
     /**
@@ -810,6 +810,11 @@
         var tableEndPos = text.indexOf("</table>");
         if (tableEndPos === -1) {
             throwInvalidData("Could not find any closing </table> tags");
+        }
+        
+        if (text.indexOf('<td colspan="25">') >= 0) {
+            // The table has 25 columns with classes and 24 without.
+            this.usesClasses = true;
         }
 
         text = text.substring(tableEndPos + "</table>".length);
@@ -917,7 +922,7 @@
     */
     OEventTabularHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (bits) {
         
-        var startPos = 4;
+        var startPos = (this.usesClasses) ? 5 : 4;
         
         // Discard the empty bits at the end.
         var endPos = bits.length;
@@ -950,14 +955,15 @@
         
         var competitive = hasNumber(firstLineBits[0]);
         var name = firstLineBits[2];
-        var totalTime = firstLineBits[3];
+        var totalTime = firstLineBits[(this.usesClasses) ? 4 : 3];
+        var className = (this.usesClasses && name !== "") ? firstLineBits[3] : null;
         var club = secondLineBits[2];
         
         // If there is any cumulative time with a blank corresponding split
         // time, use a placeholder value for the split time.  Typically this
         // happens when a competitor has punched one control but not the
         // previous.
-        for (var index = 4; index < firstLineBits.length && index < secondLineBits.length; index += 2) {
+        for (var index = ((this.usesClasses) ? 5 : 4); index < firstLineBits.length && index < secondLineBits.length; index += 2) {
             if (firstLineBits[index] !== "" && secondLineBits[index] === "") {
                 secondLineBits[index] = "----";
             }
@@ -973,7 +979,6 @@
             throwInvalidData("Cumulative and split times do not have the same length: " + cumulativeTimes.length + " cumulative times, " + splitTimes.length + " split times");
         }
         
-        var className = null;
         return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
     };
 

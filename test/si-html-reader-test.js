@@ -452,10 +452,17 @@
         
         var firstLine = "<tr>" + getCellOEventTabular((posn === "") ? "" : (posn + ".")) +
                                  getCellOEventTabular(startNum) +
-                                 getCellOEventTabular(name) +
-                                 getCellOEventTabular(time);
+                                 getCellOEventTabular(name);
                                  
-        var secondLine = "<tr>" + emptyCell + emptyCell + getCellOEventTabular(club) + emptyCell;
+        var secondLine = "<tr>" + emptyCell + emptyCell + getCellOEventTabular(club);
+        
+        if (className !== "") {
+            firstLine += getCellOEventTabular(className);
+            secondLine += emptyCell;
+        }
+        
+        firstLine += getCellOEventTabular(time);
+        secondLine += emptyCell;
         
         for (var index = 0; index < cumTimes.length; index += 1) {
             var splitTime = (cumTimes[index] === "-----") ? "" : splits[index];
@@ -480,7 +487,7 @@
         header: "<html><head></head><body>\n<pre>\n",
         courseHeaderFunc: getCourseHeaderLineOld,
         tableHeaderNoClass: "",
-        tableHeaderClass: "",        
+        tableHeaderWithClass: "",        
         controlsLineFunc: getControlsLineOld,
         competitorDataFunc: getCompetitorLinesOld,
         mispuncherSeparator: "",
@@ -505,8 +512,8 @@
         name: "OEvent tabular format",
         header: OEVENT_FORMAT_HEADER,
         courseHeaderFunc: getCourseHeaderOEventTabular,
-        tableHeaderNoClass: "",
-        tableHeaderClass: "",
+        tableHeaderNoClass: '<tr><td colspan="24">&nbsp;</td></tr>\n',
+        tableHeaderWithClass: '<tr><td colspan="25">&nbsp;</td></tr>\n',
         controlsLineFunc: getControlsLineOEventTabular,
         competitorDataFunc: getCompetitorLinesOEventTabular,
         mispuncherSeparator: "",
@@ -729,7 +736,7 @@
             {templates: [OLD_FORMAT]});
     });
     
-    QUnit.test("Can parse event data with a single course and single competitor in a different class in two formats", function (assert) {
+    QUnit.test("Can parse event data with a single course and single competitor in a different class in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
@@ -739,9 +746,7 @@
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
                 assert.strictEqual(eventData.classes[0].name, "Class1");
             },
-            // Don't run this on the OEvent format as it doesn't (yet) support
-            // class names different from course names.
-            {useClasses: true, templates: [OLD_FORMAT, NEW_FORMAT]});
+            {useClasses: true});
     });
     
     QUnit.test("Can parse event data with a single course and single competitor ignoring extra controls in all formats", function (assert) {
@@ -782,7 +787,7 @@
             });
     });
     
-    QUnit.test("Can parse event data with a single course and two competitors in the same class in two formats", function (assert) {
+    QUnit.test("Can parse event data with a single course and two competitors in the same class in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner 1", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]],
@@ -800,12 +805,10 @@
 
                 assert.strictEqual(eventData.courses[0].name, "Test course 1");            
             },
-            // Don't run this on the OEvent format as it doesn't (yet) support
-            // class names different from course names.
-            {useClasses: true, templates: [OLD_FORMAT, NEW_FORMAT]});
+            {useClasses: true});
     });
 
-    QUnit.test("Can parse event data with a single course and two competitors in different classes in two formats", function (assert) {
+    QUnit.test("Can parse event data with a single course and two competitors in different classes in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner 1", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]],
@@ -827,12 +830,10 @@
                 assertCompetitor(assert, ageClass1.competitors[0], {name: "Test runner 1", club: "TEST", totalTime: 9 * 60 + 25});
                 assertCompetitor(assert, ageClass2.competitors[0], {name: "Test runner 2", club: "ABCD", totalTime: 9 * 60 + 59});
             },
-            // Don't run this on the OEvent format as it doesn't (yet) support
-            // class names different from course names.
-            {useClasses: true, templates: [OLD_FORMAT, NEW_FORMAT]});
+            {useClasses: true});
     });
     
-    QUnit.test("Can parse event data with two courses and two competitors in different classes in two formats", function (assert) {
+    QUnit.test("Can parse event data with two courses and two competitors in different classes in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner 1", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
@@ -859,12 +860,10 @@
                 assert.strictEqual(ageClass1.competitors[0].name, "Test runner 1");
                 assert.strictEqual(ageClass2.competitors[0].name, "Test runner 2");
             },
-            // Don't run this on the OEvent format as it doesn't (yet) support
-            // class names different from course names.
-            {useClasses: true, templates: [OLD_FORMAT, NEW_FORMAT]});
+            {useClasses: true});
     });
     
-    QUnit.test("Can parse event data with a two competitors in the same class but different course using course names in two formats", function (assert) {
+    QUnit.test("Can parse event data with a two competitors in the same class but different course using course names in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner 1", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
@@ -879,9 +878,7 @@
                 assert.strictEqual(eventData.classes[0].name, "Test course 1");
                 assert.strictEqual(eventData.classes[1].name, "Test course 2");
             },
-            // Don't run this on the OEvent format as it doesn't (yet) support
-            // class names different from course names.
-            {useClasses: true, templates: [OLD_FORMAT, NEW_FORMAT]});
+            {useClasses: true});
     });
     
     QUnit.test("Can parse event data with a single course and single competitor with CRLF line endings in all formats", function (assert) {
