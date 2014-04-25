@@ -200,6 +200,9 @@
     *     null to skip the first column.
     * @param {String} name - The name of the competitor.
     * @param {String} club - The name of the competitor's club.
+    * @param {boolean} useClasses - This parameter is not used.  It is
+    *     specified only for compatibility with the other getCompetitorLines
+    *     functions.
     * @param {String} className - The name of the competitor's class, or "" to
     *     default to course name.
     * @param {Array} cumTimes - Array of cumulative times, as strings.
@@ -207,7 +210,7 @@
     * @param {Array} extras - Optional array of extra splits times.
     * @return {String} Both lines concatenated together.
     */
-    function getCompetitorLinesOld(posn, startNum, name, club, className, time, cumTimes, splits, extras) {
+    function getCompetitorLinesOld(posn, startNum, name, club, useClasses, className, time, cumTimes, splits, extras) {
     
         if (cumTimes.length !== splits.length) {
             throw new Error("Cumulative times and split times must have the same length");
@@ -307,6 +310,8 @@
     * @param {String} startNum - The start number of the competitor.
     * @param {String} name - The name of the competitor.
     * @param {String} club - The name of the competitor's club.
+    * @param {boolean} useClasses - True to include a cell for the competitor's
+    *     class name, false to default class name to course name.
     * @param {String} className - The name of the competitor's class, or "" to
     *     default to course name.
     * @param {Array} cumTimes - Array of cumulative times, as strings.
@@ -314,20 +319,19 @@
     * @param {Array} extras - Optional array of extra splits times.
     * @return {String} Both lines concatenated together.
     */
-    function getCompetitorLinesNew(posn, startNum, name, club, className, time, cumTimes, splits, extras) {
+    function getCompetitorLinesNew(posn, startNum, name, club, useClasses, className, time, cumTimes, splits, extras) {
     
         if (cumTimes.length !== splits.length) {
             throw new Error("Cumulative times and split times must have the same length");
         }
     
-        var line1 = cellNew(posn) + cellNew(startNum) + cellNew(name) + ((className === "") ? "" : cellNew(className)) + cellNew(time);
-        var line2 = cellNew("") + cellNew("") + cellNew(club) + ((className === "") ? "" : cellNew("")) + cellNew("");
+        var line1 = cellNew(posn) + cellNew(startNum) + cellNew(name) + ((useClasses) ? cellNew(className) : "") + cellNew(time);
+        var line2 = cellNew("") + cellNew("") + cellNew(club) + ((useClasses) ? cellNew("") : "") + cellNew("");
         
         for (var index = 0; index < cumTimes.length; index += 1) {
             var splitTime = (cumTimes[index] === "-----") ? "" : splits[index];
             line1 += "  " + cellNew(cumTimes[index]);
             line2 += "  " + cellNew(splitTime);
-
         }
         
         if (extras) {
@@ -434,6 +438,8 @@
     * @param {String} startNum - The start number of the competitor.
     * @param {String} name - The name of the competitor.
     * @param {String} club - The name of the competitor's club.
+    * @param {boolean} useClasses - True to include a table cell containing the
+    *     class, false to not include the class name cell.
     * @param {String} className - The name of the competitor's class, or "" to
     *     default to course name.
     * @param {Array} cumTimes - Array of cumulative times, as strings.
@@ -441,7 +447,7 @@
     * @param {Array} extras - Optional array of extra splits times.
     * @return {String} Both lines concatenated together.
     */
-    function getCompetitorLinesOEventTabular(posn, startNum, name, club, className, time, cumTimes, splits, extras) {
+    function getCompetitorLinesOEventTabular(posn, startNum, name, club, useClasses, className, time, cumTimes, splits, extras) {
     
         if (cumTimes.length !== splits.length) {
             throw new Error("Cumulative times and split times must have the same length");
@@ -456,7 +462,7 @@
                                  
         var secondLine = "<tr>" + emptyCell + emptyCell + getCellOEventTabular(club);
         
-        if (className !== "") {
+        if (useClasses) {
             firstLine += getCellOEventTabular(className);
             secondLine += emptyCell;
         }
@@ -690,7 +696,7 @@
     QUnit.test("Can parse event data with a single course and single competitor in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["1", "165", "Test runner", "TEST", "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
+                ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
@@ -714,7 +720,7 @@
     QUnit.test("Can parse event data with a single course and single competitor with negative split in the old format only", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["1", "165", "Test runner", "TEST", "", "09:25", ["01:47", "04:02", "03:57", "09:25"], ["01:47", "02:15", "", "05:28"]]
+                ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "03:57", "09:25"], ["01:47", "02:15", "", "05:28"]]
             ]}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
@@ -739,7 +745,7 @@
     QUnit.test("Can parse event data with a single course and single competitor in a different class in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["1", "165", "Test runner", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
+                ["1", "165", "Test runner", "TEST", true, "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
@@ -752,7 +758,7 @@
     QUnit.test("Can parse event data with a single course and single competitor ignoring extra controls in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["1", "165", "Test runner", "TEST", "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"],
+                ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"],
                     [{cumTime: "03:31", controlNum: "151"}, {cumTime: "08:44", controlNum: "133"}]]
             ]}],
             function (eventData, formatName) {
@@ -778,7 +784,7 @@
     QUnit.test("Can parse event data with a single course and single competitor ignoring extra control with invalid cumulative time in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["1", "165", "Test runner", "TEST", "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"],
+                ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"],
                     [{cumTime: "0.00", controlNum: "133"}]]
             ]}],
             function (eventData, formatName) {
@@ -790,8 +796,8 @@
     QUnit.test("Can parse event data with a single course and two competitors in the same class in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["1", "165", "Test runner 1", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]],
-                ["2", "184", "Test runner 2", "ABCD", "Class1", "09:59", ["01:52", "04:05", "08:40", "09:59"], ["01:52", "02:13", "04:35", "01:19"]]
+                ["1", "165", "Test runner 1", "TEST", true, "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]],
+                ["2", "184", "Test runner 2", "ABCD", true, "Class1", "09:59", ["01:52", "04:05", "08:40", "09:59"], ["01:52", "02:13", "04:35", "01:19"]]
             ]}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
@@ -811,8 +817,8 @@
     QUnit.test("Can parse event data with a single course and two competitors in different classes in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["1", "165", "Test runner 1", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]],
-                ["2", "184", "Test runner 2", "ABCD", "Class2", "09:59", ["01:52", "04:05", "08:40", "09:59"], ["01:52", "02:13", "04:35", "01:19"]]
+                ["1", "165", "Test runner 1", "TEST", true, "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]],
+                ["2", "184", "Test runner 2", "ABCD", true, "Class2", "09:59", ["01:52", "04:05", "08:40", "09:59"], ["01:52", "02:13", "04:35", "01:19"]]
             ]}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
@@ -836,10 +842,10 @@
     QUnit.test("Can parse event data with two courses and two competitors in different classes in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["1", "165", "Test runner 1", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
+                ["1", "165", "Test runner 1", "TEST", true, "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]},
             {headerDetails: ["Test course 2", "2.4", "30"], controlsLines: [["132", "143", "139"]], competitors: [
-                ["1", "184", "Test runner 2", "ABCD", "Class2", "09:59", ["01:52", "04:05", "08:40", "09:59"], ["01:52", "02:13", "04:35", "01:19"]]
+                ["1", "184", "Test runner 2", "ABCD", true, "Class2", "09:59", ["01:52", "04:05", "08:40", "09:59"], ["01:52", "02:13", "04:35", "01:19"]]
             ]}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 2, "Two classes should have been read - " + formatName);
@@ -866,10 +872,10 @@
     QUnit.test("Can parse event data with a two competitors in the same class but different course using course names in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["1", "165", "Test runner 1", "TEST", "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
+                ["1", "165", "Test runner 1", "TEST", true, "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]},
             {headerDetails: ["Test course 2", "2.7", "35"], controlsLines: [["141", "150", "145"]], competitors: [
-                ["2", "184", "Test runner 2", "ABCD", "Class1", "09:59", ["01:52", "04:05", "08:40", "09:59"], ["01:52", "02:13", "04:35", "01:19"]]
+                ["2", "184", "Test runner 2", "ABCD", true, "Class1", "09:59", ["01:52", "04:05", "08:40", "09:59"], ["01:52", "02:13", "04:35", "01:19"]]
             ]}],
             function (eventData, formatName) {
                 // As the class is shared across courses, it cannot be used, so
@@ -884,7 +890,7 @@
     QUnit.test("Can parse event data with a single course and single competitor with CRLF line endings in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["1", "165", "Test runner", "TEST", "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
+                ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
@@ -898,7 +904,7 @@
     QUnit.test("Can parse event data with a single course and single competitor with CR line endings in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["1", "165", "Test runner", "TEST", "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
+                ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
@@ -912,7 +918,7 @@
     QUnit.test("Can parse event data with a single course and single mispunching competitor in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["", "165", "Test runner", "TEST", "", "09:25", ["01:47", "04:02", "-----", "09:25"], ["01:47", "02:15", "-----", "01:12"]]
+                ["", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "-----", "09:25"], ["01:47", "02:15", "-----", "01:12"]]
             ]}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
@@ -929,7 +935,7 @@
     QUnit.test("Can parse event data with a single course and single mispunching competitor with missing cumulative split for the finish in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["", "165", "Test runner", "TEST", "", "mp", ["01:47", "04:02", "-----"], ["01:47", "02:15", "-----"]]
+                ["", "165", "Test runner", "TEST", false, "", "mp", ["01:47", "04:02", "-----"], ["01:47", "02:15", "-----"]]
             ]}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
@@ -946,7 +952,7 @@
     QUnit.test("Can parse event data with a single course and single non-competitive competitor in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["", "165", "Test runner", "TEST", "", "n/c", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
+                ["", "165", "Test runner", "TEST", false, "", "n/c", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
@@ -960,11 +966,11 @@
             });
     });
     
-    QUnit.test("Can parse event data with a single course and single competitor with 2 lines' worth of controls in the old format", function (assert) {
+    QUnit.test("Can parse event data with a single course and single competitor with 2 lines' worth of controls in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"], ["140", "154"]], competitors: [
-                ["1", "165", "Test runner", "TEST", "", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]],
-                ["", "", "", "", "", "", ["09:25", "11:09", "12:12"], ["01:12", "01:44", "01:03"]]
+                ["1", "165", "Test runner", "TEST", false, "", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]],
+                ["", "", "", "", false, "", "", ["09:25", "11:09", "12:12"], ["01:12", "01:44", "01:03"]]
             ]}],
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
@@ -984,11 +990,36 @@
             });
     });
     
+    QUnit.test("Can parse event data with a single course and single competitor with separate class name and 2 lines' worth of controls in the all formats", function (assert) {
+        runHtmlFormatParseTest(
+            [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"], ["140", "154"]], competitors: [
+                ["1", "165", "Test runner", "TEST", true, "Class1", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]],
+                ["", "", "", "", true, "", "", ["09:25", "11:09", "12:12"], ["01:12", "01:44", "01:03"]]
+            ]}],
+            function (eventData, formatName) {
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
+
+                var ageClass = eventData.classes[0];
+                assertAgeClass(assert, ageClass, {name: "Class1", numControls: 5, course: eventData.courses[0], competitorCount: 1});
+                
+                assertCompetitor(assert, ageClass.competitors[0], {name: "Test runner", club: "TEST", totalTime: 12 * 60 + 12,
+                                                                   originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25, 11 * 60 + 9, 12 * 60 + 12],
+                                                                   originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, 4 * 60 + 11, 1 * 60 + 12, 1 * 60 + 44, 1 * 60 + 3],
+                                                                   isNonCompetitive: false, completed: true});
+                
+                var course = eventData.courses[0];
+                assertCourse(assert, course, {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "152", "141", "140", "154"], classCount: 1});
+                assert.deepEqual(course.classes[0], ageClass);
+            },
+            {useClasses: true});
+    });
+    
     QUnit.test("Cannot parse event data in each format where the competitor has the wrong number of cumulative times", function (assert) {
         runFailingHtmlFormatParseTest(
             assert,
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"], ["140", "154"]], competitors: [
-                ["1", "165", "Test runner", "TEST", "", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]]
+                ["1", "165", "Test runner", "TEST", false, "", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]]
             ]}],
             false);
     });
@@ -997,7 +1028,7 @@
         runFailingHtmlFormatParseTest(
             assert,
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
-                ["", "", "", "", "", "", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
+                ["", "", "", "", false, "", "", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
             false);
     });
@@ -1024,7 +1055,7 @@
         var html = OLD_FORMAT.header +
                    getCourseHeaderLineOld("Test course 1", "2.7", "35") +
                    getControlsLineOld(["138", "152", "141"], 0, true) +
-                   getCompetitorLinesOld("1", null, "Test runner 1", "TEST", "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) +
+                   getCompetitorLinesOld("1", null, "Test runner 1", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) +
                    OLD_FORMAT.footer;
         var eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
@@ -1042,7 +1073,7 @@
         var html = "<html><head></head><body>\n<pre>\n\n\n" +
                    getCourseHeaderLineOld("Test course 1", "2.7", "35") + "\n" +
                    getControlsLineOld(["138", "152", "141"], 0, true) + "\n\n\n\n\n\n" +
-                   getCompetitorLinesOld("1", "165", "Test runner", "TEST", "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) + "\n\n\n" +
+                   getCompetitorLinesOld("1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) + "\n\n\n" +
                    "</pre></body></html>\n\n\n\n";
         var eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
@@ -1056,7 +1087,7 @@
                    getCourseHeaderNew("Test course 1", "2.7", "35") + "\n" +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
                    getControlsLineNew(["138", "152", "141"], 0, true) + "\n\n\n\n\n\n" +
-                   getCompetitorLinesNew("1", "165", "Test runner", "TEST", "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) + "\n\n\n" +
+                   getCompetitorLinesNew("1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) + "\n\n\n" +
                    NEW_FORMAT_COURSE_TABLE_FOOTER + NEW_FORMAT_DATA_FOOTER;
         var eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
@@ -1070,7 +1101,7 @@
         var html = "<html><head></head><body>\n<pre>\n" +
                    getCourseHeaderLineOld("Test course 1", "2.7", "35") +
                    getControlsLineOld(["138", "152", "141"], 0, true) +
-                   getCompetitorLinesOld("1", "165", "Test runner", "TEST0123", "", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]);
+                   getCompetitorLinesOld("1", "165", "Test runner", "TEST0123", false, "", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]);
                    
         var clubIndex = html.indexOf("TEST0123");
         var lastNewlineIndex = html.lastIndexOf("\n", clubIndex);
@@ -1083,7 +1114,7 @@
                    getCourseHeaderNew("Test course 1", "2.7", "35") +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
                    getControlsLineNew(["138", "152", "141"], 0, true) +
-                   getCompetitorLinesNew("1", "165", "Test runner", "TEST0123", "", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]);
+                   getCompetitorLinesNew("1", "165", "Test runner", "TEST0123", false, "", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]);
                    
         var clubIndex = html.indexOf("TEST0123");
         var lastNewlineIndex = html.lastIndexOf("\n", clubIndex);
@@ -1096,9 +1127,9 @@
                    getCourseHeaderNew("Test course 1", "2.7", "35") +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
                    getControlsLineNew(["138", "152", "141"], 0, true) +
-                   getCompetitorLinesNew("1", "165", "Test runner 1", "TEST", "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) +
+                   getCompetitorLinesNew("1", "165", "Test runner 1", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) +
                    NEW_FORMAT_MID_TABLE_SEPARATOR + 
-                   getCompetitorLinesNew("", "182", "Test runner 2", "ABCD", "", "mp", ["01:47", "04:02", "-----"], ["01:47", "02:15", "-----"]) +
+                   getCompetitorLinesNew("", "182", "Test runner 2", "ABCD", false, "", "mp", ["01:47", "04:02", "-----"], ["01:47", "02:15", "-----"]) +
                    NEW_FORMAT_COURSE_TABLE_FOOTER + NEW_FORMAT_DATA_FOOTER;
         var eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
@@ -1116,9 +1147,9 @@
                    getCourseHeaderNew("Test course 1", "2.7", "35") +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
                    getControlsLineNew(["138", "152", "141"], 0, true) +
-                   getCompetitorLinesNew("1", "165", "Test runner 1", "TEST", "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) +
+                   getCompetitorLinesNew("1", "165", "Test runner 1", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) +
                    NEW_FORMAT_MID_TABLE_SEPARATOR.replace(/&nbsp/g, "&nbsp;") + 
-                   getCompetitorLinesNew("", "165", "Test runner 2", "ABCD", "", "mp", ["01:47", "04:02", "-----"], ["01:47", "02:15", "-----"]) +
+                   getCompetitorLinesNew("", "165", "Test runner 2", "ABCD", false, "", "mp", ["01:47", "04:02", "-----"], ["01:47", "02:15", "-----"]) +
                    NEW_FORMAT_COURSE_TABLE_FOOTER + NEW_FORMAT_DATA_FOOTER;
         var eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
