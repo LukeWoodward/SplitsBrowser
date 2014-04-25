@@ -704,6 +704,31 @@
             });
     });
     
+    QUnit.test("Can parse event data with a single course and single competitor with negative split in the old format only", function (assert) {
+        runHtmlFormatParseTest(
+            [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
+                ["1", "165", "Test runner", "TEST", "", "09:25", ["01:47", "04:02", "03:57", "09:25"], ["01:47", "02:15", "", "05:28"]]
+            ]}],
+            function (eventData, formatName) {
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
+
+                var ageClass = eventData.classes[0];
+                assertAgeClass(assert, ageClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
+                
+                var competitor = ageClass.competitors[0];
+                assertCompetitor(assert, competitor, {name: "Test runner", club: "TEST", totalTime: 9 * 60 + 25,
+                                                      originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 3 * 60 + 57, 9 * 60 + 25],
+                                                      originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, -5, 5 * 60 + 28],
+                                                      isNonCompetitive: false, completed: true});
+                
+                var course = eventData.courses[0];
+                assertCourse(assert, course, {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "152", "141"], classCount: 1});
+                assert.deepEqual(course.classes[0], ageClass);
+            },
+            {templates: [OLD_FORMAT]});
+    });
+    
     QUnit.test("Can parse event data with a single course and single competitor in a different class in two formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [

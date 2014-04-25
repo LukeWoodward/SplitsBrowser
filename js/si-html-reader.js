@@ -496,11 +496,6 @@
 
         removeExtraControls(cumulativeTimes, splitTimes);
         
-        var nonZeroCumTimeCount = cumulativeTimes.filter(isNotNull).length;
-        if (nonZeroCumTimeCount !== splitTimes.length) {
-            throwInvalidData("Cumulative and split times do not have the same length: " + nonZeroCumTimeCount + " cumulative times, " + splitTimes.length + " split times");
-        }
-        
         var className = null;
         if (name !== null && name !== "") {
             var lastCloseFontPos = -1;
