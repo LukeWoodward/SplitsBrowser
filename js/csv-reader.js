@@ -102,6 +102,10 @@
     function parseEventData (eventData) {
 
         eventData = normaliseLineEndings(eventData);
+        
+        // Remove trailing commas.
+        eventData = eventData.replace(/,+\n/g, "\n").replace(/,+$/, "");
+
         var classSections = eventData.split(/\n\n/).map($.trim).filter(isTrue);
        
         var classes = classSections.map(parseAgeClass);
