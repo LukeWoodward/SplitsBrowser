@@ -24,6 +24,7 @@
     var isTrue = SplitsBrowser.isTrue;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
@@ -99,7 +100,9 @@
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */
     function parseEventData (eventData) {
-        var classSections = eventData.split(/\r?\n\r?\n/).map($.trim).filter(isTrue);
+
+        eventData = normaliseLineEndings(eventData);
+        var classSections = eventData.split(/\n\n/).map($.trim).filter(isTrue);
        
         var classes = classSections.map(parseAgeClass);
         

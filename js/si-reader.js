@@ -24,6 +24,7 @@
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
@@ -56,7 +57,7 @@
     * @param {String} data - The SI data to read in.
     */
     var Reader = function (data) {
-        this.data = data;
+        this.data = normaliseLineEndings(data);
         
         // Map that associates classes to all of the competitors running on
         // that age class.
@@ -480,7 +481,7 @@
     */
     Reader.prototype.parseEventData = function () {
         
-        this.lines = this.data.split(/\r?\n/);
+        this.lines = this.data.split(/\n/);
         
         var delimiter = this.identifyDelimiter();
         

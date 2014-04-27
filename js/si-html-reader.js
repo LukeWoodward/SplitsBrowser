@@ -25,6 +25,7 @@
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
@@ -1231,16 +1232,6 @@
         var eventData = this.createOverallEventObject();
         return eventData;
     };
-    
-    /**
-    * Normalise line-endings within the source data so that lines are ended
-    * with LF characters.
-    * @param {String} data - The text to normalise.
-    * @return {String} The text with normalised line-endings.
-    */
-    function normaliseLineEndings(data) {
-        return data.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-    }
     
     var RECOGNIZER_CLASSES = [OldHtmlFormatRecognizer, NewHtmlFormatRecognizer, OEventTabularHtmlFormatRecognizer];
     

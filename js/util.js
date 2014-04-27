@@ -134,4 +134,15 @@
         return courseLength;
     };
     
+    /**
+    * Normalise line endings so that all lines end with LF, instead of
+    * CRLF or CR.
+    * @param {String} stringValue - The string value to normalise line endings
+    *     within
+    * @return {String} String value with the line-endings normalised.
+    */
+    SplitsBrowser.normaliseLineEndings = function (stringValue) {
+        return stringValue.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    };
+    
 })();

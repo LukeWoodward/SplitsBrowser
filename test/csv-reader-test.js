@@ -120,6 +120,19 @@
         assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
     });
 
+    QUnit.test("Can parse a single class with a single valid competitor when file has CR line-endings", function (assert) {
+        var csvData = "Example, 4\rJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23";
+        var actualEvent = parseEventData(csvData);
+        var expectedClass = new AgeClass("Example", 4, [
+            fromSplitTimes(1, "John Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23])
+        ]);
+        
+        var expectedCourse = new Course("Example", [expectedClass], null, null, null);
+        expectedClass.setCourse(expectedCourse);
+        
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+    });
+
     QUnit.test("Can parse a single class with a single valid competitor and an empty class", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n\r\nEmpty, 6\r\n";
         var actualEvent = parseEventData(csvData);

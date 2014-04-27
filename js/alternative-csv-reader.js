@@ -24,6 +24,7 @@
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var parseCourseLength = SplitsBrowser.parseCourseLength;    
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
@@ -138,8 +139,7 @@
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */    
     function parseEventDataWithFormat(eventData, format) {
-        // Normalise line endings to LF.
-        eventData = eventData.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+        eventData = normaliseLineEndings(eventData);
         
         var lines = eventData.split(/\n/);
         

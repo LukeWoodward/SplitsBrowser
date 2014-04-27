@@ -315,6 +315,20 @@
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
     });
     
+    QUnit.test("Can parse a string that contains a single competitor's data with LF line-endings", function (assert) {
+        var eventDataStr = HEADER_46 + generateRow(getCompetitor1(), getControls1(), ROW_TEMPLATE_46);
+        eventDataStr = eventDataStr.replace(/\r\n/g, "\n");
+        var eventData = parseEventData(eventDataStr);
+        assert.strictEqual(eventData.courses.length, 1, "There should be one course");
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor's data with CR line-endings", function (assert) {
+        var eventDataStr = HEADER_46 + generateRow(getCompetitor1(), getControls1(), ROW_TEMPLATE_46);
+        eventDataStr = eventDataStr.replace(/\r\n/g, "\r");
+        var eventData = parseEventData(eventDataStr);
+        assert.strictEqual(eventData.courses.length, 1, "There should be one course");
+    });
+    
     QUnit.test("Can parse a string that contains a single competitor's data in column-44 variation", function (assert) {
         var competitor1 = getCompetitor1();
         competitor1.name = competitor1.forename + " " + competitor1.surname;
