@@ -159,11 +159,16 @@
         assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
     });
 
-    QUnit.test("Cannot parse a single class with a single competitor with zero split", function (assert) {
+    QUnit.test("Can parse a single class with a single competitor with zero split", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,00:00,03:31,02:01,00:23";
-        SplitsBrowserTest.assertInvalidData(assert, function () {
-            parseEventData(csvData);
-        });
+        var actualEvent = parseEventData(csvData);
+        var expectedClass = new AgeClass("Example", 4, [
+            fromSplitTimes(1, "John Smith", "ABC", 10 * 3600 + 34 * 60, [177, 0, 211, 121, 23])
+        ]);
+        
+        var expectedCourse = new Course("Example", [expectedClass], null, null, null);
+        expectedClass.setCourse(expectedCourse);
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
     });
 
     QUnit.test("Can parse a single class with a single valid competitor and trailing end-of-line", function (assert) {

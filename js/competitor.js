@@ -526,7 +526,11 @@
                 throwInvalidData("Cannot determine time loss of competitor when there is a NaN value in the fastest splits");
             }
             
-            if (this.splitTimes.some(isNaNStrict)) {
+            if (fastestSplitTimes.some(function (split) { return split === 0; })) {
+                // Someone registered a zero split on this course.  In this
+                // situation the time losses don't really make sense.
+                this.timeLosses = this.splitTimes.map(function () { return NaN; });
+            } else if (this.splitTimes.some(isNaNStrict)) {
                 // Competitor has some dubious times.  Unfortunately this
                 // means we cannot sensibly calculate the time losses.
                 this.timeLosses = this.splitTimes.map(function () { return NaN; });
