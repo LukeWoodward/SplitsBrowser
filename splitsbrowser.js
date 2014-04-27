@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
+var SplitsBrowser = { Version: "3.2.3", Model: {}, Input: {}, Controls: {} };
 
 
 (function () {
@@ -230,6 +230,17 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
         }
         
         return courseLength;
+    };
+    
+    /**
+    * Normalise line endings so that all lines end with LF, instead of
+    * CRLF or CR.
+    * @param {String} stringValue - The string value to normalise line endings
+    *     within
+    * @return {String} String value with the line-endings normalised.
+    */
+    SplitsBrowser.normaliseLineEndings = function (stringValue) {
+        return stringValue.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
     };
     
 })();
@@ -809,7 +820,11 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
                 throwInvalidData("Cannot determine time loss of competitor when there is a NaN value in the fastest splits");
             }
             
-            if (this.splitTimes.some(isNaNStrict)) {
+            if (fastestSplitTimes.some(function (split) { return split === 0; })) {
+                // Someone registered a zero split on this course.  In this
+                // situation the time losses don't really make sense.
+                this.timeLosses = this.splitTimes.map(function () { return NaN; });
+            } else if (this.splitTimes.some(isNaNStrict)) {
                 // Competitor has some dubious times.  Unfortunately this
                 // means we cannot sensibly calculate the time losses.
                 this.timeLosses = this.splitTimes.map(function () { return NaN; });
@@ -2467,6 +2482,7 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     var isTrue = SplitsBrowser.isTrue;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
@@ -2497,9 +2513,6 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
             }
             
             var splitTimes = parts.map(parseTime);
-            if (splitTimes.indexOf(0) >= 0) {
-                throwInvalidData("Zero split times are not permitted - found one or more zero splits for competitor '" + forename + " " + surname + "'");
-            }
             return Competitor.fromSplitTimes(index + 1, forename + " " + surname, club, startTime, splitTimes);
         } else {
             throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor in class with " + controlCount + " controls, got " + (parts.length) + " instead.");
@@ -2542,7 +2555,13 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */
     function parseEventData (eventData) {
-        var classSections = eventData.split(/\r?\n\r?\n/).map($.trim).filter(isTrue);
+
+        eventData = normaliseLineEndings(eventData);
+        
+        // Remove trailing commas.
+        eventData = eventData.replace(/,+\n/g, "\n").replace(/,+$/, "");
+
+        var classSections = eventData.split(/\n\n/).map($.trim).filter(isTrue);
        
         var classes = classSections.map(parseAgeClass);
         
@@ -2573,6 +2592,7 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
@@ -2605,7 +2625,7 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     * @param {String} data - The SI data to read in.
     */
     var Reader = function (data) {
-        this.data = data;
+        this.data = normaliseLineEndings(data);
         
         // Map that associates classes to all of the competitors running on
         // that age class.
@@ -2662,15 +2682,28 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
         
         var firstLine = this.lines[1].split(delimiter);
         
+        // Ignore trailing blanks.
         var endPos = firstLine.length - 1;
         while (endPos > 0 && $.trim(firstLine[endPos]) === "") {
             endPos -= 1;
         }
         
-        // The last empty item should be the time.
-        var controlCodeColumn = endPos - 1;
-        var digitsOnly = /^\d+$/;
-        while (controlCodeColumn >= 2 && digitsOnly.test(firstLine[controlCodeColumn - 2])) { 
+        // Now, find the last column with a control code in.  This should be
+        // one of the last two columns.  (Normally, it will be the second last,
+        // but if there is no last split recorded, it may be the last.)
+        var controlCodeRegexp = /^[A-Za-z0-9]+$/;
+        
+        var controlCodeColumn;
+        if (controlCodeRegexp.test(firstLine[endPos - 1])) {
+            controlCodeColumn = endPos - 1;
+        } else if (controlCodeRegexp.test(firstLine[endPos])) {
+            // No split for the last control.
+            controlCodeColumn = endPos;
+        } else {
+            throwWrongFileFormat("Could not find control number in last two columns of first data line");
+        }
+        
+        while (controlCodeColumn >= 2 && controlCodeRegexp.test(firstLine[controlCodeColumn - 2])) { 
             // There's another control code before this one.
             controlCodeColumn -= 2;
         }
@@ -2679,11 +2712,10 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
         
         var supportedControl1Indexes = [44, 46];
         
-        var throwException = (delimiter === ",") ? throwWrongFileFormat : throwInvalidData;
         if (this.control1Index === null) {
-            throwException("Unable to find index of control 1 in SI CSV data");
+            throwWrongFileFormat("Unable to find index of control 1 in SI CSV data");
         } else if (supportedControl1Indexes.indexOf(this.control1Index) < 0) {
-            throwException("Unsupported index of control 1: " + this.control1Index);
+            throwWrongFileFormat("Unsupported index of control 1: " + this.control1Index);
         }
     };
     
@@ -3017,7 +3049,7 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     */
     Reader.prototype.parseEventData = function () {
         
-        this.lines = this.data.split(/\r?\n/);
+        this.lines = this.data.split(/\n/);
         
         var delimiter = this.identifyDelimiter();
         
@@ -3059,6 +3091,7 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
@@ -3345,7 +3378,13 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     * @constructor
     */
     var OldHtmlFormatRecognizer = function () {
-        // Intentionally empty.
+        // There exists variations of the format depending on what the second 
+        // <font> ... </font> element on each row contains.  It can be blank,
+        // contain a number (start number, perhaps?) or something else.
+        // If blank or containing a number, the competitor's name is in column
+        // 2 and there are four preceding columns.  Otherwise the competitor's
+        // name is in column 1 and there are three preceding columns.
+        this.precedingColumnCount = null;
     };
     
     /**
@@ -3486,7 +3525,7 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     * @return {Array} Array of times.
     */
     OldHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (line) {
-        for (var i = 0; i < 4; i += 1) {
+        for (var i = 0; i < this.precedingColumnCount; i += 1) {
             var closeFontPos = line.indexOf("</font>");
             line = line.substring(closeFontPos + "</font>".length);
         }
@@ -3505,41 +3544,42 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     OldHtmlFormatRecognizer.prototype.parseCompetitor = function (firstLine, secondLine) {
         var firstLineBits = getFontBits(firstLine);
         var secondLineBits = getFontBits(secondLine);
+        
+        if (this.precedingColumnCount === null) {
+            // If column 1 is blank or a number, we have four preceding
+            // columns.  Otherwise we have three.
+            var column1 = $.trim(firstLineBits[1]); 
+            this.precedingColumnCount = (column1.match(/^\d*$/)) ? 4 : 3;
+        }
 
         var competitive = hasNumber(firstLineBits[0]);
-        var name = $.trim(firstLineBits[2]);
-        var totalTime = $.trim(firstLineBits[3]);
-        var club = $.trim(secondLineBits[2]);
+        var name = $.trim(firstLineBits[this.precedingColumnCount - 2]);
+        var totalTime = $.trim(firstLineBits[this.precedingColumnCount - 1]);
+        var club = $.trim(secondLineBits[this.precedingColumnCount - 2]);
         
         var cumulativeTimes = this.readCompetitorSplitDataLine(firstLine);
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
         cumulativeTimes = cumulativeTimes.map(parseTime);
-        
-        var nonZeroCumTimeCount = cumulativeTimes.filter(isNotNull).length;
-        if (nonZeroCumTimeCount !== splitTimes.length) {
-            throwInvalidData("Cumulative and split times do not have the same length: " + nonZeroCumTimeCount + " cumulative times, " + splitTimes.length + " split times");
-        }
+
+        removeExtraControls(cumulativeTimes, splitTimes);
         
         var className = null;
         if (name !== null && name !== "") {
             var lastCloseFontPos = -1;
-            for (var i = 0; i < 4; i += 1) {
+            for (var i = 0; i < this.precedingColumnCount; i += 1) {
                 lastCloseFontPos = firstLine.indexOf("</font>", lastCloseFontPos + 1);
             }
             
-            var firstLineUpToFourth = firstLine.substring(0, lastCloseFontPos + "</font>".length);
-            var firstLineMinusFonts = firstLineUpToFourth.replace(/<font[^>]*>(.*?)<\/font>/g, "");
+            var firstLineUpToLastPreceding = firstLine.substring(0, lastCloseFontPos + "</font>".length);
+            var firstLineMinusFonts = firstLineUpToLastPreceding.replace(/<font[^>]*>(.*?)<\/font>/g, "");
             var lineParts = splitByWhitespace(firstLineMinusFonts);
             if (lineParts.length > 0) {
                 className = lineParts[0];
             }
         }
         
-        removeExtraControls(cumulativeTimes, splitTimes);
-        
         return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
     };
-    
     
     /**
     * Constructs a recognizer for formatting the 'newer' format of SI HTML
@@ -3659,7 +3699,7 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     * If so, it means the parser has finished processing the previous course
     * (if any), and can start a new course.
     *
-    * This recognizer treats a line that contains a table-data cell with I
+    * This recognizer treats a line that contains a table-data cell with ID
     * "header" as the first line of a course.
     *
     * @param {String} line - The line to check.
@@ -3767,17 +3807,247 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
         cumulativeTimes = cumulativeTimes.map(parseTime);
         
+        removeExtraControls(cumulativeTimes, splitTimes);
+        
         var nonZeroCumTimeCount = cumulativeTimes.filter(isNotNull).length;
         
         if (nonZeroCumTimeCount !== splitTimes.length) {
             throwInvalidData("Cumulative and split times do not have the same length: " + nonZeroCumTimeCount + " cumulative times, " + splitTimes.length + " split times");
         }
         
-        removeExtraControls(cumulativeTimes, splitTimes);
-        
         return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
     };
     
+    /**
+    * Constructs a recognizer for formatting an HTML format supposedly from
+    * 'OEvent'.  The file contains exactly two tables, one of which contains
+    *
+    * Data in this format is contained within a single HTML table, with another
+    * table before it containing various (ignored) header information.
+    * @constructor
+    */
+    var OEventTabularHtmlFormatRecognizer = function () {
+        this.usesClasses = false;
+    };
+
+    /**
+    * Returns whether this recognizer is likely to recognize the given HTML
+    * text and possibly be able to parse it.  If this method returns true, the
+    * parser will use this recognizer to attempt to parse the HTML.  If it
+    * returns false, the parser will not use this recognizer.  Other methods on
+    * this object can therefore assume that this method has returned true.
+    *
+    * As this recognizer is for recognizing HTML formatted in precisely two
+    * tables, it returns whether the number of HTML &lt;table&gt; tags is
+    * two.  If fewer than two tables are found, or more than two, this method
+    * returns false.
+    *
+    * @param {String} text - The entire input text read in.
+    * @return {boolean} True if the text contains precisely two HTML table
+    *     tags.
+    */ 
+    OEventTabularHtmlFormatRecognizer.prototype.isTextOfThisFormat = function (text) {
+        var table1Pos = text.indexOf("<table");
+        if (table1Pos >= 0) {
+            var table2Pos = text.indexOf("<table", table1Pos + 1);
+            if (table2Pos >= 0) {
+                var table3Pos = text.indexOf("<table", table2Pos + 1);
+                if (table3Pos < 0) {
+                    // Format characterised by precisely two tables.
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    };
+    
+    /**
+    * Performs some pre-processing on the text before it is read in.
+    *
+    * This recognizer performs a fair amount of pre-processing, to remove
+    * parts of the file we don't care about, and to reshape what there is left
+    * so that it is in a more suitable form to be parsed.
+    * 
+    * @param {String} text - The HTML text to preprocess.
+    * @return {String} The preprocessed text.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.preprocess = function (text) {
+        // Remove the first table.
+        var tableEndPos = text.indexOf("</table>");
+        if (tableEndPos === -1) {
+            throwInvalidData("Could not find any closing </table> tags");
+        }
+        
+        if (text.indexOf('<td colspan="25">') >= 0) {
+            // The table has 25 columns with classes and 24 without.
+            this.usesClasses = true;
+        }
+
+        text = text.substring(tableEndPos + "</table>".length);
+        
+        // Remove all rows that contain only a single non-breaking space.
+        text = text.replace(/<tr[^>]*><td colspan=[^>]*>&nbsp;<\/td><\/tr>/g, "");
+        
+        // Finally, remove the trailing </body> and </html> elements.
+        text = text.replace("</body>", "").replace("</html>", "");
+        
+        return $.trim(text);
+    };
+    
+    /**
+    * Returns whether the HTML parser can ignore the given line altogether.
+    *
+    * The parser will call this method with every line read in, apart from
+    * the second line of each pair of competitor data rows.  These are always
+    * assumed to be in pairs.
+    *
+    * This recognizer ignores blank lines. It also ignores any that contain
+    * opening or closing HTML table tags or horizontal-rule tags.
+    *
+    * @param {String} line - The line to check.
+    * @return {boolean} True if the line should be ignored, false if not.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.canIgnoreThisLine = function (line) {
+        return (line === "" || line.indexOf("<table") > -1 || line.indexOf("</table>") > -1 || line.indexOf("<hr>") > -1);
+    };
+    
+    /**
+    * Returns whether the given line is the first line of a course.
+    *
+    * If so, it means the parser has finished processing the previous course
+    * (if any), and can start a new course.
+    *
+    * This recognizer treats a line that contains a table-row cell with class
+    * "clubName" as the first line of a course.
+    *
+    * @param {String} line - The line to check.
+    * @return {boolean} True if this is the first line of a course, false
+    *     otherwise.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.isCourseHeaderLine = function (line) {
+        return line.indexOf('<tr class="clubName"') > -1;
+    };
+    
+    /**
+    * Parse a course header line and return the course name, distance and
+    * climb.
+    *
+    * This method can assume that the line given is a course header line.
+    *
+    * @param {String} line - The line to parse course details from.
+    * @return {Object} Object containing the parsed course details.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.parseCourseHeaderLine = function (line) {
+        var dataBits = getNonEmptyTableDataBits(line);
+        if (dataBits.length === 0) {
+            throwInvalidData("No parts found in course header line");
+        }
+            
+        var part = dataBits[0];
+        
+        var name, distance, climb;
+        var match = /^(.*?)\s+\((\d+)m,\s*(\d+)m\)$/.exec(part);
+        if (match === null) {
+            // Assume just course name.
+            name = part;
+            distance = null;
+            climb = null;
+        } else {
+            name = match[1];
+            distance = parseInt(match[2], 10) / 1000;
+            climb = parseInt(match[3], 10);
+        }
+                    
+        return {name: $.trim(name), distance: distance, climb: climb };
+    };
+
+    /**
+    * Parse control codes from the given line and return a list of them.
+    *
+    * This method can assume that the previous line was the course header or a
+    * previous control line.  It should also return null for the finish, which
+    * should have no code.  The finish is assumed to he the last.
+    *
+    * @param {String} line - The line to parse control codes from.
+    * @return {Array} Array of control codes.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.parseControlsLine = function (line) {
+        var bits = getNonEmptyTableDataBits(line);
+        return bits.map(function (bit) {
+            var dashPos = bit.indexOf("-");
+            return (dashPos === -1) ? null : bit.substring(dashPos + 1);
+        });
+    };
+    
+    /**
+    * Read either cumulative or split times from the given line of competitor
+    * data.
+    * (This method is not used by the parser, only elsewhere in the recognizer.)
+    * @param {Array} bits - Array of all contents of table elements.
+    * @return {Array} Array of times.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (bits) {
+        
+        var startPos = (this.usesClasses) ? 5 : 4;
+        
+        // Discard the empty bits at the end.
+        var endPos = bits.length;
+        while (endPos > 0 && bits[endPos - 1] === "") {
+            endPos -= 1;
+        }
+        
+        // Alternate cells contain ranks, which we're not interested in.
+        var timeBits = [];
+        for (var index = startPos; index < endPos; index += 2) {
+            var bit = bits[index];
+            if (isNonEmpty(bit)) {
+                timeBits.push(bit);
+            }
+        }
+        
+        return timeBits;
+    };
+    
+    /**
+    * Parse two lines of competitor data into a CompetitorParseRecord object
+    * containing the data.
+    * @param {String} firstLine - The first line of competitor data.
+    * @param {String} secondLine - The second line of competitor data.
+    * @return {CompetitorParseRecord} The parsed competitor.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.parseCompetitor = function (firstLine, secondLine) {
+        var firstLineBits = getTableDataBits(firstLine);
+        var secondLineBits = getTableDataBits(secondLine);
+        
+        var competitive = hasNumber(firstLineBits[0]);
+        var name = firstLineBits[2];
+        var totalTime = firstLineBits[(this.usesClasses) ? 4 : 3];
+        var className = (this.usesClasses && name !== "") ? firstLineBits[3] : null;
+        var club = secondLineBits[2];
+        
+        // If there is any cumulative time with a blank corresponding split
+        // time, use a placeholder value for the split time.  Typically this
+        // happens when a competitor has punched one control but not the
+        // previous.
+        for (var index = ((this.usesClasses) ? 5 : 4); index < firstLineBits.length && index < secondLineBits.length; index += 2) {
+            if (firstLineBits[index] !== "" && secondLineBits[index] === "") {
+                secondLineBits[index] = "----";
+            }
+        }
+        
+        var cumulativeTimes = this.readCompetitorSplitDataLine(firstLineBits);
+        var splitTimes = this.readCompetitorSplitDataLine(secondLineBits);
+        cumulativeTimes = cumulativeTimes.map(parseTime);
+        
+        removeExtraControls(cumulativeTimes, splitTimes);
+        
+        if (cumulativeTimes.length !== splitTimes.length) {
+            throwInvalidData("Cumulative and split times do not have the same length: " + cumulativeTimes.length + " cumulative times, " + splitTimes.length + " split times");
+        }
+        
+        return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
+    };
 
     /**
     * Represents the partial result of parsing a course.
@@ -4029,17 +4299,7 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
         return eventData;
     };
     
-    /**
-    * Normalise line-endings within the source data so that lines are ended
-    * with LF characters.
-    * @param {String} data - The text to normalise.
-    * @return {String} The text with normalised line-endings.
-    */
-    function normaliseLineEndings(data) {
-        return data.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-    }
-    
-    var RECOGNIZER_CLASSES = [OldHtmlFormatRecognizer, NewHtmlFormatRecognizer];
+    var RECOGNIZER_CLASSES = [OldHtmlFormatRecognizer, NewHtmlFormatRecognizer, OEventTabularHtmlFormatRecognizer];
     
     SplitsBrowser.Input.SIHtml = {};
     
@@ -4077,6 +4337,7 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var parseCourseLength = SplitsBrowser.parseCourseLength;    
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
@@ -4088,7 +4349,7 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     // separate competitor, and includes course details such as name, controls
     // and possibly distance and climb.
     
-    // There are presently two variartions supported:
+    // There are presently two variations supported:
     // * one, distinguished by having three columns per control: control code,
     //   cumulative time and 'points'.  (Points is never used.)  Generally,
     //   these formats are quite sparse; many columns (e.g. club, placing,
@@ -4110,7 +4371,8 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
         climb: null,
         controlCount: null,
         placing: null,
-        finishTime: null
+        finishTime: null,
+        allowMultipleCompetitorNames: true
     };
     
     var NAMELESS_CONTROLS_OFFSET = 60;
@@ -4127,8 +4389,12 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
         climb: NAMELESS_CONTROLS_OFFSET - 5,
         controlCount: NAMELESS_CONTROLS_OFFSET - 4,
         placing: NAMELESS_CONTROLS_OFFSET - 3,
-        finishTime: NAMELESS_CONTROLS_OFFSET - 1
+        finishTime: NAMELESS_CONTROLS_OFFSET - 1,
+        allowMultipleCompetitorNames: false
     };
+    
+    // Supported delimiters.
+    var DELIMITERS = [",", ";"];
     
     /**
     * Trim trailing empty-string entries from the given array.
@@ -4145,14 +4411,48 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
     }
     
     /**
+    * Some lines of some formats can have multiple delimited competitors, which
+    * will move the following columns out of their normal place.  Identify any
+    * such situations and merge them together.
+    * @param {Array} row - The row of data read from the file.
+    * @param {Object} format - The format of this CSV file.
+    */
+    function adjustLinePartsForMultipleCompetitors(row, format) {
+        if (format.allowMultipleCompetitorNames) {
+            while (row.length > format.name + 1 && row[format.name + 1].match(/^\s\S/)) {
+                row[format.name] += "," + row[format.name + 1];
+                row.splice(format.name + 1, 1);
+            }
+        }
+    }
+    
+    /**
+    * Determine the delimiter used to delimit data.
+    * @param {String} firstDataLine - The first data line of the file.
+    * @return {String|null} The delimiter separating the data, or null if no
+    *    suitable delimiter was found.
+    */
+    function determineDelimiter(firstDataLine, format) {
+        for (var index = 0; index < DELIMITERS.length; index += 1) {
+            var delimiter = DELIMITERS[index];
+            var lineParts = firstDataLine.split(delimiter);
+            trimTrailingEmptyCells(lineParts);
+            if (lineParts.length > format.controlsOffset) {
+                return delimiter;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
     * Parse alternative CSV data for an entire event.
     * @param {String} eventData - String containing the entire event data.
     * @param {Object} format - The format object that describes the input format.
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */    
     function parseEventDataWithFormat(eventData, format) {
-        // Normalise line endings to LF.
-        eventData = eventData.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+        eventData = normaliseLineEndings(eventData);
         
         var lines = eventData.split(/\n/);
         
@@ -4160,33 +4460,33 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
             throwWrongFileFormat("Data appears not to be in an alternative CSV format - too few lines");
         }
         
-        var firstDataLine = lines[1];
-        var lineParts = firstDataLine.split(",");
-        trimTrailingEmptyCells(lineParts);
-        
-        if (lineParts.length < format.controlsOffset) {
-            throwWrongFileFormat("Data appears not to be in an alternative CSV format - first data line has fewer than " + format.controlsOffset + " parts");
+        var delimiter = determineDelimiter(lines[1], format);
+        if (delimiter === null) {
+            throwWrongFileFormat("Data appears not to be in an alternative CSV format - first data line has fewer than " + format.controlsOffset + " parts when separated by any recognised delimiter");
         }
         
+        var lineParts = lines[1].split(delimiter);
         trimTrailingEmptyCells(lineParts);
+        adjustLinePartsForMultipleCompetitors(lineParts, format);
         
-        // Check that all control codes except perhaps the finish are numeric.
-        var digitsOnly = /^\d+$/;
+        // Check that all control codes except perhaps the finish are alphanumeric.
+        var controlCodeRegexp = /^[A-Za-z0-9]+$/;
         
         // Don't check that the control code for the finish is numeric if the
         // finish time is specified elsewhere.
         var terminationOffset = (format.finishTime === null) ? format.step : 0;
         
         for (var index = format.controlsOffset; index + terminationOffset < lineParts.length; index += format.step) {
-            if (!digitsOnly.test(lineParts[index])) {
+            if (!controlCodeRegexp.test(lineParts[index])) {
                 throwWrongFileFormat("Data appears not to be in an alternative CSV format - data in cell " + index + " of the first row ('" + lineParts[index] + "') is not an number");
             }
         }
         
         var classes = d3.map();
         for (var rowIndex = 1; rowIndex < lines.length; rowIndex += 1) {
-            var row = lines[rowIndex].split(",");
+            var row = lines[rowIndex].split(delimiter);
             trimTrailingEmptyCells(row);
+            adjustLinePartsForMultipleCompetitors(row, format);
             
             if (row.length < format.controlsOffset) {
                 // Probably a blank line.  Ignore it.
@@ -4211,7 +4511,11 @@ var SplitsBrowser = { Version: "3.2.2", Model: {}, Input: {}, Controls: {} };
                 if (isNaNStrict(controlCount)) {
                     throwInvalidData("Control count '" + controlCount + "' is not a valid number");
                 }
+                
                 expectedRowLength = format.controlsOffset + row[format.controlCount] * format.step;
+                if (row.length < expectedRowLength) {
+                    throwInvalidData("Data in row " + rowIndex + " should have at least " + expectedRowLength + " parts but only has " + row.length);
+                }
             }
             
             var courseLength = (format.length === null) ? null : parseCourseLength(row[format.length]) || null;

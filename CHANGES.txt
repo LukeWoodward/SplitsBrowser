@@ -6,3 +6,4 @@ SplitsBrowser changelog:
 3.2.0:  Tolerate input data files with cumulative times not always strictly ascending.
 3.2.1:  Support SI CSV files with delimiters other than semicolons.
 3.2.2:  Support alternative CSV file formats.
+3.2.3:  Fix issues with format variations (GitHub issue #10).
