@@ -1513,12 +1513,11 @@ var SplitsBrowser = { Version: "3.2.3", Model: {}, Input: {}, Controls: {} };
             yMax = yMin + 1;
         }
         
-        
         var controlIndexAdjust = (chartType.skipStart) ? 1 : 0;
         var dubiousTimesInfo = currentIndexes.map(function (competitorIndex) {
-            return chartType.indexesAroundDubiousTimesFunc(this.allCompetitors[competitorIndex]).map(function (indexPair) {
-                return { start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust };
-            });
+            var indexPairs = chartType.indexesAroundDubiousTimesFunc(this.allCompetitors[competitorIndex]);
+            return indexPairs.filter(function (indexPair) { return indexPair.start >= controlIndexAdjust; })
+                             .map(function (indexPair) { return { start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust }; });
         }, this);
 
         var cumulativeTimesByControl = d3.transpose(selectedCompetitorData);

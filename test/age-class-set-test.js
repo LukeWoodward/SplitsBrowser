@@ -57,6 +57,12 @@
         return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, null, 184, 100]);
     }
     
+    function getCompetitor1WithDubiousSplitForControl1() {
+        var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 0, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        competitor.setRepairedCumulativeTimes([0, NaN, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        return competitor;
+    }
+    
     function getCompetitor1WithDubiousSplitForControl2() {
         var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         competitor.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
@@ -652,6 +658,30 @@
             numControls: 3,
             competitorNames: ["John Smith", "Fred Brown"],
             dubiousTimesInfo: [[{start: 0, end: 2}], []]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+    // If the start is being skipped, then we must ignore dubious times to control 1.
+    QUnit.test("Can return chart data with no dubious time for two competitors where one of them has a dubious split to control 1 and chart type has skip-start", function (assert) {
+        var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [getCompetitor1WithDubiousSplitForControl1(), getCompetitor2()])]);
+        var fastestTime = ageClassSet.getFastestCumTimes();
+
+        var chartData = ageClassSet.getChartData(fastestTime, [0, 1], DUMMY_CHART_TYPE_SKIP);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 81, ys: [0, 0] },
+                { x: 81 + 197, ys: [NaN, 0] },
+                { x: 81 + 197 + 184, ys: [8, 0] },
+                { x: 81 + 197 + 184 + 100, ys: [8, 28] }
+            ],
+            xExtent: [0, 81 + 197 + 184 + 100],
+            yExtent: [0, 34],
+            numControls: 3,
+            competitorNames: ["John Smith", "Fred Brown"],
+            dubiousTimesInfo: [[/* none */], []]
         };
 
         assert.deepEqual(chartData, expectedChartData);
