@@ -31,19 +31,29 @@
     // Must match that used in styles.css.
     var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
     
-    var ClassSelector = SplitsBrowser.Controls.ClassSelector;
-    var ChartTypeSelector = SplitsBrowser.Controls.ChartTypeSelector;
-    var ComparisonSelector = SplitsBrowser.Controls.ComparisonSelector;
-    var OriginalDataSelector = SplitsBrowser.Controls.OriginalDataSelector;
-    var StatisticsSelector = SplitsBrowser.Controls.StatisticsSelector;
-    var CompetitorListBox = SplitsBrowser.Controls.CompetitorListBox;
-    var Chart = SplitsBrowser.Controls.Chart;
-    var ResultsTable = SplitsBrowser.Controls.ResultsTable;
-    var repairEventData = SplitsBrowser.DataRepair.repairEventData;
-    var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
+    var Version = SplitsBrowser.Version;
     var getMessage = SplitsBrowser.getMessage;
     var tryGetMessage = SplitsBrowser.tryGetMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    
+    var Model = SplitsBrowser.Model;
+    var CompetitorSelection = Model.CompetitorSelection;
+    var AgeClassSet = Model.AgeClassSet;
+    var ChartTypes = Model.ChartTypes;
+    
+    var parseEventData = SplitsBrowser.Input.parseEventData;
+    var repairEventData = SplitsBrowser.DataRepair.repairEventData;
+    var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
+    
+    var Controls = SplitsBrowser.Controls;
+    var ClassSelector = Controls.ClassSelector;
+    var ChartTypeSelector = Controls.ChartTypeSelector;
+    var ComparisonSelector = Controls.ComparisonSelector;
+    var OriginalDataSelector = Controls.OriginalDataSelector;
+    var StatisticsSelector = Controls.StatisticsSelector;
+    var CompetitorListBox = Controls.CompetitorListBox;
+    var Chart = Controls.Chart;
+    var ResultsTable = Controls.ResultsTable;
     
     /**
     * Enables or disables a control, by setting or clearing an HTML "disabled"
@@ -52,7 +62,7 @@
     * @param {boolean} isEnabled - Whether the control is enabled.
     */
     function enableControl(control, isEnabled) {
-        control.node().disabled = !isEnabled;
+        control.property("disabled", !isEnabled);
     }
     
     /**
@@ -156,7 +166,7 @@
                                    
         logoSvg.selectAll("*")
                .append("title")
-               .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": SplitsBrowser.Version}));
+               .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": Version}));
     };
 
     /**
@@ -197,9 +207,8 @@
     * Adds the chart-type selector to the top panel.
     */
     Viewer.prototype.addChartTypeSelector = function () {
-        var types = SplitsBrowser.Model.ChartTypes;
-        var chartTypes = [types.SplitsGraph, types.RaceGraph, types.PositionAfterLeg,
-                          types.SplitPosition, types.PercentBehind, types.ResultsTable];
+        var chartTypes = [ChartTypes.SplitsGraph, ChartTypes.RaceGraph, ChartTypes.PositionAfterLeg,
+                          ChartTypes.SplitPosition, ChartTypes.PercentBehind, ChartTypes.ResultsTable];
         
         this.chartTypeSelector = new ChartTypeSelector(this.topPanel.node(), chartTypes);
         
@@ -483,7 +492,7 @@
     Viewer.prototype.selectClasses = function (classIndexes) {
     
         if (this.selection === null) {
-            this.selection = new SplitsBrowser.Model.CompetitorSelection(0);
+            this.selection = new CompetitorSelection(0);
             this.competitorListBox.setSelection(this.selection);
         } else {
             if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
@@ -496,7 +505,7 @@
         
         this.currentIndexes = [];
         this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
-        this.ageClassSet = new SplitsBrowser.Model.AgeClassSet(this.currentClasses);
+        this.ageClassSet = new AgeClassSet(this.currentClasses);
         this.comparisonSelector.setAgeClassSet(this.ageClassSet);
         this.resultsTable.setClass(this.currentClasses[0]);
         this.drawChart();
@@ -594,7 +603,7 @@
         if (status === "success") {
             var eventData;
             try {
-                eventData = SplitsBrowser.Input.parseEventData(data);
+                eventData = parseEventData(data);
             } catch (e) {
                 if (e.name === "InvalidData") {
                     showLoadFailureMessage("LoadFailedInvalidData", {"$$MESSAGE$$": e.message});
