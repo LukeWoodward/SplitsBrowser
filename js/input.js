@@ -27,7 +27,8 @@
         SplitsBrowser.Input.SI.parseEventData,
         SplitsBrowser.Input.SIHtml.parseEventData,
         SplitsBrowser.Input.AlternativeCSV.parseTripleColumnEventData,
-        SplitsBrowser.Input.AlternativeCSV.parseNamelessEventData
+        SplitsBrowser.Input.AlternativeCSV.parseNamelessEventData,
+        SplitsBrowser.Input.IOFXml.parseEventData
     ];
     
     /**

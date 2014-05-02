@@ -45,6 +45,7 @@ module.exports = function(grunt) {
                       'js/si-reader.js',
                       'js/si-html-reader.js',
                       'js/alternative-csv-reader.js',
+                      'js/iof-xml-reader.js',
                       'js/input.js',
                       'js/competitor-listbox.js',
                       'js/class-selector.js',
