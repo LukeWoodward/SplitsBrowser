@@ -589,6 +589,50 @@
     }
     
     /**
+    * Reads in the data in the given string and starts SplitsBrowser.
+    * @param {String} data - String containing the data to read.
+    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    *     containing various options to SplitsBrowser.  It can also be used for
+    *     an HTML element that forms a 'banner' across the top of the page.
+    *     This element can be specified by a CSS selector for the element, or
+    *     the HTML element itself, although this behaviour is deprecated.
+    */
+    SplitsBrowser.readEvent = function (data, options) {
+        var eventData;
+        try {
+            eventData = parseEventData(data);
+        } catch (e) {
+            if (e.name === "InvalidData") {
+                showLoadFailureMessage("LoadFailedInvalidData", {"$$MESSAGE$$": e.message});
+                return;
+            } else {
+                throw e;
+            }
+        }
+        
+        if (eventData === null) {
+            showLoadFailureMessage("LoadFailedUnrecognisedData", {});
+        } else {
+            if (eventData.needsRepair()) {
+                repairEventData(eventData);
+            }
+            
+            if (typeof options === "string") {
+                // Deprecated; support the top-bar specified only as a
+                // string.
+                options = {topBar: options};
+            }
+            
+            eventData.determineTimeLosses();
+            
+            var viewer = new Viewer(options);
+            viewer.buildUi();
+            viewer.setEvent(eventData);
+            viewer.selectClasses([0]);
+        }
+    };
+    
+    /**
     * Handles an asynchronous callback that fetched event data, by parsing the
     * data and starting SplitsBrowser.
     * @param {String} data - The data returned from the AJAX request.
@@ -601,38 +645,7 @@
     */
     function readEventData(data, status, options) {
         if (status === "success") {
-            var eventData;
-            try {
-                eventData = parseEventData(data);
-            } catch (e) {
-                if (e.name === "InvalidData") {
-                    showLoadFailureMessage("LoadFailedInvalidData", {"$$MESSAGE$$": e.message});
-                    return;
-                } else {
-                    throw e;
-                }
-            }
-            
-            if (eventData === null) {
-                showLoadFailureMessage("LoadFailedUnrecognisedData", {});
-            } else {
-                if (eventData.needsRepair()) {
-                    repairEventData(eventData);
-                }
-                
-                if (typeof options === "string") {
-                    // Deprecated; support the top-bar specified only as a
-                    // string.
-                    options = {topBar: options};
-                }
-                
-                eventData.determineTimeLosses();
-                
-                var viewer = new Viewer(options);
-                viewer.buildUi();
-                viewer.setEvent(eventData);
-                viewer.selectClasses([0]);
-            }
+            SplitsBrowser.readEvent(data, options);
         } else {
             showLoadFailureMessage("LoadFailedStatusNotSuccess", {"$$STATUS$$": status});
         }
