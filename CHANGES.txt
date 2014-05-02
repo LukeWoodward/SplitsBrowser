@@ -7,3 +7,4 @@ SplitsBrowser changelog:
 3.2.1:  Support SI CSV files with delimiters other than semicolons.
 3.2.2:  Support alternative CSV file formats.
 3.2.3:  Fix issues with format variations (GitHub issue #10).
+3.2.4:  Support IOF v2.0.3 XML files 
