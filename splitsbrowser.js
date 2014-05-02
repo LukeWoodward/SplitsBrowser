@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.2.4", Model: {}, Input: {}, Controls: {} };
+var SplitsBrowser = { Version: "3.2.5", Model: {}, Input: {}, Controls: {} };
 
 
 (function () {
@@ -7558,19 +7558,29 @@ var SplitsBrowser = { Version: "3.2.4", Model: {}, Input: {}, Controls: {} };
     // Must match that used in styles.css.
     var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
     
-    var ClassSelector = SplitsBrowser.Controls.ClassSelector;
-    var ChartTypeSelector = SplitsBrowser.Controls.ChartTypeSelector;
-    var ComparisonSelector = SplitsBrowser.Controls.ComparisonSelector;
-    var OriginalDataSelector = SplitsBrowser.Controls.OriginalDataSelector;
-    var StatisticsSelector = SplitsBrowser.Controls.StatisticsSelector;
-    var CompetitorListBox = SplitsBrowser.Controls.CompetitorListBox;
-    var Chart = SplitsBrowser.Controls.Chart;
-    var ResultsTable = SplitsBrowser.Controls.ResultsTable;
-    var repairEventData = SplitsBrowser.DataRepair.repairEventData;
-    var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
+    var Version = SplitsBrowser.Version;
     var getMessage = SplitsBrowser.getMessage;
     var tryGetMessage = SplitsBrowser.tryGetMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    
+    var Model = SplitsBrowser.Model;
+    var CompetitorSelection = Model.CompetitorSelection;
+    var AgeClassSet = Model.AgeClassSet;
+    var ChartTypes = Model.ChartTypes;
+    
+    var parseEventData = SplitsBrowser.Input.parseEventData;
+    var repairEventData = SplitsBrowser.DataRepair.repairEventData;
+    var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
+    
+    var Controls = SplitsBrowser.Controls;
+    var ClassSelector = Controls.ClassSelector;
+    var ChartTypeSelector = Controls.ChartTypeSelector;
+    var ComparisonSelector = Controls.ComparisonSelector;
+    var OriginalDataSelector = Controls.OriginalDataSelector;
+    var StatisticsSelector = Controls.StatisticsSelector;
+    var CompetitorListBox = Controls.CompetitorListBox;
+    var Chart = Controls.Chart;
+    var ResultsTable = Controls.ResultsTable;
     
     /**
     * Enables or disables a control, by setting or clearing an HTML "disabled"
@@ -7579,7 +7589,7 @@ var SplitsBrowser = { Version: "3.2.4", Model: {}, Input: {}, Controls: {} };
     * @param {boolean} isEnabled - Whether the control is enabled.
     */
     function enableControl(control, isEnabled) {
-        control.node().disabled = !isEnabled;
+        control.property("disabled", !isEnabled);
     }
     
     /**
@@ -7683,7 +7693,7 @@ var SplitsBrowser = { Version: "3.2.4", Model: {}, Input: {}, Controls: {} };
                                    
         logoSvg.selectAll("*")
                .append("title")
-               .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": SplitsBrowser.Version}));
+               .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": Version}));
     };
 
     /**
@@ -7724,9 +7734,8 @@ var SplitsBrowser = { Version: "3.2.4", Model: {}, Input: {}, Controls: {} };
     * Adds the chart-type selector to the top panel.
     */
     Viewer.prototype.addChartTypeSelector = function () {
-        var types = SplitsBrowser.Model.ChartTypes;
-        var chartTypes = [types.SplitsGraph, types.RaceGraph, types.PositionAfterLeg,
-                          types.SplitPosition, types.PercentBehind, types.ResultsTable];
+        var chartTypes = [ChartTypes.SplitsGraph, ChartTypes.RaceGraph, ChartTypes.PositionAfterLeg,
+                          ChartTypes.SplitPosition, ChartTypes.PercentBehind, ChartTypes.ResultsTable];
         
         this.chartTypeSelector = new ChartTypeSelector(this.topPanel.node(), chartTypes);
         
@@ -8010,7 +8019,7 @@ var SplitsBrowser = { Version: "3.2.4", Model: {}, Input: {}, Controls: {} };
     Viewer.prototype.selectClasses = function (classIndexes) {
     
         if (this.selection === null) {
-            this.selection = new SplitsBrowser.Model.CompetitorSelection(0);
+            this.selection = new CompetitorSelection(0);
             this.competitorListBox.setSelection(this.selection);
         } else {
             if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
@@ -8023,7 +8032,7 @@ var SplitsBrowser = { Version: "3.2.4", Model: {}, Input: {}, Controls: {} };
         
         this.currentIndexes = [];
         this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
-        this.ageClassSet = new SplitsBrowser.Model.AgeClassSet(this.currentClasses);
+        this.ageClassSet = new AgeClassSet(this.currentClasses);
         this.comparisonSelector.setAgeClassSet(this.ageClassSet);
         this.resultsTable.setClass(this.currentClasses[0]);
         this.drawChart();
@@ -8107,6 +8116,50 @@ var SplitsBrowser = { Version: "3.2.4", Model: {}, Input: {}, Controls: {} };
     }
     
     /**
+    * Reads in the data in the given string and starts SplitsBrowser.
+    * @param {String} data - String containing the data to read.
+    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    *     containing various options to SplitsBrowser.  It can also be used for
+    *     an HTML element that forms a 'banner' across the top of the page.
+    *     This element can be specified by a CSS selector for the element, or
+    *     the HTML element itself, although this behaviour is deprecated.
+    */
+    SplitsBrowser.readEvent = function (data, options) {
+        var eventData;
+        try {
+            eventData = parseEventData(data);
+        } catch (e) {
+            if (e.name === "InvalidData") {
+                showLoadFailureMessage("LoadFailedInvalidData", {"$$MESSAGE$$": e.message});
+                return;
+            } else {
+                throw e;
+            }
+        }
+        
+        if (eventData === null) {
+            showLoadFailureMessage("LoadFailedUnrecognisedData", {});
+        } else {
+            if (eventData.needsRepair()) {
+                repairEventData(eventData);
+            }
+            
+            if (typeof options === "string") {
+                // Deprecated; support the top-bar specified only as a
+                // string.
+                options = {topBar: options};
+            }
+            
+            eventData.determineTimeLosses();
+            
+            var viewer = new Viewer(options);
+            viewer.buildUi();
+            viewer.setEvent(eventData);
+            viewer.selectClasses([0]);
+        }
+    };
+    
+    /**
     * Handles an asynchronous callback that fetched event data, by parsing the
     * data and starting SplitsBrowser.
     * @param {String} data - The data returned from the AJAX request.
@@ -8119,38 +8172,7 @@ var SplitsBrowser = { Version: "3.2.4", Model: {}, Input: {}, Controls: {} };
     */
     function readEventData(data, status, options) {
         if (status === "success") {
-            var eventData;
-            try {
-                eventData = SplitsBrowser.Input.parseEventData(data);
-            } catch (e) {
-                if (e.name === "InvalidData") {
-                    showLoadFailureMessage("LoadFailedInvalidData", {"$$MESSAGE$$": e.message});
-                    return;
-                } else {
-                    throw e;
-                }
-            }
-            
-            if (eventData === null) {
-                showLoadFailureMessage("LoadFailedUnrecognisedData", {});
-            } else {
-                if (eventData.needsRepair()) {
-                    repairEventData(eventData);
-                }
-                
-                if (typeof options === "string") {
-                    // Deprecated; support the top-bar specified only as a
-                    // string.
-                    options = {topBar: options};
-                }
-                
-                eventData.determineTimeLosses();
-                
-                var viewer = new Viewer(options);
-                viewer.buildUi();
-                viewer.setEvent(eventData);
-                viewer.selectClasses([0]);
-            }
+            SplitsBrowser.readEvent(data, options);
         } else {
             showLoadFailureMessage("LoadFailedStatusNotSuccess", {"$$STATUS$$": status});
         }
