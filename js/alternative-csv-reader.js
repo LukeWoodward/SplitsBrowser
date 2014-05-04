@@ -196,12 +196,12 @@
             } else {
                 var controlCount = parseInt(row[format.controlCount], 10);
                 if (isNaNStrict(controlCount)) {
-                    throwInvalidData("Control count '" + controlCount + "' is not a valid number");
+                    throwInvalidData("Control count '" + row[format.controlCount] + "' is not a valid number");
                 }
                 
-                expectedRowLength = format.controlsOffset + row[format.controlCount] * format.step;
+                expectedRowLength = format.controlsOffset + controlCount * format.step;
                 if (row.length < expectedRowLength) {
-                    throwInvalidData("Data in row " + rowIndex + " should have at least " + expectedRowLength + " parts but only has " + row.length);
+                    throwInvalidData("Data in row " + rowIndex + " should have at least " + expectedRowLength + " parts (for " + controlCount + " controls) but only has " + row.length);
                 }
             }
             
