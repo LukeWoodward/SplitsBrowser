@@ -159,7 +159,7 @@
         // Check that all control codes except perhaps the finish are alphanumeric.
         var controlCodeRegexp = /^[A-Za-z0-9]+$/;
         
-        // Don't check that the control code for the finish is numeric if the
+        // Don't check that the control code for the finish is alphanumeric if the
         // finish time is specified elsewhere.
         var terminationOffset = (format.finishTime === null) ? format.step : 0;
         
@@ -244,8 +244,6 @@
                 // New course/class.
                 
                 // Determine the list of controls, ignoring the finish.
-                // (Sometimes this is a number, some times it is 'F1'.  Either
-                // way, we don't really care.)
                 var controls = [];
                 for (var controlIndex = format.controlsOffset; controlIndex + terminationOffset < expectedRowLength; controlIndex += format.step) {
                     controls.push(row[controlIndex]);
@@ -261,7 +259,6 @@
             var cls = classes.get(className);
             var ageClass = new AgeClass(className, cls.controls.length, cls.competitors);
             
-            // Nulls indicate no course distance and climb.
             var course = new Course(className, [ageClass], cls.length, cls.climb, cls.controls);
             ageClass.setCourse(course);
             ageClasses.push(ageClass);
