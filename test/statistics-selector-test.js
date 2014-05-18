@@ -126,4 +126,20 @@
         
         expect(0); // Tell QUnit to expect no assertions.
     });
+
+    QUnit.test("Can set selected statistics", function (assert) {
+        reset();
+        var selector = new Selector(d3.select("#qunit-fixture").node());
+        selector.clearAll();
+        
+        selector.registerChangeHandler(testChangeHandler);
+        
+        selector.setVisibleStatistics({TotalTime: false, SplitTime: true, BehindFastest: false, TimeLoss: true});
+        assert.deepEqual(lastVisibleStats, {TotalTime: false, SplitTime: true, BehindFastest: false, TimeLoss: true});
+        assert.strictEqual(1, callCount);
+        var checkboxes = $("#qunit-fixture input");
+        for (var index = 0; index < 4; index += 1) {
+            assert.strictEqual(checkboxes[index].checked, index % 2 === 1);
+        }
+    });
 })();

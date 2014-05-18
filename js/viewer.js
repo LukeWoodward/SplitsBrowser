@@ -593,6 +593,10 @@
         if (parsedQueryString.selected !== null) {
             this.selection.setSelectedIndexes(parsedQueryString.selected);
         }
+        
+        if (parsedQueryString.stats !== null) {
+            this.statisticsSelector.setVisibleStatistics(parsedQueryString.stats);
+        }
     };
     
     /**

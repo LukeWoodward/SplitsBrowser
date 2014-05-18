@@ -122,7 +122,8 @@
 
     /**
     * Return the statistics that are currently enabled.
-    * @returns {Array} Array of booleans corresponding to enabled statistics.
+    * @returns {Object} Object that specified whether each of the statistics is
+    *     is currently visible.
     */
     StatisticsSelector.prototype.getVisibleStatistics = function () {
         var visibleStats = {};
@@ -131,6 +132,18 @@
         });
         
         return visibleStats;
+    };
+    
+    /**
+    * Sets the visible statistics.
+    * @param {Object} visibleStats - The statistics to make visible.
+    */
+    StatisticsSelector.prototype.setVisibleStatistics = function (visibleStats) {
+        this.span.selectAll("input")[0].forEach(function (checkbox, index) {
+            checkbox.checked = visibleStats[STATISTIC_NAMES[index]] || false;
+        });
+        
+        this.onCheckboxChanged();
     };
 
     /**

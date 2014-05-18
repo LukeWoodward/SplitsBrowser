@@ -211,6 +211,36 @@
         }
     }
     
+    var SELECTED_STATISTICS_REGEXP = /(?:^|&|\?)stats=([^&]*)/;
+    
+    /**
+    * Reads the selected statistics from the query string.
+    * @param {String} queryString - The query string to read the selected
+    *     statistics from.
+    * @return {Object|null} - Object containing the statistics read, or null
+    *     if no statistics parameter was found.
+    */
+    function readSelectedStatistics(queryString) {
+        var statsMatch = SELECTED_STATISTICS_REGEXP.exec(queryString);
+        if (statsMatch === null) {
+            return null;
+        } else {
+            var statsNames = statsMatch[1].split(";");
+            var stats = {TotalTime: false, SplitTime: false, BehindFastest: false, TimeLoss: false};
+            for (var index = 0; index < statsNames.length; index += 1) {
+                var name = statsNames[index];
+                if (stats.hasOwnProperty(name)) {
+                    stats[name] = true;
+                } else if (name !== "") {
+                    // Ignore unrecognised non-empty statistic name.
+                    return null;
+                }
+            }
+            
+            return stats;
+        }
+    }
+    
     /**
     * Attempts to parse the given query string.
     * @param {String} queryString - The query string to parse.
@@ -224,7 +254,8 @@
             classes: classIndexes,
             view: readChartType(queryString),
             compareWith: readComparison(queryString, ageClassSet),
-            selected: readSelectedCompetitors(queryString, ageClassSet)
+            selected: readSelectedCompetitors(queryString, ageClassSet),
+            stats: readSelectedStatistics(queryString)
         };
     }
 
