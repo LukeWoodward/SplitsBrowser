@@ -142,7 +142,8 @@
 
     /**
     * Returns whether the 'Any Runner...' option is selected.
-    * @return Whether the 'Any Runner...' option is selected.
+    * @return {boolean} True if the 'Any Runner...' option is selected, false
+    *     if any other option is selected.
     */
     ComparisonSelector.prototype.isAnyRunnerSelected = function () {
         return this.dropDown.selectedIndex === ALL_COMPARISON_OPTIONS.length - 1;
@@ -159,8 +160,6 @@
 
     /**
     * Populates the drop-down list of runners from an age-class set.
-    * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - Age-class set
-    *     containing all of the runners to populate the list from.
     */
     ComparisonSelector.prototype.setRunners = function () {
         var competitors = this.ageClassSet.allCompetitors;
