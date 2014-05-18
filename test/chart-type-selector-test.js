@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - ChartTypeSelector tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -157,4 +157,41 @@
         assert.ok(notifierCalled, "Notifier function should have been called");
         assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The third chart type should still be selected");
     });
+
+    QUnit.test("Setting the chart type to a recognised type sets the type and calls change handler", function(assert) {
+        resetLastChartType();
+        var selector = createSelector();
+        selector.registerChangeHandler(handleChartTypeChanged);
+        
+        var htmlSelectSelection = d3.select("#qunit-fixture select");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
+        var htmlSelect = htmlSelectSelection.node();
+        
+        var chartType = chartTypes[2];
+
+        selector.setChartType(chartType);
+        
+        assert.strictEqual(htmlSelect.selectedIndex, 2);
+        assert.strictEqual(selector.getChartType(), chartType);
+        
+        assert.strictEqual(lastChartTypeName, chartType.name, "The third chart type should have been selected");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
+    });
+
+    QUnit.test("Setting the chart type to an unrecognised type does nothing and does not call change handler", function(assert) {
+        resetLastChartType();
+        var selector = createSelector();
+        selector.registerChangeHandler(handleChartTypeChanged);
+        
+        var htmlSelectSelection = d3.select("#qunit-fixture select");
+        assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
+        var htmlSelect = htmlSelectSelection.node();
+
+        selector.setChartType("This is not a recognised chart type");
+        
+        assert.strictEqual(htmlSelect.selectedIndex, 0);
+        
+        assert.strictEqual(callCount, 0, "No changes should have been recorded");
+    });
+    
 })();

@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser CompetitorSelection - The currently-selected competitors.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -105,6 +105,17 @@
         this.fireChangeHandlers();
     };
 
+    /**
+    * Set the selected competitors to those in the given array.
+    * @param {Array} selectedIndex - Array of indexes of selected competitors.
+    */
+    CompetitorSelection.prototype.setSelectedIndexes = function (selectedIndexes) {
+        if (selectedIndexes.every(function (index) { return 0 <= index && index < this.count; }, this)) {
+            this.currentIndexes = selectedIndexes;
+            this.fireChangeHandlers();
+        }
+    };
+    
     /**
     * Register a handler to be called whenever the list of indexes changes.
     *

@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser ComparisonSelector - Provides a choice of 'reference' competitors.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -214,6 +214,28 @@
             return function (ageClassSet) { return ageClassSet.getCumulativeTimesForCompetitor(outerThis.currentRunnerIndex); };
         } else {
             return ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
+        }
+    };
+    
+    /**
+    * Sets the comparison type.
+    * @param {Number} typeIndex - The index of the comparison type.
+    * @param {Competitor|null} runner - The selected 'Any runner', or null if
+    *     Any Runner has not been selected.
+    */
+    ComparisonSelector.prototype.setComparisonType = function (typeIndex, runner) {
+        if (0 <= typeIndex && typeIndex < ALL_COMPARISON_OPTIONS.length) {
+            if (typeIndex === ALL_COMPARISON_OPTIONS.length - 1) {
+                var runnerIndex = this.ageClassSet.allCompetitors.indexOf(runner);
+                if (runnerIndex >= 0) {
+                    this.dropDown.selectedIndex = typeIndex;
+                    this.runnerDropDown.selectedIndex = runnerIndex;
+                    this.onSelectionChanged();
+                }
+            } else {
+                this.dropDown.selectedIndex = typeIndex;
+                this.onSelectionChanged();
+            }
         }
     };
     

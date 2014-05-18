@@ -44,6 +44,7 @@
     var parseEventData = SplitsBrowser.Input.parseEventData;
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
     var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
+    var parseQueryString = SplitsBrowser.parseQueryString;
     
     var Controls = SplitsBrowser.Controls;
     var ClassSelector = Controls.ClassSelector;
@@ -570,6 +571,37 @@
         enableControl(this.crossingRunnersButton, this.selection.isSingleRunnerSelected());
     };
     
+    /**
+    * Updates the state of the viewer to reflect query-string arguments parsed.
+    * @param {Object} parsedQueryString - Parsed query-string object.
+    */
+    Viewer.prototype.updateFromQueryString = function (parsedQueryString) {
+        if (parsedQueryString.classes === null) {
+            this.classSelector.selectClasses([0]);
+        } else {
+            this.classSelector.selectClasses(parsedQueryString.classes);
+        }
+        
+        if (parsedQueryString.view !== null) {
+            this.chartTypeSelector.setChartType(parsedQueryString.view);
+        }
+        
+        if (parsedQueryString.compareWith !== null) {
+            this.comparisonSelector.setComparisonType(parsedQueryString.compareWith.index, parsedQueryString.compareWith.runner);
+        }
+        
+        if (parsedQueryString.selected !== null) {
+            this.selection.setSelectedIndexes(parsedQueryString.selected);
+        }
+    };
+    
+    /**
+    * Sets the default selected class.
+    */
+    Viewer.prototype.setDefaultSelectedClass = function () {
+        this.classSelector.selectClasses([0]);
+    };
+    
     SplitsBrowser.Viewer = Viewer;
 
     /**
@@ -628,7 +660,14 @@
             var viewer = new Viewer(options);
             viewer.buildUi();
             viewer.setEvent(eventData);
-            viewer.selectClasses([0]);
+            
+            var queryString = document.location.search;
+            if (queryString !== null && queryString.length > 0) {
+                var parsedQueryString = parseQueryString(queryString, eventData);
+                viewer.updateFromQueryString(parsedQueryString);
+            } else {
+                viewer.setDefaultSelectedClass();
+            }
         }
     };
     

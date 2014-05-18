@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser - CompetitorSelection tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -326,4 +326,39 @@
         assert.deepEqual(lastIndexes, [0]);
         assert.strictEqual(callCount, 1);
     });
+    
+    QUnit.test("Can set array of selected competitors to an empty array", function (assert) {
+        reset();
+        var selection = new CompetitorSelection(3);
+        selection.registerChangeHandler(testHandler);        
+        selection.setSelectedIndexes([]);
+        assert.deepEqual(lastIndexes, []);
+        assert.deepEqual(callCount, 1);
+    });
+    
+    QUnit.test("Can set array of selected competitors to an non-empty array", function (assert) {
+        reset();
+        var selection = new CompetitorSelection(3);
+        selection.registerChangeHandler(testHandler);        
+        selection.setSelectedIndexes([0, 2]);
+        assert.deepEqual(lastIndexes, [0, 2]);
+        assert.deepEqual(callCount, 1);
+    });
+    
+    QUnit.test("Cannot set array of selected competitors to an array containing a negative index", function (assert) {
+        reset();
+        var selection = new CompetitorSelection(3);
+        selection.registerChangeHandler(testHandler);        
+        selection.setSelectedIndexes([0, -1]);
+        assert.deepEqual(callCount, 0);
+    });
+    
+    QUnit.test("Cannot set array of selected competitors to an array containing an index too large", function (assert) {
+        reset();
+        var selection = new CompetitorSelection(3);
+        selection.registerChangeHandler(testHandler);        
+        selection.setSelectedIndexes([0, 3]);
+        assert.deepEqual(callCount, 0);
+    });
+    
 })();
