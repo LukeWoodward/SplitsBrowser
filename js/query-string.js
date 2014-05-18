@@ -219,8 +219,9 @@
     */
     function parseQueryString(queryString, eventData) {
         var ageClassSet = readSelectedClasses(queryString, eventData);
+        var classIndexes = (ageClassSet === null) ? null : ageClassSet.ageClasses.map(function (ageClass) { return eventData.classes.indexOf(ageClass); });
         return {
-            ageClassSet: ageClassSet,
+            classes: classIndexes,
             view: readChartType(queryString),
             compareWith: readComparison(queryString, ageClassSet),
             selected: readSelectedCompetitors(queryString, ageClassSet)
