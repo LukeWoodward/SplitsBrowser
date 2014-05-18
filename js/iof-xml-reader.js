@@ -296,39 +296,6 @@
         }
         
         return new Event(classes, courses);
-        
-        // Root element is ResultList
-        // ResultList/@status should be missing or "complete".  Reject anything
-        // else as intermediate.
-        // ResultList/IOFVersion/@version must be "2.0.3".
-        // Each class is under a /ResultList/ClassResult.
-        // 
-        // Under a ClassResult:
-        //      ./ClassShortName  - class name
-        //      ./PersonResult - person results
-        
-        // Under a PersonResult:
-        //      ./Person/PersonName/Family: Surname
-        //      ./Person/PersonName/Given: Forename
-        //      ./Club/ShortName: Club name
-        //      ./Result/StartTime/Clock: start time (optional)
-        //      ./Result/FinishTime/Clock: finish time, or empty if none (optional)
-        //      ./Result/Time: Time taken (optional).
-        //      ./Result/ResultPosition: Placing, if valid, empty if not (optional)
-        //      ./Result/CompetitorStatus/@value: status (OK, MisPunch, DidNotStart, DidNotFinish, NotCompeting)
-        //      ./Result/CourseLength: course length.  Optional according to the DTD.
-        //      ./Result/CourseLength/@unit: course length unit, m, km, ft, default to m.
-        //      ./Result/SplitTime: split time elements.
-        //
-        //     May get just a PersonId instead of a Person.  Without any
-        //     further data, the ID is all we can display.
-        //    
-        // Under a SplitTime:
-        //      ./@sequence: Sequence number of the control (1, 2, 3, .... )
-        //      ./ControlCode or ./Control: Control code
-        //      ./Time: Cumulative time to that control, or '-----' for none.
-        
-        // No apparent course climb.
     }
     
     SplitsBrowser.Input.IOFXml = { parseEventData: parseEventData };
