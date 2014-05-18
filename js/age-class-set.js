@@ -93,6 +93,8 @@
     /**
     * Returns whether this age-class set is empty, i.e. whether it has no
     * competitors at all.
+    * @return {boolean} True if the age-class set is empty, false if it is not
+    *     empty.
     */    
     AgeClassSet.prototype.isEmpty = function () {
         return this.allCompetitors.length === 0;
