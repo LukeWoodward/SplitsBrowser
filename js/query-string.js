@@ -57,7 +57,7 @@
     // SplitsBrowser may also use the query string for other information (e.g.
     // event ID.)
     
-    var CLASS_NAME_REGEXP = /(?:^|&)class=([^&]+)/;
+    var CLASS_NAME_REGEXP = /(?:^|&|\?)class=([^&]+)/;
     
     /**
     * Reads the selected class names from a query string.
@@ -97,7 +97,7 @@
         }
     }
 
-    var VIEW_TYPE_REGEXP = /(?:^|&)view=([^&]+)/;
+    var VIEW_TYPE_REGEXP = /(?:^|&|\?)view=([^&]+)/;
     
     /**
     * Reads the selected chart type from a query string.
@@ -119,7 +119,7 @@
         }
     }
     
-    var COMPARE_WITH_REGEXP = /(?:^|&)compareWith=([^&]+)/;
+    var COMPARE_WITH_REGEXP = /(?:^|&|\?)compareWith=([^&]+)/;
     
     var BUILTIN_COMPARISON_TYPES = ["Winner", "FastestTime", "FastestTimePlus5", "FastestTimePlus25", "FastestTimePlus50", "FastestTimePlus100"];
     
@@ -170,7 +170,7 @@
         }
     }
     
-    var SELECTED_COMPETITORS_REGEXP = /(?:^|&)selected=([^&]+)/;
+    var SELECTED_COMPETITORS_REGEXP = /(?:^|&|\?)selected=([^&]+)/;
     
     /**
     * Reads what to compare against.

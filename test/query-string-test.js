@@ -70,6 +70,12 @@
                          {classes: null, view: null, compareWith: null, selected: null});
     });
     
+    QUnit.test("Parsing a string containing a single class with a question-mark prefix should return only that class", function (assert) {
+        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);    
+        assert.deepEqual(parseQueryString("?class=TestClass1", eventData),
+                         {classes: [0], view: null, compareWith: null, selected: null});
+    });
+    
     QUnit.test("Parsing a string containing a single class should return only that class", function (assert) {
         var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);    
         assert.deepEqual(parseQueryString("class=TestClass1", eventData),
@@ -117,6 +123,11 @@
                          {classes: null, view: ChartTypes.SplitsGraph, compareWith: null, selected: null});
     });
     
+    QUnit.test("Parsing a string containing the splits-graph chart type with a leading question-mark should return the splits-graph chart type", function (assert) {
+        assert.deepEqual(parseQueryString("?view=SplitsGraph"),
+                         {classes: null, view: ChartTypes.SplitsGraph, compareWith: null, selected: null});
+    });
+    
     QUnit.test("Parsing a string containing the race-graph chart type should return the race-graph chart type", function (assert) {
         assert.deepEqual(parseQueryString("view=RaceGraph"),
                          {classes: null, view: ChartTypes.RaceGraph, compareWith: null, selected: null});
@@ -150,6 +161,12 @@
     QUnit.test("Parsing a string containing the winner comparison type returns that comparison type if a class is selected and the class has a winner", function (assert) {
         var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "John Smith"}]}]}]);
         assert.deepEqual(parseQueryString("class=TestClass1&compareWith=Winner", eventData),
+                         {classes: [0], view: null, compareWith: {index: 0, runner: null}, selected: null});
+    });
+    
+    QUnit.test("Parsing a string with a leading question mark containing the winner comparison type returns that comparison type if a class is selected and the class has a winner", function (assert) {
+        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "John Smith"}]}]}]);
+        assert.deepEqual(parseQueryString("?compareWith=Winner&class=TestClass1", eventData),
                          {classes: [0], view: null, compareWith: {index: 0, runner: null}, selected: null});
     });
     
@@ -228,6 +245,12 @@
     QUnit.test("Parsing a string with a single competitor selected returns that competitor as selected", function (assert) {
         var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "John Smith"}]}]}]);
         assert.deepEqual(parseQueryString("class=TestClass1&selected=John%20Smith", eventData),
+                         {classes: [0], view: null, compareWith: null, selected: [0]});
+    });
+    
+    QUnit.test("Parsing a string with a leading question-mark and a single competitor selected returns that competitor as selected", function (assert) {
+        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "John Smith"}]}]}]);
+        assert.deepEqual(parseQueryString("?selected=John%20Smith&class=TestClass1", eventData),
                          {classes: [0], view: null, compareWith: null, selected: [0]});
     });
     
