@@ -316,7 +316,7 @@
         if (statsMatch === null) {
             return null;
         } else {
-            var statsNames = statsMatch[1].split(";");
+            var statsNames = decodeURIComponent(statsMatch[1]).split(";");
             var stats = {};
             ALL_STATS_NAMES.forEach(function (statsName) { stats[statsName] = false; });
             

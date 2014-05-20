@@ -390,4 +390,23 @@
         assert.strictEqual(queryString, "class=Test%20Class%201&stats=");
     });
     
+    QUnit.test("Can obtain the same data by formatting and parsing a query string using a built-in comparison", function (assert) {
+        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "John Smith"}, {name: "Fred Jones"}, {name: "Alan Berry"}]}, {name: "Test Class 2"}]}]);
+        var data = {classes: [0, 1], view: ChartTypes.SplitPosition, compareWith: {index: 1, runner: null}, selected: [1, 2], stats: {TotalTime: true, SplitTime: false, BehindFastest: false, TimeLoss: true}};
+        var ageClassSet = new AgeClassSet(eventData.classes.slice(0));
+        var queryString = formatQueryString("", eventData, ageClassSet, data);
+        var parsedData = parseQueryString(queryString, eventData);
+        assert.deepEqual(parsedData, data, "Should have formatted a query string and read the same data back.  Query string: " + queryString);
+    });
+
+    QUnit.test("Can obtain the same data by formatting and parsing a query string comparing against a runner", function (assert) {
+        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "John Smith"}, {name: "Fred Jones"}, {name: "Alan Berry"}]}]}]);
+        var competitor = eventData.classes[0].competitors[1];
+        var data = {classes: [0], view: ChartTypes.SplitPosition, compareWith: {index: 6, runner: competitor}, selected: [1, 2], stats: {TotalTime: true, SplitTime: false, BehindFastest: false, TimeLoss: true}};
+        var ageClassSet = new AgeClassSet(eventData.classes.slice(0));
+        var queryString = formatQueryString("", eventData, ageClassSet, data);
+        var parsedData = parseQueryString(queryString, eventData);
+        assert.deepEqual(parsedData, data, "Should have formatted a query string and read the same data back.  Query string: " + queryString);
+    });
+        
 }());
