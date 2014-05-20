@@ -346,6 +346,35 @@
         return queryString + "&stats=" + encodeURIComponent(statsNames.join(";"));
     }
     
+    var SHOW_ORIGINAL_REGEXP = /(?:^|&|\?)showOriginal=([^&]*)/;
+    
+    /**
+    * Reads the show-original-data flag from the given query-string.
+    *
+    * To show original data, the parameter showOriginal=1 must be part of the
+    * URL.  If this parameter does not exist or has some other value, original
+    * data will not be shown.  If the selected classes do not contain any
+    * dubious splits, this option will have no effect.
+    * @param {String} queryString - The query-string to read.
+    * @return {boolean} True to show original data, false not to.
+    */
+    function readShowOriginal(queryString) {
+        var showOriginalMatch = SHOW_ORIGINAL_REGEXP.exec(queryString);
+        return (showOriginalMatch !== null && showOriginalMatch[1] === "1");
+    }
+    
+    /**
+    * Formats the show-original-data flag into the given query-string.
+    * @param {String} queryString - The original query-string.
+    * @param {boolean} showOriginal - True to show original data, false not to.
+    * @return {String} queryString - The query-string with the show-original
+    *     data flag formatted in.
+    */
+    function formatShowOriginal(queryString, showOriginal) {
+        queryString = removeAll(queryString, SHOW_ORIGINAL_REGEXP);
+        return (showOriginal) ? queryString + "&showOriginal=1" : queryString;
+    }
+    
     /**
     * Attempts to parse the given query string.
     * @param {String} queryString - The query string to parse.
@@ -360,7 +389,8 @@
             view: readChartType(queryString),
             compareWith: readComparison(queryString, ageClassSet),
             selected: readSelectedCompetitors(queryString, ageClassSet),
-            stats: readSelectedStatistics(queryString)
+            stats: readSelectedStatistics(queryString),
+            showOriginal: readShowOriginal(queryString)
         };
     }
 
@@ -385,6 +415,7 @@
         queryString = formatComparison(queryString, data.compareWith.index, data.compareWith.runner);
         queryString = formatSelectedCompetitors(queryString, ageClassSet, data.selected);
         queryString = formatSelectedStatistics(queryString, data.stats);
+        queryString = formatShowOriginal(queryString, data.showOriginal);
         queryString = queryString.replace(/^(\??)&/, "$1");
         return queryString;
     }
