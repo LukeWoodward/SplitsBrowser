@@ -57,6 +57,17 @@
     // SplitsBrowser may also use the query string for other information (e.g.
     // event ID.)
     
+    /**
+    * Remove all matches of the given regular expression from the given string.
+    * The regexp is not assumed to contain the "g" flag.
+    * @param {String} queryString - The query-string to process.
+    * @param {RegExp} regexp - The regular expression to use to remove text.
+    * @return {String} The given query-string with all regexp matches removed.
+    */
+    function removeAll(queryString, regexp) {
+        return queryString.replace(new RegExp(regexp.source, "g"), "");
+    }
+    
     var CLASS_NAME_REGEXP = /(?:^|&|\?)class=([^&]+)/;
     
     /**
@@ -96,6 +107,20 @@
             }
         }
     }
+    
+    /**
+    * Formats the selected classes into the given query-string, removing any
+    * previous matches.
+    * @param {String} queryString - The original query-string.
+    * @param {Event} eventData - The event data.
+    * @param {Array} classIndexes - Array of indexes of selected classes.
+    * @return {String} The query-string with the selected classes formatted in.
+    */
+    function formatSelectedClasses(queryString, eventData, classIndexes) {
+        queryString = removeAll(queryString, CLASS_NAME_REGEXP);
+        var classNames = classIndexes.map(function (index) { return eventData.classes[index].name; });
+        return queryString + "&class=" + encodeURIComponent(classNames.join(";"));
+    }
 
     var VIEW_TYPE_REGEXP = /(?:^|&|\?)view=([^&]+)/;
     
@@ -117,6 +142,24 @@
                 return null;
             }
         }
+    }
+    
+    /**
+    * Formats the given chart type into the query-string
+    * @param {String} queryString - The original query-string.
+    * @param {Object} chartType - The chart type
+    * @return {String} The query-string with the chart-type formatted in.
+    */
+    function formatChartType(queryString, chartType) {
+        queryString = removeAll(queryString, VIEW_TYPE_REGEXP);
+        for (var chartTypeName in ChartTypes) {
+            if (ChartTypes.hasOwnProperty(chartTypeName) && ChartTypes[chartTypeName] === chartType) {
+                return queryString + "&view=" + encodeURIComponent(chartTypeName);
+            }
+        }
+        
+        // Unrecognised chart type?
+        return queryString;
     }
     
     var COMPARE_WITH_REGEXP = /(?:^|&|\?)compareWith=([^&]+)/;
@@ -170,6 +213,28 @@
         }
     }
     
+    /**
+    * Formats the given comparison into the given query-string.
+    * @param {String} queryString - The original query-string.
+    * @param {Number} index - Index of the comparison type.
+    * @param {String} The formatted query-string.
+    */
+    function formatComparison(queryString, index, runner) {
+        queryString = removeAll(queryString, COMPARE_WITH_REGEXP);
+        var comparison = null;
+        if (typeof index === typeof 0 && 0 <= index && index < BUILTIN_COMPARISON_TYPES.length) {
+            comparison = BUILTIN_COMPARISON_TYPES[index];
+        } else if (runner !== null) {
+            comparison = runner.name;
+        }
+        
+        if (comparison === null) {
+            return queryString;
+        } else {
+            return queryString + "&compareWith=" + encodeURIComponent(comparison);
+        }
+    }
+    
     var SELECTED_COMPETITORS_REGEXP = /(?:^|&|\?)selected=([^&]+)/;
     
     /**
@@ -211,7 +276,33 @@
         }
     }
     
+    /**
+    * Formats the given selected competitors into the given query-string.
+    * @param {String} queryString - The original query-string.
+    * @param {AgeClassSet} ageClassSet - The current age-class set.
+    * @param {Array} selected - Array of indexes within the age-class set's
+    *     list of competitors of those that are selected.
+    * @return {String} Query-string with the selected competitors formatted
+    *     into it.
+    */
+    function formatSelectedCompetitors(queryString, ageClassSet, selected) {
+        queryString = removeAll(queryString, SELECTED_COMPETITORS_REGEXP);
+        var selectedCompetitors = selected.map(function (index) { return ageClassSet.allCompetitors[index]; });
+        if (selectedCompetitors.length === 0) {
+            return queryString;
+        } else if (selectedCompetitors.length === ageClassSet.allCompetitors.length) {
+            // Assume all selected competitors are different, so all must be
+            // selected.
+            return queryString + "&selected=*";
+        } else {
+            var competitorNames = selectedCompetitors.map(function (comp) { return comp.name; }).join(";");
+            return queryString + "&selected=" + encodeURIComponent(competitorNames);
+        }
+    }
+    
     var SELECTED_STATISTICS_REGEXP = /(?:^|&|\?)stats=([^&]*)/;
+    
+    var ALL_STATS_NAMES = ["TotalTime", "SplitTime", "BehindFastest", "TimeLoss"];
     
     /**
     * Reads the selected statistics from the query string.
@@ -226,7 +317,9 @@
             return null;
         } else {
             var statsNames = statsMatch[1].split(";");
-            var stats = {TotalTime: false, SplitTime: false, BehindFastest: false, TimeLoss: false};
+            var stats = {};
+            ALL_STATS_NAMES.forEach(function (statsName) { stats[statsName] = false; });
+            
             for (var index = 0; index < statsNames.length; index += 1) {
                 var name = statsNames[index];
                 if (stats.hasOwnProperty(name)) {
@@ -239,6 +332,18 @@
             
             return stats;
         }
+    }
+    
+    /**
+    * Formats the selected statistics into the given query string.
+    * @param {String} queryString - The original query-string.
+    * @param {Object} stats - The statistics to format.
+    * @return Query-string with the selected statistics formatted in.
+    */
+    function formatSelectedStatistics(queryString, stats) {
+        queryString = removeAll(queryString, SELECTED_STATISTICS_REGEXP);
+        var statsNames = ALL_STATS_NAMES.filter(function (name) { return stats.hasOwnProperty(name) && stats[name]; });
+        return queryString + "&stats=" + encodeURIComponent(statsNames.join(";"));
     }
     
     /**
@@ -259,5 +364,31 @@
         };
     }
 
-    SplitsBrowser.parseQueryString = parseQueryString;    
+    /**
+    * Formats a query string with the given data.
+    *
+    * The original query-string is provided, and any argument values within it
+    * are replaced with those given, and new ones added.  Unrecognised query-
+    * string parameters are preserved; they could be used server-side by
+    * whatever web application is hosting SplitsBrowser.
+    *
+    * @param {String} queryString - The original query-string.
+    * @param {Event} eventData - The event data.
+    * @param {AgeClassSet} ageClassSet - The current age-class set.
+    * @param {Object} data - Object containing the data to format into the
+    *     query-string.
+    * @return The formatted query-string.
+    */
+    function formatQueryString(queryString, eventData, ageClassSet, data) {
+        queryString = formatSelectedClasses(queryString, eventData, data.classes);
+        queryString = formatChartType(queryString, data.view);
+        queryString = formatComparison(queryString, data.compareWith.index, data.compareWith.runner);
+        queryString = formatSelectedCompetitors(queryString, ageClassSet, data.selected);
+        queryString = formatSelectedStatistics(queryString, data.stats);
+        queryString = queryString.replace(/^(\??)&/, "$1");
+        return queryString;
+    }
+    
+    SplitsBrowser.parseQueryString = parseQueryString;
+    SplitsBrowser.formatQueryString = formatQueryString;
 })();
