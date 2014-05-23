@@ -801,6 +801,8 @@
     * its default tick formatter.
     * 
     * @param {object} chartData - The chart data to read start times from.
+    * @return {Function|null} Tick formatter, or null to use the default d3
+    *     tick formatter. 
     */
     Chart.prototype.determineYAxisTickFormatter = function (chartData) {
         if (this.isRaceGraph) {
@@ -884,10 +886,10 @@
     Chart.prototype.drawChartLines = function (chartData) {
         var outerThis = this;
         var lineFunctionGenerator = function (selCompIdx) {
-            if (chartData.dataColumns.every(function (col) { return col.ys[selCompIdx] === null; })) {
-                // This competitor's entire row is null, so there's no data to
-                // draw.  WebKit will report an error ('Error parsing d=""') if
-                // no points on the line are defined, as will happen in this
+            if (!chartData.dataColumns.some(function (col) { return isNotNullNorNaN(col.ys[selCompIdx]); })) {
+                // This competitor's entire row is null/NaN, so there's no data
+                // to draw.  WebKit will report an error ('Error parsing d=""')
+                // if no points on the line are defined, as will happen in this
                 // case, so we substitute a single zero point instead.
                 return d3.svg.line()
                              .x(0)
