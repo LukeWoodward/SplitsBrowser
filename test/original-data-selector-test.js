@@ -25,16 +25,16 @@
     
     var OriginalDataSelector = SplitsBrowser.Controls.OriginalDataSelector;
     
-    var originalDataCalls;
+    var originalDataCalled;
     
-    var repairedDataCalls;
+    var repairedDataCalled;
     
     function showOriginalData() {
-        originalDataCalls = true;
+        originalDataCalled = true;
     }
     
     function showRepairedData() {
-        repairedDataCalls = true;
+        repairedDataCalled = true;
     }
     
     QUnit.test("Can create selector with checkbox", function (assert) {
@@ -48,22 +48,22 @@
         var parent = d3.select("#qunit-fixture");
         new OriginalDataSelector(parent, showOriginalData, showRepairedData);
         
-        originalDataCalls = false;
-        repairedDataCalls = false;
+        originalDataCalled = false;
+        repairedDataCalled = false;
         $(parent.select("input[type=checkbox]").node()).attr("checked", false).trigger("click");
-        assert.strictEqual(originalDataCalls, true, "showOriginalData should have been called");
-        assert.strictEqual(repairedDataCalls, false, "showRepairedData should not have been called");
+        assert.strictEqual(originalDataCalled, true, "showOriginalData should have been called");
+        assert.strictEqual(repairedDataCalled, false, "showRepairedData should not have been called");
     });
     
     QUnit.test("Calls show-repaired-data function when checked and clicked", function (assert) {
         var parent = d3.select("#qunit-fixture");
         new OriginalDataSelector(parent, showOriginalData, showRepairedData);
         
-        originalDataCalls = false;
-        repairedDataCalls = false;
+        originalDataCalled = false;
+        repairedDataCalled = false;
         $(parent.select("input[type=checkbox]").node()).attr("checked", true).trigger("click");
-        assert.strictEqual(originalDataCalls, false, "showOriginalData should not have been called");
-        assert.strictEqual(repairedDataCalls, true, "showRepairedData should have been called");
+        assert.strictEqual(originalDataCalled, false, "showOriginalData should not have been called");
+        assert.strictEqual(repairedDataCalled, true, "showRepairedData should have been called");
     });
     
     QUnit.test("Does nothing when disabled and clicked", function (assert) {
@@ -71,11 +71,11 @@
         var selector = new OriginalDataSelector(parent, showOriginalData, showRepairedData);
         selector.setEnabled(false);
         
-        originalDataCalls = false;
-        repairedDataCalls = false;
+        originalDataCalled = false;
+        repairedDataCalled = false;
         $(parent.select("input[type=checkbox]").node()).attr("checked", true).trigger("click");
-        assert.strictEqual(originalDataCalls, false, "showOriginalData should not have been called");
-        assert.strictEqual(repairedDataCalls, false, "showRepairedData should not have been called");
+        assert.strictEqual(originalDataCalled, false, "showOriginalData should not have been called");
+        assert.strictEqual(repairedDataCalled, false, "showRepairedData should not have been called");
     });
     
     QUnit.test("When selector is hidden, checkbox is no longer visible", function (assert) {
@@ -93,4 +93,15 @@
         assert.ok($("input[type=checkbox]", parent.node()).is(":visible"), "Selector should be visible when set to be visible");
     });
     
+    QUnit.test("Calling selectOriginalData selects original data", function (assert) {
+        var parent = d3.select("#qunit-fixture");
+        var selector = new OriginalDataSelector(parent, showOriginalData, showRepairedData);
+        selector.setVisible(true);
+        originalDataCalled = false;
+        repairedDataCalled = false;
+        selector.selectOriginalData();
+        assert.ok(originalDataCalled, "showOriginalData should have been called");
+        assert.ok(!repairedDataCalled, "showRepairedData should not have been called");
+        assert.ok($("input[type=checkbox]", parent.node()).is(":checked"), "Selector should be checked");
+    });    
 })();

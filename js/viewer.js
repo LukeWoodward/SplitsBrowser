@@ -597,6 +597,10 @@
         if (parsedQueryString.stats !== null) {
             this.statisticsSelector.setVisibleStatistics(parsedQueryString.stats);
         }
+        
+        if (parsedQueryString.showOriginal && this.ageClassSet.hasDubiousData()) {
+            this.originalDataSelector.selectOriginalData();
+        }
     };
     
     /**

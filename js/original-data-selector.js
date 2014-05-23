@@ -78,6 +78,14 @@
     };
     
     /**
+    * Selects original data.
+    */
+    OriginalDataSelector.prototype.selectOriginalData = function () {
+        this.checkbox.checked = true;
+        this.showOriginalData();
+    };
+    
+    /**
     * Sets whether this original-data selector should be visible.
     * @param {boolean} isVisible - True if the original-data selector should be
     *     visible, false if it should be hidden.
