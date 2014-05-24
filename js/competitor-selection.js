@@ -106,6 +106,15 @@
     };
 
     /**
+    * Returns an array of all currently-selected competitor indexes.
+    * @return {Array} Array of selected indexes.
+    */
+    CompetitorSelection.prototype.getSelectedIndexes = function () {
+        return this.currentIndexes.slice(0);
+    };
+    
+    
+    /**
     * Set the selected competitors to those in the given array.
     * @param {Array} selectedIndex - Array of indexes of selected competitors.
     */

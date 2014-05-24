@@ -81,49 +81,41 @@
 
     QUnit.test("All competitors unselected in newly-created selection", function (assert) {
         var selection = new CompetitorSelection(3);
-        for (var i = 0; i < 3; i += 1) {
-            assert.ok(!selection.isSelected(i), "Competitors should all be deselected");
-        }
+        assert.deepEqual(selection.getSelectedIndexes(), [], "Competitors should all be deselected");
     });
 
     QUnit.test("Toggling an unselected competitor makes them selected and vice versa", function (assert) {
         var selection = new CompetitorSelection(3);
-        var i;
-        for (i = 0; i < 3; i += 1) {
-            assert.ok(!selection.isSelected(i), "Competitor " + i + " should be deselected");
-        }
+        assert.deepEqual(selection.getSelectedIndexes(), [], "No competitors should be selected");
+
+        selection.toggle(1);
+        
+        assert.deepEqual(selection.getSelectedIndexes(), [1], "Only competitor 1 should be selected");
 
         selection.toggle(1);
 
-        for (i = 0; i < 3; i += 1) {
-            assert.ok(selection.isSelected(i) === (i === 1), "Competitor " + i + " should be " + ((i === 1) ? "selected" : "deselected"));
-        }
-
-        selection.toggle(1);
-
-        for (i = 0; i < 3; i += 1) {
-            assert.ok(!selection.isSelected(i), "Competitor " + i + " should be deselected");
-        }
+        assert.deepEqual(selection.getSelectedIndexes(), [], "No competitors should be selected");
     });
 
     QUnit.test("Selecting all competitors makes all competitors selected, and selecting none makes all competitors unselected", function (assert) {
         var selection = new CompetitorSelection(3);
-        var i;
-        for (i = 0; i < 3; i += 1) {
-            assert.ok(!selection.isSelected(i), "Competitor " + i + " should be deselected");
-        }
+        assert.deepEqual(selection.getSelectedIndexes(), [], "No competitors should be selected");
 
         selection.selectAll();
 
-        for (i = 0; i < 3; i += 1) {
-            assert.ok(selection.isSelected(i), "Competitor " + i + " should be selected");
-        }
+        assert.deepEqual(selection.getSelectedIndexes(), [0, 1, 2], "All competitors should be selected");
 
         selection.selectNone();
+        
+        assert.deepEqual(selection.getSelectedIndexes(), [], "No competitors should be selected");
+    });
 
-        for (i = 0; i < 3; i += 1) {
-            assert.ok(!selection.isSelected(i), "Competitor " + i + " should be deselected");
-        }
+    QUnit.test("Can determine whether individual competitors are selected", function (assert) {
+        var selection = new CompetitorSelection(3);
+        selection.setSelectedIndexes([0, 2]);
+        assert.ok(selection.isSelected(0), "Competitor 0 should be selected");
+        assert.ok(!selection.isSelected(1), "Competitor 1 should not be selected");
+        assert.ok(selection.isSelected(2), "Competitor 2 should be selected");
     });
 
     QUnit.test("Can register handler and have it called when competitor toggled", function (assert) {

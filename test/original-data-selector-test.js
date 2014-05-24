@@ -25,83 +25,137 @@
     
     var OriginalDataSelector = SplitsBrowser.Controls.OriginalDataSelector;
     
-    var originalDataCalled;
+    var callCount = 0;
     
-    var repairedDataCalled;
+    var lastShowOriginalData = null;
     
-    function showOriginalData() {
-        originalDataCalled = true;
+    function testChangeHandler(showOriginalData) {
+        lastShowOriginalData = showOriginalData;
+        callCount += 1;
     }
     
-    function showRepairedData() {
-        repairedDataCalled = true;
+    function reset() {
+        lastShowOriginalData = null;
+        callCount = 0;
     }
     
     QUnit.test("Can create selector with checkbox", function (assert) {
         var parent = d3.select("#qunit-fixture");
-        new OriginalDataSelector(parent, showOriginalData, showRepairedData);
+        new OriginalDataSelector(parent);
         
         assert.strictEqual(parent.select("input[type=checkbox]").size(), 1);
     });
     
-    QUnit.test("Calls show-original-data function when unchecked and clicked", function (assert) {
+    QUnit.test("Calls change handler when unchecked and clicked", function (assert) {
+        reset();
         var parent = d3.select("#qunit-fixture");
-        new OriginalDataSelector(parent, showOriginalData, showRepairedData);
+        var selector = new OriginalDataSelector(parent);
+        selector.registerChangeHandler(testChangeHandler);
         
-        originalDataCalled = false;
-        repairedDataCalled = false;
         $(parent.select("input[type=checkbox]").node()).attr("checked", false).trigger("click");
-        assert.strictEqual(originalDataCalled, true, "showOriginalData should have been called");
-        assert.strictEqual(repairedDataCalled, false, "showRepairedData should not have been called");
+        assert.strictEqual(lastShowOriginalData, true, "Handler should have been called with the show-original flag set to true");
+        assert.strictEqual(callCount, 1, "Handler should have been called once");
     });
     
-    QUnit.test("Calls show-repaired-data function when checked and clicked", function (assert) {
+    QUnit.test("Calls change handler when registered but not when deregistered", function (assert) {
+        reset();
         var parent = d3.select("#qunit-fixture");
-        new OriginalDataSelector(parent, showOriginalData, showRepairedData);
+        var selector = new OriginalDataSelector(parent);
+        selector.registerChangeHandler(testChangeHandler);
         
-        originalDataCalled = false;
-        repairedDataCalled = false;
+        $(parent.select("input[type=checkbox]").node()).attr("checked", false).trigger("click");
+        assert.strictEqual(callCount, 1, "Handler should have been called once");
+        
+        selector.deregisterChangeHandler(testChangeHandler);
+        $(parent.select("input[type=checkbox]").node()).trigger("click");
+        assert.strictEqual(callCount, 1, "Handler should still have been called once");
+    });
+    
+    QUnit.test("Calls change handler once when registered twice", function (assert) {
+        reset();
+        var parent = d3.select("#qunit-fixture");
+        var selector = new OriginalDataSelector(parent);
+        selector.registerChangeHandler(testChangeHandler);
+        selector.registerChangeHandler(testChangeHandler);
+        
+        $(parent.select("input[type=checkbox]").node()).attr("checked", false).trigger("click");
+        assert.strictEqual(callCount, 1, "Handler should have been called once");
+    });
+    
+    QUnit.test("Can deregister handler that was never registered without error", function () {
+        var parent = d3.select("#qunit-fixture");
+        var selector = new OriginalDataSelector(parent);
+        selector.deregisterChangeHandler(testChangeHandler);
+        expect(0); // No assertions
+    });
+    
+    QUnit.test("Calls multiple change handlers when unchecked and clicked", function (assert) {
+        reset();
+        var parent = d3.select("#qunit-fixture");
+        var selector = new OriginalDataSelector(parent);
+        selector.registerChangeHandler(testChangeHandler);
+        
+        var lastShowOriginalData2 = null;
+        var callCount2 = null;
+        var handler2 = function (showOriginalData) {
+            lastShowOriginalData2 = showOriginalData;
+            callCount2 += 1;
+        };
+        
+        selector.registerChangeHandler(handler2);
+        
+        $(parent.select("input[type=checkbox]").node()).attr("checked", false).trigger("click");
+        assert.strictEqual(lastShowOriginalData, true, "Handler should have been called with the show-original flag set to true");
+        assert.strictEqual(callCount, 1, "Handler should have been called once");
+        assert.strictEqual(lastShowOriginalData2, true, "Second handler should have been called with the show-original flag set to true");
+        assert.strictEqual(callCount2, 1, "Second handler should have been called once");
+    });
+    
+    QUnit.test("Calls change handler when checked and clicked", function (assert) {
+        reset();
+        var parent = d3.select("#qunit-fixture");
+        var selector = new OriginalDataSelector(parent);
+        selector.registerChangeHandler(testChangeHandler);
+        
         $(parent.select("input[type=checkbox]").node()).attr("checked", true).trigger("click");
-        assert.strictEqual(originalDataCalled, false, "showOriginalData should not have been called");
-        assert.strictEqual(repairedDataCalled, true, "showRepairedData should have been called");
+        assert.strictEqual(lastShowOriginalData, false, "Handler should have been called with the show-original flag set to false");
+        assert.strictEqual(callCount, 1, "Handler should have been called once");
     });
     
     QUnit.test("Does nothing when disabled and clicked", function (assert) {
+        reset();
         var parent = d3.select("#qunit-fixture");
-        var selector = new OriginalDataSelector(parent, showOriginalData, showRepairedData);
+        var selector = new OriginalDataSelector(parent);
         selector.setEnabled(false);
+        selector.registerChangeHandler(testChangeHandler);
         
-        originalDataCalled = false;
-        repairedDataCalled = false;
         $(parent.select("input[type=checkbox]").node()).attr("checked", true).trigger("click");
-        assert.strictEqual(originalDataCalled, false, "showOriginalData should not have been called");
-        assert.strictEqual(repairedDataCalled, false, "showRepairedData should not have been called");
+        assert.strictEqual(callCount, 0, "Change handler should not have been called");
     });
     
     QUnit.test("When selector is hidden, checkbox is no longer visible", function (assert) {
         var parent = d3.select("#qunit-fixture");
-        var selector = new OriginalDataSelector(parent, showOriginalData, showRepairedData);
+        var selector = new OriginalDataSelector(parent);
         selector.setVisible(false);
         assert.ok(!$("input[type=checkbox]", parent.node()).is(":visible"), "Selector should not be visible when set to not be visible");
     });
     
     QUnit.test("When selector is hidden and shown, checkbox is visible once again", function (assert) {
         var parent = d3.select("#qunit-fixture");
-        var selector = new OriginalDataSelector(parent, showOriginalData, showRepairedData);
+        var selector = new OriginalDataSelector(parent);
         selector.setVisible(false);
         selector.setVisible(true);
         assert.ok($("input[type=checkbox]", parent.node()).is(":visible"), "Selector should be visible when set to be visible");
     });
     
     QUnit.test("Calling selectOriginalData selects original data", function (assert) {
+        reset();    
         var parent = d3.select("#qunit-fixture");
-        var selector = new OriginalDataSelector(parent, showOriginalData, showRepairedData);
+        var selector = new OriginalDataSelector(parent);
         selector.setVisible(true);
-        originalDataCalled = false;
-        repairedDataCalled = false;
+        selector.registerChangeHandler(testChangeHandler);
         selector.selectOriginalData();
-        assert.ok(originalDataCalled, "showOriginalData should have been called");
-        assert.ok(!repairedDataCalled, "showRepairedData should not have been called");
+        assert.ok(lastShowOriginalData, true, "Handler should have been called with the show-original flag set to true");
         assert.ok($("input[type=checkbox]", parent.node()).is(":checked"), "Selector should be checked");
     });    
 })();
