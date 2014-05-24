@@ -127,5 +127,8 @@ SplitsBrowser.Messages = {
     // Placeholder text shown in the nearby-competitors dialog on the race
     // graph when there aren't any competitors visiting the control within the
     // +/- 2 minute window.
-    NoNearbyCompetitors: "No competitors"
+    NoNearbyCompetitors: "No competitors",
+    
+    DirectLink: "Link",
+    DirectLinkToolTip: "Links to a URL that opens SplitsBrowser with the current settings"
 };

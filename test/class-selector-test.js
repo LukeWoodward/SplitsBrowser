@@ -61,6 +61,12 @@
         selector.setClasses(classes);
     }
     
+    /**
+    * Asserts whether the other-class selector should be visible.
+    * @param {Qunit.assert} assert - QUnit assert object.
+    * @param {boolean} isVisible - Whether the other-class selector should be
+    *     visible.
+    */
     function assertOtherClassSelectorVisibility(assert, isVisible) {
         var shouldOrShouldNot = (isVisible) ? "should" : "should not";
         var selector = d3.selectAll("#qunit-fixture .otherClassSelector");
@@ -148,7 +154,7 @@
         var selector = new ClassSelector(d3.select("#qunit-fixture").node());
 
         setClassesInSelector(selector, [new AgeClass("Class 1", 11, []), new AgeClass("Class 2", 17, []), new AgeClass("Class 3", 22, [])]);
-        setClassesInSelector(selector,[new AgeClass("Class 4", 20, [])]);
+        setClassesInSelector(selector, [new AgeClass("Class 4", 20, [])]);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
@@ -327,6 +333,7 @@
         
         assert.deepEqual(lastClassIdxs, [1, 2], "Classes 1 and 2 should have been selected");
         assert.strictEqual(callCount, 1, "One change should have been recorded");
+        assert.deepEqual(selector.getSelectedClasses(), [1, 2], "Classes 1 and 2 should have been selected");
     });
 
     QUnit.test("Can create class selector with three classes and two courses, open the list of other classes and select and deselect the other class", function(assert) {

@@ -218,6 +218,22 @@
     };
     
     /**
+    * Returns the comparison type.
+    * @return {Object} Object containing the comparison type (type index and runner).
+    */
+    ComparisonSelector.prototype.getComparisonType = function () {
+        var typeIndex = this.dropDown.selectedIndex;
+        var runner;
+        if (typeIndex === ALL_COMPARISON_OPTIONS.length - 1) {
+            runner = this.ageClassSet.allCompetitors[this.runnerDrownDown.selectedIndex];
+        } else {
+            runner = null;
+        }
+    
+        return {index: typeIndex, runner: runner };
+    };
+    
+    /**
     * Sets the comparison type.
     * @param {Number} typeIndex - The index of the comparison type.
     * @param {Competitor|null} runner - The selected 'Any runner', or null if

@@ -97,6 +97,14 @@
     };
     
     /**
+    * Returns whether original data is selected.
+    * @return {boolean} True if original data is selected, false if not.
+    */
+    OriginalDataSelector.prototype.isOriginalDataSelected = function () {
+        return this.checkbox.checked;
+    };
+    
+    /**
     * Selects original data.
     */
     OriginalDataSelector.prototype.selectOriginalData = function () {

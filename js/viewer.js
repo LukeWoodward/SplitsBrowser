@@ -45,6 +45,7 @@
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
     var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
     var parseQueryString = SplitsBrowser.parseQueryString;
+    var formatQueryString = SplitsBrowser.formatQueryString;
     
     var Controls = SplitsBrowser.Controls;
     var ClassSelector = Controls.ClassSelector;
@@ -230,6 +231,37 @@
     Viewer.prototype.addOriginalDataSelector = function () {
         this.originalDataSelector = new OriginalDataSelector(this.topPanel);
     };
+
+    /**
+    * Adds a direct link which links directly to SplitsBrowser with the given
+    * settings.
+    */
+    Viewer.prototype.addDirectLink = function () {
+        this.directLink = this.topPanel.append("a")
+                                      .attr("title", tryGetMessage("DirectLinkToolTip", ""))
+                                      .attr("id", "directLinkAnchor")
+                                      .attr("href", document.location.href)
+                                      .text(getMessage("DirectLink"));
+    };
+    
+    /**
+    * Updates the URL that the direct link points to.
+    */
+    Viewer.prototype.updateDirectLink = function () {
+        var data = {
+            classes: this.classSelector.getSelectedClasses(),
+            view: this.chartTypeSelector.getChartType(),
+            compareWith: this.comparisonSelector.getComparisonType(),
+            selected: this.selection.getSelectedIndexes(),
+            stats: this.statisticsSelector.getVisibleStatistics(),
+            showOriginal: this.ageClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected()
+        };
+        
+        var oldQueryString = document.location.search;
+        var newQueryString = formatQueryString(oldQueryString, this.eventData, this.ageClassSet, data);
+        var oldHref = document.location.href;        
+        this.directLink.attr("href", oldHref.substring(0, oldHref.length - oldQueryString.length) + "?" + newQueryString);
+    };
     
     /**
     * Adds the list of competitors, and the buttons, to the page.
@@ -281,6 +313,8 @@
         this.addSpacer();
         this.addComparisonSelector();
         this.addOriginalDataSelector();
+        this.addSpacer();
+        this.addDirectLink();
         
         this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
 
@@ -432,6 +466,7 @@
         this.selectionChangeHandler = function () {
             outerThis.enableOrDisableCrossingRunnersButton();
             outerThis.redraw();
+            outerThis.updateDirectLink();
         };
 
         this.selection.registerChangeHandler(this.selectionChangeHandler);
@@ -439,6 +474,7 @@
         this.statisticsChangeHandler = function (visibleStatistics) {
             outerThis.currentVisibleStatistics = visibleStatistics;
             outerThis.redraw();
+            outerThis.updateDirectLink();
         };
         
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
@@ -520,6 +556,7 @@
         this.drawChart();
         this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
+        this.updateDirectLink();
     };
     
     /**
@@ -527,6 +564,7 @@
     */
     Viewer.prototype.selectComparison = function () {
         this.drawChart();
+        this.updateDirectLink();
     };
     
     /**
@@ -560,6 +598,7 @@
     Viewer.prototype.selectChartTypeAndRedraw = function (chartType) {
         this.selectChartType(chartType);
         this.drawChart();
+        this.updateDirectLink();
     };
     
     /**
@@ -585,6 +624,7 @@
     Viewer.prototype.showOriginalOrRepairedData = function (showOriginalData) {
         this.selectOriginalOrRepairedData(showOriginalData);
         this.drawChart();
+        this.updateDirectLink();
     };
     
     /**

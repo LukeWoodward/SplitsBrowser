@@ -140,6 +140,8 @@
         assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), false, "Runner selector should not be shown");
 
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
+        
+        assert.deepEqual(selector.getComparisonType(), {index: 1, runner: null});
     });
 
     QUnit.test("Comparison selector created and runner selector displayed when selecting last item", function(assert) {

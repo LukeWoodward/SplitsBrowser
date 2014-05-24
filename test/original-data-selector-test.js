@@ -55,6 +55,7 @@
         $(parent.select("input[type=checkbox]").node()).attr("checked", false).trigger("click");
         assert.strictEqual(lastShowOriginalData, true, "Handler should have been called with the show-original flag set to true");
         assert.strictEqual(callCount, 1, "Handler should have been called once");
+        assert.strictEqual(selector.isOriginalDataSelected(), true, "Original data should be selected");
     });
     
     QUnit.test("Calls change handler when registered but not when deregistered", function (assert) {

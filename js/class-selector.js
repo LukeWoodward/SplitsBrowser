@@ -161,13 +161,22 @@
             this.onSelectionChanged();
         }
     };
+    
+    /**
+    * Returns the indexes of the selected classes.
+    * @param {Array} Indexes of selected classes.
+    */
+    ClassSelector.prototype.getSelectedClasses = function () {
+        var indexes = [this.dropDown.selectedIndex];
+        this.selectedOtherClassIndexes.forEach(function (index) { indexes.push(parseInt(index, 10)); });
+        return indexes;
+    };
 
     /**
     * Handle a change of the selected option in the drop-down list.
     */
     ClassSelector.prototype.onSelectionChanged = function() {
-        var indexes = [this.dropDown.selectedIndex];
-        this.selectedOtherClassIndexes.forEach(function (index) { indexes.push(parseInt(index, 10)); });
+        var indexes = this.getSelectedClasses();
         this.changeHandlers.forEach(function(handler) { handler(indexes); });
     };
     

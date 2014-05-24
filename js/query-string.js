@@ -416,7 +416,7 @@
         queryString = formatSelectedCompetitors(queryString, ageClassSet, data.selected);
         queryString = formatSelectedStatistics(queryString, data.stats);
         queryString = formatShowOriginal(queryString, data.showOriginal);
-        queryString = queryString.replace(/^(\??)&/, "$1");
+        queryString = queryString.replace(/^\??&/, "");
         return queryString;
     }
     
