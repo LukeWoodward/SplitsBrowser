@@ -1,7 +1,7 @@
 /*!
  *  SplitsBrowser - Orienteering results analysis.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -1144,6 +1144,8 @@ var SplitsBrowser = { Version: "3.2.5", Model: {}, Input: {}, Controls: {} };
     /**
     * Returns whether this age-class set is empty, i.e. whether it has no
     * competitors at all.
+    * @return {boolean} True if the age-class set is empty, false if it is not
+    *     empty.
     */    
     AgeClassSet.prototype.isEmpty = function () {
         return this.allCompetitors.length === 0;
@@ -4471,7 +4473,7 @@ var SplitsBrowser = { Version: "3.2.5", Model: {}, Input: {}, Controls: {} };
         // Check that all control codes except perhaps the finish are alphanumeric.
         var controlCodeRegexp = /^[A-Za-z0-9]+$/;
         
-        // Don't check that the control code for the finish is numeric if the
+        // Don't check that the control code for the finish is alphanumeric if the
         // finish time is specified elsewhere.
         var terminationOffset = (format.finishTime === null) ? format.step : 0;
         
@@ -4508,12 +4510,12 @@ var SplitsBrowser = { Version: "3.2.5", Model: {}, Input: {}, Controls: {} };
             } else {
                 var controlCount = parseInt(row[format.controlCount], 10);
                 if (isNaNStrict(controlCount)) {
-                    throwInvalidData("Control count '" + controlCount + "' is not a valid number");
+                    throwInvalidData("Control count '" + row[format.controlCount] + "' is not a valid number");
                 }
                 
-                expectedRowLength = format.controlsOffset + row[format.controlCount] * format.step;
+                expectedRowLength = format.controlsOffset + controlCount * format.step;
                 if (row.length < expectedRowLength) {
-                    throwInvalidData("Data in row " + rowIndex + " should have at least " + expectedRowLength + " parts but only has " + row.length);
+                    throwInvalidData("Data in row " + rowIndex + " should have at least " + expectedRowLength + " parts (for " + controlCount + " controls) but only has " + row.length);
                 }
             }
             
@@ -4556,8 +4558,6 @@ var SplitsBrowser = { Version: "3.2.5", Model: {}, Input: {}, Controls: {} };
                 // New course/class.
                 
                 // Determine the list of controls, ignoring the finish.
-                // (Sometimes this is a number, some times it is 'F1'.  Either
-                // way, we don't really care.)
                 var controls = [];
                 for (var controlIndex = format.controlsOffset; controlIndex + terminationOffset < expectedRowLength; controlIndex += format.step) {
                     controls.push(row[controlIndex]);
@@ -4573,7 +4573,6 @@ var SplitsBrowser = { Version: "3.2.5", Model: {}, Input: {}, Controls: {} };
             var cls = classes.get(className);
             var ageClass = new AgeClass(className, cls.controls.length, cls.competitors);
             
-            // Nulls indicate no course distance and climb.
             var course = new Course(className, [ageClass], cls.length, cls.climb, cls.controls);
             ageClass.setCourse(course);
             ageClasses.push(ageClass);
@@ -4872,39 +4871,6 @@ var SplitsBrowser = { Version: "3.2.5", Model: {}, Input: {}, Controls: {} };
         }
         
         return new Event(classes, courses);
-        
-        // Root element is ResultList
-        // ResultList/@status should be missing or "complete".  Reject anything
-        // else as intermediate.
-        // ResultList/IOFVersion/@version must be "2.0.3".
-        // Each class is under a /ResultList/ClassResult.
-        // 
-        // Under a ClassResult:
-        //      ./ClassShortName  - class name
-        //      ./PersonResult - person results
-        
-        // Under a PersonResult:
-        //      ./Person/PersonName/Family: Surname
-        //      ./Person/PersonName/Given: Forename
-        //      ./Club/ShortName: Club name
-        //      ./Result/StartTime/Clock: start time (optional)
-        //      ./Result/FinishTime/Clock: finish time, or empty if none (optional)
-        //      ./Result/Time: Time taken (optional).
-        //      ./Result/ResultPosition: Placing, if valid, empty if not (optional)
-        //      ./Result/CompetitorStatus/@value: status (OK, MisPunch, DidNotStart, DidNotFinish, NotCompeting)
-        //      ./Result/CourseLength: course length.  Optional according to the DTD.
-        //      ./Result/CourseLength/@unit: course length unit, m, km, ft, default to m.
-        //      ./Result/SplitTime: split time elements.
-        //
-        //     May get just a PersonId instead of a Person.  Without any
-        //     further data, the ID is all we can display.
-        //    
-        // Under a SplitTime:
-        //      ./@sequence: Sequence number of the control (1, 2, 3, .... )
-        //      ./ControlCode or ./Control: Control code
-        //      ./Time: Cumulative time to that control, or '-----' for none.
-        
-        // No apparent course climb.
     }
     
     SplitsBrowser.Input.IOFXml = { parseEventData: parseEventData };
@@ -5417,7 +5383,8 @@ var SplitsBrowser = { Version: "3.2.5", Model: {}, Input: {}, Controls: {} };
 
     /**
     * Returns whether the 'Any Runner...' option is selected.
-    * @return Whether the 'Any Runner...' option is selected.
+    * @return {boolean} True if the 'Any Runner...' option is selected, false
+    *     if any other option is selected.
     */
     ComparisonSelector.prototype.isAnyRunnerSelected = function () {
         return this.dropDown.selectedIndex === ALL_COMPARISON_OPTIONS.length - 1;
@@ -5434,8 +5401,6 @@ var SplitsBrowser = { Version: "3.2.5", Model: {}, Input: {}, Controls: {} };
 
     /**
     * Populates the drop-down list of runners from an age-class set.
-    * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - Age-class set
-    *     containing all of the runners to populate the list from.
     */
     ComparisonSelector.prototype.setRunners = function () {
         var competitors = this.ageClassSet.allCompetitors;
@@ -7307,9 +7272,14 @@ var SplitsBrowser = { Version: "3.2.5", Model: {}, Input: {}, Controls: {} };
             }
         });
         
-        this.referenceCumTimesSorted = 
-            cumTimesToControlIndex.keys().map(function (cumTime) { return parseInt(cumTime, 10); })
-                                         .sort(d3.ascending);
+        // Sort and deduplicate the reference cumulative times.
+        this.referenceCumTimesSorted = this.referenceCumTimes.slice(0);
+        this.referenceCumTimesSorted.sort(d3.ascending);
+        for (var index = this.referenceCumTimesSorted.length - 1; index > 0; index -= 1) {
+            if (this.referenceCumTimesSorted[index] === this.referenceCumTimesSorted[index - 1]) {
+                this.referenceCumTimesSorted.splice(index, 1);
+            }
+        }
 
         this.referenceCumTimeIndexes = this.referenceCumTimesSorted.map(function (cumTime) { return cumTimesToControlIndex.get(cumTime); });
     };

@@ -1168,9 +1168,14 @@
             }
         });
         
-        this.referenceCumTimesSorted = 
-            cumTimesToControlIndex.keys().map(function (cumTime) { return parseInt(cumTime, 10); })
-                                         .sort(d3.ascending);
+        // Sort and deduplicate the reference cumulative times.
+        this.referenceCumTimesSorted = this.referenceCumTimes.slice(0);
+        this.referenceCumTimesSorted.sort(d3.ascending);
+        for (var index = this.referenceCumTimesSorted.length - 1; index > 0; index -= 1) {
+            if (this.referenceCumTimesSorted[index] === this.referenceCumTimesSorted[index - 1]) {
+                this.referenceCumTimesSorted.splice(index, 1);
+            }
+        }
 
         this.referenceCumTimeIndexes = this.referenceCumTimesSorted.map(function (cumTime) { return cumTimesToControlIndex.get(cumTime); });
     };
