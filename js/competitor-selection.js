@@ -187,6 +187,10 @@
     * After the migration, any competitors in the old list that were selected
     * and are also in the new competitors list remain selected.
     *
+    * Note that this method does NOT fire change handlers when it runs.  This
+    * is typically used during a change of class, when the application may be
+    * making other changes.
+    *
     * @param {Array} oldCompetitors - Array of Competitor objects for the old
     *      selection.  The length of this must match the current count of
     *      competitors.
@@ -213,8 +217,6 @@
                 this.currentIndexes.push(idx);
             }
         }, this);
-        
-        this.fireChangeHandlers();
     };
 
     SplitsBrowser.Model.CompetitorSelection = CompetitorSelection;

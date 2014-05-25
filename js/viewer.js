@@ -553,8 +553,8 @@
         }
         
         this.setClasses(classIndexes);
-        this.drawChart();
         this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
+        this.drawChart();
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
         this.updateDirectLink();
     };

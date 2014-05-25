@@ -315,8 +315,7 @@
         selection.registerChangeHandler(testHandler);        
         selection.migrate(oldCompetitors, newCompetitors);
         assert.strictEqual(selection.count, newCompetitors.length);
-        assert.deepEqual(lastIndexes, [0]);
-        assert.strictEqual(callCount, 1);
+        assert.strictEqual(callCount, 0);
     });
     
     QUnit.test("Can set array of selected competitors to an empty array", function (assert) {
