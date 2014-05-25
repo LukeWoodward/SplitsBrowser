@@ -25,38 +25,6 @@
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
     var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
     
-    // Parameters supported:
-    // * class: semicolon-separated list of class names
-    // * view: what to view: (SplitsGraph, RaceGraph, PositionAfterLeg,
-    //   SplitPosition, PercentBehind, ResultsTable)
-    // * compareWith: what to compare against (Winner, Fastest,
-    //   FastestPlus5, FastestPlus25, FastestPlus50, FastestPlus100, or any
-    //   runner from any of the selected classes.
-    // * selected: semicolon-separated list of competitor names, or * to
-    //   select the lot.
-    
-    // Error handling:
-    // Generally, in all cases we plan to ignore anything invalid.
-    // * class:
-    //   * Ignore unrecognised class names,
-    //   * If > 1 class specified, ignore any that are not on the same course
-    //     as the first.
-    //   * If empty, or nothing valid, leave as default.
-    // * view:
-    //   * ignore anything unrecognised and leave with default.
-    //   * if RaceGraph selected and no start times, back to SplitsGraph.
-    // * compareWith:
-    //   * if Winner and class has no winner, ignore and leave as default.
-    //   * Ignore any unrecognised runner name.
-    // * selected:
-    //   * Ignore any unrecognised names, or repeated selections,
-    // * general:
-    //   * Use only the first occurrence of each parameter.
-    
-    // We also need to be careful handling query strings as the website hosting
-    // SplitsBrowser may also use the query string for other information (e.g.
-    // event ID.)
-    
     /**
     * Remove all matches of the given regular expression from the given string.
     * The regexp is not assumed to contain the "g" flag.
@@ -122,7 +90,7 @@
         return queryString + "&class=" + encodeURIComponent(classNames.join(";"));
     }
 
-    var VIEW_TYPE_REGEXP = /(?:^|&|\?)view=([^&]+)/;
+    var CHART_TYPE_REGEXP = /(?:^|&|\?)chartType=([^&]+)/;
     
     /**
     * Reads the selected chart type from a query string.
@@ -131,11 +99,11 @@
     * @return {Object|null} Selected chart type, or null if not recognised.
     */    
     function readChartType(queryString) {
-        var viewTypeMatch = VIEW_TYPE_REGEXP.exec(queryString);
-        if (viewTypeMatch === null) {
+        var chartTypeMatch = CHART_TYPE_REGEXP.exec(queryString);
+        if (chartTypeMatch === null) {
             return null;
         } else { 
-            var chartTypeName = viewTypeMatch[1];
+            var chartTypeName = chartTypeMatch[1];
             if (ChartTypes.hasOwnProperty(chartTypeName)) {
                 return ChartTypes[chartTypeName];
             } else {
@@ -151,10 +119,10 @@
     * @return {String} The query-string with the chart-type formatted in.
     */
     function formatChartType(queryString, chartType) {
-        queryString = removeAll(queryString, VIEW_TYPE_REGEXP);
+        queryString = removeAll(queryString, CHART_TYPE_REGEXP);
         for (var chartTypeName in ChartTypes) {
             if (ChartTypes.hasOwnProperty(chartTypeName) && ChartTypes[chartTypeName] === chartType) {
-                return queryString + "&view=" + encodeURIComponent(chartTypeName);
+                return queryString + "&chartType=" + encodeURIComponent(chartTypeName);
             }
         }
         
@@ -386,7 +354,7 @@
         var classIndexes = (ageClassSet === null) ? null : ageClassSet.ageClasses.map(function (ageClass) { return eventData.classes.indexOf(ageClass); });
         return {
             classes: classIndexes,
-            view: readChartType(queryString),
+            chartType: readChartType(queryString),
             compareWith: readComparison(queryString, ageClassSet),
             selected: readSelectedCompetitors(queryString, ageClassSet),
             stats: readSelectedStatistics(queryString),
@@ -411,7 +379,7 @@
     */
     function formatQueryString(queryString, eventData, ageClassSet, data) {
         queryString = formatSelectedClasses(queryString, eventData, data.classes);
-        queryString = formatChartType(queryString, data.view);
+        queryString = formatChartType(queryString, data.chartType);
         queryString = formatComparison(queryString, data.compareWith.index, data.compareWith.runner);
         queryString = formatSelectedCompetitors(queryString, ageClassSet, data.selected);
         queryString = formatSelectedStatistics(queryString, data.stats);

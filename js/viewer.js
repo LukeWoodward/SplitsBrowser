@@ -657,9 +657,9 @@
             this.initClasses(parsedQueryString.classes);
         }
         
-        if (parsedQueryString.view !== null) {
-            this.chartTypeSelector.setChartType(parsedQueryString.view);
-            this.selectChartType(parsedQueryString.view);
+        if (parsedQueryString.chartType !== null) {
+            this.chartTypeSelector.setChartType(parsedQueryString.chartType);
+            this.selectChartType(parsedQueryString.chartType);
         }
         
         if (parsedQueryString.compareWith !== null) {
