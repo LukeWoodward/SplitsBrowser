@@ -70,7 +70,7 @@
     /**  
     * Parse a time of the form MM:SS or H:MM:SS into a number of seconds.
     * @param {string} time - The time of the form MM:SS.
-    * @return {Number} The number of seconds.
+    * @return {?Number} The number of seconds.
     */
     SplitsBrowser.parseTime = function (time) {
         if (time.match(/^\d+:\d\d$/)) {

@@ -63,7 +63,7 @@
 
     /**
     * Parse CSV data for a class.
-    * @param {string} class - The string containing data for that class.
+    * @param {string} ageClass - The string containing data for that class.
     * @return {SplitsBrowser.Model.AgeClass} Parsed class data.
     */
     function parseAgeClass (ageClass) {

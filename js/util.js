@@ -55,21 +55,21 @@
     
     /**
     * Returns whether the value given is neither null nor NaN.
-    * @param {Number|null} value - A value to test.
+    * @param {?Number} x - A value to test.
     * @return {boolean} false if the value given is null or NaN, true
     *     otherwise.
     */
     SplitsBrowser.isNotNullNorNaN = function (x) { return x !== null && x === x; };
-    
+
     /**
     * Exception object raised if invalid data is passed.
     * @constructor
-    * @param {string} message - The exception detail message.
+    * @param {String} message - The exception detail message.
     */
-    var InvalidData = function (message) {
+    function InvalidData(message) {
         this.name = "InvalidData";
         this.message = message;
-    };
+    }
 
     /**
     * Returns a string representation of this exception.
@@ -94,10 +94,10 @@
     * @constructor
     * @param {String} message - The exception message.
     */
-    var WrongFileFormat = function (message) {
+    function WrongFileFormat(message) {
         this.name = "WrongFileFormat";
         this.message = message;
-    };
+    }
     
     /**
     * Returns a string representation of this exception.

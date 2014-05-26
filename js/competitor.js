@@ -56,9 +56,9 @@
     
     /**
     * Returns the sum of two numbers, or null if either is null.
-    * @param {Number|null} a - One number, or null, to add.
-    * @param {Number|null} b - The other number, or null, to add.
-    * @return {Number|null} null if at least one of a or b is null,
+    * @param {?Number} a - One number, or null, to add.
+    * @param {?Number} b - The other number, or null, to add.
+    * @return {?Number} null if at least one of a or b is null,
     *      otherwise a + b.
     */
     function addIfNotNull(a, b) {
@@ -67,9 +67,9 @@
     
     /**
     * Returns the difference of two numbers, or null if either is null.
-    * @param {Number|null} a - One number, or null, to add.
-    * @param {Number|null} b - The other number, or null, to add.
-    * @return {Number|null} null if at least one of a or b is null,
+    * @param {?Number} a - One number, or null, to add.
+    * @param {?Number} b - The other number, or null, to add.
+    * @return {?Number} null if at least one of a or b is null,
     *      otherwise a - b.
     */    
     function subtractIfNotNull(a, b) {
@@ -151,13 +151,13 @@
     *     results.
     * @param {String} name - The name of the competitor.
     * @param {String} club - The name of the competitor's club.
-    * @param {String} originalStartTime - The competitor's start time.
+    * @param {String} startTime - The competitor's start time.
     * @param {Array} originalSplitTimes - Array of split times, as numbers,
     *      with nulls for missed controls.
     * @param {Array} originalCumTimes - Array of cumulative split times, as
     *     numbers, with nulls for missed controls.
     */
-    var Competitor = function (order, name, club, startTime, originalSplitTimes, originalCumTimes) {
+    function Competitor(order, name, club, startTime, originalSplitTimes, originalCumTimes) {
 
         if (typeof order !== NUMBER_TYPE) {
             throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
@@ -179,7 +179,7 @@
         this.timeLosses = null;
 
         this.totalTime = (originalCumTimes === null || originalCumTimes.indexOf(null) > -1) ? null : originalCumTimes[originalCumTimes.length - 1];
-    };
+    }
     
     /**
     * Marks this competitor as being non-competitive.
@@ -211,6 +211,7 @@
     * @param {String} club - The name of the competitor's club.
     * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
+    * @return {Competitor} Created competitor.
     */
     Competitor.fromSplitTimes = function (order, name, club, startTime, splitTimes) {
         var cumTimes = cumTimesFromSplitTimes(splitTimes);
@@ -239,6 +240,7 @@
     * @param {String} club - The name of the competitor's club.
     * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
+    * @return {Competitor} Created competitor.
     */
     Competitor.fromOriginalCumTimes = function (order, name, club, startTime, cumTimes) {
         var splitTimes = splitTimesFromCumTimes(cumTimes);
@@ -263,6 +265,7 @@
     * @param {String} club - The name of the competitor's club.
     * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
+    * @return {Competitor} Created competitor.
     */
     Competitor.fromCumTimes = function (order, name, club, startTime, cumTimes) {
         var competitor = Competitor.fromOriginalCumTimes(order, name, club, startTime, cumTimes);
@@ -290,10 +293,10 @@
     };
     
     /**
-    * Returns the 'suffix' to use with a competitor.
+    * Returns the 'suffix' to use with this competitor.
     * The suffix indicates whether they are non-competitive or a mispuncher.  If
     * they are neither, an empty string is returned.
-    * @return Suffix.
+    * @return {String} Suffix to use with this competitor.
     */
     Competitor.prototype.getSuffix = function () {
         if (this.completed()) {
@@ -311,7 +314,7 @@
     * invalid, NaN is returned.
     * 
     * @param {Number} controlIndex - Index of the control (0 = start).
-    * @return {Number|null} The split time in seconds for the competitor to the
+    * @return {?Number} The split time in seconds for the competitor to the
     *      given control.
     */
     Competitor.prototype.getSplitTimeTo = function (controlIndex) {
@@ -327,7 +330,7 @@
     * If the competitor has no time recorded for that control, null is
     * returned.
     * @param {Number} controlIndex - Index of the control (0 = start).
-    * @return {Number|null} The split time in seconds for the competitor to the
+    * @return {?Number} The split time in seconds for the competitor to the
     *      given control.
     */
     Competitor.prototype.getOriginalSplitTimeTo = function (controlIndex) {
@@ -411,7 +414,7 @@
     * time losses cannot be calculated for the competitor or have not yet been
     * calculated.
     * @param {Number} controlIndex - Index of the control.
-    * @return {Number|null} Time loss in seconds, or null.
+    * @return {?Number} Time loss in seconds, or null.
     */
     Competitor.prototype.getTimeLossAt = function (controlIndex) {
         return (controlIndex === 0 || this.timeLosses === null) ? null : this.timeLosses[controlIndex - 1];

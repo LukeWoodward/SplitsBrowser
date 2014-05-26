@@ -116,7 +116,8 @@
     /**
     * Determine the delimiter used to delimit data.
     * @param {String} firstDataLine - The first data line of the file.
-    * @return {String|null} The delimiter separating the data, or null if no
+    * @param {Object} format - The data format.
+    * @return {?String} The delimiter separating the data, or null if no
     *    suitable delimiter was found.
     */
     function determineDelimiter(firstDataLine, format) {

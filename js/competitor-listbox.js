@@ -30,14 +30,14 @@
     * @constructor
     * @param {HTMLElement} parent - Parent element to add this listbox to.
     */
-    var CompetitorListBox = function (parent) {
+    function CompetitorListBox(parent) {
         this.parent = parent;
         this.handler = null;
         this.competitorSelection = null;
 
         this.listDiv = d3.select(parent).append("div")
                                         .attr("id", COMPETITOR_LIST_ID);
-    };
+    }
 
     /**
     * Returns the width of the listbox, in pixels.
@@ -60,6 +60,7 @@
 
     /**
     * Toggle the selectedness of a competitor.
+    * @param {Number} index - The index of the competitor.
     */
     CompetitorListBox.prototype.toggleCompetitor = function (index) {
         this.competitorSelection.toggle(index);
@@ -68,7 +69,7 @@
     /**
     * Sets the list of competitors.
     * @param {Array} competitors - Array of competitor data.
-    * @param {boolean} hasMultipleClasses - Whether the list of competitors is
+    * @param {boolean} multipleClasses - Whether the list of competitors is
     *      made up from those in multiple classes.
     */
     CompetitorListBox.prototype.setCompetitorList = function (competitors, multipleClasses) {

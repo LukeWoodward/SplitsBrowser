@@ -56,7 +56,7 @@
     * @constructor
     * @param {String} data - The SI data to read in.
     */
-    var Reader = function (data) {
+    function Reader(data) {
         this.data = normaliseLineEndings(data);
         
         // Map that associates classes to all of the competitors running on
@@ -79,7 +79,7 @@
         // The column index that contains the control numbers for control 1.
         // This is used to determine where various columns are.
         this.control1Index = null;
-    };
+    }
 
     /**
     * Identifies the delimiter character that delimits the columns of data.
@@ -125,7 +125,7 @@
         // but if there is no last split recorded, it may be the last.)
         var controlCodeRegexp = /^[A-Za-z0-9]+$/;
         
-        var controlCodeColumn;
+        var controlCodeColumn = null;
         if (controlCodeRegexp.test(firstLine[endPos - 1])) {
             controlCodeColumn = endPos - 1;
         } else if (controlCodeRegexp.test(firstLine[endPos])) {
@@ -169,10 +169,11 @@
     };
     
     /**
-    * Reads the split times out of a row of competitor data.
+    * Reads the cumulative times out of a row of competitor data.
     * @param {Array} row - Array of row data items.
     * @param {Number} lineNumber - Line number of the row within the source data.
     * @param {Number} numControls - The number of controls to read.
+    * @return {Array} Array of cumulative times.
     */
     Reader.prototype.readCumulativeTimes = function (row, lineNumber, numControls) {
         

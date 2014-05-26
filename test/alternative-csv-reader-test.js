@@ -82,9 +82,9 @@
     * @param {String} length - The length of the course, in km.
     * @param {String} climb - The climb of the course in metres.
     * @param {Array} controls - Array of control codes.
-    * @param {Number|null} startTime - The competitor's start time, or null if none.
+    * @param {Number} startTime - The competitor's start time, or null if none.
     *     null.
-    * @param {Number|null} finishTime - The competitor's start time, or null if
+    * @param {?Number} finishTime - The competitor's start time, or null if
     *     none.
     * @param {String} placing - The competitor's placing.
     * @param {Array} cumTimes - Array of cumulative times, either numbers or

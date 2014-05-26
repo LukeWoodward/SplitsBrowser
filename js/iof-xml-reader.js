@@ -109,7 +109,7 @@
         var forename = $("> Person > PersonName > Given", jqElement).text();
         var surname = $("> Person > PersonName > Family", jqElement).text();
 
-        var name;
+        var name = null;
         if (forename === "" && surname === "") {
             var personId = $("> PersonId", jqElement).text();
             if (personId === "") {
@@ -173,7 +173,7 @@
         for (var index = 0; index < splitTimes.length; index += 1) {
             var splitTimeElement = $(splitTimes[index]);
             var sequenceNumberStr = splitTimeElement.attr("sequence");
-            var sequenceNumber;
+            var sequenceNumber = null;
             if (isUndefined(sequenceNumberStr)) {
                 throwInvalidData("Missing sequence number for control");
             } else {

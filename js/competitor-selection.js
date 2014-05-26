@@ -31,7 +31,7 @@
     * @constructor
     * @param {Number} count - The number of competitors that can be chosen.
     */
-    var CompetitorSelection = function (count) {
+    function CompetitorSelection(count) {
         if (typeof count !== NUMBER_TYPE) {
             throwInvalidData("Competitor count must be a number");
         } else if (count < 0) {
@@ -41,7 +41,7 @@
         this.count = count;
         this.currentIndexes = [];
         this.changeHandlers = [];
-    };
+    }
 
     /**
     * Returns whether the competitor at the given index is selected.
@@ -115,7 +115,7 @@
     *
     * If the handler has already been registered, nothing happens.
     *
-    * @param {function} handler - The handler to register.
+    * @param {Function} handler - The handler to register.
     */
     CompetitorSelection.prototype.registerChangeHandler = function (handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
@@ -128,7 +128,7 @@
     *
     * If the handler given was never registered, nothing happens.
     *
-    * @param {function} handler - The handler to register.
+    * @param {Function} handler - The handler to register.
     */
     CompetitorSelection.prototype.deregisterChangeHandler = function (handler) {
         var index = this.changeHandlers.indexOf(handler);

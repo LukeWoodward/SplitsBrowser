@@ -37,7 +37,7 @@
     * @param {Function} showRepairedData - Function to call when repaired data
     *     is to be shown.
     */
-    var OriginalDataSelector = function (parent, showOriginalData, showRepairedData) {
+    function OriginalDataSelector(parent, showOriginalData, showRepairedData) {
         this.parent = parent;
         this.showRepairedData = showRepairedData;
         this.showOriginalData = showOriginalData;
@@ -63,7 +63,7 @@
             .text(getMessage("ShowOriginalData"));
             
         this.containerDiv.attr("title", getMessage("ShowOriginalDataTooltip"));
-    };
+    }
 
     /**
     * Shows original or repaired data depending on whether the checkbox is

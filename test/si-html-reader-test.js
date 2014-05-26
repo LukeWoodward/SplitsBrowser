@@ -196,7 +196,7 @@
     * optional and can be omitted.
     * 
     * @param {String|Number} posn - The position of the competitor.
-    * @param {String|null} startNum - The start number of the competitor, or
+    * @param {?String} startNum - The start number of the competitor, or
     *     null to skip the first column.
     * @param {String} name - The name of the competitor.
     * @param {String} club - The name of the competitor's club.
@@ -205,6 +205,7 @@
     *     functions.
     * @param {String} className - The name of the competitor's class, or "" to
     *     default to course name.
+    * @param {Number} time - The total time of the competitor.
     * @param {Array} cumTimes - Array of cumulative times, as strings.
     * @param {Array} splits - Array of split times, as strings.
     * @param {Array} extras - Optional array of extra splits times.
@@ -314,6 +315,7 @@
     *     class name, false to default class name to course name.
     * @param {String} className - The name of the competitor's class, or "" to
     *     default to course name.
+    * @param {Number} time - The total time of the competitor.
     * @param {Array} cumTimes - Array of cumulative times, as strings.
     * @param {Array} splits - Array of split times, as strings.
     * @param {Array} extras - Optional array of extra splits times.
@@ -406,6 +408,7 @@
     * @param {Number} offset - The offset to add to the control numbers.
     * @param {boolean} includeFinish - True to include the finish, false to
     *     not include it.
+    * @return {String} Line of the table.
     */
     function getControlsLineOEventTabular(codes, offset, includeFinish) {
         var emptyCell = getCellOEventTabular("");
@@ -442,6 +445,7 @@
     *     class, false to not include the class name cell.
     * @param {String} className - The name of the competitor's class, or "" to
     *     default to course name.
+    * @param {Number} time - The total time of the competitor.
     * @param {Array} cumTimes - Array of cumulative times, as strings.
     * @param {Array} splits - Array of split times, as strings.
     * @param {Array} extras - Optional array of extra splits times.

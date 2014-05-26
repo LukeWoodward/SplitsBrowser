@@ -153,7 +153,7 @@
     /**
     * Attempts to read a course distance from the given string.
     * @param {String} text - The text string to read a course distance from.
-    * @return {Number|null} - The parsed course distance, or null if no 
+    * @return {?Number} - The parsed course distance, or null if no
     *     distance could be parsed.
     */
     function tryReadDistance(text) {
@@ -168,7 +168,7 @@
     /**
     * Attempts to read a course climb from the given string.
     * @param {String} text - The text string to read a course climb from.
-    * @return {Number|null} - The parsed course climb, or null if no climb
+    * @return {?Number} - The parsed course climb, or null if no climb
     *     could be parsed.
     */
     function tryReadClimb(text) {
@@ -179,7 +179,7 @@
             return parseInt(climbMatch[1], 10);
         }
     }
-    
+
     /**
     * Reads control codes from an array of strings.  Each code should be of the
     * form num(code), with the exception of the finish, which, if it appears,
@@ -234,19 +234,19 @@
     * @param {String} name - The name of the competitor.
     * @param {String} club - The name of the competitor's club.
     * @param {String} className - The class of the competitor.
-    * @param {Number|null} - The total time taken by the competitor, or null
-    *     for no total time.
+    * @param {?Number} totalTime - The total time taken by the competitor, or
+    *     null for no total time.
     * @param {Array} cumTimes - Array of cumulative split times.
     * @param {boolean} competitive - Whether the competitor's run is competitive.
     */
-    var CompetitorParseRecord = function (name, club, className, totalTime, cumTimes, competitive) {
+    function CompetitorParseRecord(name, club, className, totalTime, cumTimes, competitive) {
         this.name = name;
         this.club = club;
         this.className = className;
         this.totalTime = totalTime;
         this.cumTimes = cumTimes;
         this.competitive = competitive;
-    };
+    }
     
     /**
     * Returns whether this competitor record is a 'continuation' record.
@@ -987,18 +987,18 @@
     * Represents the partial result of parsing a course.
     * @constructor
     * @param {String} name - The name of the course.
-    * @param {Number|null} distance - The distance of the course in kilometres,
+    * @param {?Number} distance - The distance of the course in kilometres,
     *     if known, else null.
-    * @param {Number|null} climb - The climb of the course in metres, if known,
+    * @param {?Number} climb - The climb of the course in metres, if known,
     *     else null.
     */ 
-    var CourseParseRecord = function (name, distance, climb) {
+    function CourseParseRecord(name, distance, climb) {
         this.name = name;
         this.distance = distance;
         this.climb = climb;
         this.controls = [];
         this.competitors = [];
-    };
+    }
     
     /**
     * Adds the given list of control codes to those built up so far.
@@ -1043,19 +1043,19 @@
     * @constructor
     * @param {Object} recognizer - The recognizer to use to parse the HTML.
     */
-    var SIHtmlFormatParser = function (recognizer) {
+    function SIHtmlFormatParser(recognizer) {
         this.recognizer = recognizer;
         this.courses = [];
         this.currentCourse = null;
         this.lines = null;
         this.linePos = -1;
         this.currentCompetitor = null;
-    };
+    }
     
     /**
     * Attempts to read the next unread line from the data given.  If the end of
     * the data has been read, null will be returned.
-    * @return {String|null} The line read, or null if the end of the data has
+    * @return {?String} The line read, or null if the end of the data has
     *     been reached.
     */
     SIHtmlFormatParser.prototype.tryGetLine = function () {
@@ -1245,6 +1245,7 @@
     * way, an InvalidData exception is thrown.
     *
     * @param {String} data - The string containing event data.
+    * @return {Event} The parsed event.
     */
     SplitsBrowser.Input.SIHtml.parseEventData = function (data) {
         data = normaliseLineEndings(data);

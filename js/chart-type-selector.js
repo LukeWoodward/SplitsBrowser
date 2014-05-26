@@ -28,7 +28,7 @@
     * @param {HTMLElement} parent - The parent element to add the control to.
     * @param {Array} chartTypes - Array of types of chart to list.
     */
-    var ChartTypeSelector = function (parent, chartTypes) {
+    function ChartTypeSelector(parent, chartTypes) {
         this.changeHandlers = [];
         this.chartTypes = chartTypes;
         this.raceGraphDisabledNotifier = null;
@@ -50,7 +50,7 @@
                    .text(function (value) { return getMessage(value.nameKey); });
                    
         optionsList.exit().remove();
-    };
+    }
     
     /**
     * Sets the function used to disable the selection of the race graph.
@@ -59,8 +59,8 @@
     * graph is made, and the selection will revert to what it was before.  If
     * it is null, the race graph can be selected.
     *
-    * @param {Function|null} raceGraphDisabledNotifier - Function to call when
-    *     the race graph is selected
+    * @param {?Function} raceGraphDisabledNotifier - Function to call when the
+    *     race graph is selected
     */
     ChartTypeSelector.prototype.setRaceGraphDisabledNotifier = function (raceGraphDisabledNotifier) {
         this.raceGraphDisabledNotifier = raceGraphDisabledNotifier;

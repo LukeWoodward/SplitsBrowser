@@ -71,6 +71,7 @@
     
     /**
     * Returns data for a test competitor.
+    * @return {Object} Test competitor data.
     */
     function getCompetitor1() {
         return {
@@ -90,6 +91,7 @@
     
     /**
     * Returns data for a second test competitor.
+    * @return {Object} Test competitor data.
     */
     function getCompetitor2() {
         return {
@@ -109,6 +111,7 @@
     
     /**
     * Returns data for a second test competitor, on a longer course.
+    * @return {Object} Test competitor data.
     */
     function getCompetitor2OnLongerCourse() {
         var comp2 = getCompetitor2();
@@ -121,6 +124,7 @@
     
     /**
     * Returns data for a third test competitor.
+    * @return {Object} Test competitor data.
     */
     function getCompetitor3() {
         return {
@@ -139,28 +143,32 @@
     }
     
     /**
-    * Returns a list of test controls for competitor 1.
+    * Returns an array of test controls for competitor 1.
+    * @return {Array} Test controls data.
     */
     function getControls1() {
         return [{code: "208", time: "01:50"}, {code: "227", time: "03:38"}, {code: "212", time: "06:02"}];
     }
     
     /**
-    * Returns a list of test controls for competitor 1, with one blank time.
+    * Returns an array of test controls for competitor 1, with one blank time.
+    * @return {Array} Test controls data.
     */
     function getControls1WithBlankTimeForLast() {
         return [{code: "208", time: "01:50"}, {code: "227", time: "03:38"}, {code: "212", time: ""}];
     }
     
     /**
-    * Returns a list of test controls for competitor 1, with a non-numeric control code.
+    * Returns an array of test controls for competitor 1, with a non-numeric control code.
+    * @return {Array} Test controls data.
     */
     function getControls1WithNonNumericControlCode() {
         return [{code: "208", time: "01:50"}, {code: "ST2", time: "03:38"}, {code: "212", time: "06:02"}];
     }
     
     /**
-    * Returns a list of test controls for competitor 2.
+    * Returns an array of test controls for competitor 2.
+    * @return {Array} Test controls data.
     */ 
     function getControls2() {
         return [{code: "208", time: "02:01"}, {code: "227", time: "04:06"}, {code: "212", time: "06:37"}];
@@ -168,13 +176,15 @@
 
     /**
     * Returns a longer list of test controls for competitor 2.
+    * @return {Array} Test controls data.
     */
     function getLongerControls2() {
         return [{code: "208", time: "02:01"}, {code: "222", time: "04:06"}, {code: "219", time: "06:37"}, {code: "213", time: "09:10"}];
     }
     
     /**
-    * Returns a list of test controls for competitor 3.
+    * Returns an array of test controls for competitor 3.
+    * @return {Array} Test controls data.
     */ 
     function getControls3() {
         return [{code: "208", time: "01:48"}, {code: "227", time: "03:46"}, {code: "212", time: "05:59"}];

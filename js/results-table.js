@@ -33,14 +33,14 @@
     * @constructor
     * @param {HTMLElement} parent - The parent element to add this control to.
     */
-    var ResultsTable = function (parent) {
+    function ResultsTable(parent) {
         this.parent = parent;
         this.ageClass = null;
         this.div = null;
         this.headerSpan = null;
         this.table = null;
         this.buildTable();
-    };
+    }
     
     /**
     * Build the results table.

@@ -44,9 +44,6 @@
         callCount += 1;
     }
     
-    /**
-    * Creates and returns a new ChartTypeSelector object.
-    */
     function createSelector() {
         return new ChartTypeSelector(d3.select("#qunit-fixture").node(), chartTypes);
     }

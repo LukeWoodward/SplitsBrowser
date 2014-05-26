@@ -26,10 +26,10 @@
     /**
     * Creates a ChartPopup control.
     * @constructor
-    * @param {HTMLElement} Parent HTML element.
+    * @param {HTMLElement} parent - Parent HTML element.
     * @param {Object} handlers - Object that maps mouse event names to handlers.
     */
-    var ChartPopup = function (parent, handlers) {
+    function ChartPopup(parent, handlers) {
 
         this.shown = false;
         this.mouseIn = false;
@@ -63,7 +63,7 @@
         var outerThis = this;
         $(this.popupDiv.node()).mouseenter(function () { outerThis.mouseIn = true; });
         $(this.popupDiv.node()).mouseleave(function () { outerThis.mouseIn = false; });
-    };
+    }
 
     /**
     * Returns whether the popup is currently shown.

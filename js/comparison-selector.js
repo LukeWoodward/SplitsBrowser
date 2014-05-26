@@ -74,7 +74,7 @@
     * @param {Function} alerter - Function to call with any messages to show to
     *     the user.
     */
-    var ComparisonSelector = function (parent, alerter) {
+    function ComparisonSelector(parent, alerter) {
         this.changeHandlers = [];
         this.classes = null;
         this.currentRunnerIndex = null;
@@ -124,7 +124,7 @@
         
         this.dropDown.selectedIndex = DEFAULT_COMPARISON_INDEX;
         this.previousSelectedIndex = DEFAULT_COMPARISON_INDEX;
-    };
+    }
 
     /**
     * Add a change handler to be called whenever the selected class is changed.
@@ -150,8 +150,8 @@
     };
     
     /**
-    * Sets the list of classes.
-    * @param {Array} classes - Array of AgeClass objects.
+    * Sets the age-class set to use.
+    * @param {AgeClassSet} ageClassSet - The age-class set to set.
     */
     ComparisonSelector.prototype.setAgeClassSet = function (ageClassSet) {
         this.ageClassSet = ageClassSet;

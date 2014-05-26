@@ -68,10 +68,10 @@
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
     * @constructor
-    * @param {Object|undefined} options - Optional object containing various
-    *     options to SplitsBrowser.
+    * @param {?Object} options - Optional object containing various options
+    *     to SplitsBrowser.
     */
-    var Viewer = function (options) {
+    function Viewer(options) {
         this.options = options;
     
         this.eventData = null;
@@ -99,7 +99,7 @@
         this.competitorListContainer = null;
         
         this.currentResizeTimeout = null;
-    };
+    }
     
     /**
     * Pops up an alert box informing the user that the race graph cannot be

@@ -90,7 +90,7 @@
     * * result {Any} - Specified to include the <Result> element, omit to
     *       skip it.
     *
-    * @param {Object} person - The person data.
+    * @param {Object} personData - The person data.
     * @return {String} Generated XML string.
     */
     function getPersonResultXml(personData) {

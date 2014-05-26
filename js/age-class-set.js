@@ -31,6 +31,7 @@
     * Utility function to merge the lists of all competitors in a number of age
     * classes.  All age classes must contain the same number of controls.
     * @param {Array} ageClasses - Array of AgeClass objects.
+    * @return {Array} Merged array of competitors.
     */
     function mergeCompetitors(ageClasses) {
         if (ageClasses.length === 0) {
@@ -83,12 +84,12 @@
     * @constructor
     * @param {Array} ageClasses - Array of currently-selected age classes.
     */
-    var AgeClassSet = function (ageClasses) {
+    function AgeClassSet(ageClasses) {
         this.allCompetitors = mergeCompetitors(ageClasses);
         this.ageClasses = ageClasses;
         this.numControls = ageClasses[0].numControls;
         this.computeRanks();
-    };
+    }
     
     /**
     * Returns whether this age-class set is empty, i.e. whether it has no
@@ -172,7 +173,7 @@
     * @param {Array} cumTimes - Array of cumulative times.
     * @return {Array} Array of cumulative times with NaNs replaced.
     */
-    var fillBlankRangesInCumulativeTimes = function (cumTimes) {
+    function fillBlankRangesInCumulativeTimes(cumTimes) {
         cumTimes = cumTimes.slice(0);
         var blankRanges = getBlankRanges(cumTimes);
         for (var rangeIndex = 0; rangeIndex < blankRanges.length; rangeIndex += 1) {
@@ -197,7 +198,7 @@
         }
         
         return cumTimes;
-    };
+    }
     
     /**
     * Returns an array of the cumulative times of the winner of the set of age
@@ -218,7 +219,7 @@
     * of the class.
     * If at least one control has no competitors recording a time for it, null
     * is returned.
-    * @returns {Array|null} Cumulative splits of the imaginary competitor with
+    * @returns {?Array} Cumulative splits of the imaginary competitor with
     *           fastest time, if any.
     */
     AgeClassSet.prototype.getFastestCumTimes = function () {
@@ -231,7 +232,7 @@
     * If at least one control has no competitors recording a time for it, null
     * is returned.
     * @param {Number} percent - The percentage of time to add.
-    * @returns {Array|null} Cumulative splits of the imaginary competitor with
+    * @returns {?Array} Cumulative splits of the imaginary competitor with
     *           fastest time, if any, after adding a percentage.
     */
     AgeClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
@@ -427,7 +428,7 @@
     * @param {Array} currentIndexes - Array of indexes that indicate which
     *           competitors from the overall list are plotted.
     * @param {Object} chartType - The type of chart to draw.
-    * @returns {Array} Array of data.
+    * @returns {Object} Array of data.
     */
     AgeClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
         if (this.isEmpty()) {

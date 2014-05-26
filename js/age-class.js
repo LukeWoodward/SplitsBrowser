@@ -27,11 +27,11 @@
     /**
      * Object that represents a collection of competitor data for a class.
      * @constructor.
-     * @param {string} name - Name of the age class.
+     * @param {String} name - Name of the age class.
      * @param {Number} numControls - Number of controls.
      * @param {Array} competitors - Array of Competitor objects.
      */
-    var AgeClass = function (name, numControls, competitors) {
+    function AgeClass(name, numControls, competitors) {
         this.name = name;
         this.numControls = numControls;
         this.competitors = competitors;
@@ -40,7 +40,7 @@
         this.competitors.forEach(function (comp) {
             comp.setClassName(name);
         });
-    };
+    }
     
     /**
     * Records that this age-class has competitor data that SplitsBrowser has
@@ -87,7 +87,7 @@
     * mispunched that control, or the class is empty), null is returned.
     * @param {Number} controlIdx - The index of the control to return the
     *      fastest split to.
-    * @return {Object|null} Object containing the name and fastest split, or
+    * @return {?Object} Object containing the name and fastest split, or
     *      null if no split times for that control were recorded.
     */
     AgeClass.prototype.getFastestSplitTo = function (controlIdx) {

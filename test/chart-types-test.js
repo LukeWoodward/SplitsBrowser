@@ -155,6 +155,7 @@
                     expectedDubiousTimeInfo = [{start: 1, end: 4}];
                 } else {
                     assert.ok(false, "Unrecognised chart type: '" + chartType.nameKey + "'");
+                    expectedDubiousTimeInfo = null;
                 }
                 
                 assert.deepEqual(chartType.indexesAroundDubiousTimesFunc(competitor), expectedDubiousTimeInfo, "Dubious-time info for " + chartType.nameKey + " should be correct");

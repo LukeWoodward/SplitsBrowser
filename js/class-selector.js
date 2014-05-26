@@ -28,7 +28,7 @@
     * A control that wraps a drop-down list used to choose between classes.
     * @param {HTMLElement} parent - The parent element to add the control to.
     */
-    var ClassSelector = function(parent) {
+    function ClassSelector(parent) {
         this.changeHandlers = [];
         this.otherClassesEnabled = true;
         
@@ -87,7 +87,7 @@
                 outerThis.otherClassesList.style("display", "none");
             }
         });
-    };
+    }
 
     /**
     * Sets whether the other-classes selector is enabled, if it is shown at

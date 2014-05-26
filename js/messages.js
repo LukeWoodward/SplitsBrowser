@@ -93,6 +93,7 @@
     *
     * @param {String} key - The key of the message.
     * @param {Object} params - Object mapping parameter names to values.
+    * @return {String} The resulting message.
     */ 
     SplitsBrowser.getMessageWithFormatting = function (key, params) {
         var message = SplitsBrowser.getMessage(key);
