@@ -57,6 +57,7 @@ module.exports = function(grunt) {
                       'js/chart-popup.js',
                       'js/chart.js',
                       'js/results-table.js',
+                      'js/query-string.js',
                       'js/viewer.js'
                 ],
                 dest: '<%= pkg.name %>.js',

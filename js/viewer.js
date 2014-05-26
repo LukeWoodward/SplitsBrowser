@@ -44,6 +44,8 @@
     var parseEventData = SplitsBrowser.Input.parseEventData;
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
     var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
+    var parseQueryString = SplitsBrowser.parseQueryString;
+    var formatQueryString = SplitsBrowser.formatQueryString;
     
     var Controls = SplitsBrowser.Controls;
     var ClassSelector = Controls.ClassSelector;
@@ -77,7 +79,6 @@
         this.eventData = null;
         this.classes = null;
         this.currentClasses = [];
-        this.currentIndexes = null;
         this.chartData = null;
         this.referenceCumTimes = null;
         this.fastestCumTimes = null;
@@ -211,8 +212,6 @@
                           ChartTypes.SplitPosition, ChartTypes.PercentBehind, ChartTypes.ResultsTable];
         
         this.chartTypeSelector = new ChartTypeSelector(this.topPanel.node(), chartTypes);
-        
-        this.chartType = this.chartTypeSelector.getChartType();    
     };
     
     /**
@@ -223,8 +222,6 @@
         if (this.classes !== null) {
             this.comparisonSelector.setClasses(this.classes);
         }
-        
-        this.comparisonFunction = this.comparisonSelector.getComparisonFunction();    
     };
     
     /**
@@ -232,20 +229,38 @@
     * has attempted to repair it.
     */
     Viewer.prototype.addOriginalDataSelector = function () {
-        var outerThis = this;
-        var showOriginalData = function () {
-            transferCompetitorData(outerThis.eventData);
-            outerThis.eventData.determineTimeLosses();
-            outerThis.drawChart();
+        this.originalDataSelector = new OriginalDataSelector(this.topPanel);
+    };
+
+    /**
+    * Adds a direct link which links directly to SplitsBrowser with the given
+    * settings.
+    */
+    Viewer.prototype.addDirectLink = function () {
+        this.directLink = this.topPanel.append("a")
+                                      .attr("title", tryGetMessage("DirectLinkToolTip", ""))
+                                      .attr("id", "directLinkAnchor")
+                                      .attr("href", document.location.href)
+                                      .text(getMessage("DirectLink"));
+    };
+    
+    /**
+    * Updates the URL that the direct link points to.
+    */
+    Viewer.prototype.updateDirectLink = function () {
+        var data = {
+            classes: this.classSelector.getSelectedClasses(),
+            view: this.chartTypeSelector.getChartType(),
+            compareWith: this.comparisonSelector.getComparisonType(),
+            selected: this.selection.getSelectedIndexes(),
+            stats: this.statisticsSelector.getVisibleStatistics(),
+            showOriginal: this.ageClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected()
         };
         
-        var showRepairedData = function () {
-            repairEventData(outerThis.eventData);
-            outerThis.eventData.determineTimeLosses();
-            outerThis.drawChart();
-        };
-        
-        this.originalDataSelector = new OriginalDataSelector(this.topPanel, showOriginalData, showRepairedData);
+        var oldQueryString = document.location.search;
+        var newQueryString = formatQueryString(oldQueryString, this.eventData, this.ageClassSet, data);
+        var oldHref = document.location.href;        
+        this.directLink.attr("href", oldHref.substring(0, oldHref.length - oldQueryString.length) + "?" + newQueryString);
     };
     
     /**
@@ -298,6 +313,8 @@
         this.addSpacer();
         this.addComparisonSelector();
         this.addOriginalDataSelector();
+        this.addSpacer();
+        this.addDirectLink();
         
         this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
 
@@ -315,9 +332,6 @@
         this.resultsTable.hide();
         
         var outerThis = this;
-        this.classSelector.registerChangeHandler(function (indexes) { outerThis.selectClasses(indexes); });
-        this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartType(chartType); });
-        this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
            
         $(window).resize(function () { outerThis.handleWindowResize(); });
         
@@ -329,6 +343,17 @@
         $("body").bind("selectstart", function () { return false; });
     };
 
+    /**
+    * Registers change handlers.
+    */
+    Viewer.prototype.registerChangeHandlers = function () {
+        var outerThis = this;
+        this.classSelector.registerChangeHandler(function (indexes) { outerThis.selectClasses(indexes); });
+        this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartTypeAndRedraw(chartType); });
+        this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
+        this.originalDataSelector.registerChangeHandler(function (showOriginalData) { outerThis.showOriginalOrRepairedData(showOriginalData); });
+    };
+    
     /**
     * Select all of the competitors.
     */
@@ -351,7 +376,7 @@
         if (this.selection.isSingleRunnerSelected()) {
             // Only a single runner is still selected, so nobody crossed the
             // selected runner.
-            var competitorName = this.ageClassSet.allCompetitors[this.currentIndexes[0]].name;
+            var competitorName = this.ageClassSet.allCompetitors[this.selection.getSelectedIndexes()[0]].name;
             alert(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
         }
     };
@@ -420,7 +445,7 @@
     * Draw the chart using the current data.
     */
     Viewer.prototype.drawChart = function () {
-        if (this.chartType.isResultsTable) {
+        if (this.chartTypeSelector.getChartType().isResultsTable) {
             return;
         }
         
@@ -438,10 +463,10 @@
         
         var outerThis = this;
         
-        this.selectionChangeHandler = function (indexes) {
-            outerThis.currentIndexes = indexes;
+        this.selectionChangeHandler = function () {
             outerThis.enableOrDisableCrossingRunnersButton();
             outerThis.redraw();
+            outerThis.updateDirectLink();
         };
 
         this.selection.registerChangeHandler(this.selectionChangeHandler);
@@ -449,14 +474,16 @@
         this.statisticsChangeHandler = function (visibleStatistics) {
             outerThis.currentVisibleStatistics = visibleStatistics;
             outerThis.redraw();
+            outerThis.updateDirectLink();
         };
         
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
         this.updateControlEnabledness();
-        this.referenceCumTimes = this.comparisonFunction(this.ageClassSet);
+        var comparisonFunction = this.comparisonSelector.getComparisonFunction();
+        this.referenceCumTimes = comparisonFunction(this.ageClassSet);
         this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
-        this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+        this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType());
         this.redrawChart();
     };
 
@@ -472,17 +499,44 @@
             fastestCumTimes: this.fastestCumTimes
         };
             
-        this.chart.drawChart(data, this.currentIndexes, this.currentVisibleStatistics, this.chartType);
+        this.chart.drawChart(data, this.selection.getSelectedIndexes(), this.currentVisibleStatistics, this.chartTypeSelector.getChartType());
     };
     
     /**
     * Redraw the chart, possibly using new data.
     */
     Viewer.prototype.redraw = function () {
-        if (!this.chartType.isResultsTable) {
-            this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+        var chartType = this.chartTypeSelector.getChartType();
+        if (!chartType.isResultsTable) {
+            this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), chartType);
             this.redrawChart();
         }
+    };
+    
+    /**
+    * Sets the currently-selected classes in various objects that need it:
+    * current age-class set, comparison selector and results table.
+    * @param {Array} classIndexes - Array of selected class indexes.    
+    */
+    Viewer.prototype.setClasses = function (classIndexes) {
+        this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
+        this.ageClassSet = new AgeClassSet(this.currentClasses);
+        this.comparisonSelector.setAgeClassSet(this.ageClassSet);
+        this.resultsTable.setClass(this.currentClasses[0]);    
+        this.enableOrDisableRaceGraph();
+        this.originalDataSelector.setVisible(this.ageClassSet.hasDubiousData());
+    };
+    
+    /**
+    * Initialises the viewer with the given initial classes.
+    * @param {Array} classIndexes - Array of selected class indexes.
+    */ 
+    Viewer.prototype.initClasses = function (classIndexes) {
+        this.classSelector.selectClasses(classIndexes);
+        this.setClasses(classIndexes);
+        this.selection = new CompetitorSelection(this.ageClassSet.allCompetitors.length);
+        this.competitorListBox.setSelection(this.selection);
+        this.previousCompetitorList = this.ageClassSet.allCompetitors;
     };
     
     /**
@@ -491,38 +545,26 @@
     */
     Viewer.prototype.selectClasses = function (classIndexes) {
     
-        if (this.selection === null) {
-            this.selection = new CompetitorSelection(0);
-            this.competitorListBox.setSelection(this.selection);
+        if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
+            // The 'primary' class hasn't changed, only the 'other' ones.
+            // In this case we don't clear the selection.
         } else {
-            if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
-                // The 'primary' class hasn't changed, only the 'other' ones.
-                // In this case we don't clear the selection.
-            } else {
-                this.selection.selectNone();
-            }
+            this.selection.selectNone();
         }
         
-        this.currentIndexes = [];
-        this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
-        this.ageClassSet = new AgeClassSet(this.currentClasses);
-        this.comparisonSelector.setAgeClassSet(this.ageClassSet);
-        this.resultsTable.setClass(this.currentClasses[0]);
-        this.drawChart();
+        this.setClasses(classIndexes);
         this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
+        this.drawChart();
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
-        this.enableOrDisableRaceGraph();
-        this.originalDataSelector.setVisible(this.ageClassSet.hasDubiousData());
+        this.updateDirectLink();
     };
     
     /**
     * Change the graph to compare against a different reference.
-    * @param {Function} comparisonFunc - The function that returns the
-    *      reference class data from the class data.
     */
-    Viewer.prototype.selectComparison = function (comparisonFunc) {
-        this.comparisonFunction = comparisonFunc;
+    Viewer.prototype.selectComparison = function () {
         this.drawChart();
+        this.updateDirectLink();
     };
     
     /**
@@ -530,7 +572,6 @@
     * @param {Object} chartType - The type of chart to draw.
     */
     Viewer.prototype.selectChartType = function (chartType) {
-        this.chartType = chartType;
         if (chartType.isResultsTable) {
             this.mainPanel.style("display", "none");
             
@@ -548,18 +589,53 @@
         this.updateControlEnabledness();
         
         this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? null : "none");
-        
+    };
+    
+    /**
+    * Change the type of chart shown.
+    * @param {Object} chartType - The type of chart to draw.
+    */
+    Viewer.prototype.selectChartTypeAndRedraw = function (chartType) {
+        this.selectChartType(chartType);
         this.drawChart();
+        this.updateDirectLink();
+    };
+    
+    /**
+    * Selects original or repaired data, doing any recalculation necessary.
+    * @param {boolean} showOriginalData - True to show original data, false to
+    *     show repaired data.
+    */
+    Viewer.prototype.selectOriginalOrRepairedData = function (showOriginalData) {
+        if (showOriginalData) {
+            transferCompetitorData(this.eventData);
+        } else {
+            repairEventData(this.eventData);
+        }
+        
+        this.eventData.determineTimeLosses();
+    };
+    
+    /**
+    * Shows original or repaired data.
+    * @param {boolean} showOriginalData - True to show original data, false to
+    *     show repaired data.
+    */
+    Viewer.prototype.showOriginalOrRepairedData = function (showOriginalData) {
+        this.selectOriginalOrRepairedData(showOriginalData);
+        this.drawChart();
+        this.updateDirectLink();
     };
     
     /**
     * Updates whether a number of controls are enabled.
     */
     Viewer.prototype.updateControlEnabledness = function () {
-        this.classSelector.setOtherClassesEnabled(!this.chartType.isResultsTable);
-        this.comparisonSelector.setEnabled(!this.chartType.isResultsTable);
-        this.statisticsSelector.setEnabled(!this.chartType.isResultsTable);
-        this.originalDataSelector.setEnabled(!this.chartType.isResultsTable);
+        var chartType = this.chartTypeSelector.getChartType();
+        this.classSelector.setOtherClassesEnabled(!chartType.isResultsTable);
+        this.comparisonSelector.setEnabled(!chartType.isResultsTable);
+        this.statisticsSelector.setEnabled(!chartType.isResultsTable);
+        this.originalDataSelector.setEnabled(!chartType.isResultsTable);
         this.enableOrDisableCrossingRunnersButton();
     };
     
@@ -568,6 +644,47 @@
     */
     Viewer.prototype.enableOrDisableCrossingRunnersButton = function () {
         enableControl(this.crossingRunnersButton, this.selection.isSingleRunnerSelected());
+    };
+    
+    /**
+    * Updates the state of the viewer to reflect query-string arguments parsed.
+    * @param {Object} parsedQueryString - Parsed query-string object.
+    */
+    Viewer.prototype.updateFromQueryString = function (parsedQueryString) {
+        if (parsedQueryString.classes === null) {
+            this.initClasses([0]);
+        } else {
+            this.initClasses(parsedQueryString.classes);
+        }
+        
+        if (parsedQueryString.chartType !== null) {
+            this.chartTypeSelector.setChartType(parsedQueryString.chartType);
+            this.selectChartType(parsedQueryString.chartType);
+        }
+        
+        if (parsedQueryString.compareWith !== null) {
+            this.comparisonSelector.setComparisonType(parsedQueryString.compareWith.index, parsedQueryString.compareWith.runner);
+        }
+        
+        if (parsedQueryString.selected !== null) {
+            this.selection.setSelectedIndexes(parsedQueryString.selected);
+        }
+        
+        if (parsedQueryString.stats !== null) {
+            this.statisticsSelector.setVisibleStatistics(parsedQueryString.stats);
+        }
+        
+        if (parsedQueryString.showOriginal && this.ageClassSet.hasDubiousData()) {
+            this.originalDataSelector.selectOriginalData();
+            this.selectOriginalOrRepairedData(true);
+        }
+    };
+    
+    /**
+    * Sets the default selected class.
+    */
+    Viewer.prototype.setDefaultSelectedClass = function () {
+        this.initClasses([0]);
     };
     
     SplitsBrowser.Viewer = Viewer;
@@ -628,7 +745,17 @@
             var viewer = new Viewer(options);
             viewer.buildUi();
             viewer.setEvent(eventData);
-            viewer.selectClasses([0]);
+            
+            var queryString = document.location.search;
+            if (queryString !== null && queryString.length > 0) {
+                var parsedQueryString = parseQueryString(queryString, eventData);
+                viewer.updateFromQueryString(parsedQueryString);
+            } else {
+                viewer.setDefaultSelectedClass();
+            }
+
+            viewer.drawChart();
+            viewer.registerChangeHandlers();
         }
     };
     

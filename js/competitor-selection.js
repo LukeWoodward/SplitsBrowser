@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser CompetitorSelection - The currently-selected competitors.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -106,6 +106,26 @@
     };
 
     /**
+    * Returns an array of all currently-selected competitor indexes.
+    * @return {Array} Array of selected indexes.
+    */
+    CompetitorSelection.prototype.getSelectedIndexes = function () {
+        return this.currentIndexes.slice(0);
+    };
+    
+    
+    /**
+    * Set the selected competitors to those in the given array.
+    * @param {Array} selectedIndex - Array of indexes of selected competitors.
+    */
+    CompetitorSelection.prototype.setSelectedIndexes = function (selectedIndexes) {
+        if (selectedIndexes.every(function (index) { return 0 <= index && index < this.count; }, this)) {
+            this.currentIndexes = selectedIndexes;
+            this.fireChangeHandlers();
+        }
+    };
+    
+    /**
     * Register a handler to be called whenever the list of indexes changes.
     *
     * When a change is made, this function will be called, with the array of
@@ -167,6 +187,10 @@
     * After the migration, any competitors in the old list that were selected
     * and are also in the new competitors list remain selected.
     *
+    * Note that this method does NOT fire change handlers when it runs.  This
+    * is typically used during a change of class, when the application may be
+    * making other changes.
+    *
     * @param {Array} oldCompetitors - Array of Competitor objects for the old
     *      selection.  The length of this must match the current count of
     *      competitors.
@@ -193,8 +217,6 @@
                 this.currentIndexes.push(idx);
             }
         }, this);
-        
-        this.fireChangeHandlers();
     };
 
     SplitsBrowser.Model.CompetitorSelection = CompetitorSelection;

@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser ChartTypeSelector - Provides a choice of chart types.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@
         this.lastSelectedIndex = 0;
         
         var div = d3.select(parent).append("div")
-                                    .attr("id", "chartTypeSelector");
+                                   .attr("id", "chartTypeSelector");
         div.append("span")
            .text(getMessage("ChartTypeSelectorLabel"));
            
@@ -82,10 +82,23 @@
 
     /**
     * Returns the currently-selected chart type.
-    * @return {Array} The currently-selected chart type.
+    * @return {Object} The currently-selected chart type.
     */
     ChartTypeSelector.prototype.getChartType = function () {
         return this.chartTypes[Math.max(this.dropDown.selectedIndex, 0)];
+    };
+    
+    /**
+    * Sets the chart type.  If the chart type given is not recognised, nothing
+    * happens.
+    * @param {Object} chartType - The chart type selected.
+    */
+    ChartTypeSelector.prototype.setChartType = function (chartType) {
+        var index = this.chartTypes.indexOf(chartType);
+        if (index >= 0) {
+            this.dropDown.selectedIndex = index;
+            this.onSelectionChanged();
+        }
     };
     
     /**

@@ -87,6 +87,12 @@ span.comparisonSelectorLabel.disabled
     color: #999999;
 }
 
+a#directLinkAnchor
+{
+    float: left;
+    margin: 4px;
+}
+
 label.statisticsSelectorLabel.disabled, label.originalDataSelectorLabel.disabled
 {
     color: #999999;

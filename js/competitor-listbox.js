@@ -48,6 +48,15 @@
     };
 
     /**
+    * Returns whether the competitor with the given index is selected.
+    * @param {Number} index - Index of the competitor within the list.
+    * @return True if the competitor is selected, false if not.
+    */
+    CompetitorListBox.prototype.isSelected = function (index) {
+        return this.competitorSelection !== null && this.competitorSelection.isSelected(index);
+    };
+    
+    /**
     * Handles a change to the selection of competitors, by highlighting all
     * those selected and unhighlighting all those no longer selected.
     */
@@ -55,7 +64,7 @@
         var outerThis = this;
         this.listDiv.selectAll("div.competitor")
                     .data(d3.range(this.competitorSelection.count))
-                    .classed("selected", function (comp, index) { return outerThis.competitorSelection.isSelected(index); });
+                    .classed("selected", function (comp, index) { return outerThis.isSelected(index); });
     };
 
     /**
@@ -79,8 +88,10 @@
         
         var competitorDivs = this.listDiv.selectAll("div.competitor").data(competitors);
 
+        var outerThis = this;
         competitorDivs.enter().append("div")
-                              .classed("competitor", true);
+                              .classed("competitor", true)
+                              .classed("selected", function (comp, index) { return outerThis.isSelected(index); });
 
         competitorDivs.selectAll("span").remove();
         
@@ -96,7 +107,6 @@
 
         competitorDivs.exit().remove();
         
-        var outerThis = this;
         $("div.competitor").each(function (index, div) {
             $(div).on("click", function () { outerThis.toggleCompetitor(index); });
         });

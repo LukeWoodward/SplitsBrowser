@@ -133,6 +133,18 @@
         
         return visibleStats;
     };
+    
+    /**
+    * Sets the visible statistics.
+    * @param {Object} visibleStats - The statistics to make visible.
+    */
+    StatisticsSelector.prototype.setVisibleStatistics = function (visibleStats) {
+        this.span.selectAll("input")[0].forEach(function (checkbox, index) {
+            checkbox.checked = visibleStats[STATISTIC_NAMES[index]] || false;
+        });
+        
+        this.onCheckboxChanged();
+    };
 
     /**
     * Handles the change in state of a checkbox, by firing all of the handlers.

@@ -33,9 +33,13 @@
     * @param {Array} selectedIndexes - Indexes of selected competitors in the selection.
     * @param {boolean} multipleClasses - Whether the list of competitors is built from
     *                                    multiple classes.
+    * @param {boolean} swapConstructionOrder - (Optional) True to construct the
+    *     competitor listbox by setting the selection before the list of competitors,
+    *     false to set the list of competitors first.  Defaults to false if not
+    *     specified.
     * @return 2-element object containing the selection and listbox.
     */
-    function createSampleListbox(selectedIndexes, multipleClasses) {
+    function createSampleListbox(selectedIndexes, multipleClasses, swapConstructionOrder) {
         var parent = d3.select("div#qunit-fixture").node();
         
         var compList = [
@@ -48,8 +52,14 @@
         selectedIndexes.forEach(function (index) { selection.toggle(index); });
         
         var listbox = new CompetitorListBox(parent);
-        listbox.setCompetitorList(compList, multipleClasses);
-        listbox.setSelection(selection);
+        if (swapConstructionOrder) {
+            listbox.setSelection(selection);
+            listbox.setCompetitorList(compList, multipleClasses);
+        } else {
+            listbox.setCompetitorList(compList, multipleClasses);
+            listbox.setSelection(selection);
+        }
+        
         return { selection: selection, listbox: listbox };
     }
 
@@ -72,6 +82,13 @@
     QUnit.test("Can create a listbox with two of three competitors initially selected", function (assert) {
 
         createSampleListbox([0, 2], false);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 2);
+    });
+
+    QUnit.test("Can create a listbox with two of three competitors initially selected with the listbox construction order swapped", function (assert) {
+
+        createSampleListbox([0, 2], false, true);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor").size(), 3);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 2);
     });

@@ -32,15 +32,9 @@
     * @constructor
     * @param {d3.selection} parent - d3 selection containing the parent to
     *     insert the selector into.
-    * @param {Function} showOriginalData - Function to call when original data
-    *     is to be shown.
-    * @param {Function} showRepairedData - Function to call when repaired data
-    *     is to be shown.
     */
-    function OriginalDataSelector(parent, showOriginalData, showRepairedData) {
+    function OriginalDataSelector(parent) {
         this.parent = parent;
-        this.showRepairedData = showRepairedData;
-        this.showOriginalData = showOriginalData;
 
         var checkboxId = "originalDataCheckbox";
         this.containerDiv = parent.append("div")
@@ -54,7 +48,7 @@
         this.checkbox = span.append("input")
                             .attr("type", "checkbox")
                             .attr("id", checkboxId)
-                            .on("click", function() { outerThis.showOriginalOrRepairedData(); })
+                            .on("click", function() { outerThis.fireChangeHandlers(); })
                             .node();
                                  
         span.append("label")
@@ -63,18 +57,59 @@
             .text(getMessage("ShowOriginalData"));
             
         this.containerDiv.attr("title", getMessage("ShowOriginalDataTooltip"));
+        this.handlers = [];        
     }
 
     /**
-    * Shows original or repaired data depending on whether the checkbox is
-    * checked.
+    * Register a change handler to be called whenever the choice of original or
+    * repaired data is changed.
+    *
+    * If the handler was already registered, nothing happens.
+    * @param {Function} handler - Function to be called whenever the choice
+    *                             changes.
     */
-    OriginalDataSelector.prototype.showOriginalOrRepairedData = function () {
-        if (this.checkbox.checked) {
-            this.showOriginalData();
-        } else {
-            this.showRepairedData();
+    OriginalDataSelector.prototype.registerChangeHandler = function (handler) {
+        if (this.handlers.indexOf(handler) === -1) {
+            this.handlers.push(handler);
         }
+    };
+       
+    /**
+    * Deregister a change handler from being called whenever the choice of
+    * original or repaired data is changed.
+    *
+    * If the handler given was never registered, nothing happens.
+    * @param {Function} handler - Function to be called whenever the choice
+    *                             changes.
+    */
+    OriginalDataSelector.prototype.deregisterChangeHandler = function (handler) {
+        var index = this.handlers.indexOf(handler);
+        if (index !== -1) {
+            this.handlers.splice(index, 1);
+        }
+    };
+    
+    /**
+    * Fires all change handlers registered.
+    */
+    OriginalDataSelector.prototype.fireChangeHandlers = function () {
+        this.handlers.forEach(function (handler) { handler(this.checkbox.checked); }, this);
+    };
+    
+    /**
+    * Returns whether original data is selected.
+    * @return {boolean} True if original data is selected, false if not.
+    */
+    OriginalDataSelector.prototype.isOriginalDataSelected = function () {
+        return this.checkbox.checked;
+    };
+    
+    /**
+    * Selects original data.
+    */
+    OriginalDataSelector.prototype.selectOriginalData = function () {
+        this.checkbox.checked = true;
+        this.fireChangeHandlers();
     };
     
     /**
