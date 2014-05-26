@@ -225,7 +225,7 @@
         var typeIndex = this.dropDown.selectedIndex;
         var runner;
         if (typeIndex === ALL_COMPARISON_OPTIONS.length - 1) {
-            runner = this.ageClassSet.allCompetitors[this.runnerDrownDown.selectedIndex];
+            runner = this.ageClassSet.allCompetitors[this.runnerDropDown.selectedIndex];
         } else {
             runner = null;
         }

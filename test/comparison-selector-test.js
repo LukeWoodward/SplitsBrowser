@@ -286,6 +286,22 @@
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
+    QUnit.test("Can get comparison type when selecting a runner from the 'Any runner...' drop-down", function(assert) {
+        resetLastSelector();
+        var selector = createSelector();
+        selector.setAgeClassSet(DUMMY_CLASS_SET);        
+        
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        var anyRunnerOptionIndex = htmlSelect.options.length - 1;
+        $(htmlSelect).val(anyRunnerOptionIndex).change();
+        
+        htmlSelect = d3.select(_RUNNER_SELECTOR_SELECTOR).node();
+        $(htmlSelect).val(1).change();
+
+        var comparisonType = selector.getComparisonType();
+        assert.deepEqual(comparisonType, {index: anyRunnerOptionIndex, runner: competitors[1]}, "Selected runner should be in the comparison type");
+    });
+
     QUnit.test("Runner selector repopulated when class data changes", function(assert) {
         resetLastSelector();
         var selector = createSelector();
@@ -299,26 +315,6 @@
 
         selector.setAgeClassSet(getDummyAgeClassSet([{name: "eight", completed: returnTrue}, {name: "nine", completed: returnTrue}]));
         assert.strictEqual(htmlSelect.options.length, 2, "Wrong number of options created");
-        
-        assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
-    });
-
-    QUnit.test("Runner selector appears if 'Any Runner...' is selected and disappears when deselected", function(assert) {
-        resetLastSelector();
-        var selector = createSelector();
-        selector.setAgeClassSet(DUMMY_CLASS_SET);    
-        
-        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
-        $(htmlSelect).val(htmlSelect.options.length - 1).change();
-        
-        selector.registerChangeHandler(handleComparisonChanged);
-        
-        htmlSelect = d3.select(_RUNNER_SELECTOR_SELECTOR).node();
-        $(htmlSelect).val(1).change();
-
-        var func = selector.getComparisonFunction();
-        assert.deepEqual(func(DUMMY_CLASS_SET), DUMMY_CLASS_SET.allCompetitors[1].getAllCumulativeTimes());
-        assert.strictEqual(callCount, 1, "One change should have been recorded");
         
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
