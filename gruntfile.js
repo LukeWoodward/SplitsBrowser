@@ -82,7 +82,7 @@ module.exports = function(grunt) {
             minified: ['qunit-tests-min.html']
         },
         jshint: {
-            files: ['gruntfile.js', 'js/*.js', 'test/*-test.js'],
+            files: ['gruntfile.js', 'js/*.js', 'test/*.js'],
             options: {
                 // options here to override JSHint defaults
                 plusplus: true,
