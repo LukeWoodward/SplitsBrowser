@@ -250,7 +250,7 @@
     Viewer.prototype.updateDirectLink = function () {
         var data = {
             classes: this.classSelector.getSelectedClasses(),
-            view: this.chartTypeSelector.getChartType(),
+            chartType: this.chartTypeSelector.getChartType(),
             compareWith: this.comparisonSelector.getComparisonType(),
             selected: this.selection.getSelectedIndexes(),
             stats: this.statisticsSelector.getVisibleStatistics(),
