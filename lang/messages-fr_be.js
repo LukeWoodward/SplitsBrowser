@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  Messages - Belgian French messages for SplitsBrowser
  *  
  *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
