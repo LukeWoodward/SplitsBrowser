@@ -1,8 +1,9 @@
 ﻿/*
- *  Messages - Belgian Dutch messages for SplitsBrowser
- *  
+ *  Messages - Be Dutch messages for SplitsBrowser
+ *
  *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
- *                          Ed Nash, Luke Woodward, Robert Marique
+ *                          Ed Nash, Luke Woodward, Robert Marique,
+ *                          Jan-Gerard van der Toorn
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,13 +45,13 @@ SplitsBrowser.Messages = {
     // Chart type names and Y-axis labels.
     SplitsGraphChartType: "Splits grafiek",
     SplitsGraphYAxisLabel: "Tijd (min)",
-    RaceGraphChartType: "Wedstr graph",
+    RaceGraphChartType: "Wedstr grafiek",
     RaceGraphYAxisLabel: "Tijd",
     PositionAfterLegChartType: "Positie na been",
     SplitPositionChartType: "Split positie",
     PositionYAxisLabel: "Positie", // Shared between position-after-leg and split-position.
-    PercentBehindChartType: "Percent achter",
-    PercentBehindYAxisLabel: "Percent achter",
+    PercentBehindChartType: "Procent achter",
+    PercentBehindYAxisLabel: "Procent achter",
     ResultsTableChartType: "Resultaat tabel",
     
     ChartTypeSelectorLabel: "Weergave: ",
@@ -71,7 +72,7 @@ SplitsBrowser.Messages = {
     CompareWithAnyRunnerLabel: "Deelnemer: ",
     // Warning message shown to the user when a comparison option cannot be
     // chosen because the course has no winner.
-    CannotCompareAsNoWinner: "Kan niet vergelijken met '$$OPTION$$' omdat geen enkele deelnemer in deze omloop de wedstrijd beëdigde.",
+    CannotCompareAsNoWinner: "Kan niet vergelijken met '$$OPTION$$' omdat geen enkele deelnemer in deze omloop de wedstrijd beëindigde.",
     
     // Label of checkbox that shows the original data as opposed to the
     // 'repaired' data.  This only appears if data that needs repair has been
@@ -81,12 +82,12 @@ SplitsBrowser.Messages = {
     // Tooltip of 'Show original' checkbox.  This appears when SplitsBrowser
     // deduces that some of the cumulatives times in the data shown are
     // unrealistic.
-    ShowOriginalDataTooltip: "SplitsBrowser heeft sommige tijden verwijderd uit de gegevens van de geselecteerde omloop omdat de tijdens als ongeloofwaardig worden aanzien.  " +
+    ShowOriginalDataTooltip: "SplitsBrowser heeft sommige tijden verwijderd uit de gegevens van de geselecteerde omloop omdat de tijden als ongeloofwaardig worden aanzien.  " +
                              "Gebruik deze checkbox om te controleren of er originele of gewijzigde data worden gebruikt.",
     
     StatisticsTotalTime: "Totale tijd",
     StatisticsSplitTime: "Split tijd",
-    StatisticsBehindFastest: "Achter snelstet",
+    StatisticsBehindFastest: "Achter snelste",
     StatisticsTimeLoss: "Tijdverlies",
     
     ResultsTableHeaderSingleControl: "1 controle",
