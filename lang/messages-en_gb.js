@@ -129,6 +129,9 @@ SplitsBrowser.Messages = {
     // +/- 2 minute window.
     NoNearbyCompetitors: "No competitors",
     
+    // Link that appears at the top and opens SplitsBrowser with the settings
+    // (selected classes, competitors, comparison, chart type, etc.) that are
+    // currently shown.
     DirectLink: "Link",
     DirectLinkToolTip: "Links to a URL that opens SplitsBrowser with the current settings"
 };

@@ -127,5 +127,11 @@ SplitsBrowser.Messages = {
     // Espaço reservado mostrado nos próximos concorrentes de diálogo no gráfico de
     // corrida quando não há quaisquer concorrentes que visitam o controle dentro do
     // +/- janela de 2 minutos.
-    NoNearbyCompetitors: "Sem competidores"
+    NoNearbyCompetitors: "Sem competidores",
+    
+    // Link that appears at the top and opens SplitsBrowser with the settings
+    // (selected classes, competitors, comparison, chart type, etc.) that are
+    // currently shown.
+    DirectLink: "Link",
+    DirectLinkToolTip: "Links to a URL that opens SplitsBrowser with the current settings"
 };
