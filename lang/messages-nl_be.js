@@ -134,5 +134,5 @@ SplitsBrowser.Messages = {
     // (selected classes, competitors, comparison, chart type, etc.) that are
     // currently shown.
     DirectLink: "Link",
-    DirectLinkToolTip: "Links to a URL that opens SplitsBrowser with the current settings"
+    DirectLinkToolTip: "Linkt naar een URL die SplitsBrowser opent met de huidige weergave"
 };
