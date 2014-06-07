@@ -129,6 +129,25 @@
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");        
     });
     
+    QUnit.test("Can read in IOF v3.0 XML data", function (assert) {
+        var iofXmlData = '<?xml version="1.0" ?><ResultList xmlns="http://www.orienteering.org/datastandard/3.0"\n' +
+                         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\niofVersion="3.0">\n' + 
+                         '<ClassResult><Class><Name>Test Class</Name></Class>' +
+                         '<Course><Id>1</Id><Length>2300</Length></Course>' +
+                         '<PersonResult><Person><Name><Given>John</Given><Family>Smith</Family></Name></Person>' +
+                         '<Organisation><ShortName>TestClub</ShortName></Organisation>' +
+                         '<Result>' + 
+                         '<StartTime>2014-06-07T10:11:00</StartTime><Time>570</Time><Status>OK</Status>' +
+                         '<SplitTime><ControlCode>182</ControlCode><Time>01:05</Time></SplitTime>' +
+                         '<SplitTime><ControlCode>148</ControlCode><Time>04:46</Time></SplitTime>' +
+                         '<SplitTime><ControlCode>167</ControlCode><Time>07:50</Time></SplitTime>' +
+                         '</Result></PersonResult></ClassResult></ResultList>';
+        var eventData = parseEventData(iofXmlData);
+        assert.ok(eventData instanceof Event, "An event should be returned");
+        assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
+        assert.strictEqual(eventData.courses.length, 1, "One course should be read in");        
+    });
+    
     QUnit.test("Cannot read in invalid data", function (assert) {
         var invalidData = "This is not valid results data in any format";
         var result = parseEventData(invalidData);
