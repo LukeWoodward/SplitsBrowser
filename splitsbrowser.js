@@ -8606,7 +8606,7 @@ var SplitsBrowser = { Version: "3.2.7", Model: {}, Input: {}, Controls: {} };
         this.fastestCumTimes = null;
         this.previousCompetitorList = [];
         
-        this.topBarHeight = (options && options.topBar && $(options.topBar).length > 0) ? $(options.topBar).height() : 0;
+        this.topBarHeight = (options && options.topBar && $(options.topBar).length > 0) ? $(options.topBar).outerHeight(true) : 0;
         
         this.selection = null;
         this.ageClassSet = null;
