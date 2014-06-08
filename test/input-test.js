@@ -138,9 +138,9 @@
                          '<Organisation><ShortName>TestClub</ShortName></Organisation>' +
                          '<Result>' + 
                          '<StartTime>2014-06-07T10:11:00</StartTime><Time>570</Time><Status>OK</Status>' +
-                         '<SplitTime><ControlCode>182</ControlCode><Time>01:05</Time></SplitTime>' +
-                         '<SplitTime><ControlCode>148</ControlCode><Time>04:46</Time></SplitTime>' +
-                         '<SplitTime><ControlCode>167</ControlCode><Time>07:50</Time></SplitTime>' +
+                         '<SplitTime><ControlCode>182</ControlCode><Time>65</Time></SplitTime>' +
+                         '<SplitTime><ControlCode>148</ControlCode><Time>286</Time></SplitTime>' +
+                         '<SplitTime><ControlCode>167</ControlCode><Time>470</Time></SplitTime>' +
                          '</Result></PersonResult></ClassResult></ResultList>';
         var eventData = parseEventData(iofXmlData);
         assert.ok(eventData instanceof Event, "An event should be returned");
