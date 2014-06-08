@@ -93,8 +93,8 @@
     */
     ChartPopupData.getCompetitorsVisitingCurrentControlPopupData = function (ageClassSet, eventData, controlIndex, time) {
         var controlCode = ageClassSet.getCourse().getControlCode(controlIndex);
-        var intervalStart = time - RACE_GRAPH_COMPETITOR_WINDOW / 2;
-        var intervalEnd = time + RACE_GRAPH_COMPETITOR_WINDOW / 2;
+        var intervalStart = Math.round(time) - RACE_GRAPH_COMPETITOR_WINDOW / 2;
+        var intervalEnd = Math.round(time) + RACE_GRAPH_COMPETITOR_WINDOW / 2;
         var competitors = eventData.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
             
         var primaryClass = ageClassSet.getPrimaryClassName();

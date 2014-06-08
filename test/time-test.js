@@ -41,12 +41,20 @@
         assert.strictEqual(formatTime(3), "00:03");
     });
 
-    QUnit.test("Can format three point two five seconds as a string containing three seconds", function(assert) {
-        assert.strictEqual(formatTime(3.25), "00:03");
+    QUnit.test("Can format three point two seconds as a string", function(assert) {
+        assert.strictEqual(formatTime(3.2), "00:03.2");
     });
 
-    QUnit.test("Can format three point eight five seconds as a string containing four seconds", function(assert) {
-        assert.strictEqual(formatTime(3.85), "00:04");
+    QUnit.test("Can format three point two five seconds as a string", function(assert) {
+        assert.strictEqual(formatTime(3.25), "00:03.25");
+    });
+
+    QUnit.test("Can format three point two five one seconds as a string containing three point two five seconds", function(assert) {
+        assert.strictEqual(formatTime(3.251), "00:03.25");
+    });
+
+    QUnit.test("Can format three point two five eight seconds as a string containing three point two six seconds", function(assert) {
+        assert.strictEqual(formatTime(3.258), "00:03.26");
     });
 
     QUnit.test("Can format fifteen seconds as a string", function(assert) {
@@ -69,8 +77,8 @@
         assert.strictEqual(formatTime(60 * 60), "1:00:00");
     });
 
-    QUnit.test("Can format three hours, fifty-two minutes and seventeen seconds as a string", function(assert) {
-        assert.strictEqual(formatTime(3 * 60 * 60 + 52 * 60 + 17), "3:52:17");
+    QUnit.test("Can format three hours, fifty-two minutes and seventeen point seven four seconds as a string", function(assert) {
+        assert.strictEqual(formatTime(3 * 60 * 60 + 52 * 60 + 17.74), "3:52:17.74");
     });
 
     QUnit.test("Can format minus three seconds as a string", function(assert) {

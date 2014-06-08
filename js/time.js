@@ -62,7 +62,7 @@
             result += "0";
         }
         
-        result += Math.round(secs);
+        result += Math.round(secs * 100) / 100;
         
         return result;
     };
