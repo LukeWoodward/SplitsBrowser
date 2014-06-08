@@ -55,6 +55,19 @@
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");
     });
     
+    QUnit.test("Can read in SI CSV data in nameless format", function (assert) {
+        var namelessCSVData = "OE0014,Stno,XStno,Chipno,Database Id,Surname,First name,YB,S,Block,nc,Start,Finish,Time,Classifier,Credit -,Penalty +,Comment,Club no.," +
+                              "Cl.name,City,Nat,Location,Region,Cl. no.,Short,Long,Entry cl. No,Entry class (short),Entry class (long),Rank,Ranking points,Num1,Num2,Num3," +
+                              "Text1,Text2,Text3,Addr. surname,Addr. first name,Street,Line2,Zip,Addr. city,Phone,Mobile,Fax,EMail,Rented,Start fee,Paid,Team,Course no.," +
+                              "Course,km,m,Course controls,Place,Start punch,Finish punch,Control1,Punch1,Control2,Punch2,Control3,Punch3,Control4,Punch4,Control5,Punch5," +
+                              "Control6,Punch6\r\n" +
+                              ",,,200972,,,,,,,,,,,,,,,3621,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Course 1,2.7,150,3,1,10:38:00,10:41:22,152,01:12,188,02:21,163,03:06,,,,,,,,,,,\r\n";
+        var eventData = parseEventData(namelessCSVData);
+        assert.ok(eventData instanceof Event, "An event should be returned");
+        assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
+        assert.strictEqual(eventData.courses.length, 1, "One course should be read in");        
+    });
+    
     QUnit.test("Can read in SI HTML preformatted data", function (assert) {
         var siHtmlData = '<html><head></head><body>\n<pre>\n<font size="2"><b>   Test course 1 (2)</b></font><font size="2"><b>   2.7 km     35 m</b></font>\n' +
             '<font size="2"><b> </b></font><font size="2"><b> </b></font><font size="2"><b> </b></font><font size="2"><b>   </b></font>   1(138)     2(152)     3(141)    F  \n' +
@@ -97,19 +110,6 @@
         assert.ok(eventData instanceof Event, "An event should be returned");
         assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");
-    });
-    
-    QUnit.test("Can read in alternative CSV data in nameless format", function (assert) {
-        var namelessCSVData = "OE0014,Stno,XStno,Chipno,Database Id,Surname,First name,YB,S,Block,nc,Start,Finish,Time,Classifier,Credit -,Penalty +,Comment,Club no.," +
-                              "Cl.name,City,Nat,Location,Region,Cl. no.,Short,Long,Entry cl. No,Entry class (short),Entry class (long),Rank,Ranking points,Num1,Num2,Num3," +
-                              "Text1,Text2,Text3,Addr. surname,Addr. first name,Street,Line2,Zip,Addr. city,Phone,Mobile,Fax,EMail,Rented,Start fee,Paid,Team,Course no.," +
-                              "Course,km,m,Course controls,Place,Start punch,Finish punch,Control1,Punch1,Control2,Punch2,Control3,Punch3,Control4,Punch4,Control5,Punch5," +
-                              "Control6,Punch6\r\n" +
-                              ",,,200972,,,,,,,,,,,,,,,3621,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Course 1,2.7,150,3,1,10:38:00,10:41:22,152,01:12,188,02:21,163,03:06,,,,,,,,,,,\r\n";
-        var eventData = parseEventData(namelessCSVData);
-        assert.ok(eventData instanceof Event, "An event should be returned");
-        assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
-        assert.strictEqual(eventData.courses.length, 1, "One course should be read in");        
     });
     
     QUnit.test("Can read in IOF v2.0.3 XML data", function (assert) {

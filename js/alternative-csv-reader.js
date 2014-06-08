@@ -36,13 +36,11 @@
     // separate competitor, and includes course details such as name, controls
     // and possibly distance and climb.
     
-    // There are presently two variations supported:
+    // There is presently one variation supported:
     // * one, distinguished by having three columns per control: control code,
     //   cumulative time and 'points'.  (Points is never used.)  Generally,
     //   these formats are quite sparse; many columns (e.g. club, placing,
     //   start time) are blank or are omitted altogether.
-    // * another, distinguished by the fact that it has no competitor names,
-    //   just chip numbers.  Club names are similarly lacking.
     
     var TRIPLE_COLUMN_FORMAT = {
         // Control data starts in column AM (index 38).
@@ -60,24 +58,6 @@
         placing: null,
         finishTime: null,
         allowMultipleCompetitorNames: true
-    };
-    
-    var NAMELESS_CONTROLS_OFFSET = 60;
-    
-    var NAMELESS_FORMAT = {
-        controlsOffset: NAMELESS_CONTROLS_OFFSET,
-        step: 2,
-        // Column indexes of various data
-        name: 3,
-        club: 18,
-        courseName:  NAMELESS_CONTROLS_OFFSET - 7,
-        startTime: 11,
-        length: NAMELESS_CONTROLS_OFFSET - 6,
-        climb: NAMELESS_CONTROLS_OFFSET - 5,
-        controlCount: NAMELESS_CONTROLS_OFFSET - 4,
-        placing: NAMELESS_CONTROLS_OFFSET - 3,
-        finishTime: NAMELESS_CONTROLS_OFFSET - 1,
-        allowMultipleCompetitorNames: false
     };
     
     // Supported delimiters.
@@ -272,9 +252,6 @@
     SplitsBrowser.Input.AlternativeCSV = {
         parseTripleColumnEventData: function (eventData) {
             return parseEventDataWithFormat(eventData, TRIPLE_COLUMN_FORMAT);
-        },
-        parseNamelessEventData: function (eventData) {
-            return parseEventDataWithFormat(eventData, NAMELESS_FORMAT);
         }
     };
         

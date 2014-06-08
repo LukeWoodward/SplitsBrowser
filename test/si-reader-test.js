@@ -21,6 +21,7 @@
 (function () {
     "use strict";
     
+    var parseTime = SplitsBrowser.parseTime;
     var parseEventData = SplitsBrowser.Input.SI.parseEventData;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
@@ -39,6 +40,14 @@
     
     // Template for the row data that precedes the controls.
     var ROW_TEMPLATE_44 = "0;1;2;name;4;5;6;7;8;time;10;11;12;club;14;15;ageClass;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;course;distance;climb;numControls;placing;start;43";
+    
+    // Header line when control 1 is in column 60.
+    // This has various new columns.  It also doesn't always have competitor
+    // names and total times.
+    var HEADER_60 = "OE0014;Stno;XStno;Chipno;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Credit -;Penalty +;Comment;Club no.;Cl.name;City;Nat;Location;Region;Cl. no.;Short;Long;Entry cl. No;Entry class (short);Entry class (long);Rank;Ranking points;Num1;Num2;Num3;Text1;Text2;Text3;Addr. surname;Addr. first name;Street;Line2;Zip;Addr. city;Phone;Mobile;Fax;EMail;Rented;Start fee;Paid;Team;Course no.;Course;km;m;Course controls;Place;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
+    
+    // Template for the row data that precedes the controls of the 60-column variation.
+    var ROW_TEMPLATE_60 = "0;1;2;compno;4;surname;forename;7;8;9;10;fallbackStart;12;time;14;15;16;17;noOfClub;19;club;21;22;23;24;25;ageClass;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;45;46;47;48;49;50;51;52;course;distance;climb;numControls;placing;start;finish";
     
     /**
     * Generates a row of data for an SI-format file.
@@ -77,9 +86,13 @@
         return {
             forename: "John",
             surname: "Smith",
+            compno: "123456",
             club: "ABC",
+            noOfClub: "2",
             start: "11:27:45",
+            fallbackStart: "",
             time: "06:33",
+            finish: "11:34:18",
             ageClass: "Test class",
             course: "Test course",
             distance: "4.1",
@@ -97,9 +110,13 @@
         return {
             forename: "Fred",
             surname: "Baker",
+            compno: "654321",
             club: "DEF",
+            noOfClub: "6",
             start: "10:30:00",
+            fallbackStart: "",
             time: "07:11",
+            finish: "10:37:11",
             ageClass: "Test class",
             course: "Test course",
             distance: "4.1",
@@ -130,9 +147,13 @@
         return {
             forename: "Bill",
             surname: "Jones",
+            compno: "345678",
             club: "GHI",
+            noOfClub: "8",
             start: "11:00:00",
+            fallbackStart: "",
             time: "06:58",
+            finish: "11:06:58",
             ageClass: "Test class",
             course: "Test course",
             distance: "4.1",
@@ -366,6 +387,59 @@
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
         
         assert.strictEqual(eventData.classes[0].course, course, "Class should refer to its course");
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor's data in column-60 variation", function (assert) {
+        var competitor1 = getCompetitor1();
+        
+        var eventData = parseEventData(HEADER_60 + generateRow(competitor1, getControls1(), ROW_TEMPLATE_60));
+        assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.ok(eventData.classes[0] instanceof AgeClass, "Class element should be an AgeClass object");
+        assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
+        assert.strictEqual(eventData.classes[0].name, "Test class", "Class should have correct name");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+        
+        assert.strictEqual(eventData.courses.length, 1, "There should be one course");
+        var course = eventData.courses[0];
+        assert.strictEqual(course.name, "Test course", "Course name should be correct");
+        assert.strictEqual(course.length, 4.1, "Course length should be correct");
+        assert.strictEqual(course.climb, 140, "Course climb should be correct");
+        assert.deepEqual(course.classes, [eventData.classes[0]], "The one class in the course should be the one course");
+        assert.deepEqual(course.controls, ["208", "227", "212"]);
+        
+        var competitor = eventData.classes[0].competitors[0];
+        assert.strictEqual(competitor.name, "John Smith", "Should read correct name");
+        assert.strictEqual(competitor.club, "ABC", "Should read correct club");
+        assert.strictEqual(competitor.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
+        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
+        
+        assert.strictEqual(eventData.classes[0].course, course, "Class should refer to its course");
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor's data in 'nameless' column-60 variation", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.forename = "";
+        competitor1.surname = "";
+        competitor1.club = "";
+        competitor1.time = "";
+        competitor1.ageClass = "";
+        competitor1.fallbackStart = competitor1.start;
+        competitor1.start = "";
+        
+        var eventData = parseEventData(HEADER_60 + generateRow(competitor1, getControls1(), ROW_TEMPLATE_60));
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.strictEqual(eventData.classes[0].name, "Test course", "Class should have same name as course");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+        
+        assert.strictEqual(eventData.courses.length, 1, "There should be one course");
+        assert.strictEqual(eventData.courses[0].name, "Test course", "Course name should be correct");
+        
+        var competitor = eventData.classes[0].competitors[0];
+        assert.strictEqual(competitor.name, competitor1.compno, "Should read competitor name as ID");
+        assert.strictEqual(competitor.club, competitor1.noOfClub, "Should read club name as ID");
+        assert.deepEqual(competitor.startTime, parseTime(competitor1.fallbackStart), "Should read correct start time from fallback column");
+        assert.deepEqual(competitor.totalTime, 393, "Should read correct total time");
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with commas as column separators", function (assert) {
