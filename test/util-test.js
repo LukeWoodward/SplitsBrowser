@@ -27,6 +27,7 @@
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
+    var parseCourseClimb = SplitsBrowser.parseCourseClimb;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
 
     module("Utilities - isNotNull");
@@ -116,7 +117,17 @@
     });
     
     QUnit.test("Attempting to parse invalid course length returns null", function (assert) {
-        assert.strictEqual(parseCourseLength("nonsense"), null, "parseCourseLength should return null");
+        assert.strictEqual(parseCourseLength("nonsense"), null);
+    });
+    
+    module("Utilities - parseCourseClimb");
+    
+    QUnit.test("Can parse course climb with no decimal separator", function (assert) {
+        assert.strictEqual(parseCourseClimb("145"), 145);
+    });
+    
+    QUnit.test("Attempting to parse invalid course climb returns null", function (assert) {
+        assert.strictEqual(parseCourseClimb("nonsense"), null);
     });
     
     module("Utilities - normaliseLineEndings");

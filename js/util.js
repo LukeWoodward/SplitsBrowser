@@ -123,7 +123,7 @@
     * either a full stop or a comma as the decimal separator.
     *
     * @param {String} stringValue - The course length to parse, as a string.
-    * @return {Number} The parsed course length.
+    * @return {?Number} The parsed course length, or null if not valid.
     */
     SplitsBrowser.parseCourseLength = function (stringValue) {
         var courseLength = parseFloat(stringValue.replace(",", "."));
@@ -136,6 +136,21 @@
         }
         
         return courseLength;
+    };
+    
+    /**
+    * Parses a course climb, specified as a whole number of metres.
+    *
+    * @param {String} stringValue - The course climb to parse, as a string.
+    * @return {?Number} The parsed course climb, or null if not valid.
+    */
+    SplitsBrowser.parseCourseClimb = function (stringValue) {
+        var courseClimb = parseInt(stringValue, 10);
+        if (SplitsBrowser.isNaNStrict(courseClimb)) {
+            return null;
+        } else {
+            return courseClimb;
+        }
     };
     
     /**

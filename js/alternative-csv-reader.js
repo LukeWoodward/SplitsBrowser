@@ -26,7 +26,8 @@
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
-    var parseCourseLength = SplitsBrowser.parseCourseLength;    
+    var parseCourseLength = SplitsBrowser.parseCourseLength;
+    var parseCourseClimb = SplitsBrowser.parseCourseClimb;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
     var Course = SplitsBrowser.Model.Course;
@@ -187,7 +188,7 @@
             }
             
             var courseLength = (format.length === null) ? null : parseCourseLength(row[format.length]);
-            var courseClimb = (format.climb === null) ? null : parseInt(row[format.climb], 10) || null;
+            var courseClimb = (format.climb === null) ? null : parseCourseClimb(row[format.climb]);
             
             var cumTimes = [0];
             for (var cumTimeIndex = format.controlsOffset + 1; cumTimeIndex < expectedRowLength; cumTimeIndex += format.step) {

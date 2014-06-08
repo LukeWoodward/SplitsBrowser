@@ -24,6 +24,7 @@
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
+    var parseCourseClimb = SplitsBrowser.parseCourseClimb;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
@@ -291,7 +292,7 @@
             var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[this.columnIndexes.control1 + 2 * controlIdx]; }, this);
             this.courseDetails.set(courseName, {
                 length: parseCourseLength(row[this.columnIndexes.distance]), 
-                climb: parseInt(row[this.columnIndexes.climb], 10) || null,
+                climb: parseCourseClimb(row[this.columnIndexes.climb]),
                 controls: controlNums
             });
         }
