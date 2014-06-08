@@ -57,6 +57,22 @@
         assert.strictEqual(formatTime(3.258), "00:03.26");
     });
 
+    QUnit.test("Can format three seconds as a string containing three point zero seconds if precision is 1", function(assert) {
+        assert.strictEqual(formatTime(3, 1), "00:03.0");
+    });
+
+    QUnit.test("Can format three point two seconds as a string containing three point two zero seconds if precision is 2", function(assert) {
+        assert.strictEqual(formatTime(3.2, 2), "00:03.20");
+    });
+
+    QUnit.test("Can format three point two five seconds as a string containing three point two five seconds if precision is 2", function(assert) {
+        assert.strictEqual(formatTime(3.25, 2), "00:03.25");
+    });
+
+    QUnit.test("Can format three point two five seconds as a string containing three point three seconds if precision is 1", function(assert) {
+        assert.strictEqual(formatTime(3.25, 1), "00:03.3");
+    });
+    
     QUnit.test("Can format fifteen seconds as a string", function(assert) {
         assert.strictEqual(formatTime(15), "00:15");
     });

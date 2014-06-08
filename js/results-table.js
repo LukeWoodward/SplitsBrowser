@@ -25,9 +25,13 @@
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     
     var NON_BREAKING_SPACE_CHAR = "\u00a0";
 
+    // Maximum precision to show a results-table entry using.
+    var MAX_PERMITTED_PRECISION = 2;
+    
     /**
     * A control that shows an entire table of results.
     * @constructor
@@ -61,6 +65,34 @@
                   
         this.table.append("tbody");
     };
+    
+    /**
+    * Determines the precision with which to show the results.
+    * 
+    * If there are some fractional times, then all times should be shown with
+    * the same precision, even if not all of them need to.  For example, a
+    * a split time between controls punched after 62.7 and 108.7 seconds must
+    * be shown as 46.0 seconds, not 46.
+    *
+    * @param {Array} competitors - Array of Competitor objects.
+    * @return {Number} Maximum precision to use.
+    */
+    function determinePrecision(competitors) {
+        var maxPrecision = 0;
+        var maxPrecisionFactor = 1;        
+        competitors.forEach(function (competitor) {
+            competitor.getAllOriginalCumulativeTimes().forEach(function (cumTime) {
+                if (isNotNullNorNaN(cumTime)) {
+                    while (maxPrecision < MAX_PERMITTED_PRECISION && Math.abs(cumTime - Math.round(cumTime * maxPrecisionFactor) / maxPrecisionFactor) > 1e-7 * cumTime) {
+                        maxPrecision += 1;
+                        maxPrecisionFactor *= 10;
+                    }
+                }
+            });
+        });
+        
+        return maxPrecision;
+    }
     
     /**
     * Populates the contents of the table with the age-class data.
@@ -132,6 +164,9 @@
         
         var nonCompCount = 0;
         var rank = 0;
+        
+        var precision = determinePrecision(competitors);
+        
         competitors.forEach(function (competitor, index) {
             var tableRow = tableBody.append("tr");
             var numberCell = tableRow.append("td");
@@ -152,7 +187,7 @@
             d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
                 var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
                 var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
-                addCell(tableRow, formatTime(competitor.getOriginalCumulativeTimeTo(controlNum)), formatTime(competitor.getOriginalSplitTimeTo(controlNum)), "time", isCumDubious, isSplitDubious);
+                addCell(tableRow, formatTime(competitor.getOriginalCumulativeTimeTo(controlNum), precision), formatTime(competitor.getOriginalSplitTimeTo(controlNum), precision), "time", isCumDubious, isSplitDubious);
             });
         }, this);
     };
