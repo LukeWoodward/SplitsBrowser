@@ -285,6 +285,15 @@
         assert.strictEqual(course.length, 4.1, "Course length should be correct");
     });
     
+    QUnit.test("Can parse a string that contains a single competitor's data with the course having zero distance", function (assert) {
+        var competitor = getCompetitor1();
+        competitor.distance = "0.0";
+        var eventData = parseEventData(HEADER_46 + generateRow(competitor, getControls1(), ROW_TEMPLATE_46));
+        assert.strictEqual(eventData.courses.length, 1, "There should be one course");
+        var course = eventData.courses[0];
+        assert.strictEqual(course.length, 0, "Course length should be zero");
+    });
+    
     QUnit.test("Can parse a string that contains a single competitor's data with the course distance in metres", function (assert) {
         var competitor = getCompetitor1();
         competitor.distance = "4100";

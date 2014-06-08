@@ -290,7 +290,7 @@
         if (!this.courseDetails.has(courseName)) {
             var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[this.columnIndexes.control1 + 2 * controlIdx]; }, this);
             this.courseDetails.set(courseName, {
-                length: parseCourseLength(row[this.columnIndexes.distance]) || null, 
+                length: parseCourseLength(row[this.columnIndexes.distance]), 
                 climb: parseInt(row[this.columnIndexes.climb], 10) || null,
                 controls: controlNums
             });

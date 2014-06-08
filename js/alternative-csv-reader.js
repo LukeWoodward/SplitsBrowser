@@ -186,7 +186,7 @@
                 }
             }
             
-            var courseLength = (format.length === null) ? null : parseCourseLength(row[format.length]) || null;
+            var courseLength = (format.length === null) ? null : parseCourseLength(row[format.length]);
             var courseClimb = (format.climb === null) ? null : parseInt(row[format.climb], 10) || null;
             
             var cumTimes = [0];

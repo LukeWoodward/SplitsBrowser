@@ -115,10 +115,8 @@
         assert.strictEqual(parseCourseLength("9400"), 9.4);
     });
     
-    QUnit.test("Attempting to parse invalid course length returns NaN, as does parseFloat", function (assert) {
-        // Can't do a straightforward comparison as NaN !== NaN.
-        assert.ok(isNaN(parseFloat("nonsense")), "parseFloat should return NaN");
-        assert.ok(isNaN(parseCourseLength("nonsense")), "parseCourseLength should also return NaN");
+    QUnit.test("Attempting to parse invalid course length returns null", function (assert) {
+        assert.strictEqual(parseCourseLength("nonsense"), null, "parseCourseLength should return null");
     });
     
     module("Utilities - normaliseLineEndings");

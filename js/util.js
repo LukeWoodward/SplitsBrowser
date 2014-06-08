@@ -127,6 +127,10 @@
     */
     SplitsBrowser.parseCourseLength = function (stringValue) {
         var courseLength = parseFloat(stringValue.replace(",", "."));
+        if (!isFinite(courseLength)) {
+            return null;
+        }
+        
         if (courseLength >= MIN_COURSE_LENGTH_METRES) {
             courseLength /= 1000;
         }
