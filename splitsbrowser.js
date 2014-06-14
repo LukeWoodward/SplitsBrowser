@@ -8782,7 +8782,7 @@ var SplitsBrowser = { Version: "3.2.7", Model: {}, Input: {}, Controls: {} };
         var oldQueryString = document.location.search;
         var newQueryString = formatQueryString(oldQueryString, this.eventData, this.ageClassSet, data);
         var oldHref = document.location.href;        
-        this.directLink.attr("href", oldHref.substring(0, oldHref.length - oldQueryString.length) + "?" + newQueryString);
+        this.directLink.attr("href", oldHref.substring(0, oldHref.length - oldQueryString.length) + "?" + newQueryString.replace(/^\?+/, ""));
     };
     
     /**
