@@ -123,9 +123,9 @@
 
         var outerThis = this;
         this.competitorSelection = selection;
-        this.handler = function (indexes) { outerThis.selectionChanged(indexes); };
+        this.handler = function () { outerThis.selectionChanged(); };
         this.competitorSelection.registerChangeHandler(this.handler);
-        this.selectionChanged(d3.range(selection.count));
+        this.selectionChanged();
     };
     
     SplitsBrowser.Controls.CompetitorListBox = CompetitorListBox;

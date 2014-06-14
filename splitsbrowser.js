@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.2.7", Model: {}, Input: {}, Controls: {} };
+var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
 
 
 (function () {
@@ -5499,9 +5499,9 @@ var SplitsBrowser = { Version: "3.2.7", Model: {}, Input: {}, Controls: {} };
 
         var outerThis = this;
         this.competitorSelection = selection;
-        this.handler = function (indexes) { outerThis.selectionChanged(indexes); };
+        this.handler = function () { outerThis.selectionChanged(); };
         this.competitorSelection.registerChangeHandler(this.handler);
-        this.selectionChanged(d3.range(selection.count));
+        this.selectionChanged();
     };
     
     SplitsBrowser.Controls.CompetitorListBox = CompetitorListBox;
@@ -9076,6 +9076,7 @@ var SplitsBrowser = { Version: "3.2.7", Model: {}, Input: {}, Controls: {} };
         
         this.setClasses(classIndexes);
         this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
+        this.competitorListBox.selectionChanged();
         this.drawChart();
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
         this.updateDirectLink();

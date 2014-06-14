@@ -554,6 +554,7 @@
         
         this.setClasses(classIndexes);
         this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
+        this.competitorListBox.selectionChanged();
         this.drawChart();
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
         this.updateDirectLink();
