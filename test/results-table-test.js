@@ -52,6 +52,12 @@
         assert.strictEqual(table.selectAll("tbody tr").size(), 2);
         assert.strictEqual(table.selectAll("tbody tr:first-child td").size(), 7);
         assert.strictEqual(table.selectAll("tbody tr:last-child td").size(), 7);    
+        
+        var topRowCells = $("tbody tr:first-child td", table.node());
+        var cum2Cell = $("span:first-child", topRowCells[4]);
+        assert.strictEqual(cum2Cell.text(), "04:46");
+        var split2Cell = $("span:last-child", topRowCells[4]);
+        assert.strictEqual(split2Cell.text(), "03:41");
     });
     
     QUnit.test("Can create a results table with two competitors finishing and with control codes", function (assert) {
@@ -144,5 +150,31 @@
             assert.strictEqual($("span:first-child", cell).hasClass("dubious"), (cellIndex === 4));
             assert.strictEqual($("span:last-child", cell).hasClass("dubious"), (cellIndex === 4 || cellIndex === 5));
         }
+    });
+    
+    QUnit.test("Can create a results table with one competitor with fractional times appropriately formatted", function (assert) {
+        var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.5]);
+        var ageClass = new AgeClass("Test", 3, [competitor]);
+        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(ageClass);
+        
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
+        var table = d3.select("table.resultsTable").node();
+        assert.strictEqual($("tbody", table).length, 1);
+        assert.strictEqual($("tbody tr", table).length, 1);
+        var tableCells = $("tbody tr td", table);
+        assert.strictEqual(tableCells.length, 7);
+        
+        var cum2Cell = $("span:first-child", tableCells[4]);
+        assert.strictEqual(cum2Cell.text(), "04:46.3");
+        var split2Cell = $("span:last-child", tableCells[4]);
+        assert.strictEqual(split2Cell.text(), "03:41.0");
+        
+        var cum3Cell = $("span:first-child", tableCells[5]);
+        assert.strictEqual(cum3Cell.text(), "07:51.0");
+        var split3Cell = $("span:last-child", tableCells[5]);
+        assert.strictEqual(split3Cell.text(), "03:04.7");
     });
 })();

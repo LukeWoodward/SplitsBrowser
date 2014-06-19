@@ -27,11 +27,13 @@
     
     /**
     * Formats a time period given as a number of seconds as a string in the form
-    *  [-][h:]mm:ss.
+    * [-][h:]mm:ss.ss .
     * @param {Number} seconds - The number of seconds.
+    * @param {?Number} precision - Optional number of decimal places to format
+    *     using, or the default if not specified. 
     * @returns {string} The string formatting of the time.
     */
-    SplitsBrowser.formatTime = function (seconds) {
+    SplitsBrowser.formatTime = function (seconds, precision) {
         
         if (seconds === null) {
             return SplitsBrowser.NULL_TIME_PLACEHOLDER;
@@ -62,7 +64,11 @@
             result += "0";
         }
         
-        result += Math.round(secs);
+        if (typeof precision === "number") {
+            result += secs.toFixed(precision);
+        } else {
+            result += Math.round(secs * 100) / 100;
+        }
         
         return result;
     };
@@ -70,7 +76,7 @@
     /**  
     * Parse a time of the form MM:SS or H:MM:SS into a number of seconds.
     * @param {string} time - The time of the form MM:SS.
-    * @return {Number} The number of seconds.
+    * @return {?Number} The number of seconds.
     */
     SplitsBrowser.parseTime = function (time) {
         if (time.match(/^\d+:\d\d$/)) {

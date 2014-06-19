@@ -44,6 +44,8 @@ module.exports = function(grunt) {
                       'js/csv-reader.js',
                       'js/si-reader.js',
                       'js/si-html-reader.js',
+                      'js/alternative-csv-reader.js',
+                      'js/iof-xml-reader.js',
                       'js/input.js',
                       'js/competitor-list.js',
                       'js/class-selector.js',
@@ -55,6 +57,7 @@ module.exports = function(grunt) {
                       'js/chart-popup.js',
                       'js/chart.js',
                       'js/results-table.js',
+                      'js/query-string.js',
                       'js/viewer.js'
                 ],
                 dest: '<%= pkg.name %>.js',
@@ -76,10 +79,11 @@ module.exports = function(grunt) {
         },
         qunit: {
             src: ['qunit-tests.html'],
+            languages: ['qunit-languages-tests.html'],
             minified: ['qunit-tests-min.html']
         },
         jshint: {
-            files: ['gruntfile.js', 'js/*.js', 'test/*-test.js'],
+            files: ['gruntfile.js', 'js/*.js', 'test/*.js'],
             options: {
                 // options here to override JSHint defaults
                 plusplus: true,
@@ -108,7 +112,10 @@ module.exports = function(grunt) {
                     expect: false,
                   
                     // Test namespace.
-                    SplitsBrowserTest: true
+                    SplitsBrowserTest: true,
+                    
+                    // Languages list in languages consistency test.
+                    allLanguages: true
                 }
             }
         }
@@ -119,8 +126,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-concat');
 
-    grunt.registerTask('test', ['jshint', 'qunit:src']);
+    grunt.registerTask('test', ['jshint', 'qunit:src', 'qunit:languages']);
 
-    grunt.registerTask('default', ['jshint', 'qunit:src', 'concat', 'uglify', 'qunit:minified']);
+    grunt.registerTask('default', ['jshint', 'qunit:src', 'qunit:languages', 'concat', 'uglify', 'qunit:minified']);
 
 };

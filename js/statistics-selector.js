@@ -45,7 +45,7 @@
     * @constructor
     * @param {HTMLElement} parent - The parent element.
     */
-    var StatisticsSelector = function (parent) {
+    function StatisticsSelector (parent) {
         this.span = d3.select(parent).append("span")
                                      .attr("id", STATISTIC_SELECTOR_ID);   
 
@@ -68,7 +68,7 @@
         $("input", this.span.node()).bind("change", function () { return outerThis.onCheckboxChanged(); });
                    
         this.handlers = [];
-    };
+    }
     
     /**
     * Deselects all checkboxes.
@@ -122,7 +122,8 @@
 
     /**
     * Return the statistics that are currently enabled.
-    * @returns {Array} Array of booleans corresponding to enabled statistics.
+    * @returns {Object} Object that lists all the statistics and whether they
+    *     are enabled.
     */
     StatisticsSelector.prototype.getVisibleStatistics = function () {
         var visibleStats = {};
@@ -131,6 +132,18 @@
         });
         
         return visibleStats;
+    };
+    
+    /**
+    * Sets the visible statistics.
+    * @param {Object} visibleStats - The statistics to make visible.
+    */
+    StatisticsSelector.prototype.setVisibleStatistics = function (visibleStats) {
+        this.span.selectAll("input")[0].forEach(function (checkbox, index) {
+            checkbox.checked = visibleStats[STATISTIC_NAMES[index]] || false;
+        });
+        
+        this.onCheckboxChanged();
     };
 
     /**

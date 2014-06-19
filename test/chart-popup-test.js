@@ -34,7 +34,7 @@
     QUnit.test("Can create a popup, show it and then hide it", function (assert) { 
         var popup = new Popup(d3.select("#qunit-fixture").node(), {});
         
-        popup.show(0, 0);
+        popup.show({x: 0, y: 0});
         assert.ok(popup.isShown(), "Popup should be shown");
         
         popup.hide();

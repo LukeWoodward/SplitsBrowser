@@ -55,21 +55,21 @@
     
     /**
     * Returns whether the value given is neither null nor NaN.
-    * @param {Number|null} value - A value to test.
+    * @param {?Number} x - A value to test.
     * @return {boolean} false if the value given is null or NaN, true
     *     otherwise.
     */
     SplitsBrowser.isNotNullNorNaN = function (x) { return x !== null && x === x; };
-    
+
     /**
     * Exception object raised if invalid data is passed.
     * @constructor
-    * @param {string} message - The exception detail message.
+    * @param {String} message - The exception detail message.
     */
-    var InvalidData = function (message) {
+    function InvalidData(message) {
         this.name = "InvalidData";
         this.message = message;
-    };
+    }
 
     /**
     * Returns a string representation of this exception.
@@ -94,10 +94,10 @@
     * @constructor
     * @param {String} message - The exception message.
     */
-    var WrongFileFormat = function (message) {
+    function WrongFileFormat(message) {
         this.name = "WrongFileFormat";
         this.message = message;
-    };
+    }
     
     /**
     * Returns a string representation of this exception.
@@ -123,15 +123,45 @@
     * either a full stop or a comma as the decimal separator.
     *
     * @param {String} stringValue - The course length to parse, as a string.
-    * @return {Number} The parsed course length.
+    * @return {?Number} The parsed course length, or null if not valid.
     */
     SplitsBrowser.parseCourseLength = function (stringValue) {
         var courseLength = parseFloat(stringValue.replace(",", "."));
+        if (!isFinite(courseLength)) {
+            return null;
+        }
+        
         if (courseLength >= MIN_COURSE_LENGTH_METRES) {
             courseLength /= 1000;
         }
         
         return courseLength;
+    };
+    
+    /**
+    * Parses a course climb, specified as a whole number of metres.
+    *
+    * @param {String} stringValue - The course climb to parse, as a string.
+    * @return {?Number} The parsed course climb, or null if not valid.
+    */
+    SplitsBrowser.parseCourseClimb = function (stringValue) {
+        var courseClimb = parseInt(stringValue, 10);
+        if (SplitsBrowser.isNaNStrict(courseClimb)) {
+            return null;
+        } else {
+            return courseClimb;
+        }
+    };
+    
+    /**
+    * Normalise line endings so that all lines end with LF, instead of
+    * CRLF or CR.
+    * @param {String} stringValue - The string value to normalise line endings
+    *     within
+    * @return {String} String value with the line-endings normalised.
+    */
+    SplitsBrowser.normaliseLineEndings = function (stringValue) {
+        return stringValue.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
     };
     
 })();

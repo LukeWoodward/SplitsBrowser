@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Viewer - Top-level class that runs the application.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -27,37 +27,51 @@
     // cancelled.)
     var RESIZE_DELAY_MS = 100;
     
-    var ClassSelector = SplitsBrowser.Controls.ClassSelector;
-    var ChartTypeSelector = SplitsBrowser.Controls.ChartTypeSelector;
-    var ComparisonSelector = SplitsBrowser.Controls.ComparisonSelector;
-    var OriginalDataSelector = SplitsBrowser.Controls.OriginalDataSelector;
-    var StatisticsSelector = SplitsBrowser.Controls.StatisticsSelector;
-    var CompetitorList = SplitsBrowser.Controls.CompetitorList;
-    var Chart = SplitsBrowser.Controls.Chart;
-    var ResultsTable = SplitsBrowser.Controls.ResultsTable;
+    var Version = SplitsBrowser.Version;
+
+    var getMessage = SplitsBrowser.getMessage;
+    var tryGetMessage = SplitsBrowser.tryGetMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    
+    var Model = SplitsBrowser.Model;
+    var CompetitorSelection = Model.CompetitorSelection;
+    var AgeClassSet = Model.AgeClassSet;
+    var ChartTypes = Model.ChartTypes;
+    
+    var parseEventData = SplitsBrowser.Input.parseEventData;
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
     var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
-    var getMessage = SplitsBrowser.getMessage;
-    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    var parseQueryString = SplitsBrowser.parseQueryString;
+    var formatQueryString = SplitsBrowser.formatQueryString;
+    
+    var Controls = SplitsBrowser.Controls;
+    var ClassSelector = Controls.ClassSelector;
+    var ChartTypeSelector = Controls.ChartTypeSelector;
+    var ComparisonSelector = Controls.ComparisonSelector;
+    var OriginalDataSelector = Controls.OriginalDataSelector;
+    var StatisticsSelector = Controls.StatisticsSelector;
+    var CompetitorList = Controls.CompetitorList;
+    var Chart = Controls.Chart;
+    var ResultsTable = Controls.ResultsTable;
     
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
     * @constructor
-    * @param {String|HTMLElement|undefined} - Optional HTML element that forms
-    *     a 'banner' across the top of the page.  This can be specified by a
-    *     CSS selector or the HTML element itself.
+    * @param {?Object} options - Optional object containing various options
+    *     to SplitsBrowser.
     */
-    var Viewer = function (topDiv) {
+    function Viewer(options) {
+        this.options = options;
     
         this.eventData = null;
         this.classes = null;
         this.currentClasses = [];
-        this.currentIndexes = null;
         this.chartData = null;
         this.referenceCumTimes = null;
         this.fastestCumTimes = null;
         this.previousCompetitorList = [];
-        this.topDivHeight = (topDiv && $(topDiv).length > 0) ? $(topDiv).height() : 0;
+        
+        this.topBarHeight = (options && options.topBar && $(options.topBar).length > 0) ? $(options.topBar).outerHeight(true) : 0;
         
         this.selection = null;
         this.ageClassSet = null;
@@ -73,7 +87,7 @@
         this.competitorListContainer = null;
         
         this.currentResizeTimeout = null;
-    };
+    }
     
     /**
     * Pops up an alert box with the given message.
@@ -153,7 +167,7 @@
                                    
         logoSvg.selectAll("*")
                .append("title")
-               .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": SplitsBrowser.Version}));
+               .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": Version}));
     };
 
     /**
@@ -162,6 +176,23 @@
     Viewer.prototype.addSpacer = function () {
         this.topPanel.append("div").classed("topRowSpacer", true);    
     };
+    
+    /**
+    * Adds a country flag to the top panel.
+    */
+    Viewer.prototype.addCountryFlag = function () {
+        var flagImage = this.topPanel.append("img")
+                                     .attr("id", "flagImage")
+                                     .attr("src", this.options.flagImageURL)
+                                     .attr("alt", tryGetMessage("Language", ""))
+                                     .attr("title", tryGetMessage("Language", ""));
+        if (this.options.hasOwnProperty("flagImageWidth")) {
+            flagImage.attr("width", this.options.flagImageWidth);
+        }
+        if (this.options.hasOwnProperty("flagImageHeight")) {
+            flagImage.attr("height", this.options.flagImageHeight);
+        }
+    }; 
     
     /**
     * Adds the class selector control to the top panel.
@@ -177,13 +208,10 @@
     * Adds the chart-type selector to the top panel.
     */
     Viewer.prototype.addChartTypeSelector = function () {
-        var types = SplitsBrowser.Model.ChartTypes;
-        var chartTypes = [types.SplitsGraph, types.RaceGraph, types.PositionAfterLeg,
-                          types.SplitPosition, types.PercentBehind, types.ResultsTable];
+        var chartTypes = [ChartTypes.SplitsGraph, ChartTypes.RaceGraph, ChartTypes.PositionAfterLeg,
+                          ChartTypes.SplitPosition, ChartTypes.PercentBehind, ChartTypes.ResultsTable];
         
         this.chartTypeSelector = new ChartTypeSelector(this.topPanel.node(), chartTypes);
-        
-        this.chartType = this.chartTypeSelector.getChartType();    
     };
     
     /**
@@ -194,8 +222,6 @@
         if (this.classes !== null) {
             this.comparisonSelector.setClasses(this.classes);
         }
-        
-        this.comparisonFunction = this.comparisonSelector.getComparisonFunction();    
     };
     
     /**
@@ -203,20 +229,38 @@
     * has attempted to repair it.
     */
     Viewer.prototype.addOriginalDataSelector = function () {
-        var outerThis = this;
-        var showOriginalData = function () {
-            transferCompetitorData(outerThis.eventData);
-            outerThis.eventData.determineTimeLosses();
-            outerThis.drawChart();
+        this.originalDataSelector = new OriginalDataSelector(this.topPanel);
+    };
+
+    /**
+    * Adds a direct link which links directly to SplitsBrowser with the given
+    * settings.
+    */
+    Viewer.prototype.addDirectLink = function () {
+        this.directLink = this.topPanel.append("a")
+                                      .attr("title", tryGetMessage("DirectLinkToolTip", ""))
+                                      .attr("id", "directLinkAnchor")
+                                      .attr("href", document.location.href)
+                                      .text(getMessage("DirectLink"));
+    };
+    
+    /**
+    * Updates the URL that the direct link points to.
+    */
+    Viewer.prototype.updateDirectLink = function () {
+        var data = {
+            classes: this.classSelector.getSelectedClasses(),
+            chartType: this.chartTypeSelector.getChartType(),
+            compareWith: this.comparisonSelector.getComparisonType(),
+            selected: this.selection.getSelectedIndexes(),
+            stats: this.statisticsSelector.getVisibleStatistics(),
+            showOriginal: this.ageClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected()
         };
         
-        var showRepairedData = function () {
-            repairEventData(outerThis.eventData);
-            outerThis.eventData.determineTimeLosses();
-            outerThis.drawChart();
-        };
-        
-        this.originalDataSelector = new OriginalDataSelector(this.topPanel, showOriginalData, showRepairedData);
+        var oldQueryString = document.location.search;
+        var newQueryString = formatQueryString(oldQueryString, this.eventData, this.ageClassSet, data);
+        var oldHref = document.location.href;        
+        this.directLink.attr("href", oldHref.substring(0, oldHref.length - oldQueryString.length) + "?" + newQueryString.replace(/^\?+/, ""));
     };
     
     /**
@@ -235,12 +279,18 @@
         this.topPanel = body.append("div");
         
         this.drawLogo();
+        if (this.options && this.options.flagImageURL) {
+            this.addCountryFlag();
+        }
+        
         this.addClassSelector();
         this.addSpacer();
         this.addChartTypeSelector();
         this.addSpacer();
         this.addComparisonSelector();
         this.addOriginalDataSelector();
+        this.addSpacer();
+        this.addDirectLink();
         
         this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
 
@@ -258,9 +308,6 @@
         this.resultsTable.hide();
         
         var outerThis = this;
-        this.classSelector.registerChangeHandler(function (indexes) { outerThis.selectClasses(indexes); });
-        this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartType(chartType); });
-        this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
            
         $(window).resize(function () { outerThis.handleWindowResize(); });
         
@@ -269,6 +316,44 @@
         // -*-user-select CSS style.
         $("input:text").bind("selectstart", function (evt) { evt.stopPropagation(); });
         $("body").bind("selectstart", function () { return false; });
+    };
+
+    /**
+    * Registers change handlers.
+    */
+    Viewer.prototype.registerChangeHandlers = function () {
+        var outerThis = this;
+        this.classSelector.registerChangeHandler(function (indexes) { outerThis.selectClasses(indexes); });
+        this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartTypeAndRedraw(chartType); });
+        this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
+        this.originalDataSelector.registerChangeHandler(function (showOriginalData) { outerThis.showOriginalOrRepairedData(showOriginalData); });
+    };
+    
+    /**
+    * Select all of the competitors.
+    */
+    Viewer.prototype.selectAll = function () {
+        this.selection.selectAll();
+    };
+
+    /**
+    * Select none of the competitors.
+    */
+    Viewer.prototype.selectNone = function () {
+        this.selection.selectNone();
+    };
+
+    /**
+    * Select all of the competitors that cross the unique selected competitor.
+    */
+    Viewer.prototype.selectCrossingRunners = function () {
+        this.selection.selectCrossingRunners(this.ageClassSet.allCompetitors); 
+        if (this.selection.isSingleRunnerSelected()) {
+            // Only a single runner is still selected, so nobody crossed the
+            // selected runner.
+            var competitorName = this.ageClassSet.allCompetitors[this.selection.getSelectedIndexes()[0]].name;
+            alert(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
+        }
     };
 
     /**
@@ -305,7 +390,7 @@
         var EXTRA_WRAP_PREVENTION_SPACE = 2;
         
         var bodyWidth = $(window).width() - horzMargin;
-        var bodyHeight = $(window).height() - vertMargin - this.topDivHeight;
+        var bodyHeight = $(window).height() - vertMargin - this.topBarHeight;
 
         $("body").width(bodyWidth).height(bodyHeight);
         
@@ -335,7 +420,7 @@
     * Draw the chart using the current data.
     */
     Viewer.prototype.drawChart = function () {
-        if (this.chartType.isResultsTable) {
+        if (this.chartTypeSelector.getChartType().isResultsTable) {
             return;
         }
         
@@ -353,10 +438,10 @@
         
         var outerThis = this;
         
-        this.selectionChangeHandler = function (indexes) {
-            outerThis.currentIndexes = indexes;
+        this.selectionChangeHandler = function () {
             outerThis.competitorList.enableOrDisableCrossingRunnersButton();
             outerThis.redraw();
+            outerThis.updateDirectLink();
         };
 
         this.selection.registerChangeHandler(this.selectionChangeHandler);
@@ -364,14 +449,16 @@
         this.statisticsChangeHandler = function (visibleStatistics) {
             outerThis.currentVisibleStatistics = visibleStatistics;
             outerThis.redraw();
+            outerThis.updateDirectLink();
         };
         
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
         this.updateControlEnabledness();
-        this.referenceCumTimes = this.comparisonFunction(this.ageClassSet);
+        var comparisonFunction = this.comparisonSelector.getComparisonFunction();
+        this.referenceCumTimes = comparisonFunction(this.ageClassSet);
         this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
-        this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+        this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType());
         this.redrawChart();
     };
 
@@ -387,17 +474,44 @@
             fastestCumTimes: this.fastestCumTimes
         };
             
-        this.chart.drawChart(data, this.currentIndexes, this.currentVisibleStatistics, this.chartType);
+        this.chart.drawChart(data, this.selection.getSelectedIndexes(), this.currentVisibleStatistics, this.chartTypeSelector.getChartType());
     };
     
     /**
     * Redraw the chart, possibly using new data.
     */
     Viewer.prototype.redraw = function () {
-        if (!this.chartType.isResultsTable) {
-            this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+        var chartType = this.chartTypeSelector.getChartType();
+        if (!chartType.isResultsTable) {
+            this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), chartType);
             this.redrawChart();
         }
+    };
+    
+    /**
+    * Sets the currently-selected classes in various objects that need it:
+    * current age-class set, comparison selector and results table.
+    * @param {Array} classIndexes - Array of selected class indexes.    
+    */
+    Viewer.prototype.setClasses = function (classIndexes) {
+        this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
+        this.ageClassSet = new AgeClassSet(this.currentClasses);
+        this.comparisonSelector.setAgeClassSet(this.ageClassSet);
+        this.resultsTable.setClass(this.currentClasses[0]);    
+        this.enableOrDisableRaceGraph();
+        this.originalDataSelector.setVisible(this.ageClassSet.hasDubiousData());
+    };
+    
+    /**
+    * Initialises the viewer with the given initial classes.
+    * @param {Array} classIndexes - Array of selected class indexes.
+    */ 
+    Viewer.prototype.initClasses = function (classIndexes) {
+        this.classSelector.selectClasses(classIndexes);
+        this.setClasses(classIndexes);
+        this.selection = new CompetitorSelection(this.ageClassSet.allCompetitors.length);
+        this.competitorList.setSelection(this.selection);
+        this.previousCompetitorList = this.ageClassSet.allCompetitors;
     };
     
     /**
@@ -406,38 +520,27 @@
     */
     Viewer.prototype.selectClasses = function (classIndexes) {
     
-        if (this.selection === null) {
-            this.selection = new SplitsBrowser.Model.CompetitorSelection(0);
-            this.competitorList.setSelection(this.selection);
+        if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
+            // The 'primary' class hasn't changed, only the 'other' ones.
+            // In this case we don't clear the selection.
         } else {
-            if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
-                // The 'primary' class hasn't changed, only the 'other' ones.
-                // In this case we don't clear the selection.
-            } else {
-                this.selection.selectNone();
-            }
+            this.selection.selectNone();
         }
         
-        this.currentIndexes = [];
-        this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
-        this.ageClassSet = new SplitsBrowser.Model.AgeClassSet(this.currentClasses);
-        this.comparisonSelector.setAgeClassSet(this.ageClassSet);
-        this.resultsTable.setClass(this.currentClasses[0]);
-        this.drawChart();
+        this.setClasses(classIndexes);
         this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
+        this.competitorList.selectionChanged();
+        this.drawChart();
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
-        this.enableOrDisableRaceGraph();
-        this.originalDataSelector.setVisible(this.ageClassSet.hasDubiousData());
+        this.updateDirectLink();
     };
     
     /**
     * Change the graph to compare against a different reference.
-    * @param {Function} comparisonFunc - The function that returns the
-    *      reference class data from the class data.
     */
-    Viewer.prototype.selectComparison = function (comparisonFunc) {
-        this.comparisonFunction = comparisonFunc;
+    Viewer.prototype.selectComparison = function () {
         this.drawChart();
+        this.updateDirectLink();
     };
     
     /**
@@ -445,9 +548,14 @@
     * @param {Object} chartType - The type of chart to draw.
     */
     Viewer.prototype.selectChartType = function (chartType) {
-        this.chartType = chartType;
         if (chartType.isResultsTable) {
             this.mainPanel.style("display", "none");
+            
+            // Remove any fixed width and height on the body, as we need the
+            // window to be able to scroll if the results table is too wide or
+            // too tall and also adjust size if one or both scrollbars appear.
+            d3.select("body").style("width", null).style("height", null);
+            
             this.resultsTable.show();
         } else {
             this.resultsTable.hide();
@@ -455,21 +563,96 @@
         }
         
         this.updateControlEnabledness();
-        
         this.competitorList.setChartType(chartType);
-        
+    };
+    
+    /**
+    * Change the type of chart shown.
+    * @param {Object} chartType - The type of chart to draw.
+    */
+    Viewer.prototype.selectChartTypeAndRedraw = function (chartType) {
+        this.selectChartType(chartType);
         this.drawChart();
+        this.updateDirectLink();
+    };
+    
+    /**
+    * Selects original or repaired data, doing any recalculation necessary.
+    * @param {boolean} showOriginalData - True to show original data, false to
+    *     show repaired data.
+    */
+    Viewer.prototype.selectOriginalOrRepairedData = function (showOriginalData) {
+        if (showOriginalData) {
+            transferCompetitorData(this.eventData);
+        } else {
+            repairEventData(this.eventData);
+        }
+        
+        this.eventData.determineTimeLosses();
+    };
+    
+    /**
+    * Shows original or repaired data.
+    * @param {boolean} showOriginalData - True to show original data, false to
+    *     show repaired data.
+    */
+    Viewer.prototype.showOriginalOrRepairedData = function (showOriginalData) {
+        this.selectOriginalOrRepairedData(showOriginalData);
+        this.drawChart();
+        this.updateDirectLink();
     };
     
     /**
     * Updates whether a number of controls are enabled.
     */
     Viewer.prototype.updateControlEnabledness = function () {
-        this.classSelector.setOtherClassesEnabled(!this.chartType.isResultsTable);
-        this.comparisonSelector.setEnabled(!this.chartType.isResultsTable);
-        this.statisticsSelector.setEnabled(!this.chartType.isResultsTable);
-        this.originalDataSelector.setEnabled(!this.chartType.isResultsTable);
+        var chartType = this.chartTypeSelector.getChartType();
+        this.classSelector.setOtherClassesEnabled(!chartType.isResultsTable);
+        this.comparisonSelector.setEnabled(!chartType.isResultsTable);
+        this.statisticsSelector.setEnabled(!chartType.isResultsTable);
+        this.originalDataSelector.setEnabled(!chartType.isResultsTable);
         this.competitorList.enableOrDisableCrossingRunnersButton();
+    };
+    
+    /**
+    * Updates the state of the viewer to reflect query-string arguments parsed.
+    * @param {Object} parsedQueryString - Parsed query-string object.
+    */
+    Viewer.prototype.updateFromQueryString = function (parsedQueryString) {
+        if (parsedQueryString.classes === null) {
+            this.initClasses([0]);
+        } else {
+            this.initClasses(parsedQueryString.classes);
+        }
+        
+        if (parsedQueryString.chartType !== null) {
+            this.chartTypeSelector.setChartType(parsedQueryString.chartType);
+            this.selectChartType(parsedQueryString.chartType);
+        }
+        
+        if (parsedQueryString.compareWith !== null) {
+            this.comparisonSelector.setComparisonType(parsedQueryString.compareWith.index, parsedQueryString.compareWith.runner);
+        }
+        
+        if (parsedQueryString.selected !== null) {
+            this.selection.setSelectedIndexes(parsedQueryString.selected);
+        }
+        
+        if (parsedQueryString.stats !== null) {
+            this.statisticsSelector.setVisibleStatistics(parsedQueryString.stats);
+        }
+        
+        if (parsedQueryString.showOriginal && this.ageClassSet.hasDubiousData()) {
+            this.originalDataSelector.selectOriginalData();
+            this.selectOriginalOrRepairedData(true);
+        }
+    };
+    
+    /**
+    * Sets the default selected class.
+    */
+    Viewer.prototype.setDefaultSelectedClass = function () {
+        this.initClasses([0]);
     };
     
     SplitsBrowser.Viewer = Viewer;
@@ -491,42 +674,73 @@
     }
     
     /**
+    * Reads in the data in the given string and starts SplitsBrowser.
+    * @param {String} data - String containing the data to read.
+    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    *     containing various options to SplitsBrowser.  It can also be used for
+    *     an HTML element that forms a 'banner' across the top of the page.
+    *     This element can be specified by a CSS selector for the element, or
+    *     the HTML element itself, although this behaviour is deprecated.
+    */
+    SplitsBrowser.readEvent = function (data, options) {
+        var eventData;
+        try {
+            eventData = parseEventData(data);
+        } catch (e) {
+            if (e.name === "InvalidData") {
+                showLoadFailureMessage("LoadFailedInvalidData", {"$$MESSAGE$$": e.message});
+                return;
+            } else {
+                throw e;
+            }
+        }
+        
+        if (eventData === null) {
+            showLoadFailureMessage("LoadFailedUnrecognisedData", {});
+        } else {
+            if (eventData.needsRepair()) {
+                repairEventData(eventData);
+            }
+            
+            if (typeof options === "string") {
+                // Deprecated; support the top-bar specified only as a
+                // string.
+                options = {topBar: options};
+            }
+            
+            eventData.determineTimeLosses();
+            
+            var viewer = new Viewer(options);
+            viewer.buildUi();
+            viewer.setEvent(eventData);
+            
+            var queryString = document.location.search;
+            if (queryString !== null && queryString.length > 0) {
+                var parsedQueryString = parseQueryString(queryString, eventData);
+                viewer.updateFromQueryString(parsedQueryString);
+            } else {
+                viewer.setDefaultSelectedClass();
+            }
+
+            viewer.drawChart();
+            viewer.registerChangeHandlers();
+        }
+    };
+    
+    /**
     * Handles an asynchronous callback that fetched event data, by parsing the
     * data and starting SplitsBrowser.
     * @param {String} data - The data returned from the AJAX request.
     * @param {String} status - The status of the request.
-    * @param {String|HTMLElement|undefined} - Optional HTML element that forms
-    *     a 'banner' across the top of the page.  This can be specified by a
-    *     CSS selector or the HTML element itself.
+    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    *     containing various options to SplitsBrowser.  It can also be used for
+    *     an HTML element that forms a 'banner' across the top of the page.
+    *     This element can be specified by a CSS selector for the element, or
+    *     the HTML element itself, although this behaviour is deprecated.
     */
-    function readEventData(data, status, topDiv) {
+    function readEventData(data, status, options) {
         if (status === "success") {
-            var eventData;
-            try {
-                eventData = SplitsBrowser.Input.parseEventData(data);
-            } catch (e) {
-                if (e.name === "InvalidData") {
-                    showLoadFailureMessage("LoadFailedInvalidData", {"$$MESSAGE$$": e.message});
-                    return;
-                } else {
-                    throw e;
-                }
-            }
-            
-            if (eventData === null) {
-                showLoadFailureMessage("LoadFailedUnrecognisedData", {});
-            } else {
-                if (eventData.needsRepair()) {
-                    repairEventData(eventData);
-                }
-                
-                eventData.determineTimeLosses();
-                
-                var viewer = new Viewer(topDiv);
-                viewer.buildUi();
-                viewer.setEvent(eventData);
-                viewer.selectClasses([0]);
-            }
+            SplitsBrowser.readEvent(data, options);
         } else {
             showLoadFailureMessage("LoadFailedStatusNotSuccess", {"$$STATUS$$": status});
         }
@@ -545,15 +759,17 @@
     /**
     * Loads the event data in the given URL and starts SplitsBrowser.
     * @param {String} eventUrl - The URL that points to the event data to load.
-    * @param {String|HTMLElement|undefined} - Optional HTML element that forms
-    *     a 'banner' across the top of the page.  This can be specified by a
-    *     CSS selector or the HTML element itself.
+    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    *     containing various options to SplitsBrowser.  It can also be used for
+    *     an HTML element that forms a 'banner' across the top of the page.
+    *     This element can be specified by a CSS selector for the element, or
+    *     the HTML element itself, although this behaviour is deprecated.
     */
-    SplitsBrowser.loadEvent = function (eventUrl, topDiv) {
+    SplitsBrowser.loadEvent = function (eventUrl, options) {
         $.ajax({
             url: eventUrl,
             data: "",
-            success: function (data, status) { readEventData(data, status, topDiv); },
+            success: function (data, status) { readEventData(data, status, options); },
             dataType: "text",
             error: readEventDataError
         });

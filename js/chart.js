@@ -73,8 +73,8 @@
     /**
     * Format a time and a rank as a string, with the split time in mm:ss or h:mm:ss
     * as appropriate.
-    * @param {Number|null} time - The time, in seconds, or null.
-    * @param {Number|null} rank - The rank, or null.
+    * @param {?Number} time - The time, in seconds, or null.
+    * @param {?Number} rank - The rank, or null.
     * @returns Time and rank formatted as a string.
     */
     function formatTimeAndRank(time, rank) {
@@ -106,7 +106,7 @@
     * @constructor
     * @param {HTMLElement} parent - The parent object to create the element within.
     */
-    var Chart = function (parent) {
+    function Chart(parent) {
         this.parent = parent;
 
         this.xScale = null;
@@ -174,7 +174,7 @@
         this.popup = new ChartPopup(parent, handlers);
         
         $(document).mouseup(function () { outerThis.popup.hide(); });
-    };
+    }
     
     /**
     * Hides the chart.
@@ -210,6 +210,7 @@
     * Gets the location the chart popup should be at following a mouse-button
     * press or a mouse movement.
     * @param {jQuery.event} event - jQuery mouse-down or mouse-move event.
+    * @return {Object} Location of the popup.
     */
     Chart.prototype.getPopupLocation = function (event) {
         return {
@@ -325,6 +326,7 @@
     
     /**
     * Handles a mouse button being pressed over the chart.
+    * @param {jQuery.event} event - The jQuery onMouseUp event.
     */
     Chart.prototype.onMouseUp = function (event) {
         this.popup.hide();
@@ -333,7 +335,7 @@
     
     /**
     * Shows the popup window, populating it with data as necessary
-    * @param {jQuery event} event - The jQuery onMouseDown event that triggered
+    * @param {jQuery.event} event - The jQuery onMouseDown event that triggered
     *     the popup.
     */ 
     Chart.prototype.showPopupDialog = function (event) {
@@ -801,6 +803,8 @@
     * its default tick formatter.
     * 
     * @param {object} chartData - The chart data to read start times from.
+    * @return {?Function} Tick formatter function, or null to use the default
+    *     d3 formatter.
     */
     Chart.prototype.determineYAxisTickFormatter = function (chartData) {
         if (this.isRaceGraph) {
@@ -884,10 +888,10 @@
     Chart.prototype.drawChartLines = function (chartData) {
         var outerThis = this;
         var lineFunctionGenerator = function (selCompIdx) {
-            if (chartData.dataColumns.every(function (col) { return col.ys[selCompIdx] === null; })) {
-                // This competitor's entire row is null, so there's no data to
-                // draw.  WebKit will report an error ('Error parsing d=""') if
-                // no points on the line are defined, as will happen in this
+            if (!chartData.dataColumns.some(function (col) { return isNotNullNorNaN(col.ys[selCompIdx]); })) {
+                // This competitor's entire row is null/NaN, so there's no data
+                // to draw.  WebKit will report an error ('Error parsing d=""')
+                // if no points on the line are defined, as will happen in this
                 // case, so we substitute a single zero point instead.
                 return d3.svg.line()
                              .x(0)
@@ -1168,9 +1172,14 @@
             }
         });
         
-        this.referenceCumTimesSorted = 
-            cumTimesToControlIndex.keys().map(function (cumTime) { return parseInt(cumTime, 10); })
-                                         .sort(d3.ascending);
+        // Sort and deduplicate the reference cumulative times.
+        this.referenceCumTimesSorted = this.referenceCumTimes.slice(0);
+        this.referenceCumTimesSorted.sort(d3.ascending);
+        for (var index = this.referenceCumTimesSorted.length - 1; index > 0; index -= 1) {
+            if (this.referenceCumTimesSorted[index] === this.referenceCumTimesSorted[index - 1]) {
+                this.referenceCumTimesSorted.splice(index, 1);
+            }
+        }
 
         this.referenceCumTimeIndexes = this.referenceCumTimesSorted.map(function (cumTime) { return cumTimesToControlIndex.get(cumTime); });
     };

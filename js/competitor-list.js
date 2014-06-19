@@ -272,7 +272,16 @@
     CompetitorList.prototype.selectNone = function () {
         this.competitorSelection.selectNone();
     };
-
+    
+    /**
+    * Returns whether the competitor with the given index is selected.
+    * @param {Number} index - Index of the competitor within the list.
+    * @return True if the competitor is selected, false if not.
+    */
+    CompetitorList.prototype.isSelected = function (index) {
+        return this.competitorSelection !== null && this.competitorSelection.isSelected(index);
+    };
+    
     /**
     * Select all of the competitors that cross the unique selected competitor.
     */
@@ -310,11 +319,12 @@
         var outerThis = this;
         this.listDiv.selectAll("div.competitor")
                     .data(d3.range(this.competitorSelection.count))
-                    .classed("selected", function (comp, index) { return outerThis.competitorSelection.isSelected(index); });
+                    .classed("selected", function (comp, index) { return outerThis.isSelected(index); });
     };
 
     /**
     * Toggle the selectedness of a competitor.
+    * @param {Number} index - The index of the competitor.
     */
     CompetitorList.prototype.toggleCompetitor = function (index) {
         this.competitorSelection.toggle(index);
@@ -340,7 +350,7 @@
     /**
     * Sets the list of competitors.
     * @param {Array} competitors - Array of competitor data.
-    * @param {boolean} hasMultipleClasses - Whether the list of competitors is
+    * @param {boolean} multipleClasses - Whether the list of competitors is
     *      made up from those in multiple classes.
     */
     CompetitorList.prototype.setCompetitorList = function (competitors, multipleClasses) {
@@ -349,8 +359,10 @@
         
         var competitorDivs = this.listDiv.selectAll("div.competitor").data(competitors);
 
+        var outerThis = this;
         competitorDivs.enter().append("div")
-                              .classed("competitor", true);
+                              .classed("competitor", true)
+                              .classed("selected", function (comp, index) { return outerThis.isSelected(index); });
 
         competitorDivs.selectAll("span").remove();
         
@@ -366,7 +378,6 @@
 
         competitorDivs.exit().remove();
         
-        var outerThis = this;
         competitorDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
                       .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })
                       .on("mouseup", function () { outerThis.stopDrag(); });
@@ -383,9 +394,9 @@
 
         var outerThis = this;
         this.competitorSelection = selection;
-        this.handler = function (indexes) { outerThis.selectionChanged(indexes); };
+        this.handler = function () { outerThis.selectionChanged(); };
         this.competitorSelection.registerChangeHandler(this.handler);
-        this.selectionChanged(d3.range(selection.count));
+        this.selectionChanged();
     };
     
     /**

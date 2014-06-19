@@ -5,3 +5,9 @@ SplitsBrowser changelog:
 3.1.1:  Add support for 44-column SI CSV files (including those used by helga-o.com).
 3.2.0:  Tolerate input data files with cumulative times not always strictly ascending.
 3.2.1:  Support SI CSV files with delimiters other than semicolons.
+3.2.2:  Support alternative CSV file formats.
+3.2.3:  Fix issues with format variations (GitHub issue #10).
+3.2.4:  Support IOF v2.0.3 XML files.
+3.2.5:  Allow SplitsBrowser to be used offline.
+3.2.6:  Read settings from URL query-string parameters.
+3.2.7:  Support IOF v3.0 XML files and OE2010 CSV files.

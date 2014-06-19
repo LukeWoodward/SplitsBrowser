@@ -1,7 +1,7 @@
 ﻿/*
  *  Messages Tests - Tests for the messages.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -58,4 +58,18 @@
         assert.strictEqual(result, "This is one test one");
         assert.ok(!alerterCalled, "Alerter should not have been called");
     });
+    
+    QUnit.test("Can try to get a test message that exists", function (assert) {
+        setAlerter();
+        SplitsBrowser.Messages.TestMessage = "This is a test";
+        assert.strictEqual(SplitsBrowser.tryGetMessage("TestMessage"), SplitsBrowser.Messages.TestMessage);
+        assert.ok(!alerterCalled, "Alerter should not have been called");
+    });
+    
+    QUnit.test("Can try to get a message that does not exist with the default being returned instead", function (assert) {
+        setAlerter();
+        assert.strictEqual(SplitsBrowser.tryGetMessage("ThisMessageDoesNotExist", "DefaultValue"), "DefaultValue");
+        assert.ok(!alerterCalled, "Alerter should not have been called for tryGetMessage with non-existent message");
+    });
+    
 })();

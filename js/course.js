@@ -31,18 +31,18 @@
     * @constructor
     * @param {String} name - The name of the course.
     * @param {Array} classes - Array of AgeClass objects comprising the course.
-    * @param {Number|null} length - Length of the course, in kilometres.
-    * @param {Number|null} climb - The course climb, in metres.
-    * @param {Array|null} controls - Array of codes of the controls that make
+    * @param {?Number} length - Length of the course, in kilometres.
+    * @param {?Number} climb - The course climb, in metres.
+    * @param {?Array} controls - Array of codes of the controls that make
     *     up this course.  This may be null if no such information is provided.
     */
-    var Course = function (name, classes, length, climb, controls) {
+    function Course(name, classes, length, climb, controls) {
         this.name = name;
         this.classes = classes;
         this.length = length;
         this.climb = climb;
         this.controls = controls;
-    };
+    }
     
     /** 'Magic' control code that represents the start. */
     Course.START = "__START__";
@@ -97,8 +97,8 @@
     * SplitsBrowser.Model.Course.START and SplitsBrowser.Model.Course.FINISH.
     *
     * @param {Number} controlNum - The number of the control.
-    * @return {String|null} The code of the control, or one of the
-    *     aforementioned constants for the start or finish.
+    * @return {?String} The code of the control, or one of the aforementioned
+    *     constants for the start or finish.
     */
     Course.prototype.getControlCode = function (controlNum) {
         if (controlNum === 0) {

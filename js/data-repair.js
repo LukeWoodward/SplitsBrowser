@@ -44,8 +44,8 @@
     * returns null.
     * 
     * @param {Array} cumTimes - Array of cumulative times.
-    * @return {Object|null} Object containing indexes of non-ascending entries,
-    *     or null if none found.
+    * @return {?Object} Object containing indexes of non-ascending entries, or
+    *     null if none found.
     */
     function getFirstNonAscendingIndexes(cumTimes) {
         if (cumTimes.length === 0 || cumTimes[0] !== 0) {
@@ -203,7 +203,7 @@
     
     /**
     * Attempt to repair all of the data within an age class.
-    * @param {AgeClass} The age class whose data we wish to repair.
+    * @param {AgeClass} ageClass - The age class whose data we wish to repair.
     */
     Repairer.prototype.repairAgeClass = function (ageClass) {
         this.madeAnyChanges = false;

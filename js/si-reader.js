@@ -24,6 +24,8 @@
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
+    var parseCourseClimb = SplitsBrowser.parseCourseClimb;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
@@ -33,20 +35,58 @@
     var DELIMITERS = [";", ",", "\t", "\\"];
     
     // Indexes of the various columns relative to the column for control-1.
-    var COLUMN_OFFSETS = {
-        TIME: -35,
-        CLUB: -31,
-        AGE_CLASS: -28,
-        COURSE: -7,
-        DISTANCE: -6,
-        CLIMB: -5,
-        CONTROL_COUNT: -4,
-        PLACING: -3,
-        START: -2
-    };
+    
+    var COLUMN_INDEXES = {};
+    
+    [44, 46, 60].forEach(function (columnOffset) {
+        COLUMN_INDEXES[columnOffset] = {
+            course: columnOffset - 7,
+            distance: columnOffset - 6,
+            climb: columnOffset - 5,
+            controlCount: columnOffset - 4,
+            placing: columnOffset - 3,
+            start: columnOffset - 2,
+            finish: columnOffset - 1,
+            control1: columnOffset
+        };
+    });
+    
+    [44, 46].forEach(function (columnOffset) {
+        COLUMN_INDEXES[columnOffset].time = columnOffset - 35;
+        COLUMN_INDEXES[columnOffset].club =  columnOffset - 31;
+        COLUMN_INDEXES[columnOffset].ageClass = columnOffset - 28;
+    });
+    
+    COLUMN_INDEXES[44].combinedName = 3;
+    
+    COLUMN_INDEXES[46].forename = 4;
+    COLUMN_INDEXES[46].surname = 3;
+    
+    COLUMN_INDEXES[60].forename = 6;
+    COLUMN_INDEXES[60].surname = 5;
+    COLUMN_INDEXES[60].combinedName = 3;
+    COLUMN_INDEXES[60].startFallback = 11;
+    COLUMN_INDEXES[60].time = 13;
+    COLUMN_INDEXES[60].club = 20;
+    COLUMN_INDEXES[60].ageClass = 26;
+    COLUMN_INDEXES[60].ageClassFallback = COLUMN_INDEXES[60].course;
+    COLUMN_INDEXES[60].clubFallback = 18;
     
     // Minimum control offset.
     var MIN_CONTROLS_OFFSET = 37;
+    
+    /**
+    * Remove any leading and trailing double-quotes from the given string.
+    * @param {String} value - The value to trim quotes from.
+    * @return {String} The string with any leading and trailing quotes removed.
+    */
+    function dequote(value) {
+        if (value[0] === '"' && value[value.length - 1] === '"') {
+            value = $.trim(value.substring(1, value.length - 1).replace(/""/g, '"'));
+        }
+        
+        return value;
+    }
     
     /**
     * Constructs an SI-format data reader.
@@ -55,8 +95,8 @@
     * @constructor
     * @param {String} data - The SI data to read in.
     */
-    var Reader = function (data) {
-        this.data = data;
+    function Reader(data) {
+        this.data = normaliseLineEndings(data);
         
         // Map that associates classes to all of the competitors running on
         // that age class.
@@ -75,10 +115,9 @@
         // ignored, as are competitors that have no times at all.
         this.anyCompetitors = false;
         
-        // The column index that contains the control numbers for control 1.
-        // This is used to determine where various columns are.
-        this.control1Index = null;
-    };
+        // The indexes of the columns that we read data from.
+        this.columnIndexes = null;
+    }
 
     /**
     * Identifies the delimiter character that delimits the columns of data.
@@ -103,8 +142,9 @@
     /**
     * Identifies which variation on the SI CSV format we are parsing.
     *
-    * At present, the only variations supported are 44-column and 46-column.
-    * In both cases, the numbers count the columns before the controls data.
+    * At present, the only variations supported are 44-column, 46-column and
+    * 60-column.  In all cases, the numbers count the columns before the
+    * controls data.
     *
     * @param {String} delimiter - The character used to delimit the columns of
     *     data.
@@ -113,29 +153,67 @@
         
         var firstLine = this.lines[1].split(delimiter);
         
+        // Ignore trailing blanks.
         var endPos = firstLine.length - 1;
         while (endPos > 0 && $.trim(firstLine[endPos]) === "") {
             endPos -= 1;
         }
         
-        // The last empty item should be the time.
-        var controlCodeColumn = endPos - 1;
-        var digitsOnly = /^\d+$/;
-        while (controlCodeColumn >= 2 && digitsOnly.test(firstLine[controlCodeColumn - 2])) { 
+        // Now, find the last column with a control code in.  This should be
+        // one of the last two columns.  (Normally, it will be the second last,
+        // but if there is no last split recorded, it may be the last.)
+        var controlCodeRegexp = /^[A-Za-z0-9]+$/;
+        
+        var controlCodeColumn = null;
+        if (controlCodeRegexp.test(firstLine[endPos - 1])) {
+            controlCodeColumn = endPos - 1;
+        } else if (controlCodeRegexp.test(firstLine[endPos])) {
+            // No split for the last control.
+            controlCodeColumn = endPos;
+        } else {
+            throwWrongFileFormat("Could not find control number in last two columns of first data line");
+        }
+        
+        while (controlCodeColumn >= 2 && controlCodeRegexp.test(firstLine[controlCodeColumn - 2])) { 
             // There's another control code before this one.
             controlCodeColumn -= 2;
         }
         
-        this.control1Index = controlCodeColumn;
-        
-        var supportedControl1Indexes = [44, 46];
-        
-        var throwException = (delimiter === ",") ? throwWrongFileFormat : throwInvalidData;
-        if (this.control1Index === null) {
-            throwException("Unable to find index of control 1 in SI CSV data");
-        } else if (supportedControl1Indexes.indexOf(this.control1Index) < 0) {
-            throwException("Unsupported index of control 1: " + this.control1Index);
+        if (controlCodeColumn === null) {
+            throwWrongFileFormat("Unable to find index of control 1 in SI CSV data");
+        } else if (!COLUMN_INDEXES.hasOwnProperty(controlCodeColumn)) {
+            throwWrongFileFormat("Unsupported index of control 1: " + controlCodeColumn);
+        } else {
+            this.columnIndexes = COLUMN_INDEXES[controlCodeColumn];
         }
+    };
+    
+    /**
+    * Returns the age-class in the given row.
+    * @param {Array} row - Array of row data.
+    * @return {String} Class name.
+    */
+    Reader.prototype.getAgeClassName = function (row) {
+        var className = row[this.columnIndexes.ageClass];
+        if (className === "" && this.columnIndexes.hasOwnProperty("ageClassFallback")) {
+            // 'Nameless' variation: no age class.
+            className = row[this.columnIndexes.ageClassFallback];
+        }
+        return className;
+    };
+
+    /**
+    * Reads the start-time in the given row.
+    * @param {Array} row - Array of row data.
+    * @return {?Number} Parsed start time, or null for none.
+    */
+    Reader.prototype.getStartTime = function (row) {
+        var startTimeStr = row[this.columnIndexes.start];
+        if (startTimeStr === "" && this.columnIndexes.hasOwnProperty("startFallback")) {
+            startTimeStr = row[this.columnIndexes.startFallback];
+        }
+        
+        return parseTime(startTimeStr);
     };
     
     /**
@@ -145,34 +223,44 @@
     * @return {Number} Number of controls read.
     */
     Reader.prototype.getNumControls = function (row, lineNumber) {
-        var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
+        var className = this.getAgeClassName(row);
         if ($.trim(className) === "") {
             throwInvalidData("Line " + lineNumber + " does not contain a class for the competitor");
         } else if (this.ageClasses.has(className)) {
             return this.ageClasses.get(className).numControls;
         } else {
-            return parseInt(row[this.control1Index + COLUMN_OFFSETS.CONTROL_COUNT], 10);
+            return parseInt(row[this.columnIndexes.controlCount], 10);
         }    
     };
     
     /**
-    * Reads the split times out of a row of competitor data.
+    * Reads the cumulative times out of a row of competitor data.
     * @param {Array} row - Array of row data items.
     * @param {Number} lineNumber - Line number of the row within the source data.
     * @param {Number} numControls - The number of controls to read.
+    * @return {Array} Array of cumulative times.
     */
     Reader.prototype.readCumulativeTimes = function (row, lineNumber, numControls) {
         
         var cumTimes = [0];
         
         for (var controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
-            var cellIndex = this.control1Index + 1 + 2 * controlIdx;
+            var cellIndex = this.columnIndexes.control1 + 1 + 2 * controlIdx;
             var cumTimeStr = (cellIndex < row.length) ? row[cellIndex] : null;
             var cumTime = (cumTimeStr === null) ? null : parseTime(cumTimeStr);
             cumTimes.push(cumTime);
         }
         
-        var totalTime = parseTime(row[this.control1Index + COLUMN_OFFSETS.TIME]);
+        var totalTime = parseTime(row[this.columnIndexes.time]);
+        if (totalTime === null) {
+            // 'Nameless' variation: total time missing, so calculate from
+            // start and finish times.
+            var startTime = this.getStartTime(row);
+            var finishTime = parseTime(row[this.columnIndexes.finish]);
+            if (startTime !== null && finishTime !== null) {
+                totalTime = finishTime - startTime;
+            }
+        }
         
         cumTimes.push(totalTime);
     
@@ -186,7 +274,7 @@
     * @param {Number} numControls - The number of controls to read.
     */
     Reader.prototype.createAgeClassIfNecessary = function (row, numControls) {
-        var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
+        var className = this.getAgeClassName(row);
         if (!this.ageClasses.has(className)) {
             this.ageClasses.set(className, { numControls: numControls, competitors: [] });
         }
@@ -199,13 +287,12 @@
     * @param {Number} numControls - The number of controls to read.
     */
     Reader.prototype.createCourseIfNecessary = function (row, numControls) {
-
-        var courseName = row[this.control1Index + COLUMN_OFFSETS.COURSE];
+        var courseName = row[this.columnIndexes.course];
         if (!this.courseDetails.has(courseName)) {
-            var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[this.control1Index + 2 * controlIdx]; }, this);
+            var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[this.columnIndexes.control1 + 2 * controlIdx]; }, this);
             this.courseDetails.set(courseName, {
-                length: parseCourseLength(row[this.control1Index + COLUMN_OFFSETS.DISTANCE]) || null, 
-                climb: parseInt(row[this.control1Index + COLUMN_OFFSETS.CLIMB], 10) || null,
+                length: parseCourseLength(row[this.columnIndexes.distance]), 
+                climb: parseCourseClimb(row[this.columnIndexes.climb]),
                 controls: controlNums
             });
         }
@@ -217,8 +304,8 @@
     * @param {Array} row - Array of row data items.
     */
     Reader.prototype.createClassCoursePairIfNecessary = function (row) {
-        var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
-        var courseName = row[this.control1Index + COLUMN_OFFSETS.COURSE];
+        var className = this.getAgeClassName(row);
+        var courseName = row[this.columnIndexes.course];
         
         if (!this.classCoursePairs.some(function (pair) { return pair[0] === className && pair[1] === courseName; })) {
             this.classCoursePairs.push([className, courseName]);
@@ -233,17 +320,22 @@
     */
     Reader.prototype.addCompetitor = function (row, cumTimes) {
     
-        var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
-        var placing = row[this.control1Index + COLUMN_OFFSETS.PLACING];
-        var club = row[this.control1Index + COLUMN_OFFSETS.CLUB];
-        var startTime = parseTime(row[this.control1Index + COLUMN_OFFSETS.START]);
+        var className = this.getAgeClassName(row);
+        var placing = row[this.columnIndexes.placing];
+        var club = row[this.columnIndexes.club];
+        if (club === "" && this.columnIndexes.hasOwnProperty("clubFallback")) {
+            // Nameless variation: no club name, just number...
+            club = row[this.columnIndexes.clubFallback];
+        }
+        
+        var startTime = this.getStartTime(row);
 
         var isPlacingNonNumeric = (placing !== "" && isNaN(parseInt(placing, 10)));
         
-        var name;
-        if (this.control1Index === 46) {
-            var forename = row[4];
-            var surname = row[3];
+        var name = "";
+        if (this.columnIndexes.hasOwnProperty("forename") && this.columnIndexes.hasOwnProperty("surname")) {
+            var forename = row[this.columnIndexes.forename];
+            var surname = row[this.columnIndexes.surname];
         
             // Some surnames have their placing appended to them, if their placing
             // isn't a number (e.g. mp, n/c).  If so, remove this.
@@ -251,13 +343,12 @@
                 surname = $.trim(surname.substring(0, surname.length - placing.length));
             }
             
-            name = forename + " " + surname;
-            
-        } else if (this.control1Index === 44) {
-            name = row[3];
-        } else {
-            // Reader should have thrown an error elsewhere if this has happened.
-            throw new Error("Unrecognised control-1 index: " + this.control1Index);
+            name = $.trim(forename + " " + surname);
+        }
+        
+        if (name === "" && this.columnIndexes.hasOwnProperty("combinedName")) {
+            // 'Nameless' or 44-column variation.
+            name = row[this.columnIndexes.combinedName];
         }
         
         var order = this.ageClasses.get(className).competitors.length + 1;
@@ -286,7 +377,7 @@
             return;
         }
     
-        var row = line.split(delimiter);
+        var row = line.split(delimiter).map($.trim).map(dequote);
         
         // Check the row is long enough to have all the data besides the
         // controls data.
@@ -468,7 +559,7 @@
     */
     Reader.prototype.parseEventData = function () {
         
-        this.lines = this.data.split(/\r?\n/);
+        this.lines = this.data.split(/\n/);
         
         var delimiter = this.identifyDelimiter();
         

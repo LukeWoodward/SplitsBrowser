@@ -27,6 +27,8 @@
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
+    var parseCourseClimb = SplitsBrowser.parseCourseClimb;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
 
     module("Utilities - isNotNull");
 
@@ -114,9 +116,55 @@
         assert.strictEqual(parseCourseLength("9400"), 9.4);
     });
     
-    QUnit.test("Attempting to parse invalid course length returns NaN, as does parseFloat", function (assert) {
-        // Can't do a straightforward comparison as NaN !== NaN.
-        assert.ok(isNaN(parseFloat("nonsense")), "parseFloat should return NaN");
-        assert.ok(isNaN(parseCourseLength("nonsense")), "parseCourseLength should also return NaN");
-    });    
+    QUnit.test("Attempting to parse invalid course length returns null", function (assert) {
+        assert.strictEqual(parseCourseLength("nonsense"), null);
+    });
+    
+    module("Utilities - parseCourseClimb");
+    
+    QUnit.test("Can parse course climb with no decimal separator", function (assert) {
+        assert.strictEqual(parseCourseClimb("145"), 145);
+    });
+    
+    QUnit.test("Attempting to parse invalid course climb returns null", function (assert) {
+        assert.strictEqual(parseCourseClimb("nonsense"), null);
+    });
+    
+    module("Utilities - normaliseLineEndings");
+    
+    QUnit.test("Can normalise line endings in an empty string", function (assert) {
+        assert.strictEqual(normaliseLineEndings(""), "");
+    });
+    
+    QUnit.test("Can normalise line endings in a non-empty string with no line-endings", function (assert) {
+        assert.strictEqual(normaliseLineEndings("test 1234 abc"), "test 1234 abc");
+    });
+    
+    QUnit.test("Can normalise line endings in a string with a single LF, leaving the string untouched", function (assert) {
+        assert.strictEqual(normaliseLineEndings("test\nabc"), "test\nabc");
+    });
+    
+    QUnit.test("Can normalise line endings in a string with a single CR, changing the CR to a LF", function (assert) {
+        assert.strictEqual(normaliseLineEndings("test\rabc"), "test\nabc");
+    });
+    
+    QUnit.test("Can normalise line endings in a string with a single CRLF, changing the CRLF to a LF", function (assert) {
+        assert.strictEqual(normaliseLineEndings("test\r\nabc"), "test\nabc");
+    });
+    
+    QUnit.test("Can normalise line endings in a string with multiple LFs, leaving the string untouched", function (assert) {
+        assert.strictEqual(normaliseLineEndings("test\nabc\n1234\n"), "test\nabc\n1234\n");
+    });
+    
+    QUnit.test("Can normalise line endings in a string with multiple CRs, changing the CRs to LFs", function (assert) {
+        assert.strictEqual(normaliseLineEndings("test\rabc\r1234\r"), "test\nabc\n1234\n");
+    });
+    
+    QUnit.test("Can normalise line endings in a string with multiple CRLFs, changing the CRLFs to LFs", function (assert) {
+        assert.strictEqual(normaliseLineEndings("test\r\nabc\r\n1234\r\n"), "test\nabc\n1234\n");
+    });
+    
+    QUnit.test("Can normalise line endings in a string with varying line-endings, changing them all to LFs", function (assert) {
+        assert.strictEqual(normaliseLineEndings("test\nabc\r\n1234\r"), "test\nabc\n1234\n");
+    });
 })();

@@ -120,6 +120,32 @@
         assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
     });
 
+    QUnit.test("Can parse a single class with a single valid competitor when file has CR line-endings", function (assert) {
+        var csvData = "Example, 4\rJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23";
+        var actualEvent = parseEventData(csvData);
+        var expectedClass = new AgeClass("Example", 4, [
+            fromSplitTimes(1, "John Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23])
+        ]);
+        
+        var expectedCourse = new Course("Example", [expectedClass], null, null, null);
+        expectedClass.setCourse(expectedCourse);
+        
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+    });
+
+    QUnit.test("Can parse a single class with a single valid competitor when file has trailing commas", function (assert) {
+        var csvData = "Example, 4,,,,,,,,,,,\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23,,,,,,,,";
+        var actualEvent = parseEventData(csvData);
+        var expectedClass = new AgeClass("Example", 4, [
+            fromSplitTimes(1, "John Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23])
+        ]);
+        
+        var expectedCourse = new Course("Example", [expectedClass], null, null, null);
+        expectedClass.setCourse(expectedCourse);
+        
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+    });
+
     QUnit.test("Can parse a single class with a single valid competitor and an empty class", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n\r\nEmpty, 6\r\n";
         var actualEvent = parseEventData(csvData);
@@ -133,11 +159,16 @@
         assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
     });
 
-    QUnit.test("Cannot parse a single class with a single competitor with zero split", function (assert) {
+    QUnit.test("Can parse a single class with a single competitor with zero split", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,00:00,03:31,02:01,00:23";
-        SplitsBrowserTest.assertInvalidData(assert, function () {
-            parseEventData(csvData);
-        });
+        var actualEvent = parseEventData(csvData);
+        var expectedClass = new AgeClass("Example", 4, [
+            fromSplitTimes(1, "John Smith", "ABC", 10 * 3600 + 34 * 60, [177, 0, 211, 121, 23])
+        ]);
+        
+        var expectedCourse = new Course("Example", [expectedClass], null, null, null);
+        expectedClass.setCourse(expectedCourse);
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
     });
 
     QUnit.test("Can parse a single class with a single valid competitor and trailing end-of-line", function (assert) {
@@ -192,7 +223,6 @@
         assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
     });
 
-
     QUnit.test("Can parse two classes each with two valid competitors", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\nFred,Baker,DEF,12:12,02:42,01:51,04:00,01:31,00:30\r\n\r\n" + 
                       "Another example class, 5\r\nJane,Palmer,GHI,11:22,02:50,01:44,03:29,01:40,03:09,00:28\r\nFaye,Claidey,JKL,10:58,02:55,02:00,03:48,01:49,03:32,00:37";
@@ -217,6 +247,16 @@
         expectedClasses[1].setCourse(expectedCourses[1]);
                 
         assert.deepEqual(actualEvent, new Event(expectedClasses, expectedCourses));
+    });
+
+    QUnit.test("Can parse two classes each with two valid competitors with trailing commas", function (assert) {
+        var csvData = "Example, 4,,,,,,,,,,,,,,\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23,,,,\r\nFred,Baker,DEF,12:12,02:42,01:51,04:00,01:31,00:30,,,,\r\n,,,,,,,,,,,,,,,\r\n" + 
+                      "Another example class, 5,,,,,,,,\r\nJane,Palmer,GHI,11:22,02:50,01:44,03:29,01:40,03:09,00:28,,,,,,,\r\nFaye,Claidey,JKL,10:58,02:55,02:00,03:48,01:49,03:32,00:37,,,,,,,,,,,";
+        var actualEvent = parseEventData(csvData);
+        assert.strictEqual(actualEvent.classes.length, 2);
+        assert.strictEqual(actualEvent.courses.length, 2);
+        assert.strictEqual(actualEvent.classes[0].competitors.length, 2);
+        assert.strictEqual(actualEvent.classes[1].competitors.length, 2);
     });
 
     QUnit.test("Can parse two classes each with two valid competitors using LF line-endings", function (assert) {

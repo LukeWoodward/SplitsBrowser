@@ -41,7 +41,7 @@
     * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - The age-class set
     *     containing the splits data.
     * @param {Number} controlIndex - The index of the control.
-    * @return {Array} Array of fastest-split data.
+    * @return {Object} Fastest-split data.
     */
     ChartPopupData.getFastestSplitsPopupData = function (ageClassSet, controlIndex) {
         var data = ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, controlIndex);
@@ -81,19 +81,20 @@
     };
     
     /**
-    * Returns an array of the competitors visiting a control at a given time.
+    * Returns an object containing an array of the competitors visiting a
+    * control at a given time.
     * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - The age-class set
     *     containing the splits data.
     * @param {SplitsBrowser.Model.EventData} eventData - Data for the entire
     *     event.
     * @param {Number} controlIndex - The index of the control.
-    * @param {time} The current time, in units of seconds past midnight.
-    * @return {Array} Array of competitor data.
+    * @param {Number} time - The current time, in units of seconds past midnight.
+    * @return {Object} Object containing competitor data.
     */
     ChartPopupData.getCompetitorsVisitingCurrentControlPopupData = function (ageClassSet, eventData, controlIndex, time) {
         var controlCode = ageClassSet.getCourse().getControlCode(controlIndex);
-        var intervalStart = time - RACE_GRAPH_COMPETITOR_WINDOW / 2;
-        var intervalEnd = time + RACE_GRAPH_COMPETITOR_WINDOW / 2;
+        var intervalStart = Math.round(time) - RACE_GRAPH_COMPETITOR_WINDOW / 2;
+        var intervalEnd = Math.round(time) + RACE_GRAPH_COMPETITOR_WINDOW / 2;
         var competitors = eventData.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
             
         var primaryClass = ageClassSet.getPrimaryClassName();
@@ -170,7 +171,7 @@
     * @param {SplitsBrowser.Model.EventData} eventData - Data for the entire
     *     event.
     * @param {Number} controlIndex - The index of the control.
-    * @return {Array} Array of next-control data.
+    * @return {Object} Next-control data.
     */
     ChartPopupData.getNextControlData = function (course, eventData, controlIndex) {
         var controlIdx = Math.min(controlIndex, course.controls.length);

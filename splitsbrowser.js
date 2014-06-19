@@ -1,7 +1,7 @@
 /*!
  *  SplitsBrowser - Orienteering results analysis.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
+var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
 
 
 (function () {
@@ -59,6 +59,18 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Attempts to get a message, returning a default string if it does not
+    * exist.
+    * @param {String} key - The key of the message.
+    * @param {String} defaultValue - Value to be used 
+    * @return {String} The message with the given key, if the key exists,
+    *     otherwise the default value.
+    */
+    SplitsBrowser.tryGetMessage = function (key, defaultValue) {
+        return (SplitsBrowser.Messages && SplitsBrowser.Messages.hasOwnProperty(key)) ? SplitsBrowser.getMessage(key) : defaultValue;
+    };
+    
+    /**
     * Returns the message with the given key.
     * @param {String} key - The key of the message.
     * @return {String} The message with the given key, or a placeholder string
@@ -86,6 +98,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     *
     * @param {String} key - The key of the message.
     * @param {Object} params - Object mapping parameter names to values.
+    * @return {String} The resulting message.
     */ 
     SplitsBrowser.getMessageWithFormatting = function (key, params) {
         var message = SplitsBrowser.getMessage(key);
@@ -141,21 +154,21 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     
     /**
     * Returns whether the value given is neither null nor NaN.
-    * @param {Number|null} value - A value to test.
+    * @param {?Number} x - A value to test.
     * @return {boolean} false if the value given is null or NaN, true
     *     otherwise.
     */
     SplitsBrowser.isNotNullNorNaN = function (x) { return x !== null && x === x; };
-    
+
     /**
     * Exception object raised if invalid data is passed.
     * @constructor
-    * @param {string} message - The exception detail message.
+    * @param {String} message - The exception detail message.
     */
-    var InvalidData = function (message) {
+    function InvalidData(message) {
         this.name = "InvalidData";
         this.message = message;
-    };
+    }
 
     /**
     * Returns a string representation of this exception.
@@ -180,10 +193,10 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @constructor
     * @param {String} message - The exception message.
     */
-    var WrongFileFormat = function (message) {
+    function WrongFileFormat(message) {
         this.name = "WrongFileFormat";
         this.message = message;
-    };
+    }
     
     /**
     * Returns a string representation of this exception.
@@ -209,15 +222,45 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * either a full stop or a comma as the decimal separator.
     *
     * @param {String} stringValue - The course length to parse, as a string.
-    * @return {Number} The parsed course length.
+    * @return {?Number} The parsed course length, or null if not valid.
     */
     SplitsBrowser.parseCourseLength = function (stringValue) {
         var courseLength = parseFloat(stringValue.replace(",", "."));
+        if (!isFinite(courseLength)) {
+            return null;
+        }
+        
         if (courseLength >= MIN_COURSE_LENGTH_METRES) {
             courseLength /= 1000;
         }
         
         return courseLength;
+    };
+    
+    /**
+    * Parses a course climb, specified as a whole number of metres.
+    *
+    * @param {String} stringValue - The course climb to parse, as a string.
+    * @return {?Number} The parsed course climb, or null if not valid.
+    */
+    SplitsBrowser.parseCourseClimb = function (stringValue) {
+        var courseClimb = parseInt(stringValue, 10);
+        if (SplitsBrowser.isNaNStrict(courseClimb)) {
+            return null;
+        } else {
+            return courseClimb;
+        }
+    };
+    
+    /**
+    * Normalise line endings so that all lines end with LF, instead of
+    * CRLF or CR.
+    * @param {String} stringValue - The string value to normalise line endings
+    *     within
+    * @return {String} String value with the line-endings normalised.
+    */
+    SplitsBrowser.normaliseLineEndings = function (stringValue) {
+        return stringValue.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
     };
     
 })();
@@ -232,11 +275,13 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     
     /**
     * Formats a time period given as a number of seconds as a string in the form
-    *  [-][h:]mm:ss.
+    * [-][h:]mm:ss.ss .
     * @param {Number} seconds - The number of seconds.
+    * @param {?Number} precision - Optional number of decimal places to format
+    *     using, or the default if not specified. 
     * @returns {string} The string formatting of the time.
     */
-    SplitsBrowser.formatTime = function (seconds) {
+    SplitsBrowser.formatTime = function (seconds, precision) {
         
         if (seconds === null) {
             return SplitsBrowser.NULL_TIME_PLACEHOLDER;
@@ -267,7 +312,11 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
             result += "0";
         }
         
-        result += Math.round(secs);
+        if (typeof precision === "number") {
+            result += secs.toFixed(precision);
+        } else {
+            result += Math.round(secs * 100) / 100;
+        }
         
         return result;
     };
@@ -275,7 +324,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**  
     * Parse a time of the form MM:SS or H:MM:SS into a number of seconds.
     * @param {string} time - The time of the form MM:SS.
-    * @return {Number} The number of seconds.
+    * @return {?Number} The number of seconds.
     */
     SplitsBrowser.parseTime = function (time) {
         if (time.match(/^\d+:\d\d$/)) {
@@ -327,9 +376,9 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     
     /**
     * Returns the sum of two numbers, or null if either is null.
-    * @param {Number|null} a - One number, or null, to add.
-    * @param {Number|null} b - The other number, or null, to add.
-    * @return {Number|null} null if at least one of a or b is null,
+    * @param {?Number} a - One number, or null, to add.
+    * @param {?Number} b - The other number, or null, to add.
+    * @return {?Number} null if at least one of a or b is null,
     *      otherwise a + b.
     */
     function addIfNotNull(a, b) {
@@ -338,9 +387,9 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     
     /**
     * Returns the difference of two numbers, or null if either is null.
-    * @param {Number|null} a - One number, or null, to add.
-    * @param {Number|null} b - The other number, or null, to add.
-    * @return {Number|null} null if at least one of a or b is null,
+    * @param {?Number} a - One number, or null, to add.
+    * @param {?Number} b - The other number, or null, to add.
+    * @return {?Number} null if at least one of a or b is null,
     *      otherwise a - b.
     */    
     function subtractIfNotNull(a, b) {
@@ -422,13 +471,13 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     *     results.
     * @param {String} name - The name of the competitor.
     * @param {String} club - The name of the competitor's club.
-    * @param {String} originalStartTime - The competitor's start time.
+    * @param {String} startTime - The competitor's start time.
     * @param {Array} originalSplitTimes - Array of split times, as numbers,
     *      with nulls for missed controls.
     * @param {Array} originalCumTimes - Array of cumulative split times, as
     *     numbers, with nulls for missed controls.
     */
-    var Competitor = function (order, name, club, startTime, originalSplitTimes, originalCumTimes) {
+    function Competitor(order, name, club, startTime, originalSplitTimes, originalCumTimes) {
 
         if (typeof order !== NUMBER_TYPE) {
             throwInvalidData("Competitor order must be a number, got " + typeof order + " '" + order + "' instead");
@@ -450,7 +499,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.timeLosses = null;
 
         this.totalTime = (originalCumTimes === null || originalCumTimes.indexOf(null) > -1) ? null : originalCumTimes[originalCumTimes.length - 1];
-    };
+    }
     
     /**
     * Marks this competitor as being non-competitive.
@@ -482,6 +531,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {String} club - The name of the competitor's club.
     * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
+    * @return {Competitor} Created competitor.
     */
     Competitor.fromSplitTimes = function (order, name, club, startTime, splitTimes) {
         var cumTimes = cumTimesFromSplitTimes(splitTimes);
@@ -510,6 +560,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {String} club - The name of the competitor's club.
     * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
+    * @return {Competitor} Created competitor.
     */
     Competitor.fromOriginalCumTimes = function (order, name, club, startTime, cumTimes) {
         var splitTimes = splitTimesFromCumTimes(cumTimes);
@@ -534,6 +585,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {String} club - The name of the competitor's club.
     * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with nulls for missed controls.
+    * @return {Competitor} Created competitor.
     */
     Competitor.fromCumTimes = function (order, name, club, startTime, cumTimes) {
         var competitor = Competitor.fromOriginalCumTimes(order, name, club, startTime, cumTimes);
@@ -561,10 +613,10 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
-    * Returns the 'suffix' to use with a competitor.
+    * Returns the 'suffix' to use with this competitor.
     * The suffix indicates whether they are non-competitive or a mispuncher.  If
     * they are neither, an empty string is returned.
-    * @return Suffix.
+    * @return {String} Suffix to use with this competitor.
     */
     Competitor.prototype.getSuffix = function () {
         if (this.completed()) {
@@ -582,7 +634,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * invalid, NaN is returned.
     * 
     * @param {Number} controlIndex - Index of the control (0 = start).
-    * @return {Number|null} The split time in seconds for the competitor to the
+    * @return {?Number} The split time in seconds for the competitor to the
     *      given control.
     */
     Competitor.prototype.getSplitTimeTo = function (controlIndex) {
@@ -598,7 +650,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * If the competitor has no time recorded for that control, null is
     * returned.
     * @param {Number} controlIndex - Index of the control (0 = start).
-    * @return {Number|null} The split time in seconds for the competitor to the
+    * @return {?Number} The split time in seconds for the competitor to the
     *      given control.
     */
     Competitor.prototype.getOriginalSplitTimeTo = function (controlIndex) {
@@ -682,7 +734,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * time losses cannot be calculated for the competitor or have not yet been
     * calculated.
     * @param {Number} controlIndex - Index of the control.
-    * @return {Number|null} Time loss in seconds, or null.
+    * @return {?Number} Time loss in seconds, or null.
     */
     Competitor.prototype.getTimeLossAt = function (controlIndex) {
         return (controlIndex === 0 || this.timeLosses === null) ? null : this.timeLosses[controlIndex - 1];
@@ -797,7 +849,11 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                 throwInvalidData("Cannot determine time loss of competitor when there is a NaN value in the fastest splits");
             }
             
-            if (this.splitTimes.some(isNaNStrict)) {
+            if (fastestSplitTimes.some(function (split) { return split === 0; })) {
+                // Someone registered a zero split on this course.  In this
+                // situation the time losses don't really make sense.
+                this.timeLosses = this.splitTimes.map(function () { return NaN; });
+            } else if (this.splitTimes.some(isNaNStrict)) {
                 // Competitor has some dubious times.  Unfortunately this
                 // means we cannot sensibly calculate the time losses.
                 this.timeLosses = this.splitTimes.map(function () { return NaN; });
@@ -925,11 +981,11 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**
      * Object that represents a collection of competitor data for a class.
      * @constructor.
-     * @param {string} name - Name of the age class.
+     * @param {String} name - Name of the age class.
      * @param {Number} numControls - Number of controls.
      * @param {Array} competitors - Array of Competitor objects.
      */
-    var AgeClass = function (name, numControls, competitors) {
+    function AgeClass(name, numControls, competitors) {
         this.name = name;
         this.numControls = numControls;
         this.competitors = competitors;
@@ -938,7 +994,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.competitors.forEach(function (comp) {
             comp.setClassName(name);
         });
-    };
+    }
     
     /**
     * Records that this age-class has competitor data that SplitsBrowser has
@@ -985,7 +1041,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * mispunched that control, or the class is empty), null is returned.
     * @param {Number} controlIdx - The index of the control to return the
     *      fastest split to.
-    * @return {Object|null} Object containing the name and fastest split, or
+    * @return {?Object} Object containing the name and fastest split, or
     *      null if no split times for that control were recorded.
     */
     AgeClass.prototype.getFastestSplitTo = function (controlIdx) {
@@ -1055,6 +1111,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * Utility function to merge the lists of all competitors in a number of age
     * classes.  All age classes must contain the same number of controls.
     * @param {Array} ageClasses - Array of AgeClass objects.
+    * @return {Array} Merged array of competitors.
     */
     function mergeCompetitors(ageClasses) {
         if (ageClasses.length === 0) {
@@ -1107,16 +1164,18 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @constructor
     * @param {Array} ageClasses - Array of currently-selected age classes.
     */
-    var AgeClassSet = function (ageClasses) {
+    function AgeClassSet(ageClasses) {
         this.allCompetitors = mergeCompetitors(ageClasses);
         this.ageClasses = ageClasses;
         this.numControls = ageClasses[0].numControls;
         this.computeRanks();
-    };
+    }
     
     /**
     * Returns whether this age-class set is empty, i.e. whether it has no
     * competitors at all.
+    * @return {boolean} True if the age-class set is empty, false if it is not
+    *     empty.
     */    
     AgeClassSet.prototype.isEmpty = function () {
         return this.allCompetitors.length === 0;
@@ -1194,7 +1253,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {Array} cumTimes - Array of cumulative times.
     * @return {Array} Array of cumulative times with NaNs replaced.
     */
-    var fillBlankRangesInCumulativeTimes = function (cumTimes) {
+    function fillBlankRangesInCumulativeTimes(cumTimes) {
         cumTimes = cumTimes.slice(0);
         var blankRanges = getBlankRanges(cumTimes);
         for (var rangeIndex = 0; rangeIndex < blankRanges.length; rangeIndex += 1) {
@@ -1219,7 +1278,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         }
         
         return cumTimes;
-    };
+    }
     
     /**
     * Returns an array of the cumulative times of the winner of the set of age
@@ -1240,7 +1299,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * of the class.
     * If at least one control has no competitors recording a time for it, null
     * is returned.
-    * @returns {Array|null} Cumulative splits of the imaginary competitor with
+    * @returns {?Array} Cumulative splits of the imaginary competitor with
     *           fastest time, if any.
     */
     AgeClassSet.prototype.getFastestCumTimes = function () {
@@ -1253,7 +1312,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * If at least one control has no competitors recording a time for it, null
     * is returned.
     * @param {Number} percent - The percentage of time to add.
-    * @returns {Array|null} Cumulative splits of the imaginary competitor with
+    * @returns {?Array} Cumulative splits of the imaginary competitor with
     *           fastest time, if any, after adding a percentage.
     */
     AgeClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
@@ -1449,7 +1508,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {Array} currentIndexes - Array of indexes that indicate which
     *           competitors from the overall list are plotted.
     * @param {Object} chartType - The type of chart to draw.
-    * @returns {Array} Array of data.
+    * @returns {Object} Array of data.
     */
     AgeClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
         if (this.isEmpty()) {
@@ -1486,12 +1545,11 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
             yMax = yMin + 1;
         }
         
-        
         var controlIndexAdjust = (chartType.skipStart) ? 1 : 0;
         var dubiousTimesInfo = currentIndexes.map(function (competitorIndex) {
-            return chartType.indexesAroundDubiousTimesFunc(this.allCompetitors[competitorIndex]).map(function (indexPair) {
-                return { start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust };
-            });
+            var indexPairs = chartType.indexesAroundDubiousTimesFunc(this.allCompetitors[competitorIndex]);
+            return indexPairs.filter(function (indexPair) { return indexPair.start >= controlIndexAdjust; })
+                             .map(function (indexPair) { return { start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust }; });
         }, this);
 
         var cumulativeTimesByControl = d3.transpose(selectedCompetitorData);
@@ -1524,18 +1582,18 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @constructor
     * @param {String} name - The name of the course.
     * @param {Array} classes - Array of AgeClass objects comprising the course.
-    * @param {Number|null} length - Length of the course, in kilometres.
-    * @param {Number|null} climb - The course climb, in metres.
-    * @param {Array|null} controls - Array of codes of the controls that make
+    * @param {?Number} length - Length of the course, in kilometres.
+    * @param {?Number} climb - The course climb, in metres.
+    * @param {?Array} controls - Array of codes of the controls that make
     *     up this course.  This may be null if no such information is provided.
     */
-    var Course = function (name, classes, length, climb, controls) {
+    function Course(name, classes, length, climb, controls) {
         this.name = name;
         this.classes = classes;
         this.length = length;
         this.climb = climb;
         this.controls = controls;
-    };
+    }
     
     /** 'Magic' control code that represents the start. */
     Course.START = "__START__";
@@ -1590,8 +1648,8 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * SplitsBrowser.Model.Course.START and SplitsBrowser.Model.Course.FINISH.
     *
     * @param {Number} controlNum - The number of the control.
-    * @return {String|null} The code of the control, or one of the
-    *     aforementioned constants for the start or finish.
+    * @return {?String} The code of the control, or one of the aforementioned
+    *     constants for the start or finish.
     */
     Course.prototype.getControlCode = function (controlNum) {
         if (controlNum === 0) {
@@ -1820,7 +1878,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     "use strict";
     
     var Course = SplitsBrowser.Model.Course;
-    
+
     /**
     * Contains all of the data for an event.
     * @param {Array} classes - Array of AgeClass objects representing all of
@@ -1828,10 +1886,10 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {Array} courses - Array of Course objects representing all of the
     *     courses of the event.
     */ 
-    var Event = function (classes, courses) {
+    function Event(classes, courses) {
         this.classes = classes;
         this.courses = courses;
-    };
+    }
     
     /**
     * Determines time losses for each competitor in each class.
@@ -1894,9 +1952,10 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * The fastest splits are returned as an array of objects, where each object
     * lists the competitors name, the class, and the split time in seconds.
     *
-    * @param {String} startCode - Code for the control at the start of the leg,
-    *     or null for the start.
-    * @param {String} endCode - Code for the control at the end of the leg, or
+    * @param {String} controlCode - Code for the control.
+    * @param {Number} intervalStart - Start of the time interval, in seconds
+    *     since midnight.
+    * @param {?Number} intervalEnd - End of the time interval, in seconds, or
     *     null for the finish.
     * @return {Array} Array of objects containing fastest splits for that leg.
     */
@@ -2040,7 +2099,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @constructor
     * @param {Number} count - The number of competitors that can be chosen.
     */
-    var CompetitorSelection = function (count) {
+    function CompetitorSelection(count) {
         if (typeof count !== NUMBER_TYPE) {
             throwInvalidData("Competitor count must be a number");
         } else if (count < 0) {
@@ -2050,7 +2109,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.count = count;
         this.currentIndexes = [];
         this.changeHandlers = [];
-    };
+    }
 
     /**
     * Returns whether the competitor at the given index is selected.
@@ -2127,6 +2186,26 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     };
 
     /**
+    * Returns an array of all currently-selected competitor indexes.
+    * @return {Array} Array of selected indexes.
+    */
+    CompetitorSelection.prototype.getSelectedIndexes = function () {
+        return this.currentIndexes.slice(0);
+    };
+    
+    
+    /**
+    * Set the selected competitors to those in the given array.
+    * @param {Array} selectedIndex - Array of indexes of selected competitors.
+    */
+    CompetitorSelection.prototype.setSelectedIndexes = function (selectedIndexes) {
+        if (selectedIndexes.every(function (index) { return 0 <= index && index < this.count; }, this)) {
+            this.currentIndexes = selectedIndexes;
+            this.fireChangeHandlers();
+        }
+    };
+    
+    /**
     * Register a handler to be called whenever the list of indexes changes.
     *
     * When a change is made, this function will be called, with the array of
@@ -2136,7 +2215,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     *
     * If the handler has already been registered, nothing happens.
     *
-    * @param {function} handler - The handler to register.
+    * @param {Function} handler - The handler to register.
     */
     CompetitorSelection.prototype.registerChangeHandler = function (handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
@@ -2149,7 +2228,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     *
     * If the handler given was never registered, nothing happens.
     *
-    * @param {function} handler - The handler to register.
+    * @param {Function} handler - The handler to register.
     */
     CompetitorSelection.prototype.deregisterChangeHandler = function (handler) {
         var index = this.changeHandlers.indexOf(handler);
@@ -2240,6 +2319,10 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * After the migration, any competitors in the old list that were selected
     * and are also in the new competitors list remain selected.
     *
+    * Note that this method does NOT fire change handlers when it runs.  This
+    * is typically used during a change of class, when the application may be
+    * making other changes.
+    *
     * @param {Array} oldCompetitors - Array of Competitor objects for the old
     *      selection.  The length of this must match the current count of
     *      competitors.
@@ -2266,8 +2349,6 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                 this.currentIndexes.push(idx);
             }
         }, this);
-        
-        this.fireChangeHandlers();
     };
 
     SplitsBrowser.Model.CompetitorSelection = CompetitorSelection;
@@ -2300,8 +2381,8 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * returns null.
     * 
     * @param {Array} cumTimes - Array of cumulative times.
-    * @return {Object|null} Object containing indexes of non-ascending entries,
-    *     or null if none found.
+    * @return {?Object} Object containing indexes of non-ascending entries, or
+    *     null if none found.
     */
     function getFirstNonAscendingIndexes(cumTimes) {
         if (cumTimes.length === 0 || cumTimes[0] !== 0) {
@@ -2459,7 +2540,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     
     /**
     * Attempt to repair all of the data within an age class.
-    * @param {AgeClass} The age class whose data we wish to repair.
+    * @param {AgeClass} ageClass - The age class whose data we wish to repair.
     */
     Repairer.prototype.repairAgeClass = function (ageClass) {
         this.madeAnyChanges = false;
@@ -2519,6 +2600,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     var isTrue = SplitsBrowser.isTrue;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
@@ -2549,9 +2631,6 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
             }
             
             var splitTimes = parts.map(parseTime);
-            if (splitTimes.indexOf(0) >= 0) {
-                throwInvalidData("Zero split times are not permitted - found one or more zero splits for competitor '" + forename + " " + surname + "'");
-            }
             return Competitor.fromSplitTimes(index + 1, forename + " " + surname, club, startTime, splitTimes);
         } else {
             throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor in class with " + controlCount + " controls, got " + (parts.length) + " instead.");
@@ -2560,7 +2639,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
 
     /**
     * Parse CSV data for a class.
-    * @param {string} class - The string containing data for that class.
+    * @param {string} ageClass - The string containing data for that class.
     * @return {SplitsBrowser.Model.AgeClass} Parsed class data.
     */
     function parseAgeClass (ageClass) {
@@ -2594,7 +2673,13 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */
     function parseEventData (eventData) {
-        var classSections = eventData.split(/\r?\n\r?\n/).map($.trim).filter(isTrue);
+
+        eventData = normaliseLineEndings(eventData);
+        
+        // Remove trailing commas.
+        eventData = eventData.replace(/,+\n/g, "\n").replace(/,+$/, "");
+
+        var classSections = eventData.split(/\n\n/).map($.trim).filter(isTrue);
        
         var classes = classSections.map(parseAgeClass);
         
@@ -2625,6 +2710,8 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
+    var parseCourseClimb = SplitsBrowser.parseCourseClimb;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
@@ -2634,20 +2721,58 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     var DELIMITERS = [";", ",", "\t", "\\"];
     
     // Indexes of the various columns relative to the column for control-1.
-    var COLUMN_OFFSETS = {
-        TIME: -35,
-        CLUB: -31,
-        AGE_CLASS: -28,
-        COURSE: -7,
-        DISTANCE: -6,
-        CLIMB: -5,
-        CONTROL_COUNT: -4,
-        PLACING: -3,
-        START: -2
-    };
+    
+    var COLUMN_INDEXES = {};
+    
+    [44, 46, 60].forEach(function (columnOffset) {
+        COLUMN_INDEXES[columnOffset] = {
+            course: columnOffset - 7,
+            distance: columnOffset - 6,
+            climb: columnOffset - 5,
+            controlCount: columnOffset - 4,
+            placing: columnOffset - 3,
+            start: columnOffset - 2,
+            finish: columnOffset - 1,
+            control1: columnOffset
+        };
+    });
+    
+    [44, 46].forEach(function (columnOffset) {
+        COLUMN_INDEXES[columnOffset].time = columnOffset - 35;
+        COLUMN_INDEXES[columnOffset].club =  columnOffset - 31;
+        COLUMN_INDEXES[columnOffset].ageClass = columnOffset - 28;
+    });
+    
+    COLUMN_INDEXES[44].combinedName = 3;
+    
+    COLUMN_INDEXES[46].forename = 4;
+    COLUMN_INDEXES[46].surname = 3;
+    
+    COLUMN_INDEXES[60].forename = 6;
+    COLUMN_INDEXES[60].surname = 5;
+    COLUMN_INDEXES[60].combinedName = 3;
+    COLUMN_INDEXES[60].startFallback = 11;
+    COLUMN_INDEXES[60].time = 13;
+    COLUMN_INDEXES[60].club = 20;
+    COLUMN_INDEXES[60].ageClass = 26;
+    COLUMN_INDEXES[60].ageClassFallback = COLUMN_INDEXES[60].course;
+    COLUMN_INDEXES[60].clubFallback = 18;
     
     // Minimum control offset.
     var MIN_CONTROLS_OFFSET = 37;
+    
+    /**
+    * Remove any leading and trailing double-quotes from the given string.
+    * @param {String} value - The value to trim quotes from.
+    * @return {String} The string with any leading and trailing quotes removed.
+    */
+    function dequote(value) {
+        if (value[0] === '"' && value[value.length - 1] === '"') {
+            value = $.trim(value.substring(1, value.length - 1).replace(/""/g, '"'));
+        }
+        
+        return value;
+    }
     
     /**
     * Constructs an SI-format data reader.
@@ -2656,8 +2781,8 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @constructor
     * @param {String} data - The SI data to read in.
     */
-    var Reader = function (data) {
-        this.data = data;
+    function Reader(data) {
+        this.data = normaliseLineEndings(data);
         
         // Map that associates classes to all of the competitors running on
         // that age class.
@@ -2676,10 +2801,9 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         // ignored, as are competitors that have no times at all.
         this.anyCompetitors = false;
         
-        // The column index that contains the control numbers for control 1.
-        // This is used to determine where various columns are.
-        this.control1Index = null;
-    };
+        // The indexes of the columns that we read data from.
+        this.columnIndexes = null;
+    }
 
     /**
     * Identifies the delimiter character that delimits the columns of data.
@@ -2704,8 +2828,9 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**
     * Identifies which variation on the SI CSV format we are parsing.
     *
-    * At present, the only variations supported are 44-column and 46-column.
-    * In both cases, the numbers count the columns before the controls data.
+    * At present, the only variations supported are 44-column, 46-column and
+    * 60-column.  In all cases, the numbers count the columns before the
+    * controls data.
     *
     * @param {String} delimiter - The character used to delimit the columns of
     *     data.
@@ -2714,29 +2839,67 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         
         var firstLine = this.lines[1].split(delimiter);
         
+        // Ignore trailing blanks.
         var endPos = firstLine.length - 1;
         while (endPos > 0 && $.trim(firstLine[endPos]) === "") {
             endPos -= 1;
         }
         
-        // The last empty item should be the time.
-        var controlCodeColumn = endPos - 1;
-        var digitsOnly = /^\d+$/;
-        while (controlCodeColumn >= 2 && digitsOnly.test(firstLine[controlCodeColumn - 2])) { 
+        // Now, find the last column with a control code in.  This should be
+        // one of the last two columns.  (Normally, it will be the second last,
+        // but if there is no last split recorded, it may be the last.)
+        var controlCodeRegexp = /^[A-Za-z0-9]+$/;
+        
+        var controlCodeColumn = null;
+        if (controlCodeRegexp.test(firstLine[endPos - 1])) {
+            controlCodeColumn = endPos - 1;
+        } else if (controlCodeRegexp.test(firstLine[endPos])) {
+            // No split for the last control.
+            controlCodeColumn = endPos;
+        } else {
+            throwWrongFileFormat("Could not find control number in last two columns of first data line");
+        }
+        
+        while (controlCodeColumn >= 2 && controlCodeRegexp.test(firstLine[controlCodeColumn - 2])) { 
             // There's another control code before this one.
             controlCodeColumn -= 2;
         }
         
-        this.control1Index = controlCodeColumn;
-        
-        var supportedControl1Indexes = [44, 46];
-        
-        var throwException = (delimiter === ",") ? throwWrongFileFormat : throwInvalidData;
-        if (this.control1Index === null) {
-            throwException("Unable to find index of control 1 in SI CSV data");
-        } else if (supportedControl1Indexes.indexOf(this.control1Index) < 0) {
-            throwException("Unsupported index of control 1: " + this.control1Index);
+        if (controlCodeColumn === null) {
+            throwWrongFileFormat("Unable to find index of control 1 in SI CSV data");
+        } else if (!COLUMN_INDEXES.hasOwnProperty(controlCodeColumn)) {
+            throwWrongFileFormat("Unsupported index of control 1: " + controlCodeColumn);
+        } else {
+            this.columnIndexes = COLUMN_INDEXES[controlCodeColumn];
         }
+    };
+    
+    /**
+    * Returns the age-class in the given row.
+    * @param {Array} row - Array of row data.
+    * @return {String} Class name.
+    */
+    Reader.prototype.getAgeClassName = function (row) {
+        var className = row[this.columnIndexes.ageClass];
+        if (className === "" && this.columnIndexes.hasOwnProperty("ageClassFallback")) {
+            // 'Nameless' variation: no age class.
+            className = row[this.columnIndexes.ageClassFallback];
+        }
+        return className;
+    };
+
+    /**
+    * Reads the start-time in the given row.
+    * @param {Array} row - Array of row data.
+    * @return {?Number} Parsed start time, or null for none.
+    */
+    Reader.prototype.getStartTime = function (row) {
+        var startTimeStr = row[this.columnIndexes.start];
+        if (startTimeStr === "" && this.columnIndexes.hasOwnProperty("startFallback")) {
+            startTimeStr = row[this.columnIndexes.startFallback];
+        }
+        
+        return parseTime(startTimeStr);
     };
     
     /**
@@ -2746,34 +2909,44 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @return {Number} Number of controls read.
     */
     Reader.prototype.getNumControls = function (row, lineNumber) {
-        var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
+        var className = this.getAgeClassName(row);
         if ($.trim(className) === "") {
             throwInvalidData("Line " + lineNumber + " does not contain a class for the competitor");
         } else if (this.ageClasses.has(className)) {
             return this.ageClasses.get(className).numControls;
         } else {
-            return parseInt(row[this.control1Index + COLUMN_OFFSETS.CONTROL_COUNT], 10);
+            return parseInt(row[this.columnIndexes.controlCount], 10);
         }    
     };
     
     /**
-    * Reads the split times out of a row of competitor data.
+    * Reads the cumulative times out of a row of competitor data.
     * @param {Array} row - Array of row data items.
     * @param {Number} lineNumber - Line number of the row within the source data.
     * @param {Number} numControls - The number of controls to read.
+    * @return {Array} Array of cumulative times.
     */
     Reader.prototype.readCumulativeTimes = function (row, lineNumber, numControls) {
         
         var cumTimes = [0];
         
         for (var controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
-            var cellIndex = this.control1Index + 1 + 2 * controlIdx;
+            var cellIndex = this.columnIndexes.control1 + 1 + 2 * controlIdx;
             var cumTimeStr = (cellIndex < row.length) ? row[cellIndex] : null;
             var cumTime = (cumTimeStr === null) ? null : parseTime(cumTimeStr);
             cumTimes.push(cumTime);
         }
         
-        var totalTime = parseTime(row[this.control1Index + COLUMN_OFFSETS.TIME]);
+        var totalTime = parseTime(row[this.columnIndexes.time]);
+        if (totalTime === null) {
+            // 'Nameless' variation: total time missing, so calculate from
+            // start and finish times.
+            var startTime = this.getStartTime(row);
+            var finishTime = parseTime(row[this.columnIndexes.finish]);
+            if (startTime !== null && finishTime !== null) {
+                totalTime = finishTime - startTime;
+            }
+        }
         
         cumTimes.push(totalTime);
     
@@ -2787,7 +2960,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {Number} numControls - The number of controls to read.
     */
     Reader.prototype.createAgeClassIfNecessary = function (row, numControls) {
-        var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
+        var className = this.getAgeClassName(row);
         if (!this.ageClasses.has(className)) {
             this.ageClasses.set(className, { numControls: numControls, competitors: [] });
         }
@@ -2800,13 +2973,12 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {Number} numControls - The number of controls to read.
     */
     Reader.prototype.createCourseIfNecessary = function (row, numControls) {
-
-        var courseName = row[this.control1Index + COLUMN_OFFSETS.COURSE];
+        var courseName = row[this.columnIndexes.course];
         if (!this.courseDetails.has(courseName)) {
-            var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[this.control1Index + 2 * controlIdx]; }, this);
+            var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[this.columnIndexes.control1 + 2 * controlIdx]; }, this);
             this.courseDetails.set(courseName, {
-                length: parseCourseLength(row[this.control1Index + COLUMN_OFFSETS.DISTANCE]) || null, 
-                climb: parseInt(row[this.control1Index + COLUMN_OFFSETS.CLIMB], 10) || null,
+                length: parseCourseLength(row[this.columnIndexes.distance]), 
+                climb: parseCourseClimb(row[this.columnIndexes.climb]),
                 controls: controlNums
             });
         }
@@ -2818,8 +2990,8 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {Array} row - Array of row data items.
     */
     Reader.prototype.createClassCoursePairIfNecessary = function (row) {
-        var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
-        var courseName = row[this.control1Index + COLUMN_OFFSETS.COURSE];
+        var className = this.getAgeClassName(row);
+        var courseName = row[this.columnIndexes.course];
         
         if (!this.classCoursePairs.some(function (pair) { return pair[0] === className && pair[1] === courseName; })) {
             this.classCoursePairs.push([className, courseName]);
@@ -2834,17 +3006,22 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     */
     Reader.prototype.addCompetitor = function (row, cumTimes) {
     
-        var className = row[this.control1Index + COLUMN_OFFSETS.AGE_CLASS];
-        var placing = row[this.control1Index + COLUMN_OFFSETS.PLACING];
-        var club = row[this.control1Index + COLUMN_OFFSETS.CLUB];
-        var startTime = parseTime(row[this.control1Index + COLUMN_OFFSETS.START]);
+        var className = this.getAgeClassName(row);
+        var placing = row[this.columnIndexes.placing];
+        var club = row[this.columnIndexes.club];
+        if (club === "" && this.columnIndexes.hasOwnProperty("clubFallback")) {
+            // Nameless variation: no club name, just number...
+            club = row[this.columnIndexes.clubFallback];
+        }
+        
+        var startTime = this.getStartTime(row);
 
         var isPlacingNonNumeric = (placing !== "" && isNaN(parseInt(placing, 10)));
         
-        var name;
-        if (this.control1Index === 46) {
-            var forename = row[4];
-            var surname = row[3];
+        var name = "";
+        if (this.columnIndexes.hasOwnProperty("forename") && this.columnIndexes.hasOwnProperty("surname")) {
+            var forename = row[this.columnIndexes.forename];
+            var surname = row[this.columnIndexes.surname];
         
             // Some surnames have their placing appended to them, if their placing
             // isn't a number (e.g. mp, n/c).  If so, remove this.
@@ -2852,13 +3029,12 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                 surname = $.trim(surname.substring(0, surname.length - placing.length));
             }
             
-            name = forename + " " + surname;
-            
-        } else if (this.control1Index === 44) {
-            name = row[3];
-        } else {
-            // Reader should have thrown an error elsewhere if this has happened.
-            throw new Error("Unrecognised control-1 index: " + this.control1Index);
+            name = $.trim(forename + " " + surname);
+        }
+        
+        if (name === "" && this.columnIndexes.hasOwnProperty("combinedName")) {
+            // 'Nameless' or 44-column variation.
+            name = row[this.columnIndexes.combinedName];
         }
         
         var order = this.ageClasses.get(className).competitors.length + 1;
@@ -2887,7 +3063,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
             return;
         }
     
-        var row = line.split(delimiter);
+        var row = line.split(delimiter).map($.trim).map(dequote);
         
         // Check the row is long enough to have all the data besides the
         // controls data.
@@ -3069,7 +3245,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     */
     Reader.prototype.parseEventData = function () {
         
-        this.lines = this.data.split(/\r?\n/);
+        this.lines = this.data.split(/\n/);
         
         var delimiter = this.identifyDelimiter();
         
@@ -3111,6 +3287,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var AgeClass = SplitsBrowser.Model.AgeClass;
@@ -3238,7 +3415,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**
     * Attempts to read a course distance from the given string.
     * @param {String} text - The text string to read a course distance from.
-    * @return {Number|null} - The parsed course distance, or null if no 
+    * @return {?Number} - The parsed course distance, or null if no
     *     distance could be parsed.
     */
     function tryReadDistance(text) {
@@ -3253,7 +3430,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**
     * Attempts to read a course climb from the given string.
     * @param {String} text - The text string to read a course climb from.
-    * @return {Number|null} - The parsed course climb, or null if no climb
+    * @return {?Number} - The parsed course climb, or null if no climb
     *     could be parsed.
     */
     function tryReadClimb(text) {
@@ -3264,7 +3441,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
             return parseInt(climbMatch[1], 10);
         }
     }
-    
+
     /**
     * Reads control codes from an array of strings.  Each code should be of the
     * form num(code), with the exception of the finish, which, if it appears,
@@ -3319,19 +3496,19 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {String} name - The name of the competitor.
     * @param {String} club - The name of the competitor's club.
     * @param {String} className - The class of the competitor.
-    * @param {Number|null} - The total time taken by the competitor, or null
-    *     for no total time.
+    * @param {?Number} totalTime - The total time taken by the competitor, or
+    *     null for no total time.
     * @param {Array} cumTimes - Array of cumulative split times.
     * @param {boolean} competitive - Whether the competitor's run is competitive.
     */
-    var CompetitorParseRecord = function (name, club, className, totalTime, cumTimes, competitive) {
+    function CompetitorParseRecord(name, club, className, totalTime, cumTimes, competitive) {
         this.name = name;
         this.club = club;
         this.className = className;
         this.totalTime = totalTime;
         this.cumTimes = cumTimes;
         this.competitive = competitive;
-    };
+    }
     
     /**
     * Returns whether this competitor record is a 'continuation' record.
@@ -3397,7 +3574,13 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @constructor
     */
     var OldHtmlFormatRecognizer = function () {
-        // Intentionally empty.
+        // There exists variations of the format depending on what the second 
+        // <font> ... </font> element on each row contains.  It can be blank,
+        // contain a number (start number, perhaps?) or something else.
+        // If blank or containing a number, the competitor's name is in column
+        // 2 and there are four preceding columns.  Otherwise the competitor's
+        // name is in column 1 and there are three preceding columns.
+        this.precedingColumnCount = null;
     };
     
     /**
@@ -3538,7 +3721,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @return {Array} Array of times.
     */
     OldHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (line) {
-        for (var i = 0; i < 4; i += 1) {
+        for (var i = 0; i < this.precedingColumnCount; i += 1) {
             var closeFontPos = line.indexOf("</font>");
             line = line.substring(closeFontPos + "</font>".length);
         }
@@ -3557,41 +3740,42 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     OldHtmlFormatRecognizer.prototype.parseCompetitor = function (firstLine, secondLine) {
         var firstLineBits = getFontBits(firstLine);
         var secondLineBits = getFontBits(secondLine);
+        
+        if (this.precedingColumnCount === null) {
+            // If column 1 is blank or a number, we have four preceding
+            // columns.  Otherwise we have three.
+            var column1 = $.trim(firstLineBits[1]); 
+            this.precedingColumnCount = (column1.match(/^\d*$/)) ? 4 : 3;
+        }
 
         var competitive = hasNumber(firstLineBits[0]);
-        var name = $.trim(firstLineBits[2]);
-        var totalTime = $.trim(firstLineBits[3]);
-        var club = $.trim(secondLineBits[2]);
+        var name = $.trim(firstLineBits[this.precedingColumnCount - 2]);
+        var totalTime = $.trim(firstLineBits[this.precedingColumnCount - 1]);
+        var club = $.trim(secondLineBits[this.precedingColumnCount - 2]);
         
         var cumulativeTimes = this.readCompetitorSplitDataLine(firstLine);
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
         cumulativeTimes = cumulativeTimes.map(parseTime);
-        
-        var nonZeroCumTimeCount = cumulativeTimes.filter(isNotNull).length;
-        if (nonZeroCumTimeCount !== splitTimes.length) {
-            throwInvalidData("Cumulative and split times do not have the same length: " + nonZeroCumTimeCount + " cumulative times, " + splitTimes.length + " split times");
-        }
+
+        removeExtraControls(cumulativeTimes, splitTimes);
         
         var className = null;
         if (name !== null && name !== "") {
             var lastCloseFontPos = -1;
-            for (var i = 0; i < 4; i += 1) {
+            for (var i = 0; i < this.precedingColumnCount; i += 1) {
                 lastCloseFontPos = firstLine.indexOf("</font>", lastCloseFontPos + 1);
             }
             
-            var firstLineUpToFourth = firstLine.substring(0, lastCloseFontPos + "</font>".length);
-            var firstLineMinusFonts = firstLineUpToFourth.replace(/<font[^>]*>(.*?)<\/font>/g, "");
+            var firstLineUpToLastPreceding = firstLine.substring(0, lastCloseFontPos + "</font>".length);
+            var firstLineMinusFonts = firstLineUpToLastPreceding.replace(/<font[^>]*>(.*?)<\/font>/g, "");
             var lineParts = splitByWhitespace(firstLineMinusFonts);
             if (lineParts.length > 0) {
                 className = lineParts[0];
             }
         }
         
-        removeExtraControls(cumulativeTimes, splitTimes);
-        
         return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
     };
-    
     
     /**
     * Constructs a recognizer for formatting the 'newer' format of SI HTML
@@ -3711,7 +3895,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * If so, it means the parser has finished processing the previous course
     * (if any), and can start a new course.
     *
-    * This recognizer treats a line that contains a table-data cell with I
+    * This recognizer treats a line that contains a table-data cell with ID
     * "header" as the first line of a course.
     *
     * @param {String} line - The line to check.
@@ -3819,34 +4003,264 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
         cumulativeTimes = cumulativeTimes.map(parseTime);
         
+        removeExtraControls(cumulativeTimes, splitTimes);
+        
         var nonZeroCumTimeCount = cumulativeTimes.filter(isNotNull).length;
         
         if (nonZeroCumTimeCount !== splitTimes.length) {
             throwInvalidData("Cumulative and split times do not have the same length: " + nonZeroCumTimeCount + " cumulative times, " + splitTimes.length + " split times");
         }
         
-        removeExtraControls(cumulativeTimes, splitTimes);
-        
         return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
     };
     
+    /**
+    * Constructs a recognizer for formatting an HTML format supposedly from
+    * 'OEvent'.  The file contains exactly two tables, one of which contains
+    *
+    * Data in this format is contained within a single HTML table, with another
+    * table before it containing various (ignored) header information.
+    * @constructor
+    */
+    var OEventTabularHtmlFormatRecognizer = function () {
+        this.usesClasses = false;
+    };
+
+    /**
+    * Returns whether this recognizer is likely to recognize the given HTML
+    * text and possibly be able to parse it.  If this method returns true, the
+    * parser will use this recognizer to attempt to parse the HTML.  If it
+    * returns false, the parser will not use this recognizer.  Other methods on
+    * this object can therefore assume that this method has returned true.
+    *
+    * As this recognizer is for recognizing HTML formatted in precisely two
+    * tables, it returns whether the number of HTML &lt;table&gt; tags is
+    * two.  If fewer than two tables are found, or more than two, this method
+    * returns false.
+    *
+    * @param {String} text - The entire input text read in.
+    * @return {boolean} True if the text contains precisely two HTML table
+    *     tags.
+    */ 
+    OEventTabularHtmlFormatRecognizer.prototype.isTextOfThisFormat = function (text) {
+        var table1Pos = text.indexOf("<table");
+        if (table1Pos >= 0) {
+            var table2Pos = text.indexOf("<table", table1Pos + 1);
+            if (table2Pos >= 0) {
+                var table3Pos = text.indexOf("<table", table2Pos + 1);
+                if (table3Pos < 0) {
+                    // Format characterised by precisely two tables.
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    };
+    
+    /**
+    * Performs some pre-processing on the text before it is read in.
+    *
+    * This recognizer performs a fair amount of pre-processing, to remove
+    * parts of the file we don't care about, and to reshape what there is left
+    * so that it is in a more suitable form to be parsed.
+    * 
+    * @param {String} text - The HTML text to preprocess.
+    * @return {String} The preprocessed text.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.preprocess = function (text) {
+        // Remove the first table.
+        var tableEndPos = text.indexOf("</table>");
+        if (tableEndPos === -1) {
+            throwInvalidData("Could not find any closing </table> tags");
+        }
+        
+        if (text.indexOf('<td colspan="25">') >= 0) {
+            // The table has 25 columns with classes and 24 without.
+            this.usesClasses = true;
+        }
+
+        text = text.substring(tableEndPos + "</table>".length);
+        
+        // Remove all rows that contain only a single non-breaking space.
+        text = text.replace(/<tr[^>]*><td colspan=[^>]*>&nbsp;<\/td><\/tr>/g, "");
+        
+        // Finally, remove the trailing </body> and </html> elements.
+        text = text.replace("</body>", "").replace("</html>", "");
+        
+        return $.trim(text);
+    };
+    
+    /**
+    * Returns whether the HTML parser can ignore the given line altogether.
+    *
+    * The parser will call this method with every line read in, apart from
+    * the second line of each pair of competitor data rows.  These are always
+    * assumed to be in pairs.
+    *
+    * This recognizer ignores blank lines. It also ignores any that contain
+    * opening or closing HTML table tags or horizontal-rule tags.
+    *
+    * @param {String} line - The line to check.
+    * @return {boolean} True if the line should be ignored, false if not.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.canIgnoreThisLine = function (line) {
+        return (line === "" || line.indexOf("<table") > -1 || line.indexOf("</table>") > -1 || line.indexOf("<hr>") > -1);
+    };
+    
+    /**
+    * Returns whether the given line is the first line of a course.
+    *
+    * If so, it means the parser has finished processing the previous course
+    * (if any), and can start a new course.
+    *
+    * This recognizer treats a line that contains a table-row cell with class
+    * "clubName" as the first line of a course.
+    *
+    * @param {String} line - The line to check.
+    * @return {boolean} True if this is the first line of a course, false
+    *     otherwise.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.isCourseHeaderLine = function (line) {
+        return line.indexOf('<tr class="clubName"') > -1;
+    };
+    
+    /**
+    * Parse a course header line and return the course name, distance and
+    * climb.
+    *
+    * This method can assume that the line given is a course header line.
+    *
+    * @param {String} line - The line to parse course details from.
+    * @return {Object} Object containing the parsed course details.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.parseCourseHeaderLine = function (line) {
+        var dataBits = getNonEmptyTableDataBits(line);
+        if (dataBits.length === 0) {
+            throwInvalidData("No parts found in course header line");
+        }
+            
+        var part = dataBits[0];
+        
+        var name, distance, climb;
+        var match = /^(.*?)\s+\((\d+)m,\s*(\d+)m\)$/.exec(part);
+        if (match === null) {
+            // Assume just course name.
+            name = part;
+            distance = null;
+            climb = null;
+        } else {
+            name = match[1];
+            distance = parseInt(match[2], 10) / 1000;
+            climb = parseInt(match[3], 10);
+        }
+                    
+        return {name: $.trim(name), distance: distance, climb: climb };
+    };
+
+    /**
+    * Parse control codes from the given line and return a list of them.
+    *
+    * This method can assume that the previous line was the course header or a
+    * previous control line.  It should also return null for the finish, which
+    * should have no code.  The finish is assumed to he the last.
+    *
+    * @param {String} line - The line to parse control codes from.
+    * @return {Array} Array of control codes.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.parseControlsLine = function (line) {
+        var bits = getNonEmptyTableDataBits(line);
+        return bits.map(function (bit) {
+            var dashPos = bit.indexOf("-");
+            return (dashPos === -1) ? null : bit.substring(dashPos + 1);
+        });
+    };
+    
+    /**
+    * Read either cumulative or split times from the given line of competitor
+    * data.
+    * (This method is not used by the parser, only elsewhere in the recognizer.)
+    * @param {Array} bits - Array of all contents of table elements.
+    * @return {Array} Array of times.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (bits) {
+        
+        var startPos = (this.usesClasses) ? 5 : 4;
+        
+        // Discard the empty bits at the end.
+        var endPos = bits.length;
+        while (endPos > 0 && bits[endPos - 1] === "") {
+            endPos -= 1;
+        }
+        
+        // Alternate cells contain ranks, which we're not interested in.
+        var timeBits = [];
+        for (var index = startPos; index < endPos; index += 2) {
+            var bit = bits[index];
+            if (isNonEmpty(bit)) {
+                timeBits.push(bit);
+            }
+        }
+        
+        return timeBits;
+    };
+    
+    /**
+    * Parse two lines of competitor data into a CompetitorParseRecord object
+    * containing the data.
+    * @param {String} firstLine - The first line of competitor data.
+    * @param {String} secondLine - The second line of competitor data.
+    * @return {CompetitorParseRecord} The parsed competitor.
+    */
+    OEventTabularHtmlFormatRecognizer.prototype.parseCompetitor = function (firstLine, secondLine) {
+        var firstLineBits = getTableDataBits(firstLine);
+        var secondLineBits = getTableDataBits(secondLine);
+        
+        var competitive = hasNumber(firstLineBits[0]);
+        var name = firstLineBits[2];
+        var totalTime = firstLineBits[(this.usesClasses) ? 4 : 3];
+        var className = (this.usesClasses && name !== "") ? firstLineBits[3] : null;
+        var club = secondLineBits[2];
+        
+        // If there is any cumulative time with a blank corresponding split
+        // time, use a placeholder value for the split time.  Typically this
+        // happens when a competitor has punched one control but not the
+        // previous.
+        for (var index = ((this.usesClasses) ? 5 : 4); index < firstLineBits.length && index < secondLineBits.length; index += 2) {
+            if (firstLineBits[index] !== "" && secondLineBits[index] === "") {
+                secondLineBits[index] = "----";
+            }
+        }
+        
+        var cumulativeTimes = this.readCompetitorSplitDataLine(firstLineBits);
+        var splitTimes = this.readCompetitorSplitDataLine(secondLineBits);
+        cumulativeTimes = cumulativeTimes.map(parseTime);
+        
+        removeExtraControls(cumulativeTimes, splitTimes);
+        
+        if (cumulativeTimes.length !== splitTimes.length) {
+            throwInvalidData("Cumulative and split times do not have the same length: " + cumulativeTimes.length + " cumulative times, " + splitTimes.length + " split times");
+        }
+        
+        return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
+    };
 
     /**
     * Represents the partial result of parsing a course.
     * @constructor
     * @param {String} name - The name of the course.
-    * @param {Number|null} distance - The distance of the course in kilometres,
+    * @param {?Number} distance - The distance of the course in kilometres,
     *     if known, else null.
-    * @param {Number|null} climb - The climb of the course in metres, if known,
+    * @param {?Number} climb - The climb of the course in metres, if known,
     *     else null.
     */ 
-    var CourseParseRecord = function (name, distance, climb) {
+    function CourseParseRecord(name, distance, climb) {
         this.name = name;
         this.distance = distance;
         this.climb = climb;
         this.controls = [];
         this.competitors = [];
-    };
+    }
     
     /**
     * Adds the given list of control codes to those built up so far.
@@ -3891,19 +4305,19 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @constructor
     * @param {Object} recognizer - The recognizer to use to parse the HTML.
     */
-    var SIHtmlFormatParser = function (recognizer) {
+    function SIHtmlFormatParser(recognizer) {
         this.recognizer = recognizer;
         this.courses = [];
         this.currentCourse = null;
         this.lines = null;
         this.linePos = -1;
         this.currentCompetitor = null;
-    };
+    }
     
     /**
     * Attempts to read the next unread line from the data given.  If the end of
     * the data has been read, null will be returned.
-    * @return {String|null} The line read, or null if the end of the data has
+    * @return {?String} The line read, or null if the end of the data has
     *     been reached.
     */
     SIHtmlFormatParser.prototype.tryGetLine = function () {
@@ -4081,17 +4495,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         return eventData;
     };
     
-    /**
-    * Normalise line-endings within the source data so that lines are ended
-    * with LF characters.
-    * @param {String} data - The text to normalise.
-    * @return {String} The text with normalised line-endings.
-    */
-    function normaliseLineEndings(data) {
-        return data.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-    }
-    
-    var RECOGNIZER_CLASSES = [OldHtmlFormatRecognizer, NewHtmlFormatRecognizer];
+    var RECOGNIZER_CLASSES = [OldHtmlFormatRecognizer, NewHtmlFormatRecognizer, OEventTabularHtmlFormatRecognizer];
     
     SplitsBrowser.Input.SIHtml = {};
     
@@ -4103,6 +4507,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * way, an InvalidData exception is thrown.
     *
     * @param {String} data - The string containing event data.
+    * @return {Event} The parsed event.
     */
     SplitsBrowser.Input.SIHtml.parseEventData = function (data) {
         data = normaliseLineEndings(data);
@@ -4126,11 +4531,906 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
 (function () {
     "use strict";
     
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
+    var throwInvalidData = SplitsBrowser.throwInvalidData;
+    var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
+    var parseTime = SplitsBrowser.parseTime;
+    var parseCourseLength = SplitsBrowser.parseCourseLength;
+    var parseCourseClimb = SplitsBrowser.parseCourseClimb;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var Course = SplitsBrowser.Model.Course;
+    var Event = SplitsBrowser.Model.Event;
+    
+    // This reader reads in alternative CSV formats, where each row defines a
+    // separate competitor, and includes course details such as name, controls
+    // and possibly distance and climb.
+    
+    // There is presently one variation supported:
+    // * one, distinguished by having three columns per control: control code,
+    //   cumulative time and 'points'.  (Points is never used.)  Generally,
+    //   these formats are quite sparse; many columns (e.g. club, placing,
+    //   start time) are blank or are omitted altogether.
+    
+    var TRIPLE_COLUMN_FORMAT = {
+        // Control data starts in column AM (index 38).
+        controlsOffset: 38,
+        // Number of columns per control.
+        step: 3,
+        // Column indexes of various data
+        name: 3,
+        club: 5,
+        courseName: 7,
+        startTime: 8,
+        length: null,
+        climb: null,
+        controlCount: null,
+        placing: null,
+        finishTime: null,
+        allowMultipleCompetitorNames: true
+    };
+    
+    // Supported delimiters.
+    var DELIMITERS = [",", ";"];
+    
+    /**
+    * Trim trailing empty-string entries from the given array.
+    * The given array is mutated.
+    * @param {Array} array - The array of string values.
+    */
+    function trimTrailingEmptyCells (array) {
+        var index = array.length - 1;
+        while (index >= 0 && array[index] === "") {
+            index -= 1;
+        }
+        
+        array.splice(index + 1, array.length - index - 1);
+    }
+    
+    /**
+    * Some lines of some formats can have multiple delimited competitors, which
+    * will move the following columns out of their normal place.  Identify any
+    * such situations and merge them together.
+    * @param {Array} row - The row of data read from the file.
+    * @param {Object} format - The format of this CSV file.
+    */
+    function adjustLinePartsForMultipleCompetitors(row, format) {
+        if (format.allowMultipleCompetitorNames) {
+            while (row.length > format.name + 1 && row[format.name + 1].match(/^\s\S/)) {
+                row[format.name] += "," + row[format.name + 1];
+                row.splice(format.name + 1, 1);
+            }
+        }
+    }
+    
+    /**
+    * Determine the delimiter used to delimit data.
+    * @param {String} firstDataLine - The first data line of the file.
+    * @param {Object} format - The data format.
+    * @return {?String} The delimiter separating the data, or null if no
+    *    suitable delimiter was found.
+    */
+    function determineDelimiter(firstDataLine, format) {
+        for (var index = 0; index < DELIMITERS.length; index += 1) {
+            var delimiter = DELIMITERS[index];
+            var lineParts = firstDataLine.split(delimiter);
+            trimTrailingEmptyCells(lineParts);
+            if (lineParts.length > format.controlsOffset) {
+                return delimiter;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+    * Parse alternative CSV data for an entire event.
+    * @param {String} eventData - String containing the entire event data.
+    * @param {Object} format - The format object that describes the input format.
+    * @return {SplitsBrowser.Model.Event} All event data read in.
+    */    
+    function parseEventDataWithFormat(eventData, format) {
+        eventData = normaliseLineEndings(eventData);
+        
+        var lines = eventData.split(/\n/);
+        
+        if (lines.length < 2) {
+            throwWrongFileFormat("Data appears not to be in an alternative CSV format - too few lines");
+        }
+        
+        var delimiter = determineDelimiter(lines[1], format);
+        if (delimiter === null) {
+            throwWrongFileFormat("Data appears not to be in an alternative CSV format - first data line has fewer than " + format.controlsOffset + " parts when separated by any recognised delimiter");
+        }
+        
+        var lineParts = lines[1].split(delimiter);
+        trimTrailingEmptyCells(lineParts);
+        adjustLinePartsForMultipleCompetitors(lineParts, format);
+        
+        // Check that all control codes except perhaps the finish are alphanumeric.
+        var controlCodeRegexp = /^[A-Za-z0-9]+$/;
+        
+        // Don't check that the control code for the finish is alphanumeric if the
+        // finish time is specified elsewhere.
+        var terminationOffset = (format.finishTime === null) ? format.step : 0;
+        
+        for (var index = format.controlsOffset; index + terminationOffset < lineParts.length; index += format.step) {
+            if (!controlCodeRegexp.test(lineParts[index])) {
+                throwWrongFileFormat("Data appears not to be in an alternative CSV format - data in cell " + index + " of the first row ('" + lineParts[index] + "') is not an number");
+            }
+        }
+        
+        var classes = d3.map();
+        for (var rowIndex = 1; rowIndex < lines.length; rowIndex += 1) {
+            var row = lines[rowIndex].split(delimiter);
+            trimTrailingEmptyCells(row);
+            adjustLinePartsForMultipleCompetitors(row, format);
+            
+            if (row.length < format.controlsOffset) {
+                // Probably a blank line.  Ignore it.
+                continue;
+            }
+            
+            while ((row.length - format.controlsOffset) % format.step !== 0) {
+                // Competitor might be missing cumulative time to last control.
+                row.push("");
+            }
+            
+            var competitorName = row[format.name];
+            var club = row[format.club];
+            var courseName = row[format.courseName];
+            var startTime = parseTime(row[format.startTime]);
+            
+            var expectedRowLength;
+            if (format.controlCount === null) {
+                expectedRowLength = row.length;
+            } else {
+                var controlCount = parseInt(row[format.controlCount], 10);
+                if (isNaNStrict(controlCount)) {
+                    throwInvalidData("Control count '" + row[format.controlCount] + "' is not a valid number");
+                }
+                
+                expectedRowLength = format.controlsOffset + controlCount * format.step;
+                if (row.length < expectedRowLength) {
+                    throwInvalidData("Data in row " + rowIndex + " should have at least " + expectedRowLength + " parts (for " + controlCount + " controls) but only has " + row.length);
+                }
+            }
+            
+            var courseLength = (format.length === null) ? null : parseCourseLength(row[format.length]);
+            var courseClimb = (format.climb === null) ? null : parseCourseClimb(row[format.climb]);
+            
+            var cumTimes = [0];
+            for (var cumTimeIndex = format.controlsOffset + 1; cumTimeIndex < expectedRowLength; cumTimeIndex += format.step) {
+                cumTimes.push(parseTime(row[cumTimeIndex]));
+            }
+            
+            if (format.finishTime !== null) {
+                var finishTime = parseTime(row[format.finishTime]);
+                var totalTime = (startTime === null || finishTime === null) ? null : (finishTime - startTime);
+                cumTimes.push(totalTime);
+            }
+            
+            var order = (classes.has(courseName)) ? classes.get(courseName).competitors.length + 1 : 1;
+            
+            var competitor = fromOriginalCumTimes(order, competitorName, club, startTime, cumTimes);
+            if (format.placing !== null && competitor.completed()) {
+                var placing = row[format.placing];
+                if (!placing.match(/^\d*$/)) {
+                    competitor.setNonCompetitive();
+                }
+            }
+            
+            if (classes.has(courseName)) {
+                var cls = classes.get(courseName);
+                // Subtract one from the list of cumulative times for the 
+                // cumulative time at the start (always 0), and add one on to
+                // the count of controls in the class to cater for the finish.
+                if (cumTimes.length - 1 !== (cls.controls.length + 1)) {
+                    throwInvalidData("Competitor '" + competitorName + "' has the wrong number of splits for course '" + courseName + "': " +
+                             "expected " + (cls.controls.length + 1) + ", actual " + (cumTimes.length - 1));
+                }
+                
+                cls.competitors.push(competitor);
+            } else {
+                // New course/class.
+                
+                // Determine the list of controls, ignoring the finish.
+                var controls = [];
+                for (var controlIndex = format.controlsOffset; controlIndex + terminationOffset < expectedRowLength; controlIndex += format.step) {
+                    controls.push(row[controlIndex]);
+                }
+            
+                classes.set(courseName, {length: courseLength, climb: courseClimb, controls: controls, competitors: [competitor]});
+            }
+        }
+        
+        var ageClasses = [];
+        var courses = [];
+        classes.keys().forEach(function (className) {
+            var cls = classes.get(className);
+            var ageClass = new AgeClass(className, cls.controls.length, cls.competitors);
+            
+            var course = new Course(className, [ageClass], cls.length, cls.climb, cls.controls);
+            ageClass.setCourse(course);
+            ageClasses.push(ageClass);
+            courses.push(course);
+        });
+    
+        return new Event(ageClasses, courses);
+    }
+    
+    SplitsBrowser.Input.AlternativeCSV = {
+        parseTripleColumnEventData: function (eventData) {
+            return parseEventDataWithFormat(eventData, TRIPLE_COLUMN_FORMAT);
+        }
+    };
+        
+})();
+
+(function () {
+    "use strict";
+    
+    var throwInvalidData = SplitsBrowser.throwInvalidData;
+    var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
+    var parseTime = SplitsBrowser.parseTime;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var Course = SplitsBrowser.Model.Course;
+    var Event = SplitsBrowser.Model.Event;
+    
+    // Number of feet in a kilometre.
+    var FEET_PER_KILOMETRE = 3280;
+    
+    /**
+    * Returns whether the given value is undefined.
+    * @param {any} value - The value to check.
+    * @return {boolean} True if the value is undefined, false otherwise.
+    */
+    function isUndefined(value) {
+        return typeof value === "undefined";
+    }
+    
+    /**
+    * Parses the given XML string and returns the parsed XML.
+    * @param {String} xmlString - The XML string to parse.
+    * @return {XMLDocument} The parsed XML document.
+    */
+    function parseXml(xmlString) {
+        var xml;
+        try {
+            xml = $.parseXML(xmlString);
+        } catch (e) {
+            throwInvalidData("XML data not well-formed: " + e.message);
+        }
+        
+        if ($("> *", $(xml)).length === 0) {
+            // PhantomJS doesn't always fail parsing invalid XML; we may be
+            // left with 'xml' just containing the DOCTYPE and no root element.
+            throwInvalidData("XML data not well-formed: " + xmlString);
+        }
+        
+        return xml;
+    }
+    
+    /**
+    * Parses and returns a competitor name from the given XML element.
+    *
+    * The XML element should have name 'PersonName' for v2.0.3 or 'Name' for
+    * v3.0.  It should contain 'Given' and 'Family' child elements from which
+    * the name will be formed.
+    *
+    * @param {jQuery.selection} nameElement - jQuery selection containing the
+    *     PersonName or Name element.
+    * @return {String} Name read from the element.
+    */
+    function readCompetitorName(nameElement) {
+        
+        var forename = $("> Given", nameElement).text();
+        var surname = $("> Family", nameElement).text();
+
+        if (forename === "" && surname === "") {
+            throwInvalidData("Cannot read competitor's name");
+        } else if (forename === "") {
+            return surname;
+        } else if (surname === "") {
+            return forename;
+        } else {
+            return forename + " " + surname;
+        }
+    }
+    
+    // Object that contains various functions for parsing bits of data from
+    // IOF v2.0.3 XML event data.
+    var Version2Reader = {};
+    
+    /**
+    * Returns whether the given event data is likely to be results data of the
+    * version 2.0.3 format.
+    *
+    * This function is called before the XML is parsed and so can provide a
+    * quick way to discount files that are not of the v2.0.3 format.  Further
+    * functions of this reader are only called if this method returns true.
+    *
+    * @param {String} data - The event data.
+    * @return {boolean} True if the data is likely to be v2.0.3-format data,
+    *     false if not.
+    */
+    Version2Reader.isOfThisVersion = function (data) {
+        return data.indexOf("IOFdata.dtd") >= 0;
+    };
+        
+    /**
+    * Makes a more thorough check that the parsed XML data is likely to be of
+    * the v2.0.3 format.  If not, a WrongFileFormat exception is thrown.
+    * @param {jQuery.selection} rootElement - The root element.
+    */
+    Version2Reader.checkVersion = function (rootElement) {
+        var iofVersionElement = $("> IOFVersion", rootElement);
+        if (iofVersionElement.length === 0) {
+            throwWrongFileFormat("Could not find IOFVersion element");
+        } else {
+            var version = iofVersionElement.attr("version");
+            if (isUndefined(version)) {
+                throwWrongFileFormat("Version attribute missing from IOFVersion element");
+            } else if (version !== "2.0.3") {
+                throwWrongFileFormat("Found unrecognised IOF XML data format '" + version + "'");
+            }
+        }
+        
+        var status = rootElement.attr("status");
+        if (!isUndefined(status) && status.toLowerCase() !== "complete") {
+            throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
+        }
+    };
+
+    /**
+    * Reads the class name from a ClassResult element.
+    * @param {jQuery.selection} classResultElement - ClassResult element
+    *     containing the course details.
+    * @return {String} Class name.
+    */
+    Version2Reader.readClassName = function (classResultElement) {
+        return $("> ClassShortName", classResultElement).text();    
+    };
+    
+    /**
+    * Reads the course details from the given ClassResult element.
+    * @param {jQuery.selection} classResultElement - ClassResult element
+    *     containing the course details.
+    * @return {Object} Course details: id, name, length and climb.
+    */
+    Version2Reader.readCourseFromClass = function (classResultElement) {
+        // Although the IOF v2 format appears to support courses, they
+        // haven't been specified in any of the files I've seen.
+        // So instead grab course details from the class and the first
+        // competitor.
+        var courseName = $("> ClassShortName", classResultElement).text();
+        
+        var firstResult = $("> PersonResult > Result", classResultElement).first();
+        var length = null;
+        
+        if (firstResult.length > 0) {
+            var lengthElement = $("> CourseLength", firstResult);
+            var lengthStr = lengthElement.text();
+            
+            // Course lengths in IOF v2 are a pain, as you have to handle three
+            // units.
+            if (lengthStr.length > 0) {
+                length = parseFloat(lengthStr);
+                if (isFinite(length)) {
+                    var unit = lengthElement.attr("unit");
+                    if (isUndefined(unit) || unit === "m") {
+                        length /= 1000;
+                    } else if (unit === "km") {
+                        // Length already in kilometres, do nothing further.
+                    } else if (unit === "ft") {
+                        length /= FEET_PER_KILOMETRE;
+                    } else {
+                        throwInvalidData("Unrecognised course-length unit: '" + unit + "'");
+                    }
+                } else {
+                    throwInvalidData("Invalid course length: '" + lengthStr + "'");
+                }
+            }
+        }
+        
+        // Climb does not appear in the per-competitor results.
+        return {id: null, name: courseName, length: length, climb: null};
+    };
+    
+    /**
+    * Returns the XML element that contains a competitor's name.  This element
+    * should contain child elements with names 'Given' and 'Family'.
+    * @param {jQuery.selection} element - jQuery selection containing a
+    *     PersonResult element.
+    * @return {jQuery.selection} jQuery selection containing any child
+    *     'PersonName' element.
+    */
+    Version2Reader.getCompetitorNameElement = function (element) {
+        return $("> Person > PersonName", element);
+    };
+    
+    /**
+    * Returns the name of the competitor's club.
+    * @param {jQuery.selection} element - jQuery selection containing a
+    *     PersonResult element.
+    * @return {String} Competitor's club name.
+    */
+    Version2Reader.readClubName = function (element) {
+        return $("> Club > ShortName", element).text();
+    };
+    
+    /**
+    * Reads a competitor's start time from the given Result element.
+    * @param {jQuery.selection} resultElement - jQuery selection containing a
+    *     Result element.
+    * @return {?Number} Competitor's start time in seconds since midnight, or
+    *     null if not found.
+    */
+    Version2Reader.readStartTime = function (resultElement) {
+        var startTimeStr = $("> StartTime > Clock", resultElement).text();
+        var startTime = (startTimeStr === "") ? null : parseTime(startTimeStr);       
+        return startTime;
+    };
+    
+    /**
+    * Reads a competitor's total time from the given Result element.
+    * @param {jQuery.selection} resultElement - jQuery selection containing a
+    *     Result element.
+    * @return {?Number} - The competitor's total time in seconds, or
+    *     null if a valid time was not found.
+    */
+    Version2Reader.readTotalTime = function (resultElement) {
+        var totalTimeStr = $("> Time", resultElement).text();
+        var totalTime = (totalTimeStr === "") ? null : parseTime(totalTimeStr);
+        return totalTime;
+    };
+
+    /**
+    * Returns whether a competitor's result declares them as non-competitive.
+    * @param {jQuery.selection} resultElement - jQuery selection containing a
+    *     Result element.
+    * @return {boolean} - True if the competitor is non-competitive, false if
+    *     the competitor is competitive.
+    */
+    Version2Reader.isNonCompetitive = function (resultElement) {
+        var statusElement = $("> CompetitorStatus", resultElement);
+        return (statusElement.length === 1 && statusElement.attr("value") === "NotCompeting");
+    };
+    
+    /**
+    * Reads a control code and split time from a SplitTime element.
+    * @param {jQuery.selection} splitTimeElement - jQuery selection containing
+    *     a SplitTime element.
+    * @return {Object} Object containing code and time.
+    */
+    Version2Reader.readSplitTime = function (splitTimeElement) {
+        // IOF v2 allows ControlCode or Control elements.
+        var code = $("> ControlCode", splitTimeElement).text();
+        if (code === "") {
+            code = $("> Control", splitTimeElement).text();
+        }
+        
+        if (code === "") {
+            throwInvalidData("Control code missing for control");
+        }
+
+        var timeStr = $("> Time", splitTimeElement).text();
+        if (timeStr === "") {
+            throwInvalidData("Split time missing for control '" + code + "'");
+        }
+        
+        var time = parseTime(timeStr);
+        
+        return {code: code, time: time};
+    };
+    
+    // Regexp to match ISO-8601 dates.
+    // Ignores timezone info - always display times as local time.
+    // We don't assume there are separator characters, and we also don't assume
+    // that the seconds will be specified.
+    var ISO_8601_RE = /^\d\d\d\d-?\d\d-?\d\dT?(\d\d):?(\d\d)(?::?(\d\d))?/;
+    
+    // Object that contains various functions for parsing bits of data from
+    // IOF v3.0 XML event data.
+    var Version3Reader = {};
+    
+    /**
+    * Returns whether the given event data is likely to be results data of the
+    * version 3.0 format.
+    *
+    * This function is called before the XML is parsed and so can provide a
+    * quick way to discount files that are not of the v3.0 format.  Further
+    * functions of this reader are only called if this method returns true.
+    *
+    * @param {String} data - The event data.
+    * @return {boolean} True if the data is likely to be v3.0-format data,
+    *     false if not.
+    */
+    Version3Reader.isOfThisVersion = function (data) {
+        return data.indexOf("http://www.orienteering.org/datastandard/3.0") >= 0;
+    };
+    
+    /**
+    * Makes a more thorough check that the parsed XML data is likely to be of
+    * the v2.0.3 format.  If not, a WrongFileFormat exception is thrown.
+    * @param {jQuery.selection} rootElement - The root element.
+    */    
+    Version3Reader.checkVersion = function (rootElement) {
+        var iofVersion = rootElement.attr("iofVersion");
+        if (isUndefined(iofVersion)) {
+            throwWrongFileFormat("Could not find IOF version number");
+        } else if (iofVersion !== "3.0") {
+            throwWrongFileFormat("Found unrecognised IOF XML data format '" + iofVersion + "'");
+        }
+        
+        var status = rootElement.attr("status");
+        if (!isUndefined(status) && status.toLowerCase() !== "Complete") {
+            throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
+        }
+    };
+    
+    /**
+    * Reads the class name from a ClassResult element.
+    * @param {jQuery.selection} classResultElement - ClassResult element
+    *     containing the course details.
+    * @return {String} Class name.
+    */
+    Version3Reader.readClassName = function (classResultElement) {
+        return $("> Class > Name", classResultElement).text();
+    };
+    
+    /**
+    * Reads the course details from the given ClassResult element.
+    * @param {jQuery.selection} classResultElement - ClassResult element
+    *     containing the course details.
+    * @return {Object} Course details: id, name, length and climb.
+    */
+    Version3Reader.readCourseFromClass = function (classResultElement) {
+        var courseElement = $("> Course", classResultElement);
+        var id = $("> Id", courseElement).text();
+        var name = $("> Name", courseElement).text();
+        var lengthStr = $("> Length", courseElement).text();
+        var length;
+        if (lengthStr === "") {
+            length = null;
+        } else {
+            length = parseInt(lengthStr, 10);
+            if (isNaNStrict(length)) {
+                throwInvalidData("Unrecognised course length: '" + lengthStr + "'");
+            } else {
+                // Convert from metres to kilometres.
+                length /= 1000;
+            }
+        }
+        
+        var climbStr = $("> Climb", courseElement).text();
+        var climb = parseInt(climbStr, 10);
+        if (isNaNStrict(climb)) {
+            climb = null;
+        }
+        
+        return {id: id, name: name, length: length, climb: climb};
+    };
+    
+    /**
+    * Returns the XML element that contains a competitor's name.  This element
+    * should contain child elements with names 'Given' and 'Family'.
+    * @param {jQuery.selection} element - jQuery selection containing a
+    *     PersonResult element.
+    * @return {jQuery.selection} jQuery selection containing any child 'Name'
+    *     element.
+    */
+    Version3Reader.getCompetitorNameElement = function (element) {
+        return $("> Person > Name", element);
+    };
+    
+    /**
+    * Returns the name of the competitor's club.
+    * @param {jQuery.selection} element - jQuery selection containing a
+    *     PersonResult element.
+    * @return {String} Competitor's club name.
+    */
+    Version3Reader.readClubName = function (element) {
+        return $("> Organisation > ShortName", element).text();
+    };
+    
+    /**
+    * Reads a competitor's start time from the given Result element.
+    * @param {jQuery.selection} element - jQuery selection containing a
+    *     Result element.
+    * @return {?Number} Competitor's start time, in seconds since midnight,
+    *     or null if not known.
+    */
+    Version3Reader.readStartTime = function (resultElement) {
+        var startTimeStr = $("> StartTime", resultElement).text();
+        var result = ISO_8601_RE.exec(startTimeStr);
+        if (result === null) {
+            return null;
+        } else {
+            var hours = parseInt(result[1], 10);
+            var minutes = parseInt(result[2], 10);
+            var seconds = (isUndefined(result[3])) ? 0 : parseInt(result[3], 10);
+            return hours * 60 * 60 + minutes * 60 + seconds;
+        }
+    };
+
+    /**
+    * Reads a time, in seconds, from a string.  If the time was not valid,
+    * null is returned.
+    * @param {String} timeStr - The time string to read.
+    * @return {?Number} The parsed time, in seconds, or null if it could not
+    *     be read.
+    */    
+    Version3Reader.readTime = function (timeStr) {
+        // IOF v3 allows fractional seconds, so we use parseFloat instead
+        // of parseInt.
+        var time = parseFloat(timeStr);
+        return (isFinite(time)) ? time : null;
+    };
+    
+    /**
+    * Read a competitor's total time from the given Time element.
+    * @param {jQuery.selection} element - jQuery selection containing a
+    *     Result element.
+    * @return {?Number} Competitor's total time, in seconds, or null if a time
+    *     was not found or was invalid.
+    */
+    Version3Reader.readTotalTime = function (resultElement) {
+        var totalTimeStr = $("> Time", resultElement).text();
+        return Version3Reader.readTime(totalTimeStr);
+    };
+
+    /**
+    * Returns whether a competitor's result declares them as non-competitive.
+    * @param {jQuery.selection} resultElement - jQuery selection containing a
+    *     Result element.
+    * @return {boolean} - True if the competitor is non-competitive, false if
+    *     the competitor is competitive.
+    */
+    Version3Reader.isNonCompetitive = function (resultElement) {
+        return $("> Status", resultElement).text() === "NotCompeting";
+    };
+    
+    /**
+    * Reads a control code and split time from a SplitTime element.
+    * @param {jQuery.selection} splitTimeElement - jQuery selection containing
+    *     a SplitTime element.
+    * @return {Object} Object containing code and time.
+    */
+    Version3Reader.readSplitTime = function (splitTimeElement) {
+        var code = $("> ControlCode", splitTimeElement).text();
+        if (code === "") {
+            throwInvalidData("Control code missing for control");
+        }
+        
+        var time;
+        if (splitTimeElement.attr("status") === "Missing") {
+            // Missed controls have their time omitted.
+            time = null;
+        } else {
+            var timeStr = $("> Time", splitTimeElement).text();
+            if (timeStr === "") {
+                throwInvalidData("Split time missing for control '" + code + "'");
+            }
+            time = Version3Reader.readTime(timeStr);
+        }
+        
+        return {code: code, time: time};
+    };
+    
+    var ALL_READERS = [Version2Reader, Version3Reader];
+    
+    /**
+    * Check that the XML document passed is in a suitable format for parsing.
+    *
+    * If any problems arise, this function will throw an exception.  If the
+    * data is valid, the function will return normally.
+    * @param {XMLDocument} xml - The parsed XML document.
+    * @param {Object} reader - XML reader used to assist with format-specific
+    *     XML reading.
+    */
+    function validateData(xml, reader) {
+        var rootElement = $("> *", xml);        
+        var rootElementNodeName = rootElement.prop("tagName");
+        
+        if (rootElementNodeName !== "ResultList")  {
+            throwWrongFileFormat("Root element of XML document does not have expected name 'ResultList', got '" + rootElementNodeName + "'");
+        }
+        
+        reader.checkVersion(rootElement);
+        
+        var status = rootElement.attr("status");
+        if (!isUndefined(status) && status.toLowerCase() !== reader.completeStatus) {
+            throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
+        }
+    }
+    
+    /**
+    * Parses data for a single competitor.
+    * @param {XMLElement} element - XML PersonResult element.
+    * @param {Number} number - The competitor number (1 for first in the array
+    *     of those read so far, 2 for the second, ...)
+    * @param {Object} reader - XML reader used to assist with format-specific
+    *     XML reading.
+    * @return {Object} Object containing the competitor data.
+    */
+    function parseCompetitor(element, number, reader) {
+        var jqElement = $(element);
+        
+        var nameElement = reader.getCompetitorNameElement(jqElement);
+        var name = readCompetitorName(nameElement);
+        
+        var club = reader.readClubName(jqElement);
+        
+        var resultElement = $("Result", jqElement);
+        if (resultElement.length === 0) {
+            throwInvalidData("No result found for competitor '" + name + "'");
+        }
+        
+        var startTime = reader.readStartTime(resultElement);
+        
+        var totalTime = reader.readTotalTime(resultElement);
+        
+        var nonCompetitive = reader.isNonCompetitive(resultElement);
+        
+        var splitTimes = $("> SplitTime", resultElement).toArray();
+        var splitData = splitTimes.map(function (splitTime) { return reader.readSplitTime($(splitTime)); });
+        
+        var controls = splitData.map(function (datum) { return datum.code; });
+        var cumTimes = splitData.map(function (datum) { return datum.time; });
+        
+        cumTimes.splice(0, 0, 0); // Prepend a zero time for the start.
+        cumTimes.push(totalTime);
+        
+        var competitor = fromOriginalCumTimes(number, name, club, startTime, cumTimes);
+        if (nonCompetitive) {
+            competitor.setNonCompetitive();
+        }
+        
+        return {
+            competitor: competitor,
+            controls: controls
+        };
+    }
+    
+    /**
+    * Parses data for a single class.
+    * @param {XMLElement} element - XML ClassResult element
+    * @param {Object} reader - XML reader used to assist with format-specific
+    *     XML reading.
+    * @return {Object} Object containing parsed data.
+    */
+    function parseClassData(element, reader) {
+        var jqElement = $(element);
+        var cls = {name: null, competitors: [], controls: [], course: null};
+        
+        cls.course = reader.readCourseFromClass(jqElement, reader);
+        
+        var className = reader.readClassName(jqElement);
+        
+        if (className === "") {
+            throwInvalidData("Missing class name");
+        }
+        
+        cls.name = className;
+        
+        var personResults = $("> PersonResult", jqElement);
+
+        if (personResults.length === 0) {
+            throwInvalidData("Class '" + className + "' has no competitors");
+        }
+        
+        for (var index = 0; index < personResults.length; index += 1) {
+            var competitor = parseCompetitor(personResults[index], index + 1, reader);
+            if (cls.competitors.length === 0) {
+                cls.controls = competitor.controls;
+                cls.length = competitor.length;
+            } else {
+                // Subtract 2 for the start and finish cumulative times.
+                var actualControlCount = competitor.competitor.getAllOriginalCumulativeTimes().length - 2;
+                if (actualControlCount !== cls.controls.length) {
+                    throwInvalidData("Inconsistent numbers of controls on course '" + className + "': " + cls.controls.length + " and " + actualControlCount);
+                }
+            }
+            
+            cls.competitors.push(competitor.competitor);
+        }
+        
+        return cls;
+    }
+   
+    /**
+    * Determine which XML reader to use to parse the given event data.
+    * @param {String} data - The event data.
+    * @return {Object} XML reader used to read version-specific information.
+    */
+    function determineReader(data) {
+        for (var index = 0; index < ALL_READERS.length; index += 1) {
+            var reader = ALL_READERS[index];
+            if (reader.isOfThisVersion(data)) {
+                return reader;
+            }
+        }
+        
+        throwWrongFileFormat("Data apparently not of any recognised IOF XML format");
+    }
+   
+    /**
+    * Parses IOF XML data in the 2.0.3 format and returns the data.
+    * @param {String} data - String to parse as XML.
+    * @return {Event} Parsed event object.
+    */
+    function parseEventData(data) {
+    
+        var reader = determineReader(data);
+    
+        var xml = parseXml(data);
+        
+        validateData(xml, reader);
+        
+        var classResultElements = $("> ResultList > ClassResult", $(xml)).toArray();
+        
+        if (classResultElements.length === 0) {
+            throwInvalidData("No class result elements found");
+        }
+        
+        var classes = [];
+        
+        // Array of all 'temporary' courses, intermediate objects that contain
+        // course data but not yet in a suitable form to return.
+        var tempCourses = [];
+        
+        // d3 map that maps course IDs to the temporary course with that ID.
+        var coursesMap = d3.map();
+        
+        classResultElements.forEach(function (classResultElement) {
+            var parsedClass = parseClassData(classResultElement, reader);
+            var ageClass = new AgeClass(parsedClass.name, parsedClass.controls.length, parsedClass.competitors);
+            classes.push(ageClass);
+            
+            // Add to each temporary course object a list of all age-classes.
+            var tempCourse = parsedClass.course;
+            if (tempCourse.id !== null && coursesMap.has(tempCourse.id)) {
+                // We've come across this course before, so just add a class to
+                // it.
+                coursesMap.get(tempCourse.id).classes.push(ageClass);
+            } else {
+                // New course.  Add some further details from the class.
+                tempCourse.classes = [ageClass];
+                tempCourse.controls = parsedClass.controls;
+                tempCourses.push(tempCourse);
+                if (tempCourse.id !== null) {
+                    coursesMap.set(tempCourse.id, tempCourse);
+                }
+            }
+        });
+        
+        // Now build up the array of courses.
+        var courses = tempCourses.map(function (tempCourse) {
+            var course = new Course(tempCourse.name, tempCourse.classes, tempCourse.length, tempCourse.climb, tempCourse.controls);
+            tempCourse.classes.forEach(function (ageClass) { ageClass.setCourse(course); });
+            return course;
+        });
+        
+        return new Event(classes, courses);
+    }
+    
+    SplitsBrowser.Input.IOFXml = { parseEventData: parseEventData };
+})();
+
+(function () {
+    "use strict";
+    
     // All the parsers for parsing event data that are known about.
     var PARSERS = [
         SplitsBrowser.Input.CSV.parseEventData,
         SplitsBrowser.Input.SI.parseEventData,
-        SplitsBrowser.Input.SIHtml.parseEventData
+        SplitsBrowser.Input.SIHtml.parseEventData,
+        SplitsBrowser.Input.AlternativeCSV.parseTripleColumnEventData,
+        SplitsBrowser.Input.IOFXml.parseEventData
     ];
     
     /**
@@ -4412,7 +5712,16 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     CompetitorList.prototype.selectNone = function () {
         this.competitorSelection.selectNone();
     };
-
+    
+    /**
+    * Returns whether the competitor with the given index is selected.
+    * @param {Number} index - Index of the competitor within the list.
+    * @return True if the competitor is selected, false if not.
+    */
+    CompetitorList.prototype.isSelected = function (index) {
+        return this.competitorSelection !== null && this.competitorSelection.isSelected(index);
+    };
+    
     /**
     * Select all of the competitors that cross the unique selected competitor.
     */
@@ -4450,11 +5759,12 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         var outerThis = this;
         this.listDiv.selectAll("div.competitor")
                     .data(d3.range(this.competitorSelection.count))
-                    .classed("selected", function (comp, index) { return outerThis.competitorSelection.isSelected(index); });
+                    .classed("selected", function (comp, index) { return outerThis.isSelected(index); });
     };
 
     /**
     * Toggle the selectedness of a competitor.
+    * @param {Number} index - The index of the competitor.
     */
     CompetitorList.prototype.toggleCompetitor = function (index) {
         this.competitorSelection.toggle(index);
@@ -4480,7 +5790,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**
     * Sets the list of competitors.
     * @param {Array} competitors - Array of competitor data.
-    * @param {boolean} hasMultipleClasses - Whether the list of competitors is
+    * @param {boolean} multipleClasses - Whether the list of competitors is
     *      made up from those in multiple classes.
     */
     CompetitorList.prototype.setCompetitorList = function (competitors, multipleClasses) {
@@ -4489,8 +5799,10 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         
         var competitorDivs = this.listDiv.selectAll("div.competitor").data(competitors);
 
+        var outerThis = this;
         competitorDivs.enter().append("div")
-                              .classed("competitor", true);
+                              .classed("competitor", true)
+                              .classed("selected", function (comp, index) { return outerThis.isSelected(index); });
 
         competitorDivs.selectAll("span").remove();
         
@@ -4506,7 +5818,6 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
 
         competitorDivs.exit().remove();
         
-        var outerThis = this;
         competitorDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
                       .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })
                       .on("mouseup", function () { outerThis.stopDrag(); });
@@ -4523,9 +5834,9 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
 
         var outerThis = this;
         this.competitorSelection = selection;
-        this.handler = function (indexes) { outerThis.selectionChanged(indexes); };
+        this.handler = function () { outerThis.selectionChanged(); };
         this.competitorSelection.registerChangeHandler(this.handler);
-        this.selectionChanged(d3.range(selection.count));
+        this.selectionChanged();
     };
     
     /**
@@ -4566,7 +5877,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * A control that wraps a drop-down list used to choose between classes.
     * @param {HTMLElement} parent - The parent element to add the control to.
     */
-    var ClassSelector = function(parent) {
+    function ClassSelector(parent) {
         this.changeHandlers = [];
         this.otherClassesEnabled = true;
         
@@ -4578,7 +5889,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         var outerThis = this;
         this.dropDown = div.append("select").node();
         $(this.dropDown).bind("change", function() {
-            outerThis.updateOtherClasses();
+            outerThis.updateOtherClasses(d3.set());
             outerThis.onSelectionChanged();
         });
         
@@ -4625,7 +5936,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                 outerThis.otherClassesList.style("display", "none");
             }
         });
-    };
+    }
 
     /**
     * Sets whether the other-classes selector is enabled, if it is shown at
@@ -4665,7 +5976,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                        
             optionsList.exit().remove();
       
-            this.updateOtherClasses();
+            this.updateOtherClasses(d3.set());
         } else {
             throwInvalidData("ClassSelector.setClasses: classes is not an array");
         }
@@ -4687,13 +5998,34 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
             this.changeHandlers.push(handler);
         }    
     };
+    
+    /**
+    * Sets the selected classes.
+    * @param {Array} selectedIndexes - Array of indexes of classes.
+    */
+    ClassSelector.prototype.selectClasses = function (selectedIndexes) {
+        if (selectedIndexes.length > 0 && selectedIndexes.every(function (index) { return 0 <= index && index < this.dropDown.options.length; }, this)) {
+            this.dropDown.selectedIndex = selectedIndexes[0];
+            this.updateOtherClasses(d3.set(selectedIndexes.slice(1)));
+            this.onSelectionChanged();
+        }
+    };
+    
+    /**
+    * Returns the indexes of the selected classes.
+    * @param {Array} Indexes of selected classes.
+    */
+    ClassSelector.prototype.getSelectedClasses = function () {
+        var indexes = [this.dropDown.selectedIndex];
+        this.selectedOtherClassIndexes.forEach(function (index) { indexes.push(parseInt(index, 10)); });
+        return indexes;
+    };
 
     /**
     * Handle a change of the selected option in the drop-down list.
     */
     ClassSelector.prototype.onSelectionChanged = function() {
-        var indexes = [this.dropDown.selectedIndex];
-        this.selectedOtherClassIndexes.forEach(function (index) { indexes.push(parseInt(index, 10)); });
+        var indexes = this.getSelectedClasses();
         this.changeHandlers.forEach(function(handler) { handler(indexes); });
     };
     
@@ -4720,10 +6052,11 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**
     * Updates the other-classes selector div following a change of selected
     * 'main' class.
+    * @param {d3.set} selectedOtherClassIndexes - Array of selected other-class indexes.
     */
-    ClassSelector.prototype.updateOtherClasses = function () {
+    ClassSelector.prototype.updateOtherClasses = function (selectedOtherClassIndexes) {
         this.otherClassesList.style("display", "none");
-        this.selectedOtherClassIndexes = d3.set();
+        this.selectedOtherClassIndexes = selectedOtherClassIndexes;
         this.updateOtherClassText();
             
         $("div.otherClassItem").off("click");
@@ -4746,7 +6079,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                                      .classed("otherClassItem", true);
         
         otherClassesSelection.attr("id", function (classIdx) { return "ageClassIdx_" + classIdx; })
-                             .classed("selected", false)
+                             .classed("selected", function (classIdx) { return selectedOtherClassIndexes.has(classIdx); })
                              .text(function (classIdx) { return outerThis.classes[classIdx].name; });
                              
         otherClassesSelection.exit().remove();
@@ -4854,7 +6187,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {Function} alerter - Function to call with any messages to show to
     *     the user.
     */
-    var ComparisonSelector = function (parent, alerter) {
+    function ComparisonSelector(parent, alerter) {
         this.changeHandlers = [];
         this.classes = null;
         this.currentRunnerIndex = null;
@@ -4904,7 +6237,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         
         this.dropDown.selectedIndex = DEFAULT_COMPARISON_INDEX;
         this.previousSelectedIndex = DEFAULT_COMPARISON_INDEX;
-    };
+    }
 
     /**
     * Add a change handler to be called whenever the selected class is changed.
@@ -4922,15 +6255,16 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
 
     /**
     * Returns whether the 'Any Runner...' option is selected.
-    * @return Whether the 'Any Runner...' option is selected.
+    * @return {boolean} True if the 'Any Runner...' option is selected, false
+    *     if any other option is selected.
     */
     ComparisonSelector.prototype.isAnyRunnerSelected = function () {
         return this.dropDown.selectedIndex === ALL_COMPARISON_OPTIONS.length - 1;
     };
     
     /**
-    * Sets the list of classes.
-    * @param {Array} classes - Array of AgeClass objects.
+    * Sets the age-class set to use.
+    * @param {AgeClassSet} ageClassSet - The age-class set to set.
     */
     ComparisonSelector.prototype.setAgeClassSet = function (ageClassSet) {
         this.ageClassSet = ageClassSet;
@@ -4939,8 +6273,6 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
 
     /**
     * Populates the drop-down list of runners from an age-class set.
-    * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - Age-class set
-    *     containing all of the runners to populate the list from.
     */
     ComparisonSelector.prototype.setRunners = function () {
         var competitors = this.ageClassSet.allCompetitors;
@@ -4998,6 +6330,44 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Returns the comparison type.
+    * @return {Object} Object containing the comparison type (type index and runner).
+    */
+    ComparisonSelector.prototype.getComparisonType = function () {
+        var typeIndex = this.dropDown.selectedIndex;
+        var runner;
+        if (typeIndex === ALL_COMPARISON_OPTIONS.length - 1) {
+            runner = this.ageClassSet.allCompetitors[this.runnerDropDown.selectedIndex];
+        } else {
+            runner = null;
+        }
+    
+        return {index: typeIndex, runner: runner };
+    };
+    
+    /**
+    * Sets the comparison type.
+    * @param {Number} typeIndex - The index of the comparison type.
+    * @param {Competitor|null} runner - The selected 'Any runner', or null if
+    *     Any Runner has not been selected.
+    */
+    ComparisonSelector.prototype.setComparisonType = function (typeIndex, runner) {
+        if (0 <= typeIndex && typeIndex < ALL_COMPARISON_OPTIONS.length) {
+            if (typeIndex === ALL_COMPARISON_OPTIONS.length - 1) {
+                var runnerIndex = this.ageClassSet.allCompetitors.indexOf(runner);
+                if (runnerIndex >= 0) {
+                    this.dropDown.selectedIndex = typeIndex;
+                    this.runnerDropDown.selectedIndex = runnerIndex;
+                    this.onSelectionChanged();
+                }
+            } else {
+                this.dropDown.selectedIndex = typeIndex;
+                this.onSelectionChanged();
+            }
+        }
+    };
+    
+    /**
     * Handle a change of the selected option in either drop-down list.
     */
     ComparisonSelector.prototype.onSelectionChanged = function() {
@@ -5046,7 +6416,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @constructor
     * @param {HTMLElement} parent - The parent element.
     */
-    var StatisticsSelector = function (parent) {
+    function StatisticsSelector (parent) {
         this.span = d3.select(parent).append("span")
                                      .attr("id", STATISTIC_SELECTOR_ID);   
 
@@ -5069,7 +6439,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         $("input", this.span.node()).bind("change", function () { return outerThis.onCheckboxChanged(); });
                    
         this.handlers = [];
-    };
+    }
     
     /**
     * Deselects all checkboxes.
@@ -5123,7 +6493,8 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
 
     /**
     * Return the statistics that are currently enabled.
-    * @returns {Array} Array of booleans corresponding to enabled statistics.
+    * @returns {Object} Object that lists all the statistics and whether they
+    *     are enabled.
     */
     StatisticsSelector.prototype.getVisibleStatistics = function () {
         var visibleStats = {};
@@ -5132,6 +6503,18 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         });
         
         return visibleStats;
+    };
+    
+    /**
+    * Sets the visible statistics.
+    * @param {Object} visibleStats - The statistics to make visible.
+    */
+    StatisticsSelector.prototype.setVisibleStatistics = function (visibleStats) {
+        this.span.selectAll("input")[0].forEach(function (checkbox, index) {
+            checkbox.checked = visibleStats[STATISTIC_NAMES[index]] || false;
+        });
+        
+        this.onCheckboxChanged();
     };
 
     /**
@@ -5156,14 +6539,14 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {HTMLElement} parent - The parent element to add the control to.
     * @param {Array} chartTypes - Array of types of chart to list.
     */
-    var ChartTypeSelector = function (parent, chartTypes) {
+    function ChartTypeSelector(parent, chartTypes) {
         this.changeHandlers = [];
         this.chartTypes = chartTypes;
         this.raceGraphDisabledNotifier = null;
         this.lastSelectedIndex = 0;
         
         var div = d3.select(parent).append("div")
-                                    .attr("id", "chartTypeSelector");
+                                   .attr("id", "chartTypeSelector");
         div.append("span")
            .text(getMessage("ChartTypeSelectorLabel"));
            
@@ -5178,7 +6561,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                    .text(function (value) { return getMessage(value.nameKey); });
                    
         optionsList.exit().remove();
-    };
+    }
     
     /**
     * Sets the function used to disable the selection of the race graph.
@@ -5187,8 +6570,8 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * graph is made, and the selection will revert to what it was before.  If
     * it is null, the race graph can be selected.
     *
-    * @param {Function|null} raceGraphDisabledNotifier - Function to call when
-    *     the race graph is selected
+    * @param {?Function} raceGraphDisabledNotifier - Function to call when the
+    *     race graph is selected
     */
     ChartTypeSelector.prototype.setRaceGraphDisabledNotifier = function (raceGraphDisabledNotifier) {
         this.raceGraphDisabledNotifier = raceGraphDisabledNotifier;
@@ -5210,10 +6593,23 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
 
     /**
     * Returns the currently-selected chart type.
-    * @return {Array} The currently-selected chart type.
+    * @return {Object} The currently-selected chart type.
     */
     ChartTypeSelector.prototype.getChartType = function () {
         return this.chartTypes[Math.max(this.dropDown.selectedIndex, 0)];
+    };
+    
+    /**
+    * Sets the chart type.  If the chart type given is not recognised, nothing
+    * happens.
+    * @param {Object} chartType - The chart type selected.
+    */
+    ChartTypeSelector.prototype.setChartType = function (chartType) {
+        var index = this.chartTypes.indexOf(chartType);
+        if (index >= 0) {
+            this.dropDown.selectedIndex = index;
+            this.onSelectionChanged();
+        }
     };
     
     /**
@@ -5247,15 +6643,9 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @constructor
     * @param {d3.selection} parent - d3 selection containing the parent to
     *     insert the selector into.
-    * @param {Function} showOriginalData - Function to call when original data
-    *     is to be shown.
-    * @param {Function} showRepairedData - Function to call when repaired data
-    *     is to be shown.
     */
-    var OriginalDataSelector = function (parent, showOriginalData, showRepairedData) {
+    function OriginalDataSelector(parent) {
         this.parent = parent;
-        this.showRepairedData = showRepairedData;
-        this.showOriginalData = showOriginalData;
 
         var checkboxId = "originalDataCheckbox";
         this.containerDiv = parent.append("div")
@@ -5269,7 +6659,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.checkbox = span.append("input")
                             .attr("type", "checkbox")
                             .attr("id", checkboxId)
-                            .on("click", function() { outerThis.showOriginalOrRepairedData(); })
+                            .on("click", function() { outerThis.fireChangeHandlers(); })
                             .node();
                                  
         span.append("label")
@@ -5278,18 +6668,59 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
             .text(getMessage("ShowOriginalData"));
             
         this.containerDiv.attr("title", getMessage("ShowOriginalDataTooltip"));
-    };
+        this.handlers = [];        
+    }
 
     /**
-    * Shows original or repaired data depending on whether the checkbox is
-    * checked.
+    * Register a change handler to be called whenever the choice of original or
+    * repaired data is changed.
+    *
+    * If the handler was already registered, nothing happens.
+    * @param {Function} handler - Function to be called whenever the choice
+    *                             changes.
     */
-    OriginalDataSelector.prototype.showOriginalOrRepairedData = function () {
-        if (this.checkbox.checked) {
-            this.showOriginalData();
-        } else {
-            this.showRepairedData();
+    OriginalDataSelector.prototype.registerChangeHandler = function (handler) {
+        if (this.handlers.indexOf(handler) === -1) {
+            this.handlers.push(handler);
         }
+    };
+       
+    /**
+    * Deregister a change handler from being called whenever the choice of
+    * original or repaired data is changed.
+    *
+    * If the handler given was never registered, nothing happens.
+    * @param {Function} handler - Function to be called whenever the choice
+    *                             changes.
+    */
+    OriginalDataSelector.prototype.deregisterChangeHandler = function (handler) {
+        var index = this.handlers.indexOf(handler);
+        if (index !== -1) {
+            this.handlers.splice(index, 1);
+        }
+    };
+    
+    /**
+    * Fires all change handlers registered.
+    */
+    OriginalDataSelector.prototype.fireChangeHandlers = function () {
+        this.handlers.forEach(function (handler) { handler(this.checkbox.checked); }, this);
+    };
+    
+    /**
+    * Returns whether original data is selected.
+    * @return {boolean} True if original data is selected, false if not.
+    */
+    OriginalDataSelector.prototype.isOriginalDataSelected = function () {
+        return this.checkbox.checked;
+    };
+    
+    /**
+    * Selects original data.
+    */
+    OriginalDataSelector.prototype.selectOriginalData = function () {
+        this.checkbox.checked = true;
+        this.fireChangeHandlers();
     };
     
     /**
@@ -5340,7 +6771,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - The age-class set
     *     containing the splits data.
     * @param {Number} controlIndex - The index of the control.
-    * @return {Array} Array of fastest-split data.
+    * @return {Object} Fastest-split data.
     */
     ChartPopupData.getFastestSplitsPopupData = function (ageClassSet, controlIndex) {
         var data = ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, controlIndex);
@@ -5380,19 +6811,20 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
-    * Returns an array of the competitors visiting a control at a given time.
+    * Returns an object containing an array of the competitors visiting a
+    * control at a given time.
     * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - The age-class set
     *     containing the splits data.
     * @param {SplitsBrowser.Model.EventData} eventData - Data for the entire
     *     event.
     * @param {Number} controlIndex - The index of the control.
-    * @param {time} The current time, in units of seconds past midnight.
-    * @return {Array} Array of competitor data.
+    * @param {Number} time - The current time, in units of seconds past midnight.
+    * @return {Object} Object containing competitor data.
     */
     ChartPopupData.getCompetitorsVisitingCurrentControlPopupData = function (ageClassSet, eventData, controlIndex, time) {
         var controlCode = ageClassSet.getCourse().getControlCode(controlIndex);
-        var intervalStart = time - RACE_GRAPH_COMPETITOR_WINDOW / 2;
-        var intervalEnd = time + RACE_GRAPH_COMPETITOR_WINDOW / 2;
+        var intervalStart = Math.round(time) - RACE_GRAPH_COMPETITOR_WINDOW / 2;
+        var intervalEnd = Math.round(time) + RACE_GRAPH_COMPETITOR_WINDOW / 2;
         var competitors = eventData.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
             
         var primaryClass = ageClassSet.getPrimaryClassName();
@@ -5469,7 +6901,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {SplitsBrowser.Model.EventData} eventData - Data for the entire
     *     event.
     * @param {Number} controlIndex - The index of the control.
-    * @return {Array} Array of next-control data.
+    * @return {Object} Next-control data.
     */
     ChartPopupData.getNextControlData = function (course, eventData, controlIndex) {
         var controlIdx = Math.min(controlIndex, course.controls.length);
@@ -5491,10 +6923,10 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**
     * Creates a ChartPopup control.
     * @constructor
-    * @param {HTMLElement} Parent HTML element.
+    * @param {HTMLElement} parent - Parent HTML element.
     * @param {Object} handlers - Object that maps mouse event names to handlers.
     */
-    var ChartPopup = function (parent, handlers) {
+    function ChartPopup(parent, handlers) {
 
         this.shown = false;
         this.mouseIn = false;
@@ -5528,7 +6960,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         var outerThis = this;
         $(this.popupDiv.node()).mouseenter(function () { outerThis.mouseIn = true; });
         $(this.popupDiv.node()).mouseleave(function () { outerThis.mouseIn = false; });
-    };
+    }
 
     /**
     * Returns whether the popup is currently shown.
@@ -5717,8 +7149,8 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**
     * Format a time and a rank as a string, with the split time in mm:ss or h:mm:ss
     * as appropriate.
-    * @param {Number|null} time - The time, in seconds, or null.
-    * @param {Number|null} rank - The rank, or null.
+    * @param {?Number} time - The time, in seconds, or null.
+    * @param {?Number} rank - The rank, or null.
     * @returns Time and rank formatted as a string.
     */
     function formatTimeAndRank(time, rank) {
@@ -5750,7 +7182,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @constructor
     * @param {HTMLElement} parent - The parent object to create the element within.
     */
-    var Chart = function (parent) {
+    function Chart(parent) {
         this.parent = parent;
 
         this.xScale = null;
@@ -5818,7 +7250,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.popup = new ChartPopup(parent, handlers);
         
         $(document).mouseup(function () { outerThis.popup.hide(); });
-    };
+    }
     
     /**
     * Hides the chart.
@@ -5854,6 +7286,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * Gets the location the chart popup should be at following a mouse-button
     * press or a mouse movement.
     * @param {jQuery.event} event - jQuery mouse-down or mouse-move event.
+    * @return {Object} Location of the popup.
     */
     Chart.prototype.getPopupLocation = function (event) {
         return {
@@ -5969,6 +7402,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     
     /**
     * Handles a mouse button being pressed over the chart.
+    * @param {jQuery.event} event - The jQuery onMouseUp event.
     */
     Chart.prototype.onMouseUp = function (event) {
         this.popup.hide();
@@ -5977,7 +7411,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     
     /**
     * Shows the popup window, populating it with data as necessary
-    * @param {jQuery event} event - The jQuery onMouseDown event that triggered
+    * @param {jQuery.event} event - The jQuery onMouseDown event that triggered
     *     the popup.
     */ 
     Chart.prototype.showPopupDialog = function (event) {
@@ -6445,6 +7879,8 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * its default tick formatter.
     * 
     * @param {object} chartData - The chart data to read start times from.
+    * @return {?Function} Tick formatter function, or null to use the default
+    *     d3 formatter.
     */
     Chart.prototype.determineYAxisTickFormatter = function (chartData) {
         if (this.isRaceGraph) {
@@ -6528,10 +7964,10 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     Chart.prototype.drawChartLines = function (chartData) {
         var outerThis = this;
         var lineFunctionGenerator = function (selCompIdx) {
-            if (chartData.dataColumns.every(function (col) { return col.ys[selCompIdx] === null; })) {
-                // This competitor's entire row is null, so there's no data to
-                // draw.  WebKit will report an error ('Error parsing d=""') if
-                // no points on the line are defined, as will happen in this
+            if (!chartData.dataColumns.some(function (col) { return isNotNullNorNaN(col.ys[selCompIdx]); })) {
+                // This competitor's entire row is null/NaN, so there's no data
+                // to draw.  WebKit will report an error ('Error parsing d=""')
+                // if no points on the line are defined, as will happen in this
                 // case, so we substitute a single zero point instead.
                 return d3.svg.line()
                              .x(0)
@@ -6812,9 +8248,14 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
             }
         });
         
-        this.referenceCumTimesSorted = 
-            cumTimesToControlIndex.keys().map(function (cumTime) { return parseInt(cumTime, 10); })
-                                         .sort(d3.ascending);
+        // Sort and deduplicate the reference cumulative times.
+        this.referenceCumTimesSorted = this.referenceCumTimes.slice(0);
+        this.referenceCumTimesSorted.sort(d3.ascending);
+        for (var index = this.referenceCumTimesSorted.length - 1; index > 0; index -= 1) {
+            if (this.referenceCumTimesSorted[index] === this.referenceCumTimesSorted[index - 1]) {
+                this.referenceCumTimesSorted.splice(index, 1);
+            }
+        }
 
         this.referenceCumTimeIndexes = this.referenceCumTimesSorted.map(function (cumTime) { return cumTimesToControlIndex.get(cumTime); });
     };
@@ -6880,22 +8321,26 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     
     var NON_BREAKING_SPACE_CHAR = "\u00a0";
 
+    // Maximum precision to show a results-table entry using.
+    var MAX_PERMITTED_PRECISION = 2;
+    
     /**
     * A control that shows an entire table of results.
     * @constructor
     * @param {HTMLElement} parent - The parent element to add this control to.
     */
-    var ResultsTable = function (parent) {
+    function ResultsTable(parent) {
         this.parent = parent;
         this.ageClass = null;
         this.div = null;
         this.headerSpan = null;
         this.table = null;
         this.buildTable();
-    };
+    }
     
     /**
     * Build the results table.
@@ -6916,6 +8361,34 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                   
         this.table.append("tbody");
     };
+    
+    /**
+    * Determines the precision with which to show the results.
+    * 
+    * If there are some fractional times, then all times should be shown with
+    * the same precision, even if not all of them need to.  For example, a
+    * a split time between controls punched after 62.7 and 108.7 seconds must
+    * be shown as 46.0 seconds, not 46.
+    *
+    * @param {Array} competitors - Array of Competitor objects.
+    * @return {Number} Maximum precision to use.
+    */
+    function determinePrecision(competitors) {
+        var maxPrecision = 0;
+        var maxPrecisionFactor = 1;        
+        competitors.forEach(function (competitor) {
+            competitor.getAllOriginalCumulativeTimes().forEach(function (cumTime) {
+                if (isNotNullNorNaN(cumTime)) {
+                    while (maxPrecision < MAX_PERMITTED_PRECISION && Math.abs(cumTime - Math.round(cumTime * maxPrecisionFactor) / maxPrecisionFactor) > 1e-7 * cumTime) {
+                        maxPrecision += 1;
+                        maxPrecisionFactor *= 10;
+                    }
+                }
+            });
+        });
+        
+        return maxPrecision;
+    }
     
     /**
     * Populates the contents of the table with the age-class data.
@@ -6987,6 +8460,9 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         
         var nonCompCount = 0;
         var rank = 0;
+        
+        var precision = determinePrecision(competitors);
+        
         competitors.forEach(function (competitor, index) {
             var tableRow = tableBody.append("tr");
             var numberCell = tableRow.append("td");
@@ -7007,7 +8483,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
             d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
                 var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
                 var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
-                addCell(tableRow, formatTime(competitor.getOriginalCumulativeTimeTo(controlNum)), formatTime(competitor.getOriginalSplitTimeTo(controlNum)), "time", isCumDubious, isSplitDubious);
+                addCell(tableRow, formatTime(competitor.getOriginalCumulativeTimeTo(controlNum), precision), formatTime(competitor.getOriginalSplitTimeTo(controlNum), precision), "time", isCumDubious, isSplitDubious);
             });
         }, this);
     };
@@ -7052,6 +8528,379 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
 
 (function () {
     "use strict";
+    
+    var ChartTypes = SplitsBrowser.Model.ChartTypes;
+    var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
+    
+    /**
+    * Remove all matches of the given regular expression from the given string.
+    * The regexp is not assumed to contain the "g" flag.
+    * @param {String} queryString - The query-string to process.
+    * @param {RegExp} regexp - The regular expression to use to remove text.
+    * @return {String} The given query-string with all regexp matches removed.
+    */
+    function removeAll(queryString, regexp) {
+        return queryString.replace(new RegExp(regexp.source, "g"), "");
+    }
+    
+    var CLASS_NAME_REGEXP = /(?:^|&|\?)class=([^&]+)/;
+    
+    /**
+    * Reads the selected class names from a query string.
+    * @param {String} queryString - The query string to read the class name
+    *     from.
+    * @param {Event} eventData - The event data read in, used to validate the 
+    *     selected classes.
+    * @return {AgeClassSet|null} - Array of selected AgeClass objects, or null
+    *     if none were found.
+    */
+    function readSelectedClasses(queryString, eventData) {
+        var classNameMatch = CLASS_NAME_REGEXP.exec(queryString);
+        if (classNameMatch === null) {
+            // No class name specified in the URL.
+            return null;
+        } else {
+            var classesByName = d3.map();
+            for (var index = 0; index < eventData.classes.length; index += 1) {
+                classesByName.set(eventData.classes[index].name, eventData.classes[index]);
+            }
+            
+            var classNames = decodeURIComponent(classNameMatch[1]).split(";");
+            classNames = d3.set(classNames).values();
+            var selectedClasses = classNames.filter(function (className) { return classesByName.has(className); })
+                                            .map(function (className) { return classesByName.get(className); });
+            
+            if (selectedClasses.length === 0) {
+                // No classes recognised, or none were specified.
+                return null;
+            } else {
+                // Ignore any classes that are not on the same course as the
+                // first class.
+                var course = selectedClasses[0].course;
+                selectedClasses = selectedClasses.filter(function (selectedClass) { return selectedClass.course === course; });
+                return new AgeClassSet(selectedClasses);
+            }
+        }
+    }
+    
+    /**
+    * Formats the selected classes into the given query-string, removing any
+    * previous matches.
+    * @param {String} queryString - The original query-string.
+    * @param {Event} eventData - The event data.
+    * @param {Array} classIndexes - Array of indexes of selected classes.
+    * @return {String} The query-string with the selected classes formatted in.
+    */
+    function formatSelectedClasses(queryString, eventData, classIndexes) {
+        queryString = removeAll(queryString, CLASS_NAME_REGEXP);
+        var classNames = classIndexes.map(function (index) { return eventData.classes[index].name; });
+        return queryString + "&class=" + encodeURIComponent(classNames.join(";"));
+    }
+
+    var CHART_TYPE_REGEXP = /(?:^|&|\?)chartType=([^&]+)/;
+    
+    /**
+    * Reads the selected chart type from a query string.
+    * @param {String} queryString - The query string to read the chart type
+    *     from.
+    * @return {Object|null} Selected chart type, or null if not recognised.
+    */    
+    function readChartType(queryString) {
+        var chartTypeMatch = CHART_TYPE_REGEXP.exec(queryString);
+        if (chartTypeMatch === null) {
+            return null;
+        } else { 
+            var chartTypeName = chartTypeMatch[1];
+            if (ChartTypes.hasOwnProperty(chartTypeName)) {
+                return ChartTypes[chartTypeName];
+            } else {
+                return null;
+            }
+        }
+    }
+    
+    /**
+    * Formats the given chart type into the query-string
+    * @param {String} queryString - The original query-string.
+    * @param {Object} chartType - The chart type
+    * @return {String} The query-string with the chart-type formatted in.
+    */
+    function formatChartType(queryString, chartType) {
+        queryString = removeAll(queryString, CHART_TYPE_REGEXP);
+        for (var chartTypeName in ChartTypes) {
+            if (ChartTypes.hasOwnProperty(chartTypeName) && ChartTypes[chartTypeName] === chartType) {
+                return queryString + "&chartType=" + encodeURIComponent(chartTypeName);
+            }
+        }
+        
+        // Unrecognised chart type?
+        return queryString;
+    }
+    
+    var COMPARE_WITH_REGEXP = /(?:^|&|\?)compareWith=([^&]+)/;
+    
+    var BUILTIN_COMPARISON_TYPES = ["Winner", "FastestTime", "FastestTimePlus5", "FastestTimePlus25", "FastestTimePlus50", "FastestTimePlus100"];
+    
+    /**
+    * Reads what to compare against.
+    * @param {String} queryString - The query string to read the comparison
+    *     type from.
+    * @param {AgeClassSet|null} ageClassSet - Age-class set containing selected
+    *     age-classes, or null if none are selected.
+    * @return {Object|null} Selected comparison type, or null if not
+    *     recognised.
+    */
+    function readComparison(queryString, ageClassSet) {
+        var comparisonMatch = COMPARE_WITH_REGEXP.exec(queryString);
+        if (comparisonMatch === null) {
+            return null;
+        } else {
+            var comparisonName = decodeURIComponent(comparisonMatch[1]);
+            var defaultIndex = BUILTIN_COMPARISON_TYPES.indexOf(comparisonName);
+            if (defaultIndex >= 1) {
+                return {index: defaultIndex, runner: null};
+            } else if (defaultIndex === 0 && ageClassSet !== null) {
+                var hasCompleters = ageClassSet.allCompetitors.some(function (competitor) {
+                    return competitor.completed();
+                });
+                
+                if (hasCompleters) {
+                    return {index: 0, runner: null};
+                } else {
+                    // Cannot select 'Winner' as there was no winner.
+                    return null;
+                }
+            } else if (ageClassSet === null) {
+                // Not one of the recognised comparison types and we have no
+                // classes to look for competitor names within.
+                return null;
+            } else {
+                for (var competitorIndex = 0; competitorIndex < ageClassSet.allCompetitors.length; competitorIndex += 1) {
+                    var competitor = ageClassSet.allCompetitors[competitorIndex];
+                    if (competitor.name === comparisonName && competitor.completed()) {
+                        return {index: BUILTIN_COMPARISON_TYPES.length, runner: competitor};
+                    }
+                }
+                
+                // Didn't find the competitor.
+                return null;
+            }
+        }
+    }
+    
+    /**
+    * Formats the given comparison into the given query-string.
+    * @param {String} queryString - The original query-string.
+    * @param {Number} index - Index of the comparison type.
+    * @param {String} The formatted query-string.
+    */
+    function formatComparison(queryString, index, runner) {
+        queryString = removeAll(queryString, COMPARE_WITH_REGEXP);
+        var comparison = null;
+        if (typeof index === typeof 0 && 0 <= index && index < BUILTIN_COMPARISON_TYPES.length) {
+            comparison = BUILTIN_COMPARISON_TYPES[index];
+        } else if (runner !== null) {
+            comparison = runner.name;
+        }
+        
+        if (comparison === null) {
+            return queryString;
+        } else {
+            return queryString + "&compareWith=" + encodeURIComponent(comparison);
+        }
+    }
+    
+    var SELECTED_COMPETITORS_REGEXP = /(?:^|&|\?)selected=([^&]+)/;
+    
+    /**
+    * Reads what to compare against.
+    * @param {String} queryString - The query string to read the comparison
+    *     type from.
+    * @param {AgeClassSet|null} ageClassSet - Age-class set containing selected
+    *     age-classes, or null if none are selected.
+    * @return {Array|null} Array of selected competitor indexes, or null if
+    *     none found.
+    */
+    function readSelectedCompetitors(queryString, ageClassSet) {
+        if (ageClassSet === null) {
+            return null;
+        } else {
+            var selectedCompetitorsMatch = SELECTED_COMPETITORS_REGEXP.exec(queryString);
+            if (selectedCompetitorsMatch === null) {
+                return null;
+            } else {
+                var competitorNames = decodeURIComponent(selectedCompetitorsMatch[1]).split(";");
+                if (competitorNames.indexOf("*") >= 0) {
+                    // All competitors selected.
+                    return d3.range(0, ageClassSet.allCompetitors.length);
+                }
+                
+                competitorNames = d3.set(competitorNames).values();
+                var allCompetitorNames = ageClassSet.allCompetitors.map(function (competitor) { return competitor.name; });
+                var selectedCompetitorIndexes = [];
+                competitorNames.forEach(function (competitorName) {
+                    var index = allCompetitorNames.indexOf(competitorName);
+                    if (index >= 0) {
+                        selectedCompetitorIndexes.push(index);
+                    }
+                });
+                
+                selectedCompetitorIndexes.sort(d3.ascending);
+                return (selectedCompetitorIndexes.length === 0) ? null : selectedCompetitorIndexes;
+            }
+        }
+    }
+    
+    /**
+    * Formats the given selected competitors into the given query-string.
+    * @param {String} queryString - The original query-string.
+    * @param {AgeClassSet} ageClassSet - The current age-class set.
+    * @param {Array} selected - Array of indexes within the age-class set's
+    *     list of competitors of those that are selected.
+    * @return {String} Query-string with the selected competitors formatted
+    *     into it.
+    */
+    function formatSelectedCompetitors(queryString, ageClassSet, selected) {
+        queryString = removeAll(queryString, SELECTED_COMPETITORS_REGEXP);
+        var selectedCompetitors = selected.map(function (index) { return ageClassSet.allCompetitors[index]; });
+        if (selectedCompetitors.length === 0) {
+            return queryString;
+        } else if (selectedCompetitors.length === ageClassSet.allCompetitors.length) {
+            // Assume all selected competitors are different, so all must be
+            // selected.
+            return queryString + "&selected=*";
+        } else {
+            var competitorNames = selectedCompetitors.map(function (comp) { return comp.name; }).join(";");
+            return queryString + "&selected=" + encodeURIComponent(competitorNames);
+        }
+    }
+    
+    var SELECTED_STATISTICS_REGEXP = /(?:^|&|\?)stats=([^&]*)/;
+    
+    var ALL_STATS_NAMES = ["TotalTime", "SplitTime", "BehindFastest", "TimeLoss"];
+    
+    /**
+    * Reads the selected statistics from the query string.
+    * @param {String} queryString - The query string to read the selected
+    *     statistics from.
+    * @return {Object|null} - Object containing the statistics read, or null
+    *     if no statistics parameter was found.
+    */
+    function readSelectedStatistics(queryString) {
+        var statsMatch = SELECTED_STATISTICS_REGEXP.exec(queryString);
+        if (statsMatch === null) {
+            return null;
+        } else {
+            var statsNames = decodeURIComponent(statsMatch[1]).split(";");
+            var stats = {};
+            ALL_STATS_NAMES.forEach(function (statsName) { stats[statsName] = false; });
+            
+            for (var index = 0; index < statsNames.length; index += 1) {
+                var name = statsNames[index];
+                if (stats.hasOwnProperty(name)) {
+                    stats[name] = true;
+                } else if (name !== "") {
+                    // Ignore unrecognised non-empty statistic name.
+                    return null;
+                }
+            }
+            
+            return stats;
+        }
+    }
+    
+    /**
+    * Formats the selected statistics into the given query string.
+    * @param {String} queryString - The original query-string.
+    * @param {Object} stats - The statistics to format.
+    * @return Query-string with the selected statistics formatted in.
+    */
+    function formatSelectedStatistics(queryString, stats) {
+        queryString = removeAll(queryString, SELECTED_STATISTICS_REGEXP);
+        var statsNames = ALL_STATS_NAMES.filter(function (name) { return stats.hasOwnProperty(name) && stats[name]; });
+        return queryString + "&stats=" + encodeURIComponent(statsNames.join(";"));
+    }
+    
+    var SHOW_ORIGINAL_REGEXP = /(?:^|&|\?)showOriginal=([^&]*)/;
+    
+    /**
+    * Reads the show-original-data flag from the given query-string.
+    *
+    * To show original data, the parameter showOriginal=1 must be part of the
+    * URL.  If this parameter does not exist or has some other value, original
+    * data will not be shown.  If the selected classes do not contain any
+    * dubious splits, this option will have no effect.
+    * @param {String} queryString - The query-string to read.
+    * @return {boolean} True to show original data, false not to.
+    */
+    function readShowOriginal(queryString) {
+        var showOriginalMatch = SHOW_ORIGINAL_REGEXP.exec(queryString);
+        return (showOriginalMatch !== null && showOriginalMatch[1] === "1");
+    }
+    
+    /**
+    * Formats the show-original-data flag into the given query-string.
+    * @param {String} queryString - The original query-string.
+    * @param {boolean} showOriginal - True to show original data, false not to.
+    * @return {String} queryString - The query-string with the show-original
+    *     data flag formatted in.
+    */
+    function formatShowOriginal(queryString, showOriginal) {
+        queryString = removeAll(queryString, SHOW_ORIGINAL_REGEXP);
+        return (showOriginal) ? queryString + "&showOriginal=1" : queryString;
+    }
+    
+    /**
+    * Attempts to parse the given query string.
+    * @param {String} queryString - The query string to parse.
+    * @param {Event} eventData - The parsed event data.
+    * @return {Object} The data parsed from the given query string.
+    */
+    function parseQueryString(queryString, eventData) {
+        var ageClassSet = readSelectedClasses(queryString, eventData);
+        var classIndexes = (ageClassSet === null) ? null : ageClassSet.ageClasses.map(function (ageClass) { return eventData.classes.indexOf(ageClass); });
+        return {
+            classes: classIndexes,
+            chartType: readChartType(queryString),
+            compareWith: readComparison(queryString, ageClassSet),
+            selected: readSelectedCompetitors(queryString, ageClassSet),
+            stats: readSelectedStatistics(queryString),
+            showOriginal: readShowOriginal(queryString)
+        };
+    }
+
+    /**
+    * Formats a query string with the given data.
+    *
+    * The original query-string is provided, and any argument values within it
+    * are replaced with those given, and new ones added.  Unrecognised query-
+    * string parameters are preserved; they could be used server-side by
+    * whatever web application is hosting SplitsBrowser.
+    *
+    * @param {String} queryString - The original query-string.
+    * @param {Event} eventData - The event data.
+    * @param {AgeClassSet} ageClassSet - The current age-class set.
+    * @param {Object} data - Object containing the data to format into the
+    *     query-string.
+    * @return The formatted query-string.
+    */
+    function formatQueryString(queryString, eventData, ageClassSet, data) {
+        queryString = formatSelectedClasses(queryString, eventData, data.classes);
+        queryString = formatChartType(queryString, data.chartType);
+        queryString = formatComparison(queryString, data.compareWith.index, data.compareWith.runner);
+        queryString = formatSelectedCompetitors(queryString, ageClassSet, data.selected);
+        queryString = formatSelectedStatistics(queryString, data.stats);
+        queryString = formatShowOriginal(queryString, data.showOriginal);
+        queryString = queryString.replace(/^\??&/, "");
+        return queryString;
+    }
+    
+    SplitsBrowser.parseQueryString = parseQueryString;
+    SplitsBrowser.formatQueryString = formatQueryString;
+})();
+
+(function () {
+    "use strict";
     // Delay in milliseconds between a resize event being triggered and the
     // page responding to it.
     // (Resize events tend to come more than one at a time; if a resize event
@@ -7059,37 +8908,51 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     // cancelled.)
     var RESIZE_DELAY_MS = 100;
     
-    var ClassSelector = SplitsBrowser.Controls.ClassSelector;
-    var ChartTypeSelector = SplitsBrowser.Controls.ChartTypeSelector;
-    var ComparisonSelector = SplitsBrowser.Controls.ComparisonSelector;
-    var OriginalDataSelector = SplitsBrowser.Controls.OriginalDataSelector;
-    var StatisticsSelector = SplitsBrowser.Controls.StatisticsSelector;
-    var CompetitorList = SplitsBrowser.Controls.CompetitorList;
-    var Chart = SplitsBrowser.Controls.Chart;
-    var ResultsTable = SplitsBrowser.Controls.ResultsTable;
+    var Version = SplitsBrowser.Version;
+
+    var getMessage = SplitsBrowser.getMessage;
+    var tryGetMessage = SplitsBrowser.tryGetMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    
+    var Model = SplitsBrowser.Model;
+    var CompetitorSelection = Model.CompetitorSelection;
+    var AgeClassSet = Model.AgeClassSet;
+    var ChartTypes = Model.ChartTypes;
+    
+    var parseEventData = SplitsBrowser.Input.parseEventData;
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
     var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
-    var getMessage = SplitsBrowser.getMessage;
-    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    var parseQueryString = SplitsBrowser.parseQueryString;
+    var formatQueryString = SplitsBrowser.formatQueryString;
+    
+    var Controls = SplitsBrowser.Controls;
+    var ClassSelector = Controls.ClassSelector;
+    var ChartTypeSelector = Controls.ChartTypeSelector;
+    var ComparisonSelector = Controls.ComparisonSelector;
+    var OriginalDataSelector = Controls.OriginalDataSelector;
+    var StatisticsSelector = Controls.StatisticsSelector;
+    var CompetitorList = Controls.CompetitorList;
+    var Chart = Controls.Chart;
+    var ResultsTable = Controls.ResultsTable;
     
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
     * @constructor
-    * @param {String|HTMLElement|undefined} - Optional HTML element that forms
-    *     a 'banner' across the top of the page.  This can be specified by a
-    *     CSS selector or the HTML element itself.
+    * @param {?Object} options - Optional object containing various options
+    *     to SplitsBrowser.
     */
-    var Viewer = function (topDiv) {
+    function Viewer(options) {
+        this.options = options;
     
         this.eventData = null;
         this.classes = null;
         this.currentClasses = [];
-        this.currentIndexes = null;
         this.chartData = null;
         this.referenceCumTimes = null;
         this.fastestCumTimes = null;
         this.previousCompetitorList = [];
-        this.topDivHeight = (topDiv && $(topDiv).length > 0) ? $(topDiv).height() : 0;
+        
+        this.topBarHeight = (options && options.topBar && $(options.topBar).length > 0) ? $(options.topBar).outerHeight(true) : 0;
         
         this.selection = null;
         this.ageClassSet = null;
@@ -7105,7 +8968,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.competitorListContainer = null;
         
         this.currentResizeTimeout = null;
-    };
+    }
     
     /**
     * Pops up an alert box with the given message.
@@ -7185,7 +9048,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
                                    
         logoSvg.selectAll("*")
                .append("title")
-               .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": SplitsBrowser.Version}));
+               .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": Version}));
     };
 
     /**
@@ -7194,6 +9057,23 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     Viewer.prototype.addSpacer = function () {
         this.topPanel.append("div").classed("topRowSpacer", true);    
     };
+    
+    /**
+    * Adds a country flag to the top panel.
+    */
+    Viewer.prototype.addCountryFlag = function () {
+        var flagImage = this.topPanel.append("img")
+                                     .attr("id", "flagImage")
+                                     .attr("src", this.options.flagImageURL)
+                                     .attr("alt", tryGetMessage("Language", ""))
+                                     .attr("title", tryGetMessage("Language", ""));
+        if (this.options.hasOwnProperty("flagImageWidth")) {
+            flagImage.attr("width", this.options.flagImageWidth);
+        }
+        if (this.options.hasOwnProperty("flagImageHeight")) {
+            flagImage.attr("height", this.options.flagImageHeight);
+        }
+    }; 
     
     /**
     * Adds the class selector control to the top panel.
@@ -7209,13 +9089,10 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * Adds the chart-type selector to the top panel.
     */
     Viewer.prototype.addChartTypeSelector = function () {
-        var types = SplitsBrowser.Model.ChartTypes;
-        var chartTypes = [types.SplitsGraph, types.RaceGraph, types.PositionAfterLeg,
-                          types.SplitPosition, types.PercentBehind, types.ResultsTable];
+        var chartTypes = [ChartTypes.SplitsGraph, ChartTypes.RaceGraph, ChartTypes.PositionAfterLeg,
+                          ChartTypes.SplitPosition, ChartTypes.PercentBehind, ChartTypes.ResultsTable];
         
         this.chartTypeSelector = new ChartTypeSelector(this.topPanel.node(), chartTypes);
-        
-        this.chartType = this.chartTypeSelector.getChartType();    
     };
     
     /**
@@ -7226,8 +9103,6 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         if (this.classes !== null) {
             this.comparisonSelector.setClasses(this.classes);
         }
-        
-        this.comparisonFunction = this.comparisonSelector.getComparisonFunction();    
     };
     
     /**
@@ -7235,20 +9110,38 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * has attempted to repair it.
     */
     Viewer.prototype.addOriginalDataSelector = function () {
-        var outerThis = this;
-        var showOriginalData = function () {
-            transferCompetitorData(outerThis.eventData);
-            outerThis.eventData.determineTimeLosses();
-            outerThis.drawChart();
+        this.originalDataSelector = new OriginalDataSelector(this.topPanel);
+    };
+
+    /**
+    * Adds a direct link which links directly to SplitsBrowser with the given
+    * settings.
+    */
+    Viewer.prototype.addDirectLink = function () {
+        this.directLink = this.topPanel.append("a")
+                                      .attr("title", tryGetMessage("DirectLinkToolTip", ""))
+                                      .attr("id", "directLinkAnchor")
+                                      .attr("href", document.location.href)
+                                      .text(getMessage("DirectLink"));
+    };
+    
+    /**
+    * Updates the URL that the direct link points to.
+    */
+    Viewer.prototype.updateDirectLink = function () {
+        var data = {
+            classes: this.classSelector.getSelectedClasses(),
+            chartType: this.chartTypeSelector.getChartType(),
+            compareWith: this.comparisonSelector.getComparisonType(),
+            selected: this.selection.getSelectedIndexes(),
+            stats: this.statisticsSelector.getVisibleStatistics(),
+            showOriginal: this.ageClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected()
         };
         
-        var showRepairedData = function () {
-            repairEventData(outerThis.eventData);
-            outerThis.eventData.determineTimeLosses();
-            outerThis.drawChart();
-        };
-        
-        this.originalDataSelector = new OriginalDataSelector(this.topPanel, showOriginalData, showRepairedData);
+        var oldQueryString = document.location.search;
+        var newQueryString = formatQueryString(oldQueryString, this.eventData, this.ageClassSet, data);
+        var oldHref = document.location.href;        
+        this.directLink.attr("href", oldHref.substring(0, oldHref.length - oldQueryString.length) + "?" + newQueryString.replace(/^\?+/, ""));
     };
     
     /**
@@ -7267,12 +9160,18 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.topPanel = body.append("div");
         
         this.drawLogo();
+        if (this.options && this.options.flagImageURL) {
+            this.addCountryFlag();
+        }
+        
         this.addClassSelector();
         this.addSpacer();
         this.addChartTypeSelector();
         this.addSpacer();
         this.addComparisonSelector();
         this.addOriginalDataSelector();
+        this.addSpacer();
+        this.addDirectLink();
         
         this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
 
@@ -7290,9 +9189,6 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.resultsTable.hide();
         
         var outerThis = this;
-        this.classSelector.registerChangeHandler(function (indexes) { outerThis.selectClasses(indexes); });
-        this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartType(chartType); });
-        this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
            
         $(window).resize(function () { outerThis.handleWindowResize(); });
         
@@ -7301,6 +9197,44 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         // -*-user-select CSS style.
         $("input:text").bind("selectstart", function (evt) { evt.stopPropagation(); });
         $("body").bind("selectstart", function () { return false; });
+    };
+
+    /**
+    * Registers change handlers.
+    */
+    Viewer.prototype.registerChangeHandlers = function () {
+        var outerThis = this;
+        this.classSelector.registerChangeHandler(function (indexes) { outerThis.selectClasses(indexes); });
+        this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartTypeAndRedraw(chartType); });
+        this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
+        this.originalDataSelector.registerChangeHandler(function (showOriginalData) { outerThis.showOriginalOrRepairedData(showOriginalData); });
+    };
+    
+    /**
+    * Select all of the competitors.
+    */
+    Viewer.prototype.selectAll = function () {
+        this.selection.selectAll();
+    };
+
+    /**
+    * Select none of the competitors.
+    */
+    Viewer.prototype.selectNone = function () {
+        this.selection.selectNone();
+    };
+
+    /**
+    * Select all of the competitors that cross the unique selected competitor.
+    */
+    Viewer.prototype.selectCrossingRunners = function () {
+        this.selection.selectCrossingRunners(this.ageClassSet.allCompetitors); 
+        if (this.selection.isSingleRunnerSelected()) {
+            // Only a single runner is still selected, so nobody crossed the
+            // selected runner.
+            var competitorName = this.ageClassSet.allCompetitors[this.selection.getSelectedIndexes()[0]].name;
+            alert(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
+        }
     };
 
     /**
@@ -7337,7 +9271,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         var EXTRA_WRAP_PREVENTION_SPACE = 2;
         
         var bodyWidth = $(window).width() - horzMargin;
-        var bodyHeight = $(window).height() - vertMargin - this.topDivHeight;
+        var bodyHeight = $(window).height() - vertMargin - this.topBarHeight;
 
         $("body").width(bodyWidth).height(bodyHeight);
         
@@ -7367,7 +9301,7 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * Draw the chart using the current data.
     */
     Viewer.prototype.drawChart = function () {
-        if (this.chartType.isResultsTable) {
+        if (this.chartTypeSelector.getChartType().isResultsTable) {
             return;
         }
         
@@ -7385,10 +9319,10 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         
         var outerThis = this;
         
-        this.selectionChangeHandler = function (indexes) {
-            outerThis.currentIndexes = indexes;
+        this.selectionChangeHandler = function () {
             outerThis.competitorList.enableOrDisableCrossingRunnersButton();
             outerThis.redraw();
+            outerThis.updateDirectLink();
         };
 
         this.selection.registerChangeHandler(this.selectionChangeHandler);
@@ -7396,14 +9330,16 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         this.statisticsChangeHandler = function (visibleStatistics) {
             outerThis.currentVisibleStatistics = visibleStatistics;
             outerThis.redraw();
+            outerThis.updateDirectLink();
         };
         
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
         this.updateControlEnabledness();
-        this.referenceCumTimes = this.comparisonFunction(this.ageClassSet);
+        var comparisonFunction = this.comparisonSelector.getComparisonFunction();
+        this.referenceCumTimes = comparisonFunction(this.ageClassSet);
         this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
-        this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+        this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType());
         this.redrawChart();
     };
 
@@ -7419,17 +9355,44 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
             fastestCumTimes: this.fastestCumTimes
         };
             
-        this.chart.drawChart(data, this.currentIndexes, this.currentVisibleStatistics, this.chartType);
+        this.chart.drawChart(data, this.selection.getSelectedIndexes(), this.currentVisibleStatistics, this.chartTypeSelector.getChartType());
     };
     
     /**
     * Redraw the chart, possibly using new data.
     */
     Viewer.prototype.redraw = function () {
-        if (!this.chartType.isResultsTable) {
-            this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.currentIndexes, this.chartType);
+        var chartType = this.chartTypeSelector.getChartType();
+        if (!chartType.isResultsTable) {
+            this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), chartType);
             this.redrawChart();
         }
+    };
+    
+    /**
+    * Sets the currently-selected classes in various objects that need it:
+    * current age-class set, comparison selector and results table.
+    * @param {Array} classIndexes - Array of selected class indexes.    
+    */
+    Viewer.prototype.setClasses = function (classIndexes) {
+        this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
+        this.ageClassSet = new AgeClassSet(this.currentClasses);
+        this.comparisonSelector.setAgeClassSet(this.ageClassSet);
+        this.resultsTable.setClass(this.currentClasses[0]);    
+        this.enableOrDisableRaceGraph();
+        this.originalDataSelector.setVisible(this.ageClassSet.hasDubiousData());
+    };
+    
+    /**
+    * Initialises the viewer with the given initial classes.
+    * @param {Array} classIndexes - Array of selected class indexes.
+    */ 
+    Viewer.prototype.initClasses = function (classIndexes) {
+        this.classSelector.selectClasses(classIndexes);
+        this.setClasses(classIndexes);
+        this.selection = new CompetitorSelection(this.ageClassSet.allCompetitors.length);
+        this.competitorListBox.setSelection(this.selection);
+        this.previousCompetitorList = this.ageClassSet.allCompetitors;
     };
     
     /**
@@ -7438,38 +9401,27 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     */
     Viewer.prototype.selectClasses = function (classIndexes) {
     
-        if (this.selection === null) {
-            this.selection = new SplitsBrowser.Model.CompetitorSelection(0);
-            this.competitorList.setSelection(this.selection);
+        if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
+            // The 'primary' class hasn't changed, only the 'other' ones.
+            // In this case we don't clear the selection.
         } else {
-            if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
-                // The 'primary' class hasn't changed, only the 'other' ones.
-                // In this case we don't clear the selection.
-            } else {
-                this.selection.selectNone();
-            }
+            this.selection.selectNone();
         }
         
-        this.currentIndexes = [];
-        this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
-        this.ageClassSet = new SplitsBrowser.Model.AgeClassSet(this.currentClasses);
-        this.comparisonSelector.setAgeClassSet(this.ageClassSet);
-        this.resultsTable.setClass(this.currentClasses[0]);
-        this.drawChart();
+        this.setClasses(classIndexes);
         this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
+        this.competitorListBox.selectionChanged();
+        this.drawChart();
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
-        this.enableOrDisableRaceGraph();
-        this.originalDataSelector.setVisible(this.ageClassSet.hasDubiousData());
+        this.updateDirectLink();
     };
     
     /**
     * Change the graph to compare against a different reference.
-    * @param {Function} comparisonFunc - The function that returns the
-    *      reference class data from the class data.
     */
-    Viewer.prototype.selectComparison = function (comparisonFunc) {
-        this.comparisonFunction = comparisonFunc;
+    Viewer.prototype.selectComparison = function () {
         this.drawChart();
+        this.updateDirectLink();
     };
     
     /**
@@ -7477,9 +9429,14 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     * @param {Object} chartType - The type of chart to draw.
     */
     Viewer.prototype.selectChartType = function (chartType) {
-        this.chartType = chartType;
         if (chartType.isResultsTable) {
             this.mainPanel.style("display", "none");
+            
+            // Remove any fixed width and height on the body, as we need the
+            // window to be able to scroll if the results table is too wide or
+            // too tall and also adjust size if one or both scrollbars appear.
+            d3.select("body").style("width", null).style("height", null);
+            
             this.resultsTable.show();
         } else {
             this.resultsTable.hide();
@@ -7487,21 +9444,96 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
         }
         
         this.updateControlEnabledness();
-        
         this.competitorList.setChartType(chartType);
-        
+    };
+    
+    /**
+    * Change the type of chart shown.
+    * @param {Object} chartType - The type of chart to draw.
+    */
+    Viewer.prototype.selectChartTypeAndRedraw = function (chartType) {
+        this.selectChartType(chartType);
         this.drawChart();
+        this.updateDirectLink();
+    };
+    
+    /**
+    * Selects original or repaired data, doing any recalculation necessary.
+    * @param {boolean} showOriginalData - True to show original data, false to
+    *     show repaired data.
+    */
+    Viewer.prototype.selectOriginalOrRepairedData = function (showOriginalData) {
+        if (showOriginalData) {
+            transferCompetitorData(this.eventData);
+        } else {
+            repairEventData(this.eventData);
+        }
+        
+        this.eventData.determineTimeLosses();
+    };
+    
+    /**
+    * Shows original or repaired data.
+    * @param {boolean} showOriginalData - True to show original data, false to
+    *     show repaired data.
+    */
+    Viewer.prototype.showOriginalOrRepairedData = function (showOriginalData) {
+        this.selectOriginalOrRepairedData(showOriginalData);
+        this.drawChart();
+        this.updateDirectLink();
     };
     
     /**
     * Updates whether a number of controls are enabled.
     */
     Viewer.prototype.updateControlEnabledness = function () {
-        this.classSelector.setOtherClassesEnabled(!this.chartType.isResultsTable);
-        this.comparisonSelector.setEnabled(!this.chartType.isResultsTable);
-        this.statisticsSelector.setEnabled(!this.chartType.isResultsTable);
-        this.originalDataSelector.setEnabled(!this.chartType.isResultsTable);
+        var chartType = this.chartTypeSelector.getChartType();
+        this.classSelector.setOtherClassesEnabled(!chartType.isResultsTable);
+        this.comparisonSelector.setEnabled(!chartType.isResultsTable);
+        this.statisticsSelector.setEnabled(!chartType.isResultsTable);
+        this.originalDataSelector.setEnabled(!chartType.isResultsTable);
         this.competitorList.enableOrDisableCrossingRunnersButton();
+    };
+    
+    /**
+    * Updates the state of the viewer to reflect query-string arguments parsed.
+    * @param {Object} parsedQueryString - Parsed query-string object.
+    */
+    Viewer.prototype.updateFromQueryString = function (parsedQueryString) {
+        if (parsedQueryString.classes === null) {
+            this.initClasses([0]);
+        } else {
+            this.initClasses(parsedQueryString.classes);
+        }
+        
+        if (parsedQueryString.chartType !== null) {
+            this.chartTypeSelector.setChartType(parsedQueryString.chartType);
+            this.selectChartType(parsedQueryString.chartType);
+        }
+        
+        if (parsedQueryString.compareWith !== null) {
+            this.comparisonSelector.setComparisonType(parsedQueryString.compareWith.index, parsedQueryString.compareWith.runner);
+        }
+        
+        if (parsedQueryString.selected !== null) {
+            this.selection.setSelectedIndexes(parsedQueryString.selected);
+        }
+        
+        if (parsedQueryString.stats !== null) {
+            this.statisticsSelector.setVisibleStatistics(parsedQueryString.stats);
+        }
+        
+        if (parsedQueryString.showOriginal && this.ageClassSet.hasDubiousData()) {
+            this.originalDataSelector.selectOriginalData();
+            this.selectOriginalOrRepairedData(true);
+        }
+    };
+    
+    /**
+    * Sets the default selected class.
+    */
+    Viewer.prototype.setDefaultSelectedClass = function () {
+        this.initClasses([0]);
     };
     
     SplitsBrowser.Viewer = Viewer;
@@ -7523,42 +9555,73 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     }
     
     /**
+    * Reads in the data in the given string and starts SplitsBrowser.
+    * @param {String} data - String containing the data to read.
+    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    *     containing various options to SplitsBrowser.  It can also be used for
+    *     an HTML element that forms a 'banner' across the top of the page.
+    *     This element can be specified by a CSS selector for the element, or
+    *     the HTML element itself, although this behaviour is deprecated.
+    */
+    SplitsBrowser.readEvent = function (data, options) {
+        var eventData;
+        try {
+            eventData = parseEventData(data);
+        } catch (e) {
+            if (e.name === "InvalidData") {
+                showLoadFailureMessage("LoadFailedInvalidData", {"$$MESSAGE$$": e.message});
+                return;
+            } else {
+                throw e;
+            }
+        }
+        
+        if (eventData === null) {
+            showLoadFailureMessage("LoadFailedUnrecognisedData", {});
+        } else {
+            if (eventData.needsRepair()) {
+                repairEventData(eventData);
+            }
+            
+            if (typeof options === "string") {
+                // Deprecated; support the top-bar specified only as a
+                // string.
+                options = {topBar: options};
+            }
+            
+            eventData.determineTimeLosses();
+            
+            var viewer = new Viewer(options);
+            viewer.buildUi();
+            viewer.setEvent(eventData);
+            
+            var queryString = document.location.search;
+            if (queryString !== null && queryString.length > 0) {
+                var parsedQueryString = parseQueryString(queryString, eventData);
+                viewer.updateFromQueryString(parsedQueryString);
+            } else {
+                viewer.setDefaultSelectedClass();
+            }
+
+            viewer.drawChart();
+            viewer.registerChangeHandlers();
+        }
+    };
+    
+    /**
     * Handles an asynchronous callback that fetched event data, by parsing the
     * data and starting SplitsBrowser.
     * @param {String} data - The data returned from the AJAX request.
     * @param {String} status - The status of the request.
-    * @param {String|HTMLElement|undefined} - Optional HTML element that forms
-    *     a 'banner' across the top of the page.  This can be specified by a
-    *     CSS selector or the HTML element itself.
+    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    *     containing various options to SplitsBrowser.  It can also be used for
+    *     an HTML element that forms a 'banner' across the top of the page.
+    *     This element can be specified by a CSS selector for the element, or
+    *     the HTML element itself, although this behaviour is deprecated.
     */
-    function readEventData(data, status, topDiv) {
+    function readEventData(data, status, options) {
         if (status === "success") {
-            var eventData;
-            try {
-                eventData = SplitsBrowser.Input.parseEventData(data);
-            } catch (e) {
-                if (e.name === "InvalidData") {
-                    showLoadFailureMessage("LoadFailedInvalidData", {"$$MESSAGE$$": e.message});
-                    return;
-                } else {
-                    throw e;
-                }
-            }
-            
-            if (eventData === null) {
-                showLoadFailureMessage("LoadFailedUnrecognisedData", {});
-            } else {
-                if (eventData.needsRepair()) {
-                    repairEventData(eventData);
-                }
-                
-                eventData.determineTimeLosses();
-                
-                var viewer = new Viewer(topDiv);
-                viewer.buildUi();
-                viewer.setEvent(eventData);
-                viewer.selectClasses([0]);
-            }
+            SplitsBrowser.readEvent(data, options);
         } else {
             showLoadFailureMessage("LoadFailedStatusNotSuccess", {"$$STATUS$$": status});
         }
@@ -7577,15 +9640,17 @@ var SplitsBrowser = { Version: "3.2.1", Model: {}, Input: {}, Controls: {} };
     /**
     * Loads the event data in the given URL and starts SplitsBrowser.
     * @param {String} eventUrl - The URL that points to the event data to load.
-    * @param {String|HTMLElement|undefined} - Optional HTML element that forms
-    *     a 'banner' across the top of the page.  This can be specified by a
-    *     CSS selector or the HTML element itself.
+    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    *     containing various options to SplitsBrowser.  It can also be used for
+    *     an HTML element that forms a 'banner' across the top of the page.
+    *     This element can be specified by a CSS selector for the element, or
+    *     the HTML element itself, although this behaviour is deprecated.
     */
-    SplitsBrowser.loadEvent = function (eventUrl, topDiv) {
+    SplitsBrowser.loadEvent = function (eventUrl, options) {
         $.ajax({
             url: eventUrl,
             data: "",
-            success: function (data, status) { readEventData(data, status, topDiv); },
+            success: function (data, status) { readEventData(data, status, options); },
             dataType: "text",
             error: readEventDataError
         });

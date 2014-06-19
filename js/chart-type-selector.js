@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser ChartTypeSelector - Provides a choice of chart types.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -28,14 +28,14 @@
     * @param {HTMLElement} parent - The parent element to add the control to.
     * @param {Array} chartTypes - Array of types of chart to list.
     */
-    var ChartTypeSelector = function (parent, chartTypes) {
+    function ChartTypeSelector(parent, chartTypes) {
         this.changeHandlers = [];
         this.chartTypes = chartTypes;
         this.raceGraphDisabledNotifier = null;
         this.lastSelectedIndex = 0;
         
         var div = d3.select(parent).append("div")
-                                    .attr("id", "chartTypeSelector");
+                                   .attr("id", "chartTypeSelector");
         div.append("span")
            .text(getMessage("ChartTypeSelectorLabel"));
            
@@ -50,7 +50,7 @@
                    .text(function (value) { return getMessage(value.nameKey); });
                    
         optionsList.exit().remove();
-    };
+    }
     
     /**
     * Sets the function used to disable the selection of the race graph.
@@ -59,8 +59,8 @@
     * graph is made, and the selection will revert to what it was before.  If
     * it is null, the race graph can be selected.
     *
-    * @param {Function|null} raceGraphDisabledNotifier - Function to call when
-    *     the race graph is selected
+    * @param {?Function} raceGraphDisabledNotifier - Function to call when the
+    *     race graph is selected
     */
     ChartTypeSelector.prototype.setRaceGraphDisabledNotifier = function (raceGraphDisabledNotifier) {
         this.raceGraphDisabledNotifier = raceGraphDisabledNotifier;
@@ -82,10 +82,23 @@
 
     /**
     * Returns the currently-selected chart type.
-    * @return {Array} The currently-selected chart type.
+    * @return {Object} The currently-selected chart type.
     */
     ChartTypeSelector.prototype.getChartType = function () {
         return this.chartTypes[Math.max(this.dropDown.selectedIndex, 0)];
+    };
+    
+    /**
+    * Sets the chart type.  If the chart type given is not recognised, nothing
+    * happens.
+    * @param {Object} chartType - The chart type selected.
+    */
+    ChartTypeSelector.prototype.setChartType = function (chartType) {
+        var index = this.chartTypes.indexOf(chartType);
+        if (index >= 0) {
+            this.dropDown.selectedIndex = index;
+            this.onSelectionChanged();
+        }
     };
     
     /**

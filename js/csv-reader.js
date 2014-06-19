@@ -24,6 +24,7 @@
     var isTrue = SplitsBrowser.isTrue;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
@@ -54,9 +55,6 @@
             }
             
             var splitTimes = parts.map(parseTime);
-            if (splitTimes.indexOf(0) >= 0) {
-                throwInvalidData("Zero split times are not permitted - found one or more zero splits for competitor '" + forename + " " + surname + "'");
-            }
             return Competitor.fromSplitTimes(index + 1, forename + " " + surname, club, startTime, splitTimes);
         } else {
             throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor in class with " + controlCount + " controls, got " + (parts.length) + " instead.");
@@ -65,7 +63,7 @@
 
     /**
     * Parse CSV data for a class.
-    * @param {string} class - The string containing data for that class.
+    * @param {string} ageClass - The string containing data for that class.
     * @return {SplitsBrowser.Model.AgeClass} Parsed class data.
     */
     function parseAgeClass (ageClass) {
@@ -99,7 +97,13 @@
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */
     function parseEventData (eventData) {
-        var classSections = eventData.split(/\r?\n\r?\n/).map($.trim).filter(isTrue);
+
+        eventData = normaliseLineEndings(eventData);
+        
+        // Remove trailing commas.
+        eventData = eventData.replace(/,+\n/g, "\n").replace(/,+$/, "");
+
+        var classSections = eventData.split(/\n\n/).map($.trim).filter(isTrue);
        
         var classes = classSections.map(parseAgeClass);
         

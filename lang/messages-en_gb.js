@@ -1,7 +1,7 @@
 ﻿/*
  *  Messages - UK English messages for SplitsBrowser
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 SplitsBrowser.Messages = {
 
     ApplicationVersion: "SplitsBrowser - Version $$VERSION$$",
+    Language: "English",
     
     MispunchedShort: "mp",
     NonCompetitiveShort: "n/c",
@@ -126,5 +127,11 @@ SplitsBrowser.Messages = {
     // Placeholder text shown in the nearby-competitors dialog on the race
     // graph when there aren't any competitors visiting the control within the
     // +/- 2 minute window.
-    NoNearbyCompetitors: "No competitors"
+    NoNearbyCompetitors: "No competitors",
+    
+    // Link that appears at the top and opens SplitsBrowser with the settings
+    // (selected classes, competitors, comparison, chart type, etc.) that are
+    // currently shown.
+    DirectLink: "Link",
+    DirectLinkToolTip: "Links to a URL that opens SplitsBrowser with the current settings"
 };

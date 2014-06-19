@@ -83,5 +83,5 @@ var SplitsBrowserTest = {};
                 assert.strictEqual(actualArray[index], expectedArray[index], "Array values at index " + index + " should be strict-equal");
             }
         }
-    }
+    };
 })();

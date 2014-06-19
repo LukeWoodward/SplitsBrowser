@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser Messages - Fetches internationalised message strings.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -54,6 +54,18 @@
     };
     
     /**
+    * Attempts to get a message, returning a default string if it does not
+    * exist.
+    * @param {String} key - The key of the message.
+    * @param {String} defaultValue - Value to be used 
+    * @return {String} The message with the given key, if the key exists,
+    *     otherwise the default value.
+    */
+    SplitsBrowser.tryGetMessage = function (key, defaultValue) {
+        return (SplitsBrowser.Messages && SplitsBrowser.Messages.hasOwnProperty(key)) ? SplitsBrowser.getMessage(key) : defaultValue;
+    };
+    
+    /**
     * Returns the message with the given key.
     * @param {String} key - The key of the message.
     * @return {String} The message with the given key, or a placeholder string
@@ -81,6 +93,7 @@
     *
     * @param {String} key - The key of the message.
     * @param {Object} params - Object mapping parameter names to values.
+    * @return {String} The resulting message.
     */ 
     SplitsBrowser.getMessageWithFormatting = function (key, params) {
         var message = SplitsBrowser.getMessage(key);
