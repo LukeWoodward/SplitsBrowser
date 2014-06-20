@@ -96,9 +96,9 @@
         // updates to filter on key-up and mouse-up, which I believe *should*
         // catch every change.  It's not a problem to update the filter too
         // often: if the filter text hasn't changed, nothing happens.
-        this.filter.on("input", function () { outerThis.updateFilter(); })
-                   .on("keyup", function () { outerThis.updateFilterDelayed(); })
-                   .on("mouseup", function () { outerThis.updateFilterDelayed(); });
+        this.filter.on("input", function () { outerThis.updateFilterIfChanged(); })
+                   .on("keyup", function () { outerThis.updateFilterIfChangedDelayed(); })
+                   .on("mouseup", function () { outerThis.updateFilterIfChangedDelayed(); });
                                       
         this.listDiv = this.containerDiv.append("div")
                                         .attr("id", COMPETITOR_LIST_ID);
@@ -381,6 +381,9 @@
         competitorDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
                       .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })
                       .on("mouseup", function () { outerThis.stopDrag(); });
+
+        // Force an update on the filtering.
+        this.updateFilter();
     };
 
     /**
@@ -400,16 +403,24 @@
     };
     
     /**
-    * Updates the filtering following a change in the filter text input.
+    * Updates the filtering.
     */
     CompetitorList.prototype.updateFilter = function () {
         var currentFilterString = this.filter.node().value;
+        var normedFilter = normaliseName(currentFilterString);
+        var outerThis = this;
+        this.listDiv.selectAll("div.competitor")
+                    .style("display", function (div, index) { return (outerThis.normedNames[index].indexOf(normedFilter) >= 0) ? null : "none"; });
+    };
+    
+    /**
+    * Updates the filtering following a change in the filter text input, if the
+    * filter text has changed since last time.  If not, nothing happens.
+    */
+    CompetitorList.prototype.updateFilterIfChanged = function () {
+        var currentFilterString = this.filter.node().value;
         if (currentFilterString !== this.lastFilterString) {
-            var normedFilter = normaliseName(currentFilterString);
-            var outerThis = this;
-            this.listDiv.selectAll("div.competitor")
-                        .style("display", function (div, index) { return (outerThis.normedNames[index].indexOf(normedFilter) >= 0) ? null : "none"; });
-            
+            this.updateFilter();
             this.lastFilterString = currentFilterString;
         }
     };
@@ -418,9 +429,9 @@
     * Updates the filtering following a change in the filter text input
     * in a short whiie.
     */
-    CompetitorList.prototype.updateFilterDelayed = function () {
+    CompetitorList.prototype.updateFilterIfChangedDelayed = function () {
         var outerThis = this;
-        setTimeout(function () { outerThis.updateFilter(); }, 1);
+        setTimeout(function () { outerThis.updateFilterIfChanged(); }, 1);
     };
     
     SplitsBrowser.Controls.CompetitorList = CompetitorList;

@@ -985,4 +985,27 @@
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), true, "No competitors should be visible");
         }
     });
+
+    QUnit.test("Filtering is updated when the list of competitors is changed", function (assert) {
+        var listAndSelection = createSampleListForRaceGraph([], false);
+            
+        setFilterText("son", listAndSelection);
+        
+        for (var i = 0; i < 3; i += 1) {
+            assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i !== 1), "The first and third competitors should be visible");
+        }
+        
+        var newCompetitors = [
+            fromSplitTimes(1, "Jane Smith", "CDO", 10 * 3600, [13, 96, 35]),
+            fromSplitTimes(2, "Lucy Watson", "GHO", 10 * 3600 + 6, [15, 79, 41]),
+            fromSplitTimes(3, "Kate Jones", "KLO", 10 * 3600 + 33, [18, 81, 37])
+        ];
+        
+        listAndSelection.list.setCompetitorList(newCompetitors, false);
+        listAndSelection.list.setSelection(new CompetitorSelection(newCompetitors.length));
+        
+        for (i = 0; i < 3; i += 1) {
+            assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 1), "Only the second competitor should be visible");
+        }
+    });
 })();
