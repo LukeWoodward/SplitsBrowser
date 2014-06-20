@@ -87,7 +87,7 @@
         
         this.filter = this.buttonsPanel.append("input")
                                        .attr("type", "text")
-                                       .attr("placeholder", "Filter");
+                                       .attr("placeholder", getMessage("CompetitorListFilter"));
 
         // Update the filtered list of competitors on any change to the
         // contents of the filter textbox.  The last two are for the benefit of
