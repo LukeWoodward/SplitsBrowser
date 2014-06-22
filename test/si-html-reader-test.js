@@ -97,7 +97,7 @@
     * @param {Object} expectedDetails - The expected details.
     */
     function assertCompetitor(assert, actualCompetitor, expectedDetails) {
-        var optionalProps = ["name", "club", "totalTime", "originalCumTimes", "originalSplitTimes", "isNonCompetitive"];
+        var optionalProps = ["name", "club", "totalTime", "originalCumTimes", "originalSplitTimes", "isNonCompetitive", "isNonStarter", "isNonFinisher", "isDisqualified"];
         optionalProps.forEach(function (propName) {
             if (expectedDetails.hasOwnProperty(propName)) {
                 var assertion = (propName === "originalCumTimes" || propName === "originalSplitTimes") ? assert.deepEqual : assert.strictEqual;
@@ -713,7 +713,8 @@
                 assertCompetitor(assert, competitor, {name: "Test runner", club: "TEST", totalTime: 9 * 60 + 25,
                                                       originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25],
                                                       originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, 4 * 60 + 11, 1 * 60 + 12],
-                                                      isNonCompetitive: false, completed: true});
+                                                      isNonCompetitive: false, completed: true,
+                                                      isNonStarter: false, isNonFinisher: false, isDisqualified: false});
                 
                 var course = eventData.courses[0];
                 assertCourse(assert, course, {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "152", "141"], classCount: 1});
@@ -966,7 +967,26 @@
                 assertCompetitor(assert, ageClass.competitors[0], {totalTime: 9 * 60 + 25,
                                                                    originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25],
                                                                    originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, 4 * 60 + 11, 1 * 60 + 12],
-                                                                   isNonCompetitive: true, completed: true});
+                                                                   isNonCompetitive: true, completed: true,
+                                                                   isNonStarter: false, isNonFinisher: false, isDisqualified: false});
+            });
+    });
+    
+    QUnit.test("Can parse event data with a single course and single non-starting competitor in all formats", function (assert) {
+        runHtmlFormatParseTest(
+            [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
+                ["", "165", "Test runner", "TEST", false, "", "", ["-----", "-----", "-----", "-----"], ["-----", "-----", "-----", "-----"]]
+            ]}],
+            function (eventData, formatName) {
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
+                var ageClass = eventData.classes[0];
+                assert.strictEqual(ageClass.competitors.length, 1);
+                assertCompetitor(assert, ageClass.competitors[0], {totalTime: null,
+                                                                   originalCumTimes: [0, null, null, null, null],
+                                                                   originalSplitTimes: [null, null, null, null],
+                                                                   isNonCompetitive: false, completed: false,
+                                                                   isNonStarter: true, isNonFinisher: false, isDisqualified: false});
             });
     });
     

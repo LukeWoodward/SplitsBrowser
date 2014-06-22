@@ -42,10 +42,12 @@
     * 
     * @param {SplitsBrowser.Model.Competitor} a - One competitor to compare.
     * @param {SplitsBrowser.Model.Competitor} b - The other competitor to compare.
-    * @returns {Number} Result of comparing two competitors.  TH
+    * @returns {Number} Result of comparing two competitors.
     */
     SplitsBrowser.Model.compareCompetitors = function (a, b) {
-        if (a.totalTime === b.totalTime) {
+        if (a.isDisqualified !== b.isDisqualified) {
+            return (a.isDisqualified) ? 1 : -1;
+        } else if (a.totalTime === b.totalTime) {
             return a.order - b.order;
         } else if (a.totalTime === null) {
             return (b.totalTime === null) ? 0 : 1;
@@ -168,6 +170,9 @@
         this.club = club;
         this.startTime = startTime;
         this.isNonCompetitive = false;
+        this.isNonStarter = false;
+        this.isNonFinisher = false;
+        this.isDisqualified = false;
         this.className = null;
         
         this.originalSplitTimes = originalSplitTimes;
@@ -186,6 +191,28 @@
     */
     Competitor.prototype.setNonCompetitive = function () {
         this.isNonCompetitive = true;
+    };
+    
+    /**
+    * Marks this competitor as not starting.
+    */
+    Competitor.prototype.setNonStarter = function () {
+        this.isNonStarter = true;
+    };
+    
+    /**
+    * Marks this competitor as not finishing.
+    */
+    Competitor.prototype.setNonFinisher = function () {
+        this.isNonFinisher = true;
+    };
+    
+    /**
+    * Marks this competitor as disqualified, for reasons other than a missing
+    * punch.
+    */
+    Competitor.prototype.disqualify = function () {
+        this.isDisqualified = true;
     };
     
     /**
@@ -291,16 +318,35 @@
     Competitor.prototype.completed = function () {
         return this.totalTime !== null;
     };
-    
+
+    /**
+    * Returns whether the competitor has any times recorded at all.
+    * @return {boolean} True if the competitor has recorded at least one time,
+    *     false if the competitor has recorded no times.
+    */
+    Competitor.prototype.hasAnyTimes = function () {
+        // Trim the leading zero
+        return this.originalCumTimes.slice(1).some(isNotNull);
+    };
+
     /**
     * Returns the 'suffix' to use with this competitor.
-    * The suffix indicates whether they are non-competitive or a mispuncher.  If
-    * they are neither, an empty string is returned.
+    * The suffix indicates whether they are non-competitive or a mispuncher, 
+    * were disqualified or did not finish.  If none of the above apply, an
+    * empty string is returned.
     * @return {String} Suffix to use with this competitor.
     */
     Competitor.prototype.getSuffix = function () {
-        if (this.completed()) {
-            return (this.isNonCompetitive) ? getMessage("NonCompetitiveShort") : "";
+        // Non-starters are not catered for here, as this is intended to only
+        // be used on the chart and non-starters shouldn't appear on the chart.
+        if (this.completed() && this.isNonCompetitive) {
+            return getMessage("NonCompetitiveShort");
+        } else if (this.isNonFinisher) {
+            return getMessage("DidNotFinishShort"); 
+        } else if (this.isDisqualified) {
+            return getMessage("DisqualifiedShort");
+        } else if (this.completed()) {
+            return "";
         } else {
             return getMessage("MispunchedShort");
         }

@@ -95,6 +95,29 @@
     }
     
     /**
+    * Returns the contents of the time or status column for the given
+    * competitor.
+    * 
+    * The status may be a string that indicates the competitor mispunched.
+    *
+    * @param {Competitor} competitor The competitor to get the status of.
+    * @return {String} Time or status for the given competitor.
+    */
+    function getTimeOrStatus (competitor) {
+        if (competitor.isNonStarter) {
+            return getMessage("DidNotStartShort");
+        } else if (competitor.isNonFinisher) {
+            return getMessage("DidNotFinishShort");
+        } else if (competitor.isDisqualified) {
+            return getMessage("DisqualifiedShort");
+        } else if (competitor.completed()) {
+            return formatTime(competitor.totalTime);
+        } else {
+            return getMessage("MispunchedShort");
+        }
+    }
+    
+    /**
     * Populates the contents of the table with the age-class data.
     */
     ResultsTable.prototype.populateTable = function () {
@@ -173,7 +196,7 @@
             if (competitor.isNonCompetitive) {
                 numberCell.text(getMessage("NonCompetitiveShort"));
                 nonCompCount += 1;
-            } else if (competitor.completed()) {
+            } else if (competitor.completed() && !competitor.isDisqualified) {
                 if (index === 0 || competitors[index - 1].totalTime !== competitor.totalTime) {
                     rank = index + 1 - nonCompCount;
                 }
@@ -182,7 +205,7 @@
             }
             
             addCell(tableRow, competitor.name, competitor.club, false, false);
-            addCell(tableRow, (competitor.completed()) ? formatTime(competitor.totalTime) : getMessage("MispunchedShort"), NON_BREAKING_SPACE_CHAR, "time", false, false);
+            addCell(tableRow, getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false);
             
             d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
                 var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);

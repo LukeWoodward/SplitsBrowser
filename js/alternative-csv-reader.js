@@ -211,6 +211,10 @@
                 }
             }
             
+            if (!competitor.hasAnyTimes()) {
+                competitor.setNonStarter();
+            }
+            
             if (classes.has(courseName)) {
                 var cls = classes.get(courseName);
                 // Subtract one from the list of cumulative times for the 

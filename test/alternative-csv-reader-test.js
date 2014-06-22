@@ -115,7 +115,11 @@
         assert.strictEqual(competitor.club, "TEST");
         assert.strictEqual(competitor.startTime, 10 * 3600 + 38 * 60);
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, 202]);
+        assert.ok(competitor.completed());
         assert.ok(!competitor.isNonCompetitive);
+        assert.ok(!competitor.isNonStarter);
+        assert.ok(!competitor.isNonFinisher);
+        assert.ok(!competitor.isDisqualified);
         
         assert.strictEqual(eventData.courses.length, 1);
         var course = eventData.courses[0];
@@ -216,6 +220,9 @@
         var competitor = ageClass.competitors[0];
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 72, null, 186, 202]);
         assert.ok(!competitor.completed());
+        assert.ok(!competitor.isNonStarter);
+        assert.ok(!competitor.isNonFinisher);
+        assert.ok(!competitor.isDisqualified);
     });
     
     QUnit.test("Can parse a string that contains a single competitor missing the finish control", function (assert) {
@@ -229,5 +236,24 @@
         var competitor = ageClass.competitors[0];
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, null]);
         assert.ok(!competitor.completed());
+        assert.ok(!competitor.isNonStarter);
+        assert.ok(!competitor.isNonFinisher);
+        assert.ok(!competitor.isDisqualified);
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor missing all controls and mark said competitor as a non-starter", function (assert) {
+        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [null, null, null, null]);
+        var eventData = parseTripleColumnEventData(data);
+        
+        assert.strictEqual(eventData.classes.length, 1);
+        var ageClass = eventData.classes[0];
+        
+        assert.strictEqual(ageClass.competitors.length, 1);
+        var competitor = ageClass.competitors[0];
+        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, null, null, null, null]);
+        assert.ok(!competitor.completed());
+        assert.ok(competitor.isNonStarter);
+        assert.ok(!competitor.isNonFinisher);
+        assert.ok(!competitor.isDisqualified);
     });
 })();

@@ -139,7 +139,13 @@
         var totalTimeXml = (exists("totalTime")) ? '<Time>' + formatTime(personData.totalTime) + '</Time>\n' : '';
         
         var status;
-        if (personData.cumTimes.indexOf(null) >= 0) {
+        if (exists("nonStarter")) {
+            status = "DidNotStart";
+        } else if (exists("nonFinisher")) {
+            status = "DidNotFinish";
+        } else if (exists("disqualified")) {
+            status = "Disqualified";
+        } else if (personData.cumTimes.indexOf(null) >= 0) {
             status = "MisPunch";
         } else if (!exists("competitive") || personData.competitive) {
             status = "OK";
@@ -320,7 +326,13 @@
         var totalTimeXml = (exists("totalTime")) ? '<Time>' + personData.totalTime + '</Time>' : '';
         
         var status;
-        if (personData.cumTimes.indexOf(null) >= 0) {
+        if (exists("nonStarter")) {
+            status = "DidNotStart";
+        } else if (exists("nonFinisher")) {
+            status = "DidNotFinish";
+        } else if (exists("disqualified")) {
+            status = "Disqualified";
+        } else if (personData.cumTimes.indexOf(null) >= 0) {
             status = "MissingPunch";
         } else if (!exists("competitive") || personData.competitive) {
             status = "OK";
@@ -811,6 +823,36 @@
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
                 assert.strictEqual(competitor.isNonCompetitive, true);        
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains a non-starting competitor", function (assert) {
+        var person = getPerson();
+        person.nonStarter = true;
+        person.cumTimes = [null, null, null];
+        runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
+            function (competitor) {
+                assert.strictEqual(competitor.isNonStarter, true);        
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains a non-finishing competitor", function (assert) {
+        var person = getPerson();
+        person.nonFinisher = true;
+        person.cumTimes[2] = null;
+        runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
+            function (competitor) {
+                assert.strictEqual(competitor.isNonFinisher, true);        
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains a disqualified competitor", function (assert) {
+        var person = getPerson();
+        person.disqualified = true;
+        person.cumTimes = [null, null, null];
+        runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
+            function (competitor) {
+                assert.strictEqual(competitor.isDisqualified, true);        
             });
     });
     

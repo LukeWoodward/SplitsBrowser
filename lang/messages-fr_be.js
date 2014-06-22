@@ -137,5 +137,11 @@ SplitsBrowser.Messages = {
     
     // The placeholder text shown in the competitor-list filter box when no
     // text has been entered into this box.
-    CompetitorListFilter: "Filter"
+    CompetitorListFilter: "Filter",
+    
+    // Labels that appear beside a competitor on the Results Table to indicate
+    // that they did not start, did not finish, or were disqualified.
+    DidNotStartShort: "dns",
+    DidNotFinishShort: "dnf",
+    DisqualifiedShort: "dsq"
 };

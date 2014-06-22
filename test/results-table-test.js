@@ -21,6 +21,7 @@
 (function () {
     "use strict";
     
+    var getMessage = SplitsBrowser.getMessage;
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
@@ -92,8 +93,82 @@
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
         var table = d3.select("table.resultsTable");
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
+        
+        var lastRow = $("tbody tr:last-child td");
+        assert.strictEqual($("span:first-child", lastRow[2]).text(), getMessage("MispunchedShort"), "Mispunching competitor should be marked as such");
     });
     
+    QUnit.test("Can create a results table with one mispunching competitor", function (assert) {
+        var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]);
+        var ageClass = new AgeClass("Test", 3, [competitor]);
+
+        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(ageClass);
+        
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
+        var table = d3.select("table.resultsTable");
+        assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
+        
+        var row = $("tbody tr:last-child td");
+        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("MispunchedShort"), "Mispunching competitor should be marked as such");
+    });
+    
+    QUnit.test("Can create a results table with one non-starting competitor", function (assert) {
+        var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [null, null, null, null]);
+        competitor.setNonStarter();
+        var ageClass = new AgeClass("Test", 3, [competitor]);
+
+        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(ageClass);
+        
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
+        var table = d3.select("table.resultsTable");
+        assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
+        
+        var row = $("tbody tr:last-child td");
+        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DidNotStartShort"), "Non-starting competitor should be marked as such");
+    });
+
+    QUnit.test("Can create a results table with one non-finishing competitor", function (assert) {
+        var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, null]);
+        competitor.setNonFinisher();
+        var ageClass = new AgeClass("Test", 3, [competitor]);
+
+        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(ageClass);
+        
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
+        var table = d3.select("table.resultsTable");
+        assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
+        
+        var row = $("tbody tr:last-child td");
+        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DidNotFinishShort"), "Non-finishing competitor should be marked as such");
+    });
+
+    QUnit.test("Can create a results table with one disqualified competitor", function (assert) {
+        var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
+        competitor.disqualify();
+        var ageClass = new AgeClass("Test", 3, [competitor]);
+
+        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(ageClass);
+        
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
+        var table = d3.select("table.resultsTable");
+        assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
+        
+        var row = $("tbody tr:last-child td");
+        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DisqualifiedShort"), "Disqualified competitor should be marked as such");
+    });
+
     QUnit.test("Can create a results table with one non-competitive competitor and the other competitor getting rank 1", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         competitor1.setNonCompetitive();
@@ -108,6 +183,22 @@
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
         var table = d3.select("table.resultsTable");
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "1");
+    });
+
+    QUnit.test("Can create a results table with one disqualified competitor and the other competitor getting rank 1", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
+        competitor1.disqualify();
+        var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
+        var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
+
+        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(ageClass);
+        
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
+        var table = d3.select("table.resultsTable");
+        assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
     });
     
     QUnit.test("Can create a results table with course with no length and climb", function () {
