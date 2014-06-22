@@ -94,7 +94,7 @@
         var table = d3.select("table.resultsTable");
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
         
-        var lastRow = $("tbody tr:last-child td");
+        var lastRow = $("tbody tr:last-child td", table.node());
         assert.strictEqual($("span:first-child", lastRow[2]).text(), getMessage("MispunchedShort"), "Mispunching competitor should be marked as such");
     });
     
@@ -111,7 +111,7 @@
         var table = d3.select("table.resultsTable");
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
         
-        var row = $("tbody tr:last-child td");
+        var row = $("tbody tr:last-child td", table.node());
         assert.strictEqual($("span:first-child", row[2]).text(), getMessage("MispunchedShort"), "Mispunching competitor should be marked as such");
     });
     
@@ -129,7 +129,7 @@
         var table = d3.select("table.resultsTable");
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
         
-        var row = $("tbody tr:last-child td");
+        var row = $("tbody tr:last-child td", table.node());
         assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DidNotStartShort"), "Non-starting competitor should be marked as such");
     });
 
@@ -147,7 +147,7 @@
         var table = d3.select("table.resultsTable");
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
         
-        var row = $("tbody tr:last-child td");
+        var row = $("tbody tr:last-child td", table.node());
         assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DidNotFinishShort"), "Non-finishing competitor should be marked as such");
     });
 
@@ -165,7 +165,7 @@
         var table = d3.select("table.resultsTable");
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
         
-        var row = $("tbody tr:last-child td");
+        var row = $("tbody tr:last-child td", table.node());
         assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DisqualifiedShort"), "Disqualified competitor should be marked as such");
     });
 
