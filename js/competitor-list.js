@@ -411,8 +411,8 @@
         }
         
         competitorDivs.append("span")
-                      .classed("nonfinisher", function (comp) { return !comp.completed() || comp.isDisqualified; })
-                      .text(function (comp) { return (comp.completed() && !comp.isDisqualified) ? comp.name : "* " + comp.name; });
+                      .classed("nonfinisher", function (comp) { return !comp.completed(); })
+                      .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });
 
         competitorDivs.exit().remove();
         

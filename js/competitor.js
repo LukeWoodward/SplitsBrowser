@@ -312,11 +312,14 @@
     };
     
     /**
-    * Returns whether this competitor completed the course.
-    * @return {boolean} Whether the competitor completed the course.
+    * Returns whether this competitor completed the course and did not get
+    * disqualified.
+    * @return {boolean} True if the competitor completed the course and did not
+    *     get disqualified, false if the competitor did not complete the course
+    *     or got disqualified.
     */
     Competitor.prototype.completed = function () {
-        return this.totalTime !== null;
+        return this.totalTime !== null && !this.isDisqualified;
     };
 
     /**

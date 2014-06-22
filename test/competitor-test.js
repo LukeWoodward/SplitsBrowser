@@ -191,6 +191,7 @@
     QUnit.test("Can create a disqualified competitor from cumulative times", function (assert) {
         var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         competitor.disqualify();
+        assert.ok(!competitor.completed(), "Disqualified competitor should not be marked as completing the course");
         assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
         assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
         assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");

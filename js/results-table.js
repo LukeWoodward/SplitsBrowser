@@ -196,7 +196,7 @@
             if (competitor.isNonCompetitive) {
                 numberCell.text(getMessage("NonCompetitiveShort"));
                 nonCompCount += 1;
-            } else if (competitor.completed() && !competitor.isDisqualified) {
+            } else if (competitor.completed()) {
                 if (index === 0 || competitors[index - 1].totalTime !== competitor.totalTime) {
                     rank = index + 1 - nonCompCount;
                 }
