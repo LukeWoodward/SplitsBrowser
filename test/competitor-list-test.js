@@ -46,6 +46,17 @@
         alertCount += 1;
     }
     
+    // Test code for handling filter-text changes 
+    var callCount = 0;
+
+    function testHandler() {
+        callCount += 1;
+    }
+
+    function reset() {
+        callCount = 0;
+    }
+    
     var propagationStopped = false;
     
     /**
@@ -56,7 +67,7 @@
     */
     function setFilterText(value, listAndSelection) {
         $("div#qunit-fixture input:text").val(value);
-        listAndSelection.list.updateFilter();        
+        listAndSelection.list.updateFilterIfChanged();
     }
    
     /**
@@ -207,6 +218,20 @@
         var listAndSelection = createSampleList(selectedIndexes, multipleClasses);
         listAndSelection.list.setChartType(ChartTypes.RaceGraph);
         listAndSelection.list.enableOrDisableCrossingRunnersButton();
+        return listAndSelection;
+    }
+
+    /**
+    * Creates a list with three options in it, wires up the test change handler
+    * and returns the list and the selection.
+    * @param {Array} selectedIndexes - Indexes of selected competitors in the selection.
+    * @param {boolean} multipleClasses - Whether the list of competitors is built from
+    *                                    multiple classes.
+    * @return 2-element object containing the selection and list.
+    */
+    function createSampleListWithChangeHandler(selectedIndexes, multipleClasses) {
+        var listAndSelection = createSampleList(selectedIndexes, multipleClasses);
+        listAndSelection.list.registerChangeHandler(testHandler);
         return listAndSelection;
     }
     
@@ -927,7 +952,7 @@
     });
 
     QUnit.test("Filtering by a string contained in one competitor only matches only that competitor", function (assert) {
-        var listAndSelection = createSampleListForRaceGraph([], false);
+        var listAndSelection = createSampleList([], false);
             
         setFilterText("John", listAndSelection);
         
@@ -937,7 +962,7 @@
     });
 
     QUnit.test("Filtering by a string contained in one competitor but not matching case only matches only that competitor", function (assert) {
-        var listAndSelection = createSampleListForRaceGraph([], false);
+        var listAndSelection = createSampleList([], false);
             
         setFilterText("joHn", listAndSelection);
         
@@ -947,7 +972,7 @@
     });
 
     QUnit.test("Filtering by a string contained in one competitor with apostrophe in name but not in search string matches only that competitor", function (assert) {
-        var listAndSelection = createSampleListForRaceGraph([], false);
+        var listAndSelection = createSampleList([], false);
             
         setFilterText("OConnor", listAndSelection);
         
@@ -957,7 +982,7 @@
     });
 
     QUnit.test("Filtering by a string contained in two competitors matches both of those competitors", function (assert) {
-        var listAndSelection = createSampleListForRaceGraph([], false);
+        var listAndSelection = createSampleList([], false);
             
         setFilterText("son", listAndSelection);
         
@@ -967,7 +992,7 @@
     });
 
     QUnit.test("Filtering by a string contained in no competitors matches no competitors", function (assert) {
-        var listAndSelection = createSampleListForRaceGraph([], false);
+        var listAndSelection = createSampleList([], false);
             
         setFilterText("xxxxxx", listAndSelection);
         
@@ -977,7 +1002,7 @@
     });
 
     QUnit.test("Filtering by an empty string matches all competitors", function (assert) {
-        var listAndSelection = createSampleListForRaceGraph([], false);
+        var listAndSelection = createSampleList([], false);
             
         setFilterText("", listAndSelection);
         
@@ -987,7 +1012,7 @@
     });
 
     QUnit.test("Filtering is updated when the list of competitors is changed", function (assert) {
-        var listAndSelection = createSampleListForRaceGraph([], false);
+        var listAndSelection = createSampleList([], false);
             
         setFilterText("son", listAndSelection);
         
@@ -1008,4 +1033,75 @@
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 1), "Only the second competitor should be visible");
         }
     });
+
+    QUnit.test("Can register handler and have it called when filter text changes", function (assert) {
+        reset();
+        var listAndSelection = createSampleListWithChangeHandler([], false);
+        setFilterText("son", listAndSelection);
+        assert.strictEqual(callCount, 1, "Handler should have been called once");
+    });
+
+    QUnit.test("Can register handler and have it called multiple times when filter text changed multiple times", function (assert) {
+        reset();
+        var listAndSelection = createSampleListWithChangeHandler([], false);
+        setFilterText("son", listAndSelection);
+        setFilterText("smi", listAndSelection);
+        assert.strictEqual(callCount, 2, "Handler should have been called twice");
+    });
+
+    QUnit.test("Can register multiple handlers and have them all called when competitor selection toggled", function (assert) {
+        reset();
+        var listAndSelection = createSampleListWithChangeHandler([], false);
+
+        var callCount2 = 0;
+        var handler2 = function () {
+            callCount2 += 1;
+        };
+
+        listAndSelection.list.registerChangeHandler(handler2);
+
+        setFilterText("son", listAndSelection);
+
+        assert.strictEqual(callCount, 1, "Handler should only have been called once");
+        assert.strictEqual(callCount2, 1, "Handler should only have been called once");
+    });
+
+    QUnit.test("Handler only called once even if registered miltiple times", function (assert) {
+        reset();
+        var listAndSelection = createSampleListWithChangeHandler([], false);
+        listAndSelection.list.registerChangeHandler(testHandler);
+        setFilterText("son", listAndSelection);
+        assert.strictEqual(callCount, 1, "Handler should only have been called once");
+    });
+
+    QUnit.test("Can deregister previously-registered handler", function (assert) {
+        reset();
+        var listAndSelection = createSampleListWithChangeHandler([], false);
+        setFilterText("son", listAndSelection);
+        assert.strictEqual(callCount, 1, "Handler should only have been called once");
+
+        listAndSelection.list.deregisterChangeHandler(testHandler);
+        setFilterText("smi", listAndSelection);
+        assert.strictEqual(callCount, 1, "Handler should still only have been called once");
+    });
+
+    QUnit.test("Can deregister previously-registered handler multiple times without error", function (assert) {
+        reset();
+        var listAndSelection = createSampleListWithChangeHandler([], false);
+        setFilterText("son", listAndSelection);
+        assert.strictEqual(callCount, 1, "Handler should only have been called once");
+
+        listAndSelection.list.deregisterChangeHandler(testHandler);
+        listAndSelection.list.deregisterChangeHandler(testHandler);
+        setFilterText("smi", listAndSelection);
+        assert.strictEqual(callCount, 1, "Handler should still only have been called once");
+    });
+
+    QUnit.test("Can deregister handler that was never registered without error", function () {
+        reset();
+        var listAndSelection = createSampleListWithChangeHandler([], false);
+        var someOtherHandler = function() { /* do nothing */ };
+        listAndSelection.list.deregisterChangeHandler(someOtherHandler);
+        expect(0); // No assertions here, but there should also have been no errors.
+    });  
 })();

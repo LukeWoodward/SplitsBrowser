@@ -327,6 +327,7 @@
         this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartTypeAndRedraw(chartType); });
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
         this.originalDataSelector.registerChangeHandler(function (showOriginalData) { outerThis.showOriginalOrRepairedData(showOriginalData); });
+        this.competitorList.registerChangeHandler(function () { outerThis.setChartSize(); outerThis.redraw(); });
     };
     
     /**
@@ -373,13 +374,35 @@
     */
     Viewer.prototype.postResizeHook = function () {
         this.currentResizeTimeout = null;
-        this.drawChart();
+        this.setCompetitorListHeight();
+        this.setChartSize();
+        this.redraw();
     };
-
+    
     /**
-    * Adjusts the size of the viewer.
+    * Gets the usable height of the window, i.e. the height of the window minus
+    * margin and the height of the top bar, if any.  This height is used for
+    * the competitor list and the chart.
+    * @return {Number} Usable height of the window.
     */
-    Viewer.prototype.adjustSize = function () {
+    Viewer.prototype.getUsableHeight = function () {
+        var vertMargin = parseInt($("body").css("margin-top"), 10) + parseInt($("body").css("margin-bottom"), 10);
+        var bodyHeight = $(window).height() - vertMargin - this.topBarHeight;
+        var topPanelHeight = $(this.topPanel.node()).height();
+        return bodyHeight - topPanelHeight;
+    };
+    
+    /**
+    * Sets the height of the competitor list.
+    */
+    Viewer.prototype.setCompetitorListHeight = function () {
+        this.competitorList.setHeight(this.getUsableHeight());
+    };
+    
+    /**
+    * Determines the size of the chart and sets it.
+    */
+    Viewer.prototype.setChartSize = function () {
         // Margin around the body element.
         var horzMargin = parseInt($("body").css("margin-left"), 10) + parseInt($("body").css("margin-right"), 10);
         var vertMargin = parseInt($("body").css("margin-top"), 10) + parseInt($("body").css("margin-bottom"), 10);
@@ -394,26 +417,10 @@
 
         $("body").width(bodyWidth).height(bodyHeight);
         
-        var topPanelHeight = $(this.topPanel.node()).height();
-
-        // Hide the chart before we adjust the width of the competitor list.
-        // If the competitor list gets wider, the new competitor list and the
-        // old chart may be too wide together, and so the chart wraps onto a
-        // new line.  Even after shrinking the chart back down, there still
-        // might not be enough horizontal space, because of the vertical
-        // scrollbar.  So, hide the chart now, and re-show it later once we
-        // know what size it should have.
-        this.chart.hide();
-        
-        this.competitorList.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
-        
         var chartWidth = bodyWidth - this.competitorList.width() - EXTRA_WRAP_PREVENTION_SPACE;
-        var chartHeight = bodyHeight - topPanelHeight;
-
-        this.chart.setSize(chartWidth, chartHeight);
-        this.chart.show();
+        var chartHeight = this.getUsableHeight();
         
-        this.competitorList.setHeight(bodyHeight - topPanelHeight);
+        this.chart.setSize(chartWidth, chartHeight);
     };
     
     /**
@@ -423,8 +430,6 @@
         if (this.chartTypeSelector.getChartType().isResultsTable) {
             return;
         }
-        
-        this.adjustSize();
         
         this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
         
@@ -509,6 +514,7 @@
     Viewer.prototype.initClasses = function (classIndexes) {
         this.classSelector.selectClasses(classIndexes);
         this.setClasses(classIndexes);
+        this.competitorList.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
         this.selection = new CompetitorSelection(this.ageClassSet.allCompetitors.length);
         this.competitorList.setSelection(this.selection);
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
@@ -519,7 +525,6 @@
     * @param {Number} classIndexes - The (zero-based) indexes of the classes.
     */
     Viewer.prototype.selectClasses = function (classIndexes) {
-    
         if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
             // The 'primary' class hasn't changed, only the 'other' ones.
             // In this case we don't clear the selection.
@@ -528,8 +533,10 @@
         }
         
         this.setClasses(classIndexes);
+        this.competitorList.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
         this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
         this.competitorList.selectionChanged();
+        this.setChartSize();
         this.drawChart();
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
         this.updateDirectLink();
@@ -560,6 +567,7 @@
         } else {
             this.resultsTable.hide();
             this.mainPanel.style("display", null);
+            this.setChartSize();
         }
         
         this.updateControlEnabledness();
@@ -722,6 +730,8 @@
                 viewer.setDefaultSelectedClass();
             }
 
+            viewer.setCompetitorListHeight();
+            viewer.setChartSize();
             viewer.drawChart();
             viewer.registerChangeHandlers();
         }

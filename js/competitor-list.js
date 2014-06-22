@@ -58,6 +58,8 @@
         this.allCompetitorDivs = [];
         this.inverted = false;
         
+        this.changeHandlers = [];
+        
         this.containerDiv = d3.select(parent).append("div")
                                              .attr("id", COMPETITOR_LIST_CONTAINER_ID);
                                                
@@ -108,6 +110,42 @@
                     .on("mouseup", function () { outerThis.stopDrag(); });
                               
         d3.select(document).on("mouseup", function () { outerThis.stopDrag(); });
+    };
+    
+    /**
+    * Register a handler to be called whenever the filter text changes.
+    *
+    * When a change is made, this function will be called, with no arguments.
+    *
+    * If the handler has already been registered, nothing happens.
+    *
+    * @param {Function} handler - The handler to register.
+    */
+    CompetitorList.prototype.registerChangeHandler = function (handler) {
+        if (this.changeHandlers.indexOf(handler) === -1) {
+            this.changeHandlers.push(handler);
+        }
+    };
+
+    /**
+    * Unregister a handler from being called when the filter text changes.
+    *
+    * If the handler given was never registered, nothing happens.
+    *
+    * @param {Function} handler - The handler to register.
+    */
+    CompetitorList.prototype.deregisterChangeHandler = function (handler) {
+        var index = this.changeHandlers.indexOf(handler);
+        if (index > -1) {
+            this.changeHandlers.splice(index, 1);
+        }
+    };
+    
+    /**
+    * Fires all of the change handlers currently registered.
+    */
+    CompetitorList.prototype.fireChangeHandlers = function () {
+        this.changeHandlers.forEach(function (handler) { handler(); }, this);
     };
     
     /**
@@ -422,6 +460,7 @@
         if (currentFilterString !== this.lastFilterString) {
             this.updateFilter();
             this.lastFilterString = currentFilterString;
+            this.fireChangeHandlers();
         }
     };
     
