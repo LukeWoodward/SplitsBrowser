@@ -343,6 +343,36 @@
         return (showOriginal) ? queryString + "&showOriginal=1" : queryString;
     }
     
+    var FILTER_TEXT_REGEXP = /(?:^|&|\?)filterText=([^&]*)/;
+    
+    /**
+    * Reads the filter text from the given query string.
+    *
+    * If no filter text is found, an empty string is returned.
+    *
+    * @param {String} queryString - The query-string to read.
+    * @return {String} The filter text read.
+    */
+    function readFilterText(queryString) {
+        var filterTextMatch = FILTER_TEXT_REGEXP.exec(queryString);
+        if (filterTextMatch === null) {
+            return "";
+        } else {
+            return decodeURIComponent(filterTextMatch[1]);
+        }
+    }
+    
+    /**
+    * Formats filter text into the given query-string.
+    * @param {String} queryString - The original query-string.
+    * @param {String} filterText - The filter text.
+    * @return {String} The query-string with the filter text formatted in.
+    */
+    function formatFilterText(queryString, filterText) {
+        queryString = removeAll(queryString, FILTER_TEXT_REGEXP);
+        return (filterText === "") ? queryString : queryString + "&filterText=" + encodeURIComponent(filterText);
+    }
+    
     /**
     * Attempts to parse the given query string.
     * @param {String} queryString - The query string to parse.
@@ -358,7 +388,8 @@
             compareWith: readComparison(queryString, ageClassSet),
             selected: readSelectedCompetitors(queryString, ageClassSet),
             stats: readSelectedStatistics(queryString),
-            showOriginal: readShowOriginal(queryString)
+            showOriginal: readShowOriginal(queryString),
+            filterText: readFilterText(queryString)
         };
     }
 
@@ -384,6 +415,7 @@
         queryString = formatSelectedCompetitors(queryString, ageClassSet, data.selected);
         queryString = formatSelectedStatistics(queryString, data.stats);
         queryString = formatShowOriginal(queryString, data.showOriginal);
+        queryString = formatFilterText(queryString, data.filterText);
         queryString = queryString.replace(/^\??&/, "");
         return queryString;
     }

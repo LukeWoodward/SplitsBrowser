@@ -254,7 +254,8 @@
             compareWith: this.comparisonSelector.getComparisonType(),
             selected: this.selection.getSelectedIndexes(),
             stats: this.statisticsSelector.getVisibleStatistics(),
-            showOriginal: this.ageClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected()
+            showOriginal: this.ageClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected(),
+            filterText: this.competitorList.getFilterText()
         };
         
         var oldQueryString = document.location.search;
@@ -327,7 +328,7 @@
         this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartTypeAndRedraw(chartType); });
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
         this.originalDataSelector.registerChangeHandler(function (showOriginalData) { outerThis.showOriginalOrRepairedData(showOriginalData); });
-        this.competitorList.registerChangeHandler(function () { outerThis.setChartSize(); outerThis.redraw(); });
+        this.competitorList.registerChangeHandler(function () { outerThis.handleFilterTextChanged(); });
     };
     
     /**
@@ -611,6 +612,15 @@
     };
     
     /**
+    * Handles a change in the filter text in the competitor list.
+    */
+    Viewer.prototype.handleFilterTextChanged = function () {
+        this.setChartSize();
+        this.redraw();
+        this.updateDirectLink();
+    };
+    
+    /**
     * Updates whether a number of controls are enabled.
     */
     Viewer.prototype.updateControlEnabledness = function () {
@@ -653,6 +663,10 @@
         if (parsedQueryString.showOriginal && this.ageClassSet.hasDubiousData()) {
             this.originalDataSelector.selectOriginalData();
             this.selectOriginalOrRepairedData(true);
+        }
+        
+        if (parsedQueryString.filterText !== "") {
+            this.competitorList.setFilterText(parsedQueryString.filterText);
         }
     };
     

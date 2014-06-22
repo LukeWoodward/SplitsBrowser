@@ -58,17 +58,6 @@
     }
     
     var propagationStopped = false;
-    
-    /**
-    * Sets the text in the filter textbox.
-    * @param {String} value - The text value to set.
-    * @param {Object} listAndSelection - Object containing the competitor list
-    *     and the competitor selection.
-    */
-    function setFilterText(value, listAndSelection) {
-        $("div#qunit-fixture input:text").val(value);
-        listAndSelection.list.updateFilterIfChanged();
-    }
    
     /**
     * Verifies that the given value is a Number.
@@ -298,6 +287,12 @@
         assert.strictEqual($("div.competitor.dragSelected").length, 0);
     }
 
+    QUnit.test("Can create a list, set the filter text and read the same value back", function (assert) {
+        var listAndSelection = createSampleList([], false);
+        listAndSelection.list.setFilterText("test abc 123 DEF");
+        assert.strictEqual(listAndSelection.list.getFilterText(), "test abc 123 DEF");
+    });
+
     QUnit.test("Can create a list for a single class with all competitors deselected and without class labels", function (assert) {
         createSampleList([], false);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor").size(), 3);
@@ -458,7 +453,7 @@
     
     QUnit.test("Can create a list with all competitors deselected, filter the list and then drag-select those only in the filtered list", function (assert) {
         var listAndSelection = createSampleList([], false);
-        setFilterText("son", listAndSelection);
+        listAndSelection.list.setFilterText("son");
         
         setUpD3EventAndStartDrag(0, {}, listAndSelection);
         setUpD3EventAndMoveMouse(2, listAndSelection);
@@ -576,7 +571,7 @@
     
     QUnit.test("Can create a list with all competitors selected, filter the list and then drag-deselect those only in the filtered list", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
-        setFilterText("son", listAndSelection);
+        listAndSelection.list.setFilterText("son");
         
         setUpD3EventAndStartDrag(0, {shiftKey: true}, listAndSelection);
         setUpD3EventAndMoveMouse(2, listAndSelection);
@@ -872,7 +867,7 @@
     
     QUnit.test("Can create a list with all competitors deselected, filter the list and then select those only in the filtered list", function (assert) {
         var listAndSelection = createSampleList([], false);
-        setFilterText("son", listAndSelection);
+        listAndSelection.list.setFilterText("son");
         
         setUpD3EventAndStartDrag(0, {}, listAndSelection);
         setUpD3EventAndMoveMouse(2, listAndSelection);
@@ -954,7 +949,7 @@
     QUnit.test("Filtering by a string contained in one competitor only matches only that competitor", function (assert) {
         var listAndSelection = createSampleList([], false);
             
-        setFilterText("John", listAndSelection);
+        listAndSelection.list.setFilterText("John");
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 0), "Only the first competitor should be visible");
@@ -964,7 +959,7 @@
     QUnit.test("Filtering by a string contained in one competitor but not matching case only matches only that competitor", function (assert) {
         var listAndSelection = createSampleList([], false);
             
-        setFilterText("joHn", listAndSelection);
+        listAndSelection.list.setFilterText("joHn");
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 0), "Only the first competitor should be visible");
@@ -974,7 +969,7 @@
     QUnit.test("Filtering by a string contained in one competitor with apostrophe in name but not in search string matches only that competitor", function (assert) {
         var listAndSelection = createSampleList([], false);
             
-        setFilterText("OConnor", listAndSelection);
+        listAndSelection.list.setFilterText("OConnor");
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 1), "Only the second competitor should be visible");
@@ -984,7 +979,7 @@
     QUnit.test("Filtering by a string contained in two competitors matches both of those competitors", function (assert) {
         var listAndSelection = createSampleList([], false);
             
-        setFilterText("son", listAndSelection);
+        listAndSelection.list.setFilterText("son");
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 0 || i === 2), "Only the first and third competitors should be visible: this is competitor " + i);
@@ -994,7 +989,7 @@
     QUnit.test("Filtering by a string contained in no competitors matches no competitors", function (assert) {
         var listAndSelection = createSampleList([], false);
             
-        setFilterText("xxxxxx", listAndSelection);
+        listAndSelection.list.setFilterText("xxxxxx");
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), false, "No competitors should be visible");
@@ -1004,7 +999,7 @@
     QUnit.test("Filtering by an empty string matches all competitors", function (assert) {
         var listAndSelection = createSampleList([], false);
             
-        setFilterText("", listAndSelection);
+        listAndSelection.list.setFilterText("");
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), true, "No competitors should be visible");
@@ -1014,7 +1009,7 @@
     QUnit.test("Filtering is updated when the list of competitors is changed", function (assert) {
         var listAndSelection = createSampleList([], false);
             
-        setFilterText("son", listAndSelection);
+        listAndSelection.list.setFilterText("son");
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i !== 1), "The first and third competitors should be visible");
@@ -1037,15 +1032,15 @@
     QUnit.test("Can register handler and have it called when filter text changes", function (assert) {
         reset();
         var listAndSelection = createSampleListWithChangeHandler([], false);
-        setFilterText("son", listAndSelection);
+        listAndSelection.list.setFilterText("son");
         assert.strictEqual(callCount, 1, "Handler should have been called once");
     });
 
     QUnit.test("Can register handler and have it called multiple times when filter text changed multiple times", function (assert) {
         reset();
         var listAndSelection = createSampleListWithChangeHandler([], false);
-        setFilterText("son", listAndSelection);
-        setFilterText("smi", listAndSelection);
+        listAndSelection.list.setFilterText("son");
+        listAndSelection.list.setFilterText("smi");
         assert.strictEqual(callCount, 2, "Handler should have been called twice");
     });
 
@@ -1060,7 +1055,7 @@
 
         listAndSelection.list.registerChangeHandler(handler2);
 
-        setFilterText("son", listAndSelection);
+        listAndSelection.list.setFilterText("son");
 
         assert.strictEqual(callCount, 1, "Handler should only have been called once");
         assert.strictEqual(callCount2, 1, "Handler should only have been called once");
@@ -1070,30 +1065,30 @@
         reset();
         var listAndSelection = createSampleListWithChangeHandler([], false);
         listAndSelection.list.registerChangeHandler(testHandler);
-        setFilterText("son", listAndSelection);
+        listAndSelection.list.setFilterText("son");
         assert.strictEqual(callCount, 1, "Handler should only have been called once");
     });
 
     QUnit.test("Can deregister previously-registered handler", function (assert) {
         reset();
         var listAndSelection = createSampleListWithChangeHandler([], false);
-        setFilterText("son", listAndSelection);
+        listAndSelection.list.setFilterText("son");
         assert.strictEqual(callCount, 1, "Handler should only have been called once");
 
         listAndSelection.list.deregisterChangeHandler(testHandler);
-        setFilterText("smi", listAndSelection);
+        listAndSelection.list.setFilterText("smi");
         assert.strictEqual(callCount, 1, "Handler should still only have been called once");
     });
 
     QUnit.test("Can deregister previously-registered handler multiple times without error", function (assert) {
         reset();
         var listAndSelection = createSampleListWithChangeHandler([], false);
-        setFilterText("son", listAndSelection);
+        listAndSelection.list.setFilterText("son");
         assert.strictEqual(callCount, 1, "Handler should only have been called once");
 
         listAndSelection.list.deregisterChangeHandler(testHandler);
         listAndSelection.list.deregisterChangeHandler(testHandler);
-        setFilterText("smi", listAndSelection);
+        listAndSelection.list.setFilterText("smi");
         assert.strictEqual(callCount, 1, "Handler should still only have been called once");
     });
 

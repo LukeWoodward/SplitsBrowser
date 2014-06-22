@@ -441,6 +441,23 @@
     };
     
     /**
+    * Returns the filter text currently being used.
+    * @return {String} Filter text.
+    */
+    CompetitorList.prototype.getFilterText = function () {
+        return this.filter.node().value;
+    };
+    
+    /**
+    * Sets the filter text to use.
+    * @param {String} filterText - The filter text to use.
+    */
+    CompetitorList.prototype.setFilterText = function (filterText) {
+        this.filter.node().value = filterText;
+        this.updateFilterIfChanged();
+    };
+    
+    /**
     * Updates the filtering.
     */
     CompetitorList.prototype.updateFilter = function () {
@@ -456,7 +473,7 @@
     * filter text has changed since last time.  If not, nothing happens.
     */
     CompetitorList.prototype.updateFilterIfChanged = function () {
-        var currentFilterString = this.filter.node().value;
+        var currentFilterString = this.getFilterText();
         if (currentFilterString !== this.lastFilterString) {
             this.updateFilter();
             this.lastFilterString = currentFilterString;
