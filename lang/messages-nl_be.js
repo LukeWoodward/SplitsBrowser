@@ -144,5 +144,9 @@ SplitsBrowser.Messages = {
     // that they did not start, did not finish, or were disqualified.
     DidNotStartShort: "dns",
     DidNotFinishShort: "dnf",
-    DisqualifiedShort: "dsq"
+    DisqualifiedShort: "dsq",
+    
+    // Placeholder message shown inside the competitor list if all competitors
+    // in the class did not start.
+    NoCompetitorsStarted: "No competitors started"
 };

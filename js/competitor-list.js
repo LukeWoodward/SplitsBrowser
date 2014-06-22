@@ -57,6 +57,7 @@
         this.currentDragCompetitorIndex = null;
         this.allCompetitorDivs = [];
         this.inverted = false;
+        this.placeholderDiv = null;
         
         this.changeHandlers = [];
         
@@ -155,7 +156,7 @@
     *     if not.
     */
     CompetitorList.prototype.isMouseOffBottomOfCompetitorList = function () {
-        return d3.mouse(this.lastVisibleDiv)[1] >= $(this.lastVisibleDiv).height();
+        return this.lastVisibleDiv === null || d3.mouse(this.lastVisibleDiv)[1] >= $(this.lastVisibleDiv).height();
     };
     
     /**
@@ -178,7 +179,7 @@
             this.currentDragCompetitorIndex = index;
             this.allCompetitorDivs = $("div.competitor");
             var visibleDivs = this.allCompetitorDivs.filter(":visible");
-            this.lastVisibleDiv = visibleDivs[visibleDivs.length - 1];
+            this.lastVisibleDiv = (visibleDivs.length === 0) ? null : visibleDivs[visibleDivs.length - 1];
             this.inverted = d3.event.shiftKey;
             if (index === CONTAINER_COMPETITOR_INDEX) {
                 // Drag not starting on one of the competitors.
@@ -395,6 +396,11 @@
         this.allCompetitors = competitors;
         this.normedNames = competitors.map(function (comp) { return normaliseName(comp.name); });
         
+        if (this.placeholderDiv !== null) {
+            this.placeholderDiv.remove();
+            this.placeholderDiv = null;
+        }
+        
         var competitorDivs = this.listDiv.selectAll("div.competitor").data(competitors);
 
         var outerThis = this;
@@ -415,6 +421,16 @@
                       .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });
 
         competitorDivs.exit().remove();
+        
+        if (competitors.length === 0) {
+            this.placeholderDiv = this.listDiv.append("div")
+                                              .classed("competitorListPlaceholder", true)
+                                              .text(getMessage("NoCompetitorsStarted"));
+        }
+        
+        this.allButton.property("disabled", competitors.length === 0);
+        this.noneButton.property("disabled", competitors.length === 0);
+        this.filter.property("disabled", competitors.length === 0);
         
         competitorDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
                       .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })

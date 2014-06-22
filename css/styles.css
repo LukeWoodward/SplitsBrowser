@@ -212,6 +212,11 @@ div.chartPopup tr.highlighted
     float: left;
 }
 
+div.competitorListPlaceholder
+{
+    color: #AAAAAA;
+}
+
 #chart
 {
     float: left;
