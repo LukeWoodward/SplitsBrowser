@@ -277,6 +277,8 @@
     Viewer.prototype.buildUi = function () {
         var body = d3.select("body");
         
+        body.style("overflow", "hidden");
+        
         this.topPanel = body.append("div");
         
         this.drawLogo();
@@ -559,14 +561,16 @@
         if (chartType.isResultsTable) {
             this.mainPanel.style("display", "none");
             
-            // Remove any fixed width and height on the body, as we need the
-            // window to be able to scroll if the results table is too wide or
-            // too tall and also adjust size if one or both scrollbars appear.
-            d3.select("body").style("width", null).style("height", null);
+            // Remove any fixed width and height on the body, as well as
+            // overflow:hidden, as we need the window to be able to scroll if
+            // the results table is too wide or too tall and also adjust size
+            // if one or both scrollbars appear.
+            d3.select("body").style("width", null).style("height", null).style("overflow", null);
             
             this.resultsTable.show();
         } else {
             this.resultsTable.hide();
+            d3.select("body").style("overflow", "hidden");
             this.mainPanel.style("display", null);
             this.setChartSize();
         }
