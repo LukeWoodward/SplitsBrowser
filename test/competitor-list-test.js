@@ -300,6 +300,37 @@
         assert.strictEqual(d3.selectAll("div#qunit-fixture span.competitorClassLabel").size(), 0);
         assert.strictEqual(d3.selectAll("div#qunit-fixture button").size(), 3);
         assert.strictEqual(d3.selectAll("div#qunit-fixture input[type=text]").size(), 1);
+        assert.ok(!$("div#qunit-fixture button")[0].disabled);
+        assert.ok(!$("div#qunit-fixture button")[1].disabled);
+        assert.ok(!d3.select("div#qunit-fixture input[type=text]").property("disabled"));
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitorListPlaceholder").size(), 0);
+    });
+    
+    QUnit.test("Can create a list for an empty class of competitors, with placeholder message", function (assert) {
+        var parent = d3.select("div#qunit-fixture").node();
+        var list = new CompetitorList(parent, customAlert);
+        list.setCompetitorList([], false);
+        list.setSelection(new CompetitorSelection(0));
+        assert.ok($("div#qunit-fixture button")[0].disabled);
+        assert.ok($("div#qunit-fixture button")[1].disabled);
+        assert.ok(d3.select("div#qunit-fixture input[type=text]").property("disabled"));
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitorListPlaceholder").size(), 1);
+    });
+    
+    QUnit.test("Can create a list for an empty class of competitors and then a non-empty list, removing placeholder div", function (assert) {
+        var parent = d3.select("div#qunit-fixture").node();
+        var list = new CompetitorList(parent, customAlert);
+        list.setCompetitorList([], false);
+        list.setSelection(new CompetitorSelection(0));
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitorListPlaceholder").size(), 1);
+        
+        var compList = [fromSplitTimes(1, "John Watson", "CDO", 10 * 3600, [13, 96, 35])];
+        list.setCompetitorList(compList);
+        list.setSelection(new CompetitorSelection(1));
+        assert.ok(!$("div#qunit-fixture button")[0].disabled);
+        assert.ok(!$("div#qunit-fixture button")[1].disabled);
+        assert.ok(!d3.select("div#qunit-fixture input[type=text]").property("disabled"));
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitorListPlaceholder").size(), 0);
     });
 
     QUnit.test("Can create a list for multiple classes with all competitors deselected but with class labels shown", function (assert) {

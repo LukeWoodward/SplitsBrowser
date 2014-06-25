@@ -188,6 +188,15 @@
     }
     
     /**
+    * Returns an array of test controls for competitor 1, with all times
+    * missing.
+    * @return {Array} Test controls data.
+    */
+    function getControls1AllMissed() {
+        return [{code: "208", time: "-----"}, {code: "227", time: "-----"}, {code: "212", time: "-----"}];
+    }
+    
+    /**
     * Returns an array of test controls for competitor 2.
     * @return {Array} Test controls data.
     */ 
@@ -272,6 +281,10 @@
         assert.strictEqual(competitor.club, "ABC", "Should read correct club");
         assert.strictEqual(competitor.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
+        assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
+        assert.ok(!competitor.isNonStarter, "Competitor should not be marked as a non-starter");
+        assert.ok(!competitor.isNonFinisher, "Competitor should not be marked as a non-finisher");
+        assert.ok(!competitor.isDisqualified, "Competitor should not be marked as disqualified");        
         
         assert.strictEqual(eventData.classes[0].course, course, "Class should refer to its course");
     });
@@ -525,7 +538,7 @@
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
     });
     
-    QUnit.test("Can parse a string that contains a single competitor's data and remove the trailing 'n/c' from the name", function (assert) {
+    QUnit.test("Can parse a string that contains a single non-competitive competitor's data and remove the trailing 'n/c' from the name", function (assert) {
         var comp = getCompetitor1();
         comp.surname = "Smith n/c";
         comp.placing = "n/c";
@@ -538,6 +551,21 @@
         assert.strictEqual(competitor.name, "John Smith", "Should read correct name without 'n/c' suffix");
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
         assert.ok(competitor.isNonCompetitive, "Competitor should be marked as non-competitive");
+        assert.ok(!competitor.isNonStarter, "Competitor should not be marked as a non-starter");
+        assert.ok(!competitor.isNonFinisher, "Competitor should not be marked as a non-finisher");
+        assert.ok(!competitor.isDisqualified, "Competitor should not be marked as disqualified");
+    });
+    
+    QUnit.test("Can parse a string that contains a single non-starting competitor's data", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.time = null;
+        var eventData = parseEventData(HEADER_46 + generateRow(competitor1, getControls1AllMissed(), ROW_TEMPLATE_46));
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        var competitor = eventData.classes[0].competitors[0];
+        assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
+        assert.ok(competitor.isNonStarter, "Competitor should be marked as a non-starter");
+        assert.ok(!competitor.isNonFinisher, "Competitor should not be marked as a non-finisher");
+        assert.ok(!competitor.isDisqualified, "Competitor should not be marked as disqualified");        
     });
     
     QUnit.test("Can parse a string that contains two competitors in the same class and course", function (assert) {

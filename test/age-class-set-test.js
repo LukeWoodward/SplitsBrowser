@@ -93,6 +93,12 @@
         return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 197, 209, 100]);
     }
     
+    function getNonStartingCompetitor1() {
+        var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [null, null, null, null]);
+        competitor.setNonStarter();
+        return competitor;
+    }
+    
     function getCompetitor2() {
         return fromSplitTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
@@ -143,6 +149,12 @@
         var ageClass = new AgeClass("Test", 3, [getCompetitor1(), getCompetitor2(), getCompetitor3()]);
         var ageClassSet = new AgeClassSet([ageClass]);
         assert.deepEqual(ageClassSet.allCompetitors, ageClass.competitors, "An AgeClassSet created from one age class should contain the only the competitors of that class");
+    });
+    
+    QUnit.test("Can create an AgeClassSet from a single age class, ignoring non-starting competitor", function (assert) {
+        var ageClass = new AgeClass("Test", 3, [getNonStartingCompetitor1(), getCompetitor2(), getCompetitor3()]);
+        var ageClassSet = new AgeClassSet([ageClass]);
+        assert.deepEqual(ageClassSet.allCompetitors, ageClass.competitors.slice(1), "An AgeClassSet created from one age class should contain the only the competitors of that class that started");
     });
     
     QUnit.test("Can create an AgeClassSet from a single age class and get the course", function (assert) {
@@ -828,11 +840,18 @@
         assert.ok(chartData.yExtent[0] < chartData.yExtent[1], "The y-axis should have a positive extent: got values " + chartData.yExtent[0] + " and " + chartData.yExtent[1]);
     });    
 
-    QUnit.test("Cannot return chart data when no competitors", function (assert) {
+    QUnit.test("Can return empty chart data when no competitors", function (assert) {
         var ageClassSet = new AgeClassSet([new AgeClass("Test", 3, [])]);
-        SplitsBrowserTest.assertInvalidData(assert, function () {
-            ageClassSet.getChartData([0, 87, 87 + 147, 87 + 147 + 92], [0, 2], _DUMMY_CHART_TYPE);
-        });
+        var data = ageClassSet.getChartData([0, 87, 87 + 147, 87 + 147 + 92], [], _DUMMY_CHART_TYPE);
+        var expectedChartData = {
+            dataColumns: [],
+            xExtent: data.xExtent,
+            yExtent: data.yExtent,
+            numControls: 3,
+            competitorNames: [],
+            dubiousTimesInfo: []
+        };
+        assert.deepEqual(data, expectedChartData);
     });
 
     QUnit.test("Cannot return chart data when no reference data given", function (assert) {

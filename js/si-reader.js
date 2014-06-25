@@ -358,6 +358,11 @@
             // Assume that they are non-competitive.
             competitor.setNonCompetitive();
         }
+        
+        if (!competitor.hasAnyTimes()) {
+            competitor.setNonStarter();
+        }
+        
 
         this.ageClasses.get(className).competitors.push(competitor);
     };

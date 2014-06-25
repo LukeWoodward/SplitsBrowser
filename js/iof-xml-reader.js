@@ -239,16 +239,20 @@
     };
 
     /**
-    * Returns whether a competitor's result declares them as non-competitive.
+    * Returns the status of the competitor with the given result.
     * @param {jQuery.selection} resultElement - jQuery selection containing a
     *     Result element.
-    * @return {boolean} - True if the competitor is non-competitive, false if
-    *     the competitor is competitive.
+    * @return {String} Status of the competitor.
     */
-    Version2Reader.isNonCompetitive = function (resultElement) {
+    Version2Reader.getStatus = function (resultElement) {
         var statusElement = $("> CompetitorStatus", resultElement);
-        return (statusElement.length === 1 && statusElement.attr("value") === "NotCompeting");
+        return (statusElement.length === 1) ? statusElement.attr("value") : "";
     };
+    
+    Version2Reader.StatusNonCompetitive = "NotCompeting";
+    Version2Reader.StatusNonStarter = "DidNotStart";
+    Version2Reader.StatusNonFinisher = "DidNotFinish";
+    Version2Reader.StatusDisqualified = "Disqualified";
     
     /**
     * Reads a control code and split time from a SplitTime element.
@@ -434,16 +438,20 @@
     };
 
     /**
-    * Returns whether a competitor's result declares them as non-competitive.
+    * Returns the status of the competitor with the given result.
     * @param {jQuery.selection} resultElement - jQuery selection containing a
     *     Result element.
-    * @return {boolean} - True if the competitor is non-competitive, false if
-    *     the competitor is competitive.
+    * @return {String} Status of the competitor.
     */
-    Version3Reader.isNonCompetitive = function (resultElement) {
-        return $("> Status", resultElement).text() === "NotCompeting";
+    Version3Reader.getStatus = function (resultElement) {
+        return $("> Status", resultElement).text();
     };
     
+    Version3Reader.StatusNonCompetitive = "NotCompeting";
+    Version3Reader.StatusNonStarter = "DidNotStart";
+    Version3Reader.StatusNonFinisher = "DidNotFinish";
+    Version3Reader.StatusDisqualified = "Disqualified";
+
     /**
     * Reads a control code and split time from a SplitTime element.
     * @param {jQuery.selection} splitTimeElement - jQuery selection containing
@@ -524,8 +532,6 @@
         
         var totalTime = reader.readTotalTime(resultElement);
         
-        var nonCompetitive = reader.isNonCompetitive(resultElement);
-        
         var splitTimes = $("> SplitTime", resultElement).toArray();
         var splitData = splitTimes.map(function (splitTime) { return reader.readSplitTime($(splitTime)); });
         
@@ -536,8 +542,16 @@
         cumTimes.push(totalTime);
         
         var competitor = fromOriginalCumTimes(number, name, club, startTime, cumTimes);
-        if (nonCompetitive) {
+        
+        var status = reader.getStatus(resultElement);
+        if (status === reader.StatusNonCompetitive) {
             competitor.setNonCompetitive();
+        } else if (status === reader.StatusNonStarter) {
+            competitor.setNonStarter();
+        } else if (status === reader.StatusNonFinisher) {
+            competitor.setNonFinisher();
+        } else if (status === reader.StatusDisqualified) {
+            competitor.disqualify();
         }
         
         return {

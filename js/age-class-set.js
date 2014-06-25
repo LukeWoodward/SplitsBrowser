@@ -45,7 +45,11 @@
                 throwInvalidData("Cannot merge age classes with " + expectedControlCount + " and " + ageClass.numControls + " controls");
             }
             
-            ageClass.competitors.forEach(function (comp) { allCompetitors.push(comp); });
+            ageClass.competitors.forEach(function (comp) {
+                if (!comp.isNonStarter) { 
+                    allCompetitors.push(comp);
+                }
+            });
         });
 
         allCompetitors.sort(compareCompetitors);
@@ -431,9 +435,7 @@
     * @returns {Object} Array of data.
     */
     AgeClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
-        if (this.isEmpty()) {
-            throwInvalidData("Cannot return chart data when there is no data");
-        } else if (typeof referenceCumTimes === "undefined") {
+        if (typeof referenceCumTimes === "undefined") {
             throw new TypeError("referenceCumTimes undefined or missing");
         } else if (typeof currentIndexes === "undefined") {
             throw new TypeError("currentIndexes undefined or missing");
@@ -449,11 +451,17 @@
         var yMin;
         var yMax;
         if (currentIndexes.length === 0) {
-            // No competitors selected.  Set yMin and yMax to the boundary
-            // values of the first competitor.
-            var firstCompetitorTimes = competitorData[0];
-            yMin = d3.min(firstCompetitorTimes);
-            yMax = d3.max(firstCompetitorTimes);
+            // No competitors selected.  
+            if (this.isEmpty()) {
+                // No competitors at all.  Make up some values.
+                yMin = 0;
+                yMax = 60;
+            } else {
+                // Set yMin and yMax to the boundary values of the first competitor.
+                var firstCompetitorTimes = competitorData[0];
+                yMin = d3.min(firstCompetitorTimes);
+                yMax = d3.max(firstCompetitorTimes);
+            }
         } else {
             yMin = d3.min(selectedCompetitorData.map(function (values) { return d3.min(values); }));
             yMax = d3.max(selectedCompetitorData.map(function (values) { return d3.max(values); }));

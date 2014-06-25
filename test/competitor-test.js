@@ -22,6 +22,7 @@
     "use strict";
 
     var isNaNStrict = SplitsBrowser.isNaNStrict;
+    var getMessage = SplitsBrowser.getMessage;
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
@@ -77,6 +78,9 @@
         assert.ok(competitor.completed(), "Competitor should be marked as completing the course");
         assert.ok(!competitor.isNonCompetitive, "Competitor should be competitive");
         assert.strictEqual(competitor.getSuffix(), "", "Competitor should have no suffix");
+        assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
+        assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
+        assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");
     });
 
     QUnit.test("Can create a non-competitive competitor from split times and determine cumulative times", function (assert) {
@@ -132,6 +136,10 @@
         assert.deepEqual(competitor.getAllCumulativeTimes(), cumTimes);
         assertSplitTimes(assert, competitor, [65, 221, 184, 100]);
         assert.ok(competitor.completed(), "Competitor should be marked as completing the course");
+        assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
+        assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
+        assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
+        assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");        
     });
 
     QUnit.test("Can create a competitor from cumulative times and determine split times when competitor has missed a control", function (assert) {
@@ -149,6 +157,46 @@
         assertCumulativeTimes(assert, competitor, cumTimes);
         assertSplitTimes(assert, competitor, [65, null, null, null, null, 184, 100]);
         assert.ok(!competitor.completed(), "Competitor should be marked as not completing the course");
+    });
+
+    QUnit.test("Can create a non-competitive competitor from cumulative times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        competitor.setNonCompetitive();
+        assert.ok(competitor.isNonCompetitive, "Competitor should not be competitive");
+        assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
+        assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
+        assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");                
+        assert.strictEqual(competitor.getSuffix(), getMessage("NonCompetitiveShort"), "Competitor should have non-competitive suffix");
+    });
+
+    QUnit.test("Can create a non-starting competitor from cumulative times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, null, null, null, null]);
+        competitor.setNonStarter();
+        assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
+        assert.ok(competitor.isNonStarter, "Competitor should be a non-starter");
+        assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
+        assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");                
+    });
+
+    QUnit.test("Can create a non-finishing competitor from cumulative times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, null, null]);
+        competitor.setNonFinisher();
+        assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
+        assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
+        assert.ok(competitor.isNonFinisher, "Competitor should be a non-finisher");
+        assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");        
+        assert.strictEqual(competitor.getSuffix(), getMessage("DidNotFinishShort"), "Competitor should have non-finishing suffix");
+    });
+
+    QUnit.test("Can create a disqualified competitor from cumulative times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        competitor.disqualify();
+        assert.ok(!competitor.completed(), "Disqualified competitor should not be marked as completing the course");
+        assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
+        assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
+        assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
+        assert.ok(competitor.isDisqualified, "Competitor should be disqualified");
+        assert.strictEqual(competitor.getSuffix(), getMessage("DisqualifiedShort"), "Competitor should have a disqualified suffix");
     });
 
     QUnit.test("Can create a competitor from original cumulative times and determine original split times with final times still null", function (assert) {
@@ -269,15 +317,15 @@
         assert.ok(signum(compareCompetitors(competitor1, competitor2)), 1);
     });
 
-    QUnit.test("Competitor with valid time comes before mispunching competitor", function (assert) {
-        var competitor1 = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [154]);
-        var competitor2 = fromSplitTimes(2, "Fred Baker", "DEF", 12 * 3600, [null]);
-        assert.ok(signum(compareCompetitors(competitor1, competitor2)) , -1);
-    });
-
     QUnit.test("Mispunching competitor compares equal to itself", function (assert) {
         var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [null]);
         assert.strictEqual(compareCompetitors(competitor, competitor), 0);
+    });
+    
+    QUnit.test("Competitor with valid time comes before mispunching competitor", function (assert) {
+        var competitor1 = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [154]);
+        var competitor2 = fromSplitTimes(2, "Fred Baker", "DEF", 12 * 3600, [null]);
+        assert.ok(signum(compareCompetitors(competitor1, competitor2)), -1);
     });
 
     QUnit.test("Mispunching competitor comes after competitor with valid time", function (assert) {
@@ -289,13 +337,64 @@
     QUnit.test("Mispunching competitor with lower order comes before mispunching competitor with higher order", function (assert) {
         var competitor1 = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [null]);
         var competitor2 = fromSplitTimes(2, "Fred Baker", "DEF", 12 * 3600, [null]);
-        assert.ok(signum(compareCompetitors(competitor1, competitor2)) , -1);
+        assert.ok(signum(compareCompetitors(competitor1, competitor2)), -1);
     });
 
     QUnit.test("Mispunching competitor with higher order comes before mispunching competitor with lower order", function (assert) {
         var competitor1 = fromSplitTimes(3, "John Smith", "ABC", 10 * 3600, [null]);
         var competitor2 = fromSplitTimes(2, "Fred Baker", "DEF", 12 * 3600, [null]);
         assert.ok(signum(compareCompetitors(competitor1, competitor2)), 1);
+    });
+
+    QUnit.test("Disqualified competitor compares equal to itself", function (assert) {
+        var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [154]);
+        competitor.disqualify();
+        assert.strictEqual(compareCompetitors(competitor, competitor), 0);
+    });
+
+    QUnit.test("Valid competitor comes before disqualified competitor", function (assert) {
+        var competitor1 = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [154]);
+        var competitor2 = fromSplitTimes(2, "Fred Baker", "DEF", 12 * 3600, [188]);
+        competitor2.disqualify();
+        assert.ok(signum(compareCompetitors(competitor1, competitor2)), -1);
+    });
+
+    QUnit.test("Disqualified competitor comes after valid competitor", function (assert) {
+        var competitor1 = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [154]);
+        competitor1.disqualify();
+        var competitor2 = fromSplitTimes(2, "Fred Baker", "DEF", 12 * 3600, [188]);
+        assert.ok(signum(compareCompetitors(competitor1, competitor2)), 1);
+    });
+
+    QUnit.test("Disqualified competitor with lower order comes before disqualified competitor with higher order", function (assert) {
+        var competitor1 = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [154]);
+        competitor1.disqualify();
+        var competitor2 = fromSplitTimes(2, "Fred Baker", "DEF", 12 * 3600, [188]);
+        competitor2.disqualify();
+        assert.ok(signum(compareCompetitors(competitor1, competitor2)), -1);
+    });
+
+    QUnit.test("Disqualified competitor with higher order comes before disqualified competitor with lower order", function (assert) {
+        var competitor1 = fromSplitTimes(3, "John Smith", "ABC", 10 * 3600, [188]);
+        competitor1.disqualify();
+        var competitor2 = fromSplitTimes(2, "Fred Baker", "DEF", 12 * 3600, [154]);
+        competitor2.disqualify();
+        assert.ok(signum(compareCompetitors(competitor1, competitor2)), 1);
+    });
+    
+    QUnit.test("Competitor with no times missing has times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        assert.ok(competitor.hasAnyTimes(), "Competitor with no times missing should have times");
+    });
+    
+    QUnit.test("Competitor with some but not all times missing has times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, null, null, 65 + 221 + 184 + 100]);
+        assert.ok(competitor.hasAnyTimes(), "Competitor with some but not all times missing should have times");
+    });
+    
+    QUnit.test("Competitor with all times missing does not have times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, null, null, null, null]);
+        assert.ok(!competitor.hasAnyTimes(), "Competitor with all times missing should not have times");
     });
 
     QUnit.test("Can adjust a competitor's cumulative times by reference data with all valid times and same number of controls", function (assert) {

@@ -125,7 +125,6 @@
         return this.currentIndexes.slice(0);
     };
     
-    
     /**
     * Set the selected competitors to those in the given array.
     * @param {Array} selectedIndex - Array of indexes of selected competitors.
@@ -268,8 +267,8 @@
             throwInvalidData("CompetitorSelection.migrate: newCompetitors not an array");
         } else if (oldCompetitors.length !== this.count) {
             throwInvalidData("CompetitorSelection.migrate: oldCompetitors list must have the same length as the current count"); 
-        } else if (newCompetitors.length === 0) {
-            throwInvalidData("CompetitorSelection.migrate: newCompetitors list must not be empty"); 
+        } else if (newCompetitors.length === 0 && this.currentIndexes.length > 0) {
+            throwInvalidData("CompetitorSelection.migrate: newCompetitors list must not be empty if current list has competitors selected");
         }
     
         var selectedCompetitors = this.currentIndexes.map(function (index) { return oldCompetitors[index]; });

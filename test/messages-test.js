@@ -40,7 +40,7 @@
     QUnit.test("Cannot look up a message that does not exist", function (assert) {
         setAlerter();
         SplitsBrowser.getMessage("ThisMessageDoesNotExist");
-        assert.ok(alerterCalled, "Alerter should have been called for non-existent message");
+        assert.ok(alerterCalled, "Alerter should have been called for non-existent message.  Has some other test already reported a missing message key?");
     });
     
     QUnit.test("Can look up a test message that exists and apply formatting", function (assert) {

@@ -289,14 +289,18 @@
             competitor.setNonCompetitive();
         }
         
+        if (!competitor.hasAnyTimes()) {
+            competitor.setNonStarter();
+        }
+        
         return competitor;
     };
 
     /*
-    * There are two types of HTML format supported by this parser: one that is
-    * based on pre-formatted text, and one that uses HTML tables.  The overall
-    * strategy when parsing either format is largely the same, but the exact
-    * details vary.
+    * There are three types of HTML format supported by this parser: one that is
+    * based on pre-formatted text, one that is based around a single HTML table,
+    * and one that uses many HTML tables.  The overall strategy when parsing
+    * any format is largely the same, but the exact details vary.
     *
     * A 'Recognizer' is used to handle the finer details of the format parsing.
     * A recognizer should contain methods 'isTextOfThisFormat',

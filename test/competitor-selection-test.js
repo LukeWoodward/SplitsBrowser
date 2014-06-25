@@ -286,7 +286,7 @@
     });
 
     QUnit.test("Cannot migrate from an old list of competitors that isn't an array", function (assert) {
-        var selection = new CompetitorSelection(2);
+        var selection = new CompetitorSelection(1);
         var newCompetitors = [fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301])];
         SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate("this is not an array", newCompetitors);
@@ -303,19 +303,28 @@
     });
 
     QUnit.test("Cannot migrate to a new list of competitors that isn't an array", function (assert) {
-        var selection = new CompetitorSelection(2);
+        var selection = new CompetitorSelection(1);
         var oldCompetitors = [fromCumTimes(2, "Fred Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
         SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate(oldCompetitors, "this is not an array");
         });
     });
 
-    QUnit.test("Cannot migrate to an empty new list of competitors", function (assert) {
-        var selection = new CompetitorSelection(2);
+    QUnit.test("Cannot migrate to an empty new list of competitors if a competitor is selected", function (assert) {
+        var selection = new CompetitorSelection(1);
+        selection.toggle(0);
         var oldCompetitors = [fromCumTimes(2, "Fred Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
         SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate(oldCompetitors, []);
         });
+    });
+
+    QUnit.test("Can migrate to an empty new list of competitors if no competitors are selected", function (assert) {
+        var selection = new CompetitorSelection(1);
+        selection.selectNone();
+        var oldCompetitors = [fromCumTimes(2, "Fred Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561])];
+        selection.migrate(oldCompetitors, []);
+        assert.deepEqual(selection.getSelectedIndexes(), []);
     });
 
     QUnit.test("Can migrate to new list of competitors", function (assert) {
