@@ -135,15 +135,15 @@
         var ageClass = new AgeClass("Test class", 0, []);
         var controls = [];
         var course = new Course("Test course", [ageClass], 4.1, 115, controls);
-        assert.ok(course.usesLeg(null, null), "Course should use leg from start to finish");
+        assert.ok(course.usesLeg(Course.START, Course.FINISH), "Course should use leg from start to finish");
     });
     
     QUnit.test("Course created with empty list of controls does not contain legs with controls other than the start and finish", function (assert) {
         var ageClass = new AgeClass("Test class", 0, []);
         var controls = [];
         var course = new Course("Test course", [ageClass], 4.1, 115, controls);
-        assert.ok(!course.usesLeg(null, "212"), "Course should use leg from start to some control");
-        assert.ok(!course.usesLeg("212", null), "Course should use leg from some control to the finish");
+        assert.ok(!course.usesLeg(Course.START, "212"), "Course should use leg from start to some control");
+        assert.ok(!course.usesLeg("212", Course.FINISH), "Course should use leg from some control to the finish");
         assert.ok(!course.usesLeg("212", "189"), "Course should use leg from some control to some other control");
     });
     
@@ -153,9 +153,9 @@
         var course = new Course("Test course", [ageClass], 4.1, 115, controls);
         assert.ok(!course.usesLeg("200", "189"), "Course does not use leg from control not on the course");
         assert.ok(!course.usesLeg("212", "200"), "Course does not use leg to control not on the course");
-        assert.ok(!course.usesLeg(null, null), "Course does not use leg from start to finish");
-        assert.ok(!course.usesLeg(null, "212"), "Course does not use leg from the start to control 2");
-        assert.ok(!course.usesLeg("212", null), "Course does not use leg from control 2 to the finish");
+        assert.ok(!course.usesLeg(Course.START, Course.FINISH), "Course does not use leg from start to finish");
+        assert.ok(!course.usesLeg(Course.START, "212"), "Course does not use leg from the start to control 2");
+        assert.ok(!course.usesLeg("212", Course.FINISH), "Course does not use leg from control 2 to the finish");
         assert.ok(!course.usesLeg("235", "189"), "Course does not use leg from control 1 to control 3");
     });
     
@@ -325,7 +325,12 @@
         assert.deepEqual(course.getNextControls("189"), [Course.FINISH]);
     });    
     
-    QUnit.test("Can return next controls after intermediate control that appears more than once ", function (assert) {
+    QUnit.test("Can return next control from start on course that has zero controls as the finish only", function (assert) {
+        var course = new Course("Test course", [], null, null, []);
+        assert.deepEqual(course.getNextControls(Course.START), [Course.FINISH]);
+    });
+    
+    QUnit.test("Can return next controls after intermediate control that appears more than once", function (assert) {
         var course = new Course("Test course", [], null, null, ["235", "212", "189", "212", "197"]);
         assert.deepEqual(course.getNextControls("212"), ["189", "197"]);
     });

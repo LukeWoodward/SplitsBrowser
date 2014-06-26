@@ -153,7 +153,7 @@
             return -1;
         }
         
-        if (startCode === null && endCode === null) {
+        if (startCode === START && endCode === FINISH) {
             // No controls - straight from the start to the finish.
             // This leg is only present, and is leg 1, if there are no
             // controls.
@@ -295,7 +295,7 @@
         } else if (controlCode === FINISH) {
             throwInvalidData("Cannot fetch next control after the finish");
         } else if (controlCode === START) {
-            return [this.controls[0]];
+            return [(this.controls.length === 0) ? FINISH : this.controls[0]];
         } else {
             var lastControlIdx = -1;
             var nextControls = [];
