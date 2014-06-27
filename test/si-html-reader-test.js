@@ -381,7 +381,7 @@
     * @return {String} The contents wrapped up in a table-data element.
     */
     function getCellOEventTabular(contents) {
-        return '<td  align="right>' + contents + '</td>';
+        return '<td  align="right">' + contents + '</td>';
     }
     
     /**
