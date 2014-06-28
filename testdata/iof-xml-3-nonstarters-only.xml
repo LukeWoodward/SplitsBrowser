@@ -1,0 +1,87 @@
+<?xml version="1.0" ?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" iofVersion="3.0">
+    <ClassResult>
+        <Class>
+            <Name>Class 1</Name>
+        </Class>
+        <Course>
+            <Id>1</Id>
+            <Name>Course 1</Name>
+            <Length>4100</Length>
+            <Climb>35</Climb>
+        </Course>
+        <PersonResult>
+            <Person>
+                <Name>
+                    <Given>Non</Given>
+                    <Family>Starter1</Family>
+                </Name>
+            </Person>
+            <Organisation>
+                <ShortName>ABC</ShortName>
+            </Organisation>
+            <Result>
+                <StartTime>2014-06-07T10:00:00</StartTime>
+                <Status>DidNotStart</Status>
+                <SplitTime status="Missing">
+                    <ControlCode>212</ControlCode>
+                </SplitTime>
+                <SplitTime status="Missing">
+                    <ControlCode>229</ControlCode>
+                </SplitTime>
+                <SplitTime status="Missing">
+                    <ControlCode>208</ControlCode>
+                </SplitTime>
+            </Result>
+        </PersonResult>
+        <PersonResult>
+            <Person>
+                <Name>
+                    <Given>Non</Given>
+                    <Family>Starter2</Family>
+                </Name>
+            </Person>
+            <Organisation>
+                <ShortName>DEF</ShortName>
+            </Organisation>
+            <Result>
+                <StartTime>2014-06-07T10:30:00</StartTime>
+                <Status>DidNotStart</Status>
+                <SplitTime status="Missing">
+                    <ControlCode>212</ControlCode>
+                </SplitTime>
+                <SplitTime status="Missing">
+                    <ControlCode>229</ControlCode>
+                </SplitTime>
+                <SplitTime status="Missing">
+                    <ControlCode>208</ControlCode>
+                </SplitTime>
+            </Result>
+        </PersonResult>
+        <PersonResult>
+            <Person>
+                <Name>
+                    <Given>Non</Given>
+                    <Family>Starter3</Family>
+                </Name>
+            </Person>
+            <Organisation>
+                <ShortName>GHI</ShortName>
+            </Organisation>
+            <Result>
+                <StartTime>2014-06-07T11:00:00</StartTime>
+                <Status>DidNotStart</Status>
+                <SplitTime status="Missing">
+                    <ControlCode>212</ControlCode>
+                </SplitTime>
+                <SplitTime status="Missing">
+                    <ControlCode>229</ControlCode>
+                </SplitTime>
+                <SplitTime status="Missing">
+                    <ControlCode>208</ControlCode>
+                </SplitTime>
+            </Result>
+        </PersonResult>
+    </ClassResult>
+</ResultList>

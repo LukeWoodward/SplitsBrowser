@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<!DOCTYPE ResultList SYSTEM "IOFdata.dtd">
+<ResultList>
+    <IOFVersion version="2.0.3" />
+    <ClassResult>
+        <ClassShortName>Class 1</ClassShortName>
+        <PersonResult>
+            <Person>
+                <PersonName>
+                    <Given>First</Given>
+                    <Family>Runner</Family>
+                </PersonName>
+            </Person>
+            <Club>
+                <ShortName>ABC</ShortName>
+            </Club>
+            <Result>
+                <StartTime>
+                    <Clock>10:00:00</Clock>
+                </StartTime>
+                <Time>12:14</Time>
+                <CompetitorStatus value="OK"/>
+                <CourseLength>4100</CourseLength>
+            </Result>
+        </PersonResult>
+        <PersonResult>
+            <Person>
+                <PersonName>
+                    <Given>Second</Given>
+                    <Family>Runner</Family>
+                </PersonName>
+            </Person>
+            <Club>
+                <ShortName>DEF</ShortName>
+            </Club>
+            <Result>
+                <StartTime>
+                    <Clock>10:30:00</Clock>
+                </StartTime>
+                <Time>14:12</Time>
+                <CompetitorStatus value="OK"/>
+            </Result>
+        </PersonResult>
+        <PersonResult>
+            <Person>
+                <PersonName>
+                    <Given>Third</Given>
+                    <Family>Runner</Family>
+                </PersonName>
+            </Person>
+            <Club>
+                <ShortName>GHI</ShortName>
+            </Club>
+            <Result>
+                <StartTime>
+                    <Clock>11:00:00</Clock>
+                </StartTime>
+                <Time>13:32</Time>
+                <CompetitorStatus value="OK"/>
+            </Result>
+        </PersonResult>
+    </ClassResult>
+</ResultList>

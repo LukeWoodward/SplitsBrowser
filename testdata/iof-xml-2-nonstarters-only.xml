@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+<!DOCTYPE ResultList SYSTEM "IOFdata.dtd">
+<ResultList>
+    <IOFVersion version="2.0.3" />
+    <ClassResult>
+        <ClassShortName>Class 1</ClassShortName>
+        <PersonResult>
+            <Person>
+                <PersonName>
+                    <Given>Non</Given>
+                    <Family>Starter1</Family>
+                </PersonName>
+            </Person>
+            <Club>
+                <ShortName>ABC</ShortName>
+            </Club>
+            <Result>
+                <StartTime>
+                    <Clock>10:00:00</Clock>
+                </StartTime>
+                <Time>-----</Time>
+                <CompetitorStatus value="DidNotStart"/>
+                <CourseLength>4100</CourseLength>
+                <SplitTime sequence="1">
+                    <ControlCode>212</ControlCode>
+                    <Time>-----</Time>
+                </SplitTime>
+                <SplitTime sequence="2">
+                    <ControlCode>229</ControlCode>
+                    <Time>-----</Time>
+                </SplitTime>
+                <SplitTime sequence="3">
+                    <ControlCode>208</ControlCode>
+                    <Time>-----</Time>
+                </SplitTime>
+            </Result>
+        </PersonResult>
+        <PersonResult>
+            <Person>
+                <PersonName>
+                    <Given>Non</Given>
+                    <Family>Starter2</Family>
+                </PersonName>
+            </Person>
+            <Club>
+                <ShortName>DEF</ShortName>
+            </Club>
+            <Result>
+                <StartTime>
+                    <Clock>10:30:00</Clock>
+                </StartTime>
+                <Time>-----</Time>
+                <CompetitorStatus value="DidNotStart"/>
+                <SplitTime sequence="1">
+                    <ControlCode>212</ControlCode>
+                    <Time>-----</Time>
+                </SplitTime>
+                <SplitTime sequence="2">
+                    <ControlCode>229</ControlCode>
+                    <Time>-----</Time>
+                </SplitTime>
+                <SplitTime sequence="3">
+                    <ControlCode>208</ControlCode>
+                    <Time>-----</Time>
+                </SplitTime>
+            </Result>
+        </PersonResult>
+        <PersonResult>
+            <Person>
+                <PersonName>
+                    <Given>Non</Given>
+                    <Family>Starter3</Family>
+                </PersonName>
+            </Person>
+            <Club>
+                <ShortName>GHI</ShortName>
+            </Club>
+            <Result>
+                <StartTime>
+                    <Clock>11:00:00</Clock>
+                </StartTime>
+                <Time>-----</Time>
+                <CompetitorStatus value="DidNotStart"/>
+                <SplitTime sequence="1">
+                    <ControlCode>212</ControlCode>
+                    <Time>-----</Time>
+                </SplitTime>
+                <SplitTime sequence="2">
+                    <ControlCode>229</ControlCode>
+                    <Time>-----</Time>
+                </SplitTime>
+                <SplitTime sequence="3">
+                    <ControlCode>208</ControlCode>
+                    <Time>-----</Time>
+                </SplitTime>
+            </Result>
+        </PersonResult>
+    </ClassResult>
+</ResultList>
