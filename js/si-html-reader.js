@@ -1233,6 +1233,10 @@
         
         this.addCurrentCompetitorAndCourseIfNecessary();
         
+        if (this.courses.length === 0) {
+            throwInvalidData("No competitor data was found");
+        }
+        
         var eventData = this.createOverallEventObject();
         return eventData;
     };

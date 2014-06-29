@@ -620,6 +620,10 @@
         });
     }
     
+    QUnit.test("Cannot parse an empty event in any format", function (assert) {
+        runFailingHtmlFormatParseTest(assert, [], false);
+    });
+    
     QUnit.test("Can parse an event with an empty course in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: []}],
@@ -1066,12 +1070,6 @@
     QUnit.test("Cannot read event data without any closing table elements", function (assert) {
         var html = NEW_FORMAT_DATA_HEADER.replace(/<\/table>/g, "") + "<table><table><table>" + NEW_FORMAT_DATA_FOOTER;
         runInvalidDataTest(assert, html, "no closing-table elements");
-    });
-    
-    QUnit.test("Can parse an empty event in the old format", function (assert) {
-        var eventData = parseEventData("<html><head></head><body>\n<pre>\n</pre>\n</body></html>");
-        assert.strictEqual(eventData.courses.length, 0, "No courses should have been read");
-        assert.strictEqual(eventData.classes.length, 0, "No classes should have been read");
     });
     
     // Format-specific as handles a quirk of the old format.
