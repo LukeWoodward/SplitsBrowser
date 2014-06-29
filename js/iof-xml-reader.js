@@ -52,7 +52,7 @@
         try {
             xml = $.parseXML(xmlString);
         } catch (e) {
-            throwInvalidData("XML data not well-formed: " + e.message);
+            throwInvalidData("XML data not well-formed");
         }
         
         if ($("> *", $(xml)).length === 0) {
