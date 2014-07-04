@@ -11,3 +11,4 @@ SplitsBrowser changelog:
 3.2.5:  Allow SplitsBrowser to be used offline.
 3.2.6:  Read settings from URL query-string parameters.
 3.2.7:  Support IOF v3.0 XML files and OE2010 CSV files.
+3.3.0:  Runner selection improvements, improve handling of non-starters

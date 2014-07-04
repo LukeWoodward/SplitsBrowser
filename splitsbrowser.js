@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
+var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
 
 
 (function () {
@@ -362,10 +362,12 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     * 
     * @param {SplitsBrowser.Model.Competitor} a - One competitor to compare.
     * @param {SplitsBrowser.Model.Competitor} b - The other competitor to compare.
-    * @returns {Number} Result of comparing two competitors.  TH
+    * @returns {Number} Result of comparing two competitors.
     */
     SplitsBrowser.Model.compareCompetitors = function (a, b) {
-        if (a.totalTime === b.totalTime) {
+        if (a.isDisqualified !== b.isDisqualified) {
+            return (a.isDisqualified) ? 1 : -1;
+        } else if (a.totalTime === b.totalTime) {
             return a.order - b.order;
         } else if (a.totalTime === null) {
             return (b.totalTime === null) ? 0 : 1;
@@ -488,6 +490,9 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         this.club = club;
         this.startTime = startTime;
         this.isNonCompetitive = false;
+        this.isNonStarter = false;
+        this.isNonFinisher = false;
+        this.isDisqualified = false;
         this.className = null;
         
         this.originalSplitTimes = originalSplitTimes;
@@ -506,6 +511,28 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     */
     Competitor.prototype.setNonCompetitive = function () {
         this.isNonCompetitive = true;
+    };
+    
+    /**
+    * Marks this competitor as not starting.
+    */
+    Competitor.prototype.setNonStarter = function () {
+        this.isNonStarter = true;
+    };
+    
+    /**
+    * Marks this competitor as not finishing.
+    */
+    Competitor.prototype.setNonFinisher = function () {
+        this.isNonFinisher = true;
+    };
+    
+    /**
+    * Marks this competitor as disqualified, for reasons other than a missing
+    * punch.
+    */
+    Competitor.prototype.disqualify = function () {
+        this.isDisqualified = true;
     };
     
     /**
@@ -605,22 +632,44 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
-    * Returns whether this competitor completed the course.
-    * @return {boolean} Whether the competitor completed the course.
+    * Returns whether this competitor completed the course and did not get
+    * disqualified.
+    * @return {boolean} True if the competitor completed the course and did not
+    *     get disqualified, false if the competitor did not complete the course
+    *     or got disqualified.
     */
     Competitor.prototype.completed = function () {
-        return this.totalTime !== null;
+        return this.totalTime !== null && !this.isDisqualified;
     };
-    
+
+    /**
+    * Returns whether the competitor has any times recorded at all.
+    * @return {boolean} True if the competitor has recorded at least one time,
+    *     false if the competitor has recorded no times.
+    */
+    Competitor.prototype.hasAnyTimes = function () {
+        // Trim the leading zero
+        return this.originalCumTimes.slice(1).some(isNotNull);
+    };
+
     /**
     * Returns the 'suffix' to use with this competitor.
-    * The suffix indicates whether they are non-competitive or a mispuncher.  If
-    * they are neither, an empty string is returned.
+    * The suffix indicates whether they are non-competitive or a mispuncher, 
+    * were disqualified or did not finish.  If none of the above apply, an
+    * empty string is returned.
     * @return {String} Suffix to use with this competitor.
     */
     Competitor.prototype.getSuffix = function () {
-        if (this.completed()) {
-            return (this.isNonCompetitive) ? getMessage("NonCompetitiveShort") : "";
+        // Non-starters are not catered for here, as this is intended to only
+        // be used on the chart and non-starters shouldn't appear on the chart.
+        if (this.completed() && this.isNonCompetitive) {
+            return getMessage("NonCompetitiveShort");
+        } else if (this.isNonFinisher) {
+            return getMessage("DidNotFinishShort"); 
+        } else if (this.isDisqualified) {
+            return getMessage("DisqualifiedShort");
+        } else if (this.completed()) {
+            return "";
         } else {
             return getMessage("MispunchedShort");
         }
@@ -1125,7 +1174,11 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
                 throwInvalidData("Cannot merge age classes with " + expectedControlCount + " and " + ageClass.numControls + " controls");
             }
             
-            ageClass.competitors.forEach(function (comp) { allCompetitors.push(comp); });
+            ageClass.competitors.forEach(function (comp) {
+                if (!comp.isNonStarter) { 
+                    allCompetitors.push(comp);
+                }
+            });
         });
 
         allCompetitors.sort(compareCompetitors);
@@ -1511,9 +1564,7 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     * @returns {Object} Array of data.
     */
     AgeClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
-        if (this.isEmpty()) {
-            throwInvalidData("Cannot return chart data when there is no data");
-        } else if (typeof referenceCumTimes === "undefined") {
+        if (typeof referenceCumTimes === "undefined") {
             throw new TypeError("referenceCumTimes undefined or missing");
         } else if (typeof currentIndexes === "undefined") {
             throw new TypeError("currentIndexes undefined or missing");
@@ -1529,11 +1580,17 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         var yMin;
         var yMax;
         if (currentIndexes.length === 0) {
-            // No competitors selected.  Set yMin and yMax to the boundary
-            // values of the first competitor.
-            var firstCompetitorTimes = competitorData[0];
-            yMin = d3.min(firstCompetitorTimes);
-            yMax = d3.max(firstCompetitorTimes);
+            // No competitors selected.  
+            if (this.isEmpty()) {
+                // No competitors at all.  Make up some values.
+                yMin = 0;
+                yMax = 60;
+            } else {
+                // Set yMin and yMax to the boundary values of the first competitor.
+                var firstCompetitorTimes = competitorData[0];
+                yMin = d3.min(firstCompetitorTimes);
+                yMax = d3.max(firstCompetitorTimes);
+            }
         } else {
             yMin = d3.min(selectedCompetitorData.map(function (values) { return d3.min(values); }));
             yMax = d3.max(selectedCompetitorData.map(function (values) { return d3.max(values); }));
@@ -1704,7 +1761,7 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
             return -1;
         }
         
-        if (startCode === null && endCode === null) {
+        if (startCode === START && endCode === FINISH) {
             // No controls - straight from the start to the finish.
             // This leg is only present, and is leg 1, if there are no
             // controls.
@@ -1846,7 +1903,7 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         } else if (controlCode === FINISH) {
             throwInvalidData("Cannot fetch next control after the finish");
         } else if (controlCode === START) {
-            return [this.controls[0]];
+            return [(this.controls.length === 0) ? FINISH : this.controls[0]];
         } else {
             var lastControlIdx = -1;
             var nextControls = [];
@@ -2193,7 +2250,6 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         return this.currentIndexes.slice(0);
     };
     
-    
     /**
     * Set the selected competitors to those in the given array.
     * @param {Array} selectedIndex - Array of indexes of selected competitors.
@@ -2336,8 +2392,8 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
             throwInvalidData("CompetitorSelection.migrate: newCompetitors not an array");
         } else if (oldCompetitors.length !== this.count) {
             throwInvalidData("CompetitorSelection.migrate: oldCompetitors list must have the same length as the current count"); 
-        } else if (newCompetitors.length === 0) {
-            throwInvalidData("CompetitorSelection.migrate: newCompetitors list must not be empty"); 
+        } else if (newCompetitors.length === 0 && this.currentIndexes.length > 0) {
+            throwInvalidData("CompetitorSelection.migrate: newCompetitors list must not be empty if current list has competitors selected");
         }
     
         var selectedCompetitors = this.currentIndexes.map(function (index) { return oldCompetitors[index]; });
@@ -3044,6 +3100,11 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
             // Assume that they are non-competitive.
             competitor.setNonCompetitive();
         }
+        
+        if (!competitor.hasAnyTimes()) {
+            competitor.setNonStarter();
+        }
+        
 
         this.ageClasses.get(className).competitors.push(competitor);
     };
@@ -3551,14 +3612,18 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
             competitor.setNonCompetitive();
         }
         
+        if (!competitor.hasAnyTimes()) {
+            competitor.setNonStarter();
+        }
+        
         return competitor;
     };
 
     /*
-    * There are two types of HTML format supported by this parser: one that is
-    * based on pre-formatted text, and one that uses HTML tables.  The overall
-    * strategy when parsing either format is largely the same, but the exact
-    * details vary.
+    * There are three types of HTML format supported by this parser: one that is
+    * based on pre-formatted text, one that is based around a single HTML table,
+    * and one that uses many HTML tables.  The overall strategy when parsing
+    * any format is largely the same, but the exact details vary.
     *
     * A 'Recognizer' is used to handle the finer details of the format parsing.
     * A recognizer should contain methods 'isTextOfThisFormat',
@@ -4491,6 +4556,10 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         
         this.addCurrentCompetitorAndCourseIfNecessary();
         
+        if (this.courses.length === 0) {
+            throwInvalidData("No competitor data was found");
+        }
+        
         var eventData = this.createOverallEventObject();
         return eventData;
     };
@@ -4721,6 +4790,10 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
                 }
             }
             
+            if (!competitor.hasAnyTimes()) {
+                competitor.setNonStarter();
+            }
+            
             if (classes.has(courseName)) {
                 var cls = classes.get(courseName);
                 // Subtract one from the list of cumulative times for the 
@@ -4802,7 +4875,7 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         try {
             xml = $.parseXML(xmlString);
         } catch (e) {
-            throwInvalidData("XML data not well-formed: " + e.message);
+            throwInvalidData("XML data not well-formed");
         }
         
         if ($("> *", $(xml)).length === 0) {
@@ -4989,16 +5062,20 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     };
 
     /**
-    * Returns whether a competitor's result declares them as non-competitive.
+    * Returns the status of the competitor with the given result.
     * @param {jQuery.selection} resultElement - jQuery selection containing a
     *     Result element.
-    * @return {boolean} - True if the competitor is non-competitive, false if
-    *     the competitor is competitive.
+    * @return {String} Status of the competitor.
     */
-    Version2Reader.isNonCompetitive = function (resultElement) {
+    Version2Reader.getStatus = function (resultElement) {
         var statusElement = $("> CompetitorStatus", resultElement);
-        return (statusElement.length === 1 && statusElement.attr("value") === "NotCompeting");
+        return (statusElement.length === 1) ? statusElement.attr("value") : "";
     };
+    
+    Version2Reader.StatusNonCompetitive = "NotCompeting";
+    Version2Reader.StatusNonStarter = "DidNotStart";
+    Version2Reader.StatusNonFinisher = "DidNotFinish";
+    Version2Reader.StatusDisqualified = "Disqualified";
     
     /**
     * Reads a control code and split time from a SplitTime element.
@@ -5184,16 +5261,20 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     };
 
     /**
-    * Returns whether a competitor's result declares them as non-competitive.
+    * Returns the status of the competitor with the given result.
     * @param {jQuery.selection} resultElement - jQuery selection containing a
     *     Result element.
-    * @return {boolean} - True if the competitor is non-competitive, false if
-    *     the competitor is competitive.
+    * @return {String} Status of the competitor.
     */
-    Version3Reader.isNonCompetitive = function (resultElement) {
-        return $("> Status", resultElement).text() === "NotCompeting";
+    Version3Reader.getStatus = function (resultElement) {
+        return $("> Status", resultElement).text();
     };
     
+    Version3Reader.StatusNonCompetitive = "NotCompeting";
+    Version3Reader.StatusNonStarter = "DidNotStart";
+    Version3Reader.StatusNonFinisher = "DidNotFinish";
+    Version3Reader.StatusDisqualified = "Disqualified";
+
     /**
     * Reads a control code and split time from a SplitTime element.
     * @param {jQuery.selection} splitTimeElement - jQuery selection containing
@@ -5274,8 +5355,6 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         
         var totalTime = reader.readTotalTime(resultElement);
         
-        var nonCompetitive = reader.isNonCompetitive(resultElement);
-        
         var splitTimes = $("> SplitTime", resultElement).toArray();
         var splitData = splitTimes.map(function (splitTime) { return reader.readSplitTime($(splitTime)); });
         
@@ -5286,8 +5365,16 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         cumTimes.push(totalTime);
         
         var competitor = fromOriginalCumTimes(number, name, club, startTime, cumTimes);
-        if (nonCompetitive) {
+        
+        var status = reader.getStatus(resultElement);
+        if (status === reader.StatusNonCompetitive) {
             competitor.setNonCompetitive();
+        } else if (status === reader.StatusNonStarter) {
+            competitor.setNonStarter();
+        } else if (status === reader.StatusNonFinisher) {
+            competitor.setNonFinisher();
+        } else if (status === reader.StatusDisqualified) {
+            competitor.disqualify();
         }
         
         return {
@@ -5497,6 +5584,9 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         this.currentDragCompetitorIndex = null;
         this.allCompetitorDivs = [];
         this.inverted = false;
+        this.placeholderDiv = null;
+        
+        this.changeHandlers = [];
         
         this.containerDiv = d3.select(parent).append("div")
                                              .attr("id", COMPETITOR_LIST_CONTAINER_ID);
@@ -5527,7 +5617,7 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         
         this.filter = this.buttonsPanel.append("input")
                                        .attr("type", "text")
-                                       .attr("placeholder", "Filter");
+                                       .attr("placeholder", getMessage("CompetitorListFilter"));
 
         // Update the filtered list of competitors on any change to the
         // contents of the filter textbox.  The last two are for the benefit of
@@ -5536,9 +5626,9 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         // updates to filter on key-up and mouse-up, which I believe *should*
         // catch every change.  It's not a problem to update the filter too
         // often: if the filter text hasn't changed, nothing happens.
-        this.filter.on("input", function () { outerThis.updateFilter(); })
-                   .on("keyup", function () { outerThis.updateFilterDelayed(); })
-                   .on("mouseup", function () { outerThis.updateFilterDelayed(); });
+        this.filter.on("input", function () { outerThis.updateFilterIfChanged(); })
+                   .on("keyup", function () { outerThis.updateFilterIfChangedDelayed(); })
+                   .on("mouseup", function () { outerThis.updateFilterIfChangedDelayed(); });
                                       
         this.listDiv = this.containerDiv.append("div")
                                         .attr("id", COMPETITOR_LIST_ID);
@@ -5551,13 +5641,49 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
+    * Register a handler to be called whenever the filter text changes.
+    *
+    * When a change is made, this function will be called, with no arguments.
+    *
+    * If the handler has already been registered, nothing happens.
+    *
+    * @param {Function} handler - The handler to register.
+    */
+    CompetitorList.prototype.registerChangeHandler = function (handler) {
+        if (this.changeHandlers.indexOf(handler) === -1) {
+            this.changeHandlers.push(handler);
+        }
+    };
+
+    /**
+    * Unregister a handler from being called when the filter text changes.
+    *
+    * If the handler given was never registered, nothing happens.
+    *
+    * @param {Function} handler - The handler to register.
+    */
+    CompetitorList.prototype.deregisterChangeHandler = function (handler) {
+        var index = this.changeHandlers.indexOf(handler);
+        if (index > -1) {
+            this.changeHandlers.splice(index, 1);
+        }
+    };
+    
+    /**
+    * Fires all of the change handlers currently registered.
+    */
+    CompetitorList.prototype.fireChangeHandlers = function () {
+        this.changeHandlers.forEach(function (handler) { handler(); }, this);
+    };
+    
+    /**
     * Returns whether the current mouse event is off the bottom of the list of
     * competitor divs.
     * @return {boolean} True if the mouse is below the last visible div, false
     *     if not.
     */
     CompetitorList.prototype.isMouseOffBottomOfCompetitorList = function () {
-        return d3.mouse(this.lastVisibleDiv)[1] >= $(this.lastVisibleDiv).height();
+        return this.lastVisibleDiv === null || d3.mouse(this.lastVisibleDiv)[1] >= $(this.lastVisibleDiv).height();
     };
     
     /**
@@ -5580,7 +5706,7 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
             this.currentDragCompetitorIndex = index;
             this.allCompetitorDivs = $("div.competitor");
             var visibleDivs = this.allCompetitorDivs.filter(":visible");
-            this.lastVisibleDiv = visibleDivs[visibleDivs.length - 1];
+            this.lastVisibleDiv = (visibleDivs.length === 0) ? null : visibleDivs[visibleDivs.length - 1];
             this.inverted = d3.event.shiftKey;
             if (index === CONTAINER_COMPETITOR_INDEX) {
                 // Drag not starting on one of the competitors.
@@ -5797,6 +5923,11 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         this.allCompetitors = competitors;
         this.normedNames = competitors.map(function (comp) { return normaliseName(comp.name); });
         
+        if (this.placeholderDiv !== null) {
+            this.placeholderDiv.remove();
+            this.placeholderDiv = null;
+        }
+        
         var competitorDivs = this.listDiv.selectAll("div.competitor").data(competitors);
 
         var outerThis = this;
@@ -5818,9 +5949,22 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
 
         competitorDivs.exit().remove();
         
+        if (competitors.length === 0) {
+            this.placeholderDiv = this.listDiv.append("div")
+                                              .classed("competitorListPlaceholder", true)
+                                              .text(getMessage("NoCompetitorsStarted"));
+        }
+        
+        this.allButton.property("disabled", competitors.length === 0);
+        this.noneButton.property("disabled", competitors.length === 0);
+        this.filter.property("disabled", competitors.length === 0);
+        
         competitorDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
                       .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })
                       .on("mouseup", function () { outerThis.stopDrag(); });
+
+        // Force an update on the filtering.
+        this.updateFilter();
     };
 
     /**
@@ -5840,17 +5984,43 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
-    * Updates the filtering following a change in the filter text input.
+    * Returns the filter text currently being used.
+    * @return {String} Filter text.
+    */
+    CompetitorList.prototype.getFilterText = function () {
+        return this.filter.node().value;
+    };
+    
+    /**
+    * Sets the filter text to use.
+    * @param {String} filterText - The filter text to use.
+    */
+    CompetitorList.prototype.setFilterText = function (filterText) {
+        this.filter.node().value = filterText;
+        this.updateFilterIfChanged();
+    };
+    
+    /**
+    * Updates the filtering.
     */
     CompetitorList.prototype.updateFilter = function () {
         var currentFilterString = this.filter.node().value;
+        var normedFilter = normaliseName(currentFilterString);
+        var outerThis = this;
+        this.listDiv.selectAll("div.competitor")
+                    .style("display", function (div, index) { return (outerThis.normedNames[index].indexOf(normedFilter) >= 0) ? null : "none"; });
+    };
+    
+    /**
+    * Updates the filtering following a change in the filter text input, if the
+    * filter text has changed since last time.  If not, nothing happens.
+    */
+    CompetitorList.prototype.updateFilterIfChanged = function () {
+        var currentFilterString = this.getFilterText();
         if (currentFilterString !== this.lastFilterString) {
-            var normedFilter = normaliseName(currentFilterString);
-            var outerThis = this;
-            this.listDiv.selectAll("div.competitor")
-                        .style("display", function (div, index) { return (outerThis.normedNames[index].indexOf(normedFilter) >= 0) ? null : "none"; });
-            
+            this.updateFilter();
             this.lastFilterString = currentFilterString;
+            this.fireChangeHandlers();
         }
     };
     
@@ -5858,9 +6028,9 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     * Updates the filtering following a change in the filter text input
     * in a short whiie.
     */
-    CompetitorList.prototype.updateFilterDelayed = function () {
+    CompetitorList.prototype.updateFilterIfChangedDelayed = function () {
         var outerThis = this;
-        setTimeout(function () { outerThis.updateFilter(); }, 1);
+        setTimeout(function () { outerThis.updateFilterIfChanged(); }, 1);
     };
     
     SplitsBrowser.Controls.CompetitorList = CompetitorList;
@@ -7253,27 +7423,6 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     }
     
     /**
-    * Hides the chart.
-    */
-    Chart.prototype.hide = function () {
-        // Note that we don't use display: none to hide the chart.
-        // While the chart is hidden, the sizes of various text strings are
-        // determined.  Firefox gives you an NS_ERROR_FAILURE message if the
-        // element you're trying to compute the size of, or an ancestor of it,
-        // has display: none.        
-        this.svg.style("position", "absolute")
-                .style("left", "-9999px");
-    };
-    
-    /**
-    * Shows the chart, after it has been hidden.
-    */
-    Chart.prototype.show = function () {
-        this.svg.style("position", null)
-                .style("left", null);
-    };
-    
-    /**
     * Sets the left margin of the chart.
     * @param {Number} leftMargin - The left margin of the chart.
     */
@@ -8391,6 +8540,29 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     }
     
     /**
+    * Returns the contents of the time or status column for the given
+    * competitor.
+    * 
+    * The status may be a string that indicates the competitor mispunched.
+    *
+    * @param {Competitor} competitor The competitor to get the status of.
+    * @return {String} Time or status for the given competitor.
+    */
+    function getTimeOrStatus (competitor) {
+        if (competitor.isNonStarter) {
+            return getMessage("DidNotStartShort");
+        } else if (competitor.isNonFinisher) {
+            return getMessage("DidNotFinishShort");
+        } else if (competitor.isDisqualified) {
+            return getMessage("DisqualifiedShort");
+        } else if (competitor.completed()) {
+            return formatTime(competitor.totalTime);
+        } else {
+            return getMessage("MispunchedShort");
+        }
+    }
+    
+    /**
     * Populates the contents of the table with the age-class data.
     */
     ResultsTable.prototype.populateTable = function () {
@@ -8478,7 +8650,7 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
             }
             
             addCell(tableRow, competitor.name, competitor.club, false, false);
-            addCell(tableRow, (competitor.completed()) ? formatTime(competitor.totalTime) : getMessage("MispunchedShort"), NON_BREAKING_SPACE_CHAR, "time", false, false);
+            addCell(tableRow, getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false);
             
             d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
                 var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
@@ -8850,6 +9022,36 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         return (showOriginal) ? queryString + "&showOriginal=1" : queryString;
     }
     
+    var FILTER_TEXT_REGEXP = /(?:^|&|\?)filterText=([^&]*)/;
+    
+    /**
+    * Reads the filter text from the given query string.
+    *
+    * If no filter text is found, an empty string is returned.
+    *
+    * @param {String} queryString - The query-string to read.
+    * @return {String} The filter text read.
+    */
+    function readFilterText(queryString) {
+        var filterTextMatch = FILTER_TEXT_REGEXP.exec(queryString);
+        if (filterTextMatch === null) {
+            return "";
+        } else {
+            return decodeURIComponent(filterTextMatch[1]);
+        }
+    }
+    
+    /**
+    * Formats filter text into the given query-string.
+    * @param {String} queryString - The original query-string.
+    * @param {String} filterText - The filter text.
+    * @return {String} The query-string with the filter text formatted in.
+    */
+    function formatFilterText(queryString, filterText) {
+        queryString = removeAll(queryString, FILTER_TEXT_REGEXP);
+        return (filterText === "") ? queryString : queryString + "&filterText=" + encodeURIComponent(filterText);
+    }
+    
     /**
     * Attempts to parse the given query string.
     * @param {String} queryString - The query string to parse.
@@ -8865,7 +9067,8 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
             compareWith: readComparison(queryString, ageClassSet),
             selected: readSelectedCompetitors(queryString, ageClassSet),
             stats: readSelectedStatistics(queryString),
-            showOriginal: readShowOriginal(queryString)
+            showOriginal: readShowOriginal(queryString),
+            filterText: readFilterText(queryString)
         };
     }
 
@@ -8891,6 +9094,7 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         queryString = formatSelectedCompetitors(queryString, ageClassSet, data.selected);
         queryString = formatSelectedStatistics(queryString, data.stats);
         queryString = formatShowOriginal(queryString, data.showOriginal);
+        queryString = formatFilterText(queryString, data.filterText);
         queryString = queryString.replace(/^\??&/, "");
         return queryString;
     }
@@ -9135,7 +9339,8 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
             compareWith: this.comparisonSelector.getComparisonType(),
             selected: this.selection.getSelectedIndexes(),
             stats: this.statisticsSelector.getVisibleStatistics(),
-            showOriginal: this.ageClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected()
+            showOriginal: this.ageClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected(),
+            filterText: this.competitorList.getFilterText()
         };
         
         var oldQueryString = document.location.search;
@@ -9156,6 +9361,8 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     */
     Viewer.prototype.buildUi = function () {
         var body = d3.select("body");
+        
+        body.style("overflow", "hidden");
         
         this.topPanel = body.append("div");
         
@@ -9208,6 +9415,7 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartTypeAndRedraw(chartType); });
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
         this.originalDataSelector.registerChangeHandler(function (showOriginalData) { outerThis.showOriginalOrRepairedData(showOriginalData); });
+        this.competitorList.registerChangeHandler(function () { outerThis.handleFilterTextChanged(); });
     };
     
     /**
@@ -9254,13 +9462,35 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     */
     Viewer.prototype.postResizeHook = function () {
         this.currentResizeTimeout = null;
-        this.drawChart();
+        this.setCompetitorListHeight();
+        this.setChartSize();
+        this.redraw();
     };
-
+    
     /**
-    * Adjusts the size of the viewer.
+    * Gets the usable height of the window, i.e. the height of the window minus
+    * margin and the height of the top bar, if any.  This height is used for
+    * the competitor list and the chart.
+    * @return {Number} Usable height of the window.
     */
-    Viewer.prototype.adjustSize = function () {
+    Viewer.prototype.getUsableHeight = function () {
+        var vertMargin = parseInt($("body").css("margin-top"), 10) + parseInt($("body").css("margin-bottom"), 10);
+        var bodyHeight = $(window).height() - vertMargin - this.topBarHeight;
+        var topPanelHeight = $(this.topPanel.node()).height();
+        return bodyHeight - topPanelHeight;
+    };
+    
+    /**
+    * Sets the height of the competitor list.
+    */
+    Viewer.prototype.setCompetitorListHeight = function () {
+        this.competitorList.setHeight(this.getUsableHeight());
+    };
+    
+    /**
+    * Determines the size of the chart and sets it.
+    */
+    Viewer.prototype.setChartSize = function () {
         // Margin around the body element.
         var horzMargin = parseInt($("body").css("margin-left"), 10) + parseInt($("body").css("margin-right"), 10);
         var vertMargin = parseInt($("body").css("margin-top"), 10) + parseInt($("body").css("margin-bottom"), 10);
@@ -9275,26 +9505,10 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
 
         $("body").width(bodyWidth).height(bodyHeight);
         
-        var topPanelHeight = $(this.topPanel.node()).height();
-
-        // Hide the chart before we adjust the width of the competitor list.
-        // If the competitor list gets wider, the new competitor list and the
-        // old chart may be too wide together, and so the chart wraps onto a
-        // new line.  Even after shrinking the chart back down, there still
-        // might not be enough horizontal space, because of the vertical
-        // scrollbar.  So, hide the chart now, and re-show it later once we
-        // know what size it should have.
-        this.chart.hide();
-        
-        this.competitorList.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
-        
         var chartWidth = bodyWidth - this.competitorList.width() - EXTRA_WRAP_PREVENTION_SPACE;
-        var chartHeight = bodyHeight - topPanelHeight;
-
-        this.chart.setSize(chartWidth, chartHeight);
-        this.chart.show();
+        var chartHeight = this.getUsableHeight();
         
-        this.competitorList.setHeight(bodyHeight - topPanelHeight);
+        this.chart.setSize(chartWidth, chartHeight);
     };
     
     /**
@@ -9304,8 +9518,6 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         if (this.chartTypeSelector.getChartType().isResultsTable) {
             return;
         }
-        
-        this.adjustSize();
         
         this.currentVisibleStatistics = this.statisticsSelector.getVisibleStatistics();
         
@@ -9390,8 +9602,9 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     Viewer.prototype.initClasses = function (classIndexes) {
         this.classSelector.selectClasses(classIndexes);
         this.setClasses(classIndexes);
+        this.competitorList.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
         this.selection = new CompetitorSelection(this.ageClassSet.allCompetitors.length);
-        this.competitorListBox.setSelection(this.selection);
+        this.competitorList.setSelection(this.selection);
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
     };
     
@@ -9400,7 +9613,6 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     * @param {Number} classIndexes - The (zero-based) indexes of the classes.
     */
     Viewer.prototype.selectClasses = function (classIndexes) {
-    
         if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
             // The 'primary' class hasn't changed, only the 'other' ones.
             // In this case we don't clear the selection.
@@ -9409,8 +9621,10 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         }
         
         this.setClasses(classIndexes);
+        this.competitorList.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
         this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
-        this.competitorListBox.selectionChanged();
+        this.competitorList.selectionChanged();
+        this.setChartSize();
         this.drawChart();
         this.previousCompetitorList = this.ageClassSet.allCompetitors;
         this.updateDirectLink();
@@ -9432,15 +9646,18 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         if (chartType.isResultsTable) {
             this.mainPanel.style("display", "none");
             
-            // Remove any fixed width and height on the body, as we need the
-            // window to be able to scroll if the results table is too wide or
-            // too tall and also adjust size if one or both scrollbars appear.
-            d3.select("body").style("width", null).style("height", null);
+            // Remove any fixed width and height on the body, as well as
+            // overflow:hidden, as we need the window to be able to scroll if
+            // the results table is too wide or too tall and also adjust size
+            // if one or both scrollbars appear.
+            d3.select("body").style("width", null).style("height", null).style("overflow", null);
             
             this.resultsTable.show();
         } else {
             this.resultsTable.hide();
+            d3.select("body").style("overflow", "hidden");
             this.mainPanel.style("display", null);
+            this.setChartSize();
         }
         
         this.updateControlEnabledness();
@@ -9480,6 +9697,15 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
     Viewer.prototype.showOriginalOrRepairedData = function (showOriginalData) {
         this.selectOriginalOrRepairedData(showOriginalData);
         this.drawChart();
+        this.updateDirectLink();
+    };
+    
+    /**
+    * Handles a change in the filter text in the competitor list.
+    */
+    Viewer.prototype.handleFilterTextChanged = function () {
+        this.setChartSize();
+        this.redraw();
         this.updateDirectLink();
     };
     
@@ -9526,6 +9752,10 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
         if (parsedQueryString.showOriginal && this.ageClassSet.hasDubiousData()) {
             this.originalDataSelector.selectOriginalData();
             this.selectOriginalOrRepairedData(true);
+        }
+        
+        if (parsedQueryString.filterText !== "") {
+            this.competitorList.setFilterText(parsedQueryString.filterText);
         }
     };
     
@@ -9603,6 +9833,8 @@ var SplitsBrowser = { Version: "3.2.7c", Model: {}, Input: {}, Controls: {} };
                 viewer.setDefaultSelectedClass();
             }
 
+            viewer.setCompetitorListHeight();
+            viewer.setChartSize();
             viewer.drawChart();
             viewer.registerChangeHandlers();
         }
