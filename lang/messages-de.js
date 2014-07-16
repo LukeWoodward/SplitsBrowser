@@ -141,11 +141,11 @@ SplitsBrowser.Messages = {
     
     // Labels that appear beside a competitor on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
-    DidNotStartShort: "dns",
-    DidNotFinishShort: "dnf",
-    DisqualifiedShort: "dsq",
+    DidNotStartShort: "n.ang.",
+    DidNotFinishShort: "aufg.",
+    DisqualifiedShort: "disq.",
     
     // Placeholder message shown inside the competitor list if all competitors
     // in the class did not start.
-    NoCompetitorsStarted: "No competitors started"
+    NoCompetitorsStarted: "Keine Teilnehmer gestartet"
 };
