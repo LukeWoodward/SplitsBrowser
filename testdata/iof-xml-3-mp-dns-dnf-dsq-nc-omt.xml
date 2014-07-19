@@ -172,5 +172,33 @@
                 </SplitTime>
             </Result>
         </PersonResult>
+        <PersonResult>
+            <Person>
+                <Name>
+                    <Given>Over</Given>
+                    <Family>Max Time</Family>
+                </Name>
+            </Person>
+            <Organisation>
+                <ShortName>STU</ShortName>
+            </Organisation>
+            <Result>
+                <StartTime>2014-06-07T11:45:00</StartTime>
+                <Time>11087</Time>
+                <Status>OverTime</Status>
+                <SplitTime>
+                    <ControlCode>212</ControlCode>
+                    <Time>4762</Time>
+                </SplitTime>
+                <SplitTime>
+                    <ControlCode>229</ControlCode>
+                    <Time>7507</Time>
+                </SplitTime>
+                <SplitTime>
+                    <ControlCode>208</ControlCode>
+                    <Time>9859</Time>
+                </SplitTime>
+            </Result>
+        </PersonResult>
     </ClassResult>
 </ResultList>
