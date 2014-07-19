@@ -55,6 +55,7 @@
         COLUMN_INDEXES[columnOffset].nonCompetitive = columnOffset - 38;
         COLUMN_INDEXES[columnOffset].startTime = columnOffset - 37;
         COLUMN_INDEXES[columnOffset].time = columnOffset - 35;
+        COLUMN_INDEXES[columnOffset].classifier = columnOffset - 34;
         COLUMN_INDEXES[columnOffset].club =  columnOffset - 31;
         COLUMN_INDEXES[columnOffset].ageClass = columnOffset - 28;
     });
@@ -70,6 +71,7 @@
     COLUMN_INDEXES[60].nonCompetitive = 10;
     COLUMN_INDEXES[60].startTime = 11;
     COLUMN_INDEXES[60].time = 13;
+    COLUMN_INDEXES[60].classifier = 14;
     COLUMN_INDEXES[60].club = 20;
     COLUMN_INDEXES[60].ageClass = 26;
     COLUMN_INDEXES[60].ageClassFallback = COLUMN_INDEXES[60].course;
@@ -367,10 +369,20 @@
             competitor.setNonCompetitive();
         }
         
-        if (!competitor.hasAnyTimes()) {
+        var classifier = row[this.columnIndexes.classifier];
+        if (classifier !== "" && classifier !== "0") {
+            if (classifier === "1") {
+                competitor.setNonStarter();
+            } else if (classifier === "2") {
+                competitor.setNonFinisher();
+            } else if (classifier === "4") {
+                competitor.disqualify();
+            } else if (classifier === "5") {
+                competitor.setOverMaxTime();
+            }
+        } else if (!competitor.hasAnyTimes()) {
             competitor.setNonStarter();
         }
-        
 
         this.ageClasses.get(className).competitors.push(competitor);
     };
