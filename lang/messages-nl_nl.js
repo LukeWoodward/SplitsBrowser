@@ -150,5 +150,9 @@ SplitsBrowser.Messages.nl_nl = {
     NoCompetitorsStarted: "No competitors started",
     
     // Label of the language-selector control.
-    LanguageSelectorLabel: "Language:"
+    LanguageSelectorLabel: "Language:",
+    
+    // Label that appears beside a competitor on the Results Table to indicate
+    // that they were over the maximum time.
+    OverMaxTimeShort: "over max time"
 };

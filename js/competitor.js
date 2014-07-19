@@ -173,6 +173,7 @@
         this.isNonStarter = false;
         this.isNonFinisher = false;
         this.isDisqualified = false;
+        this.isOverMaxTime = false;
         this.className = null;
         
         this.originalSplitTimes = originalSplitTimes;
@@ -213,6 +214,13 @@
     */
     Competitor.prototype.disqualify = function () {
         this.isDisqualified = true;
+    };
+    
+    /**
+    * Marks this competitor as over maximum time.
+    */
+    Competitor.prototype.setOverMaxTime = function () {
+        this.isOverMaxTime = true;
     };
     
     /**
@@ -319,7 +327,7 @@
     *     or got disqualified.
     */
     Competitor.prototype.completed = function () {
-        return this.totalTime !== null && !this.isDisqualified;
+        return this.totalTime !== null && !this.isDisqualified && !this.isOverMaxTime;
     };
 
     /**
@@ -348,6 +356,8 @@
             return getMessage("DidNotFinishShort"); 
         } else if (this.isDisqualified) {
             return getMessage("DisqualifiedShort");
+        } else if (this.isOverMaxTime) {
+            return getMessage("OverMaxTimeShort");
         } else if (this.completed()) {
             return "";
         } else {

@@ -81,6 +81,7 @@
         assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
         assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
         assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");
+        assert.ok(!competitor.isOverMaxTime, "Competitor should not be over max time");
     });
 
     QUnit.test("Can create a non-competitive competitor from split times and determine cumulative times", function (assert) {
@@ -139,7 +140,8 @@
         assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
         assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
         assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
-        assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");        
+        assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");
+        assert.ok(!competitor.isOverMaxTime, "Competitor should not be over max time");
     });
 
     QUnit.test("Can create a competitor from cumulative times and determine split times when competitor has missed a control", function (assert) {
@@ -165,7 +167,9 @@
         assert.ok(competitor.isNonCompetitive, "Competitor should not be competitive");
         assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
         assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
-        assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");                
+        assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");
+        assert.ok(!competitor.isOverMaxTime, "Competitor should not be over max time");
+        
         assert.strictEqual(competitor.getSuffix(), getMessage("NonCompetitiveShort"), "Competitor should have non-competitive suffix");
     });
 
@@ -176,6 +180,7 @@
         assert.ok(competitor.isNonStarter, "Competitor should be a non-starter");
         assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
         assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");                
+        assert.ok(!competitor.isOverMaxTime, "Competitor should not be over max time");
     });
 
     QUnit.test("Can create a non-finishing competitor from cumulative times", function (assert) {
@@ -185,6 +190,7 @@
         assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
         assert.ok(competitor.isNonFinisher, "Competitor should be a non-finisher");
         assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");        
+        assert.ok(!competitor.isOverMaxTime, "Competitor should not be over max time");
         assert.strictEqual(competitor.getSuffix(), getMessage("DidNotFinishShort"), "Competitor should have non-finishing suffix");
     });
 
@@ -196,7 +202,20 @@
         assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
         assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
         assert.ok(competitor.isDisqualified, "Competitor should be disqualified");
+        assert.ok(!competitor.isOverMaxTime, "Competitor should not be over max time");
         assert.strictEqual(competitor.getSuffix(), getMessage("DisqualifiedShort"), "Competitor should have a disqualified suffix");
+    });
+
+    QUnit.test("Can create an over-max-time competitor from cumulative times", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        competitor.setOverMaxTime();
+        assert.ok(!competitor.completed(), "Over-max-time competitor should not be marked as completing the course");
+        assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
+        assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
+        assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
+        assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");
+        assert.ok(competitor.isOverMaxTime, "Competitor should be over max time");
+        assert.strictEqual(competitor.getSuffix(), getMessage("OverMaxTimeShort"), "Competitor should have an over-max-time suffix");
     });
 
     QUnit.test("Can create a competitor from original cumulative times and determine original split times with final times still null", function (assert) {
