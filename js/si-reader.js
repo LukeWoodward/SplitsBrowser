@@ -353,6 +353,9 @@
         if (name === "" && this.columnIndexes.hasOwnProperty("combinedName")) {
             // 'Nameless' or 44-column variation.
             name = row[this.columnIndexes.combinedName];
+            if (isPlacingNonNumeric && name.substring(name.length - placing.length) === placing) {
+                name = $.trim(name.substring(0, name.length - placing.length));
+            }
         }
         
         var order = this.ageClasses.get(className).competitors.length + 1;
