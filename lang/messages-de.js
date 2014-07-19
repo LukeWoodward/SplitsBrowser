@@ -150,5 +150,5 @@ SplitsBrowser.Messages.de = {
     NoCompetitorsStarted: "Keine Teilnehmer gestartet",
     
     // Label of the language-selector control.
-    LanguageSelectorLabel: "Language:"
+    LanguageSelectorLabel: "Sprache:"
 };
