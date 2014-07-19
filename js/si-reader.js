@@ -45,13 +45,14 @@
             climb: columnOffset - 5,
             controlCount: columnOffset - 4,
             placing: columnOffset - 3,
-            start: columnOffset - 2,
+            startPunch: columnOffset - 2,
             finish: columnOffset - 1,
             control1: columnOffset
         };
     });
     
     [44, 46].forEach(function (columnOffset) {
+        COLUMN_INDEXES[columnOffset].startTime = columnOffset - 37;
         COLUMN_INDEXES[columnOffset].time = columnOffset - 35;
         COLUMN_INDEXES[columnOffset].club =  columnOffset - 31;
         COLUMN_INDEXES[columnOffset].ageClass = columnOffset - 28;
@@ -65,7 +66,7 @@
     COLUMN_INDEXES[60].forename = 6;
     COLUMN_INDEXES[60].surname = 5;
     COLUMN_INDEXES[60].combinedName = 3;
-    COLUMN_INDEXES[60].startFallback = 11;
+    COLUMN_INDEXES[60].startTime = 11;
     COLUMN_INDEXES[60].time = 13;
     COLUMN_INDEXES[60].club = 20;
     COLUMN_INDEXES[60].ageClass = 26;
@@ -203,14 +204,15 @@
     };
 
     /**
-    * Reads the start-time in the given row.
+    * Reads the start-time in the given row.  The start punch time will
+    * be used if it is available, otherwise the start time.
     * @param {Array} row - Array of row data.
     * @return {?Number} Parsed start time, or null for none.
     */
     Reader.prototype.getStartTime = function (row) {
-        var startTimeStr = row[this.columnIndexes.start];
-        if (startTimeStr === "" && this.columnIndexes.hasOwnProperty("startFallback")) {
-            startTimeStr = row[this.columnIndexes.startFallback];
+        var startTimeStr = row[this.columnIndexes.startPunch];
+        if (startTimeStr === "") {
+            startTimeStr = row[this.columnIndexes.startTime];
         }
         
         return parseTime(startTimeStr);
