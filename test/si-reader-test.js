@@ -31,7 +31,7 @@
     var HEADER_46 = "Stno;SI card;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls.
-    var ROW_TEMPLATE_46 = "0;1;2;surname;forename;5;6;7;8;startTime;10;time;12;13;14;club;16;17;ageClass;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;course;distance;climb;numControls;placing;startPunch;45";
+    var ROW_TEMPLATE_46 = "0;1;2;surname;forename;5;6;7;nonComp;startTime;10;time;12;13;14;club;16;17;ageClass;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;course;distance;climb;numControls;placing;startPunch;45";
     
     // Header line when control 1 is in column 44.
     // Compared to the variant above, this line has no 'S' column and has the
@@ -39,7 +39,7 @@
     var HEADER_44 = "Stno;SI card;Database Id;Name;YB;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls.
-    var ROW_TEMPLATE_44 = "0;1;2;name;4;5;6;startTime;8;time;10;11;12;club;14;15;ageClass;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;course;distance;climb;numControls;placing;startPunch;43";
+    var ROW_TEMPLATE_44 = "0;1;2;name;4;5;nonComp;startTime;8;time;10;11;12;club;14;15;ageClass;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;course;distance;climb;numControls;placing;startPunch;43";
     
     // Header line when control 1 is in column 60.
     // This has various new columns.  It also doesn't always have competitor
@@ -47,7 +47,7 @@
     var HEADER_60 = "OE0014;Stno;XStno;Chipno;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Credit -;Penalty +;Comment;Club no.;Cl.name;City;Nat;Location;Region;Cl. no.;Short;Long;Entry cl. No;Entry class (short);Entry class (long);Rank;Ranking points;Num1;Num2;Num3;Text1;Text2;Text3;Addr. surname;Addr. first name;Street;Line2;Zip;Addr. city;Phone;Mobile;Fax;EMail;Rented;Start fee;Paid;Team;Course no.;Course;km;m;Course controls;Place;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls of the 60-column variation.
-    var ROW_TEMPLATE_60 = "0;1;2;compno;4;surname;forename;7;8;9;10;startTime;12;time;14;15;16;17;noOfClub;19;club;21;22;23;24;25;ageClass;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;45;46;47;48;49;50;51;52;course;distance;climb;numControls;placing;startPunch;finish";
+    var ROW_TEMPLATE_60 = "0;1;2;compno;4;surname;forename;7;8;9;nonComp;startTime;12;time;14;15;16;17;noOfClub;19;club;21;22;23;24;25;ageClass;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;45;46;47;48;49;50;51;52;course;distance;climb;numControls;placing;startPunch;finish";
     
     /**
     * Generates a row of data for an SI-format file.
@@ -98,7 +98,8 @@
             distance: "4.1",
             climb: "140",
             numControls: "3",
-            placing: "1"
+            placing: "1",
+            nonComp: ""
         };
     }
     
@@ -122,7 +123,8 @@
             distance: "4.1",
             climb: "140",
             numControls: "3",
-            placing: "2"
+            placing: "2",
+            nonComp: ""            
         };
     }
     
@@ -159,7 +161,8 @@
             distance: "4.1",
             climb: "140",
             numControls: "3",
-            placing: "3"        
+            placing: "3",
+            nonComp: ""
         };
     }
     
@@ -578,6 +581,33 @@
         assert.ok(!competitor.isNonFinisher, "Competitor should not be marked as a non-finisher");
         assert.ok(!competitor.isDisqualified, "Competitor should not be marked as disqualified");
     });
+    
+    QUnit.test("Can parse a string that contains a single non-competitive competitor's data", function (assert) {
+        var comp = getCompetitor1();
+        comp.nonComp = "1";
+        var eventData = parseEventData(HEADER_46 + generateRow(comp, getControls1(), ROW_TEMPLATE_46));
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+        assert.ok(eventData.classes[0].competitors[0].isNonCompetitive, "Competitor should be marked as non-competitive");
+   });
+    
+    QUnit.test("Can parse a string that contains a single non-competitive competitor's data in column-44 variation", function (assert) {
+        var comp = getCompetitor1();
+        comp.nonComp = "1";
+        var eventData = parseEventData(HEADER_44 + generateRow(comp, getControls1(), ROW_TEMPLATE_44));
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+        assert.ok(eventData.classes[0].competitors[0].isNonCompetitive, "Competitor should be marked as non-competitive");
+   });
+    
+    QUnit.test("Can parse a string that contains a single non-competitive competitor's data in column-60 variation", function (assert) {
+        var comp = getCompetitor1();
+        comp.nonComp = "1";
+        var eventData = parseEventData(HEADER_60 + generateRow(comp, getControls1(), ROW_TEMPLATE_60));
+        assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+        assert.ok(eventData.classes[0].competitors[0].isNonCompetitive, "Competitor should be marked as non-competitive");
+   });
     
     QUnit.test("Can parse a string that contains a single non-starting competitor's data", function (assert) {
         var competitor1 = getCompetitor1();

@@ -52,6 +52,7 @@
     });
     
     [44, 46].forEach(function (columnOffset) {
+        COLUMN_INDEXES[columnOffset].nonCompetitive = columnOffset - 38;
         COLUMN_INDEXES[columnOffset].startTime = columnOffset - 37;
         COLUMN_INDEXES[columnOffset].time = columnOffset - 35;
         COLUMN_INDEXES[columnOffset].club =  columnOffset - 31;
@@ -66,6 +67,7 @@
     COLUMN_INDEXES[60].forename = 6;
     COLUMN_INDEXES[60].surname = 5;
     COLUMN_INDEXES[60].combinedName = 3;
+    COLUMN_INDEXES[60].nonCompetitive = 10;
     COLUMN_INDEXES[60].startTime = 11;
     COLUMN_INDEXES[60].time = 13;
     COLUMN_INDEXES[60].club = 20;
@@ -355,9 +357,10 @@
         
         var order = this.ageClasses.get(className).competitors.length + 1;
         var competitor = fromOriginalCumTimes(order, name, club, startTime, cumTimes);
-        if (isPlacingNonNumeric && competitor.completed()) {
-            // Competitor has completed the course but has no placing.
-            // Assume that they are non-competitive.
+        if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && competitor.completed()) {
+            // Competitor either marked as non-competitive, or has completed
+            // the course but has a non-numeric placing.  In the latter case,
+            // assume that they are non-competitive.
             competitor.setNonCompetitive();
         }
         
