@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
+var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -33,6 +33,15 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
     
     // Default alerter function, just calls window.alert.
     var alertFunc = function (message) { window.alert(message); };
+    
+    // The currently-chosen language, or null if none chosen or found yet.
+    var currentLanguage = null;
+    
+    // The list of all languages read in, or null if none.
+    var allLanguages = null;
+    
+    // The messages object.
+    var messages = SplitsBrowser.Messages;
     
     /**
     * Issue a warning about the messages, if a warning hasn't already been
@@ -67,7 +76,7 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
     *     otherwise the default value.
     */
     SplitsBrowser.tryGetMessage = function (key, defaultValue) {
-        return (SplitsBrowser.Messages && SplitsBrowser.Messages.hasOwnProperty(key)) ? SplitsBrowser.getMessage(key) : defaultValue;
+        return (currentLanguage !== null && messages[currentLanguage].hasOwnProperty(key)) ? SplitsBrowser.getMessage(key) : defaultValue;
     };
     
     /**
@@ -77,11 +86,15 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
     *     if the message could not be looked up.
     */
     SplitsBrowser.getMessage = function (key) {
-        if (SplitsBrowser.hasOwnProperty("Messages")) {
-            if (SplitsBrowser.Messages.hasOwnProperty(key)) {
-                return SplitsBrowser.Messages[key];
+        if (allLanguages === null) {
+            SplitsBrowser.initialiseMessages();
+        }
+        
+        if (currentLanguage !== null) {
+            if (messages[currentLanguage].hasOwnProperty(key)) {
+                return messages[currentLanguage][key];
             } else {
-                warn("Message not found for key '" + key + "'");
+                warn("Message not found for key '" + key + "' in language '" + currentLanguage + "'");
                 return "?????";
             }
         } else {
@@ -114,6 +127,74 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
         }
         
         return message;
+    };
+    
+    /**
+    * Returns an array of codes of languages that have been loaded.
+    * @return {Array} Array of language codes.
+    */
+    SplitsBrowser.getAllLanguages = function () {
+        return allLanguages.slice(0);
+    };
+    
+    /**
+    * Returns the language code of the current language, e.g. "en_gb".
+    * @return {String} Language code of the current language.
+    */
+    SplitsBrowser.getLanguage = function () {
+        return currentLanguage;
+    };
+    
+    /**
+    * Returns the name of the language with the given code.
+    * @param {String} language - The code of the language, e.g. "en_gb".
+    * @return {String} The name of the language, e.g. "English".
+    */
+    SplitsBrowser.getLanguageName = function (language) {
+        if (messages.hasOwnProperty(language) && messages[language].hasOwnProperty("Language")) {
+            return messages[language].Language;
+        } else {
+            return "?????";
+        }
+    };
+    
+    /**
+    * Sets the current language.
+    * @param {String} language - The code of the new language to set.
+    */
+    SplitsBrowser.setLanguage = function (language) {
+        if (messages.hasOwnProperty(language)) {
+            currentLanguage = language;
+        }
+    };
+    
+    /**
+    * Initialises the messages from those read in.
+    *
+    * @param {String} defaultLanguage - (Optional) The default language to choose.
+    */
+    SplitsBrowser.initialiseMessages = function (defaultLanguage) {
+        allLanguages = [];
+        if (messages !== SplitsBrowser.Messages) {
+            // SplitsBrowser.Messages has changed since the JS source was
+            // loaded and now.  Likely culprit is an old-format language file.
+            warn("You appear to have loaded a messages file in the old format.  This file, and all " +
+                 "others loaded after it, will not work.\n\nPlease check the messages files.");
+        }
+    
+        for (var messageKey in messages) {
+            if (messages.hasOwnProperty(messageKey)) {
+                allLanguages.push(messageKey);
+            }
+        }
+        
+        if (allLanguages.length === 0) {
+            warn("No messages files were found.");
+        } else if (defaultLanguage && messages.hasOwnProperty(defaultLanguage)) {
+            currentLanguage = defaultLanguage;
+        } else {
+            currentLanguage = allLanguages[0];
+        }
     };
 })();
 
@@ -5596,13 +5677,11 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
         var outerThis = this;
         this.allButton = this.buttonsPanel.append("button")
                                           .attr("id", "selectAllCompetitors")
-                                          .text(getMessage("SelectAllCompetitors"))
                                           .style("width", "50%")
                                           .on("click", function () { outerThis.selectAll(); });
                         
         this.noneButton = this.buttonsPanel.append("button")
                                            .attr("id", "selectNoCompetitors")
-                                           .text(getMessage("SelectNoCompetitors"))
                                            .style("width", "50%")
                                            .on("click", function () { outerThis.selectNone(); });
                         
@@ -5610,14 +5689,12 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
                         
         this.crossingRunnersButton = this.buttonsPanel.append("button")
                                                       .attr("id", "selectCrossingRunners")
-                                                      .text(getMessage("SelectCrossingRunners"))
                                                       .style("width", "100%")
                                                       .on("click", function () { outerThis.selectCrossingRunners(); })
                                                       .style("display", "none");
         
         this.filter = this.buttonsPanel.append("input")
-                                       .attr("type", "text")
-                                       .attr("placeholder", getMessage("CompetitorListFilter"));
+                                       .attr("type", "text");
 
         // Update the filtered list of competitors on any change to the
         // contents of the filter textbox.  The last two are for the benefit of
@@ -5638,6 +5715,30 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
                     .on("mouseup", function () { outerThis.stopDrag(); });
                               
         d3.select(document).on("mouseup", function () { outerThis.stopDrag(); });
+        
+        this.setMessages();
+    };
+    
+    /**
+    * Sets messages within this control, following either its creation or a
+    * change of language.
+    */
+    CompetitorList.prototype.setMessages = function () {
+        this.allButton.text(getMessage("SelectAllCompetitors"));
+        this.noneButton.text(getMessage("SelectNoCompetitors"));
+        this.crossingRunnersButton.text(getMessage("SelectCrossingRunners"));
+        this.filter.attr("placeholder", getMessage("CompetitorListFilter"));
+    };
+    
+    /**
+    * Retranslates this control following a change of language.
+    */
+    CompetitorList.prototype.retranslate = function () {
+        this.setMessages();
+        if (this.placeholderDiv !== null) {
+            this.placeholderDiv.text(getMessage("NoCompetitorsStarted"));
+            this.fireChangeHandlers();
+        }
     };
     
     /**
@@ -6040,6 +6141,103 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
 (function (){
     "use strict";
     
+    var getMessage = SplitsBrowser.getMessage;
+    var getAllLanguages = SplitsBrowser.getAllLanguages;
+    var getLanguage = SplitsBrowser.getLanguage;
+    var getLanguageName = SplitsBrowser.getLanguageName;
+    var setLanguage = SplitsBrowser.setLanguage;
+    
+    /**
+    * A control that wraps a drop-down list used to choose the language to view.
+    * @param {HTMLElement} parent - The parent element to add the control to.
+    */
+    function LanguageSelector(parent) {
+        this.changeHandlers = [];
+        this.label = null;
+        this.dropDown = null;
+        
+        this.allLanguages = getAllLanguages();
+        
+        if (this.allLanguages.length < 2) {
+            // User hasn't loaded multiple languages, so no point doing
+            // anything further here.
+            return;
+        }
+        
+        d3.select(parent).append("div")
+                         .classed("topRowSpacer", true);
+        
+        var div = d3.select(parent).append("div")
+                                   .attr("id", "languageSelector");
+                                   
+        this.label = div.append("span");
+           
+        var outerThis = this;
+        this.dropDown = div.append("select").node();
+        $(this.dropDown).bind("change", function() { outerThis.onLanguageChanged(); });
+        
+        var optionsList = d3.select(this.dropDown).selectAll("option").data(this.allLanguages);
+        optionsList.enter().append("option");
+        
+        optionsList.attr("value", function (language) { return language; })
+                   .text(function (language) { return getLanguageName(language); });
+                   
+        optionsList.exit().remove();
+        
+        this.setLanguage(getLanguage());
+        this.setMessages();
+    }
+    
+    /**
+    * Sets the text of various messages in this control, following either its
+    * creation or a change of language.
+    */
+    LanguageSelector.prototype.setMessages = function () {
+        this.label.text(getMessage("LanguageSelectorLabel"));
+    };
+    
+    /**
+    * Add a change handler to be called whenever the selected language is changed.
+    *
+    * The handler function is called with no arguments.
+    *
+    * @param {Function} handler - Handler function to be called whenever the
+    *                             language changes.
+    */
+    LanguageSelector.prototype.registerChangeHandler = function (handler) {
+        if (this.changeHandlers.indexOf(handler) === -1) {
+            this.changeHandlers.push(handler);
+        }    
+    };
+    
+    /**
+    * Sets the language.  If the language given is not recognised, nothing
+    * happens.
+    * @param {String} language - The language code.
+    */
+    LanguageSelector.prototype.setLanguage = function (language) {
+        var index = this.allLanguages.indexOf(language);
+        if (index >= 0) {
+            this.dropDown.selectedIndex = index;
+            this.onLanguageChanged();
+        }
+    };
+    
+    /**
+    * Handle a change of the selected option in the drop-down list.
+    */
+    LanguageSelector.prototype.onLanguageChanged = function () {
+        setLanguage(this.dropDown.options[this.dropDown.selectedIndex].value);
+        this.changeHandlers.forEach(function(handler) { handler(); });
+    };
+    
+    SplitsBrowser.Controls.LanguageSelector = LanguageSelector;
+})();
+
+
+(function (){
+    "use strict";
+    
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var getMessage = SplitsBrowser.getMessage;
 
@@ -6053,8 +6251,8 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
         
         var div = d3.select(parent).append("div")
                                    .style("float", "left");
-                                   
-        div.text(getMessage("ClassSelectorLabel"));
+        
+        this.labelSpan = div.append("span");
         
         var outerThis = this;
         this.dropDown = div.append("select").node();
@@ -6065,8 +6263,7 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
         
         this.otherClassesCombiningLabel = div.append("span")
                                              .classed("otherClassCombining", true)
-                                             .style("display", "none")
-                                             .text(getMessage("AdditionalClassSelectorLabel"));
+                                             .style("display", "none");
         
         this.otherClassesSelector = div.append("div")
                                        .classed("otherClassSelector", true)
@@ -6106,7 +6303,18 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
                 outerThis.otherClassesList.style("display", "none");
             }
         });
+        
+        this.setMessages();
     }
+    
+    /**
+    * Sets some messages following either the creation of this control or a
+    * change of selected language.
+    */
+    ClassSelector.prototype.setMessages = function () {
+        this.labelSpan.text(getMessage("ClassSelectorLabel"));    
+        this.otherClassesCombiningLabel.text(getMessage("AdditionalClassSelectorLabel"));
+    };
 
     /**
     * Sets whether the other-classes selector is enabled, if it is shown at
@@ -6297,6 +6505,19 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
         this.onSelectionChanged();
     };
     
+    /**
+    * Retranslates this control following a change of selected language.
+    */
+    ClassSelector.prototype.retranslate = function () {
+        this.setMessages();
+        if (this.classes.length === 0) {
+            d3.select(this.dropDown.options[0]).text(getMessage("NoClassesLoadedPlaceholder"));
+        }
+        if (this.selectedOtherClassIndexes.values().length === 0) {
+            this.otherClassesSpan.text(getMessage("NoAdditionalClassesSelectedPlaceholder"));
+        }
+    };
+    
     SplitsBrowser.Controls.ClassSelector = ClassSelector;
 })();
 
@@ -6370,9 +6591,9 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
         var div = d3.select(parent).append("div")
                                    .attr("id", "comparisonSelectorContainer");
         
-        div.append("span")
-           .classed("comparisonSelectorLabel", true)
-           .text(getMessage("ComparisonSelectorLabel"));
+        this.comparisonSelectorLabel = div.append("span")
+                                          .classed("comparisonSelectorLabel", true);
+        
 
         var outerThis = this;
         this.dropDown = div.append("select")
@@ -6381,23 +6602,21 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
                             
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
 
-        var optionsList = d3.select(this.dropDown).selectAll("option")
-                                                  .data(ALL_COMPARISON_OPTIONS);
-        optionsList.enter().append("option");
+        this.optionsList = d3.select(this.dropDown).selectAll("option")
+                                                   .data(ALL_COMPARISON_OPTIONS);
+        this.optionsList.enter().append("option");
         
-        optionsList.attr("value", function (_opt, index) { return index.toString(); })
-                   .text(function (opt) { return getMessageWithFormatting(opt.nameKey, {"$$PERCENT$$": opt.percentage}); });
+        this.optionsList.attr("value", function (_opt, index) { return index.toString(); });
                    
-        optionsList.exit().remove();
+        this.optionsList.exit().remove();
         
         this.runnerDiv = d3.select(parent).append("div")
                                           .attr("id", "runnerSelectorContainer")
                                           .style("display", "none")
                                           .style("padding-left", "20px");
         
-        this.runnerDiv.append("span")
-                      .classed("comparisonSelectorLabel", true)
-                      .text(getMessage("CompareWithAnyRunnerLabel"));
+        this.runnerSpan = this.runnerDiv.append("span")
+                                        .classed("comparisonSelectorLabel", true);
         
         this.runnerDropDown = this.runnerDiv.append("select")
                                             .attr("id", RUNNER_SELECTOR_ID)
@@ -6407,7 +6626,19 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
         
         this.dropDown.selectedIndex = DEFAULT_COMPARISON_INDEX;
         this.previousSelectedIndex = DEFAULT_COMPARISON_INDEX;
+        
+        this.setMessages();
     }
+
+    /**
+    * Sets the messages in this control, following its creation or a change of
+    * selected language.
+    */ 
+    ComparisonSelector.prototype.setMessages = function () {
+        this.comparisonSelectorLabel.text(getMessage("ComparisonSelectorLabel"));    
+        this.runnerSpan.text(getMessage("CompareWithAnyRunnerLabel"));
+        this.optionsList.text(function (opt) { return getMessageWithFormatting(opt.nameKey, {"$$PERCENT$$": opt.percentage}); });
+    };
 
     /**
     * Add a change handler to be called whenever the selected class is changed.
@@ -6600,16 +6831,26 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
                   .attr("type", "checkbox")
                   .attr("checked", function (name) { return (DEFAULT_SELECTED_STATISTICS.indexOf(name) >= 0) ? "checked" : null; });
                   
-        childSpans.append("label")
-                  .attr("for", function(name) { return LABEL_ID_PREFIX + name; })
-                  .classed("statisticsSelectorLabel", true)
-                  .text(function (name, index) { return getMessage(STATISTIC_NAME_KEYS[index]); });
+        this.statisticLabels  = childSpans.append("label")
+                                          .attr("for", function(name) { return LABEL_ID_PREFIX + name; })
+                                          .classed("statisticsSelectorLabel", true);
+
         
         var outerThis = this;
         $("input", this.span.node()).bind("change", function () { return outerThis.onCheckboxChanged(); });
                    
         this.handlers = [];
+        
+        this.setMessages();
     }
+    
+    /**
+    * Sets the messages in this control, following either its creation or a
+    * change of selected language.
+    */
+    StatisticsSelector.prototype.setMessages = function () {
+        this.statisticLabels.text(function (name, index) { return getMessage(STATISTIC_NAME_KEYS[index]); });    
+    };
     
     /**
     * Deselects all checkboxes.
@@ -6717,21 +6958,31 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
         
         var div = d3.select(parent).append("div")
                                    .attr("id", "chartTypeSelector");
-        div.append("span")
-           .text(getMessage("ChartTypeSelectorLabel"));
+                                   
+        this.labelSpan = div.append("span");
            
         var outerThis = this;
         this.dropDown = div.append("select").node();
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
         
-        var optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);
-        optionsList.enter().append("option");
+        this.optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);
+        this.optionsList.enter().append("option");
         
-        optionsList.attr("value", function (_value, index) { return index.toString(); })
-                   .text(function (value) { return getMessage(value.nameKey); });
+        this.optionsList.attr("value", function (_value, index) { return index.toString(); });
                    
-        optionsList.exit().remove();
+        this.optionsList.exit().remove();
+        
+        this.setMessages();
     }
+    
+    /**
+    * Sets the messages displayed within this control, following either its
+    * creation or a change of selected language.
+    */
+    ChartTypeSelector.prototype.setMessages = function () {
+        this.labelSpan.text(getMessage("ChartTypeSelectorLabel"));
+        this.optionsList.text(function (value) { return getMessage(value.nameKey); });    
+    };
     
     /**
     * Sets the function used to disable the selection of the race graph.
@@ -6832,14 +7083,22 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
                             .on("click", function() { outerThis.fireChangeHandlers(); })
                             .node();
                                  
-        span.append("label")
-            .attr("for", checkboxId)
-            .classed("originalDataSelectorLabel", true)
-            .text(getMessage("ShowOriginalData"));
-            
-        this.containerDiv.attr("title", getMessage("ShowOriginalDataTooltip"));
-        this.handlers = [];        
+        this.label = span.append("label")
+                         .attr("for", checkboxId)
+                         .classed("originalDataSelectorLabel", true);
+                         
+        this.handlers = [];
+        this.setMessages();
     }
+    
+    /**
+    * Sets the messages in this control, following either its creation of a
+    * change of selected language.
+    */
+    OriginalDataSelector.prototype.setMessages = function () {
+        this.label.text(getMessage("ShowOriginalData"));
+        this.containerDiv.attr("title", getMessage("ShowOriginalDataTooltip"));    
+    };
 
     /**
     * Register a change handler to be called whenever the choice of original or
@@ -8695,6 +8954,16 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
         this.div.style("display", "none");
     };
     
+    /**
+    * Retranslates the results table following a change of selected language.
+    */
+    ResultsTable.prototype.retranslate = function () {
+        this.populateTable();
+        if (this.div.style("display") !== "none") {
+            this.adjustTableCellWidths();
+        }    
+    };
+    
     SplitsBrowser.Controls.ResultsTable = ResultsTable;
 })();
 
@@ -9117,6 +9386,7 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
     var getMessage = SplitsBrowser.getMessage;
     var tryGetMessage = SplitsBrowser.tryGetMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    var initialiseMessages = SplitsBrowser.initialiseMessages;
     
     var Model = SplitsBrowser.Model;
     var CompetitorSelection = Model.CompetitorSelection;
@@ -9130,6 +9400,7 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
     var formatQueryString = SplitsBrowser.formatQueryString;
     
     var Controls = SplitsBrowser.Controls;
+    var LanguageSelector = Controls.LanguageSelector;
     var ClassSelector = Controls.ClassSelector;
     var ChartTypeSelector = Controls.ChartTypeSelector;
     var ComparisonSelector = Controls.ComparisonSelector;
@@ -9160,6 +9431,7 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
         
         this.selection = null;
         this.ageClassSet = null;
+        this.languageSelector = null;
         this.classSelector = null;
         this.comparisonSelector = null;
         this.originalDataSelector = null;
@@ -9220,41 +9492,50 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
     * Draws the logo in the top panel.
     */
     Viewer.prototype.drawLogo = function () {
-        var logoSvg = this.topPanel.append("svg")
-                                   .style("float", "left");
+        this.logoSvg = this.topPanel.append("svg")
+                                    .style("float", "left");
 
-        logoSvg.style("width", "19px")
-               .style("height", "19px")
-               .style("margin-bottom", "-3px")
-               .style("margin-right", "20px");
+        this.logoSvg.style("width", "19px")
+                    .style("height", "19px")
+                    .style("margin-bottom", "-3px");
                
-        logoSvg.append("rect")
-               .attr("x", "0")
-               .attr("y", "0")
-               .attr("width", "19")
-               .attr("height", "19")
-               .attr("fill", "white");
+        this.logoSvg.append("rect")
+                    .attr("x", "0")
+                    .attr("y", "0")
+                    .attr("width", "19")
+                    .attr("height", "19")
+                    .attr("fill", "white");
          
-        logoSvg.append("polygon")
-               .attr("points", "0,19 19,0 19,19")
-               .attr("fill", "red");
+        this.logoSvg.append("polygon")
+                    .attr("points", "0,19 19,0 19,19")
+                    .attr("fill", "red");
                
-        logoSvg.append("polyline")
-               .attr("points", "0.5,0.5 0.5,18.5 18.5,18.5 18.5,0.5 0.5,0.5 0.5,18.5")
-               .attr("stroke", "black")
-               .attr("fill", "none");
+        this.logoSvg.append("polyline")
+                    .attr("points", "0.5,0.5 0.5,18.5 18.5,18.5 18.5,0.5 0.5,0.5 0.5,18.5")
+                    .attr("stroke", "black")
+                    .attr("fill", "none");
                
-        logoSvg.append("polyline")
-               .attr("points", "1,12 5,8 8,14 17,11")
-               .attr("fill", "none")
-               .attr("stroke", "blue")
-               .attr("stroke-width", "2");
+        this.logoSvg.append("polyline")
+                    .attr("points", "1,12 5,8 8,14 17,11")
+                    .attr("fill", "none")
+                    .attr("stroke", "blue")
+                    .attr("stroke-width", "2");
                                    
-        logoSvg.selectAll("*")
-               .append("title")
-               .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": Version}));
+        this.logoSvg.selectAll("*")
+                    .append("title");
+
+        this.setLogoMessages();
     };
 
+    /**
+    * Sets messages in the logo, following either its creation or a change of
+    * selected language.
+    */
+    Viewer.prototype.setLogoMessages = function () {
+        this.logoSvg.selectAll("title")
+                    .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": Version}));
+    };
+    
     /**
     * Adds a spacer between controls on the top row.
     */
@@ -9263,21 +9544,11 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
     };
     
     /**
-    * Adds a country flag to the top panel.
+    * Adds the language selector control to the top panel.
     */
-    Viewer.prototype.addCountryFlag = function () {
-        var flagImage = this.topPanel.append("img")
-                                     .attr("id", "flagImage")
-                                     .attr("src", this.options.flagImageURL)
-                                     .attr("alt", tryGetMessage("Language", ""))
-                                     .attr("title", tryGetMessage("Language", ""));
-        if (this.options.hasOwnProperty("flagImageWidth")) {
-            flagImage.attr("width", this.options.flagImageWidth);
-        }
-        if (this.options.hasOwnProperty("flagImageHeight")) {
-            flagImage.attr("height", this.options.flagImageHeight);
-        }
-    }; 
+    Viewer.prototype.addLanguageSelector = function () {
+        this.languageSelector = new LanguageSelector(this.topPanel.node());
+    };
     
     /**
     * Adds the class selector control to the top panel.
@@ -9323,10 +9594,18 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
     */
     Viewer.prototype.addDirectLink = function () {
         this.directLink = this.topPanel.append("a")
-                                      .attr("title", tryGetMessage("DirectLinkToolTip", ""))
-                                      .attr("id", "directLinkAnchor")
-                                      .attr("href", document.location.href)
-                                      .text(getMessage("DirectLink"));
+                                       .attr("id", "directLinkAnchor")
+                                       .attr("href", document.location.href);
+        this.setDirectLinkMessages();
+    };
+    
+    /**
+    * Sets the text in the direct-link, following either its creation or a
+    * change in selected language.
+    */
+    Viewer.prototype.setDirectLinkMessages = function () {
+        this.directLink.attr("title", tryGetMessage("DirectLinkToolTip", ""))
+                       .text(getMessage("DirectLink"));
     };
     
     /**
@@ -9367,10 +9646,8 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
         this.topPanel = body.append("div");
         
         this.drawLogo();
-        if (this.options && this.options.flagImageURL) {
-            this.addCountryFlag();
-        }
-        
+        this.addLanguageSelector();
+        this.addSpacer();
         this.addClassSelector();
         this.addSpacer();
         this.addChartTypeSelector();
@@ -9411,6 +9688,7 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
     */
     Viewer.prototype.registerChangeHandlers = function () {
         var outerThis = this;
+        this.languageSelector.registerChangeHandler(function () { outerThis.retranslate(); });
         this.classSelector.registerChangeHandler(function (indexes) { outerThis.selectClasses(indexes); });
         this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartTypeAndRedraw(chartType); });
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
@@ -9577,6 +9855,25 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
         var chartType = this.chartTypeSelector.getChartType();
         if (!chartType.isResultsTable) {
             this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), chartType);
+            this.redrawChart();
+        }
+    };
+    
+    /**
+    * Retranslates the UI following a change of language.
+    */
+    Viewer.prototype.retranslate = function () {
+        this.setLogoMessages();
+        this.languageSelector.setMessages();
+        this.classSelector.retranslate();
+        this.chartTypeSelector.setMessages();
+        this.comparisonSelector.setMessages();
+        this.originalDataSelector.setMessages();
+        this.setDirectLinkMessages();
+        this.statisticsSelector.setMessages();
+        this.competitorList.retranslate();
+        this.resultsTable.retranslate();
+        if (!this.chartTypeSelector.getChartType().isResultsTable) {
             this.redrawChart();
         }
     };
@@ -9820,6 +10117,10 @@ var SplitsBrowser = { Version: "3.3.0", Model: {}, Input: {}, Controls: {} };
             }
             
             eventData.determineTimeLosses();
+            
+            if (options && options.defaultLanguage) {
+                initialiseMessages(options.defaultLanguage);
+            }
             
             var viewer = new Viewer(options);
             viewer.buildUi();
