@@ -27,15 +27,9 @@ body
 
 div.topRowSpacer
 {
-    padding: 0px 30px 0px 30px;
+    padding: 0px 18px 0px 18px;
     min-height: 1px;
     float: left;
-}
-
-img#flagImage
-{
-    float: left;
-    margin-right: 20px;
 }
 
 div.otherClassSelector
@@ -239,7 +233,7 @@ div.competitor.selected.dragDeselected
     color: black;
 }
 
-#chartTypeSelector, #comparisonSelectorContainer, #runnerSelectorContainer, #originalDataSelectorContainer
+#chartTypeSelector, #comparisonSelectorContainer, #runnerSelectorContainer, #originalDataSelectorContainer, #languageSelector
 {
     float: left;
 }

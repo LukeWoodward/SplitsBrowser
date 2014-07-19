@@ -18,7 +18,7 @@
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-SplitsBrowser.Messages = {
+SplitsBrowser.Messages.fr_be = {
 
     ApplicationVersion: "SplitsBrowser - Version $$VERSION$$",
     Language: "Français",
@@ -147,5 +147,8 @@ SplitsBrowser.Messages = {
     
     // Placeholder message shown inside the competitor list if all competitors
     // in the class did not start.
-    NoCompetitorsStarted: "No competitors started"
+    NoCompetitorsStarted: "No competitors started",
+    
+    // Label of the language-selector control.
+    LanguageSelectorLabel: "Language:"
 };

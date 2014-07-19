@@ -32,8 +32,8 @@
     *     found.
     */
     function verifyConsistency(referenceLanguageKey, otherLanguageKey, consistencyErrors) {
-        var referenceLanguage = allLanguages[referenceLanguageKey];
-        var otherLanguage = allLanguages[otherLanguageKey];
+        var referenceLanguage = SplitsBrowser.Messages[referenceLanguageKey];
+        var otherLanguage = SplitsBrowser.Messages[otherLanguageKey];
         for (var refKey in referenceLanguage) {
             if (referenceLanguage.hasOwnProperty(refKey)) {
                 if (!otherLanguage.hasOwnProperty(refKey)) {
@@ -44,16 +44,16 @@
     }
     
     QUnit.test("All languages are consistent", function (assert) {
-        if (typeof allLanguages === "undefined") {
+        if (typeof SplitsBrowser.Messages === "undefined") {
             throw new Error("Languages not defined");
-        } else if (!allLanguages.hasOwnProperty(REFERENCE_LANGUAGE)) {
+        } else if (!SplitsBrowser.Messages.hasOwnProperty(REFERENCE_LANGUAGE)) {
             throw new Error("Reference language not found");
         }
         
         var consistencyErrors = [];
         var languageCount = 1;
-        for (var language in allLanguages) {
-            if (allLanguages.hasOwnProperty(language) && language !== REFERENCE_LANGUAGE) {
+        for (var language in SplitsBrowser.Messages) {
+            if (SplitsBrowser.Messages.hasOwnProperty(language) && language !== REFERENCE_LANGUAGE) {
                 verifyConsistency(REFERENCE_LANGUAGE, language, consistencyErrors);
                 verifyConsistency(language, REFERENCE_LANGUAGE, consistencyErrors);
                 languageCount += 1;

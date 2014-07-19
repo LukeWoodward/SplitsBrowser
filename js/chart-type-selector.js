@@ -36,21 +36,31 @@
         
         var div = d3.select(parent).append("div")
                                    .attr("id", "chartTypeSelector");
-        div.append("span")
-           .text(getMessage("ChartTypeSelectorLabel"));
+                                   
+        this.labelSpan = div.append("span");
            
         var outerThis = this;
         this.dropDown = div.append("select").node();
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
         
-        var optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);
-        optionsList.enter().append("option");
+        this.optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);
+        this.optionsList.enter().append("option");
         
-        optionsList.attr("value", function (_value, index) { return index.toString(); })
-                   .text(function (value) { return getMessage(value.nameKey); });
+        this.optionsList.attr("value", function (_value, index) { return index.toString(); });
                    
-        optionsList.exit().remove();
+        this.optionsList.exit().remove();
+        
+        this.setMessages();
     }
+    
+    /**
+    * Sets the messages displayed within this control, following either its
+    * creation or a change of selected language.
+    */
+    ChartTypeSelector.prototype.setMessages = function () {
+        this.labelSpan.text(getMessage("ChartTypeSelectorLabel"));
+        this.optionsList.text(function (value) { return getMessage(value.nameKey); });    
+    };
     
     /**
     * Sets the function used to disable the selection of the race graph.

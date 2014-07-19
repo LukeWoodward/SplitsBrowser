@@ -18,7 +18,7 @@
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-SplitsBrowser.Messages = {
+SplitsBrowser.Messages.de = {
 
     ApplicationVersion: "SplitsBrowser - Version $$VERSION$$",
     Language: "Deutsch",
@@ -100,7 +100,7 @@ SplitsBrowser.Messages = {
     
     // Alert message shown when you click 'Crossing runners' but there are no
     // crossing runners to show.
-    RaceGraphNoCrossingRunners: "$$NAME$$hat keine kreuzenden Läufer.",
+    RaceGraphNoCrossingRunners: "$$NAME$$ hat keine kreuzenden Läufer.",
     RaceGraphDisabledAsStartTimesMissing: "Die Ansicht Absolutzeiten ist deaktiviert, weil die Daten keine Startzeiten enthalten.",
     
     LoadFailedHeader: "SplitsBrowser \u2013 Fehler",
@@ -147,5 +147,8 @@ SplitsBrowser.Messages = {
     
     // Placeholder message shown inside the competitor list if all competitors
     // in the class did not start.
-    NoCompetitorsStarted: "Keine Teilnehmer gestartet"
+    NoCompetitorsStarted: "Keine Teilnehmer gestartet",
+    
+    // Label of the language-selector control.
+    LanguageSelectorLabel: "Language:"
 };

@@ -32,6 +32,7 @@
     var getMessage = SplitsBrowser.getMessage;
     var tryGetMessage = SplitsBrowser.tryGetMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    var initialiseMessages = SplitsBrowser.initialiseMessages;
     
     var Model = SplitsBrowser.Model;
     var CompetitorSelection = Model.CompetitorSelection;
@@ -45,6 +46,7 @@
     var formatQueryString = SplitsBrowser.formatQueryString;
     
     var Controls = SplitsBrowser.Controls;
+    var LanguageSelector = Controls.LanguageSelector;
     var ClassSelector = Controls.ClassSelector;
     var ChartTypeSelector = Controls.ChartTypeSelector;
     var ComparisonSelector = Controls.ComparisonSelector;
@@ -75,6 +77,7 @@
         
         this.selection = null;
         this.ageClassSet = null;
+        this.languageSelector = null;
         this.classSelector = null;
         this.comparisonSelector = null;
         this.originalDataSelector = null;
@@ -135,41 +138,50 @@
     * Draws the logo in the top panel.
     */
     Viewer.prototype.drawLogo = function () {
-        var logoSvg = this.topPanel.append("svg")
-                                   .style("float", "left");
+        this.logoSvg = this.topPanel.append("svg")
+                                    .style("float", "left");
 
-        logoSvg.style("width", "19px")
-               .style("height", "19px")
-               .style("margin-bottom", "-3px")
-               .style("margin-right", "20px");
+        this.logoSvg.style("width", "19px")
+                    .style("height", "19px")
+                    .style("margin-bottom", "-3px");
                
-        logoSvg.append("rect")
-               .attr("x", "0")
-               .attr("y", "0")
-               .attr("width", "19")
-               .attr("height", "19")
-               .attr("fill", "white");
+        this.logoSvg.append("rect")
+                    .attr("x", "0")
+                    .attr("y", "0")
+                    .attr("width", "19")
+                    .attr("height", "19")
+                    .attr("fill", "white");
          
-        logoSvg.append("polygon")
-               .attr("points", "0,19 19,0 19,19")
-               .attr("fill", "red");
+        this.logoSvg.append("polygon")
+                    .attr("points", "0,19 19,0 19,19")
+                    .attr("fill", "red");
                
-        logoSvg.append("polyline")
-               .attr("points", "0.5,0.5 0.5,18.5 18.5,18.5 18.5,0.5 0.5,0.5 0.5,18.5")
-               .attr("stroke", "black")
-               .attr("fill", "none");
+        this.logoSvg.append("polyline")
+                    .attr("points", "0.5,0.5 0.5,18.5 18.5,18.5 18.5,0.5 0.5,0.5 0.5,18.5")
+                    .attr("stroke", "black")
+                    .attr("fill", "none");
                
-        logoSvg.append("polyline")
-               .attr("points", "1,12 5,8 8,14 17,11")
-               .attr("fill", "none")
-               .attr("stroke", "blue")
-               .attr("stroke-width", "2");
+        this.logoSvg.append("polyline")
+                    .attr("points", "1,12 5,8 8,14 17,11")
+                    .attr("fill", "none")
+                    .attr("stroke", "blue")
+                    .attr("stroke-width", "2");
                                    
-        logoSvg.selectAll("*")
-               .append("title")
-               .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": Version}));
+        this.logoSvg.selectAll("*")
+                    .append("title");
+
+        this.setLogoMessages();
     };
 
+    /**
+    * Sets messages in the logo, following either its creation or a change of
+    * selected language.
+    */
+    Viewer.prototype.setLogoMessages = function () {
+        this.logoSvg.selectAll("title")
+                    .text(getMessageWithFormatting("ApplicationVersion", {"$$VERSION$$": Version}));
+    };
+    
     /**
     * Adds a spacer between controls on the top row.
     */
@@ -178,21 +190,11 @@
     };
     
     /**
-    * Adds a country flag to the top panel.
+    * Adds the language selector control to the top panel.
     */
-    Viewer.prototype.addCountryFlag = function () {
-        var flagImage = this.topPanel.append("img")
-                                     .attr("id", "flagImage")
-                                     .attr("src", this.options.flagImageURL)
-                                     .attr("alt", tryGetMessage("Language", ""))
-                                     .attr("title", tryGetMessage("Language", ""));
-        if (this.options.hasOwnProperty("flagImageWidth")) {
-            flagImage.attr("width", this.options.flagImageWidth);
-        }
-        if (this.options.hasOwnProperty("flagImageHeight")) {
-            flagImage.attr("height", this.options.flagImageHeight);
-        }
-    }; 
+    Viewer.prototype.addLanguageSelector = function () {
+        this.languageSelector = new LanguageSelector(this.topPanel.node());
+    };
     
     /**
     * Adds the class selector control to the top panel.
@@ -238,10 +240,18 @@
     */
     Viewer.prototype.addDirectLink = function () {
         this.directLink = this.topPanel.append("a")
-                                      .attr("title", tryGetMessage("DirectLinkToolTip", ""))
-                                      .attr("id", "directLinkAnchor")
-                                      .attr("href", document.location.href)
-                                      .text(getMessage("DirectLink"));
+                                       .attr("id", "directLinkAnchor")
+                                       .attr("href", document.location.href);
+        this.setDirectLinkMessages();
+    };
+    
+    /**
+    * Sets the text in the direct-link, following either its creation or a
+    * change in selected language.
+    */
+    Viewer.prototype.setDirectLinkMessages = function () {
+        this.directLink.attr("title", tryGetMessage("DirectLinkToolTip", ""))
+                       .text(getMessage("DirectLink"));
     };
     
     /**
@@ -282,10 +292,8 @@
         this.topPanel = body.append("div");
         
         this.drawLogo();
-        if (this.options && this.options.flagImageURL) {
-            this.addCountryFlag();
-        }
-        
+        this.addLanguageSelector();
+        this.addSpacer();
         this.addClassSelector();
         this.addSpacer();
         this.addChartTypeSelector();
@@ -326,6 +334,7 @@
     */
     Viewer.prototype.registerChangeHandlers = function () {
         var outerThis = this;
+        this.languageSelector.registerChangeHandler(function () { outerThis.retranslate(); });
         this.classSelector.registerChangeHandler(function (indexes) { outerThis.selectClasses(indexes); });
         this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartTypeAndRedraw(chartType); });
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
@@ -492,6 +501,25 @@
         var chartType = this.chartTypeSelector.getChartType();
         if (!chartType.isResultsTable) {
             this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), chartType);
+            this.redrawChart();
+        }
+    };
+    
+    /**
+    * Retranslates the UI following a change of language.
+    */
+    Viewer.prototype.retranslate = function () {
+        this.setLogoMessages();
+        this.languageSelector.setMessages();
+        this.classSelector.retranslate();
+        this.chartTypeSelector.setMessages();
+        this.comparisonSelector.setMessages();
+        this.originalDataSelector.setMessages();
+        this.setDirectLinkMessages();
+        this.statisticsSelector.setMessages();
+        this.competitorList.retranslate();
+        this.resultsTable.retranslate();
+        if (!this.chartTypeSelector.getChartType().isResultsTable) {
             this.redrawChart();
         }
     };
@@ -735,6 +763,10 @@
             }
             
             eventData.determineTimeLosses();
+            
+            if (options && options.defaultLanguage) {
+                initialiseMessages(options.defaultLanguage);
+            }
             
             var viewer = new Viewer(options);
             viewer.buildUi();

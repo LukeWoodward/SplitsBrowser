@@ -9,43 +9,12 @@
   <script type="text/javascript" charset="utf-8" src="node_modules/qunitjs/qunit/qunit.js"></script>
   <script type="text/javascript" charset="utf-8" src="js/core.js"></script>
   
-  <!--
-  Sadly there doesn't seem to be a way to cut down on the boilerplate of
-  loading each language file and moving it across.  It's possible to load JS
-  dynamically, and this approach tends to work in browsers but not in
-  PhantomJS.
-  -->  
-  
   <script type="text/javascript" charset="utf-8" src="lang/messages-en_gb.js"></script>
-  <script type="text/javascript">
-   var allLanguages = {};
-   allLanguages.en_gb = SplitsBrowser.Messages;
-  </script>
-  
   <script type="text/javascript" charset="utf-8" src="lang/messages-fr_be.js"></script>
-  <script type="text/javascript">
-   allLanguages.fr_be = SplitsBrowser.Messages;
-  </script>
-  
   <script type="text/javascript" charset="utf-8" src="lang/messages-nl_be.js"></script>
-  <script type="text/javascript">
-   allLanguages.nl_be = SplitsBrowser.Messages;
-  </script>
-  
   <script type="text/javascript" charset="utf-8" src="lang/messages-pt_br.js"></script>
-  <script type="text/javascript">
-   allLanguages.pt_br = SplitsBrowser.Messages;
-  </script>
-  
   <script type="text/javascript" charset="utf-8" src="lang/messages-nl_nl.js"></script>
-  <script type="text/javascript">
-   allLanguages.nl_nl = SplitsBrowser.Messages;
-  </script>
-  
   <script type="text/javascript" charset="utf-8" src="lang/messages-de.js"></script>
-  <script type="text/javascript">
-   allLanguages.de = SplitsBrowser.Messages;
-  </script>
 </head>
 <body>
   <div id="qunit"></div>

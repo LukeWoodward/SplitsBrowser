@@ -250,5 +250,15 @@
         this.div.style("display", "none");
     };
     
+    /**
+    * Retranslates the results table following a change of selected language.
+    */
+    ResultsTable.prototype.retranslate = function () {
+        this.populateTable();
+        if (this.div.style("display") !== "none") {
+            this.adjustTableCellWidths();
+        }    
+    };
+    
     SplitsBrowser.Controls.ResultsTable = ResultsTable;
 })();

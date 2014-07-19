@@ -87,9 +87,9 @@
         var div = d3.select(parent).append("div")
                                    .attr("id", "comparisonSelectorContainer");
         
-        div.append("span")
-           .classed("comparisonSelectorLabel", true)
-           .text(getMessage("ComparisonSelectorLabel"));
+        this.comparisonSelectorLabel = div.append("span")
+                                          .classed("comparisonSelectorLabel", true);
+        
 
         var outerThis = this;
         this.dropDown = div.append("select")
@@ -98,23 +98,21 @@
                             
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
 
-        var optionsList = d3.select(this.dropDown).selectAll("option")
-                                                  .data(ALL_COMPARISON_OPTIONS);
-        optionsList.enter().append("option");
+        this.optionsList = d3.select(this.dropDown).selectAll("option")
+                                                   .data(ALL_COMPARISON_OPTIONS);
+        this.optionsList.enter().append("option");
         
-        optionsList.attr("value", function (_opt, index) { return index.toString(); })
-                   .text(function (opt) { return getMessageWithFormatting(opt.nameKey, {"$$PERCENT$$": opt.percentage}); });
+        this.optionsList.attr("value", function (_opt, index) { return index.toString(); });
                    
-        optionsList.exit().remove();
+        this.optionsList.exit().remove();
         
         this.runnerDiv = d3.select(parent).append("div")
                                           .attr("id", "runnerSelectorContainer")
                                           .style("display", "none")
                                           .style("padding-left", "20px");
         
-        this.runnerDiv.append("span")
-                      .classed("comparisonSelectorLabel", true)
-                      .text(getMessage("CompareWithAnyRunnerLabel"));
+        this.runnerSpan = this.runnerDiv.append("span")
+                                        .classed("comparisonSelectorLabel", true);
         
         this.runnerDropDown = this.runnerDiv.append("select")
                                             .attr("id", RUNNER_SELECTOR_ID)
@@ -124,7 +122,19 @@
         
         this.dropDown.selectedIndex = DEFAULT_COMPARISON_INDEX;
         this.previousSelectedIndex = DEFAULT_COMPARISON_INDEX;
+        
+        this.setMessages();
     }
+
+    /**
+    * Sets the messages in this control, following its creation or a change of
+    * selected language.
+    */ 
+    ComparisonSelector.prototype.setMessages = function () {
+        this.comparisonSelectorLabel.text(getMessage("ComparisonSelectorLabel"));    
+        this.runnerSpan.text(getMessage("CompareWithAnyRunnerLabel"));
+        this.optionsList.text(function (opt) { return getMessageWithFormatting(opt.nameKey, {"$$PERCENT$$": opt.percentage}); });
+    };
 
     /**
     * Add a change handler to be called whenever the selected class is changed.

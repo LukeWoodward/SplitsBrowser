@@ -48,6 +48,7 @@ module.exports = function(grunt) {
                       'js/iof-xml-reader.js',
                       'js/input.js',
                       'js/competitor-list.js',
+                      'js/language-selector.js',
                       'js/class-selector.js',
                       'js/comparison-selector.js',
                       'js/statistics-selector.js',
@@ -112,10 +113,7 @@ module.exports = function(grunt) {
                     expect: false,
                   
                     // Test namespace.
-                    SplitsBrowserTest: true,
-                    
-                    // Languages list in languages consistency test.
-                    allLanguages: true
+                    SplitsBrowserTest: true
                 }
             }
         }

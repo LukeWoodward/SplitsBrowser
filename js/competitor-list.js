@@ -69,13 +69,11 @@
         var outerThis = this;
         this.allButton = this.buttonsPanel.append("button")
                                           .attr("id", "selectAllCompetitors")
-                                          .text(getMessage("SelectAllCompetitors"))
                                           .style("width", "50%")
                                           .on("click", function () { outerThis.selectAll(); });
                         
         this.noneButton = this.buttonsPanel.append("button")
                                            .attr("id", "selectNoCompetitors")
-                                           .text(getMessage("SelectNoCompetitors"))
                                            .style("width", "50%")
                                            .on("click", function () { outerThis.selectNone(); });
                         
@@ -83,14 +81,12 @@
                         
         this.crossingRunnersButton = this.buttonsPanel.append("button")
                                                       .attr("id", "selectCrossingRunners")
-                                                      .text(getMessage("SelectCrossingRunners"))
                                                       .style("width", "100%")
                                                       .on("click", function () { outerThis.selectCrossingRunners(); })
                                                       .style("display", "none");
         
         this.filter = this.buttonsPanel.append("input")
-                                       .attr("type", "text")
-                                       .attr("placeholder", getMessage("CompetitorListFilter"));
+                                       .attr("type", "text");
 
         // Update the filtered list of competitors on any change to the
         // contents of the filter textbox.  The last two are for the benefit of
@@ -111,6 +107,30 @@
                     .on("mouseup", function () { outerThis.stopDrag(); });
                               
         d3.select(document).on("mouseup", function () { outerThis.stopDrag(); });
+        
+        this.setMessages();
+    };
+    
+    /**
+    * Sets messages within this control, following either its creation or a
+    * change of language.
+    */
+    CompetitorList.prototype.setMessages = function () {
+        this.allButton.text(getMessage("SelectAllCompetitors"));
+        this.noneButton.text(getMessage("SelectNoCompetitors"));
+        this.crossingRunnersButton.text(getMessage("SelectCrossingRunners"));
+        this.filter.attr("placeholder", getMessage("CompetitorListFilter"));
+    };
+    
+    /**
+    * Retranslates this control following a change of language.
+    */
+    CompetitorList.prototype.retranslate = function () {
+        this.setMessages();
+        if (this.placeholderDiv !== null) {
+            this.placeholderDiv.text(getMessage("NoCompetitorsStarted"));
+            this.fireChangeHandlers();
+        }
     };
     
     /**

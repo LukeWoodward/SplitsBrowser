@@ -29,6 +29,15 @@
     // Default alerter function, just calls window.alert.
     var alertFunc = function (message) { window.alert(message); };
     
+    // The currently-chosen language, or null if none chosen or found yet.
+    var currentLanguage = null;
+    
+    // The list of all languages read in, or null if none.
+    var allLanguages = null;
+    
+    // The messages object.
+    var messages = SplitsBrowser.Messages;
+    
     /**
     * Issue a warning about the messages, if a warning hasn't already been
     * issued.
@@ -62,7 +71,7 @@
     *     otherwise the default value.
     */
     SplitsBrowser.tryGetMessage = function (key, defaultValue) {
-        return (SplitsBrowser.Messages && SplitsBrowser.Messages.hasOwnProperty(key)) ? SplitsBrowser.getMessage(key) : defaultValue;
+        return (currentLanguage !== null && messages[currentLanguage].hasOwnProperty(key)) ? SplitsBrowser.getMessage(key) : defaultValue;
     };
     
     /**
@@ -72,11 +81,15 @@
     *     if the message could not be looked up.
     */
     SplitsBrowser.getMessage = function (key) {
-        if (SplitsBrowser.hasOwnProperty("Messages")) {
-            if (SplitsBrowser.Messages.hasOwnProperty(key)) {
-                return SplitsBrowser.Messages[key];
+        if (allLanguages === null) {
+            SplitsBrowser.initialiseMessages();
+        }
+        
+        if (currentLanguage !== null) {
+            if (messages[currentLanguage].hasOwnProperty(key)) {
+                return messages[currentLanguage][key];
             } else {
-                warn("Message not found for key '" + key + "'");
+                warn("Message not found for key '" + key + "' in language '" + currentLanguage + "'");
                 return "?????";
             }
         } else {
@@ -109,5 +122,73 @@
         }
         
         return message;
+    };
+    
+    /**
+    * Returns an array of codes of languages that have been loaded.
+    * @return {Array} Array of language codes.
+    */
+    SplitsBrowser.getAllLanguages = function () {
+        return allLanguages.slice(0);
+    };
+    
+    /**
+    * Returns the language code of the current language, e.g. "en_gb".
+    * @return {String} Language code of the current language.
+    */
+    SplitsBrowser.getLanguage = function () {
+        return currentLanguage;
+    };
+    
+    /**
+    * Returns the name of the language with the given code.
+    * @param {String} language - The code of the language, e.g. "en_gb".
+    * @return {String} The name of the language, e.g. "English".
+    */
+    SplitsBrowser.getLanguageName = function (language) {
+        if (messages.hasOwnProperty(language) && messages[language].hasOwnProperty("Language")) {
+            return messages[language].Language;
+        } else {
+            return "?????";
+        }
+    };
+    
+    /**
+    * Sets the current language.
+    * @param {String} language - The code of the new language to set.
+    */
+    SplitsBrowser.setLanguage = function (language) {
+        if (messages.hasOwnProperty(language)) {
+            currentLanguage = language;
+        }
+    };
+    
+    /**
+    * Initialises the messages from those read in.
+    *
+    * @param {String} defaultLanguage - (Optional) The default language to choose.
+    */
+    SplitsBrowser.initialiseMessages = function (defaultLanguage) {
+        allLanguages = [];
+        if (messages !== SplitsBrowser.Messages) {
+            // SplitsBrowser.Messages has changed since the JS source was
+            // loaded and now.  Likely culprit is an old-format language file.
+            warn("You appear to have loaded a messages file in the old format.  This file, and all " +
+                 "others loaded after it, will not work.\n\nPlease check the messages files.");
+        }
+    
+        for (var messageKey in messages) {
+            if (messages.hasOwnProperty(messageKey)) {
+                allLanguages.push(messageKey);
+            }
+        }
+        
+        if (allLanguages.length === 0) {
+            warn("No messages files were found.");
+        } else if (defaultLanguage && messages.hasOwnProperty(defaultLanguage)) {
+            currentLanguage = defaultLanguage;
+        } else {
+            currentLanguage = allLanguages[0];
+        }
     };
 })();

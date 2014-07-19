@@ -19,7 +19,7 @@
  * este programa; se não, escreva para a Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 EUA.
  */
-SplitsBrowser.Messages = {
+SplitsBrowser.Messages.pt_br = {
 
     ApplicationVersion: "SplitsBrowser - Versão $$VERSION$$",
     Language: "Portugues-BR",
@@ -147,5 +147,8 @@ SplitsBrowser.Messages = {
     
     // Placeholder message shown inside the competitor list if all competitors
     // in the class did not start.
-    NoCompetitorsStarted: "Nenhum atleta partiu"
+    NoCompetitorsStarted: "Nenhum atleta partiu",
+    
+    // Label of the language-selector control.
+    LanguageSelectorLabel: "Language:"
 };

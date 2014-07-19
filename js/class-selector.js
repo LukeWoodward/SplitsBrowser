@@ -34,8 +34,8 @@
         
         var div = d3.select(parent).append("div")
                                    .style("float", "left");
-                                   
-        div.text(getMessage("ClassSelectorLabel"));
+        
+        this.labelSpan = div.append("span");
         
         var outerThis = this;
         this.dropDown = div.append("select").node();
@@ -46,8 +46,7 @@
         
         this.otherClassesCombiningLabel = div.append("span")
                                              .classed("otherClassCombining", true)
-                                             .style("display", "none")
-                                             .text(getMessage("AdditionalClassSelectorLabel"));
+                                             .style("display", "none");
         
         this.otherClassesSelector = div.append("div")
                                        .classed("otherClassSelector", true)
@@ -87,7 +86,18 @@
                 outerThis.otherClassesList.style("display", "none");
             }
         });
+        
+        this.setMessages();
     }
+    
+    /**
+    * Sets some messages following either the creation of this control or a
+    * change of selected language.
+    */
+    ClassSelector.prototype.setMessages = function () {
+        this.labelSpan.text(getMessage("ClassSelectorLabel"));    
+        this.otherClassesCombiningLabel.text(getMessage("AdditionalClassSelectorLabel"));
+    };
 
     /**
     * Sets whether the other-classes selector is enabled, if it is shown at
@@ -276,6 +286,19 @@
         d3.select("div#ageClassIdx_" + classIdx).classed("selected", this.selectedOtherClassIndexes.has(classIdx));
         this.updateOtherClassText();
         this.onSelectionChanged();
+    };
+    
+    /**
+    * Retranslates this control following a change of selected language.
+    */
+    ClassSelector.prototype.retranslate = function () {
+        this.setMessages();
+        if (this.classes.length === 0) {
+            d3.select(this.dropDown.options[0]).text(getMessage("NoClassesLoadedPlaceholder"));
+        }
+        if (this.selectedOtherClassIndexes.values().length === 0) {
+            this.otherClassesSpan.text(getMessage("NoAdditionalClassesSelectedPlaceholder"));
+        }
     };
     
     SplitsBrowser.Controls.ClassSelector = ClassSelector;

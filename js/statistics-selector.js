@@ -59,16 +59,26 @@
                   .attr("type", "checkbox")
                   .attr("checked", function (name) { return (DEFAULT_SELECTED_STATISTICS.indexOf(name) >= 0) ? "checked" : null; });
                   
-        childSpans.append("label")
-                  .attr("for", function(name) { return LABEL_ID_PREFIX + name; })
-                  .classed("statisticsSelectorLabel", true)
-                  .text(function (name, index) { return getMessage(STATISTIC_NAME_KEYS[index]); });
+        this.statisticLabels  = childSpans.append("label")
+                                          .attr("for", function(name) { return LABEL_ID_PREFIX + name; })
+                                          .classed("statisticsSelectorLabel", true);
+
         
         var outerThis = this;
         $("input", this.span.node()).bind("change", function () { return outerThis.onCheckboxChanged(); });
                    
         this.handlers = [];
+        
+        this.setMessages();
     }
+    
+    /**
+    * Sets the messages in this control, following either its creation or a
+    * change of selected language.
+    */
+    StatisticsSelector.prototype.setMessages = function () {
+        this.statisticLabels.text(function (name, index) { return getMessage(STATISTIC_NAME_KEYS[index]); });    
+    };
     
     /**
     * Deselects all checkboxes.

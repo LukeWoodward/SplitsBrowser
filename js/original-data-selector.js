@@ -51,14 +51,22 @@
                             .on("click", function() { outerThis.fireChangeHandlers(); })
                             .node();
                                  
-        span.append("label")
-            .attr("for", checkboxId)
-            .classed("originalDataSelectorLabel", true)
-            .text(getMessage("ShowOriginalData"));
-            
-        this.containerDiv.attr("title", getMessage("ShowOriginalDataTooltip"));
-        this.handlers = [];        
+        this.label = span.append("label")
+                         .attr("for", checkboxId)
+                         .classed("originalDataSelectorLabel", true);
+                         
+        this.handlers = [];
+        this.setMessages();
     }
+    
+    /**
+    * Sets the messages in this control, following either its creation of a
+    * change of selected language.
+    */
+    OriginalDataSelector.prototype.setMessages = function () {
+        this.label.text(getMessage("ShowOriginalData"));
+        this.containerDiv.attr("title", getMessage("ShowOriginalDataTooltip"));    
+    };
 
     /**
     * Register a change handler to be called whenever the choice of original or
