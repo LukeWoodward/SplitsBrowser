@@ -104,7 +104,7 @@ SplitsBrowser.Messages.fr_be = {
     RaceGraphDisabledAsStartTimesMissing: "Ce graphique ne peut être affiché car il n'y a pas d'heures de départ dans les données.",
     
     LoadFailedHeader: "SplitsBrowser \u2013 Erreur",
-    LoadFailedInvalidData: "Désolé, il est impossible de lire les données; elle sont invalides: '$$MESSAGE$$'.",
+    LoadFailedInvalidData: "Désolé, il est impossible de lire les données; elles sont invalides: '$$MESSAGE$$'.",
     LoadFailedUnrecognisedData: "Désolé, il est impossible de lire les données.  Elles sont fournies dans un format inconnu.",
     LoadFailedStatusNotSuccess: "Désolé, il est impossible de lire les données.  l'état de la requête est '$$STATUS$$'.",
     LoadFailedReadError: "Désolé, il est impossible de charger les données.  Le message d'erreur reçu du serveur est '$$ERROR$$'.",
