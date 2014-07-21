@@ -253,6 +253,7 @@
     Version2Reader.StatusNonStarter = "DidNotStart";
     Version2Reader.StatusNonFinisher = "DidNotFinish";
     Version2Reader.StatusDisqualified = "Disqualified";
+    Version2Reader.StatusOverMaxTime = "OverTime";
     
     /**
     * Reads a control code and split time from a SplitTime element.
@@ -451,6 +452,7 @@
     Version3Reader.StatusNonStarter = "DidNotStart";
     Version3Reader.StatusNonFinisher = "DidNotFinish";
     Version3Reader.StatusDisqualified = "Disqualified";
+    Version3Reader.StatusOverMaxTime = "OverTime";
 
     /**
     * Reads a control code and split time from a SplitTime element.
@@ -552,6 +554,8 @@
             competitor.setNonFinisher();
         } else if (status === reader.StatusDisqualified) {
             competitor.disqualify();
+        } else if (status === reader.StatusOverMaxTime) {
+            competitor.setOverMaxTime();
         }
         
         return {

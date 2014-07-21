@@ -110,6 +110,8 @@
             return getMessage("DidNotFinishShort");
         } else if (competitor.isDisqualified) {
             return getMessage("DisqualifiedShort");
+        } else if (competitor.isOverMaxTime) {
+            return getMessage("OverMaxTimeShort");
         } else if (competitor.completed()) {
             return formatTime(competitor.totalTime);
         } else {

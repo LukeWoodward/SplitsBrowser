@@ -150,5 +150,9 @@ SplitsBrowser.Messages.de = {
     NoCompetitorsStarted: "Keine Teilnehmer gestartet",
     
     // Label of the language-selector control.
-    LanguageSelectorLabel: "Sprache:"
+    LanguageSelectorLabel: "Sprache:",
+    
+    // Label that appears beside a competitor on the Results Table to indicate
+    // that they were over the maximum time.
+    OverMaxTimeShort: "ZeitUeb"
 };

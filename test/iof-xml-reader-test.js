@@ -145,6 +145,8 @@
             status = "DidNotFinish";
         } else if (exists("disqualified")) {
             status = "Disqualified";
+        } else if (exists("overMaxTime")) {
+            status = "OverTime";
         } else if (personData.cumTimes.indexOf(null) >= 0) {
             status = "MisPunch";
         } else if (!exists("competitive") || personData.competitive) {
@@ -332,6 +334,8 @@
             status = "DidNotFinish";
         } else if (exists("disqualified")) {
             status = "Disqualified";
+        } else if (exists("overMaxTime")) {
+            status = "OverTime";
         } else if (personData.cumTimes.indexOf(null) >= 0) {
             status = "MissingPunch";
         } else if (!exists("competitive") || personData.competitive) {
@@ -849,10 +853,18 @@
     QUnit.test("Can parse a string that contains a disqualified competitor", function (assert) {
         var person = getPerson();
         person.disqualified = true;
-        person.cumTimes = [null, null, null];
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
                 assert.strictEqual(competitor.isDisqualified, true);        
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains an over-max-time competitor", function (assert) {
+        var person = getPerson();
+        person.overMaxTime = true;
+        runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
+            function (competitor) {
+                assert.strictEqual(competitor.isOverMaxTime, true);        
             });
     });
     
@@ -914,7 +926,7 @@
         runFailingXmlFormatParseTest(assert, [{name: "Test Class", length: 2300, courseId: 1, competitors: [person1, person2]}]);
     });
     
-    QUnit.test("Can parse a string that contains two classes each with one competitor, both on the same course", function (assert) {
+    QUnit.test("Can parse a string that contains two classes each with one competitor", function (assert) {
         var person1 = getPerson();
         var person2 = getPerson();
         person2.forename = "Fred";

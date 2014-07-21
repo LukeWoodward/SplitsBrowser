@@ -45,14 +45,17 @@
             climb: columnOffset - 5,
             controlCount: columnOffset - 4,
             placing: columnOffset - 3,
-            start: columnOffset - 2,
+            startPunch: columnOffset - 2,
             finish: columnOffset - 1,
             control1: columnOffset
         };
     });
     
     [44, 46].forEach(function (columnOffset) {
+        COLUMN_INDEXES[columnOffset].nonCompetitive = columnOffset - 38;
+        COLUMN_INDEXES[columnOffset].startTime = columnOffset - 37;
         COLUMN_INDEXES[columnOffset].time = columnOffset - 35;
+        COLUMN_INDEXES[columnOffset].classifier = columnOffset - 34;
         COLUMN_INDEXES[columnOffset].club =  columnOffset - 31;
         COLUMN_INDEXES[columnOffset].ageClass = columnOffset - 28;
     });
@@ -65,8 +68,10 @@
     COLUMN_INDEXES[60].forename = 6;
     COLUMN_INDEXES[60].surname = 5;
     COLUMN_INDEXES[60].combinedName = 3;
-    COLUMN_INDEXES[60].startFallback = 11;
+    COLUMN_INDEXES[60].nonCompetitive = 10;
+    COLUMN_INDEXES[60].startTime = 11;
     COLUMN_INDEXES[60].time = 13;
+    COLUMN_INDEXES[60].classifier = 14;
     COLUMN_INDEXES[60].club = 20;
     COLUMN_INDEXES[60].ageClass = 26;
     COLUMN_INDEXES[60].ageClassFallback = COLUMN_INDEXES[60].course;
@@ -203,14 +208,15 @@
     };
 
     /**
-    * Reads the start-time in the given row.
+    * Reads the start-time in the given row.  The start punch time will
+    * be used if it is available, otherwise the start time.
     * @param {Array} row - Array of row data.
     * @return {?Number} Parsed start time, or null for none.
     */
     Reader.prototype.getStartTime = function (row) {
-        var startTimeStr = row[this.columnIndexes.start];
-        if (startTimeStr === "" && this.columnIndexes.hasOwnProperty("startFallback")) {
-            startTimeStr = row[this.columnIndexes.startFallback];
+        var startTimeStr = row[this.columnIndexes.startPunch];
+        if (startTimeStr === "") {
+            startTimeStr = row[this.columnIndexes.startTime];
         }
         
         return parseTime(startTimeStr);
@@ -349,20 +355,34 @@
         if (name === "" && this.columnIndexes.hasOwnProperty("combinedName")) {
             // 'Nameless' or 44-column variation.
             name = row[this.columnIndexes.combinedName];
+            if (isPlacingNonNumeric && name.substring(name.length - placing.length) === placing) {
+                name = $.trim(name.substring(0, name.length - placing.length));
+            }
         }
         
         var order = this.ageClasses.get(className).competitors.length + 1;
         var competitor = fromOriginalCumTimes(order, name, club, startTime, cumTimes);
-        if (isPlacingNonNumeric && competitor.completed()) {
-            // Competitor has completed the course but has no placing.
-            // Assume that they are non-competitive.
+        if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && competitor.completed()) {
+            // Competitor either marked as non-competitive, or has completed
+            // the course but has a non-numeric placing.  In the latter case,
+            // assume that they are non-competitive.
             competitor.setNonCompetitive();
         }
         
-        if (!competitor.hasAnyTimes()) {
+        var classifier = row[this.columnIndexes.classifier];
+        if (classifier !== "" && classifier !== "0") {
+            if (classifier === "1") {
+                competitor.setNonStarter();
+            } else if (classifier === "2") {
+                competitor.setNonFinisher();
+            } else if (classifier === "4") {
+                competitor.disqualify();
+            } else if (classifier === "5") {
+                competitor.setOverMaxTime();
+            }
+        } else if (!competitor.hasAnyTimes()) {
             competitor.setNonStarter();
         }
-        
 
         this.ageClasses.get(className).competitors.push(competitor);
     };

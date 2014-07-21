@@ -185,5 +185,35 @@
                 </SplitTime>
             </Result>
         </PersonResult>
+        <PersonResult>
+            <Person>
+                <PersonName>
+                    <Given>Over</Given>
+                    <Family>Max Time</Family>
+                </PersonName>
+            </Person>
+            <Club>
+                <ShortName>STU</ShortName>
+            </Club>
+            <Result>
+                <StartTime>
+                    <Clock>11:45:00</Clock>
+                </StartTime>
+                <Time>3:04:47</Time>
+                <CompetitorStatus value="OverTime"/>
+                <SplitTime sequence="1">
+                    <ControlCode>212</ControlCode>
+                    <Time>1:19:22</Time>
+                </SplitTime>
+                <SplitTime sequence="2">
+                    <ControlCode>229</ControlCode>
+                    <Time>2:05:07</Time>
+                </SplitTime>
+                <SplitTime sequence="3">
+                    <ControlCode>208</ControlCode>
+                    <Time>2:44:19</Time>
+                </SplitTime>
+            </Result>
+        </PersonResult>
     </ClassResult>
 </ResultList>

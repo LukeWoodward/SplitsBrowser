@@ -1,0 +1,8 @@
+Stno;SI card;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;
+ ; ; ;Runner;First; ; ; ;0;10:00:00; ;12:14;0; ; ;ABC; ; ;Class 1; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;Course 1;4.1;35;3;1;10:00:00;10:12:14;212;01:48;229;06:14;208;08:43;
+ ; ; ;Puncher;Mis; ; ; ;0;10:30:00; ;14:12;3; ; ;DEF; ; ;Class 1; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;Course 1;4.1;35;3;2;10:30:00;10:44:12;212;03:37;229;-----;208;10:32
+ ; ; ;Cheater;Nasty; ; ; ;0;11:00:00; ;13:32;4; ; ;GHI; ; ;Class 1; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;Course 1;4.1;35;3;3;11:00:00;11:13:32;212;03:01;229;07:05;208;09:59;
+ ; ; ;Starter;Non; ; ; ;0;10:15:00; ;-----;1; ; ;JKL; ; ;Class 1; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;Course 1;4.1;35;3;3;10:15:00;-----;212;-----;229;-----;208;-----;
+ ; ; ;Finisher;Non; ; ; ;0;10:45:00; ;-----;2; ; ;MNO; ; ;Class 1; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;Course 1;4.1;35;3;3;10:45:00;-----;212;3:22;229;6:49;208;-----;
+ ; ; ;Competitive;Non; ; ; ;1;11:15:00; ;13:37;0; ; ;PQR; ; ;Class 1; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;Course 1;4.1;35;3;3;11:15:00;11:28:37;212;3:36;229;5:55;208;11:02;
+ ; ; ;Max Time;Over; ; ; ;0;11:45:00; ;3:04:47;5; ; ;STU; ; ;Class 1; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;Course 1;4.1;35;3;3;11:45:00;14:49:47;212;1:19:22;229;2:05:07;208;2:44:19;
