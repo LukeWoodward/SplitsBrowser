@@ -40,7 +40,7 @@
     }
 
     function handleChartTypeChanged(chartType) {
-        lastChartTypeName = chartType.name;
+        lastChartTypeName = chartType.nameKey;
         callCount += 1;
     }
     
@@ -68,7 +68,7 @@
         var htmlSelect = htmlSelectSelection.node();
         $(htmlSelect).val(2).change();
         
-        assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The third chart type should have been selected");
+        assert.strictEqual(lastChartTypeName, chartTypes[2].nameKey, "The third chart type should have been selected");
         assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
@@ -78,7 +78,7 @@
         var lastChartTypeName2 = null;
         var callCount2 = null;
         var secondHandler = function (chartType) {
-            lastChartTypeName2 = chartType.name;
+            lastChartTypeName2 = chartType.nameKey;
             callCount2 += 1;
         };
         
@@ -91,9 +91,9 @@
         var htmlSelect = htmlSelectSelection.node();
         $(htmlSelect).val(2).change();
         
-        assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The third chart type should have been selected");
+        assert.strictEqual(lastChartTypeName, chartTypes[2].nameKey, "The third chart type should have been selected");
         assert.strictEqual(callCount, 1, "One change should have been recorded");
-        assert.strictEqual(lastChartTypeName2, chartTypes[2].name, "The third chart type should have been selected");
+        assert.strictEqual(lastChartTypeName2, chartTypes[2].nameKey, "The third chart type should have been selected");
         assert.strictEqual(callCount2, 1, "One change should have been recorded");
     });
 
@@ -109,7 +109,7 @@
 
         $(htmlSelect).val(2).change();
         
-        assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The third chart type should have been selected");
+        assert.strictEqual(lastChartTypeName, chartTypes[2].nameKey, "The third chart type should have been selected");
         assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
@@ -128,7 +128,7 @@
         $(htmlSelect).val(1).change();
         
         assert.ok(notifierCalled, "Notifier function should have been called");
-        assert.strictEqual(lastChartTypeName, chartTypes[0].name, "The first chart type should have been selected");
+        assert.strictEqual(lastChartTypeName, chartTypes[0].nameKey, "The first chart type should have been selected");
         assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
@@ -147,12 +147,12 @@
         $(htmlSelect).val(2).change();
         
         assert.ok(!notifierCalled, "Notifier function should not have been called");
-        assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The third chart type should have been selected");
+        assert.strictEqual(lastChartTypeName, chartTypes[2].nameKey, "The third chart type should have been selected");
         
         $(htmlSelect).val(1).change();
         
         assert.ok(notifierCalled, "Notifier function should have been called");
-        assert.strictEqual(lastChartTypeName, chartTypes[2].name, "The third chart type should still be selected");
+        assert.strictEqual(lastChartTypeName, chartTypes[2].nameKey, "The third chart type should still be selected");
     });
 
     QUnit.test("Setting the chart type to a recognised type sets the type and calls change handler", function(assert) {
@@ -171,7 +171,7 @@
         assert.strictEqual(htmlSelect.selectedIndex, 2);
         assert.strictEqual(selector.getChartType(), chartType);
         
-        assert.strictEqual(lastChartTypeName, chartType.name, "The third chart type should have been selected");
+        assert.strictEqual(lastChartTypeName, chartType.nameKey, "The third chart type should have been selected");
         assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
@@ -190,5 +190,22 @@
         
         assert.strictEqual(callCount, 0, "No changes should have been recorded");
     });
-    
+
+    QUnit.test("Race graph notifier function called and selection reverted to splits graph if notifier set while race graph selected", function(assert) {
+        resetLastChartType();
+        var selector = createSelector();
+        
+        var htmlSelect = $("#qunit-fixture select")[0];
+        $(htmlSelect).val(1).change();
+        
+        selector.registerChangeHandler(handleChartTypeChanged);
+        
+        var notifierCalled = false;
+        selector.setRaceGraphDisabledNotifier(function () { notifierCalled = true; });
+        
+        assert.ok(notifierCalled, "Notifier function should have been called");
+        assert.strictEqual($(htmlSelect).val(), "0", "The splits graph should now be selected");
+        assert.strictEqual(lastChartTypeName, chartTypes[0].nameKey, "The first chart type should have been selected");
+        assert.strictEqual(callCount, 1, "One change should have been recorded");
+    });
 })();

@@ -74,6 +74,13 @@
     */
     ChartTypeSelector.prototype.setRaceGraphDisabledNotifier = function (raceGraphDisabledNotifier) {
         this.raceGraphDisabledNotifier = raceGraphDisabledNotifier;
+        if (this.raceGraphDisabledNotifier !== null && this.chartTypes[this.dropDown.selectedIndex].isRaceGraph) {
+            // Race graph has already been selected but now the race graph
+            // isn't available, so switch back to the splits graph.
+            this.raceGraphDisabledNotifier();
+            this.dropDown.selectedIndex = 0;
+            this.onSelectionChanged();
+        }
     };
     
     /**
