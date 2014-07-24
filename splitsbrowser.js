@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -574,6 +574,7 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
         this.isNonStarter = false;
         this.isNonFinisher = false;
         this.isDisqualified = false;
+        this.isOverMaxTime = false;
         this.className = null;
         
         this.originalSplitTimes = originalSplitTimes;
@@ -614,6 +615,13 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
     */
     Competitor.prototype.disqualify = function () {
         this.isDisqualified = true;
+    };
+    
+    /**
+    * Marks this competitor as over maximum time.
+    */
+    Competitor.prototype.setOverMaxTime = function () {
+        this.isOverMaxTime = true;
     };
     
     /**
@@ -720,7 +728,7 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
     *     or got disqualified.
     */
     Competitor.prototype.completed = function () {
-        return this.totalTime !== null && !this.isDisqualified;
+        return this.totalTime !== null && !this.isDisqualified && !this.isOverMaxTime;
     };
 
     /**
@@ -749,6 +757,8 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
             return getMessage("DidNotFinishShort"); 
         } else if (this.isDisqualified) {
             return getMessage("DisqualifiedShort");
+        } else if (this.isOverMaxTime) {
+            return getMessage("OverMaxTimeShort");
         } else if (this.completed()) {
             return "";
         } else {
@@ -2868,14 +2878,17 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
             climb: columnOffset - 5,
             controlCount: columnOffset - 4,
             placing: columnOffset - 3,
-            start: columnOffset - 2,
+            startPunch: columnOffset - 2,
             finish: columnOffset - 1,
             control1: columnOffset
         };
     });
     
     [44, 46].forEach(function (columnOffset) {
+        COLUMN_INDEXES[columnOffset].nonCompetitive = columnOffset - 38;
+        COLUMN_INDEXES[columnOffset].startTime = columnOffset - 37;
         COLUMN_INDEXES[columnOffset].time = columnOffset - 35;
+        COLUMN_INDEXES[columnOffset].classifier = columnOffset - 34;
         COLUMN_INDEXES[columnOffset].club =  columnOffset - 31;
         COLUMN_INDEXES[columnOffset].ageClass = columnOffset - 28;
     });
@@ -2888,8 +2901,10 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
     COLUMN_INDEXES[60].forename = 6;
     COLUMN_INDEXES[60].surname = 5;
     COLUMN_INDEXES[60].combinedName = 3;
-    COLUMN_INDEXES[60].startFallback = 11;
+    COLUMN_INDEXES[60].nonCompetitive = 10;
+    COLUMN_INDEXES[60].startTime = 11;
     COLUMN_INDEXES[60].time = 13;
+    COLUMN_INDEXES[60].classifier = 14;
     COLUMN_INDEXES[60].club = 20;
     COLUMN_INDEXES[60].ageClass = 26;
     COLUMN_INDEXES[60].ageClassFallback = COLUMN_INDEXES[60].course;
@@ -3026,14 +3041,15 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
     };
 
     /**
-    * Reads the start-time in the given row.
+    * Reads the start-time in the given row.  The start punch time will
+    * be used if it is available, otherwise the start time.
     * @param {Array} row - Array of row data.
     * @return {?Number} Parsed start time, or null for none.
     */
     Reader.prototype.getStartTime = function (row) {
-        var startTimeStr = row[this.columnIndexes.start];
-        if (startTimeStr === "" && this.columnIndexes.hasOwnProperty("startFallback")) {
-            startTimeStr = row[this.columnIndexes.startFallback];
+        var startTimeStr = row[this.columnIndexes.startPunch];
+        if (startTimeStr === "") {
+            startTimeStr = row[this.columnIndexes.startTime];
         }
         
         return parseTime(startTimeStr);
@@ -3172,20 +3188,34 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
         if (name === "" && this.columnIndexes.hasOwnProperty("combinedName")) {
             // 'Nameless' or 44-column variation.
             name = row[this.columnIndexes.combinedName];
+            if (isPlacingNonNumeric && name.substring(name.length - placing.length) === placing) {
+                name = $.trim(name.substring(0, name.length - placing.length));
+            }
         }
         
         var order = this.ageClasses.get(className).competitors.length + 1;
         var competitor = fromOriginalCumTimes(order, name, club, startTime, cumTimes);
-        if (isPlacingNonNumeric && competitor.completed()) {
-            // Competitor has completed the course but has no placing.
-            // Assume that they are non-competitive.
+        if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && competitor.completed()) {
+            // Competitor either marked as non-competitive, or has completed
+            // the course but has a non-numeric placing.  In the latter case,
+            // assume that they are non-competitive.
             competitor.setNonCompetitive();
         }
         
-        if (!competitor.hasAnyTimes()) {
+        var classifier = row[this.columnIndexes.classifier];
+        if (classifier !== "" && classifier !== "0") {
+            if (classifier === "1") {
+                competitor.setNonStarter();
+            } else if (classifier === "2") {
+                competitor.setNonFinisher();
+            } else if (classifier === "4") {
+                competitor.disqualify();
+            } else if (classifier === "5") {
+                competitor.setOverMaxTime();
+            }
+        } else if (!competitor.hasAnyTimes()) {
             competitor.setNonStarter();
         }
-        
 
         this.ageClasses.get(className).competitors.push(competitor);
     };
@@ -5157,6 +5187,7 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
     Version2Reader.StatusNonStarter = "DidNotStart";
     Version2Reader.StatusNonFinisher = "DidNotFinish";
     Version2Reader.StatusDisqualified = "Disqualified";
+    Version2Reader.StatusOverMaxTime = "OverTime";
     
     /**
     * Reads a control code and split time from a SplitTime element.
@@ -5355,6 +5386,7 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
     Version3Reader.StatusNonStarter = "DidNotStart";
     Version3Reader.StatusNonFinisher = "DidNotFinish";
     Version3Reader.StatusDisqualified = "Disqualified";
+    Version3Reader.StatusOverMaxTime = "OverTime";
 
     /**
     * Reads a control code and split time from a SplitTime element.
@@ -5456,6 +5488,8 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
             competitor.setNonFinisher();
         } else if (status === reader.StatusDisqualified) {
             competitor.disqualify();
+        } else if (status === reader.StatusOverMaxTime) {
+            competitor.setOverMaxTime();
         }
         
         return {
@@ -6996,6 +7030,13 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
     */
     ChartTypeSelector.prototype.setRaceGraphDisabledNotifier = function (raceGraphDisabledNotifier) {
         this.raceGraphDisabledNotifier = raceGraphDisabledNotifier;
+        if (this.raceGraphDisabledNotifier !== null && this.chartTypes[this.dropDown.selectedIndex].isRaceGraph) {
+            // Race graph has already been selected but now the race graph
+            // isn't available, so switch back to the splits graph.
+            this.raceGraphDisabledNotifier();
+            this.dropDown.selectedIndex = 0;
+            this.onSelectionChanged();
+        }
     };
     
     /**
@@ -8814,6 +8855,8 @@ var SplitsBrowser = { Version: "3.3.1", Model: {}, Input: {}, Controls: {}, Mess
             return getMessage("DidNotFinishShort");
         } else if (competitor.isDisqualified) {
             return getMessage("DisqualifiedShort");
+        } else if (competitor.isOverMaxTime) {
+            return getMessage("OverMaxTimeShort");
         } else if (competitor.completed()) {
             return formatTime(competitor.totalTime);
         } else {
