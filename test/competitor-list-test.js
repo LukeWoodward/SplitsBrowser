@@ -482,6 +482,20 @@
         assertDragSelected(assert, 3, []);
     });
     
+    QUnit.test("Can create a list with all competitors deselected, filter the list and then select only all filtered competitors", function (assert) {
+        var listAndSelection = createSampleList([], false);
+        listAndSelection.list.setFilterText("son");
+        $("div#qunit-fixture button#selectAllCompetitors").click();
+        assertSelected(assert, 3, [0, 2], listAndSelection);
+    });
+    
+    QUnit.test("Can create a list with all competitors selected, filter the list and then deselect only all filtered competitors", function (assert) {
+        var listAndSelection = createSampleList([0, 1, 2], false);
+        listAndSelection.list.setFilterText("son");
+        $("div#qunit-fixture button#selectNoCompetitors").click();
+        assertSelected(assert, 3, [1], listAndSelection);
+    });
+    
     QUnit.test("Can create a list with all competitors deselected, filter the list and then drag-select those only in the filtered list", function (assert) {
         var listAndSelection = createSampleList([], false);
         listAndSelection.list.setFilterText("son");

@@ -51,7 +51,7 @@
         this.competitorSelection = null;
         this.lastFilterString = "";
         this.allCompetitors = [];
-        this.normedNames = [];
+        this.allCompetitorDetails = [];
         this.dragging = false;
         this.dragStartCompetitorIndex = null;
         this.currentDragCompetitorIndex = null;
@@ -248,7 +248,7 @@
                 
                 var selectedCompetitors = [];
                 for (var index = leastIndex; index <= greatestIndex; index += 1) {
-                    if (this.allCompetitorDivs[index].style.display !== "none") {
+                    if (this.allCompetitorDetails[index].visible) {
                         selectedCompetitors.push(this.allCompetitorDivs[index]);
                     }
                 }
@@ -317,19 +317,30 @@
     CompetitorList.prototype.setHeight = function (height) {
         $(this.listDiv.node()).height(height - $(this.buttonsPanel.node()).height());
     };
+    
+    /**
+    * Returns all visible indexes.  This is the indexes of all competitors that
+    * have not been excluded by the filters.
+    * @returns {Array} Array of indexes of visible competitors.
+    */
+    CompetitorList.prototype.getAllVisibleIndexes = function () {
+        return d3.range(this.allCompetitorDetails.length).filter(function (index) {
+            return this.allCompetitorDetails[index].visible;
+        }, this);
+    };
 
     /**
     * Select all of the competitors.
     */
     CompetitorList.prototype.selectAll = function () {
-        this.competitorSelection.selectAll();
+        this.competitorSelection.bulkSelect(this.getAllVisibleIndexes());
     };
 
     /**
     * Select none of the competitors.
     */
     CompetitorList.prototype.selectNone = function () {
-        this.competitorSelection.selectNone();
+        this.competitorSelection.bulkDeselect(this.getAllVisibleIndexes());
     };
     
     /**
@@ -414,14 +425,16 @@
     */
     CompetitorList.prototype.setCompetitorList = function (competitors, multipleClasses) {
         this.allCompetitors = competitors;
-        this.normedNames = competitors.map(function (comp) { return normaliseName(comp.name); });
+        this.allCompetitorDetails = this.allCompetitors.map(function (comp) {
+            return { competitor: comp, normedName: normaliseName(comp.name), visible: true };
+        });
         
         if (this.placeholderDiv !== null) {
             this.placeholderDiv.remove();
             this.placeholderDiv = null;
         }
         
-        var competitorDivs = this.listDiv.selectAll("div.competitor").data(competitors);
+        var competitorDivs = this.listDiv.selectAll("div.competitor").data(this.allCompetitors);
 
         var outerThis = this;
         competitorDivs.enter().append("div")
@@ -442,15 +455,15 @@
 
         competitorDivs.exit().remove();
         
-        if (competitors.length === 0) {
+        if (this.allCompetitors.length === 0) {
             this.placeholderDiv = this.listDiv.append("div")
                                               .classed("competitorListPlaceholder", true)
                                               .text(getMessage("NoCompetitorsStarted"));
         }
         
-        this.allButton.property("disabled", competitors.length === 0);
-        this.noneButton.property("disabled", competitors.length === 0);
-        this.filter.property("disabled", competitors.length === 0);
+        this.allButton.property("disabled", this.allCompetitors.length === 0);
+        this.noneButton.property("disabled", this.allCompetitors.length === 0);
+        this.filter.property("disabled", this.allCompetitors.length === 0);
         
         competitorDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
                       .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })
@@ -499,9 +512,13 @@
     CompetitorList.prototype.updateFilter = function () {
         var currentFilterString = this.filter.node().value;
         var normedFilter = normaliseName(currentFilterString);
+        this.allCompetitorDetails.forEach(function (comp) {
+            comp.visible = (comp.normedName.indexOf(normedFilter) >= 0);
+        });
+        
         var outerThis = this;
         this.listDiv.selectAll("div.competitor")
-                    .style("display", function (div, index) { return (outerThis.normedNames[index].indexOf(normedFilter) >= 0) ? null : "none"; });
+                    .style("display", function (div, index) { return (outerThis.allCompetitorDetails[index].visible) ? null : "none"; });
     };
     
     /**
