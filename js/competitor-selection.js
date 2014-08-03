@@ -75,15 +75,16 @@
 
     /**
     * Given that a single runner is selected, select also all of the runners
-    * that 'cross' this runner.
-    * @param {Array} competitors - All competitors in the same class.
+    * that 'cross' this runner and are also marked as visible.
+    * @param {Array} competitorDetails - Array of competitor details to
+    *     check within.
     */    
-    CompetitorSelection.prototype.selectCrossingRunners = function (competitors) {
+    CompetitorSelection.prototype.selectCrossingRunners = function (competitorDetails) {
         if (this.isSingleRunnerSelected()) {
-            var refCompetitor = competitors[this.currentIndexes[0]];
+            var refCompetitor = competitorDetails[this.currentIndexes[0]].competitor;
             
-            competitors.forEach(function (comp, idx) {
-                if (comp.crosses(refCompetitor)) {
+            competitorDetails.forEach(function (compDetails, idx) {
+                if (compDetails.visible && compDetails.competitor.crosses(refCompetitor)) {
                     this.currentIndexes.push(idx);
                 }
             }, this);

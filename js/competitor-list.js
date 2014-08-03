@@ -356,12 +356,14 @@
     * Select all of the competitors that cross the unique selected competitor.
     */
     CompetitorList.prototype.selectCrossingRunners = function () {
-        this.competitorSelection.selectCrossingRunners(this.allCompetitors); 
+        this.competitorSelection.selectCrossingRunners(this.allCompetitorDetails);
         if (this.competitorSelection.isSingleRunnerSelected()) {
             // Only a single runner is still selected, so nobody crossed the
             // selected runner.
             var competitorName = this.allCompetitors[this.competitorSelection.getSingleRunnerIndex()].name;
-            this.alerter(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
+            var filterInEffect = (this.lastFilterString.length > 0);
+            var messageKey = (filterInEffect) ? "RaceGraphNoCrossingRunnersFiltered" : "RaceGraphNoCrossingRunners";
+            this.alerter(getMessageWithFormatting(messageKey, {"$$NAME$$": competitorName}));
         }
     };
     

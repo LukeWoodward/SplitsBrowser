@@ -990,6 +990,19 @@
             assert.strictEqual(listAndSelection.selection.isSelected(i), (i === 2), "Wrong selectedness for competitor " + i);
         }
     });
+    
+    QUnit.test("Clicking the Crossing Runners button when a filter is active but there are no crossing runners among the filtered competitors pops up an alert messages", function (assert) {
+        resetAlert();
+        var listAndSelection = createSampleListForRaceGraph([1], false);
+        assert.ok(!$(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":disabled"));
+        listAndSelection.list.setFilterText("k");
+        $(CROSSING_RUNNERS_BUTTON_SELECTOR).click();
+        assert.strictEqual(alertCount, 1);
+        assert.ok(typeof lastAlertMessage !== "undefined" && lastAlertMessage !== null);
+        for (var i = 0; i < 3; i += 1) {
+            assert.strictEqual(listAndSelection.selection.isSelected(i), (i === 1));
+        }
+    });
 
     QUnit.test("Filtering by a string contained in one competitor only matches only that competitor", function (assert) {
         var listAndSelection = createSampleList([], false);

@@ -154,5 +154,9 @@ SplitsBrowser.Messages.de = {
     
     // Label that appears beside a competitor on the Results Table to indicate
     // that they were over the maximum time.
-    OverMaxTimeShort: "ZeitUeb"
+    OverMaxTimeShort: "ZeitUeb",
+
+    // Alert message shown when you click 'Crossing runners' but there are no
+    // crossing runners to show and also a filter is active.
+    RaceGraphNoCrossingRunnersFiltered: "$$NAME$$ has no crossing runners among the filtered competitors."
 };

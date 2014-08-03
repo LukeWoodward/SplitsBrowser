@@ -268,21 +268,57 @@
         assert.strictEqual(selection.getSingleRunnerIndex(), null);
     });
 
+    /**
+    * Returns some test competitor-details objects for testing the crossing-
+    * runners functionality.
+    * @return {Array} Array of competitor-details objects.
+    */
+    function getCompetitorDetailsForCrossingRunners() {
+        return [
+            {competitor: fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301]), visible: true},
+            {competitor: fromCumTimes(2, "Fred Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561]), visible: true},
+            {competitor: fromCumTimes(3, "Bill Baker", "GHI", 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381]), visible: true}
+        ];
+    }
+
+    QUnit.test("If no runners are selected, when crossing competitors are selected, no other competitors are selected", function (assert) {
+        reset();
+        var selection = new CompetitorSelection(3);
+        selection.registerChangeHandler(testHandler);
+        selection.selectCrossingRunners(getCompetitorDetailsForCrossingRunners());
+        assert.strictEqual(callCount, 0, "No call to the change-handler should be registered");
+    });
+    
     QUnit.test("If a single runner is selected, when crossing competitors are selected, then one other competitor is selected", function (assert) {
         reset();
         var selection = new CompetitorSelection(3);
         selection.toggle(1);
-        
-        var competitors = [
-            fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 184, 229, 301]),
-            fromCumTimes(2, "Fred Jones", "DEF", 11 * 3600, [0, 77, 191, 482, 561]),
-            fromCumTimes(3, "Bill Baker", "GHI", 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381])
-        ];
-        
         selection.registerChangeHandler(testHandler);
-        selection.selectCrossingRunners(competitors);
+        selection.selectCrossingRunners(getCompetitorDetailsForCrossingRunners());
         assert.deepEqual(lastIndexes, [1, 2], "Selected indexes should be 1 and 2");
         assert.strictEqual(callCount, 1, "One call to the change-handler should be registered");
+    });
+
+    QUnit.test("If two runners are selected, when crossing competitors are selected, no other competitors are selected", function (assert) {
+        reset();
+        var selection = new CompetitorSelection(3);
+        selection.toggle(0);
+        selection.toggle(1);
+        selection.registerChangeHandler(testHandler);
+        selection.selectCrossingRunners(getCompetitorDetailsForCrossingRunners());
+        assert.strictEqual(callCount, 0, "No call to the change-handler should be registered");
+    });
+
+    QUnit.test("If a single runner is selected but the crossing runner is not visible then no further competitors are selected", function (assert) {
+        reset();
+        var selection = new CompetitorSelection(3);
+        selection.toggle(1);
+        selection.registerChangeHandler(testHandler);
+        var competitorDetails = getCompetitorDetailsForCrossingRunners();
+        competitorDetails[2].visible = false;
+        selection.selectCrossingRunners(competitorDetails);
+        assert.deepEqual(lastIndexes, [1], "Selected indexes should be just 1");
+        assert.strictEqual(callCount, 1, "No call to the change-handler should be registered");
     });
 
     QUnit.test("Cannot migrate from an old list of competitors that isn't an array", function (assert) {
