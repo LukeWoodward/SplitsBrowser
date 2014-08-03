@@ -496,6 +496,13 @@
         assertSelected(assert, 3, [1], listAndSelection);
     });
     
+    QUnit.test("Can create a list with all competitors selected, filter the list and then deselect all competitors with a double-click", function (assert) {
+        var listAndSelection = createSampleList([0, 1, 2], false);
+        listAndSelection.list.setFilterText("son");
+        $("div#qunit-fixture button#selectNoCompetitors").dblclick();
+        assertSelected(assert, 3, [], listAndSelection);
+    });
+    
     QUnit.test("Can create a list with all competitors deselected, filter the list and then drag-select those only in the filtered list", function (assert) {
         var listAndSelection = createSampleList([], false);
         listAndSelection.list.setFilterText("son");

@@ -70,12 +70,15 @@
         this.allButton = this.buttonsPanel.append("button")
                                           .attr("id", "selectAllCompetitors")
                                           .style("width", "50%")
-                                          .on("click", function () { outerThis.selectAll(); });
+                                          .on("click", function () { outerThis.selectAllFiltered(); });
                         
         this.noneButton = this.buttonsPanel.append("button")
                                            .attr("id", "selectNoCompetitors")
                                            .style("width", "50%")
-                                           .on("click", function () { outerThis.selectNone(); });
+                                           .on("click", function () { outerThis.selectNoneFiltered(); });
+                                           
+        // Wire up double-click event with jQuery for easier testing.                                           
+        $(this.noneButton.node()).dblclick(function () { outerThis.selectNone(); });
                         
         this.buttonsPanel.append("br");
                         
@@ -330,17 +333,24 @@
     };
 
     /**
-    * Select all of the competitors.
+    * Selects all of the competitors that are matched by the filter.
     */
-    CompetitorList.prototype.selectAll = function () {
+    CompetitorList.prototype.selectAllFiltered = function () {
         this.competitorSelection.bulkSelect(this.getAllVisibleIndexes());
     };
 
     /**
-    * Select none of the competitors.
+    * Selects none of the competitors that are matched by the filter.
+    */
+    CompetitorList.prototype.selectNoneFiltered = function () {
+        this.competitorSelection.bulkDeselect(this.getAllVisibleIndexes());
+    };
+
+    /**
+    * Selects none of the competitors at all.
     */
     CompetitorList.prototype.selectNone = function () {
-        this.competitorSelection.bulkDeselect(this.getAllVisibleIndexes());
+        this.competitorSelection.selectNone();
     };
     
     /**
