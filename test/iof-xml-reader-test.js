@@ -391,7 +391,7 @@
     /**
     * Returns the single competitor in the given event.
     *
-    * This function also asserts that the event has exactly one ageclass and
+    * This function also asserts that the event has exactly one course-class and
     * exactly one competitor within that class.  This one competitor is what
     * it returns.
     * @param {QUnit.assert} assert - QUnit assert object.
@@ -403,9 +403,9 @@
     function getSingleCompetitor(assert, eventData, formatterName) {
         assert.strictEqual(eventData.classes.length, 1, "Expected one class - " + formatterName);
         if (eventData.classes.length === 1) {
-            var ageClass = eventData.classes[0];
-            assert.strictEqual(ageClass.competitors.length, 1, "Expected one competitor - " + formatterName);
-            if (ageClass.competitors.length === 1) {
+            var courseClass = eventData.classes[0];
+            assert.strictEqual(courseClass.competitors.length, 1, "Expected one competitor - " + formatterName);
+            if (courseClass.competitors.length === 1) {
                 return eventData.classes[0].competitors[0];
             } else {
                 return null;
@@ -634,13 +634,13 @@
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
                 if (eventData.classes.length === 1) {
-                    var ageClass = eventData.classes[0];
-                    assert.strictEqual(ageClass.name, className);
-                    assert.strictEqual(ageClass.competitors.length, 1, "One competitor should have been read -  " + formatterName);
-                    assert.strictEqual(ageClass.numControls, 3);
+                    var courseClass = eventData.classes[0];
+                    assert.strictEqual(courseClass.name, className);
+                    assert.strictEqual(courseClass.competitors.length, 1, "One competitor should have been read -  " + formatterName);
+                    assert.strictEqual(courseClass.numControls, 3);
                     
-                    if (ageClass.competitors.length === 1) {
-                        var competitor = ageClass.competitors[0];
+                    if (courseClass.competitors.length === 1) {
+                        var competitor = courseClass.competitors[0];
                         assert.strictEqual(competitor.name, person.forename + " " + person.surname);
                         assert.strictEqual(competitor.club, person.club);
                         assert.strictEqual(competitor.startTime, person.startTime);
@@ -657,8 +657,8 @@
                         assert.strictEqual(course.length, classLength / 1000);
                         assert.deepEqual(course.controls, person.controls);
                         
-                        assert.deepEqual(course.classes, [ageClass]);
-                        assert.strictEqual(ageClass.course, course);
+                        assert.deepEqual(course.classes, [courseClass]);
+                        assert.strictEqual(courseClass.course, course);
                     }
                 }
             });

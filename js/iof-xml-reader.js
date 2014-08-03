@@ -26,7 +26,7 @@
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
@@ -656,18 +656,18 @@
         
         classResultElements.forEach(function (classResultElement) {
             var parsedClass = parseClassData(classResultElement, reader);
-            var ageClass = new AgeClass(parsedClass.name, parsedClass.controls.length, parsedClass.competitors);
-            classes.push(ageClass);
+            var courseClass = new CourseClass(parsedClass.name, parsedClass.controls.length, parsedClass.competitors);
+            classes.push(courseClass);
             
-            // Add to each temporary course object a list of all age-classes.
+            // Add to each temporary course object a list of all classes.
             var tempCourse = parsedClass.course;
             if (tempCourse.id !== null && coursesMap.has(tempCourse.id)) {
                 // We've come across this course before, so just add a class to
                 // it.
-                coursesMap.get(tempCourse.id).classes.push(ageClass);
+                coursesMap.get(tempCourse.id).classes.push(courseClass);
             } else {
                 // New course.  Add some further details from the class.
-                tempCourse.classes = [ageClass];
+                tempCourse.classes = [courseClass];
                 tempCourse.controls = parsedClass.controls;
                 tempCourses.push(tempCourse);
                 if (tempCourse.id !== null) {
@@ -679,7 +679,7 @@
         // Now build up the array of courses.
         var courses = tempCourses.map(function (tempCourse) {
             var course = new Course(tempCourse.name, tempCourse.classes, tempCourse.length, tempCourse.climb, tempCourse.controls);
-            tempCourse.classes.forEach(function (ageClass) { ageClass.setCourse(course); });
+            tempCourse.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
             return course;
         });
         

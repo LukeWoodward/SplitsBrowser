@@ -24,8 +24,8 @@
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
-    var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
+    var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
     
     module("Chart types");
@@ -69,7 +69,7 @@
         var chartType = ChartTypes.PositionAfterLeg;
         var competitor1 = fromCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 278, 490, 596]);
         var competitor2 = fromCumTimes(2, "John Smith", "ABC", 10 * 3600, [0, 65, 286, 495, 595]);
-        new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
+        new CourseClassSet([new CourseClass("Test", 3, [competitor1, competitor2])]);
 
         assert.deepEqual(chartType.dataSelector(competitor1), [2, 1, 1, 2]);
         assert.deepEqual(chartType.dataSelector(competitor2), [1, 2, 2, 1]);
@@ -79,7 +79,7 @@
         var chartType = ChartTypes.SplitPosition;
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
-        new AgeClassSet([new AgeClass("Test", 3, [competitor1, competitor2])]);
+        new CourseClassSet([new CourseClass("Test", 3, [competitor1, competitor2])]);
         
         assert.deepEqual(chartType.dataSelector(competitor1), [2, 1, 2, 2]);
         assert.deepEqual(chartType.dataSelector(competitor2), [1, 2, 1, 1]);

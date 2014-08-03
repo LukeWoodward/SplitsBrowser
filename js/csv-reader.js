@@ -28,7 +28,7 @@
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
 
@@ -63,13 +63,13 @@
 
     /**
     * Parse CSV data for a class.
-    * @param {string} ageClass - The string containing data for that class.
-    * @return {SplitsBrowser.Model.AgeClass} Parsed class data.
+    * @param {string} courseClass - The string containing data for that class.
+    * @return {SplitsBrowser.Model.CourseClass} Parsed class data.
     */
-    function parseAgeClass (ageClass) {
-        var lines = ageClass.split(/\r?\n/).filter(isTrue);
+    function parseCourseClass (courseClass) {
+        var lines = courseClass.split(/\r?\n/).filter(isTrue);
         if (lines.length === 0) {
-            throwInvalidData("parseAgeClass got an empty list of lines");
+            throwInvalidData("parseCourseClass got an empty list of lines");
         }
 
         var firstLineParts = lines.shift().split(",");
@@ -84,7 +84,7 @@
             } else {
                 var competitors = lines.map(function (line, index) { return parseCompetitors(index, line, controlCount); });
                 competitors.sort(compareCompetitors);
-                return new AgeClass(className, controlCount, competitors);
+                return new CourseClass(className, controlCount, competitors);
             }
         } else {
             throwWrongFileFormat("Expected first line to have two parts (class name and number of controls), got " + firstLineParts.length + " part(s) instead");
@@ -105,9 +105,9 @@
 
         var classSections = eventData.split(/\n\n/).map($.trim).filter(isTrue);
        
-        var classes = classSections.map(parseAgeClass);
+        var classes = classSections.map(parseCourseClass);
         
-        classes = classes.filter(function (ageClass) { return !ageClass.isEmpty(); });
+        classes = classes.filter(function (courseClass) { return !courseClass.isEmpty(); });
         
         if (classes.length === 0) {
             throwInvalidData("No competitor data was found");

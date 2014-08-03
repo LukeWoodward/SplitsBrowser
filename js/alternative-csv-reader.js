@@ -29,7 +29,7 @@
     var parseCourseLength = SplitsBrowser.parseCourseLength;
     var parseCourseClimb = SplitsBrowser.parseCourseClimb;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
@@ -239,19 +239,19 @@
             }
         }
         
-        var ageClasses = [];
+        var courseClasses = [];
         var courses = [];
         classes.keys().forEach(function (className) {
             var cls = classes.get(className);
-            var ageClass = new AgeClass(className, cls.controls.length, cls.competitors);
+            var courseClass = new CourseClass(className, cls.controls.length, cls.competitors);
             
-            var course = new Course(className, [ageClass], cls.length, cls.climb, cls.controls);
-            ageClass.setCourse(course);
-            ageClasses.push(ageClass);
+            var course = new Course(className, [courseClass], cls.length, cls.climb, cls.controls);
+            courseClass.setCourse(course);
+            courseClasses.push(courseClass);
             courses.push(course);
         });
     
-        return new Event(ageClasses, courses);
+        return new Event(courseClasses, courses);
     }
     
     SplitsBrowser.Input.AlternativeCSV = {

@@ -75,10 +75,10 @@
     * name, numControls, course and competitorCount.
     *
     * @param {QUnit.assert} assert - The QUnit assert object.
-    * @param {AgeClass} actualClass - The parsed age class.
+    * @param {CourseClass} actualClass - The parsed class.
     * @param {Object} expectedDetails - The expected details.
     */
-    function assertAgeClass(assert, actualClass, expectedDetails) {
+    function assertCourseClass(assert, actualClass, expectedDetails) {
         assert.strictEqual(actualClass.name, expectedDetails.name);
         assert.strictEqual(actualClass.numControls, expectedDetails.numControls);
         assert.strictEqual(actualClass.course, expectedDetails.course);
@@ -93,7 +93,7 @@
     * All seven are optional.
     * 
     * @param {QUnit.assert} assert - The QUnit assert object.
-    * @param {AgeClass} actualCompetitor - The parsed competitor.
+    * @param {CourseClass} actualCompetitor - The parsed competitor.
     * @param {Object} expectedDetails - The expected details.
     */
     function assertCompetitor(assert, actualCompetitor, expectedDetails) {
@@ -710,10 +710,10 @@
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
 
-                var ageClass = eventData.classes[0];
-                assertAgeClass(assert, ageClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
+                var courseClass = eventData.classes[0];
+                assertCourseClass(assert, courseClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
                 
-                var competitor = ageClass.competitors[0];
+                var competitor = courseClass.competitors[0];
                 assertCompetitor(assert, competitor, {name: "Test runner", club: "TEST", totalTime: 9 * 60 + 25,
                                                       originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25],
                                                       originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, 4 * 60 + 11, 1 * 60 + 12],
@@ -722,7 +722,7 @@
                 
                 var course = eventData.courses[0];
                 assertCourse(assert, course, {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "152", "141"], classCount: 1});
-                assert.deepEqual(course.classes[0], ageClass);
+                assert.deepEqual(course.classes[0], courseClass);
             });
     });
     
@@ -735,10 +735,10 @@
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
 
-                var ageClass = eventData.classes[0];
-                assertAgeClass(assert, ageClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
+                var courseClass = eventData.classes[0];
+                assertCourseClass(assert, courseClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
                 
-                var competitor = ageClass.competitors[0];
+                var competitor = courseClass.competitors[0];
                 assertCompetitor(assert, competitor, {name: "Test runner", club: "TEST", totalTime: 9 * 60 + 25,
                                                       originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 3 * 60 + 57, 9 * 60 + 25],
                                                       originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, -5, 5 * 60 + 28],
@@ -746,7 +746,7 @@
                 
                 var course = eventData.courses[0];
                 assertCourse(assert, course, {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "152", "141"], classCount: 1});
-                assert.deepEqual(course.classes[0], ageClass);
+                assert.deepEqual(course.classes[0], courseClass);
             },
             {templates: [OLD_FORMAT]});
     });
@@ -774,10 +774,10 @@
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
 
-                var ageClass = eventData.classes[0];
-                assertAgeClass(assert, ageClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
+                var courseClass = eventData.classes[0];
+                assertCourseClass(assert, courseClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
         
-                var competitor = ageClass.competitors[0];
+                var competitor = courseClass.competitors[0];
                 assertCompetitor(assert, competitor, {name: "Test runner", club: "TEST", totalTime: 9 * 60 + 25,
                                                       originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25],
                                                       originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, 4 * 60 + 11, 1 * 60 + 12],
@@ -785,7 +785,7 @@
         
                 var course = eventData.courses[0];
                 assertCourse(assert, course, {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "152", "141"], classCount: 1});
-                assert.deepEqual(course.classes[0], ageClass);
+                assert.deepEqual(course.classes[0], courseClass);
             });
     });
     
@@ -812,11 +812,11 @@
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
 
-                var ageClass = eventData.classes[0];
-                assertAgeClass(assert, ageClass, {name: "Class1", numControls: 3, course: eventData.courses[0], competitorCount: 2});
+                var courseClass = eventData.classes[0];
+                assertCourseClass(assert, courseClass, {name: "Class1", numControls: 3, course: eventData.courses[0], competitorCount: 2});
 
-                assertCompetitor(assert, ageClass.competitors[0], {name: "Test runner 1", club: "TEST", totalTime: 9 * 60 + 25});
-                assertCompetitor(assert, ageClass.competitors[1], {name: "Test runner 2", club: "ABCD", totalTime: 9 * 60 + 59});
+                assertCompetitor(assert, courseClass.competitors[0], {name: "Test runner 1", club: "TEST", totalTime: 9 * 60 + 25});
+                assertCompetitor(assert, courseClass.competitors[1], {name: "Test runner 2", club: "ABCD", totalTime: 9 * 60 + 59});
 
                 assert.strictEqual(eventData.courses[0].name, "Test course 1");            
             },
@@ -836,14 +836,14 @@
                 var course = eventData.courses[0];
                 assert.strictEqual(course.name, "Test course 1");
                 
-                var ageClass1 = eventData.classes[0];
-                assertAgeClass(assert, ageClass1, {name: "Class1", numControls: 3, course: course, competitorCount: 1});
+                var courseClass1 = eventData.classes[0];
+                assertCourseClass(assert, courseClass1, {name: "Class1", numControls: 3, course: course, competitorCount: 1});
                 
-                var ageClass2 = eventData.classes[1];
-                assertAgeClass(assert, ageClass2, {name: "Class2", numControls: 3, course: course, competitorCount: 1});
+                var courseClass2 = eventData.classes[1];
+                assertCourseClass(assert, courseClass2, {name: "Class2", numControls: 3, course: course, competitorCount: 1});
                 
-                assertCompetitor(assert, ageClass1.competitors[0], {name: "Test runner 1", club: "TEST", totalTime: 9 * 60 + 25});
-                assertCompetitor(assert, ageClass2.competitors[0], {name: "Test runner 2", club: "ABCD", totalTime: 9 * 60 + 59});
+                assertCompetitor(assert, courseClass1.competitors[0], {name: "Test runner 1", club: "TEST", totalTime: 9 * 60 + 25});
+                assertCompetitor(assert, courseClass2.competitors[0], {name: "Test runner 2", club: "ABCD", totalTime: 9 * 60 + 59});
             },
             {useClasses: true});
     });
@@ -866,14 +866,14 @@
                 var course2 = eventData.courses[1];
                 assertCourse(assert, course2, {name: "Test course 2", length: 2.4, climb: 30, controls: ["132", "143", "139"]});
                 
-                var ageClass1 = eventData.classes[0];
-                assertAgeClass(assert, ageClass1, {name: "Class1", numControls: 3, course: course1, competitorCount: 1});
+                var courseClass1 = eventData.classes[0];
+                assertCourseClass(assert, courseClass1, {name: "Class1", numControls: 3, course: course1, competitorCount: 1});
                 
-                var ageClass2 = eventData.classes[1];
-                assertAgeClass(assert, ageClass2, {name: "Class2", numControls: 3, course: course2, competitorCount: 1});
+                var courseClass2 = eventData.classes[1];
+                assertCourseClass(assert, courseClass2, {name: "Class2", numControls: 3, course: course2, competitorCount: 1});
                 
-                assert.strictEqual(ageClass1.competitors[0].name, "Test runner 1");
-                assert.strictEqual(ageClass2.competitors[0].name, "Test runner 2");
+                assert.strictEqual(courseClass1.competitors[0].name, "Test runner 1");
+                assert.strictEqual(courseClass2.competitors[0].name, "Test runner 2");
             },
             {useClasses: true});
     });
@@ -888,7 +888,7 @@
             ]}],
             function (eventData, formatName) {
                 // As the class is shared across courses, it cannot be used, so
-                // age class names should fall back to course names.
+                // class names should fall back to course names.
                 assert.strictEqual(eventData.classes.length, 2, "Two classes should have been read - " + formatName);
                 assert.strictEqual(eventData.classes[0].name, "Test course 1");
                 assert.strictEqual(eventData.classes[1].name, "Test course 2");
@@ -932,9 +932,9 @@
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
-                var ageClass = eventData.classes[0];
-                assert.strictEqual(ageClass.competitors.length, 1);
-                assertCompetitor(assert, ageClass.competitors[0], {totalTime: null,
+                var courseClass = eventData.classes[0];
+                assert.strictEqual(courseClass.competitors.length, 1);
+                assertCompetitor(assert, courseClass.competitors[0], {totalTime: null,
                                                                    originalCumTimes: [0, 1 * 60 + 47, 4 * 60 + 2, null, 9 * 60 + 25],
                                                                    originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, null, null],
                                                                    isNonCompetitive: false, completed: false});
@@ -949,9 +949,9 @@
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
-                var ageClass = eventData.classes[0];
-                assert.strictEqual(ageClass.competitors.length, 1);
-                assertCompetitor(assert, ageClass.competitors[0], {totalTime: null,
+                var courseClass = eventData.classes[0];
+                assert.strictEqual(courseClass.competitors.length, 1);
+                assertCompetitor(assert, courseClass.competitors[0], {totalTime: null,
                                                                    originalCumTimes: [0, 1 * 60 + 47, 4 * 60 + 2, null, null],
                                                                    originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, null, null],
                                                                    isNonCompetitive: false, completed: false});
@@ -966,9 +966,9 @@
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
-                var ageClass = eventData.classes[0];
-                assert.strictEqual(ageClass.competitors.length, 1);
-                assertCompetitor(assert, ageClass.competitors[0], {totalTime: 9 * 60 + 25,
+                var courseClass = eventData.classes[0];
+                assert.strictEqual(courseClass.competitors.length, 1);
+                assertCompetitor(assert, courseClass.competitors[0], {totalTime: 9 * 60 + 25,
                                                                    originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25],
                                                                    originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, 4 * 60 + 11, 1 * 60 + 12],
                                                                    isNonCompetitive: true, completed: true,
@@ -984,9 +984,9 @@
             function (eventData, formatName) {
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
-                var ageClass = eventData.classes[0];
-                assert.strictEqual(ageClass.competitors.length, 1);
-                assertCompetitor(assert, ageClass.competitors[0], {totalTime: null,
+                var courseClass = eventData.classes[0];
+                assert.strictEqual(courseClass.competitors.length, 1);
+                assertCompetitor(assert, courseClass.competitors[0], {totalTime: null,
                                                                    originalCumTimes: [0, null, null, null, null],
                                                                    originalSplitTimes: [null, null, null, null],
                                                                    isNonCompetitive: false, completed: false,
@@ -1004,17 +1004,17 @@
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
 
-                var ageClass = eventData.classes[0];
-                assertAgeClass(assert, ageClass, {name: "Test course 1", numControls: 5, course: eventData.courses[0], competitorCount: 1});
+                var courseClass = eventData.classes[0];
+                assertCourseClass(assert, courseClass, {name: "Test course 1", numControls: 5, course: eventData.courses[0], competitorCount: 1});
                 
-                assertCompetitor(assert, ageClass.competitors[0], {name: "Test runner", club: "TEST", totalTime: 12 * 60 + 12,
+                assertCompetitor(assert, courseClass.competitors[0], {name: "Test runner", club: "TEST", totalTime: 12 * 60 + 12,
                                                                    originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25, 11 * 60 + 9, 12 * 60 + 12],
                                                                    originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, 4 * 60 + 11, 1 * 60 + 12, 1 * 60 + 44, 1 * 60 + 3],
                                                                    isNonCompetitive: false, completed: true});
                 
                 var course = eventData.courses[0];
                 assertCourse(assert, course, {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "152", "141", "140", "154"], classCount: 1});
-                assert.deepEqual(course.classes[0], ageClass);
+                assert.deepEqual(course.classes[0], courseClass);
             });
     });
     
@@ -1028,17 +1028,17 @@
                 assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
 
-                var ageClass = eventData.classes[0];
-                assertAgeClass(assert, ageClass, {name: "Class1", numControls: 5, course: eventData.courses[0], competitorCount: 1});
+                var courseClass = eventData.classes[0];
+                assertCourseClass(assert, courseClass, {name: "Class1", numControls: 5, course: eventData.courses[0], competitorCount: 1});
                 
-                assertCompetitor(assert, ageClass.competitors[0], {name: "Test runner", club: "TEST", totalTime: 12 * 60 + 12,
+                assertCompetitor(assert, courseClass.competitors[0], {name: "Test runner", club: "TEST", totalTime: 12 * 60 + 12,
                                                                    originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25, 11 * 60 + 9, 12 * 60 + 12],
                                                                    originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, 4 * 60 + 11, 1 * 60 + 12, 1 * 60 + 44, 1 * 60 + 3],
                                                                    isNonCompetitive: false, completed: true});
                 
                 var course = eventData.courses[0];
                 assertCourse(assert, course, {name: "Test course 1", length: 2.7, climb: 35, controls: ["138", "152", "141", "140", "154"], classCount: 1});
-                assert.deepEqual(course.classes[0], ageClass);
+                assert.deepEqual(course.classes[0], courseClass);
             },
             {useClasses: true});
     });
@@ -1082,9 +1082,9 @@
         var eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
         assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
-        var ageClass = eventData.classes[0];
-        assert.strictEqual(ageClass.competitors.length, 1, "One competitor should should have been read");
-        assertCompetitor(assert, ageClass.competitors[0], {name: "Test runner 1", totalTime: 9 * 60 + 25,
+        var courseClass = eventData.classes[0];
+        assert.strictEqual(courseClass.competitors.length, 1, "One competitor should should have been read");
+        assertCompetitor(assert, courseClass.competitors[0], {name: "Test runner 1", totalTime: 9 * 60 + 25,
                                                            originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25],
                                                            originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, 4 * 60 + 11, 1 * 60 + 12],
                                                            isNonCompetitive: false, completed: true});
@@ -1156,9 +1156,9 @@
         var eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
         assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
-        var ageClass = eventData.classes[0];
-        assert.strictEqual(ageClass.competitors.length, 2, "Two competitors should should have been read");
-        assertCompetitor(assert, ageClass.competitors[1], {name: "Test runner 2", totalTime: null,
+        var courseClass = eventData.classes[0];
+        assert.strictEqual(courseClass.competitors.length, 2, "Two competitors should should have been read");
+        assertCompetitor(assert, courseClass.competitors[1], {name: "Test runner 2", totalTime: null,
                                                            originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, null, null],
                                                            originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, null, null],
                                                            isNonCompetitive: false, completed: false});
@@ -1176,9 +1176,9 @@
         var eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
         assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
-        var ageClass = eventData.classes[0];
-        assert.strictEqual(ageClass.competitors.length, 2, "Two competitors should should have been read");
-        assertCompetitor(assert, ageClass.competitors[1], {name: "Test runner 2", totalTime: null,
+        var courseClass = eventData.classes[0];
+        assert.strictEqual(courseClass.competitors.length, 2, "Two competitors should should have been read");
+        assertCompetitor(assert, courseClass.competitors[1], {name: "Test runner 2", totalTime: null,
                                                            originalCumTimes: [0, 1 * 60 + 47, 4 * 60 +  2, null, null],
                                                            originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, null, null],
                                                            isNonCompetitive: false, completed: false});

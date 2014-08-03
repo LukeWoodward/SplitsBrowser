@@ -27,26 +27,26 @@
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
-    var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
+    var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
 
     var ChartPopupData = SplitsBrowser.Model.ChartPopupData;
 
-    function getTestAgeClassSet() {
+    function getTestCourseClassSet() {
         var competitors = d3.range(0, 11).map(function (num) {
             var timeOffset = (num * 7) % 11;
             return fromSplitTimes(1, "Name" + num, "Club" + num, 10 * 3600 + 127 * num, [65 + 10 * timeOffset, 221 + 20 * timeOffset, 209 + 15 * timeOffset, 100 + 5 * timeOffset]);
         });
     
-        return new AgeClassSet([new AgeClass("Test class", 3, competitors)]);
+        return new CourseClassSet([new CourseClass("Test class", 3, competitors)]);
     }
     
     QUnit.test("Can get selected classes popup data", function (assert) {
     
-        var ageClassSet = getTestAgeClassSet();
-        var actualData = ChartPopupData.getFastestSplitsPopupData(ageClassSet, 2);
+        var courseClassSet = getTestCourseClassSet();
+        var actualData = ChartPopupData.getFastestSplitsPopupData(courseClassSet, 2);
     
         var expectedData = {
             title: getMessage("SelectedClassesPopupHeader"),
@@ -65,16 +65,16 @@
 
     QUnit.test("Can get fastest splits to intermediate control", function (assert) {
     
-        var ageClassSet1 = getTestAgeClassSet();
-        var course1 = new Course("Test course", ageClassSet1.ageClasses, null, null, ["235", "189", "212"]);
-        ageClassSet1.ageClasses.forEach(function (ageClass) { ageClass.setCourse(course1); });
+        var courseClassSet1 = getTestCourseClassSet();
+        var course1 = new Course("Test course", courseClassSet1.classes, null, null, ["235", "189", "212"]);
+        courseClassSet1.classes.forEach(function (courseClass) { courseClass.setCourse(course1); });
 
-        var ageClassSet2 = new AgeClassSet([new AgeClass("Test class 2", 3, [fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [75, 242, 200, 157])])]);
-        var course2 = new Course("Test course 2", ageClassSet2.ageClasses, null, null, ["235", "189", "212"]);
-        ageClassSet2.ageClasses[0].setCourse(course2);
+        var courseClassSet2 = new CourseClassSet([new CourseClass("Test class 2", 3, [fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [75, 242, 200, 157])])]);
+        var course2 = new Course("Test course 2", courseClassSet2.classes, null, null, ["235", "189", "212"]);
+        courseClassSet2.classes[0].setCourse(course2);
         
-        var eventData = new Event(ageClassSet1.ageClasses.concat(ageClassSet2.ageClasses), [course1, course2]);
-        var actualData = ChartPopupData.getFastestSplitsForLegPopupData(ageClassSet1, eventData, 2);
+        var eventData = new Event(courseClassSet1.classes.concat(courseClassSet2.classes), [course1, course2]);
+        var actualData = ChartPopupData.getFastestSplitsForLegPopupData(courseClassSet1, eventData, 2);
         
         var expectedData = {
             title: getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": "235", "$$END$$": "189"}),
@@ -98,12 +98,12 @@
 
     QUnit.test("Can get fastest splits from start to first control", function (assert) {
     
-        var ageClassSet = getTestAgeClassSet();
-        var course = new Course("Test course", ageClassSet.ageClasses, null, null, ["235", "189", "212"]);
-        ageClassSet.ageClasses.forEach(function (ageClass) { ageClass.setCourse(course); });
+        var courseClassSet = getTestCourseClassSet();
+        var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
+        courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
         
-        var eventData = new Event(ageClassSet.ageClasses, [course]);
-        var actualData = ChartPopupData.getFastestSplitsForLegPopupData(ageClassSet, eventData, 1);
+        var eventData = new Event(courseClassSet.classes, [course]);
+        var actualData = ChartPopupData.getFastestSplitsForLegPopupData(courseClassSet, eventData, 1);
         
         var expectedData = {
             title: getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": getMessage("StartName"), "$$END$$": "235"}),
@@ -121,12 +121,12 @@
 
     QUnit.test("Can get fastest splits from last control to finish", function (assert) {
     
-        var ageClassSet = getTestAgeClassSet();
-        var course = new Course("Test course", ageClassSet.ageClasses, null, null, ["235", "189", "212"]);
-        ageClassSet.ageClasses.forEach(function (ageClass) { ageClass.setCourse(course); });
+        var courseClassSet = getTestCourseClassSet();
+        var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
+        courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
         
-        var eventData = new Event(ageClassSet.ageClasses, [course]);
-        var actualData = ChartPopupData.getFastestSplitsForLegPopupData(ageClassSet, eventData, 4);
+        var eventData = new Event(courseClassSet.classes, [course]);
+        var actualData = ChartPopupData.getFastestSplitsForLegPopupData(courseClassSet, eventData, 4);
         
         var expectedData = {
             title: getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": "212", "$$END$$": getMessage("FinishName")}),
@@ -143,11 +143,11 @@
     });
     
     QUnit.test("Can get competitors near intermediate control", function (assert) {
-        var ageClassSet = getTestAgeClassSet();
-        var course = new Course("Test course", ageClassSet.ageClasses, null, null, ["235", "189", "212"]);
-        ageClassSet.ageClasses.forEach(function (ageClass) { ageClass.setCourse(course); });
+        var courseClassSet = getTestCourseClassSet();
+        var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
+        courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
         
-        var eventData = new Event(ageClassSet.ageClasses, [course]);
+        var eventData = new Event(courseClassSet.classes, [course]);
         
         var testTime = 10 * 3600 + 12 * 60;
         
@@ -164,17 +164,17 @@
             placeholder: getMessage("NoNearbyCompetitors")
         };
         
-        var actualData = ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(ageClassSet, eventData, 2, testTime);
+        var actualData = ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(courseClassSet, eventData, 2, testTime);
         
         assert.deepEqual(actualData, expectedData);
     });
     
     QUnit.test("Can get competitors near start control", function (assert) {
-        var ageClassSet = getTestAgeClassSet();
-        var course = new Course("Test course", ageClassSet.ageClasses, null, null, ["235", "189", "212"]);
-        ageClassSet.ageClasses.forEach(function (ageClass) { ageClass.setCourse(course); });
+        var courseClassSet = getTestCourseClassSet();
+        var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
+        courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
         
-        var eventData = new Event(ageClassSet.ageClasses, [course]);
+        var eventData = new Event(courseClassSet.classes, [course]);
         
         var testTime = 10 * 3600 + 12 * 60;
         
@@ -191,17 +191,17 @@
             placeholder: getMessage("NoNearbyCompetitors")
         };
         
-        var actualData = ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(ageClassSet, eventData, 0, testTime);
+        var actualData = ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(courseClassSet, eventData, 0, testTime);
         
         assert.deepEqual(actualData, expectedData);
     });
     
     QUnit.test("Can get competitors near finish control", function (assert) {
-        var ageClassSet = getTestAgeClassSet();
-        var course = new Course("Test course", ageClassSet.ageClasses, null, null, ["235", "189", "212"]);
-        ageClassSet.ageClasses.forEach(function (ageClass) { ageClass.setCourse(course); });
+        var courseClassSet = getTestCourseClassSet();
+        var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
+        courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
         
-        var eventData = new Event(ageClassSet.ageClasses, [course]);
+        var eventData = new Event(courseClassSet.classes, [course]);
         
         var testTime = 10 * 3600 + 28 * 60;
         
@@ -218,7 +218,7 @@
             placeholder: getMessage("NoNearbyCompetitors")
         };
         
-        var actualData = ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(ageClassSet, eventData, 4, testTime);
+        var actualData = ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(courseClassSet, eventData, 4, testTime);
         
         assert.deepEqual(actualData, expectedData);
     });

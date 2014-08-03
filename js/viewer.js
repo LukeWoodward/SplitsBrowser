@@ -36,7 +36,7 @@
     
     var Model = SplitsBrowser.Model;
     var CompetitorSelection = Model.CompetitorSelection;
-    var AgeClassSet = Model.AgeClassSet;
+    var CourseClassSet = Model.CourseClassSet;
     var ChartTypes = Model.ChartTypes;
     
     var parseEventData = SplitsBrowser.Input.parseEventData;
@@ -76,7 +76,7 @@
         this.topBarHeight = (options && options.topBar && $(options.topBar).length > 0) ? $(options.topBar).outerHeight(true) : 0;
         
         this.selection = null;
-        this.ageClassSet = null;
+        this.courseClassSet = null;
         this.languageSelector = null;
         this.classSelector = null;
         this.comparisonSelector = null;
@@ -118,7 +118,7 @@
     * depending on whether all visible competitors have start times.
     */
     Viewer.prototype.enableOrDisableRaceGraph = function () {
-        var anyStartTimesMissing = this.ageClassSet.allCompetitors.some(function (competitor) { return competitor.lacksStartTime(); });
+        var anyStartTimesMissing = this.courseClassSet.allCompetitors.some(function (competitor) { return competitor.lacksStartTime(); });
         this.chartTypeSelector.setRaceGraphDisabledNotifier((anyStartTimesMissing) ? alertRaceGraphDisabledAsStartTimesMissing : null);
     };
     
@@ -264,12 +264,12 @@
             compareWith: this.comparisonSelector.getComparisonType(),
             selected: this.selection.getSelectedIndexes(),
             stats: this.statisticsSelector.getVisibleStatistics(),
-            showOriginal: this.ageClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected(),
+            showOriginal: this.courseClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected(),
             filterText: this.competitorList.getFilterText()
         };
         
         var oldQueryString = document.location.search;
-        var newQueryString = formatQueryString(oldQueryString, this.eventData, this.ageClassSet, data);
+        var newQueryString = formatQueryString(oldQueryString, this.eventData, this.courseClassSet, data);
         var oldHref = document.location.href;        
         this.directLink.attr("href", oldHref.substring(0, oldHref.length - oldQueryString.length) + "?" + newQueryString.replace(/^\?+/, ""));
     };
@@ -360,11 +360,11 @@
     * Select all of the competitors that cross the unique selected competitor.
     */
     Viewer.prototype.selectCrossingRunners = function () {
-        this.selection.selectCrossingRunners(this.ageClassSet.allCompetitors); 
+        this.selection.selectCrossingRunners(this.courseClassSet.allCompetitors); 
         if (this.selection.isSingleRunnerSelected()) {
             // Only a single runner is still selected, so nobody crossed the
             // selected runner.
-            var competitorName = this.ageClassSet.allCompetitors[this.selection.getSelectedIndexes()[0]].name;
+            var competitorName = this.courseClassSet.allCompetitors[this.selection.getSelectedIndexes()[0]].name;
             alert(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
         }
     };
@@ -473,9 +473,9 @@
 
         this.updateControlEnabledness();
         var comparisonFunction = this.comparisonSelector.getComparisonFunction();
-        this.referenceCumTimes = comparisonFunction(this.ageClassSet);
-        this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
-        this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType());
+        this.referenceCumTimes = comparisonFunction(this.courseClassSet);
+        this.fastestCumTimes = this.courseClassSet.getFastestCumTimes();
+        this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType());
         this.redrawChart();
     };
 
@@ -486,7 +486,7 @@
         var data = {
             chartData: this.chartData,
             eventData: this.eventData,
-            ageClassSet: this.ageClassSet,
+            courseClassSet: this.courseClassSet,
             referenceCumTimes: this.referenceCumTimes,
             fastestCumTimes: this.fastestCumTimes
         };
@@ -500,7 +500,7 @@
     Viewer.prototype.redraw = function () {
         var chartType = this.chartTypeSelector.getChartType();
         if (!chartType.isResultsTable) {
-            this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), chartType);
+            this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), chartType);
             this.redrawChart();
         }
     };
@@ -526,16 +526,16 @@
     
     /**
     * Sets the currently-selected classes in various objects that need it:
-    * current age-class set, comparison selector and results table.
+    * current course-class set, comparison selector and results table.
     * @param {Array} classIndexes - Array of selected class indexes.    
     */
     Viewer.prototype.setClasses = function (classIndexes) {
         this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
-        this.ageClassSet = new AgeClassSet(this.currentClasses);
-        this.comparisonSelector.setAgeClassSet(this.ageClassSet);
+        this.courseClassSet = new CourseClassSet(this.currentClasses);
+        this.comparisonSelector.setCourseClassSet(this.courseClassSet);
         this.resultsTable.setClass(this.currentClasses[0]);    
         this.enableOrDisableRaceGraph();
-        this.originalDataSelector.setVisible(this.ageClassSet.hasDubiousData());
+        this.originalDataSelector.setVisible(this.courseClassSet.hasDubiousData());
     };
     
     /**
@@ -545,10 +545,10 @@
     Viewer.prototype.initClasses = function (classIndexes) {
         this.classSelector.selectClasses(classIndexes);
         this.setClasses(classIndexes);
-        this.competitorList.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
-        this.selection = new CompetitorSelection(this.ageClassSet.allCompetitors.length);
+        this.competitorList.setCompetitorList(this.courseClassSet.allCompetitors, (this.currentClasses.length > 1));
+        this.selection = new CompetitorSelection(this.courseClassSet.allCompetitors.length);
         this.competitorList.setSelection(this.selection);
-        this.previousCompetitorList = this.ageClassSet.allCompetitors;
+        this.previousCompetitorList = this.courseClassSet.allCompetitors;
     };
     
     /**
@@ -564,12 +564,12 @@
         }
         
         this.setClasses(classIndexes);
-        this.competitorList.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
-        this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
+        this.competitorList.setCompetitorList(this.courseClassSet.allCompetitors, (this.currentClasses.length > 1));
+        this.selection.migrate(this.previousCompetitorList, this.courseClassSet.allCompetitors);
         this.competitorList.selectionChanged();
         this.setChartSize();
         this.drawChart();
-        this.previousCompetitorList = this.ageClassSet.allCompetitors;
+        this.previousCompetitorList = this.courseClassSet.allCompetitors;
         this.updateDirectLink();
     };
     
@@ -692,7 +692,7 @@
             this.statisticsSelector.setVisibleStatistics(parsedQueryString.stats);
         }
         
-        if (parsedQueryString.showOriginal && this.ageClassSet.hasDubiousData()) {
+        if (parsedQueryString.showOriginal && this.courseClassSet.hasDubiousData()) {
             this.originalDataSelector.selectOriginalData();
             this.selectOriginalOrRepairedData(true);
         }

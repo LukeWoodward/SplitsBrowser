@@ -38,13 +38,13 @@
     
     /**
     * Returns the fastest splits to a control.
-    * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - The age-class set
-    *     containing the splits data.
+    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet - The
+    *     course-class set containing the splits data.
     * @param {Number} controlIndex - The index of the control.
     * @return {Object} Fastest-split data.
     */
-    ChartPopupData.getFastestSplitsPopupData = function (ageClassSet, controlIndex) {
-        var data = ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, controlIndex);
+    ChartPopupData.getFastestSplitsPopupData = function (courseClassSet, controlIndex) {
+        var data = courseClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, controlIndex);
         data = data.map(function (comp) {
             return {time: comp.split, name: comp.name, highlight: false};
         });
@@ -55,7 +55,7 @@
     /**
     * Returns the fastest splits for the currently-shown leg.  The list
     * returned contains the fastest splits for the current leg for each class.
-    * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - The age-class set
+    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet - The course-class set
     *     containing the splits data.
     * @param {SplitsBrowser.Model.EventData} eventData - Data for the entire
     *     event.
@@ -63,8 +63,8 @@
     * @return {Object} Object that contains the title for the popup and the
     *     array of data to show within it.
     */
-    ChartPopupData.getFastestSplitsForLegPopupData = function (ageClassSet, eventData, controlIndex) {
-        var course = ageClassSet.getCourse();
+    ChartPopupData.getFastestSplitsForLegPopupData = function (courseClassSet, eventData, controlIndex) {
+        var course = courseClassSet.getCourse();
         var startCode = course.getControlCode(controlIndex - 1);
         var endCode = course.getControlCode(controlIndex);
         
@@ -73,7 +73,7 @@
         
         var title = getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": startControl, "$$END$$": endControl});
         
-        var primaryClass = ageClassSet.getPrimaryClassName();
+        var primaryClass = courseClassSet.getPrimaryClassName();
         var data = eventData.getFastestSplitsForLeg(startCode, endCode)
                             .map(function (row) { return { name: row.name, className: row.className, time: row.split, highlight: (row.className === primaryClass)}; });
         
@@ -83,7 +83,7 @@
     /**
     * Returns an object containing an array of the competitors visiting a
     * control at a given time.
-    * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - The age-class set
+    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet - The course-class set
     *     containing the splits data.
     * @param {SplitsBrowser.Model.EventData} eventData - Data for the entire
     *     event.
@@ -91,13 +91,13 @@
     * @param {Number} time - The current time, in units of seconds past midnight.
     * @return {Object} Object containing competitor data.
     */
-    ChartPopupData.getCompetitorsVisitingCurrentControlPopupData = function (ageClassSet, eventData, controlIndex, time) {
-        var controlCode = ageClassSet.getCourse().getControlCode(controlIndex);
+    ChartPopupData.getCompetitorsVisitingCurrentControlPopupData = function (courseClassSet, eventData, controlIndex, time) {
+        var controlCode = courseClassSet.getCourse().getControlCode(controlIndex);
         var intervalStart = Math.round(time) - RACE_GRAPH_COMPETITOR_WINDOW / 2;
         var intervalEnd = Math.round(time) + RACE_GRAPH_COMPETITOR_WINDOW / 2;
         var competitors = eventData.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
             
-        var primaryClass = ageClassSet.getPrimaryClassName();
+        var primaryClass = courseClassSet.getPrimaryClassName();
         var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}; });
         
         var controlName;

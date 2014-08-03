@@ -1,5 +1,5 @@
 /*
- *  SplitsBrowser ClassSelector - Provides a choice of age classes to compare.
+ *  SplitsBrowser ClassSelector - Provides a choice of classes to compare.
  *  
  *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
@@ -115,7 +115,8 @@
     * Sets the list of classes that this selector can choose between.
     * 
     * If there are no classes, a 'dummy' entry is added
-    * @param {Array} classes - Array of AgeClass objects containing class data.
+    * @param {Array} classes - Array of CourseClass objects containing class
+    *     data.
     */
     ClassSelector.prototype.setClasses = function(classes) {
         if ($.isArray(classes)) {
@@ -126,7 +127,7 @@
                 options = [getMessage("NoClassesLoadedPlaceholder")];
             } else {
                 this.dropDown.disabled = false;
-                options = classes.map(function(ageClass) { return ageClass.name; });
+                options = classes.map(function(courseClass) { return courseClass.name; });
             }
             
             var optionsList = d3.select(this.dropDown).selectAll("option").data(options);
@@ -239,7 +240,7 @@
         otherClassesSelection.enter().append("div")
                                      .classed("otherClassItem", true);
         
-        otherClassesSelection.attr("id", function (classIdx) { return "ageClassIdx_" + classIdx; })
+        otherClassesSelection.attr("id", function (classIdx) { return "courseClassIdx_" + classIdx; })
                              .classed("selected", function (classIdx) { return selectedOtherClassIndexes.has(classIdx); })
                              .text(function (classIdx) { return outerThis.classes[classIdx].name; });
                              
@@ -283,7 +284,7 @@
             this.selectedOtherClassIndexes.add(classIdx);
         }
         
-        d3.select("div#ageClassIdx_" + classIdx).classed("selected", this.selectedOtherClassIndexes.has(classIdx));
+        d3.select("div#courseClassIdx_" + classIdx).classed("selected", this.selectedOtherClassIndexes.has(classIdx));
         this.updateOtherClassText();
         this.onSelectionChanged();
     };

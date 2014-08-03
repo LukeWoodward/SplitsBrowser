@@ -23,7 +23,7 @@
     
     var parseTime = SplitsBrowser.parseTime;
     var parseEventData = SplitsBrowser.Input.SI.parseEventData;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
@@ -31,7 +31,7 @@
     var HEADER_46 = "Stno;SI card;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls.
-    var ROW_TEMPLATE_46 = "0;1;2;surname;forename;5;6;7;nonComp;startTime;10;time;classifier;13;14;club;16;17;ageClass;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;course;distance;climb;numControls;placing;startPunch;45";
+    var ROW_TEMPLATE_46 = "0;1;2;surname;forename;5;6;7;nonComp;startTime;10;time;classifier;13;14;club;16;17;className;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;course;distance;climb;numControls;placing;startPunch;45";
     
     // Header line when control 1 is in column 44.
     // Compared to the variant above, this line has no 'S' column and has the
@@ -39,7 +39,7 @@
     var HEADER_44 = "Stno;SI card;Database Id;Name;YB;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls.
-    var ROW_TEMPLATE_44 = "0;1;2;name;4;5;nonComp;startTime;8;time;classifier;11;12;club;14;15;ageClass;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;course;distance;climb;numControls;placing;startPunch;43";
+    var ROW_TEMPLATE_44 = "0;1;2;name;4;5;nonComp;startTime;8;time;classifier;11;12;club;14;15;className;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;course;distance;climb;numControls;placing;startPunch;43";
     
     // Header line when control 1 is in column 60.
     // This has various new columns.  It also doesn't always have competitor
@@ -47,7 +47,7 @@
     var HEADER_60 = "OE0014;Stno;XStno;Chipno;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Credit -;Penalty +;Comment;Club no.;Cl.name;City;Nat;Location;Region;Cl. no.;Short;Long;Entry cl. No;Entry class (short);Entry class (long);Rank;Ranking points;Num1;Num2;Num3;Text1;Text2;Text3;Addr. surname;Addr. first name;Street;Line2;Zip;Addr. city;Phone;Mobile;Fax;EMail;Rented;Start fee;Paid;Team;Course no.;Course;km;m;Course controls;Place;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls of the 60-column variation.
-    var ROW_TEMPLATE_60 = "0;1;2;compno;4;surname;forename;7;8;9;nonComp;startTime;12;time;classifier;15;16;17;noOfClub;19;club;21;22;23;24;25;ageClass;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;45;46;47;48;49;50;51;52;course;distance;climb;numControls;placing;startPunch;finish";
+    var ROW_TEMPLATE_60 = "0;1;2;compno;4;surname;forename;7;8;9;nonComp;startTime;12;time;classifier;15;16;17;noOfClub;19;club;21;22;23;24;25;className;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;45;46;47;48;49;50;51;52;course;distance;climb;numControls;placing;startPunch;finish";
     
     var ALL_FORMATS = [
         { name: "46-column", header: HEADER_46, template: ROW_TEMPLATE_46, combineName: false },
@@ -99,7 +99,7 @@
             startTime: "",
             time: "06:33",
             finish: "11:34:18",
-            ageClass: "Test class",
+            className: "Test class",
             course: "Test course",
             distance: "4.1",
             climb: "140",
@@ -125,7 +125,7 @@
             startTime: "",
             time: "07:11",
             finish: "10:37:11",
-            ageClass: "Test class",
+            className: "Test class",
             course: "Test course",
             distance: "4.1",
             climb: "140",
@@ -164,7 +164,7 @@
             startTime: "",
             time: "06:58",
             finish: "11:06:58",
-            ageClass: "Test class",
+            className: "Test class",
             course: "Test course",
             distance: "4.1",
             climb: "140",
@@ -306,7 +306,7 @@
         runTestOverAllFormats([[getCompetitor1(), getControls1()]], function (eventData) {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.ok(eventData.classes[0] instanceof AgeClass, "Class element should be an AgeClass object");
+            assert.ok(eventData.classes[0] instanceof CourseClass, "Class element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
             assert.strictEqual(eventData.classes[0].name, "Test class", "Class should have correct name");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
@@ -452,7 +452,7 @@
         competitor1.surname = "";
         competitor1.club = "";
         competitor1.time = "";
-        competitor1.ageClass = "";
+        competitor1.className = "";
         competitor1.startTime = competitor1.startPunch;
         competitor1.startPunch = "";
         
@@ -668,7 +668,7 @@
     QUnit.test("Can parse a string that contains two competitors in the same class and course", function (assert) {
         runTestOverAllFormats([[getCompetitor1(), getControls1()], [getCompetitor2(), getControls2()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.ok(eventData.classes[0] instanceof AgeClass, "Array element should be an AgeClass object");
+            assert.ok(eventData.classes[0] instanceof CourseClass, "Array element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
             assert.strictEqual(eventData.classes[0].competitors.length, 2, "Two competitors should have been read");
             
@@ -685,7 +685,7 @@
         comp2.course = "Test course 2";
         runTestOverAllFormats([[comp1, getControls1()], [comp2, getControls2()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.ok(eventData.classes[0] instanceof AgeClass, "Array element should be an AgeClass object");
+            assert.ok(eventData.classes[0] instanceof CourseClass, "Array element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
             assert.strictEqual(eventData.classes[0].competitors.length, 2, "Two competitors should have been read");
             
@@ -702,9 +702,9 @@
     
     QUnit.test("Can parse a string that contains two competitors in the same course but different class", function (assert) {
         var comp1 = getCompetitor1();
-        comp1.ageClass = "Test class 1";
+        comp1.className = "Test class 1";
         var comp2 = getCompetitor2();
-        comp2.ageClass = "Test class 2";
+        comp2.className = "Test class 2";
         runTestOverAllFormats([[comp1, getControls1()], [comp2, getControls2()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 2, "There should be two classes");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "First class should have two competitors");
@@ -724,13 +724,13 @@
     
     QUnit.test("Can parse a string that contains a course with two classes where one class is used in another course into an event with a single course", function (assert) {
         var comp1 = getCompetitor1();
-        comp1.ageClass = "Test class 1";
+        comp1.className = "Test class 1";
         comp1.course = "Test course 1";
         var comp2 = getCompetitor2();
-        comp2.ageClass = "Test class 2";
+        comp2.className = "Test class 2";
         comp2.course = "Test course 1";
         var comp3 = getCompetitor3();
-        comp3.ageClass = "Test class 2";
+        comp3.className = "Test class 2";
         comp3.course = "Test course 2";
         
         runTestOverAllFormats([[comp1, getControls1()], [comp2, getControls2()], [comp3, getControls3()]], function (eventData) {
@@ -753,10 +753,10 @@
     
     QUnit.test("Can parse a string that contains two competitors on different classes and courses", function (assert) {
         var comp1 = getCompetitor1();
-        comp1.ageClass = "Test class 1";
+        comp1.className = "Test class 1";
         comp1.course = "Test course 1";
         var comp2 = getCompetitor2();
-        comp2.ageClass = "Test class 2";
+        comp2.className = "Test class 2";
         comp2.course = "Test course 2";
         comp2.numControls = "4";
         comp2.distance = "5.3";
@@ -765,8 +765,8 @@
         
         runTestOverAllFormats([[comp1, getControls1()], [comp2, getLongerControls2()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 2, "There should be two classes");
-            assert.ok(eventData.classes[0] instanceof AgeClass, "First array element should be an AgeClass object");
-            assert.ok(eventData.classes[1] instanceof AgeClass, "Second array element should be an AgeClass object");
+            assert.ok(eventData.classes[0] instanceof CourseClass, "First array element should be a CourseClass object");
+            assert.ok(eventData.classes[1] instanceof CourseClass, "Second array element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].numControls, 3, "First class should have three controls");
             assert.strictEqual(eventData.classes[1].numControls, 4, "Second class should have four controls");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read for the first class");
@@ -795,16 +795,16 @@
     
     QUnit.test("Can parse a string that contains two competitors on different classes, sorting the classes into order", function (assert) {
         var comp1 = getCompetitor1();
-        comp1.ageClass = "Test class 2";
+        comp1.className = "Test class 2";
         comp1.course = "Test course 1";
         var comp2 = getCompetitor2OnLongerCourse();
-        comp2.ageClass = "Test class 1";
+        comp2.className = "Test class 1";
         comp2.course = "Test course 2";
         var controls2 = [{code: "208", time: "02:01"}, {code: "222", time: "04:06"}, {code: "219", time: "06:37"}, {code: "213", time: "09:10"}];
         runTestOverAllFormats([[comp1, getControls1()], [comp2, controls2]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 2, "There should be two elements in the classes array");
-            assert.ok(eventData.classes[0] instanceof AgeClass, "First array element should be an AgeClass object");
-            assert.ok(eventData.classes[1] instanceof AgeClass, "Second array element should be an AgeClass object");
+            assert.ok(eventData.classes[0] instanceof CourseClass, "First array element should be a CourseClass object");
+            assert.ok(eventData.classes[1] instanceof CourseClass, "Second array element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].name, "Test class 1", "First class should be first class alphabetically");
             assert.strictEqual(eventData.classes[1].name, "Test class 2", "Second class should be second class alphabetically");
             assert.strictEqual(eventData.classes[0].competitors[0].name, "Fred Baker", "Should read correct name for competitor on first class");
@@ -825,16 +825,16 @@
     
     QUnit.test("Can parse a string that contains two competitors on different classes, sorting the classes into order", function (assert) {
         var comp1 = getCompetitor1();
-        comp1.ageClass = "Test class 2";
+        comp1.className = "Test class 2";
         comp1.course = "Test course 1";
         var comp2 = getCompetitor2OnLongerCourse();
-        comp2.ageClass = "Test class 1";
+        comp2.className = "Test class 1";
         comp2.course = "Test course 2";
         var controls2 = [{code: "208", time: "02:01"}, {code: "222", time: "04:06"}, {code: "219", time: "06:37"}, {code: "213", time: "09:10"}];
         runTestOverAllFormats([[comp1, getControls1()], [comp2, controls2]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 2, "There should be two elements in the classes array");
-            assert.ok(eventData.classes[0] instanceof AgeClass, "First array element should be an AgeClass object");
-            assert.ok(eventData.classes[1] instanceof AgeClass, "Second array element should be an AgeClass object");
+            assert.ok(eventData.classes[0] instanceof CourseClass, "First array element should be a CourseClass object");
+            assert.ok(eventData.classes[1] instanceof CourseClass, "Second array element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].name, "Test class 1", "First class should be first class alphabetically");
             assert.strictEqual(eventData.classes[1].name, "Test class 2", "Second class should be second class alphabetically");
             assert.strictEqual(eventData.classes[0].competitors[0].name, "Fred Baker", "Should read correct name for competitor on first class");

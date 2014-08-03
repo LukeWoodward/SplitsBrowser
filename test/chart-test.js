@@ -25,8 +25,8 @@
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
-    var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
+    var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
@@ -111,25 +111,25 @@
     module("Chart");
     
     /**
-    * Creates and returns a AgeClassSet object and event object populated with
+    * Creates and returns a CourseClassSet object and event object populated with
     * test data.  If no value is provided for the optional competitors parameter,
     * a list of two competitors is used as a default.
     * @param {Array} competitors - Optional array of competitors.
-    * @return {Object} Object containing an age-class set and event data.
+    * @return {Object} Object containing a course-class set and event data.
     */
-    function getTestAgeClassSetAndEvent(competitors) {
+    function getTestCourseClassSetAndEvent(competitors) {
         if (typeof competitors === "undefined") {
             var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
             var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
             competitors = [competitor1, competitor2];
         }
         
-        var ageClass = new AgeClass("Test", 3, competitors);
-        var ageClassSet = new AgeClassSet([ageClass]);
-        var course = new Course("Test course", [ageClass], null, null, null);
-        ageClass.setCourse(course);
-        var eventData = new Event([ageClass], [course]);
-        return {ageClassSet: ageClassSet, eventData: eventData};
+        var courseClass = new CourseClass("Test", 3, competitors);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var course = new Course("Test course", [courseClass], null, null, null);
+        courseClass.setCourse(course);
+        var eventData = new Event([courseClass], [course]);
+        return {courseClassSet: courseClassSet, eventData: eventData};
     }
     
     /**
@@ -139,13 +139,13 @@
     * @param {Array} competitors - Optional array of competitors.
     */
     function runChartCreationTest(chartType, competitors) {
-        var ageClassSetAndEvent = getTestAgeClassSetAndEvent(competitors);
-        var fastestCumTimes = ageClassSetAndEvent.ageClassSet.getFastestCumTimes();
+        var courseClassSetAndEvent = getTestCourseClassSetAndEvent(competitors);
+        var fastestCumTimes = courseClassSetAndEvent.courseClassSet.getFastestCumTimes();
         var chart = createTestChart(chartType);
         var data = {
-            chartData: ageClassSetAndEvent.ageClassSet.getChartData(fastestCumTimes, [0, 1], chartType),
-            eventData: ageClassSetAndEvent.eventData,
-            ageClassSet: ageClassSetAndEvent.ageClassSet,
+            chartData: courseClassSetAndEvent.courseClassSet.getChartData(fastestCumTimes, [0, 1], chartType),
+            eventData: courseClassSetAndEvent.eventData,
+            courseClassSet: courseClassSetAndEvent.courseClassSet,
             referenceCumTimes: fastestCumTimes,
             fastestCumTimes: fastestCumTimes
         };

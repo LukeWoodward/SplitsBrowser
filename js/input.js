@@ -33,8 +33,7 @@
     /**
     * Attempts to parse the given event data, which may be of any of the
     * supported formats, or may be invalid.  This function returns the results
-    * as an array of SplitsBrowser.Model.AgeClass objects, or null in the event
-    * of failure.
+    * as an Event object if successful, or null in the event of failure.
     * @param {String} data - The data read.
     * @return {Event} Event data read in, or null for failure.
     */ 

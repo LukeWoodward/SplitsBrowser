@@ -28,7 +28,7 @@
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
 
@@ -1125,12 +1125,12 @@
     
     /**
     * Returns whether the classes are unique within courses.  If so, they can
-    * be used to subdivide courses.  If not, AgeClasses and Courses must be
+    * be used to subdivide courses.  If not, CourseClasses and Courses must be
     * the same.
     * @return {boolean} True if no two competitors in the same class are on
     *     different classes, false otherwise.
     */ 
-    SIHtmlFormatParser.prototype.areAgeClassesUniqueWithinCourses = function () {
+    SIHtmlFormatParser.prototype.areClassesUniqueWithinCourses = function () {
         var classesToCoursesMap = d3.map();
         for (var courseIndex = 0; courseIndex < this.courses.length; courseIndex += 1) {
             var course = this.courses[courseIndex];
@@ -1156,12 +1156,12 @@
     */
     SIHtmlFormatParser.prototype.createOverallEventObject = function () {
         // There is a complication here regarding classes.  Sometimes, classes
-        // are repeated within multiple courses.  In this case, ignore the age
-        // classes given and create an AgeClass for each set.
-        var classesUniqueWithinCourses = this.areAgeClassesUniqueWithinCourses();
+        // are repeated within multiple courses.  In this case, ignore the
+        // classes given and create a CourseClass for each set.
+        var classesUniqueWithinCourses = this.areClassesUniqueWithinCourses();
         
         var newCourses = [];
-        var ageClasses = [];
+        var classes = [];
         
         var competitorsHaveClasses = this.courses.every(function (course) {
             return course.competitors.every(function (competitor) { return isNotNull(competitor.className); });
@@ -1179,7 +1179,7 @@
                 }
             });
             
-            var courseClasses = [];
+            var classesForThisCourse = [];
             
             classToCompetitorsMap.keys().forEach(function (className) {
                 var numControls = course.controls.length - 1;
@@ -1188,19 +1188,19 @@
                     return competitor.toCompetitor(index + 1);
                 });
                 
-                var ageClass = new AgeClass(className, numControls, newCompetitors);
-                courseClasses.push(ageClass);
-                ageClasses.push(ageClass);
+                var courseClass = new CourseClass(className, numControls, newCompetitors);
+                classesForThisCourse.push(courseClass);
+                classes.push(courseClass);
             }, this);
             
-            var newCourse = new Course(course.name, courseClasses, course.distance, course.climb, course.controls.slice(0, course.controls.length - 1));
+            var newCourse = new Course(course.name, classesForThisCourse, course.distance, course.climb, course.controls.slice(0, course.controls.length - 1));
             newCourses.push(newCourse);
-            courseClasses.forEach(function (ageClass) {
-                ageClass.setCourse(newCourse);
+            classesForThisCourse.forEach(function (courseClass) {
+                courseClass.setCourse(newCourse);
             });
         }, this);
         
-        return new Event(ageClasses, newCourses);
+        return new Event(classes, newCourses);
     };
     
     /**

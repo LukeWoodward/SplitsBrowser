@@ -28,7 +28,7 @@
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
@@ -57,7 +57,7 @@
         COLUMN_INDEXES[columnOffset].time = columnOffset - 35;
         COLUMN_INDEXES[columnOffset].classifier = columnOffset - 34;
         COLUMN_INDEXES[columnOffset].club =  columnOffset - 31;
-        COLUMN_INDEXES[columnOffset].ageClass = columnOffset - 28;
+        COLUMN_INDEXES[columnOffset].className = columnOffset - 28;
     });
     
     COLUMN_INDEXES[44].combinedName = 3;
@@ -73,8 +73,8 @@
     COLUMN_INDEXES[60].time = 13;
     COLUMN_INDEXES[60].classifier = 14;
     COLUMN_INDEXES[60].club = 20;
-    COLUMN_INDEXES[60].ageClass = 26;
-    COLUMN_INDEXES[60].ageClassFallback = COLUMN_INDEXES[60].course;
+    COLUMN_INDEXES[60].className = 26;
+    COLUMN_INDEXES[60].classNameFallback = COLUMN_INDEXES[60].course;
     COLUMN_INDEXES[60].clubFallback = 18;
     
     // Minimum control offset.
@@ -104,8 +104,8 @@
         this.data = normaliseLineEndings(data);
         
         // Map that associates classes to all of the competitors running on
-        // that age class.
-        this.ageClasses = d3.map();
+        // that class.
+        this.classes = d3.map();
         
         // Map that associates course names to length and climb values.
         this.courseDetails = d3.map();
@@ -194,15 +194,15 @@
     };
     
     /**
-    * Returns the age-class in the given row.
+    * Returns the name of the class in the given row.
     * @param {Array} row - Array of row data.
     * @return {String} Class name.
     */
-    Reader.prototype.getAgeClassName = function (row) {
-        var className = row[this.columnIndexes.ageClass];
-        if (className === "" && this.columnIndexes.hasOwnProperty("ageClassFallback")) {
-            // 'Nameless' variation: no age class.
-            className = row[this.columnIndexes.ageClassFallback];
+    Reader.prototype.getClassName = function (row) {
+        var className = row[this.columnIndexes.className];
+        if (className === "" && this.columnIndexes.hasOwnProperty("classNameFallback")) {
+            // 'Nameless' variation: no class names.
+            className = row[this.columnIndexes.classNameFallback];
         }
         return className;
     };
@@ -229,11 +229,11 @@
     * @return {Number} Number of controls read.
     */
     Reader.prototype.getNumControls = function (row, lineNumber) {
-        var className = this.getAgeClassName(row);
+        var className = this.getClassName(row);
         if ($.trim(className) === "") {
             throwInvalidData("Line " + lineNumber + " does not contain a class for the competitor");
-        } else if (this.ageClasses.has(className)) {
-            return this.ageClasses.get(className).numControls;
+        } else if (this.classes.has(className)) {
+            return this.classes.get(className).numControls;
         } else {
             return parseInt(row[this.columnIndexes.controlCount], 10);
         }    
@@ -274,15 +274,15 @@
     };
     
     /**
-    * Checks to see whether the given row contains a new age-class, and if so,
+    * Checks to see whether the given row contains a new class, and if so,
     * creates it.
     * @param {Array} row - Array of row data items.
     * @param {Number} numControls - The number of controls to read.
     */
-    Reader.prototype.createAgeClassIfNecessary = function (row, numControls) {
-        var className = this.getAgeClassName(row);
-        if (!this.ageClasses.has(className)) {
-            this.ageClasses.set(className, { numControls: numControls, competitors: [] });
+    Reader.prototype.createClassIfNecessary = function (row, numControls) {
+        var className = this.getClassName(row);
+        if (!this.classes.has(className)) {
+            this.classes.set(className, { numControls: numControls, competitors: [] });
         }
     };
     
@@ -310,7 +310,7 @@
     * @param {Array} row - Array of row data items.
     */
     Reader.prototype.createClassCoursePairIfNecessary = function (row) {
-        var className = this.getAgeClassName(row);
+        var className = this.getClassName(row);
         var courseName = row[this.columnIndexes.course];
         
         if (!this.classCoursePairs.some(function (pair) { return pair[0] === className && pair[1] === courseName; })) {
@@ -326,7 +326,7 @@
     */
     Reader.prototype.addCompetitor = function (row, cumTimes) {
     
-        var className = this.getAgeClassName(row);
+        var className = this.getClassName(row);
         var placing = row[this.columnIndexes.placing];
         var club = row[this.columnIndexes.club];
         if (club === "" && this.columnIndexes.hasOwnProperty("clubFallback")) {
@@ -360,7 +360,7 @@
             }
         }
         
-        var order = this.ageClasses.get(className).competitors.length + 1;
+        var order = this.classes.get(className).competitors.length + 1;
         var competitor = fromOriginalCumTimes(order, name, club, startTime, cumTimes);
         if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && competitor.completed()) {
             // Competitor either marked as non-competitive, or has completed
@@ -384,7 +384,7 @@
             competitor.setNonStarter();
         }
 
-        this.ageClasses.get(className).competitors.push(competitor);
+        this.classes.get(className).competitors.push(competitor);
     };
     
     /**
@@ -415,7 +415,7 @@
         var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
         this.anyCompetitors = true;
         
-        this.createAgeClassIfNecessary(row, numControls);
+        this.createClassIfNecessary(row, numControls);
         this.createCourseIfNecessary(row, numControls);
         this.createClassCoursePairIfNecessary(row);
         
@@ -454,15 +454,15 @@
     };
     
     /**
-    * Creates and return a list of AgeClass objects from all of the data read.
-    * @return {Array} Array of AgeClass objects.
+    * Creates and return a list of CourseClass objects from all of the data read.
+    * @return {Array} Array of CourseClass objects.
     */
-    Reader.prototype.createAgeClasses = function () {
-        var classNames = this.ageClasses.keys();
+    Reader.prototype.createClasses = function () {
+        var classNames = this.classes.keys();
         classNames.sort();
         return classNames.map(function (className) {
-            var ageClass = this.ageClasses.get(className);
-            return new AgeClass(className, ageClass.numControls, ageClass.competitors);
+            var courseClass = this.classes.get(className);
+            return new CourseClass(className, courseClass.numControls, courseClass.competitors);
         }, this);
     };
     
@@ -486,7 +486,7 @@
     * @param {d3.set} doneCourseNames - Set of all course names that have been
     *     'done', i.e. included in a Course object that has been returned from
     *     a call to this method.
-    * @param {d3.map} classesMap - Map that maps age-class names to AgeClass
+    * @param {d3.map} classesMap - Map that maps class names to CourseClass
     *     objects.
     * @return {SplitsBrowser.Model.Course} - The created Course object.
     */
@@ -533,12 +533,12 @@
             doneCourseNames.add(courseName);
         });
         
-        var courseClasses = relatedClassNames.map(function (className) { return classesMap.get(className); });
+        var classesForThisCourse = relatedClassNames.map(function (className) { return classesMap.get(className); });
         var details = this.courseDetails.get(initCourseName);
-        var course = new Course(initCourseName, courseClasses, details.length, details.climb, details.controls);
+        var course = new Course(initCourseName, classesForThisCourse, details.length, details.climb, details.controls);
         
-        courseClasses.forEach(function (ageClass) {
-            ageClass.setCourse(course);
+        classesForThisCourse.forEach(function (courseClass) {
+            courseClass.setCourse(course);
         });
         
         return course;
@@ -547,7 +547,7 @@
     /**
     * Sort through the data read in and create Course objects representing each
     * course in the event.
-    * @param {Array} classes - Array of AgeClass objects read.
+    * @param {Array} classes - Array of CourseClass objects read.
     * @return {Array} Array of course objects.
     */
     Reader.prototype.determineCourses = function (classes) {
@@ -562,8 +562,8 @@
         var doneCourseNames = d3.set();
         
         var classesMap = d3.map();
-        classes.forEach(function (ageClass) {
-            classesMap.set(ageClass.name, ageClass);
+        classes.forEach(function (courseClass) {
+            classesMap.set(courseClass.name, courseClass);
         });
         
         // List of all Course objects created so far.
@@ -601,7 +601,7 @@
             throwInvalidData("No competitors' data were found");
         }
         
-        var classes = this.createAgeClasses();
+        var classes = this.createClasses();
         var courses = this.determineCourses(classes);
         return new Event(classes, courses);
     };
