@@ -158,5 +158,6 @@ SplitsBrowser.Messages.de = {
 
     // Alert message shown when you click 'Crossing runners' but there are no
     // crossing runners to show and also a filter is active.
+    // TO BE TRANSLATED
     RaceGraphNoCrossingRunnersFiltered: "$$NAME$$ has no crossing runners among the filtered competitors."
 };

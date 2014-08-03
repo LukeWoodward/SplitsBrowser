@@ -150,13 +150,16 @@ SplitsBrowser.Messages.pt_br = {
     NoCompetitorsStarted: "Nenhum atleta partiu",
     
     // Label of the language-selector control.
+    // TO BE TRANSLATED?
     LanguageSelectorLabel: "Language:",
     
     // Label that appears beside a competitor on the Results Table to indicate
     // that they were over the maximum time.
+    // TO BE TRANSLATED
     OverMaxTimeShort: "over max time",
 
     // Alert message shown when you click 'Crossing runners' but there are no
     // crossing runners to show and also a filter is active.
+    // TO BE TRANSLATED
     RaceGraphNoCrossingRunnersFiltered: "$$NAME$$ has no crossing runners among the filtered competitors."
 };

@@ -138,26 +138,32 @@ SplitsBrowser.Messages.nl_be = {
     
     // The placeholder text shown in the competitor-list filter box when no
     // text has been entered into this box.
+    // TO BE TRANSLATED
     CompetitorListFilter: "Filter",
     
     // Labels that appear beside a competitor on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
+    // TO BE TRANSLATED
     DidNotStartShort: "dns",
     DidNotFinishShort: "dnf",
     DisqualifiedShort: "dsq",
     
     // Placeholder message shown inside the competitor list if all competitors
     // in the class did not start.
+    // TO BE TRANSLATED
     NoCompetitorsStarted: "No competitors started",
     
     // Label of the language-selector control.
+    // TO BE TRANSLATED?
     LanguageSelectorLabel: "Language:",
     
     // Label that appears beside a competitor on the Results Table to indicate
     // that they were over the maximum time.
+    // TO BE TRANSLATED
     OverMaxTimeShort: "over max time",
 
     // Alert message shown when you click 'Crossing runners' but there are no
     // crossing runners to show and also a filter is active.
+    // TO BE TRANSLATED
     RaceGraphNoCrossingRunnersFiltered: "$$NAME$$ has no crossing runners among the filtered competitors."
 };
