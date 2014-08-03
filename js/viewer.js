@@ -341,33 +341,6 @@
         this.originalDataSelector.registerChangeHandler(function (showOriginalData) { outerThis.showOriginalOrRepairedData(showOriginalData); });
         this.competitorList.registerChangeHandler(function () { outerThis.handleFilterTextChanged(); });
     };
-    
-    /**
-    * Select all of the competitors.
-    */
-    Viewer.prototype.selectAll = function () {
-        this.selection.selectAll();
-    };
-
-    /**
-    * Select none of the competitors.
-    */
-    Viewer.prototype.selectNone = function () {
-        this.selection.selectNone();
-    };
-
-    /**
-    * Select all of the competitors that cross the unique selected competitor.
-    */
-    Viewer.prototype.selectCrossingRunners = function () {
-        this.selection.selectCrossingRunners(this.ageClassSet.allCompetitors); 
-        if (this.selection.isSingleRunnerSelected()) {
-            // Only a single runner is still selected, so nobody crossed the
-            // selected runner.
-            var competitorName = this.ageClassSet.allCompetitors[this.selection.getSelectedIndexes()[0]].name;
-            alert(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
-        }
-    };
 
     /**
      * Handle a resize of the window.
