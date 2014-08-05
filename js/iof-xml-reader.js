@@ -91,6 +91,11 @@
         }
     }
     
+    // Regexp that matches the year in an ISO-8601 date.
+    // Both XML formats use ISO-8601 (YYYY-MM-DD) dates, so parsing is
+    // fortunately straightforward.
+    var yearRegexp = /^\d{4}/;
+    
     // Object that contains various functions for parsing bits of data from
     // IOF v2.0.3 XML event data.
     var Version2Reader = {};
@@ -211,7 +216,17 @@
     Version2Reader.readClubName = function (element) {
         return $("> Club > ShortName", element).text();
     };
-    
+        
+    /**
+    * Returns the competitor's date of birth, as a string.
+    * @param {jQuery.selection} element - jQuery selection containing a
+    *     PersonResult element.
+    * @return {String} The competitors date of birth, as a string.
+    */
+    Version2Reader.readDateOfBirth = function (element) {
+        return $("> Person > BirthDate > Date", element).text();
+    };
+
     /**
     * Reads a competitor's start time from the given Result element.
     * @param {jQuery.selection} resultElement - jQuery selection containing a
@@ -393,6 +408,18 @@
     };
     
     /**
+    * Returns the competitor's date of birth, as a string.
+    * @param {jQuery.selection} element - jQuery selection containing a
+    *     PersonResult element.
+    * @return {String} The competitor's date of birth, as a string.
+    */
+    Version3Reader.readDateOfBirth = function (element) {
+        var birthDate = $("> Person > BirthDate", element).text();
+        var regexResult = yearRegexp.exec(birthDate);
+        return (regexResult === null) ? null : parseInt(regexResult[0], 10);
+    };
+    
+    /**
     * Reads a competitor's start time from the given Result element.
     * @param {jQuery.selection} element - jQuery selection containing a
     *     Result element.
@@ -525,6 +552,12 @@
         
         var club = reader.readClubName(jqElement);
         
+        var dateOfBirth =  reader.readDateOfBirth(jqElement);
+        var regexResult = yearRegexp.exec(dateOfBirth);
+        var yearOfBirth = (regexResult === null) ? null : parseInt(regexResult[0], 10);
+        
+        var gender = $("> Person", jqElement).attr("sex");
+        
         var resultElement = $("Result", jqElement);
         if (resultElement.length === 0) {
             throwInvalidData("No result found for competitor '" + name + "'");
@@ -544,6 +577,14 @@
         cumTimes.push(totalTime);
         
         var competitor = fromOriginalCumTimes(number, name, club, startTime, cumTimes);
+        
+        if (yearOfBirth !== null) {
+            competitor.setYearOfBirth(yearOfBirth);
+        }
+        
+        if (gender === "M" || gender === "F") {
+            competitor.setGender(gender);
+        }
         
         var status = reader.getStatus(resultElement);
         if (status === reader.StatusNonCompetitive) {

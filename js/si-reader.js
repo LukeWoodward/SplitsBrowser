@@ -23,6 +23,7 @@
     
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
     var parseCourseClimb = SplitsBrowser.parseCourseClimb;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
@@ -61,12 +62,17 @@
     });
     
     COLUMN_INDEXES[44].combinedName = 3;
+    COLUMN_INDEXES[44].yearOfBirth = 4;
     
     COLUMN_INDEXES[46].forename = 4;
     COLUMN_INDEXES[46].surname = 3;
+    COLUMN_INDEXES[46].yearOfBirth = 5;
+    COLUMN_INDEXES[46].gender = 6;
     
     COLUMN_INDEXES[60].forename = 6;
     COLUMN_INDEXES[60].surname = 5;
+    COLUMN_INDEXES[60].yearOfBirth = 7;
+    COLUMN_INDEXES[60].gender = 8;
     COLUMN_INDEXES[60].combinedName = 3;
     COLUMN_INDEXES[60].nonCompetitive = 10;
     COLUMN_INDEXES[60].startTime = 11;
@@ -336,7 +342,7 @@
         
         var startTime = this.getStartTime(row);
 
-        var isPlacingNonNumeric = (placing !== "" && isNaN(parseInt(placing, 10)));
+        var isPlacingNonNumeric = (placing !== "" && isNaNStrict(parseInt(placing, 10)));
         
         var name = "";
         if (this.columnIndexes.hasOwnProperty("forename") && this.columnIndexes.hasOwnProperty("surname")) {
@@ -382,6 +388,21 @@
             }
         } else if (!competitor.hasAnyTimes()) {
             competitor.setNonStarter();
+        }
+        
+        var yearOfBirthStr = row[this.columnIndexes.yearOfBirth];
+        if (yearOfBirthStr !== "") {
+            var yearOfBirth = parseInt(yearOfBirthStr, 10);
+            if (!isNaNStrict(yearOfBirth)) {
+                competitor.setYearOfBirth(yearOfBirth);
+            }
+        }
+        
+        if (this.columnIndexes.hasOwnProperty("gender")) {
+            var gender = row[this.columnIndexes.gender];
+            if (gender === "M" || gender === "F") {
+                competitor.setGender(gender);
+            }
         }
 
         this.classes.get(className).competitors.push(competitor);

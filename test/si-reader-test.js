@@ -31,7 +31,7 @@
     var HEADER_46 = "Stno;SI card;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls.
-    var ROW_TEMPLATE_46 = "0;1;2;surname;forename;5;6;7;nonComp;startTime;10;time;classifier;13;14;club;16;17;className;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;course;distance;climb;numControls;placing;startPunch;45";
+    var ROW_TEMPLATE_46 = "0;1;2;surname;forename;yearOfBirth;gender;7;nonComp;startTime;10;time;classifier;13;14;club;16;17;className;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;course;distance;climb;numControls;placing;startPunch;45";
     
     // Header line when control 1 is in column 44.
     // Compared to the variant above, this line has no 'S' column and has the
@@ -39,7 +39,7 @@
     var HEADER_44 = "Stno;SI card;Database Id;Name;YB;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls.
-    var ROW_TEMPLATE_44 = "0;1;2;name;4;5;nonComp;startTime;8;time;classifier;11;12;club;14;15;className;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;course;distance;climb;numControls;placing;startPunch;43";
+    var ROW_TEMPLATE_44 = "0;1;2;name;yearOfBirth;5;nonComp;startTime;8;time;classifier;11;12;club;14;15;className;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;course;distance;climb;numControls;placing;startPunch;43";
     
     // Header line when control 1 is in column 60.
     // This has various new columns.  It also doesn't always have competitor
@@ -47,12 +47,12 @@
     var HEADER_60 = "OE0014;Stno;XStno;Chipno;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Credit -;Penalty +;Comment;Club no.;Cl.name;City;Nat;Location;Region;Cl. no.;Short;Long;Entry cl. No;Entry class (short);Entry class (long);Rank;Ranking points;Num1;Num2;Num3;Text1;Text2;Text3;Addr. surname;Addr. first name;Street;Line2;Zip;Addr. city;Phone;Mobile;Fax;EMail;Rented;Start fee;Paid;Team;Course no.;Course;km;m;Course controls;Place;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls of the 60-column variation.
-    var ROW_TEMPLATE_60 = "0;1;2;compno;4;surname;forename;7;8;9;nonComp;startTime;12;time;classifier;15;16;17;noOfClub;19;club;21;22;23;24;25;className;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;45;46;47;48;49;50;51;52;course;distance;climb;numControls;placing;startPunch;finish";
+    var ROW_TEMPLATE_60 = "0;1;2;compno;4;surname;forename;yearOfBirth;gender;9;nonComp;startTime;12;time;classifier;15;16;17;noOfClub;19;club;21;22;23;24;25;className;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;45;46;47;48;49;50;51;52;course;distance;climb;numControls;placing;startPunch;finish";
     
     var ALL_FORMATS = [
-        { name: "46-column", header: HEADER_46, template: ROW_TEMPLATE_46, combineName: false },
-        { name: "44-column", header: HEADER_44, template: ROW_TEMPLATE_44, combineName: true },
-        { name: "60-column", header: HEADER_60, template: ROW_TEMPLATE_60, combineName: false }
+        { name: "46-column", header: HEADER_46, template: ROW_TEMPLATE_46, combineName: false, hasGender: true },
+        { name: "44-column", header: HEADER_44, template: ROW_TEMPLATE_44, combineName: true, hasGender: false },
+        { name: "60-column", header: HEADER_60, template: ROW_TEMPLATE_60, combineName: false, hasGender: true }
     ];
     
     /**
@@ -106,7 +106,9 @@
             numControls: "3",
             placing: "1",
             nonComp: "",
-            classifier: ""
+            classifier: "",
+            gender: "M",
+            yearOfBirth: "1984"
         };
     }
     
@@ -132,7 +134,9 @@
             numControls: "3",
             placing: "2",
             nonComp: "",
-            classifier: ""
+            classifier: "",
+            gender: "M",
+            yearOfBirth: "1981"
         };
     }
     
@@ -171,7 +175,9 @@
             numControls: "3",
             placing: "3",
             nonComp: "",
-            classifier: ""
+            classifier: "",
+            gender: "M",
+            yearOfBirth: "1977"
         };
     }
     
@@ -276,7 +282,8 @@
     * data using all formats.
     * @param {Array} competitors - Array of 2-element arrays containing
     *     competitor and control data.
-    * @param {Function} testFunc - Function called with the parsed event data.
+    * @param {Function} testFunc - Function called with the parsed event data
+    *     and the format used to generate it.
     * @param {Function} preprocessor - Function called on the event data string
     *     immediately before it is passed to the parser.  If not specified,
     *     no preprocessing is done.
@@ -298,12 +305,12 @@
             }
             
             var eventData = parseEventData(text);
-            testFunc(eventData);
+            testFunc(eventData, format);
         });
     }
     
     QUnit.test("Can parse a string that contains a single competitor's data in all formats", function (assert) {
-        runTestOverAllFormats([[getCompetitor1(), getControls1()]], function (eventData) {
+        runTestOverAllFormats([[getCompetitor1(), getControls1()]], function (eventData, format) {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.ok(eventData.classes[0] instanceof CourseClass, "Class element should be a CourseClass object");
@@ -323,6 +330,10 @@
             assert.strictEqual(competitor.name, "John Smith", "Should read correct name");
             assert.strictEqual(competitor.club, "ABC", "Should read correct club");
             assert.strictEqual(competitor.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
+            assert.strictEqual(competitor.yearOfBirth, 1984, "Should read correct year of birth");
+            if (format.hasGender) {
+                assert.strictEqual(competitor.gender, "M", "Should read correct gender");
+            }
             assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
             assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
             assert.ok(!competitor.isNonStarter, "Competitor should not be marked as a non-starter");
@@ -423,6 +434,68 @@
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
             var competitor = eventData.classes[0].competitors[0];
             assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
+        });
+    });
+    
+    QUnit.test("Can parse a string ignoring a blank year of birth", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.yearOfBirth = "";
+        runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
+            assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].competitors[0].yearOfBirth, null, "No year of birth should have been read");
+        });
+    });
+    
+    QUnit.test("Can parse a string ignoring an invalid year of birth", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.yearOfBirth = "This is not a valid year";
+        runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
+            assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].competitors[0].yearOfBirth, null, "No year of birth should have been read");
+        });
+    });
+    
+    QUnit.test("Can parse a string that contains a single female competitor's data", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.forename = "Freda";
+        competitor1.gender = "F";
+        runTestOverAllFormats([[competitor1, getControls1()]], function (eventData, format) {
+            assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            if (format.hasGender) {
+                assert.strictEqual(eventData.classes[0].competitors[0].gender, "F", "Should read correct gender");
+            }
+        });
+    });
+        
+    QUnit.test("Can parse a string that contains a single competitor's data ignoring a blank gender", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.gender = "";
+        runTestOverAllFormats([[competitor1, getControls1()]], function (eventData, format) {
+            assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            if (format.hasGender) {
+                assert.strictEqual(eventData.classes[0].competitors[0].gender, null, "No gender should have been read");
+            }
+        });
+    });
+        
+    QUnit.test("Can parse a string that contains a single competitor's data ignoring an invalid gender", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.gender = "This is not a valid gender";
+        runTestOverAllFormats([[competitor1, getControls1()]], function (eventData, format) {
+            assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            if (format.hasGender) {
+                assert.strictEqual(eventData.classes[0].competitors[0].gender, null, "No gender should have been read");
+            }
         });
     });
     
