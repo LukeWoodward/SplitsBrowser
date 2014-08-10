@@ -26,7 +26,6 @@
     var isNotNull = SplitsBrowser.isNotNull;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
-    var getMessage = SplitsBrowser.getMessage;
 
     /**
     * Function used with the JavaScript sort method to sort competitors in order
@@ -357,31 +356,6 @@
     Competitor.prototype.hasAnyTimes = function () {
         // Trim the leading zero
         return this.originalCumTimes.slice(1).some(isNotNull);
-    };
-
-    /**
-    * Returns the 'suffix' to use with this competitor.
-    * The suffix indicates whether they are non-competitive or a mispuncher, 
-    * were disqualified or did not finish.  If none of the above apply, an
-    * empty string is returned.
-    * @return {String} Suffix to use with this competitor.
-    */
-    Competitor.prototype.getSuffix = function () {
-        // Non-starters are not catered for here, as this is intended to only
-        // be used on the chart and non-starters shouldn't appear on the chart.
-        if (this.completed() && this.isNonCompetitive) {
-            return getMessage("NonCompetitiveShort");
-        } else if (this.isNonFinisher) {
-            return getMessage("DidNotFinishShort"); 
-        } else if (this.isDisqualified) {
-            return getMessage("DisqualifiedShort");
-        } else if (this.isOverMaxTime) {
-            return getMessage("OverMaxTimeShort");
-        } else if (this.completed()) {
-            return "";
-        } else {
-            return getMessage("MispunchedShort");
-        }
     };
     
     /**

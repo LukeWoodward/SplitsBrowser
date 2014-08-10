@@ -102,6 +102,31 @@
     }
 
     /**
+    * Returns the 'suffix' to use with the given competitor.
+    * The suffix indicates whether they are non-competitive or a mispuncher, 
+    * were disqualified or did not finish.  If none of the above apply, an
+    * empty string is returned.
+    * @return {String} Suffix to use with the given competitor.
+    */
+    function getSuffix(competitor) {
+        // Non-starters are not catered for here, as this is intended to only
+        // be used on the chart and non-starters shouldn't appear on the chart.
+        if (competitor.completed() && competitor.isNonCompetitive) {
+            return getMessage("NonCompetitiveShort");
+        } else if (competitor.isNonFinisher) {
+            return getMessage("DidNotFinishShort"); 
+        } else if (competitor.isDisqualified) {
+            return getMessage("DisqualifiedShort");
+        } else if (competitor.isOverMaxTime) {
+            return getMessage("OverMaxTimeShort");
+        } else if (competitor.completed()) {
+            return "";
+        } else {
+            return getMessage("MispunchedShort");
+        }
+    }
+
+    /**
     * A chart object in a window.
     * @constructor
     * @param {HTMLElement} parent - The parent object to create the element within.
@@ -497,7 +522,7 @@
     */
     Chart.prototype.updateCompetitorStatistics = function() {
         var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
-        var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, comp.getSuffix()); });
+        var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, getSuffix(comp)); });
         
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
             if (this.visibleStatistics.TotalTime) {
@@ -583,7 +608,7 @@
         } else {
             var nameWidths = this.selectedIndexes.map(function (index) {
                 var comp = this.courseClassSet.allCompetitors[index];
-                return this.getTextWidth(formatNameAndSuffix(comp.name, comp.getSuffix()));
+                return this.getTextWidth(formatNameAndSuffix(comp.name, getSuffix(comp)));
             }, this);
             return d3.max(nameWidths) + this.determineMaxStatisticTextWidth();
         }
@@ -1033,7 +1058,7 @@
                 var textHeight = this.getTextHeight(name);
                 minLastY += textHeight;
                 return {
-                    label: formatNameAndSuffix(name, this.courseClassSet.allCompetitors[competitorIndex].getSuffix()),
+                    label: formatNameAndSuffix(name, getSuffix(this.courseClassSet.allCompetitors[competitorIndex])),
                     textHeight: textHeight,
                     y: (isNotNullNorNaN(finishColumn.ys[i])) ? this.yScale(finishColumn.ys[i]) : null,
                     colour: colours[competitorIndex % colours.length],

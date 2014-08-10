@@ -22,7 +22,6 @@
     "use strict";
 
     var isNaNStrict = SplitsBrowser.isNaNStrict;
-    var getMessage = SplitsBrowser.getMessage;
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
@@ -77,7 +76,6 @@
         assertSplitTimes(assert, competitor, [65, 221, 184, 100]);
         assert.ok(competitor.completed(), "Competitor should be marked as completing the course");
         assert.ok(!competitor.isNonCompetitive, "Competitor should be competitive");
-        assert.strictEqual(competitor.getSuffix(), "", "Competitor should have no suffix");
         assert.ok(!competitor.isNonStarter, "Competitor should not be a non-starter");
         assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
         assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");
@@ -88,7 +86,6 @@
         var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
         competitor.setNonCompetitive();
         assert.ok(competitor.isNonCompetitive, "Competitor should not be competitive");
-        assert.strictEqual(competitor.getSuffix(), "n/c", "Competitor should have non-competitive suffix");
     });
 
     QUnit.test("Can create a competitor from split times and determine cumulative times when competitor has missed a control", function (assert) {
@@ -96,7 +93,6 @@
         assertCumulativeTimes(assert, competitor, [0, 65, 65 + 221, null, null, null]);
         assertSplitTimes(assert, competitor, [65, 221, null, 184, 100]);
         assert.ok(!competitor.completed(), "Competitor should be marked as not completing the course");
-        assert.strictEqual(competitor.getSuffix(), "mp", "Competitor should have mispunched suffix");
     });
 
     QUnit.test("Can create a competitor from split times and determine cumulative times when competitor has missed multiple consecutive controls", function (assert) {
@@ -169,8 +165,6 @@
         assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
         assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");
         assert.ok(!competitor.isOverMaxTime, "Competitor should not be over max time");
-        
-        assert.strictEqual(competitor.getSuffix(), getMessage("NonCompetitiveShort"), "Competitor should have non-competitive suffix");
     });
 
     QUnit.test("Can create a non-starting competitor from cumulative times", function (assert) {
@@ -191,7 +185,6 @@
         assert.ok(competitor.isNonFinisher, "Competitor should be a non-finisher");
         assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");        
         assert.ok(!competitor.isOverMaxTime, "Competitor should not be over max time");
-        assert.strictEqual(competitor.getSuffix(), getMessage("DidNotFinishShort"), "Competitor should have non-finishing suffix");
     });
 
     QUnit.test("Can create a disqualified competitor from cumulative times", function (assert) {
@@ -203,7 +196,6 @@
         assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
         assert.ok(competitor.isDisqualified, "Competitor should be disqualified");
         assert.ok(!competitor.isOverMaxTime, "Competitor should not be over max time");
-        assert.strictEqual(competitor.getSuffix(), getMessage("DisqualifiedShort"), "Competitor should have a disqualified suffix");
     });
 
     QUnit.test("Can create an over-max-time competitor from cumulative times", function (assert) {
@@ -215,7 +207,6 @@
         assert.ok(!competitor.isNonFinisher, "Competitor should not be a non-finisher");
         assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");
         assert.ok(competitor.isOverMaxTime, "Competitor should be over max time");
-        assert.strictEqual(competitor.getSuffix(), getMessage("OverMaxTimeShort"), "Competitor should have an over-max-time suffix");
     });
 
     QUnit.test("Can create a competitor with gender and year of birth and read them back", function (assert) {
