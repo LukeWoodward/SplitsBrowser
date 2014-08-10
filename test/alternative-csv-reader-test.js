@@ -105,12 +105,12 @@
         var eventData = parseTripleColumnEventData(data);
         
         assert.strictEqual(eventData.classes.length, 1);
-        var ageClass = eventData.classes[0];
-        assert.strictEqual(ageClass.name, "Course 1");
-        assert.strictEqual(ageClass.numControls, 3);
+        var courseClass = eventData.classes[0];
+        assert.strictEqual(courseClass.name, "Course 1");
+        assert.strictEqual(courseClass.numControls, 3);
         
-        assert.strictEqual(ageClass.competitors.length, 1);
-        var competitor = ageClass.competitors[0];
+        assert.strictEqual(courseClass.competitors.length, 1);
+        var competitor = courseClass.competitors[0];
         assert.strictEqual(competitor.name, "John Smith");
         assert.strictEqual(competitor.club, "TEST");
         assert.strictEqual(competitor.startTime, 10 * 3600 + 38 * 60);
@@ -123,7 +123,7 @@
         
         assert.strictEqual(eventData.courses.length, 1);
         var course = eventData.courses[0];
-        assert.strictEqual(ageClass.course, course);
+        assert.strictEqual(courseClass.course, course);
         assert.strictEqual(course.name, "Course 1");
         assert.strictEqual(course.length, null);
         assert.strictEqual(course.climb, null);
@@ -169,10 +169,10 @@
         var eventData = parseTripleColumnEventData(data);
         assert.strictEqual(eventData.classes.length, 1);
         
-        var ageClass = eventData.classes[0];
-        assert.strictEqual(ageClass.competitors.length, 1);
+        var courseClass = eventData.classes[0];
+        assert.strictEqual(courseClass.competitors.length, 1);
         
-        var competitor = ageClass.competitors[0];
+        var competitor = courseClass.competitors[0];
         assert.strictEqual(competitor.name, "John Smith, Fred Baker");
     });
     
@@ -182,16 +182,16 @@
         var eventData = parseTripleColumnEventData(data);
         
         assert.strictEqual(eventData.classes.length, 1);
-        var ageClass = eventData.classes[0];
+        var courseClass = eventData.classes[0];
         
-        assert.strictEqual(ageClass.competitors.length, 2);
-        var competitor1 = ageClass.competitors[0];
+        assert.strictEqual(courseClass.competitors.length, 2);
+        var competitor1 = courseClass.competitors[0];
         assert.strictEqual(competitor1.name, "John Smith");
         assert.strictEqual(competitor1.club, "TEST");
         assert.strictEqual(competitor1.startTime, 10 * 3600 + 38 * 60);
         assert.deepEqual(competitor1.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, 202]);
         
-        var competitor2 = ageClass.competitors[1];
+        var competitor2 = courseClass.competitors[1];
         assert.strictEqual(competitor2.name, "Fred Baker");
         assert.strictEqual(competitor2.club, "ABCD");
         assert.strictEqual(competitor2.startTime, 11 * 3600 + 19 * 60);
@@ -214,10 +214,10 @@
         var eventData = parseTripleColumnEventData(data);
         
         assert.strictEqual(eventData.classes.length, 1);
-        var ageClass = eventData.classes[0];
+        var courseClass = eventData.classes[0];
         
-        assert.strictEqual(ageClass.competitors.length, 1);
-        var competitor = ageClass.competitors[0];
+        assert.strictEqual(courseClass.competitors.length, 1);
+        var competitor = courseClass.competitors[0];
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 72, null, 186, 202]);
         assert.ok(!competitor.completed());
         assert.ok(!competitor.isNonStarter);
@@ -230,10 +230,10 @@
         var eventData = parseTripleColumnEventData(data);
         
         assert.strictEqual(eventData.classes.length, 1);
-        var ageClass = eventData.classes[0];
+        var courseClass = eventData.classes[0];
         
-        assert.strictEqual(ageClass.competitors.length, 1);
-        var competitor = ageClass.competitors[0];
+        assert.strictEqual(courseClass.competitors.length, 1);
+        var competitor = courseClass.competitors[0];
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, null]);
         assert.ok(!competitor.completed());
         assert.ok(!competitor.isNonStarter);
@@ -246,10 +246,10 @@
         var eventData = parseTripleColumnEventData(data);
         
         assert.strictEqual(eventData.classes.length, 1);
-        var ageClass = eventData.classes[0];
+        var courseClass = eventData.classes[0];
         
-        assert.strictEqual(ageClass.competitors.length, 1);
-        var competitor = ageClass.competitors[0];
+        assert.strictEqual(courseClass.competitors.length, 1);
+        var competitor = courseClass.competitors[0];
         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, null, null, null, null]);
         assert.ok(!competitor.completed());
         assert.ok(competitor.isNonStarter);

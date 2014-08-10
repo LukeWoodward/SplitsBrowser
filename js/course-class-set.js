@@ -1,7 +1,7 @@
 /*
- *  SplitsBrowser Age-Class Set - A collection of selected age classes.
+ *  SplitsBrowser Course-Class Set - A collection of selected course classes.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -28,24 +28,24 @@
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
     
     /**
-    * Utility function to merge the lists of all competitors in a number of age
-    * classes.  All age classes must contain the same number of controls.
-    * @param {Array} ageClasses - Array of AgeClass objects.
+    * Utility function to merge the lists of all competitors in a number of
+    * classes.  All classes must contain the same number of controls.
+    * @param {Array} classes - Array of CourseClass objects.
     * @return {Array} Merged array of competitors.
     */
-    function mergeCompetitors(ageClasses) {
-        if (ageClasses.length === 0) {
-            throwInvalidData("Cannot create an AgeClassSet from an empty set of competitors");
+    function mergeCompetitors(classes) {
+        if (classes.length === 0) {
+            throwInvalidData("Cannot create a CourseClassSet from an empty set of competitors");
         }
         
         var allCompetitors = [];
-        var expectedControlCount = ageClasses[0].numControls;
-        ageClasses.forEach(function (ageClass) {
-            if (ageClass.numControls !== expectedControlCount) {
-                throwInvalidData("Cannot merge age classes with " + expectedControlCount + " and " + ageClass.numControls + " controls");
+        var expectedControlCount = classes[0].numControls;
+        classes.forEach(function (courseClass) {
+            if (courseClass.numControls !== expectedControlCount) {
+                throwInvalidData("Cannot merge classes with " + expectedControlCount + " and " + courseClass.numControls + " controls");
             }
             
-            ageClass.competitors.forEach(function (comp) {
+            courseClass.competitors.forEach(function (comp) {
                 if (!comp.isNonStarter) { 
                     allCompetitors.push(comp);
                 }
@@ -84,61 +84,61 @@
     }
     
     /**
-    * An object that represents the currently-selected age classes.
+    * An object that represents the currently-selected classes.
     * @constructor
-    * @param {Array} ageClasses - Array of currently-selected age classes.
+    * @param {Array} classes - Array of currently-selected classes.
     */
-    function AgeClassSet(ageClasses) {
-        this.allCompetitors = mergeCompetitors(ageClasses);
-        this.ageClasses = ageClasses;
-        this.numControls = ageClasses[0].numControls;
+    function CourseClassSet(classes) {
+        this.allCompetitors = mergeCompetitors(classes);
+        this.classes = classes;
+        this.numControls = classes[0].numControls;
         this.computeRanks();
     }
     
     /**
-    * Returns whether this age-class set is empty, i.e. whether it has no
+    * Returns whether this course-class set is empty, i.e. whether it has no
     * competitors at all.
-    * @return {boolean} True if the age-class set is empty, false if it is not
+    * @return {boolean} True if the course-class set is empty, false if it is not
     *     empty.
     */    
-    AgeClassSet.prototype.isEmpty = function () {
+    CourseClassSet.prototype.isEmpty = function () {
         return this.allCompetitors.length === 0;
     };
     
     /**
-    * Returns the course used by all of the age classes that make up this set.
-    * @return {SplitsBrowser.Model.Course} The course used by all age-classes.
+    * Returns the course used by all of the classes that make up this set.
+    * @return {SplitsBrowser.Model.Course} The course used by all classes.
     */
-    AgeClassSet.prototype.getCourse = function () {
-        return this.ageClasses[0].course;
+    CourseClassSet.prototype.getCourse = function () {
+        return this.classes[0].course;
     };
     
     /**
-    * Returns the name of the 'primary' age class, i.e. that that has been
+    * Returns the name of the 'primary' class, i.e. that that has been
     * chosen in the drop-down list.
-    * @return {String} Name of the primary age class.
+    * @return {String} Name of the primary class.
     */
-    AgeClassSet.prototype.getPrimaryClassName = function () {
-        return this.ageClasses[0].name;
+    CourseClassSet.prototype.getPrimaryClassName = function () {
+        return this.classes[0].name;
     };
     
     /**
-    * Returns the number of age classes that this age-class set is made up of.
-    * @return {Number} The number of age classes that this age-class set is
+    * Returns the number of classes that this course-class set is made up of.
+    * @return {Number} The number of classes that this course-class set is
     *     made up of.
     */
-    AgeClassSet.prototype.getNumClasses = function () {
-        return this.ageClasses.length;
+    CourseClassSet.prototype.getNumClasses = function () {
+        return this.classes.length;
     };
     
     /**
-    * Returns whether any of the age-classes within this set have data that
+    * Returns whether any of the classes within this set have data that
     * SplitsBrowser can identify as dubious.
-    * @return {boolean} True if any of the age-classes within this set contain
+    * @return {boolean} True if any of the classes within this set contain
     *     dubious data, false if none of them do.
     */
-    AgeClassSet.prototype.hasDubiousData = function () {
-        return this.ageClasses.some(function (ageClass) { return ageClass.hasDubiousData; });
+    CourseClassSet.prototype.hasDubiousData = function () {
+        return this.classes.some(function (courseClass) { return courseClass.hasDubiousData; });
     };
 
     /**
@@ -205,11 +205,11 @@
     }
     
     /**
-    * Returns an array of the cumulative times of the winner of the set of age
+    * Returns an array of the cumulative times of the winner of the set of
     * classes.
     * @return {Array} Array of the winner's cumulative times.
     */
-    AgeClassSet.prototype.getWinnerCumTimes = function () {
+    CourseClassSet.prototype.getWinnerCumTimes = function () {
         if (this.allCompetitors.length === 0) {
             return null;
         }
@@ -226,7 +226,7 @@
     * @returns {?Array} Cumulative splits of the imaginary competitor with
     *           fastest time, if any.
     */
-    AgeClassSet.prototype.getFastestCumTimes = function () {
+    CourseClassSet.prototype.getFastestCumTimes = function () {
         return this.getFastestCumTimesPlusPercentage(0);
     };
     
@@ -239,7 +239,7 @@
     * @returns {?Array} Cumulative splits of the imaginary competitor with
     *           fastest time, if any, after adding a percentage.
     */
-    AgeClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
+    CourseClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
     
         var ratio = 1 + percent / 100;
         
@@ -338,14 +338,14 @@
     * @param {Number} competitorIndex - The index of the competitor.
     * @return {Array} Array of cumulative times.
     */
-    AgeClassSet.prototype.getCumulativeTimesForCompetitor = function (competitorIndex) {
+    CourseClassSet.prototype.getCumulativeTimesForCompetitor = function (competitorIndex) {
         return fillBlankRangesInCumulativeTimes(this.allCompetitors[competitorIndex].getAllCumulativeTimes());
     };
 
     /**
     * Compute the ranks of each competitor within their class.
     */
-    AgeClassSet.prototype.computeRanks = function () {
+    CourseClassSet.prototype.computeRanks = function () {
         var splitRanksByCompetitor = [];
         var cumRanksByCompetitor = [];
         
@@ -400,7 +400,7 @@
     * @param {Number} controlIdx - Index of the control.
     * @return {Array} Array of the fastest splits to the given control.
     */
-    AgeClassSet.prototype.getFastestSplitsTo = function (numSplits, controlIdx) {
+    CourseClassSet.prototype.getFastestSplitsTo = function (numSplits, controlIdx) {
         if (typeof numSplits !== "number" || numSplits <= 0) {
             throwInvalidData("The number of splits must be a positive integer");
         } else if (typeof controlIdx !== "number" || controlIdx <= 0 || controlIdx > this.numControls + 1) {
@@ -434,7 +434,7 @@
     * @param {Object} chartType - The type of chart to draw.
     * @returns {Object} Array of data.
     */
-    AgeClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
+    CourseClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
         if (typeof referenceCumTimes === "undefined") {
             throw new TypeError("referenceCumTimes undefined or missing");
         } else if (typeof currentIndexes === "undefined") {
@@ -494,5 +494,5 @@
         };
     };
     
-    SplitsBrowser.Model.AgeClassSet = AgeClassSet;
+    SplitsBrowser.Model.CourseClassSet = CourseClassSet;
 })();

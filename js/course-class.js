@@ -1,7 +1,7 @@
 /*
- *  SplitsBrowser AgeClass - A collection of runners competing against each other.
+ *  SplitsBrowser CourseClass - A collection of runners competing against each other.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -27,11 +27,11 @@
     /**
      * Object that represents a collection of competitor data for a class.
      * @constructor.
-     * @param {String} name - Name of the age class.
+     * @param {String} name - Name of the class.
      * @param {Number} numControls - Number of controls.
      * @param {Array} competitors - Array of Competitor objects.
      */
-    function AgeClass(name, numControls, competitors) {
+    function CourseClass(name, numControls, competitors) {
         this.name = name;
         this.numControls = numControls;
         this.competitors = competitors;
@@ -43,17 +43,17 @@
     }
     
     /**
-    * Records that this age-class has competitor data that SplitsBrowser has
+    * Records that this course-class has competitor data that SplitsBrowser has
     * deduced as dubious.
     */
-    AgeClass.prototype.recordHasDubiousData = function () {
+    CourseClass.prototype.recordHasDubiousData = function () {
         this.hasDubiousData = true;
     };
      
     /**
-    * Determines the time losses for the competitors in this age class.
+    * Determines the time losses for the competitors in this course-class.
     */
-    AgeClass.prototype.determineTimeLosses = function () {
+    CourseClass.prototype.determineTimeLosses = function () {
         var fastestSplitTimes = d3.range(1, this.numControls + 2).map(function (controlIdx) {
             var splitRec = this.getFastestSplitTo(controlIdx);
             return (splitRec === null) ? null : splitRec.split;
@@ -65,19 +65,19 @@
     };
     
     /**
-    * Returns whether this age-class is empty, i.e. has no competitors.
-    * @return {boolean} True if this age class has no competitors, false if it
+    * Returns whether this course-class is empty, i.e. has no competitors.
+    * @return {boolean} True if this course-class has no competitors, false if it
     *     has at least one competitor.
     */
-    AgeClass.prototype.isEmpty = function () {
+    CourseClass.prototype.isEmpty = function () {
         return (this.competitors.length === 0);
     };
     
     /**
-    * Sets the course that this age class belongs to.
+    * Sets the course that this course-class belongs to.
     * @param {SplitsBrowser.Model.Course} course - The course this class belongs to.
     */
-    AgeClass.prototype.setCourse = function (course) {
+    CourseClass.prototype.setCourse = function (course) {
         this.course = course;
     };
 
@@ -90,7 +90,7 @@
     * @return {?Object} Object containing the name and fastest split, or
     *      null if no split times for that control were recorded.
     */
-    AgeClass.prototype.getFastestSplitTo = function (controlIdx) {
+    CourseClass.prototype.getFastestSplitTo = function (controlIdx) {
         if (typeof controlIdx !== "number" || controlIdx < 1 || controlIdx > this.numControls + 1) {
             throwInvalidData("Cannot return splits to leg '" + controlIdx + "' in a course with " + this.numControls + " control(s)");
         }
@@ -122,7 +122,7 @@
     * @return {Array} Array of objects listing the name and start time of each
     *     competitor visiting the control within the given time interval.
     */
-    AgeClass.prototype.getCompetitorsAtControlInTimeRange = function (controlNum, intervalStart, intervalEnd) {
+    CourseClass.prototype.getCompetitorsAtControlInTimeRange = function (controlNum, intervalStart, intervalEnd) {
         if (typeof controlNum !== "number" || isNaN(controlNum) || controlNum < 0 || controlNum > this.numControls + 1) {
             throwInvalidData("Control number must be a number between 0 and " + this.numControls + " inclusive");
         }
@@ -141,5 +141,5 @@
         return matchingCompetitors;
     };
     
-    SplitsBrowser.Model.AgeClass = AgeClass;
+    SplitsBrowser.Model.CourseClass = CourseClass;
 })();

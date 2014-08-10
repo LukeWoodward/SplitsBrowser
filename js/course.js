@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Course - A single course at an event.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@
     * Course length and climb are both optional and can both be null.
     * @constructor
     * @param {String} name - The name of the course.
-    * @param {Array} classes - Array of AgeClass objects comprising the course.
+    * @param {Array} classes - Array of CourseClass objects comprising the course.
     * @param {?Number} length - Length of the course, in kilometres.
     * @param {?Number} climb - The course climb, in metres.
     * @param {?Array} controls - Array of codes of the controls that make
@@ -55,12 +55,12 @@
     
     /**
     * Returns an array of the 'other' classes on this course.
-    * @param {SplitsBrowser.Model.AgeClass} ageClass - An age class that should
-    *     be on this course,
-    * @return {Array} Array of other age classes.
+    * @param {SplitsBrowser.Model.CourseClass} courseClass - A course-class
+    *    that should be on this course.
+    * @return {Array} Array of other course-classes.
     */
-    Course.prototype.getOtherClasses = function (ageClass) {
-        var otherClasses = this.classes.filter(function (cls) { return cls !== ageClass; });
+    Course.prototype.getOtherClasses = function (courseClass) {
+        var otherClasses = this.classes.filter(function (cls) { return cls !== courseClass; });
         if (otherClasses.length === this.classes.length) {
             // Given class not found.
             throwInvalidData("Course.getOtherClasses: given class is not in this course");
@@ -70,8 +70,8 @@
     };
     
     /**
-    * Returns the number of age classes that use this course.
-    * @return {Number} Number of age classes that use this course.
+    * Returns the number of course-classes that use this course.
+    * @return {Number} Number of course-classes that use this course.
     */
     Course.prototype.getNumClasses = function () {
         return this.classes.length;
@@ -185,7 +185,7 @@
     *     or SplitsBrowser.Model.Course.START for the start.
     * @param {String} endCode - Code for the control at the end of the leg, or
     *     SplitsBrowser.Model.Course.FINISH for the finish.
-    * @return {Array} Array of fastest splits for each age class using this
+    * @return {Array} Array of fastest splits for each course-class using this
     *      course.
     */
     Course.prototype.getFastestSplitsForLeg = function (startCode, endCode) {
@@ -201,10 +201,10 @@
         
         var controlNum = legNumber;
         var fastestSplits = [];
-        this.classes.forEach(function (ageClass) {
-            var classFastest = ageClass.getFastestSplitTo(controlNum);
+        this.classes.forEach(function (courseClass) {
+            var classFastest = courseClass.getFastestSplitTo(controlNum);
             if (classFastest !== null) {
-                fastestSplits.push({name: classFastest.name, className: ageClass.name, split: classFastest.split});
+                fastestSplits.push({name: classFastest.name, className: courseClass.name, split: classFastest.split});
             }
         });
         
@@ -261,9 +261,9 @@
     */
     Course.prototype.getCompetitorsAtControlNumInTimeRange = function (controlNum, intervalStart, intervalEnd) {
         var matchingCompetitors = [];
-        this.classes.forEach(function (ageClass) {
-            ageClass.getCompetitorsAtControlInTimeRange(controlNum, intervalStart, intervalEnd).forEach(function (comp) {
-                matchingCompetitors.push({name: comp.name, time: comp.time, className: ageClass.name});
+        this.classes.forEach(function (courseClass) {
+            courseClass.getCompetitorsAtControlInTimeRange(controlNum, intervalStart, intervalEnd).forEach(function (comp) {
+                matchingCompetitors.push({name: comp.name, time: comp.time, className: courseClass.name});
             });
         });
         

@@ -1,5 +1,5 @@
 /*
- *  SplitsBrowser ResultsTable - Shows age-class results in a table.
+ *  SplitsBrowser ResultsTable - Shows class results in a table.
  *  
  *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
@@ -39,7 +39,7 @@
     */
     function ResultsTable(parent) {
         this.parent = parent;
-        this.ageClass = null;
+        this.courseClass = null;
         this.div = null;
         this.headerSpan = null;
         this.table = null;
@@ -120,17 +120,17 @@
     }
     
     /**
-    * Populates the contents of the table with the age-class data.
+    * Populates the contents of the table with the course-class data.
     */
     ResultsTable.prototype.populateTable = function () {
-        var headerText = this.ageClass.name + ", ";
-        if (this.ageClass.numControls === 1) {
+        var headerText = this.courseClass.name + ", ";
+        if (this.courseClass.numControls === 1) {
             headerText += getMessage("ResultsTableHeaderSingleControl");
         } else {
-            headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": this.ageClass.numControls});
+            headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": this.courseClass.numControls});
         }
 
-        var course = this.ageClass.course;
+        var course = this.courseClass.course;
         if (course.length !== null) {
             headerText += ", " + getMessageWithFormatting("ResultsTableHeaderCourseLength", {"$$DISTANCE$$": course.length.toFixed(1)});
         }
@@ -146,9 +146,9 @@
             getMessage("ResultsTableHeaderTime")
         ];
         
-        var controls = this.ageClass.course.controls;
+        var controls = this.courseClass.course.controls;
         if (controls === null) {
-            headerCellData = headerCellData.concat(d3.range(1, this.ageClass.numControls + 1));
+            headerCellData = headerCellData.concat(d3.range(1, this.courseClass.numControls + 1));
         } else {
             headerCellData = headerCellData.concat(controls.map(function (control, index) {
                 return (index + 1) + NON_BREAKING_SPACE_CHAR + "(" + control + ")";
@@ -184,7 +184,7 @@
             }
         }
         
-        var competitors = this.ageClass.competitors.slice(0);
+        var competitors = this.courseClass.competitors.slice(0);
         competitors.sort(compareCompetitors);
         
         var nonCompCount = 0;
@@ -209,7 +209,7 @@
             addCell(tableRow, competitor.name, competitor.club, false, false);
             addCell(tableRow, getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false);
             
-            d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
+            d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {
                 var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
                 var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
                 addCell(tableRow, formatTime(competitor.getOriginalCumulativeTimeTo(controlNum), precision), formatTime(competitor.getOriginalSplitTimeTo(controlNum), precision), "time", isCumDubious, isSplitDubious);
@@ -219,10 +219,10 @@
     
     /**
     * Sets the class whose data is displayed.
-    * @param {SplitsBrowser.Model.AgeClass} ageClass - The class displayed.
+    * @param {SplitsBrowser.Model.CourseClass} courseClass - The class displayed.
     */
-    ResultsTable.prototype.setClass = function (ageClass) {
-        this.ageClass = ageClass;
+    ResultsTable.prototype.setClass = function (courseClass) {
+        this.courseClass = courseClass;
         this.populateTable();
         if (this.div.style("display") !== "none") {
             this.adjustTableCellWidths();

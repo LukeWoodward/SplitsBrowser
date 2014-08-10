@@ -26,22 +26,22 @@
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
     var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
     function wrapInEvent(competitors) {
-        var ageClass = new AgeClass("Test class", competitors[0].originalCumTimes.length - 2, competitors);
-        var course = new Course("Test course", [ageClass], null, null, null);
-        var eventData = new Event([ageClass], [course]);
+        var courseClass = new CourseClass("Test class", competitors[0].originalCumTimes.length - 2, competitors);
+        var course = new Course("Test course", [courseClass], null, null, null);
+        var eventData = new Event([courseClass], [course]);
         return eventData;
     }
     
     /**
-    * Wraps the given array of competitors in an age-class, course and event,
-    * repair the event and return whether the age-class has dubious data.
+    * Wraps the given array of competitors in a course-class, course and event,
+    * repair the event and return whether the course-class has dubious data.
     * @param {Array} competitors - Array of competitor objects.
-    * @return {boolean} True if the age-class has dubious data, false
+    * @return {boolean} True if the course-class has dubious data, false
     *     otherwise.
     */
     function wrapInEventAndRepair(competitors) {

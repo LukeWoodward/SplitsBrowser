@@ -25,7 +25,7 @@
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     
     module("Results Table");
@@ -33,12 +33,12 @@
     QUnit.test("Can create a results table with two competitors finishing", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
+        var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
         
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
         
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
         var table = d3.select("table.resultsTable");
@@ -64,12 +64,12 @@
     QUnit.test("Can create a results table with two competitors finishing and with control codes", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
+        var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
         
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, ["138", "152", "141"]));
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, ["138", "152", "141"]));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
         
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
         var table = d3.select("table.resultsTable");
@@ -83,12 +83,12 @@
     QUnit.test("Can create a results table with one competitor not finishing sorted to the bottom", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]);
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
+        var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
 
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
         
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
         var table = d3.select("table.resultsTable");
@@ -100,12 +100,12 @@
     
     QUnit.test("Can create a results table with one mispunching competitor", function (assert) {
         var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]);
-        var ageClass = new AgeClass("Test", 3, [competitor]);
+        var courseClass = new CourseClass("Test", 3, [competitor]);
 
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
         
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
         var table = d3.select("table.resultsTable");
@@ -118,12 +118,12 @@
     QUnit.test("Can create a results table with one non-starting competitor", function (assert) {
         var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [null, null, null, null]);
         competitor.setNonStarter();
-        var ageClass = new AgeClass("Test", 3, [competitor]);
+        var courseClass = new CourseClass("Test", 3, [competitor]);
 
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
         
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
         var table = d3.select("table.resultsTable");
@@ -136,12 +136,12 @@
     QUnit.test("Can create a results table with one non-finishing competitor", function (assert) {
         var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, null]);
         competitor.setNonFinisher();
-        var ageClass = new AgeClass("Test", 3, [competitor]);
+        var courseClass = new CourseClass("Test", 3, [competitor]);
 
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
         
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
         var table = d3.select("table.resultsTable");
@@ -154,12 +154,12 @@
     QUnit.test("Can create a results table with one disqualified competitor", function (assert) {
         var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         competitor.disqualify();
-        var ageClass = new AgeClass("Test", 3, [competitor]);
+        var courseClass = new CourseClass("Test", 3, [competitor]);
 
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
         
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
         var table = d3.select("table.resultsTable");
@@ -172,12 +172,12 @@
     QUnit.test("Can create a results table with one over-max-time competitor", function (assert) {
         var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         competitor.setOverMaxTime();
-        var ageClass = new AgeClass("Test", 3, [competitor]);
+        var courseClass = new CourseClass("Test", 3, [competitor]);
 
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
         
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
         var table = d3.select("table.resultsTable");
@@ -191,12 +191,12 @@
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         competitor1.setNonCompetitive();
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
+        var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
 
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
         
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
         var table = d3.select("table.resultsTable");
@@ -207,12 +207,12 @@
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         competitor1.disqualify();
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
+        var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
 
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
         
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1);
         var table = d3.select("table.resultsTable");
@@ -222,12 +222,12 @@
     QUnit.test("Can create a results table with course with no length and climb", function () {
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var ageClass = new AgeClass("Test", 3, [competitor1, competitor2]);
+        var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
         
-        ageClass.setCourse(new Course("Test", [ageClass], null, null, null));
+        courseClass.setCourse(new Course("Test", [courseClass], null, null, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
             
         // We don't expect any errors, but we also make no assertions here.
         expect(0);
@@ -236,11 +236,11 @@
     QUnit.test("Can create a results table with one competitor with suspicious times appropriately classed", function (assert) {
         var competitor1 = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 65, 65 + 0, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         competitor1.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
-        var ageClass = new AgeClass("Test", 3, [competitor1]);
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        var courseClass = new CourseClass("Test", 3, [competitor1]);
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
         
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
         var table = d3.select("table.resultsTable").node();
@@ -263,11 +263,11 @@
     
     QUnit.test("Can create a results table with one competitor with fractional times appropriately formatted", function (assert) {
         var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.5]);
-        var ageClass = new AgeClass("Test", 3, [competitor]);
-        ageClass.setCourse(new Course("Test", [ageClass], 4.1, 140, null));
+        var courseClass = new CourseClass("Test", 3, [competitor]);
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
-        resultsTable.setClass(ageClass);
+        resultsTable.setClass(courseClass);
         
         assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
         var table = d3.select("table.resultsTable").node();

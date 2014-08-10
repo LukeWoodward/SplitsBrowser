@@ -26,7 +26,7 @@
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
@@ -90,6 +90,11 @@
             return forename + " " + surname;
         }
     }
+    
+    // Regexp that matches the year in an ISO-8601 date.
+    // Both XML formats use ISO-8601 (YYYY-MM-DD) dates, so parsing is
+    // fortunately straightforward.
+    var yearRegexp = /^\d{4}/;
     
     // Object that contains various functions for parsing bits of data from
     // IOF v2.0.3 XML event data.
@@ -211,7 +216,17 @@
     Version2Reader.readClubName = function (element) {
         return $("> Club > ShortName", element).text();
     };
-    
+        
+    /**
+    * Returns the competitor's date of birth, as a string.
+    * @param {jQuery.selection} element - jQuery selection containing a
+    *     PersonResult element.
+    * @return {String} The competitors date of birth, as a string.
+    */
+    Version2Reader.readDateOfBirth = function (element) {
+        return $("> Person > BirthDate > Date", element).text();
+    };
+
     /**
     * Reads a competitor's start time from the given Result element.
     * @param {jQuery.selection} resultElement - jQuery selection containing a
@@ -393,6 +408,18 @@
     };
     
     /**
+    * Returns the competitor's date of birth, as a string.
+    * @param {jQuery.selection} element - jQuery selection containing a
+    *     PersonResult element.
+    * @return {String} The competitor's date of birth, as a string.
+    */
+    Version3Reader.readDateOfBirth = function (element) {
+        var birthDate = $("> Person > BirthDate", element).text();
+        var regexResult = yearRegexp.exec(birthDate);
+        return (regexResult === null) ? null : parseInt(regexResult[0], 10);
+    };
+    
+    /**
     * Reads a competitor's start time from the given Result element.
     * @param {jQuery.selection} element - jQuery selection containing a
     *     Result element.
@@ -525,6 +552,12 @@
         
         var club = reader.readClubName(jqElement);
         
+        var dateOfBirth =  reader.readDateOfBirth(jqElement);
+        var regexResult = yearRegexp.exec(dateOfBirth);
+        var yearOfBirth = (regexResult === null) ? null : parseInt(regexResult[0], 10);
+        
+        var gender = $("> Person", jqElement).attr("sex");
+        
         var resultElement = $("Result", jqElement);
         if (resultElement.length === 0) {
             throwInvalidData("No result found for competitor '" + name + "'");
@@ -544,6 +577,14 @@
         cumTimes.push(totalTime);
         
         var competitor = fromOriginalCumTimes(number, name, club, startTime, cumTimes);
+        
+        if (yearOfBirth !== null) {
+            competitor.setYearOfBirth(yearOfBirth);
+        }
+        
+        if (gender === "M" || gender === "F") {
+            competitor.setGender(gender);
+        }
         
         var status = reader.getStatus(resultElement);
         if (status === reader.StatusNonCompetitive) {
@@ -656,18 +697,18 @@
         
         classResultElements.forEach(function (classResultElement) {
             var parsedClass = parseClassData(classResultElement, reader);
-            var ageClass = new AgeClass(parsedClass.name, parsedClass.controls.length, parsedClass.competitors);
-            classes.push(ageClass);
+            var courseClass = new CourseClass(parsedClass.name, parsedClass.controls.length, parsedClass.competitors);
+            classes.push(courseClass);
             
-            // Add to each temporary course object a list of all age-classes.
+            // Add to each temporary course object a list of all classes.
             var tempCourse = parsedClass.course;
             if (tempCourse.id !== null && coursesMap.has(tempCourse.id)) {
                 // We've come across this course before, so just add a class to
                 // it.
-                coursesMap.get(tempCourse.id).classes.push(ageClass);
+                coursesMap.get(tempCourse.id).classes.push(courseClass);
             } else {
                 // New course.  Add some further details from the class.
-                tempCourse.classes = [ageClass];
+                tempCourse.classes = [courseClass];
                 tempCourse.controls = parsedClass.controls;
                 tempCourses.push(tempCourse);
                 if (tempCourse.id !== null) {
@@ -679,7 +720,7 @@
         // Now build up the array of courses.
         var courses = tempCourses.map(function (tempCourse) {
             var course = new Course(tempCourse.name, tempCourse.classes, tempCourse.length, tempCourse.climb, tempCourse.controls);
-            tempCourse.classes.forEach(function (ageClass) { ageClass.setCourse(course); });
+            tempCourse.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
             return course;
         });
         

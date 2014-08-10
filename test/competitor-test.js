@@ -218,6 +218,14 @@
         assert.strictEqual(competitor.getSuffix(), getMessage("OverMaxTimeShort"), "Competitor should have an over-max-time suffix");
     });
 
+    QUnit.test("Can create a competitor with gender and year of birth and read them back", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        competitor.setYearOfBirth(1984);
+        competitor.setGender("M");
+        assert.strictEqual(competitor.yearOfBirth, 1984);
+        assert.strictEqual(competitor.gender, "M");
+    });
+
     QUnit.test("Can create a competitor from original cumulative times and determine original split times with final times still null", function (assert) {
         var cumTimes = [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100];
         var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, cumTimes);

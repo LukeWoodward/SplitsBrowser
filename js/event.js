@@ -25,7 +25,7 @@
 
     /**
     * Contains all of the data for an event.
-    * @param {Array} classes - Array of AgeClass objects representing all of
+    * @param {Array} classes - Array of CourseClass objects representing all of
     *     the classes of competitors.
     * @param {Array} courses - Array of Course objects representing all of the
     *     courses of the event.
@@ -42,8 +42,8 @@
     * attempting to plot it.
     */
     Event.prototype.determineTimeLosses = function () {
-        this.classes.forEach(function (ageClass) {
-            ageClass.determineTimeLosses();
+        this.classes.forEach(function (courseClass) {
+            courseClass.determineTimeLosses();
         });
     };
     
@@ -57,8 +57,8 @@
     *     otherwise.
     */
     Event.prototype.needsRepair = function () {
-        return this.classes.some(function (ageClass) {
-            return ageClass.competitors.some(function (competitor) {
+        return this.classes.some(function (courseClass) {
+            return courseClass.competitors.some(function (competitor) {
                 return (competitor.getAllCumulativeTimes() === null);
             });
         });

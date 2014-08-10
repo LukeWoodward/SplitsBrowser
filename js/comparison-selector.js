@@ -27,13 +27,13 @@
     var ALL_COMPARISON_OPTIONS = [
         {
             nameKey: "CompareWithWinner",
-            selector: function (ageClassSet) { return ageClassSet.getWinnerCumTimes(); },
+            selector: function (courseClassSet) { return courseClassSet.getWinnerCumTimes(); },
             requiresWinner: true,
             percentage: ""
         },
         {
             nameKey: "CompareWithFastestTime",
-            selector: function (ageClassSet) { return ageClassSet.getFastestCumTimes(); },
+            selector: function (courseClassSet) { return courseClassSet.getFastestCumTimes(); },
             requiresWinner: false,
             percentage: ""
         }
@@ -45,7 +45,7 @@
     FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
         ALL_COMPARISON_OPTIONS.push({
             nameKey: "CompareWithFastestTimePlusPercentage",
-            selector: function (ageClassSet) { return ageClassSet.getFastestCumTimesPlusPercentage(percent); },
+            selector: function (courseClassSet) { return courseClassSet.getFastestCumTimesPlusPercentage(percent); },
             requiresWinner: false, 
             percentage: percent
         });
@@ -160,19 +160,19 @@
     };
     
     /**
-    * Sets the age-class set to use.
-    * @param {AgeClassSet} ageClassSet - The age-class set to set.
+    * Sets the course-class set to use.
+    * @param {CourseClassSet} courseClassSet - The course-class set to set.
     */
-    ComparisonSelector.prototype.setAgeClassSet = function (ageClassSet) {
-        this.ageClassSet = ageClassSet;
+    ComparisonSelector.prototype.setCourseClassSet = function (courseClassSet) {
+        this.courseClassSet = courseClassSet;
         this.setRunners();
     };
 
     /**
-    * Populates the drop-down list of runners from an age-class set.
+    * Populates the drop-down list of runners from a course-class set.
     */
     ComparisonSelector.prototype.setRunners = function () {
-        var competitors = this.ageClassSet.allCompetitors;
+        var competitors = this.courseClassSet.allCompetitors;
         var completingCompetitorIndexes = d3.range(competitors.length).filter(function (idx) { return competitors[idx].completed(); });
         var completingCompetitors = competitors.filter(function (comp) { return comp.completed(); });
         
@@ -190,13 +190,13 @@
             this.currentRunnerIndex = 0;
         } else {
             var oldSelectedRunner = this.previousCompetitorList[this.currentRunnerIndex];
-            var newIndex = this.ageClassSet.allCompetitors.indexOf(oldSelectedRunner);
+            var newIndex = this.courseClassSet.allCompetitors.indexOf(oldSelectedRunner);
             this.currentRunnerIndex = Math.max(newIndex, 0);
         }
         
         this.runnerDropDown.selectedIndex = this.currentRunnerIndex;
        
-        this.previousCompetitorList = this.ageClassSet.allCompetitors;
+        this.previousCompetitorList = this.courseClassSet.allCompetitors;
     };
     
     /**
@@ -220,7 +220,7 @@
     ComparisonSelector.prototype.getComparisonFunction = function () {
         if (this.isAnyRunnerSelected()) {
             var outerThis = this;
-            return function (ageClassSet) { return ageClassSet.getCumulativeTimesForCompetitor(outerThis.currentRunnerIndex); };
+            return function (courseClassSet) { return courseClassSet.getCumulativeTimesForCompetitor(outerThis.currentRunnerIndex); };
         } else {
             return ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
         }
@@ -234,7 +234,7 @@
         var typeIndex = this.dropDown.selectedIndex;
         var runner;
         if (typeIndex === ALL_COMPARISON_OPTIONS.length - 1) {
-            runner = this.ageClassSet.allCompetitors[this.runnerDropDown.selectedIndex];
+            runner = this.courseClassSet.allCompetitors[this.runnerDropDown.selectedIndex];
         } else {
             runner = null;
         }
@@ -251,7 +251,7 @@
     ComparisonSelector.prototype.setComparisonType = function (typeIndex, runner) {
         if (0 <= typeIndex && typeIndex < ALL_COMPARISON_OPTIONS.length) {
             if (typeIndex === ALL_COMPARISON_OPTIONS.length - 1) {
-                var runnerIndex = this.ageClassSet.allCompetitors.indexOf(runner);
+                var runnerIndex = this.courseClassSet.allCompetitors.indexOf(runner);
                 if (runnerIndex >= 0) {
                     this.dropDown.selectedIndex = typeIndex;
                     this.runnerDropDown.selectedIndex = runnerIndex;

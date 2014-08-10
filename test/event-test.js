@@ -25,7 +25,7 @@
     var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var Event = SplitsBrowser.Model.Event;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     
     module("Event");
@@ -49,29 +49,29 @@
     
     QUnit.test("Returns fastest split to a leg if the event has a single class with competitors on that leg", function (assert) {
         var competitor2 = getCompetitor2();
-        var ageClass = new AgeClass("Test class", 3, [getCompetitor1(), competitor2]);
-        var course = new Course("Test course", [ageClass], null, null, ["235", "212", "189"]);
-        var event = new Event([ageClass], [course]);
-        assert.deepEqual(event.getFastestSplitsForLeg("212", "189"), [{name: competitor2.name, className: ageClass.name, split: 184}]);
+        var courseClass = new CourseClass("Test class", 3, [getCompetitor1(), competitor2]);
+        var course = new Course("Test course", [courseClass], null, null, ["235", "212", "189"]);
+        var event = new Event([courseClass], [course]);
+        assert.deepEqual(event.getFastestSplitsForLeg("212", "189"), [{name: competitor2.name, className: courseClass.name, split: 184}]);
     });
     
     QUnit.test("Returns empty list of fastest splits to a leg if the event has a single course with competitors not on that leg", function (assert) {
-        var ageClass = new AgeClass("Test class", 3, [getCompetitor1(), getCompetitor2()]);
-        var course = new Course("Test course", [ageClass], null, null, ["235", "212", "189"]);
-        var event = new Event([ageClass], [course]);
+        var courseClass = new CourseClass("Test class", 3, [getCompetitor1(), getCompetitor2()]);
+        var course = new Course("Test course", [courseClass], null, null, ["235", "212", "189"]);
+        var event = new Event([courseClass], [course]);
         assert.deepEqual(event.getFastestSplitsForLeg("235", "189"), []);
     });
     
     QUnit.test("Returns list of fastest splits to a leg if the event has two courses with competitors in each on that leg, sorted into split order", function (assert) {
         var competitor1 = getCompetitor1();
         var competitor2 = getCompetitor2WithExtraSplit();
-        var ageClass1 = new AgeClass("Test class 1", 3, [competitor1]);
-        var ageClass2 = new AgeClass("Test class 2", 4, [competitor2]);
-        var course1 = new Course("Test course 1", [ageClass1], null, null, ["235", "212", "189"]);
-        var course2 = new Course("Test course 2", [ageClass2], null, null, ["226", "212", "189", "211"]);
+        var courseClass1 = new CourseClass("Test class 1", 3, [competitor1]);
+        var courseClass2 = new CourseClass("Test class 2", 4, [competitor2]);
+        var course1 = new Course("Test course 1", [courseClass1], null, null, ["235", "212", "189"]);
+        var course2 = new Course("Test course 2", [courseClass2], null, null, ["226", "212", "189", "211"]);
     
-        var event = new Event([ageClass1, ageClass2], [course1, course2]);
-        assert.deepEqual(event.getFastestSplitsForLeg("212", "189"), [{name: competitor2.name, className: ageClass2.name, split: 184}, {name: competitor1.name, className: ageClass1.name, split: 212}]);
+        var event = new Event([courseClass1, courseClass2], [course1, course2]);
+        assert.deepEqual(event.getFastestSplitsForLeg("212", "189"), [{name: competitor2.name, className: courseClass2.name, split: 184}, {name: competitor1.name, className: courseClass1.name, split: 212}]);
     });
     
     QUnit.test("Returns empty list of competitors visiting a control during an interval when the event has no courses", function (assert) {
@@ -82,31 +82,31 @@
     QUnit.test("Returns list of competitors visiting a control during an interval if the event has a single class with competitors visiting that control, with competitors sorted in order of time", function (assert) {
         var competitor1 = getCompetitor1();
         var competitor2 = getCompetitor2();
-        var ageClass = new AgeClass("Test class", 3, [competitor1, competitor2]);
-        var course = new Course("Test course", [ageClass], null, null, ["235", "212", "189"]);
+        var courseClass = new CourseClass("Test class", 3, [competitor1, competitor2]);
+        var course = new Course("Test course", [courseClass], null, null, ["235", "212", "189"]);
     
-        var event = new Event([ageClass], [course]);
+        var event = new Event([courseClass], [course]);
         var competitor1Time = 10 * 3600 + 30 * 60 + 81 + 197;
         var competitor2Time = 10 * 3600 + 65 + 221;
         assert.deepEqual(event.getCompetitorsAtControlInTimeRange("212", competitor2Time - 1, competitor1Time + 1),
-                [{name: competitor2.name, className: ageClass.name, time: competitor2Time},
-                 {name: competitor1.name, className: ageClass.name, time: competitor1Time}]);
+                [{name: competitor2.name, className: courseClass.name, time: competitor2Time},
+                 {name: competitor1.name, className: courseClass.name, time: competitor1Time}]);
     });
     
     QUnit.test("Returns list of competitors visiting a control during an interval if the event has two courses and with one class each with competitors visiting that control, with competitors sorted in order of time", function (assert) {
         var competitor1 = getCompetitor1();
         var competitor2 = getCompetitor2WithExtraSplit();
-        var ageClass1 = new AgeClass("Test class 1", 3, [competitor1]);
-        var ageClass2 = new AgeClass("Test class 2", 4, [competitor2]);
-        var course1 = new Course("Test course 1", [ageClass1], null, null, ["235", "212", "189"]);
-        var course2 = new Course("Test course 2", [ageClass2], null, null, ["226", "212", "189", "211"]);
+        var courseClass1 = new CourseClass("Test class 1", 3, [competitor1]);
+        var courseClass2 = new CourseClass("Test class 2", 4, [competitor2]);
+        var course1 = new Course("Test course 1", [courseClass1], null, null, ["235", "212", "189"]);
+        var course2 = new Course("Test course 2", [courseClass2], null, null, ["226", "212", "189", "211"]);
     
-        var event = new Event([ageClass1, ageClass2], [course1, course2]);
+        var event = new Event([courseClass1, courseClass2], [course1, course2]);
         var competitor1Time = 10 * 3600 + 30 * 60 + 81 + 197;
         var competitor2Time = 10 * 3600 + 65 + 221;
         assert.deepEqual(event.getCompetitorsAtControlInTimeRange("212", competitor2Time - 1, competitor1Time + 1),
-                [{name: competitor2.name, className: ageClass2.name, time: competitor2Time},
-                 {name: competitor1.name, className: ageClass1.name, time: competitor1Time}]);
+                [{name: competitor2.name, className: courseClass2.name, time: competitor2Time},
+                 {name: competitor1.name, className: courseClass1.name, time: competitor1Time}]);
     });
     
     QUnit.test("Returns empty array of next controls for control that does not exist in any course", function (assert) {
@@ -144,12 +144,12 @@
     QUnit.test("Determines time losses in each class when asked to do so", function (assert) {
         var competitor1 = getCompetitor1();
         var competitor2 = getCompetitor2();
-        var ageClass1 = new AgeClass("Test class 1", 3, [competitor1]);
-        var ageClass2 = new AgeClass("Test class 2", 3, [competitor2]);
-        var course1 = new Course("Test course 1", [ageClass1], null, null, ["235", "212", "189"]);
-        var course2 = new Course("Test course 2", [ageClass2], null, null, ["226", "212", "189"]);
+        var courseClass1 = new CourseClass("Test class 1", 3, [competitor1]);
+        var courseClass2 = new CourseClass("Test class 2", 3, [competitor2]);
+        var course1 = new Course("Test course 1", [courseClass1], null, null, ["235", "212", "189"]);
+        var course2 = new Course("Test course 2", [courseClass2], null, null, ["226", "212", "189"]);
     
-        var event = new Event([ageClass1, ageClass2], [course1, course2]);
+        var event = new Event([courseClass1, courseClass2], [course1, course2]);
         assert.strictEqual(competitor1.getTimeLossAt(2), null);
         assert.strictEqual(competitor2.getTimeLossAt(2), null);
         event.determineTimeLosses();
@@ -159,19 +159,19 @@
     
     QUnit.test("Event that does not need repairing reports that it doesn't", function (assert) {
         var competitor = getCompetitor1();
-        var ageClass = new AgeClass("Test class", 3, [competitor]);
-        var course = new Course("Test course", [ageClass], null, null, ["235", "212", "189"]);
+        var courseClass = new CourseClass("Test class", 3, [competitor]);
+        var course = new Course("Test course", [courseClass], null, null, ["235", "212", "189"]);
     
-        var event = new Event([ageClass], [course]);
+        var event = new Event([courseClass], [course]);
         assert.ok(!event.needsRepair());
     });
     
     QUnit.test("Event that does need repairing reports that it does", function (assert) {
         var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 0, 81 + 197 + 212, 81 + 197 + 212 + 106]);
-        var ageClass = new AgeClass("Test class", 3, [competitor]);
-        var course = new Course("Test course", [ageClass], null, null, ["235", "212", "189"]);
+        var courseClass = new CourseClass("Test class", 3, [competitor]);
+        var course = new Course("Test course", [courseClass], null, null, ["235", "212", "189"]);
     
-        var event = new Event([ageClass], [course]);
+        var event = new Event([courseClass], [course]);
         assert.ok(event.needsRepair());
     });
     

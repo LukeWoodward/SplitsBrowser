@@ -203,7 +203,7 @@
     * @return {Array} Array of fastest-split data.
     */
     Chart.prototype.getFastestSplitsPopupData = function () {
-        return ChartPopupData.getFastestSplitsPopupData(this.ageClassSet, this.currentControlIndex);
+        return ChartPopupData.getFastestSplitsPopupData(this.courseClassSet, this.currentControlIndex);
     };
     
     /**
@@ -213,7 +213,7 @@
     *     array of data to show within it.
     */
     Chart.prototype.getFastestSplitsForCurrentLegPopupData = function () {
-        return ChartPopupData.getFastestSplitsForLegPopupData(this.ageClassSet, this.eventData, this.currentControlIndex);
+        return ChartPopupData.getFastestSplitsForLegPopupData(this.courseClassSet, this.eventData, this.currentControlIndex);
     };
     
     /**
@@ -231,7 +231,7 @@
     * @return {Array} Array of competitor data.
     */
     Chart.prototype.getCompetitorsVisitingCurrentControlPopupData = function () {
-        return ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(this.ageClassSet, this.eventData, this.currentControlIndex, this.currentChartTime);
+        return ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(this.courseClassSet, this.eventData, this.currentControlIndex, this.currentChartTime);
     };
     
     /**
@@ -239,7 +239,7 @@
     * @return {Array} Array of next-control data.
     */
     Chart.prototype.getNextControlData = function () {
-        return ChartPopupData.getNextControlData(this.ageClassSet.getCourse(), this.eventData, this.actualControlIndex);
+        return ChartPopupData.getNextControlData(this.courseClassSet.getCourse(), this.eventData, this.actualControlIndex);
     };
 
     /**
@@ -472,7 +472,7 @@
     *     behind the fastest time.
     */
     Chart.prototype.getTimesBehindFastest = function (controlIndex, indexes) {
-        var selectedCompetitors = indexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
+        var selectedCompetitors = indexes.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
         var fastestSplit = this.fastestCumTimes[controlIndex] - this.fastestCumTimes[controlIndex - 1];
         var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - fastestSplit; });
         return timesBehind;
@@ -487,7 +487,7 @@
     *     deemed to have lost at the given control.
     */
     Chart.prototype.getTimeLosses = function (controlIndex, indexes) {
-        var selectedCompetitors = indexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
+        var selectedCompetitors = indexes.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
         var timeLosses = selectedCompetitors.map(function (comp) { return comp.getTimeLossAt(controlIndex); });
         return timeLosses;
     };
@@ -496,7 +496,7 @@
     * Updates the statistics text shown after the competitors.
     */
     Chart.prototype.updateCompetitorStatistics = function() {
-        var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
+        var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
         var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, comp.getSuffix()); });
         
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
@@ -582,7 +582,7 @@
             return 0;
         } else {
             var nameWidths = this.selectedIndexes.map(function (index) {
-                var comp = this.ageClassSet.allCompetitors[index];
+                var comp = this.courseClassSet.allCompetitors[index];
                 return this.getTextWidth(formatNameAndSuffix(comp.name, comp.getSuffix()));
             }, this);
             return d3.max(nameWidths) + this.determineMaxStatisticTextWidth();
@@ -614,7 +614,7 @@
         var maxTime = 0;
         var maxRank = 0;
         
-        var selectedCompetitors = this.selectedIndexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
+        var selectedCompetitors = this.selectedIndexes.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
         
         d3.range(1, this.numControls + 2).forEach(function (controlIndex) {
             var times = selectedCompetitors.map(function (comp) { return comp[timeFuncName](controlIndex); });
@@ -1029,11 +1029,11 @@
             var finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
             this.currentCompetitorData = d3.range(this.numLines).map(function (i) {
                 var competitorIndex = this.selectedIndexes[i];
-                var name = this.ageClassSet.allCompetitors[competitorIndex].name;
+                var name = this.courseClassSet.allCompetitors[competitorIndex].name;
                 var textHeight = this.getTextHeight(name);
                 minLastY += textHeight;
                 return {
-                    label: formatNameAndSuffix(name, this.ageClassSet.allCompetitors[competitorIndex].getSuffix()),
+                    label: formatNameAndSuffix(name, this.courseClassSet.allCompetitors[competitorIndex].getSuffix()),
                     textHeight: textHeight,
                     y: (isNotNullNorNaN(finishColumn.ys[i])) ? this.yScale(finishColumn.ys[i]) : null,
                     colour: colours[competitorIndex % colours.length],
@@ -1170,7 +1170,7 @@
     *     must contain the following properties:
     *     * chartData {Object} - the data to plot on the chart
     *     * eventData {SplitsBrowser.Model.Event} - the overall Event object.
-    *     * ageClassSet {SplitsBrowser.Model.Event} - the age-class set.
+    *     * courseClassSet {SplitsBrowser.Model.Event} - the course-class set.
     *     * referenceCumTimes {Array} - Array of cumulative split times of the
     *       'reference'.
     *     * fastestCumTimes {Array} - Array of cumulative times of the
@@ -1190,8 +1190,8 @@
         this.referenceCumTimes = data.referenceCumTimes;
         this.fastestCumTimes = data.fastestCumTimes;
         this.eventData = data.eventData;
-        this.ageClassSet = data.ageClassSet;
-        this.hasControls = data.ageClassSet.getCourse().hasControls();
+        this.courseClassSet = data.courseClassSet;
+        this.hasControls = data.courseClassSet.getCourse().hasControls();
         this.isRaceGraph = chartType.isRaceGraph;
         this.minViewableControl = chartType.minViewableControl;
         this.visibleStatistics = visibleStatistics;

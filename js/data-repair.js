@@ -202,17 +202,18 @@
     };
     
     /**
-    * Attempt to repair all of the data within an age class.
-    * @param {AgeClass} ageClass - The age class whose data we wish to repair.
+    * Attempt to repair all of the data within a course-class.
+    * @param {CourseClass} courseClass - The class whose data we wish to
+    *     repair.
     */
-    Repairer.prototype.repairAgeClass = function (ageClass) {
+    Repairer.prototype.repairCourseClass = function (courseClass) {
         this.madeAnyChanges = false;
-        ageClass.competitors.forEach(function (competitor) {
+        courseClass.competitors.forEach(function (competitor) {
             this.repairCompetitor(competitor);
         }, this);
         
         if (this.madeAnyChanges) {
-            ageClass.recordHasDubiousData();
+            courseClass.recordHasDubiousData();
         }
     };
     
@@ -221,8 +222,8 @@
     * @param {Event} eventData - The event data to repair.
     */
     Repairer.prototype.repairEventData = function (eventData) {
-        eventData.classes.forEach(function (ageClass) {
-            this.repairAgeClass(ageClass);
+        eventData.classes.forEach(function (courseClass) {
+            this.repairCourseClass(courseClass);
         }, this);
     };
     
@@ -244,8 +245,8 @@
     * @param {Event} eventData - The event data to repair.
     */
     function transferCompetitorData(eventData) {
-        eventData.classes.forEach(function (ageClass) {
-            ageClass.competitors.forEach(function (competitor) {
+        eventData.classes.forEach(function (courseClass) {
+            courseClass.competitors.forEach(function (competitor) {
                 competitor.setRepairedCumulativeTimes(competitor.getAllOriginalCumulativeTimes());
             });
         });

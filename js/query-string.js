@@ -23,7 +23,7 @@
     "use strict";
     
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
-    var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
+    var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     
     /**
     * Remove all matches of the given regular expression from the given string.
@@ -44,7 +44,7 @@
     *     from.
     * @param {Event} eventData - The event data read in, used to validate the 
     *     selected classes.
-    * @return {AgeClassSet|null} - Array of selected AgeClass objects, or null
+    * @return {CourseClassSet|null} - Array of selected CourseClass objects, or null
     *     if none were found.
     */
     function readSelectedClasses(queryString, eventData) {
@@ -71,7 +71,7 @@
                 // first class.
                 var course = selectedClasses[0].course;
                 selectedClasses = selectedClasses.filter(function (selectedClass) { return selectedClass.course === course; });
-                return new AgeClassSet(selectedClasses);
+                return new CourseClassSet(selectedClasses);
             }
         }
     }
@@ -138,12 +138,12 @@
     * Reads what to compare against.
     * @param {String} queryString - The query string to read the comparison
     *     type from.
-    * @param {AgeClassSet|null} ageClassSet - Age-class set containing selected
-    *     age-classes, or null if none are selected.
+    * @param {CourseClassSet|null} courseClassSet - Course-class set containing
+    *     selected course-classes, or null if none are selected.
     * @return {Object|null} Selected comparison type, or null if not
     *     recognised.
     */
-    function readComparison(queryString, ageClassSet) {
+    function readComparison(queryString, courseClassSet) {
         var comparisonMatch = COMPARE_WITH_REGEXP.exec(queryString);
         if (comparisonMatch === null) {
             return null;
@@ -152,8 +152,8 @@
             var defaultIndex = BUILTIN_COMPARISON_TYPES.indexOf(comparisonName);
             if (defaultIndex >= 1) {
                 return {index: defaultIndex, runner: null};
-            } else if (defaultIndex === 0 && ageClassSet !== null) {
-                var hasCompleters = ageClassSet.allCompetitors.some(function (competitor) {
+            } else if (defaultIndex === 0 && courseClassSet !== null) {
+                var hasCompleters = courseClassSet.allCompetitors.some(function (competitor) {
                     return competitor.completed();
                 });
                 
@@ -163,13 +163,13 @@
                     // Cannot select 'Winner' as there was no winner.
                     return null;
                 }
-            } else if (ageClassSet === null) {
+            } else if (courseClassSet === null) {
                 // Not one of the recognised comparison types and we have no
                 // classes to look for competitor names within.
                 return null;
             } else {
-                for (var competitorIndex = 0; competitorIndex < ageClassSet.allCompetitors.length; competitorIndex += 1) {
-                    var competitor = ageClassSet.allCompetitors[competitorIndex];
+                for (var competitorIndex = 0; competitorIndex < courseClassSet.allCompetitors.length; competitorIndex += 1) {
+                    var competitor = courseClassSet.allCompetitors[competitorIndex];
                     if (competitor.name === comparisonName && competitor.completed()) {
                         return {index: BUILTIN_COMPARISON_TYPES.length, runner: competitor};
                     }
@@ -209,13 +209,13 @@
     * Reads what to compare against.
     * @param {String} queryString - The query string to read the comparison
     *     type from.
-    * @param {AgeClassSet|null} ageClassSet - Age-class set containing selected
-    *     age-classes, or null if none are selected.
+    * @param {CourseClassSet|null} courseClassSet - Course-class set containing
+    *     selected course-classes, or null if none are selected.
     * @return {Array|null} Array of selected competitor indexes, or null if
     *     none found.
     */
-    function readSelectedCompetitors(queryString, ageClassSet) {
-        if (ageClassSet === null) {
+    function readSelectedCompetitors(queryString, courseClassSet) {
+        if (courseClassSet === null) {
             return null;
         } else {
             var selectedCompetitorsMatch = SELECTED_COMPETITORS_REGEXP.exec(queryString);
@@ -225,11 +225,11 @@
                 var competitorNames = decodeURIComponent(selectedCompetitorsMatch[1]).split(";");
                 if (competitorNames.indexOf("*") >= 0) {
                     // All competitors selected.
-                    return d3.range(0, ageClassSet.allCompetitors.length);
+                    return d3.range(0, courseClassSet.allCompetitors.length);
                 }
                 
                 competitorNames = d3.set(competitorNames).values();
-                var allCompetitorNames = ageClassSet.allCompetitors.map(function (competitor) { return competitor.name; });
+                var allCompetitorNames = courseClassSet.allCompetitors.map(function (competitor) { return competitor.name; });
                 var selectedCompetitorIndexes = [];
                 competitorNames.forEach(function (competitorName) {
                     var index = allCompetitorNames.indexOf(competitorName);
@@ -247,18 +247,18 @@
     /**
     * Formats the given selected competitors into the given query-string.
     * @param {String} queryString - The original query-string.
-    * @param {AgeClassSet} ageClassSet - The current age-class set.
-    * @param {Array} selected - Array of indexes within the age-class set's
+    * @param {CourseClassSet} courseClassSet - The current course-class set.
+    * @param {Array} selected - Array of indexes within the course-class set's
     *     list of competitors of those that are selected.
     * @return {String} Query-string with the selected competitors formatted
     *     into it.
     */
-    function formatSelectedCompetitors(queryString, ageClassSet, selected) {
+    function formatSelectedCompetitors(queryString, courseClassSet, selected) {
         queryString = removeAll(queryString, SELECTED_COMPETITORS_REGEXP);
-        var selectedCompetitors = selected.map(function (index) { return ageClassSet.allCompetitors[index]; });
+        var selectedCompetitors = selected.map(function (index) { return courseClassSet.allCompetitors[index]; });
         if (selectedCompetitors.length === 0) {
             return queryString;
-        } else if (selectedCompetitors.length === ageClassSet.allCompetitors.length) {
+        } else if (selectedCompetitors.length === courseClassSet.allCompetitors.length) {
             // Assume all selected competitors are different, so all must be
             // selected.
             return queryString + "&selected=*";
@@ -380,13 +380,13 @@
     * @return {Object} The data parsed from the given query string.
     */
     function parseQueryString(queryString, eventData) {
-        var ageClassSet = readSelectedClasses(queryString, eventData);
-        var classIndexes = (ageClassSet === null) ? null : ageClassSet.ageClasses.map(function (ageClass) { return eventData.classes.indexOf(ageClass); });
+        var courseClassSet = readSelectedClasses(queryString, eventData);
+        var classIndexes = (courseClassSet === null) ? null : courseClassSet.classes.map(function (courseClass) { return eventData.classes.indexOf(courseClass); });
         return {
             classes: classIndexes,
             chartType: readChartType(queryString),
-            compareWith: readComparison(queryString, ageClassSet),
-            selected: readSelectedCompetitors(queryString, ageClassSet),
+            compareWith: readComparison(queryString, courseClassSet),
+            selected: readSelectedCompetitors(queryString, courseClassSet),
             stats: readSelectedStatistics(queryString),
             showOriginal: readShowOriginal(queryString),
             filterText: readFilterText(queryString)
@@ -403,16 +403,16 @@
     *
     * @param {String} queryString - The original query-string.
     * @param {Event} eventData - The event data.
-    * @param {AgeClassSet} ageClassSet - The current age-class set.
+    * @param {CourseClassSet} courseClassSet - The current course-class set.
     * @param {Object} data - Object containing the data to format into the
     *     query-string.
     * @return The formatted query-string.
     */
-    function formatQueryString(queryString, eventData, ageClassSet, data) {
+    function formatQueryString(queryString, eventData, courseClassSet, data) {
         queryString = formatSelectedClasses(queryString, eventData, data.classes);
         queryString = formatChartType(queryString, data.chartType);
         queryString = formatComparison(queryString, data.compareWith.index, data.compareWith.runner);
-        queryString = formatSelectedCompetitors(queryString, ageClassSet, data.selected);
+        queryString = formatSelectedCompetitors(queryString, courseClassSet, data.selected);
         queryString = formatSelectedStatistics(queryString, data.stats);
         queryString = formatShowOriginal(queryString, data.showOriginal);
         queryString = formatFilterText(queryString, data.filterText);

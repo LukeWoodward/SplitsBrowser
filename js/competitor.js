@@ -175,6 +175,8 @@
         this.isDisqualified = false;
         this.isOverMaxTime = false;
         this.className = null;
+        this.yearOfBirth = null;
+        this.gender = null; // "M" or "F" for male or female.
         
         this.originalSplitTimes = originalSplitTimes;
         this.originalCumTimes = originalCumTimes;
@@ -225,10 +227,27 @@
     
     /**
     * Sets the name of the class that the competitor belongs to.
+    * This is the course-class, not the competitor's age class.
     * @param {String} className - The name of the class.
     */
     Competitor.prototype.setClassName = function (className) {
         this.className = className;
+    };
+    
+    /**
+    * Sets the competitor's year of birth.
+    * @param {Number} yearOfBirth - The competitor's year of birth.
+    */
+    Competitor.prototype.setYearOfBirth = function (yearOfBirth) {
+        this.yearOfBirth = yearOfBirth;
+    };
+    
+    /**
+    * Sets the competitor's gender.  This should be "M" or "F".
+    * @param {String} gender - The competitor's gender, "M" or "F".
+    */
+    Competitor.prototype.setGender = function (gender) {
+        this.gender = gender;
     };
     
     /**

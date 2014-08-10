@@ -43,6 +43,8 @@
             forename: "John",
             surname: "Smith",
             club: "TestClub",
+            gender: "M",
+            birthDate: "1976-04-11",
             startTime: 10 * 3600 + 11 * 60 + 37,
             totalTime: 65 + 221 + 184 + 100,
             controls: ["182", "148", "167"],
@@ -124,14 +126,25 @@
     
         var personNameXml = "";
         if (exists("forename") || exists("surname")) {
-            personNameXml = '<Person><PersonName>\n';
+            personNameXml = '<Person';
+            if (exists("gender")) {
+                personNameXml += ' sex="' + personData.gender + '"';
+            }
+            
+            personNameXml += '><PersonName>\n';
             if (exists("forename")) {
                 personNameXml += '<Given>' + personData.forename + '</Given>\n';
             }
             if (exists("surname")) {
                 personNameXml += '<Family>' + personData.surname + '</Family>\n';
             }
-            personNameXml += '</PersonName></Person>\n';
+            personNameXml += '</PersonName>';
+            
+            if (exists("birthDate")) {
+                personNameXml += '<BirthDate><Date>' + personData.birthDate + '</Date></BirthDate>\n';
+            }
+            
+            personNameXml += '</Person>\n';
         }
         
         var clubXml = (exists("club")) ? '<Club><ShortName>' + personData.club + '</ShortName></Club>\n' : '';
@@ -301,14 +314,28 @@
     
         var personNameXml = "";
         if (exists("forename") || exists("surname")) {
-            personNameXml = '<Person><Name>\n';
+            personNameXml = '<Person';
+            
+            if (exists("gender")) {
+                personNameXml += ' sex="' + personData.gender + '"';
+            }
+            
+            personNameXml += '><Name>\n';
+            
             if (exists("forename")) {
                 personNameXml += '<Given>' + personData.forename + '</Given>\n';
             }
             if (exists("surname")) {
                 personNameXml += '<Family>' + personData.surname + '</Family>\n';
             }
-            personNameXml += '</Name></Person>\n';
+            
+            personNameXml += '</Name>';
+            
+            if (exists("birthDate")) {
+                personNameXml += '<BirthDate>' + personData.birthDate + '</BirthDate>\n';
+            }
+            
+            personNameXml += '</Person>\n';
         }
         
         var clubXml = (exists("club")) ? '<Organisation><ShortName>' + personData.club + '</ShortName></Organisation>\n' : '';
@@ -391,7 +418,7 @@
     /**
     * Returns the single competitor in the given event.
     *
-    * This function also asserts that the event has exactly one ageclass and
+    * This function also asserts that the event has exactly one course-class and
     * exactly one competitor within that class.  This one competitor is what
     * it returns.
     * @param {QUnit.assert} assert - QUnit assert object.
@@ -403,9 +430,9 @@
     function getSingleCompetitor(assert, eventData, formatterName) {
         assert.strictEqual(eventData.classes.length, 1, "Expected one class - " + formatterName);
         if (eventData.classes.length === 1) {
-            var ageClass = eventData.classes[0];
-            assert.strictEqual(ageClass.competitors.length, 1, "Expected one competitor - " + formatterName);
-            if (ageClass.competitors.length === 1) {
+            var courseClass = eventData.classes[0];
+            assert.strictEqual(courseClass.competitors.length, 1, "Expected one competitor - " + formatterName);
+            if (courseClass.competitors.length === 1) {
                 return eventData.classes[0].competitors[0];
             } else {
                 return null;
@@ -634,17 +661,19 @@
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
                 if (eventData.classes.length === 1) {
-                    var ageClass = eventData.classes[0];
-                    assert.strictEqual(ageClass.name, className);
-                    assert.strictEqual(ageClass.competitors.length, 1, "One competitor should have been read -  " + formatterName);
-                    assert.strictEqual(ageClass.numControls, 3);
+                    var courseClass = eventData.classes[0];
+                    assert.strictEqual(courseClass.name, className);
+                    assert.strictEqual(courseClass.competitors.length, 1, "One competitor should have been read -  " + formatterName);
+                    assert.strictEqual(courseClass.numControls, 3);
                     
-                    if (ageClass.competitors.length === 1) {
-                        var competitor = ageClass.competitors[0];
+                    if (courseClass.competitors.length === 1) {
+                        var competitor = courseClass.competitors[0];
                         assert.strictEqual(competitor.name, person.forename + " " + person.surname);
                         assert.strictEqual(competitor.club, person.club);
                         assert.strictEqual(competitor.startTime, person.startTime);
                         assert.strictEqual(competitor.totalTime, person.totalTime);
+                        assert.strictEqual(competitor.gender, "M");
+                        assert.strictEqual(competitor.yearOfBirth, 1976);
                         assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat(person.totalTime));
                         assert.ok(competitor.completed());
                         assert.ok(!competitor.isNonCompetitive);
@@ -657,8 +686,8 @@
                         assert.strictEqual(course.length, classLength / 1000);
                         assert.deepEqual(course.controls, person.controls);
                         
-                        assert.deepEqual(course.classes, [ageClass]);
-                        assert.strictEqual(ageClass.course, course);
+                        assert.deepEqual(course.classes, [courseClass]);
+                        assert.strictEqual(courseClass.course, course);
                     }
                 }
             });
@@ -695,6 +724,62 @@
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
                 assert.strictEqual(competitor.club, "");
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains a competitor with no year of birth", function (assert) {
+        var person = getPerson();
+        delete person.birthDate;
+        runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors[0].yearOfBirth, null);
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains a competitor with an invalid year of birth, ignoring it", function (assert) {
+        var person = getPerson();
+        person.birthDate = "This is not a valid birth date";
+        runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors[0].yearOfBirth, null);
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains a female competitor", function (assert) {
+        var person = getPerson();
+        person.forename = "Joan";
+        person.gender = "F";
+        runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors[0].gender, "F");
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains a competitor with no gender specified", function (assert) {
+        var person = getPerson();
+        delete person.gender;
+        runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors[0].gender, null);
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains a competitor with an invalid gender, ignoring it", function (assert) {
+        var person = getPerson();
+        person.gender = "This is not a valid gender";
+        runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors[0].gender, null);
             });
     });
     

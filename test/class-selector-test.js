@@ -22,7 +22,7 @@
     "use strict";
 
     var ClassSelector = SplitsBrowser.Controls.ClassSelector;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
 
     module("Class Selector");
@@ -53,7 +53,7 @@
                 The class-selector to set up.
     */
     function setClassesInSelectorWithTwoCourses(selector) {
-        var classes = [new AgeClass("Class 1", 11, []), new AgeClass("Class 2", 17, []), new AgeClass("Class 3", 22, [])];
+        var classes = [new CourseClass("Class 1", 11, []), new CourseClass("Class 2", 17, []), new CourseClass("Class 3", 22, [])];
         var course1 = new Course("Test 1", [classes[0]], null, null);
         var course2 = new Course("Test 2", classes.slice(1), null, null);        
         classes[0].setCourse(course1);
@@ -118,7 +118,7 @@
     QUnit.test("Can create class selector with course in single class and with other-class selector hidden", function(assert) {
         var selector = new ClassSelector(d3.select("#qunit-fixture").node());
         
-        setClassesInSelector(selector, [new AgeClass("Class 1", 11, [])]);
+        setClassesInSelector(selector, [new CourseClass("Class 1", 11, [])]);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
@@ -133,7 +133,7 @@
     QUnit.test("Can create class selector with a list of three classes in the same course, making other-class selector available", function(assert) {
         var selector = new ClassSelector(d3.select("#qunit-fixture").node());
         
-        setClassesInSelector(selector, [new AgeClass("Class 1", 11, []), new AgeClass("Class 2", 17, []), new AgeClass("Class 3", 22, [])]);
+        setClassesInSelector(selector, [new CourseClass("Class 1", 11, []), new CourseClass("Class 2", 17, []), new CourseClass("Class 3", 22, [])]);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
@@ -153,8 +153,8 @@
     QUnit.test("Setting the list of classes back to a single class sets the selector to the shorter list of class names and hides the other-class selector", function(assert) {
         var selector = new ClassSelector(d3.select("#qunit-fixture").node());
 
-        setClassesInSelector(selector, [new AgeClass("Class 1", 11, []), new AgeClass("Class 2", 17, []), new AgeClass("Class 3", 22, [])]);
-        setClassesInSelector(selector, [new AgeClass("Class 4", 20, [])]);
+        setClassesInSelector(selector, [new CourseClass("Class 1", 11, []), new CourseClass("Class 2", 17, []), new CourseClass("Class 3", 22, [])]);
+        setClassesInSelector(selector, [new CourseClass("Class 4", 20, [])]);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
@@ -171,7 +171,7 @@
     QUnit.test("Setting the selector back to an empty list of classes disables the selector again", function(assert) {
         var selector = new ClassSelector(d3.select("#qunit-fixture").node());
         
-        setClassesInSelector(selector, [new AgeClass("Class 1", 11, []), new AgeClass("Class 2", 17, []), new AgeClass("Class 3", 22, [])]);
+        setClassesInSelector(selector, [new CourseClass("Class 1", 11, []), new CourseClass("Class 2", 17, []), new CourseClass("Class 3", 22, [])]);
         setClassesInSelector(selector, []);
         
         var htmlSelectSelection = d3.select("#qunit-fixture select");
@@ -189,7 +189,7 @@
         var selector = new ClassSelector(d3.select("#qunit-fixture").node());
         selector.registerChangeHandler(handleClassChanged);
         
-        setClassesInSelector(selector, [new AgeClass("Class 1", 11, []), new AgeClass("Class 2", 17, []), new AgeClass("Class 3", 22, [])]);
+        setClassesInSelector(selector, [new CourseClass("Class 1", 11, []), new CourseClass("Class 2", 17, []), new CourseClass("Class 3", 22, [])]);
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
@@ -213,7 +213,7 @@
         selector.registerChangeHandler(handleClassChanged);
         selector.registerChangeHandler(secondHandler);
         
-        setClassesInSelector(selector, [new AgeClass("Class 1", 11, []), new AgeClass("Class 2", 17, []), new AgeClass("Class 3", 22, [])]);
+        setClassesInSelector(selector, [new CourseClass("Class 1", 11, []), new CourseClass("Class 2", 17, []), new CourseClass("Class 3", 22, [])]);
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
@@ -231,7 +231,7 @@
         selector.registerChangeHandler(handleClassChanged);
         selector.registerChangeHandler(handleClassChanged);
         
-        setClassesInSelector(selector, [new AgeClass("Class 1", 11, []), new AgeClass("Class 2", 17, []), new AgeClass("Class 3", 22, [])]);
+        setClassesInSelector(selector, [new CourseClass("Class 1", 11, []), new CourseClass("Class 2", 17, []), new CourseClass("Class 3", 22, [])]);
         var htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
         var htmlSelect = htmlSelectSelection.node();
