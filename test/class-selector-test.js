@@ -69,12 +69,9 @@
     */
     function assertOtherClassSelectorVisibility(assert, isVisible) {
         var shouldOrShouldNot = (isVisible) ? "should" : "should not";
-        var selector = d3.selectAll("#qunit-fixture .otherClassSelector");
-        var combiningText = d3.selectAll("#qunit-fixture .otherClassCombining");
+        var selector = d3.select("#otherClassesContainer");
         assert.strictEqual(selector.size(), 1, "One other-class selector should be present");
-        assert.strictEqual(combiningText.size(), 1, "One other-class combining-text element should be present");
-        assert.strictEqual(selector.style("display"), (isVisible) ? "inline-block" : "none", "Other-class selector " + shouldOrShouldNot + " be displayed");
-        assert.strictEqual(combiningText.style("display"), (isVisible) ? "inline" : "none", "Other-class combining-text element " + shouldOrShouldNot + " be displayed");
+        assert.strictEqual(selector.style("display"), (isVisible) ? "block" : "none", "Other-class selector " + shouldOrShouldNot + " be displayed");
         
         if (!isVisible) {
             assertOtherClassListVisibility(assert, false);

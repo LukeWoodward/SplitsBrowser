@@ -45,6 +45,7 @@
         });
         
         this.otherClassesContainer = d3.select(parent).append("div")
+                                                      .attr("id", "otherClassesContainer")
                                                       .classed("topRowStart", true)
                                                       .style("display", "none");
                                                       
