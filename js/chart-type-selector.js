@@ -35,7 +35,7 @@
         this.lastSelectedIndex = 0;
         
         var div = d3.select(parent).append("div")
-                                   .attr("id", "chartTypeSelector");
+                                   .classed("topRowStart", true);
                                    
         this.labelSpan = div.append("span");
            

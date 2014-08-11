@@ -85,7 +85,7 @@
         this.previousSelectedIndex = -1;
         
         var div = d3.select(parent).append("div")
-                                   .attr("id", "comparisonSelectorContainer");
+                                   .classed("topRowStart", true);
         
         this.comparisonSelectorLabel = div.append("span")
                                           .classed("comparisonSelectorLabel", true);
@@ -107,7 +107,7 @@
         this.optionsList.exit().remove();
         
         this.runnerDiv = d3.select(parent).append("div")
-                                          .attr("id", "runnerSelectorContainer")
+                                          .classed("topRowStart", true)
                                           .style("display", "none")
                                           .style("padding-left", "20px");
         

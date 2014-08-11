@@ -45,10 +45,10 @@
         }
         
         d3.select(parent).append("div")
-                         .classed("topRowSpacer", true);
+                         .classed("topRowStartSpacer", true);
         
         var div = d3.select(parent).append("div")
-                                   .attr("id", "languageSelector");
+                                   .classed("topRowStart", true);
                                    
         this.label = div.append("span");
            

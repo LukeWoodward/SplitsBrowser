@@ -33,7 +33,7 @@
         this.otherClassesEnabled = true;
         
         var div = d3.select(parent).append("div")
-                                   .style("float", "left");
+                                   .classed("topRowStart", true);
         
         this.labelSpan = div.append("span");
         
@@ -44,13 +44,16 @@
             outerThis.onSelectionChanged();
         });
         
-        this.otherClassesCombiningLabel = div.append("span")
-                                             .classed("otherClassCombining", true)
-                                             .style("display", "none");
+        this.otherClassesContainer = d3.select(parent).append("div")
+                                                      .classed("topRowStart", true)
+                                                      .style("display", "none");
+                                                      
+        this.otherClassesCombiningLabel = this.otherClassesContainer.append("span")
+                                                                    .classed("otherClassCombining", true);
         
-        this.otherClassesSelector = div.append("div")
-                                       .classed("otherClassSelector", true)
-                                       .style("display", "none");
+        this.otherClassesSelector = this.otherClassesContainer.append("div")
+                                                              .classed("otherClassSelector", true)
+                                                              .style("display", "inline-block");
                                    
         this.otherClassesSpan = this.otherClassesSelector.append("span");
         
@@ -247,11 +250,9 @@
         otherClassesSelection.exit().remove();
         
         if (otherClassIndexes.length > 0) {
-            this.otherClassesSelector.style("display", "inline-block");
-            this.otherClassesCombiningLabel.style("display", null);
+            this.otherClassesContainer.style("display", null);
         } else {
-            this.otherClassesSelector.style("display", "none");
-            this.otherClassesCombiningLabel.style("display", "none");
+            this.otherClassesContainer.style("display", "none");
         }
         
         var offset = $(this.otherClassesSelector.node()).offset();

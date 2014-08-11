@@ -139,7 +139,7 @@
     */
     Viewer.prototype.drawLogo = function () {
         this.logoSvg = this.topPanel.append("svg")
-                                    .style("float", "left");
+                                    .classed("topRowStart", true);
 
         this.logoSvg.style("width", "19px")
                     .style("height", "19px")
@@ -186,7 +186,7 @@
     * Adds a spacer between controls on the top row.
     */
     Viewer.prototype.addSpacer = function () {
-        this.topPanel.append("div").classed("topRowSpacer", true);    
+        this.topPanel.append("div").classed("topRowStartSpacer", true);
     };
     
     /**
@@ -240,6 +240,7 @@
     */
     Viewer.prototype.addDirectLink = function () {
         this.directLink = this.topPanel.append("a")
+                                       .classed("topRowStart", true)
                                        .attr("id", "directLinkAnchor")
                                        .attr("href", document.location.href);
         this.setDirectLinkMessages();

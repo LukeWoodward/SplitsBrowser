@@ -46,26 +46,28 @@
     * @param {HTMLElement} parent - The parent element.
     */
     function StatisticsSelector (parent) {
-        this.span = d3.select(parent).append("span")
+        this.div = d3.select(parent).append("div")
+                                     .classed("topRowEnd", true)
                                      .attr("id", STATISTIC_SELECTOR_ID);   
 
-        var childSpans = this.span.selectAll("span")
-                                  .data(STATISTIC_NAMES)
-                                  .enter()
-                                  .append("span");
+        var childDivs = this.div.selectAll("div")
+                                .data(STATISTIC_NAMES)
+                                .enter()
+                                .append("div")
+                                .style("display", "inline-block");
          
-        childSpans.append("input")
-                  .attr("id", function(name) { return LABEL_ID_PREFIX + name; }) 
-                  .attr("type", "checkbox")
-                  .attr("checked", function (name) { return (DEFAULT_SELECTED_STATISTICS.indexOf(name) >= 0) ? "checked" : null; });
+        childDivs.append("input")
+                 .attr("id", function(name) { return LABEL_ID_PREFIX + name; }) 
+                 .attr("type", "checkbox")
+                 .attr("checked", function (name) { return (DEFAULT_SELECTED_STATISTICS.indexOf(name) >= 0) ? "checked" : null; });
                   
-        this.statisticLabels  = childSpans.append("label")
-                                          .attr("for", function(name) { return LABEL_ID_PREFIX + name; })
-                                          .classed("statisticsSelectorLabel", true);
+        this.statisticLabels  = childDivs.append("label")
+                                         .attr("for", function(name) { return LABEL_ID_PREFIX + name; })
+                                         .classed("statisticsSelectorLabel", true);
 
         
         var outerThis = this;
-        $("input", this.span.node()).bind("change", function () { return outerThis.onCheckboxChanged(); });
+        $("input", this.div.node()).bind("change", function () { return outerThis.onCheckboxChanged(); });
                    
         this.handlers = [];
         
@@ -86,7 +88,7 @@
     * This method is intended only for test purposes.
     */
     StatisticsSelector.prototype.clearAll = function () {
-        this.span.selectAll("input").attr("checked", null);
+        this.div.selectAll("input").attr("checked", null);
     };
 
     /**
@@ -95,10 +97,10 @@
     *      false if the controls are to be disabled.
     */
     StatisticsSelector.prototype.setEnabled = function (isEnabled) {
-        this.span.selectAll("label.statisticsSelectorLabel")
-                 .classed("disabled", !isEnabled);
-        this.span.selectAll("input")
-                 .attr("disabled", (isEnabled) ? null : "disabled");
+        this.div.selectAll("label.statisticsSelectorLabel")
+                .classed("disabled", !isEnabled);
+        this.div.selectAll("input")
+                .attr("disabled", (isEnabled) ? null : "disabled");
     };
     
     /**
@@ -137,7 +139,7 @@
     */
     StatisticsSelector.prototype.getVisibleStatistics = function () {
         var visibleStats = {};
-        this.span.selectAll("input")[0].forEach(function (checkbox, index) {
+        this.div.selectAll("input")[0].forEach(function (checkbox, index) {
             visibleStats[STATISTIC_NAMES[index]] = checkbox.checked;
         });
         
@@ -149,7 +151,7 @@
     * @param {Object} visibleStats - The statistics to make visible.
     */
     StatisticsSelector.prototype.setVisibleStatistics = function (visibleStats) {
-        this.span.selectAll("input")[0].forEach(function (checkbox, index) {
+        this.div.selectAll("input")[0].forEach(function (checkbox, index) {
             checkbox.checked = visibleStats[STATISTIC_NAMES[index]] || false;
         });
         

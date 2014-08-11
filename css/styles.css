@@ -25,7 +25,17 @@ body
     font: 12px sans-serif;
 }
 
-div.topRowSpacer
+.topRowStart
+{
+    float: left;
+}
+
+.topRowEnd
+{
+    float: right;
+}
+
+div.topRowStartSpacer
 {
     padding: 0px 18px 0px 18px;
     min-height: 1px;
@@ -38,6 +48,7 @@ div.otherClassSelector
     border: 1px solid #aaaaaa;
     padding: 2px;
     background-color: #eeeeee;
+    vertical-align: middle;
 }
 
 div.otherClassSelector.disabled
@@ -83,7 +94,6 @@ span.comparisonSelectorLabel.disabled
 
 a#directLinkAnchor
 {
-    float: left;
     margin: 4px;
 }
 
@@ -231,16 +241,6 @@ div.competitor.selected.dragDeselected
 {
     background-color: transparent;
     color: black;
-}
-
-#chartTypeSelector, #comparisonSelectorContainer, #runnerSelectorContainer, #originalDataSelectorContainer, #languageSelector
-{
-    float: left;
-}
-
-#statisticSelector
-{
-    float: right;
 }
 
 #statisticSelector label, #originalDataSelectorContainer label

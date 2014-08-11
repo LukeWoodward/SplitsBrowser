@@ -38,9 +38,10 @@
 
         var checkboxId = "originalDataCheckbox";
         this.containerDiv = parent.append("div")
+                                  .classed("topRowStart", true)
                                   .attr("id", CONTAINER_DIV_ID);
 
-        this.containerDiv.append("div").classed("topRowSpacer", true);    
+        this.containerDiv.append("div").classed("topRowStartSpacer", true);
         
         var span = this.containerDiv.append("span");
         
