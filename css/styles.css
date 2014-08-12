@@ -19,8 +19,8 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 @charset "UTF-8";
- 
-body
+
+div#sbContainer, div.sbErrors
 {
     font: 12px sans-serif;
 }
@@ -303,7 +303,7 @@ div.warningPanel
 Disable text selection, as it causes unsightly selection during dragging.
 Non-standard CSS here, but that's all we can do.
 */
-body
+div#sbContainer
 {
   -moz-user-select: none;
   -webkit-user-select: none;

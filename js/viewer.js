@@ -88,6 +88,7 @@
         this.mainPanel = null;
         this.buttonsPanel = null;
         this.competitorListContainer = null;
+        this.container = null;
         
         this.currentResizeTimeout = null;
     }
@@ -287,10 +288,12 @@
     */
     Viewer.prototype.buildUi = function () {
         var body = d3.select("body");
-        
         body.style("overflow", "hidden");
+
+        this.container = body.append("div")
+                             .attr("id", "sbContainer");
         
-        this.topPanel = body.append("div");
+        this.topPanel = this.container.append("div");
         
         this.drawLogo();
         this.addLanguageSelector();
@@ -311,12 +314,12 @@
         this.topPanel.append("div")
                      .style("clear", "both");
         
-        this.mainPanel = body.append("div");
+        this.mainPanel = this.container.append("div");
                              
         this.addCompetitorList();
         this.chart = new Chart(this.mainPanel.node());
         
-        this.resultsTable = new ResultsTable(body.node());
+        this.resultsTable = new ResultsTable(this.container.node());
         this.resultsTable.hide();
         
         var outerThis = this;
@@ -327,7 +330,7 @@
         // This is mainly for the benefit of IE9, which doesn't support any
         // -*-user-select CSS style.
         $("input:text").bind("selectstart", function (evt) { evt.stopPropagation(); });
-        $("body").bind("selectstart", function () { return false; });
+        $(this.container.node()).bind("selectstart", function () { return false; });
     };
 
     /**
@@ -366,14 +369,37 @@
     };
     
     /**
+    * Returns the horizontal margin around the container, i.e. the sum of the
+    * left and right margin, padding and border for the body element and the
+    * container element.
+    * @return {Number} Total horizontal margin.
+    */ 
+    Viewer.prototype.getHorizontalMargin = function () {
+        var body = $("body");
+        var container = $(this.container.node());
+        return (body.outerWidth(true) - body.width()) + (container.outerWidth() - container.width());
+    };
+    
+    /**
+    * Returns the vertical margin around the container, i.e. the sum of the top
+    * and bottom margin, padding and border for the body element and the
+    * container element.
+    * @return {Number} Total vertical margin.
+    */ 
+    Viewer.prototype.getVerticalMargin = function () {
+        var body = $("body");
+        var container = $(this.container.node());
+        return (body.outerHeight(true) - body.height()) + (container.outerHeight() - container.height());
+    };
+    
+    /**
     * Gets the usable height of the window, i.e. the height of the window minus
     * margin and the height of the top bar, if any.  This height is used for
     * the competitor list and the chart.
     * @return {Number} Usable height of the window.
     */
     Viewer.prototype.getUsableHeight = function () {
-        var vertMargin = parseInt($("body").css("margin-top"), 10) + parseInt($("body").css("margin-bottom"), 10);
-        var bodyHeight = $(window).height() - vertMargin - this.topBarHeight;
+        var bodyHeight = $(window).outerHeight() - this.getVerticalMargin() - this.topBarHeight;
         var topPanelHeight = $(this.topPanel.node()).height();
         return bodyHeight - topPanelHeight;
     };
@@ -390,20 +416,20 @@
     */
     Viewer.prototype.setChartSize = function () {
         // Margin around the body element.
-        var horzMargin = parseInt($("body").css("margin-left"), 10) + parseInt($("body").css("margin-right"), 10);
-        var vertMargin = parseInt($("body").css("margin-top"), 10) + parseInt($("body").css("margin-bottom"), 10);
+        var horzMargin = this.getHorizontalMargin();
+        var vertMargin = this.getVerticalMargin();
         
         // Extra amount subtracted off of the width of the chart in order to
         // prevent wrapping, in units of pixels.
         // 2 to prevent wrapping when zoomed out to 33% in Chrome.
         var EXTRA_WRAP_PREVENTION_SPACE = 2;
         
-        var bodyWidth = $(window).width() - horzMargin;
-        var bodyHeight = $(window).height() - vertMargin - this.topBarHeight;
+        var containerWidth = $(window).width() - horzMargin;
+        var containerHeight = $(window).height() - vertMargin - this.topBarHeight;
 
-        $("body").width(bodyWidth).height(bodyHeight);
+        $(this.container.node()).width(containerWidth).height(containerHeight);
         
-        var chartWidth = bodyWidth - this.competitorList.width() - EXTRA_WRAP_PREVENTION_SPACE;
+        var chartWidth = containerWidth - this.competitorList.width() - EXTRA_WRAP_PREVENTION_SPACE;
         var chartHeight = this.getUsableHeight();
         
         this.chart.setSize(chartWidth, chartHeight);
@@ -541,8 +567,10 @@
         this.competitorList.setCompetitorList(this.courseClassSet.allCompetitors, (this.currentClasses.length > 1));
         this.selection.migrate(this.previousCompetitorList, this.courseClassSet.allCompetitors);
         this.competitorList.selectionChanged();
-        this.setChartSize();
-        this.drawChart();
+        if (!this.chartTypeSelector.getChartType().isResultsTable) {
+            this.setChartSize();
+            this.drawChart();
+        }
         this.previousCompetitorList = this.courseClassSet.allCompetitors;
         this.updateDirectLink();
     };
@@ -563,11 +591,12 @@
         if (chartType.isResultsTable) {
             this.mainPanel.style("display", "none");
             
-            // Remove any fixed width and height on the body, as well as
-            // overflow:hidden, as we need the window to be able to scroll if
-            // the results table is too wide or too tall and also adjust size
-            // if one or both scrollbars appear.
-            d3.select("body").style("width", null).style("height", null).style("overflow", null);
+            // Remove any fixed width and height on the container, as well as
+            // overflow:hidden on the body, as we need the window to be able
+            // to scroll if the results table is too wide or too tall and also
+            // adjust size if one or both scrollbars appear.
+            this.container.style("width", null).style("height", null);
+            d3.select("body").style("overflow", null);
             
             this.resultsTable.show();
         } else {
@@ -692,13 +721,15 @@
     * @param {Object} params - Object mapping parameter names to values.
     */
     function showLoadFailureMessage(key, params) {
-        d3.select("body")
-          .append("h1")
-          .text(getMessage("LoadFailedHeader"));
+        var errorDiv = d3.select("body")
+                         .append("div")
+                         .classed("sbErrors", true);
+                         
+        errorDiv.append("h1")
+                .text(getMessage("LoadFailedHeader"));
           
-        d3.select("body")
-          .append("p")
-          .text(getMessageWithFormatting(key, params));
+        errorDiv.append("p")
+                .text(getMessageWithFormatting(key, params));
     }
     
     /**
