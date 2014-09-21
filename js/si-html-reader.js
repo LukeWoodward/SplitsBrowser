@@ -332,15 +332,16 @@
     * returns false, the parser will not use this recognizer.  Other methods on
     * this object can therefore assume that this method has returned true.
     *
-    * As this recognizer is for recognizing preformatted text, it simply checks
-    * for the presence of an HTML &lt;pre&gt; tag.
+    * As this recognizer is for recognizing preformatted text which also uses a
+    * lot of &lt;font&gt; elements, it simply checks for the presence of
+    * HTML &lt;pre&gt; and &lt;font&gt; elements.
     *
     * @param {String} text - The entire input text read in.
     * @return {boolean} True if the text contains any pre-formatted HTML, false
     *     otherwise
     */ 
     OldHtmlFormatRecognizer.prototype.isTextOfThisFormat = function (text) {
-        return (text.indexOf("<pre>") >= 0);
+        return (text.indexOf("<pre>") >= 0 && text.indexOf("<font") >= 0);
     };
     
     /**

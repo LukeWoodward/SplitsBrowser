@@ -118,6 +118,10 @@
         runInvalidDataTest(assert, "<html><head></head><body>blah blah blah</body></html>", "a string that contains no <pre> nor <table> tags", "WrongFileFormat");
     });
     
+    QUnit.test("Cannot parse a string that contains an HTML pre tag but no font tag", function (assert) {
+        runInvalidDataTest(assert, "<html><head></head><body><pre>blah blah blah</pre></body></html>", "a string that contains a <pre> tag but no <font> tags", "WrongFileFormat");
+    });
+    
     // HTML generation.
     // Old-format (preformatted).
     
@@ -494,7 +498,7 @@
     
     var OLD_FORMAT = {
         name: "old format (preformatted)",
-        header: "<html><head></head><body>\n<pre>\n",
+        header: "<html><head></head><body>\n<pre>\n<font>Dummy line</font>\n",
         courseHeaderFunc: getCourseHeaderLineOld,
         tableHeaderNoClass: "",
         tableHeaderWithClass: "",        
@@ -1064,7 +1068,7 @@
     // Format-specific tests.
     
     QUnit.test("Cannot parse a string that contains an opening pre tag but no closing pre tag", function (assert) {
-        runInvalidDataTest(assert, "<html><head></head><body>\n<pre>\nblah blah blah\n</body></html>", "a string that contains <pre> but not </pre>", "InvalidData");
+        runInvalidDataTest(assert, "<html><head></head><body>\n<pre>\n<font>blah blah blah</font>\n</body></html>", "a string that contains <pre> but not </pre>", "InvalidData");
     });
 
     QUnit.test("Cannot read event data without any closing table elements", function (assert) {
