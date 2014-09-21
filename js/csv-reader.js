@@ -97,6 +97,10 @@
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */
     function parseEventData (eventData) {
+    
+        if (/<html/i.test(eventData)) {
+            throwWrongFileFormat("Cannot parse this file as CSV as it appears to be HTML");
+        }
 
         eventData = normaliseLineEndings(eventData);
         

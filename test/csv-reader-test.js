@@ -72,6 +72,22 @@
             parseEventData(csvData);
         });
     });
+
+    QUnit.test("Rejects HTML that happens to have a single comma on the first line as being of the wrong format", function (assert) {
+
+        var csvData = "<html><head><title>Blah blah blah, blah blah</title>\n<head><body><p>blah blah blah</p>\n</body>\n</html>\n";
+        SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
+            parseEventData(csvData);
+        });
+    });
+
+    QUnit.test("Rejects HTML in capitals that happens to have a single comma on the first line as being of the wrong format", function (assert) {
+
+        var csvData = "<HTML><HEAD><TITLE>Blah blah blah, blah blah</TITLE>\n<HEAD><BODY><P>blah blah blah</P>\n</BODY>\n</HTML>\n";
+        SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
+            parseEventData(csvData);
+        });
+    });
     
     QUnit.test("Rejects SI-format file as being of the wrong format", function (assert) {
         var siData = "First name;Surname;City;Start;Time;Short;AgeClass controls;Punch1;Punch2;Punch3;\r\n" + 
