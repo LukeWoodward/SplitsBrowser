@@ -188,10 +188,16 @@
 
         if (this.previousCompetitorList === null) {
             this.currentRunnerIndex = 0;
-        } else {
+        } else if (this.hasWinner) {
             var oldSelectedRunner = this.previousCompetitorList[this.currentRunnerIndex];
             var newIndex = this.courseClassSet.allCompetitors.indexOf(oldSelectedRunner);
             this.currentRunnerIndex = Math.max(newIndex, 0);
+        } else if (ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].requiresWinner) {
+            // We're currently viewing a comparison type that requires a
+            // winner.  However, there is no longer a winner, presumably
+            // because there was a winner but following the removal of a class
+            // there isn't any more.  Switch back to the fastest time.
+            this.setComparisonType(1, null);
         }
         
         this.runnerDropDown.selectedIndex = this.currentRunnerIndex;
@@ -234,6 +240,10 @@
         var typeIndex = this.dropDown.selectedIndex;
         var runner;
         if (typeIndex === ALL_COMPARISON_OPTIONS.length - 1) {
+            if (this.runnerDropDown.selectedIndex < 0) {
+                this.runnerDropDown.selectedIndex = 0;
+            }
+            
             runner = this.courseClassSet.allCompetitors[this.runnerDropDown.selectedIndex];
         } else {
             runner = null;

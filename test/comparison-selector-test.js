@@ -65,6 +65,10 @@
         };
     }
     
+    function returnFalse() {
+        return false;
+    }
+    
     function returnTrue() {
         return true;
     }
@@ -75,6 +79,8 @@
         { name: "three", getAllCumulativeTimes: function() { return [5, 6]; }, completed: returnTrue }
     ];
     
+    var extraCompetitor = {name: "four", getAllCumulativeTimes: function () { return [7, 8]; }, completed: returnTrue };
+    
     var DUMMY_CLASS_SET = getDummyCourseClassSet(competitors);
     
     function getDummyCourseClassSetWithMispuncher() {
@@ -84,12 +90,19 @@
     }
     
     function getDummyCourseClassSetWithNoWinner() {
-        var returnFalse = function () { return false; };
         var winnerlessCompetitors = competitors.map(function (comp) {
             return { name: comp.name, getAllCumulativeTimes: comp.getAllCumulativeTimes, completed: returnFalse };
         });
 
         return getDummyCourseClassSet(winnerlessCompetitors);
+    }
+    
+    function getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother() {
+        var allCompetitors = [extraCompetitor].concat(competitors.map(function (comp) {
+            return { name: comp.name, getAllCumulativeTimes: comp.getAllCumulativeTimes, completed: returnFalse };
+        }));
+        
+        return getDummyCourseClassSet(allCompetitors);
     }
     
     function createSelector() {
@@ -461,6 +474,88 @@
         assert.strictEqual(callCount, 0, "No call to the change-handler should have been made");
         assert.strictEqual(alertsReceived.length, 0, "No alert should have been issued");
         assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), false, "Runner selector should not be shown");
+    });
+
+    QUnit.test("Can get the compared-against runner after selecting to compare against any runner", function(assert) {
+        resetLastSelector();
+        var selector = createSelector();
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother());
+        selector.registerChangeHandler(handleComparisonChanged);
+        
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        selector.setComparisonType(htmlSelect.options.length - 1, extraCompetitor);
+        
+        assert.strictEqual($(htmlSelect).val(), (htmlSelect.options.length - 1).toString(), "Initially the comparison should be set to 'Any runner...'");
+        assert.strictEqual(callCount, 1, "One call to the change-handler should have been made");
+        assert.strictEqual(alertsReceived.length, 0, "No alert should have been issued");
+        assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), true, "Runner selector should be shown");
+        
+        assert.deepEqual(selector.getComparisonType(), {index: 6, runner: extraCompetitor});
+    });
+
+    QUnit.test("Comparison type reverts to from Winner to Fastest Time if removing a class removes the winner", function(assert) {
+        resetLastSelector();
+        var selector = createSelector();
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother());
+        selector.registerChangeHandler(handleComparisonChanged);
+        
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        selector.setComparisonType(0, extraCompetitor);
+        
+        assert.strictEqual($(htmlSelect).val(), "0", "Initially the comparison should be set to 'Winner'");
+        
+        resetLastSelector();
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner());
+        
+        assert.strictEqual($(htmlSelect).val(), "1", "Later the comparison should be set to 'Fastest time'");               
+        assert.strictEqual(callCount, 1, "One call to the change-handler should have been made");
+        assert.strictEqual(alertsReceived.length, 0, "No alert should have been issued");
+     
+        assert.deepEqual(selector.getComparisonType(), {index: 1, runner: null});
+    });
+
+    QUnit.test("Comparison type doesn't change from Fastest Time + 5% if removing a class removes the winner", function(assert) {
+        resetLastSelector();
+        var selector = createSelector();
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother());
+        selector.registerChangeHandler(handleComparisonChanged);
+        
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        selector.setComparisonType(2, extraCompetitor);
+        
+        assert.strictEqual($(htmlSelect).val(), "2", "Initially the comparison should be set to 'Fastest Time + 5%'");
+        
+        resetLastSelector();
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner());
+        
+        assert.strictEqual($(htmlSelect).val(), "2", "The comparison should still be set to 'Fastest time + 5%'");
+        assert.strictEqual(callCount, 0, "No calls to the change-handler should have been made");
+        assert.strictEqual(alertsReceived.length, 0, "No alert should have been issued");
+     
+        assert.deepEqual(selector.getComparisonType(), {index: 2, runner: null});
+    });
+
+    QUnit.test("Comparison type reverts to from Any Runner to Fastest Time if removing a class removes the winner", function(assert) {
+        resetLastSelector();
+        var selector = createSelector();
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother());
+        selector.registerChangeHandler(handleComparisonChanged);
+        
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        selector.setComparisonType(htmlSelect.options.length - 1, extraCompetitor);
+        
+        assert.strictEqual($(htmlSelect).val(), (htmlSelect.options.length - 1).toString(), "Initially the comparison should be set to 'Any runner...'");
+        assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), true, "Runner selector should be shown");
+
+        resetLastSelector();
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner());
+        
+        assert.strictEqual($(htmlSelect).val(), "1", "Later the comparison should be set to 'Fastest time'");               
+        assert.strictEqual(callCount, 1, "One call to the change-handler should have been made");
+        assert.strictEqual(alertsReceived.length, 0, "No alert should have been issued");
+        assert.strictEqual($(_RUNNER_SELECTOR_SELECTOR).is(":visible"), false, "Runner selector should no longer be shown");
+     
+        assert.deepEqual(selector.getComparisonType(), {index: 1, runner: null});
     });
     
 })();
