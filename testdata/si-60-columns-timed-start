@@ -1,0 +1,6 @@
+OE0014;Stno;XStno;Chipno;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Credit -;Penalty +;Comment;Club no.;Cl.name;City;Nat;Location;Region;Cl. no.;Short;Long;Entry cl. No;Entry class (short);Entry class (long);Rank;Ranking points;Num1;Num2;Num3;Text1;Text2;Text3;Addr. surname;Addr. first name;Street;Line2;Zip;Addr. city;Phone;Mobile;Fax;EMail;Rented;Start fee;Paid;Team;Course no.;Course;km;m;Course controls;Place;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;
+;;;1;;Runner;First;;;;;10:00:00;;12:14;;;;;6;;ABC;;;;;;Class 1;;;;;;;;;;;;;;;;;;;;;;;;;;;Course 1;4.1;35;3;1;;10:12:14;212;01:48;229;06:14;208;08:43;
+;;;2;;Runner;Second;;;;;10:30:00;;14:12;;;;;11;;DEF;;;;;;Class 1;;;;;;;;;;;;;;;;;;;;;;;;;;;Course 1;4.1;35;3;2;;10:44:12;212;03:37;229;07:56;208;10:32
+;;;3;;Runner;Third;;;;;11:00:00;;13:32;;;;;17;;GHI;;;;;;Class 1;;;;;;;;;;;;;;;;;;;;;;;;;;;Course 1;4.1;35;3;3;;11:13:32;212;03:01;229;07:05;208;09:59;
+
+    
