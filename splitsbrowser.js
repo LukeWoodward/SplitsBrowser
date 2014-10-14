@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.3.3", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -427,7 +427,6 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     var isNotNull = SplitsBrowser.isNotNull;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
-    var getMessage = SplitsBrowser.getMessage;
 
     /**
     * Function used with the JavaScript sort method to sort competitors in order
@@ -576,6 +575,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.isDisqualified = false;
         this.isOverMaxTime = false;
         this.className = null;
+        this.yearOfBirth = null;
+        this.gender = null; // "M" or "F" for male or female.
         
         this.originalSplitTimes = originalSplitTimes;
         this.originalCumTimes = originalCumTimes;
@@ -626,10 +627,27 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     
     /**
     * Sets the name of the class that the competitor belongs to.
+    * This is the course-class, not the competitor's age class.
     * @param {String} className - The name of the class.
     */
     Competitor.prototype.setClassName = function (className) {
         this.className = className;
+    };
+    
+    /**
+    * Sets the competitor's year of birth.
+    * @param {Number} yearOfBirth - The competitor's year of birth.
+    */
+    Competitor.prototype.setYearOfBirth = function (yearOfBirth) {
+        this.yearOfBirth = yearOfBirth;
+    };
+    
+    /**
+    * Sets the competitor's gender.  This should be "M" or "F".
+    * @param {String} gender - The competitor's gender, "M" or "F".
+    */
+    Competitor.prototype.setGender = function (gender) {
+        this.gender = gender;
     };
     
     /**
@@ -739,31 +757,6 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     Competitor.prototype.hasAnyTimes = function () {
         // Trim the leading zero
         return this.originalCumTimes.slice(1).some(isNotNull);
-    };
-
-    /**
-    * Returns the 'suffix' to use with this competitor.
-    * The suffix indicates whether they are non-competitive or a mispuncher, 
-    * were disqualified or did not finish.  If none of the above apply, an
-    * empty string is returned.
-    * @return {String} Suffix to use with this competitor.
-    */
-    Competitor.prototype.getSuffix = function () {
-        // Non-starters are not catered for here, as this is intended to only
-        // be used on the chart and non-starters shouldn't appear on the chart.
-        if (this.completed() && this.isNonCompetitive) {
-            return getMessage("NonCompetitiveShort");
-        } else if (this.isNonFinisher) {
-            return getMessage("DidNotFinishShort"); 
-        } else if (this.isDisqualified) {
-            return getMessage("DisqualifiedShort");
-        } else if (this.isOverMaxTime) {
-            return getMessage("OverMaxTimeShort");
-        } else if (this.completed()) {
-            return "";
-        } else {
-            return getMessage("MispunchedShort");
-        }
     };
     
     /**
@@ -1121,11 +1114,11 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     /**
      * Object that represents a collection of competitor data for a class.
      * @constructor.
-     * @param {String} name - Name of the age class.
+     * @param {String} name - Name of the class.
      * @param {Number} numControls - Number of controls.
      * @param {Array} competitors - Array of Competitor objects.
      */
-    function AgeClass(name, numControls, competitors) {
+    function CourseClass(name, numControls, competitors) {
         this.name = name;
         this.numControls = numControls;
         this.competitors = competitors;
@@ -1137,17 +1130,17 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     }
     
     /**
-    * Records that this age-class has competitor data that SplitsBrowser has
+    * Records that this course-class has competitor data that SplitsBrowser has
     * deduced as dubious.
     */
-    AgeClass.prototype.recordHasDubiousData = function () {
+    CourseClass.prototype.recordHasDubiousData = function () {
         this.hasDubiousData = true;
     };
      
     /**
-    * Determines the time losses for the competitors in this age class.
+    * Determines the time losses for the competitors in this course-class.
     */
-    AgeClass.prototype.determineTimeLosses = function () {
+    CourseClass.prototype.determineTimeLosses = function () {
         var fastestSplitTimes = d3.range(1, this.numControls + 2).map(function (controlIdx) {
             var splitRec = this.getFastestSplitTo(controlIdx);
             return (splitRec === null) ? null : splitRec.split;
@@ -1159,19 +1152,19 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     };
     
     /**
-    * Returns whether this age-class is empty, i.e. has no competitors.
-    * @return {boolean} True if this age class has no competitors, false if it
+    * Returns whether this course-class is empty, i.e. has no competitors.
+    * @return {boolean} True if this course-class has no competitors, false if it
     *     has at least one competitor.
     */
-    AgeClass.prototype.isEmpty = function () {
+    CourseClass.prototype.isEmpty = function () {
         return (this.competitors.length === 0);
     };
     
     /**
-    * Sets the course that this age class belongs to.
+    * Sets the course that this course-class belongs to.
     * @param {SplitsBrowser.Model.Course} course - The course this class belongs to.
     */
-    AgeClass.prototype.setCourse = function (course) {
+    CourseClass.prototype.setCourse = function (course) {
         this.course = course;
     };
 
@@ -1184,7 +1177,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @return {?Object} Object containing the name and fastest split, or
     *      null if no split times for that control were recorded.
     */
-    AgeClass.prototype.getFastestSplitTo = function (controlIdx) {
+    CourseClass.prototype.getFastestSplitTo = function (controlIdx) {
         if (typeof controlIdx !== "number" || controlIdx < 1 || controlIdx > this.numControls + 1) {
             throwInvalidData("Cannot return splits to leg '" + controlIdx + "' in a course with " + this.numControls + " control(s)");
         }
@@ -1216,7 +1209,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @return {Array} Array of objects listing the name and start time of each
     *     competitor visiting the control within the given time interval.
     */
-    AgeClass.prototype.getCompetitorsAtControlInTimeRange = function (controlNum, intervalStart, intervalEnd) {
+    CourseClass.prototype.getCompetitorsAtControlInTimeRange = function (controlNum, intervalStart, intervalEnd) {
         if (typeof controlNum !== "number" || isNaN(controlNum) || controlNum < 0 || controlNum > this.numControls + 1) {
             throwInvalidData("Control number must be a number between 0 and " + this.numControls + " inclusive");
         }
@@ -1235,7 +1228,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         return matchingCompetitors;
     };
     
-    SplitsBrowser.Model.AgeClass = AgeClass;
+    SplitsBrowser.Model.CourseClass = CourseClass;
 })();
 
 (function () {
@@ -1248,24 +1241,24 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
     
     /**
-    * Utility function to merge the lists of all competitors in a number of age
-    * classes.  All age classes must contain the same number of controls.
-    * @param {Array} ageClasses - Array of AgeClass objects.
+    * Utility function to merge the lists of all competitors in a number of
+    * classes.  All classes must contain the same number of controls.
+    * @param {Array} classes - Array of CourseClass objects.
     * @return {Array} Merged array of competitors.
     */
-    function mergeCompetitors(ageClasses) {
-        if (ageClasses.length === 0) {
-            throwInvalidData("Cannot create an AgeClassSet from an empty set of competitors");
+    function mergeCompetitors(classes) {
+        if (classes.length === 0) {
+            throwInvalidData("Cannot create a CourseClassSet from an empty set of competitors");
         }
         
         var allCompetitors = [];
-        var expectedControlCount = ageClasses[0].numControls;
-        ageClasses.forEach(function (ageClass) {
-            if (ageClass.numControls !== expectedControlCount) {
-                throwInvalidData("Cannot merge age classes with " + expectedControlCount + " and " + ageClass.numControls + " controls");
+        var expectedControlCount = classes[0].numControls;
+        classes.forEach(function (courseClass) {
+            if (courseClass.numControls !== expectedControlCount) {
+                throwInvalidData("Cannot merge classes with " + expectedControlCount + " and " + courseClass.numControls + " controls");
             }
             
-            ageClass.competitors.forEach(function (comp) {
+            courseClass.competitors.forEach(function (comp) {
                 if (!comp.isNonStarter) { 
                     allCompetitors.push(comp);
                 }
@@ -1304,61 +1297,61 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     }
     
     /**
-    * An object that represents the currently-selected age classes.
+    * An object that represents the currently-selected classes.
     * @constructor
-    * @param {Array} ageClasses - Array of currently-selected age classes.
+    * @param {Array} classes - Array of currently-selected classes.
     */
-    function AgeClassSet(ageClasses) {
-        this.allCompetitors = mergeCompetitors(ageClasses);
-        this.ageClasses = ageClasses;
-        this.numControls = ageClasses[0].numControls;
+    function CourseClassSet(classes) {
+        this.allCompetitors = mergeCompetitors(classes);
+        this.classes = classes;
+        this.numControls = classes[0].numControls;
         this.computeRanks();
     }
     
     /**
-    * Returns whether this age-class set is empty, i.e. whether it has no
+    * Returns whether this course-class set is empty, i.e. whether it has no
     * competitors at all.
-    * @return {boolean} True if the age-class set is empty, false if it is not
+    * @return {boolean} True if the course-class set is empty, false if it is not
     *     empty.
     */    
-    AgeClassSet.prototype.isEmpty = function () {
+    CourseClassSet.prototype.isEmpty = function () {
         return this.allCompetitors.length === 0;
     };
     
     /**
-    * Returns the course used by all of the age classes that make up this set.
-    * @return {SplitsBrowser.Model.Course} The course used by all age-classes.
+    * Returns the course used by all of the classes that make up this set.
+    * @return {SplitsBrowser.Model.Course} The course used by all classes.
     */
-    AgeClassSet.prototype.getCourse = function () {
-        return this.ageClasses[0].course;
+    CourseClassSet.prototype.getCourse = function () {
+        return this.classes[0].course;
     };
     
     /**
-    * Returns the name of the 'primary' age class, i.e. that that has been
+    * Returns the name of the 'primary' class, i.e. that that has been
     * chosen in the drop-down list.
-    * @return {String} Name of the primary age class.
+    * @return {String} Name of the primary class.
     */
-    AgeClassSet.prototype.getPrimaryClassName = function () {
-        return this.ageClasses[0].name;
+    CourseClassSet.prototype.getPrimaryClassName = function () {
+        return this.classes[0].name;
     };
     
     /**
-    * Returns the number of age classes that this age-class set is made up of.
-    * @return {Number} The number of age classes that this age-class set is
+    * Returns the number of classes that this course-class set is made up of.
+    * @return {Number} The number of classes that this course-class set is
     *     made up of.
     */
-    AgeClassSet.prototype.getNumClasses = function () {
-        return this.ageClasses.length;
+    CourseClassSet.prototype.getNumClasses = function () {
+        return this.classes.length;
     };
     
     /**
-    * Returns whether any of the age-classes within this set have data that
+    * Returns whether any of the classes within this set have data that
     * SplitsBrowser can identify as dubious.
-    * @return {boolean} True if any of the age-classes within this set contain
+    * @return {boolean} True if any of the classes within this set contain
     *     dubious data, false if none of them do.
     */
-    AgeClassSet.prototype.hasDubiousData = function () {
-        return this.ageClasses.some(function (ageClass) { return ageClass.hasDubiousData; });
+    CourseClassSet.prototype.hasDubiousData = function () {
+        return this.classes.some(function (courseClass) { return courseClass.hasDubiousData; });
     };
 
     /**
@@ -1425,11 +1418,11 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     }
     
     /**
-    * Returns an array of the cumulative times of the winner of the set of age
+    * Returns an array of the cumulative times of the winner of the set of
     * classes.
     * @return {Array} Array of the winner's cumulative times.
     */
-    AgeClassSet.prototype.getWinnerCumTimes = function () {
+    CourseClassSet.prototype.getWinnerCumTimes = function () {
         if (this.allCompetitors.length === 0) {
             return null;
         }
@@ -1446,7 +1439,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @returns {?Array} Cumulative splits of the imaginary competitor with
     *           fastest time, if any.
     */
-    AgeClassSet.prototype.getFastestCumTimes = function () {
+    CourseClassSet.prototype.getFastestCumTimes = function () {
         return this.getFastestCumTimesPlusPercentage(0);
     };
     
@@ -1459,7 +1452,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @returns {?Array} Cumulative splits of the imaginary competitor with
     *           fastest time, if any, after adding a percentage.
     */
-    AgeClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
+    CourseClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
     
         var ratio = 1 + percent / 100;
         
@@ -1558,14 +1551,14 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @param {Number} competitorIndex - The index of the competitor.
     * @return {Array} Array of cumulative times.
     */
-    AgeClassSet.prototype.getCumulativeTimesForCompetitor = function (competitorIndex) {
+    CourseClassSet.prototype.getCumulativeTimesForCompetitor = function (competitorIndex) {
         return fillBlankRangesInCumulativeTimes(this.allCompetitors[competitorIndex].getAllCumulativeTimes());
     };
 
     /**
     * Compute the ranks of each competitor within their class.
     */
-    AgeClassSet.prototype.computeRanks = function () {
+    CourseClassSet.prototype.computeRanks = function () {
         var splitRanksByCompetitor = [];
         var cumRanksByCompetitor = [];
         
@@ -1620,7 +1613,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @param {Number} controlIdx - Index of the control.
     * @return {Array} Array of the fastest splits to the given control.
     */
-    AgeClassSet.prototype.getFastestSplitsTo = function (numSplits, controlIdx) {
+    CourseClassSet.prototype.getFastestSplitsTo = function (numSplits, controlIdx) {
         if (typeof numSplits !== "number" || numSplits <= 0) {
             throwInvalidData("The number of splits must be a positive integer");
         } else if (typeof controlIdx !== "number" || controlIdx <= 0 || controlIdx > this.numControls + 1) {
@@ -1654,7 +1647,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @param {Object} chartType - The type of chart to draw.
     * @returns {Object} Array of data.
     */
-    AgeClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
+    CourseClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
         if (typeof referenceCumTimes === "undefined") {
             throw new TypeError("referenceCumTimes undefined or missing");
         } else if (typeof currentIndexes === "undefined") {
@@ -1714,7 +1707,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         };
     };
     
-    SplitsBrowser.Model.AgeClassSet = AgeClassSet;
+    SplitsBrowser.Model.CourseClassSet = CourseClassSet;
 })();
 
 (function () {
@@ -1729,7 +1722,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * Course length and climb are both optional and can both be null.
     * @constructor
     * @param {String} name - The name of the course.
-    * @param {Array} classes - Array of AgeClass objects comprising the course.
+    * @param {Array} classes - Array of CourseClass objects comprising the course.
     * @param {?Number} length - Length of the course, in kilometres.
     * @param {?Number} climb - The course climb, in metres.
     * @param {?Array} controls - Array of codes of the controls that make
@@ -1754,12 +1747,12 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     
     /**
     * Returns an array of the 'other' classes on this course.
-    * @param {SplitsBrowser.Model.AgeClass} ageClass - An age class that should
-    *     be on this course,
-    * @return {Array} Array of other age classes.
+    * @param {SplitsBrowser.Model.CourseClass} courseClass - A course-class
+    *    that should be on this course.
+    * @return {Array} Array of other course-classes.
     */
-    Course.prototype.getOtherClasses = function (ageClass) {
-        var otherClasses = this.classes.filter(function (cls) { return cls !== ageClass; });
+    Course.prototype.getOtherClasses = function (courseClass) {
+        var otherClasses = this.classes.filter(function (cls) { return cls !== courseClass; });
         if (otherClasses.length === this.classes.length) {
             // Given class not found.
             throwInvalidData("Course.getOtherClasses: given class is not in this course");
@@ -1769,8 +1762,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     };
     
     /**
-    * Returns the number of age classes that use this course.
-    * @return {Number} Number of age classes that use this course.
+    * Returns the number of course-classes that use this course.
+    * @return {Number} Number of course-classes that use this course.
     */
     Course.prototype.getNumClasses = function () {
         return this.classes.length;
@@ -1884,7 +1877,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     *     or SplitsBrowser.Model.Course.START for the start.
     * @param {String} endCode - Code for the control at the end of the leg, or
     *     SplitsBrowser.Model.Course.FINISH for the finish.
-    * @return {Array} Array of fastest splits for each age class using this
+    * @return {Array} Array of fastest splits for each course-class using this
     *      course.
     */
     Course.prototype.getFastestSplitsForLeg = function (startCode, endCode) {
@@ -1900,10 +1893,10 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         
         var controlNum = legNumber;
         var fastestSplits = [];
-        this.classes.forEach(function (ageClass) {
-            var classFastest = ageClass.getFastestSplitTo(controlNum);
+        this.classes.forEach(function (courseClass) {
+            var classFastest = courseClass.getFastestSplitTo(controlNum);
             if (classFastest !== null) {
-                fastestSplits.push({name: classFastest.name, className: ageClass.name, split: classFastest.split});
+                fastestSplits.push({name: classFastest.name, className: courseClass.name, split: classFastest.split});
             }
         });
         
@@ -1960,9 +1953,9 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     */
     Course.prototype.getCompetitorsAtControlNumInTimeRange = function (controlNum, intervalStart, intervalEnd) {
         var matchingCompetitors = [];
-        this.classes.forEach(function (ageClass) {
-            ageClass.getCompetitorsAtControlInTimeRange(controlNum, intervalStart, intervalEnd).forEach(function (comp) {
-                matchingCompetitors.push({name: comp.name, time: comp.time, className: ageClass.name});
+        this.classes.forEach(function (courseClass) {
+            courseClass.getCompetitorsAtControlInTimeRange(controlNum, intervalStart, intervalEnd).forEach(function (comp) {
+                matchingCompetitors.push({name: comp.name, time: comp.time, className: courseClass.name});
             });
         });
         
@@ -2029,7 +2022,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
 
     /**
     * Contains all of the data for an event.
-    * @param {Array} classes - Array of AgeClass objects representing all of
+    * @param {Array} classes - Array of CourseClass objects representing all of
     *     the classes of competitors.
     * @param {Array} courses - Array of Course objects representing all of the
     *     courses of the event.
@@ -2046,8 +2039,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * attempting to plot it.
     */
     Event.prototype.determineTimeLosses = function () {
-        this.classes.forEach(function (ageClass) {
-            ageClass.determineTimeLosses();
+        this.classes.forEach(function (courseClass) {
+            courseClass.determineTimeLosses();
         });
     };
     
@@ -2061,8 +2054,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     *     otherwise.
     */
     Event.prototype.needsRepair = function () {
-        return this.classes.some(function (ageClass) {
-            return ageClass.competitors.some(function (competitor) {
+        return this.classes.some(function (courseClass) {
+            return courseClass.competitors.some(function (competitor) {
                 return (competitor.getAllCumulativeTimes() === null);
             });
         });
@@ -2291,15 +2284,16 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
 
     /**
     * Given that a single runner is selected, select also all of the runners
-    * that 'cross' this runner.
-    * @param {Array} competitors - All competitors in the same class.
+    * that 'cross' this runner and are also marked as visible.
+    * @param {Array} competitorDetails - Array of competitor details to
+    *     check within.
     */    
-    CompetitorSelection.prototype.selectCrossingRunners = function (competitors) {
+    CompetitorSelection.prototype.selectCrossingRunners = function (competitorDetails) {
         if (this.isSingleRunnerSelected()) {
-            var refCompetitor = competitors[this.currentIndexes[0]];
+            var refCompetitor = competitorDetails[this.currentIndexes[0]].competitor;
             
-            competitors.forEach(function (comp, idx) {
-                if (comp.crosses(refCompetitor)) {
+            competitorDetails.forEach(function (compDetails, idx) {
+                if (compDetails.visible && compDetails.competitor.crosses(refCompetitor)) {
                     this.currentIndexes.push(idx);
                 }
             }, this);
@@ -2686,17 +2680,18 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     };
     
     /**
-    * Attempt to repair all of the data within an age class.
-    * @param {AgeClass} ageClass - The age class whose data we wish to repair.
+    * Attempt to repair all of the data within a course-class.
+    * @param {CourseClass} courseClass - The class whose data we wish to
+    *     repair.
     */
-    Repairer.prototype.repairAgeClass = function (ageClass) {
+    Repairer.prototype.repairCourseClass = function (courseClass) {
         this.madeAnyChanges = false;
-        ageClass.competitors.forEach(function (competitor) {
+        courseClass.competitors.forEach(function (competitor) {
             this.repairCompetitor(competitor);
         }, this);
         
         if (this.madeAnyChanges) {
-            ageClass.recordHasDubiousData();
+            courseClass.recordHasDubiousData();
         }
     };
     
@@ -2705,8 +2700,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @param {Event} eventData - The event data to repair.
     */
     Repairer.prototype.repairEventData = function (eventData) {
-        eventData.classes.forEach(function (ageClass) {
-            this.repairAgeClass(ageClass);
+        eventData.classes.forEach(function (courseClass) {
+            this.repairCourseClass(courseClass);
         }, this);
     };
     
@@ -2728,8 +2723,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @param {Event} eventData - The event data to repair.
     */
     function transferCompetitorData(eventData) {
-        eventData.classes.forEach(function (ageClass) {
-            ageClass.competitors.forEach(function (competitor) {
+        eventData.classes.forEach(function (courseClass) {
+            courseClass.competitors.forEach(function (competitor) {
                 competitor.setRepairedCumulativeTimes(competitor.getAllOriginalCumulativeTimes());
             });
         });
@@ -2751,7 +2746,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     var parseTime = SplitsBrowser.parseTime;
     var Competitor = SplitsBrowser.Model.Competitor;
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
 
@@ -2786,13 +2781,13 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
 
     /**
     * Parse CSV data for a class.
-    * @param {string} ageClass - The string containing data for that class.
-    * @return {SplitsBrowser.Model.AgeClass} Parsed class data.
+    * @param {string} courseClass - The string containing data for that class.
+    * @return {SplitsBrowser.Model.CourseClass} Parsed class data.
     */
-    function parseAgeClass (ageClass) {
-        var lines = ageClass.split(/\r?\n/).filter(isTrue);
+    function parseCourseClass (courseClass) {
+        var lines = courseClass.split(/\r?\n/).filter(isTrue);
         if (lines.length === 0) {
-            throwInvalidData("parseAgeClass got an empty list of lines");
+            throwInvalidData("parseCourseClass got an empty list of lines");
         }
 
         var firstLineParts = lines.shift().split(",");
@@ -2807,7 +2802,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             } else {
                 var competitors = lines.map(function (line, index) { return parseCompetitors(index, line, controlCount); });
                 competitors.sort(compareCompetitors);
-                return new AgeClass(className, controlCount, competitors);
+                return new CourseClass(className, controlCount, competitors);
             }
         } else {
             throwWrongFileFormat("Expected first line to have two parts (class name and number of controls), got " + firstLineParts.length + " part(s) instead");
@@ -2820,6 +2815,10 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */
     function parseEventData (eventData) {
+    
+        if (/<html/i.test(eventData)) {
+            throwWrongFileFormat("Cannot parse this file as CSV as it appears to be HTML");
+        }
 
         eventData = normaliseLineEndings(eventData);
         
@@ -2828,9 +2827,9 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
 
         var classSections = eventData.split(/\n\n/).map($.trim).filter(isTrue);
        
-        var classes = classSections.map(parseAgeClass);
+        var classes = classSections.map(parseCourseClass);
         
-        classes = classes.filter(function (ageClass) { return !ageClass.isEmpty(); });
+        classes = classes.filter(function (courseClass) { return !courseClass.isEmpty(); });
         
         if (classes.length === 0) {
             throwInvalidData("No competitor data was found");
@@ -2856,12 +2855,13 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
     var parseCourseClimb = SplitsBrowser.parseCourseClimb;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
@@ -2890,24 +2890,29 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         COLUMN_INDEXES[columnOffset].time = columnOffset - 35;
         COLUMN_INDEXES[columnOffset].classifier = columnOffset - 34;
         COLUMN_INDEXES[columnOffset].club =  columnOffset - 31;
-        COLUMN_INDEXES[columnOffset].ageClass = columnOffset - 28;
+        COLUMN_INDEXES[columnOffset].className = columnOffset - 28;
     });
     
     COLUMN_INDEXES[44].combinedName = 3;
+    COLUMN_INDEXES[44].yearOfBirth = 4;
     
     COLUMN_INDEXES[46].forename = 4;
     COLUMN_INDEXES[46].surname = 3;
+    COLUMN_INDEXES[46].yearOfBirth = 5;
+    COLUMN_INDEXES[46].gender = 6;
     
     COLUMN_INDEXES[60].forename = 6;
     COLUMN_INDEXES[60].surname = 5;
+    COLUMN_INDEXES[60].yearOfBirth = 7;
+    COLUMN_INDEXES[60].gender = 8;
     COLUMN_INDEXES[60].combinedName = 3;
     COLUMN_INDEXES[60].nonCompetitive = 10;
     COLUMN_INDEXES[60].startTime = 11;
     COLUMN_INDEXES[60].time = 13;
     COLUMN_INDEXES[60].classifier = 14;
     COLUMN_INDEXES[60].club = 20;
-    COLUMN_INDEXES[60].ageClass = 26;
-    COLUMN_INDEXES[60].ageClassFallback = COLUMN_INDEXES[60].course;
+    COLUMN_INDEXES[60].className = 26;
+    COLUMN_INDEXES[60].classNameFallback = COLUMN_INDEXES[60].course;
     COLUMN_INDEXES[60].clubFallback = 18;
     
     // Minimum control offset.
@@ -2937,8 +2942,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.data = normaliseLineEndings(data);
         
         // Map that associates classes to all of the competitors running on
-        // that age class.
-        this.ageClasses = d3.map();
+        // that class.
+        this.classes = d3.map();
         
         // Map that associates course names to length and climb values.
         this.courseDetails = d3.map();
@@ -3027,15 +3032,15 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     };
     
     /**
-    * Returns the age-class in the given row.
+    * Returns the name of the class in the given row.
     * @param {Array} row - Array of row data.
     * @return {String} Class name.
     */
-    Reader.prototype.getAgeClassName = function (row) {
-        var className = row[this.columnIndexes.ageClass];
-        if (className === "" && this.columnIndexes.hasOwnProperty("ageClassFallback")) {
-            // 'Nameless' variation: no age class.
-            className = row[this.columnIndexes.ageClassFallback];
+    Reader.prototype.getClassName = function (row) {
+        var className = row[this.columnIndexes.className];
+        if (className === "" && this.columnIndexes.hasOwnProperty("classNameFallback")) {
+            // 'Nameless' variation: no class names.
+            className = row[this.columnIndexes.classNameFallback];
         }
         return className;
     };
@@ -3062,11 +3067,11 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @return {Number} Number of controls read.
     */
     Reader.prototype.getNumControls = function (row, lineNumber) {
-        var className = this.getAgeClassName(row);
+        var className = this.getClassName(row);
         if ($.trim(className) === "") {
             throwInvalidData("Line " + lineNumber + " does not contain a class for the competitor");
-        } else if (this.ageClasses.has(className)) {
-            return this.ageClasses.get(className).numControls;
+        } else if (this.classes.has(className)) {
+            return this.classes.get(className).numControls;
         } else {
             return parseInt(row[this.columnIndexes.controlCount], 10);
         }    
@@ -3107,15 +3112,15 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     };
     
     /**
-    * Checks to see whether the given row contains a new age-class, and if so,
+    * Checks to see whether the given row contains a new class, and if so,
     * creates it.
     * @param {Array} row - Array of row data items.
     * @param {Number} numControls - The number of controls to read.
     */
-    Reader.prototype.createAgeClassIfNecessary = function (row, numControls) {
-        var className = this.getAgeClassName(row);
-        if (!this.ageClasses.has(className)) {
-            this.ageClasses.set(className, { numControls: numControls, competitors: [] });
+    Reader.prototype.createClassIfNecessary = function (row, numControls) {
+        var className = this.getClassName(row);
+        if (!this.classes.has(className)) {
+            this.classes.set(className, { numControls: numControls, competitors: [] });
         }
     };
     
@@ -3143,7 +3148,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @param {Array} row - Array of row data items.
     */
     Reader.prototype.createClassCoursePairIfNecessary = function (row) {
-        var className = this.getAgeClassName(row);
+        var className = this.getClassName(row);
         var courseName = row[this.columnIndexes.course];
         
         if (!this.classCoursePairs.some(function (pair) { return pair[0] === className && pair[1] === courseName; })) {
@@ -3159,7 +3164,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     */
     Reader.prototype.addCompetitor = function (row, cumTimes) {
     
-        var className = this.getAgeClassName(row);
+        var className = this.getClassName(row);
         var placing = row[this.columnIndexes.placing];
         var club = row[this.columnIndexes.club];
         if (club === "" && this.columnIndexes.hasOwnProperty("clubFallback")) {
@@ -3169,7 +3174,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         
         var startTime = this.getStartTime(row);
 
-        var isPlacingNonNumeric = (placing !== "" && isNaN(parseInt(placing, 10)));
+        var isPlacingNonNumeric = (placing !== "" && isNaNStrict(parseInt(placing, 10)));
         
         var name = "";
         if (this.columnIndexes.hasOwnProperty("forename") && this.columnIndexes.hasOwnProperty("surname")) {
@@ -3193,7 +3198,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             }
         }
         
-        var order = this.ageClasses.get(className).competitors.length + 1;
+        var order = this.classes.get(className).competitors.length + 1;
         var competitor = fromOriginalCumTimes(order, name, club, startTime, cumTimes);
         if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && competitor.completed()) {
             // Competitor either marked as non-competitive, or has completed
@@ -3216,8 +3221,23 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         } else if (!competitor.hasAnyTimes()) {
             competitor.setNonStarter();
         }
+        
+        var yearOfBirthStr = row[this.columnIndexes.yearOfBirth];
+        if (yearOfBirthStr !== "") {
+            var yearOfBirth = parseInt(yearOfBirthStr, 10);
+            if (!isNaNStrict(yearOfBirth)) {
+                competitor.setYearOfBirth(yearOfBirth);
+            }
+        }
+        
+        if (this.columnIndexes.hasOwnProperty("gender")) {
+            var gender = row[this.columnIndexes.gender];
+            if (gender === "M" || gender === "F") {
+                competitor.setGender(gender);
+            }
+        }
 
-        this.ageClasses.get(className).competitors.push(competitor);
+        this.classes.get(className).competitors.push(competitor);
     };
     
     /**
@@ -3248,7 +3268,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
         this.anyCompetitors = true;
         
-        this.createAgeClassIfNecessary(row, numControls);
+        this.createClassIfNecessary(row, numControls);
         this.createCourseIfNecessary(row, numControls);
         this.createClassCoursePairIfNecessary(row);
         
@@ -3287,15 +3307,15 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     };
     
     /**
-    * Creates and return a list of AgeClass objects from all of the data read.
-    * @return {Array} Array of AgeClass objects.
+    * Creates and return a list of CourseClass objects from all of the data read.
+    * @return {Array} Array of CourseClass objects.
     */
-    Reader.prototype.createAgeClasses = function () {
-        var classNames = this.ageClasses.keys();
+    Reader.prototype.createClasses = function () {
+        var classNames = this.classes.keys();
         classNames.sort();
         return classNames.map(function (className) {
-            var ageClass = this.ageClasses.get(className);
-            return new AgeClass(className, ageClass.numControls, ageClass.competitors);
+            var courseClass = this.classes.get(className);
+            return new CourseClass(className, courseClass.numControls, courseClass.competitors);
         }, this);
     };
     
@@ -3319,7 +3339,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @param {d3.set} doneCourseNames - Set of all course names that have been
     *     'done', i.e. included in a Course object that has been returned from
     *     a call to this method.
-    * @param {d3.map} classesMap - Map that maps age-class names to AgeClass
+    * @param {d3.map} classesMap - Map that maps class names to CourseClass
     *     objects.
     * @return {SplitsBrowser.Model.Course} - The created Course object.
     */
@@ -3366,12 +3386,12 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             doneCourseNames.add(courseName);
         });
         
-        var courseClasses = relatedClassNames.map(function (className) { return classesMap.get(className); });
+        var classesForThisCourse = relatedClassNames.map(function (className) { return classesMap.get(className); });
         var details = this.courseDetails.get(initCourseName);
-        var course = new Course(initCourseName, courseClasses, details.length, details.climb, details.controls);
+        var course = new Course(initCourseName, classesForThisCourse, details.length, details.climb, details.controls);
         
-        courseClasses.forEach(function (ageClass) {
-            ageClass.setCourse(course);
+        classesForThisCourse.forEach(function (courseClass) {
+            courseClass.setCourse(course);
         });
         
         return course;
@@ -3380,7 +3400,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     /**
     * Sort through the data read in and create Course objects representing each
     * course in the event.
-    * @param {Array} classes - Array of AgeClass objects read.
+    * @param {Array} classes - Array of CourseClass objects read.
     * @return {Array} Array of course objects.
     */
     Reader.prototype.determineCourses = function (classes) {
@@ -3395,8 +3415,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         var doneCourseNames = d3.set();
         
         var classesMap = d3.map();
-        classes.forEach(function (ageClass) {
-            classesMap.set(ageClass.name, ageClass);
+        classes.forEach(function (courseClass) {
+            classesMap.set(courseClass.name, courseClass);
         });
         
         // List of all Course objects created so far.
@@ -3434,7 +3454,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             throwInvalidData("No competitors' data were found");
         }
         
-        var classes = this.createAgeClasses();
+        var classes = this.createClasses();
         var courses = this.determineCourses(classes);
         return new Event(classes, courses);
     };
@@ -3462,7 +3482,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
 
@@ -3766,15 +3786,16 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * returns false, the parser will not use this recognizer.  Other methods on
     * this object can therefore assume that this method has returned true.
     *
-    * As this recognizer is for recognizing preformatted text, it simply checks
-    * for the presence of an HTML &lt;pre&gt; tag.
+    * As this recognizer is for recognizing preformatted text which also uses a
+    * lot of &lt;font&gt; elements, it simply checks for the presence of
+    * HTML &lt;pre&gt; and &lt;font&gt; elements.
     *
     * @param {String} text - The entire input text read in.
     * @return {boolean} True if the text contains any pre-formatted HTML, false
     *     otherwise
     */ 
     OldHtmlFormatRecognizer.prototype.isTextOfThisFormat = function (text) {
-        return (text.indexOf("<pre>") >= 0);
+        return (text.indexOf("<pre>") >= 0 && text.indexOf("<font") >= 0);
     };
     
     /**
@@ -4559,12 +4580,12 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     
     /**
     * Returns whether the classes are unique within courses.  If so, they can
-    * be used to subdivide courses.  If not, AgeClasses and Courses must be
+    * be used to subdivide courses.  If not, CourseClasses and Courses must be
     * the same.
     * @return {boolean} True if no two competitors in the same class are on
     *     different classes, false otherwise.
     */ 
-    SIHtmlFormatParser.prototype.areAgeClassesUniqueWithinCourses = function () {
+    SIHtmlFormatParser.prototype.areClassesUniqueWithinCourses = function () {
         var classesToCoursesMap = d3.map();
         for (var courseIndex = 0; courseIndex < this.courses.length; courseIndex += 1) {
             var course = this.courses[courseIndex];
@@ -4590,12 +4611,12 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     */
     SIHtmlFormatParser.prototype.createOverallEventObject = function () {
         // There is a complication here regarding classes.  Sometimes, classes
-        // are repeated within multiple courses.  In this case, ignore the age
-        // classes given and create an AgeClass for each set.
-        var classesUniqueWithinCourses = this.areAgeClassesUniqueWithinCourses();
+        // are repeated within multiple courses.  In this case, ignore the
+        // classes given and create a CourseClass for each set.
+        var classesUniqueWithinCourses = this.areClassesUniqueWithinCourses();
         
         var newCourses = [];
-        var ageClasses = [];
+        var classes = [];
         
         var competitorsHaveClasses = this.courses.every(function (course) {
             return course.competitors.every(function (competitor) { return isNotNull(competitor.className); });
@@ -4613,7 +4634,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
                 }
             });
             
-            var courseClasses = [];
+            var classesForThisCourse = [];
             
             classToCompetitorsMap.keys().forEach(function (className) {
                 var numControls = course.controls.length - 1;
@@ -4622,19 +4643,19 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
                     return competitor.toCompetitor(index + 1);
                 });
                 
-                var ageClass = new AgeClass(className, numControls, newCompetitors);
-                courseClasses.push(ageClass);
-                ageClasses.push(ageClass);
+                var courseClass = new CourseClass(className, numControls, newCompetitors);
+                classesForThisCourse.push(courseClass);
+                classes.push(courseClass);
             }, this);
             
-            var newCourse = new Course(course.name, courseClasses, course.distance, course.climb, course.controls.slice(0, course.controls.length - 1));
+            var newCourse = new Course(course.name, classesForThisCourse, course.distance, course.climb, course.controls.slice(0, course.controls.length - 1));
             newCourses.push(newCourse);
-            courseClasses.forEach(function (ageClass) {
-                ageClass.setCourse(newCourse);
+            classesForThisCourse.forEach(function (courseClass) {
+                courseClass.setCourse(newCourse);
             });
         }, this);
         
-        return new Event(ageClasses, newCourses);
+        return new Event(classes, newCourses);
     };
     
     /**
@@ -4719,7 +4740,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     var parseCourseLength = SplitsBrowser.parseCourseLength;
     var parseCourseClimb = SplitsBrowser.parseCourseClimb;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
@@ -4929,19 +4950,19 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             }
         }
         
-        var ageClasses = [];
+        var courseClasses = [];
         var courses = [];
         classes.keys().forEach(function (className) {
             var cls = classes.get(className);
-            var ageClass = new AgeClass(className, cls.controls.length, cls.competitors);
+            var courseClass = new CourseClass(className, cls.controls.length, cls.competitors);
             
-            var course = new Course(className, [ageClass], cls.length, cls.climb, cls.controls);
-            ageClass.setCourse(course);
-            ageClasses.push(ageClass);
+            var course = new Course(className, [courseClass], cls.length, cls.climb, cls.controls);
+            courseClass.setCourse(course);
+            courseClasses.push(courseClass);
             courses.push(course);
         });
     
-        return new Event(ageClasses, courses);
+        return new Event(courseClasses, courses);
     }
     
     SplitsBrowser.Input.AlternativeCSV = {
@@ -4960,7 +4981,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var AgeClass = SplitsBrowser.Model.AgeClass;
+    var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     
@@ -5024,6 +5045,11 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             return forename + " " + surname;
         }
     }
+    
+    // Regexp that matches the year in an ISO-8601 date.
+    // Both XML formats use ISO-8601 (YYYY-MM-DD) dates, so parsing is
+    // fortunately straightforward.
+    var yearRegexp = /^\d{4}/;
     
     // Object that contains various functions for parsing bits of data from
     // IOF v2.0.3 XML event data.
@@ -5145,7 +5171,17 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     Version2Reader.readClubName = function (element) {
         return $("> Club > ShortName", element).text();
     };
-    
+        
+    /**
+    * Returns the competitor's date of birth, as a string.
+    * @param {jQuery.selection} element - jQuery selection containing a
+    *     PersonResult element.
+    * @return {String} The competitors date of birth, as a string.
+    */
+    Version2Reader.readDateOfBirth = function (element) {
+        return $("> Person > BirthDate > Date", element).text();
+    };
+
     /**
     * Reads a competitor's start time from the given Result element.
     * @param {jQuery.selection} resultElement - jQuery selection containing a
@@ -5327,6 +5363,18 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     };
     
     /**
+    * Returns the competitor's date of birth, as a string.
+    * @param {jQuery.selection} element - jQuery selection containing a
+    *     PersonResult element.
+    * @return {String} The competitor's date of birth, as a string.
+    */
+    Version3Reader.readDateOfBirth = function (element) {
+        var birthDate = $("> Person > BirthDate", element).text();
+        var regexResult = yearRegexp.exec(birthDate);
+        return (regexResult === null) ? null : parseInt(regexResult[0], 10);
+    };
+    
+    /**
     * Reads a competitor's start time from the given Result element.
     * @param {jQuery.selection} element - jQuery selection containing a
     *     Result element.
@@ -5459,6 +5507,12 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         
         var club = reader.readClubName(jqElement);
         
+        var dateOfBirth =  reader.readDateOfBirth(jqElement);
+        var regexResult = yearRegexp.exec(dateOfBirth);
+        var yearOfBirth = (regexResult === null) ? null : parseInt(regexResult[0], 10);
+        
+        var gender = $("> Person", jqElement).attr("sex");
+        
         var resultElement = $("Result", jqElement);
         if (resultElement.length === 0) {
             throwInvalidData("No result found for competitor '" + name + "'");
@@ -5478,6 +5532,14 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         cumTimes.push(totalTime);
         
         var competitor = fromOriginalCumTimes(number, name, club, startTime, cumTimes);
+        
+        if (yearOfBirth !== null) {
+            competitor.setYearOfBirth(yearOfBirth);
+        }
+        
+        if (gender === "M" || gender === "F") {
+            competitor.setGender(gender);
+        }
         
         var status = reader.getStatus(resultElement);
         if (status === reader.StatusNonCompetitive) {
@@ -5590,18 +5652,18 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         
         classResultElements.forEach(function (classResultElement) {
             var parsedClass = parseClassData(classResultElement, reader);
-            var ageClass = new AgeClass(parsedClass.name, parsedClass.controls.length, parsedClass.competitors);
-            classes.push(ageClass);
+            var courseClass = new CourseClass(parsedClass.name, parsedClass.controls.length, parsedClass.competitors);
+            classes.push(courseClass);
             
-            // Add to each temporary course object a list of all age-classes.
+            // Add to each temporary course object a list of all classes.
             var tempCourse = parsedClass.course;
             if (tempCourse.id !== null && coursesMap.has(tempCourse.id)) {
                 // We've come across this course before, so just add a class to
                 // it.
-                coursesMap.get(tempCourse.id).classes.push(ageClass);
+                coursesMap.get(tempCourse.id).classes.push(courseClass);
             } else {
                 // New course.  Add some further details from the class.
-                tempCourse.classes = [ageClass];
+                tempCourse.classes = [courseClass];
                 tempCourse.controls = parsedClass.controls;
                 tempCourses.push(tempCourse);
                 if (tempCourse.id !== null) {
@@ -5613,7 +5675,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         // Now build up the array of courses.
         var courses = tempCourses.map(function (tempCourse) {
             var course = new Course(tempCourse.name, tempCourse.classes, tempCourse.length, tempCourse.climb, tempCourse.controls);
-            tempCourse.classes.forEach(function (ageClass) { ageClass.setCourse(course); });
+            tempCourse.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
             return course;
         });
         
@@ -5638,8 +5700,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     /**
     * Attempts to parse the given event data, which may be of any of the
     * supported formats, or may be invalid.  This function returns the results
-    * as an array of SplitsBrowser.Model.AgeClass objects, or null in the event
-    * of failure.
+    * as an Event object if successful, or null in the event of failure.
     * @param {String} data - The data read.
     * @return {Event} Event data read in, or null for failure.
     */ 
@@ -5693,7 +5754,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.competitorSelection = null;
         this.lastFilterString = "";
         this.allCompetitors = [];
-        this.normedNames = [];
+        this.allCompetitorDetails = [];
         this.dragging = false;
         this.dragStartCompetitorIndex = null;
         this.currentDragCompetitorIndex = null;
@@ -5712,12 +5773,15 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.allButton = this.buttonsPanel.append("button")
                                           .attr("id", "selectAllCompetitors")
                                           .style("width", "50%")
-                                          .on("click", function () { outerThis.selectAll(); });
+                                          .on("click", function () { outerThis.selectAllFiltered(); });
                         
         this.noneButton = this.buttonsPanel.append("button")
                                            .attr("id", "selectNoCompetitors")
                                            .style("width", "50%")
-                                           .on("click", function () { outerThis.selectNone(); });
+                                           .on("click", function () { outerThis.selectNoneFiltered(); });
+                                           
+        // Wire up double-click event with jQuery for easier testing.                                           
+        $(this.noneButton.node()).dblclick(function () { outerThis.selectNone(); });
                         
         this.buttonsPanel.append("br");
                         
@@ -5890,7 +5954,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
                 
                 var selectedCompetitors = [];
                 for (var index = leastIndex; index <= greatestIndex; index += 1) {
-                    if (this.allCompetitorDivs[index].style.display !== "none") {
+                    if (this.allCompetitorDetails[index].visible) {
                         selectedCompetitors.push(this.allCompetitorDivs[index]);
                     }
                 }
@@ -5959,16 +6023,34 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     CompetitorList.prototype.setHeight = function (height) {
         $(this.listDiv.node()).height(height - $(this.buttonsPanel.node()).height());
     };
-
+    
     /**
-    * Select all of the competitors.
+    * Returns all visible indexes.  This is the indexes of all competitors that
+    * have not been excluded by the filters.
+    * @returns {Array} Array of indexes of visible competitors.
     */
-    CompetitorList.prototype.selectAll = function () {
-        this.competitorSelection.selectAll();
+    CompetitorList.prototype.getAllVisibleIndexes = function () {
+        return d3.range(this.allCompetitorDetails.length).filter(function (index) {
+            return this.allCompetitorDetails[index].visible;
+        }, this);
     };
 
     /**
-    * Select none of the competitors.
+    * Selects all of the competitors that are matched by the filter.
+    */
+    CompetitorList.prototype.selectAllFiltered = function () {
+        this.competitorSelection.bulkSelect(this.getAllVisibleIndexes());
+    };
+
+    /**
+    * Selects none of the competitors that are matched by the filter.
+    */
+    CompetitorList.prototype.selectNoneFiltered = function () {
+        this.competitorSelection.bulkDeselect(this.getAllVisibleIndexes());
+    };
+
+    /**
+    * Selects none of the competitors at all.
     */
     CompetitorList.prototype.selectNone = function () {
         this.competitorSelection.selectNone();
@@ -5987,12 +6069,14 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * Select all of the competitors that cross the unique selected competitor.
     */
     CompetitorList.prototype.selectCrossingRunners = function () {
-        this.competitorSelection.selectCrossingRunners(this.allCompetitors); 
+        this.competitorSelection.selectCrossingRunners(this.allCompetitorDetails);
         if (this.competitorSelection.isSingleRunnerSelected()) {
             // Only a single runner is still selected, so nobody crossed the
             // selected runner.
             var competitorName = this.allCompetitors[this.competitorSelection.getSingleRunnerIndex()].name;
-            this.alerter(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
+            var filterInEffect = (this.lastFilterString.length > 0);
+            var messageKey = (filterInEffect) ? "RaceGraphNoCrossingRunnersFiltered" : "RaceGraphNoCrossingRunners";
+            this.alerter(getMessageWithFormatting(messageKey, {"$$NAME$$": competitorName}));
         }
     };
     
@@ -6056,14 +6140,16 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     */
     CompetitorList.prototype.setCompetitorList = function (competitors, multipleClasses) {
         this.allCompetitors = competitors;
-        this.normedNames = competitors.map(function (comp) { return normaliseName(comp.name); });
+        this.allCompetitorDetails = this.allCompetitors.map(function (comp) {
+            return { competitor: comp, normedName: normaliseName(comp.name), visible: true };
+        });
         
         if (this.placeholderDiv !== null) {
             this.placeholderDiv.remove();
             this.placeholderDiv = null;
         }
         
-        var competitorDivs = this.listDiv.selectAll("div.competitor").data(competitors);
+        var competitorDivs = this.listDiv.selectAll("div.competitor").data(this.allCompetitors);
 
         var outerThis = this;
         competitorDivs.enter().append("div")
@@ -6084,15 +6170,15 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
 
         competitorDivs.exit().remove();
         
-        if (competitors.length === 0) {
+        if (this.allCompetitors.length === 0) {
             this.placeholderDiv = this.listDiv.append("div")
                                               .classed("competitorListPlaceholder", true)
                                               .text(getMessage("NoCompetitorsStarted"));
         }
         
-        this.allButton.property("disabled", competitors.length === 0);
-        this.noneButton.property("disabled", competitors.length === 0);
-        this.filter.property("disabled", competitors.length === 0);
+        this.allButton.property("disabled", this.allCompetitors.length === 0);
+        this.noneButton.property("disabled", this.allCompetitors.length === 0);
+        this.filter.property("disabled", this.allCompetitors.length === 0);
         
         competitorDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
                       .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })
@@ -6141,9 +6227,13 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     CompetitorList.prototype.updateFilter = function () {
         var currentFilterString = this.filter.node().value;
         var normedFilter = normaliseName(currentFilterString);
+        this.allCompetitorDetails.forEach(function (comp) {
+            comp.visible = (comp.normedName.indexOf(normedFilter) >= 0);
+        });
+        
         var outerThis = this;
         this.listDiv.selectAll("div.competitor")
-                    .style("display", function (div, index) { return (outerThis.normedNames[index].indexOf(normedFilter) >= 0) ? null : "none"; });
+                    .style("display", function (div, index) { return (outerThis.allCompetitorDetails[index].visible) ? null : "none"; });
     };
     
     /**
@@ -6199,10 +6289,10 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         }
         
         d3.select(parent).append("div")
-                         .classed("topRowSpacer", true);
+                         .classed("topRowStartSpacer", true);
         
         var div = d3.select(parent).append("div")
-                                   .attr("id", "languageSelector");
+                                   .classed("topRowStart", true);
                                    
         this.label = div.append("span");
            
@@ -6284,7 +6374,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.otherClassesEnabled = true;
         
         var div = d3.select(parent).append("div")
-                                   .style("float", "left");
+                                   .classed("topRowStart", true);
         
         this.labelSpan = div.append("span");
         
@@ -6295,13 +6385,17 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             outerThis.onSelectionChanged();
         });
         
-        this.otherClassesCombiningLabel = div.append("span")
-                                             .classed("otherClassCombining", true)
-                                             .style("display", "none");
+        this.otherClassesContainer = d3.select(parent).append("div")
+                                                      .attr("id", "otherClassesContainer")
+                                                      .classed("topRowStart", true)
+                                                      .style("display", "none");
+                                                      
+        this.otherClassesCombiningLabel = this.otherClassesContainer.append("span")
+                                                                    .classed("otherClassCombining", true);
         
-        this.otherClassesSelector = div.append("div")
-                                       .classed("otherClassSelector", true)
-                                       .style("display", "none");
+        this.otherClassesSelector = this.otherClassesContainer.append("div")
+                                                              .classed("otherClassSelector", true)
+                                                              .style("display", "inline-block");
                                    
         this.otherClassesSpan = this.otherClassesSelector.append("span");
         
@@ -6366,7 +6460,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * Sets the list of classes that this selector can choose between.
     * 
     * If there are no classes, a 'dummy' entry is added
-    * @param {Array} classes - Array of AgeClass objects containing class data.
+    * @param {Array} classes - Array of CourseClass objects containing class
+    *     data.
     */
     ClassSelector.prototype.setClasses = function(classes) {
         if ($.isArray(classes)) {
@@ -6377,7 +6472,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
                 options = [getMessage("NoClassesLoadedPlaceholder")];
             } else {
                 this.dropDown.disabled = false;
-                options = classes.map(function(ageClass) { return ageClass.name; });
+                options = classes.map(function(courseClass) { return courseClass.name; });
             }
             
             var optionsList = d3.select(this.dropDown).selectAll("option").data(options);
@@ -6490,18 +6585,16 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         otherClassesSelection.enter().append("div")
                                      .classed("otherClassItem", true);
         
-        otherClassesSelection.attr("id", function (classIdx) { return "ageClassIdx_" + classIdx; })
+        otherClassesSelection.attr("id", function (classIdx) { return "courseClassIdx_" + classIdx; })
                              .classed("selected", function (classIdx) { return selectedOtherClassIndexes.has(classIdx); })
                              .text(function (classIdx) { return outerThis.classes[classIdx].name; });
                              
         otherClassesSelection.exit().remove();
         
         if (otherClassIndexes.length > 0) {
-            this.otherClassesSelector.style("display", "inline-block");
-            this.otherClassesCombiningLabel.style("display", null);
+            this.otherClassesContainer.style("display", null);
         } else {
-            this.otherClassesSelector.style("display", "none");
-            this.otherClassesCombiningLabel.style("display", "none");
+            this.otherClassesContainer.style("display", "none");
         }
         
         var offset = $(this.otherClassesSelector.node()).offset();
@@ -6534,7 +6627,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             this.selectedOtherClassIndexes.add(classIdx);
         }
         
-        d3.select("div#ageClassIdx_" + classIdx).classed("selected", this.selectedOtherClassIndexes.has(classIdx));
+        d3.select("div#courseClassIdx_" + classIdx).classed("selected", this.selectedOtherClassIndexes.has(classIdx));
         this.updateOtherClassText();
         this.onSelectionChanged();
     };
@@ -6565,13 +6658,13 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     var ALL_COMPARISON_OPTIONS = [
         {
             nameKey: "CompareWithWinner",
-            selector: function (ageClassSet) { return ageClassSet.getWinnerCumTimes(); },
+            selector: function (courseClassSet) { return courseClassSet.getWinnerCumTimes(); },
             requiresWinner: true,
             percentage: ""
         },
         {
             nameKey: "CompareWithFastestTime",
-            selector: function (ageClassSet) { return ageClassSet.getFastestCumTimes(); },
+            selector: function (courseClassSet) { return courseClassSet.getFastestCumTimes(); },
             requiresWinner: false,
             percentage: ""
         }
@@ -6583,7 +6676,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
         ALL_COMPARISON_OPTIONS.push({
             nameKey: "CompareWithFastestTimePlusPercentage",
-            selector: function (ageClassSet) { return ageClassSet.getFastestCumTimesPlusPercentage(percent); },
+            selector: function (courseClassSet) { return courseClassSet.getFastestCumTimesPlusPercentage(percent); },
             requiresWinner: false, 
             percentage: percent
         });
@@ -6623,7 +6716,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.previousSelectedIndex = -1;
         
         var div = d3.select(parent).append("div")
-                                   .attr("id", "comparisonSelectorContainer");
+                                   .classed("topRowStart", true);
         
         this.comparisonSelectorLabel = div.append("span")
                                           .classed("comparisonSelectorLabel", true);
@@ -6645,7 +6738,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.optionsList.exit().remove();
         
         this.runnerDiv = d3.select(parent).append("div")
-                                          .attr("id", "runnerSelectorContainer")
+                                          .classed("topRowStart", true)
                                           .style("display", "none")
                                           .style("padding-left", "20px");
         
@@ -6698,19 +6791,19 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     };
     
     /**
-    * Sets the age-class set to use.
-    * @param {AgeClassSet} ageClassSet - The age-class set to set.
+    * Sets the course-class set to use.
+    * @param {CourseClassSet} courseClassSet - The course-class set to set.
     */
-    ComparisonSelector.prototype.setAgeClassSet = function (ageClassSet) {
-        this.ageClassSet = ageClassSet;
+    ComparisonSelector.prototype.setCourseClassSet = function (courseClassSet) {
+        this.courseClassSet = courseClassSet;
         this.setRunners();
     };
 
     /**
-    * Populates the drop-down list of runners from an age-class set.
+    * Populates the drop-down list of runners from a course-class set.
     */
     ComparisonSelector.prototype.setRunners = function () {
-        var competitors = this.ageClassSet.allCompetitors;
+        var competitors = this.courseClassSet.allCompetitors;
         var completingCompetitorIndexes = d3.range(competitors.length).filter(function (idx) { return competitors[idx].completed(); });
         var completingCompetitors = competitors.filter(function (comp) { return comp.completed(); });
         
@@ -6726,15 +6819,21 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
 
         if (this.previousCompetitorList === null) {
             this.currentRunnerIndex = 0;
-        } else {
+        } else if (this.hasWinner) {
             var oldSelectedRunner = this.previousCompetitorList[this.currentRunnerIndex];
-            var newIndex = this.ageClassSet.allCompetitors.indexOf(oldSelectedRunner);
+            var newIndex = this.courseClassSet.allCompetitors.indexOf(oldSelectedRunner);
             this.currentRunnerIndex = Math.max(newIndex, 0);
+        } else if (ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].requiresWinner) {
+            // We're currently viewing a comparison type that requires a
+            // winner.  However, there is no longer a winner, presumably
+            // because there was a winner but following the removal of a class
+            // there isn't any more.  Switch back to the fastest time.
+            this.setComparisonType(1, null);
         }
         
         this.runnerDropDown.selectedIndex = this.currentRunnerIndex;
        
-        this.previousCompetitorList = this.ageClassSet.allCompetitors;
+        this.previousCompetitorList = this.courseClassSet.allCompetitors;
     };
     
     /**
@@ -6758,7 +6857,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     ComparisonSelector.prototype.getComparisonFunction = function () {
         if (this.isAnyRunnerSelected()) {
             var outerThis = this;
-            return function (ageClassSet) { return ageClassSet.getCumulativeTimesForCompetitor(outerThis.currentRunnerIndex); };
+            return function (courseClassSet) { return courseClassSet.getCumulativeTimesForCompetitor(outerThis.currentRunnerIndex); };
         } else {
             return ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
         }
@@ -6772,7 +6871,11 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         var typeIndex = this.dropDown.selectedIndex;
         var runner;
         if (typeIndex === ALL_COMPARISON_OPTIONS.length - 1) {
-            runner = this.ageClassSet.allCompetitors[this.runnerDropDown.selectedIndex];
+            if (this.runnerDropDown.selectedIndex < 0) {
+                this.runnerDropDown.selectedIndex = 0;
+            }
+            
+            runner = this.courseClassSet.allCompetitors[this.runnerDropDown.selectedIndex];
         } else {
             runner = null;
         }
@@ -6789,7 +6892,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     ComparisonSelector.prototype.setComparisonType = function (typeIndex, runner) {
         if (0 <= typeIndex && typeIndex < ALL_COMPARISON_OPTIONS.length) {
             if (typeIndex === ALL_COMPARISON_OPTIONS.length - 1) {
-                var runnerIndex = this.ageClassSet.allCompetitors.indexOf(runner);
+                var runnerIndex = this.courseClassSet.allCompetitors.indexOf(runner);
                 if (runnerIndex >= 0) {
                     this.dropDown.selectedIndex = typeIndex;
                     this.runnerDropDown.selectedIndex = runnerIndex;
@@ -6852,26 +6955,28 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @param {HTMLElement} parent - The parent element.
     */
     function StatisticsSelector (parent) {
-        this.span = d3.select(parent).append("span")
+        this.div = d3.select(parent).append("div")
+                                     .classed("topRowEnd", true)
                                      .attr("id", STATISTIC_SELECTOR_ID);   
 
-        var childSpans = this.span.selectAll("span")
-                                  .data(STATISTIC_NAMES)
-                                  .enter()
-                                  .append("span");
+        var childDivs = this.div.selectAll("div")
+                                .data(STATISTIC_NAMES)
+                                .enter()
+                                .append("div")
+                                .style("display", "inline-block");
          
-        childSpans.append("input")
-                  .attr("id", function(name) { return LABEL_ID_PREFIX + name; }) 
-                  .attr("type", "checkbox")
-                  .attr("checked", function (name) { return (DEFAULT_SELECTED_STATISTICS.indexOf(name) >= 0) ? "checked" : null; });
+        childDivs.append("input")
+                 .attr("id", function(name) { return LABEL_ID_PREFIX + name; }) 
+                 .attr("type", "checkbox")
+                 .attr("checked", function (name) { return (DEFAULT_SELECTED_STATISTICS.indexOf(name) >= 0) ? "checked" : null; });
                   
-        this.statisticLabels  = childSpans.append("label")
-                                          .attr("for", function(name) { return LABEL_ID_PREFIX + name; })
-                                          .classed("statisticsSelectorLabel", true);
+        this.statisticLabels  = childDivs.append("label")
+                                         .attr("for", function(name) { return LABEL_ID_PREFIX + name; })
+                                         .classed("statisticsSelectorLabel", true);
 
         
         var outerThis = this;
-        $("input", this.span.node()).bind("change", function () { return outerThis.onCheckboxChanged(); });
+        $("input", this.div.node()).bind("change", function () { return outerThis.onCheckboxChanged(); });
                    
         this.handlers = [];
         
@@ -6892,7 +6997,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * This method is intended only for test purposes.
     */
     StatisticsSelector.prototype.clearAll = function () {
-        this.span.selectAll("input").attr("checked", null);
+        this.div.selectAll("input").attr("checked", null);
     };
 
     /**
@@ -6901,10 +7006,10 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     *      false if the controls are to be disabled.
     */
     StatisticsSelector.prototype.setEnabled = function (isEnabled) {
-        this.span.selectAll("label.statisticsSelectorLabel")
-                 .classed("disabled", !isEnabled);
-        this.span.selectAll("input")
-                 .attr("disabled", (isEnabled) ? null : "disabled");
+        this.div.selectAll("label.statisticsSelectorLabel")
+                .classed("disabled", !isEnabled);
+        this.div.selectAll("input")
+                .attr("disabled", (isEnabled) ? null : "disabled");
     };
     
     /**
@@ -6943,7 +7048,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     */
     StatisticsSelector.prototype.getVisibleStatistics = function () {
         var visibleStats = {};
-        this.span.selectAll("input")[0].forEach(function (checkbox, index) {
+        this.div.selectAll("input")[0].forEach(function (checkbox, index) {
             visibleStats[STATISTIC_NAMES[index]] = checkbox.checked;
         });
         
@@ -6955,7 +7060,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @param {Object} visibleStats - The statistics to make visible.
     */
     StatisticsSelector.prototype.setVisibleStatistics = function (visibleStats) {
-        this.span.selectAll("input")[0].forEach(function (checkbox, index) {
+        this.div.selectAll("input")[0].forEach(function (checkbox, index) {
             checkbox.checked = visibleStats[STATISTIC_NAMES[index]] || false;
         });
         
@@ -6991,7 +7096,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.lastSelectedIndex = 0;
         
         var div = d3.select(parent).append("div")
-                                   .attr("id", "chartTypeSelector");
+                                   .classed("topRowStart", true);
                                    
         this.labelSpan = div.append("span");
            
@@ -7111,9 +7216,10 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
 
         var checkboxId = "originalDataCheckbox";
         this.containerDiv = parent.append("div")
+                                  .classed("topRowStart", true)
                                   .attr("id", CONTAINER_DIV_ID);
 
-        this.containerDiv.append("div").classed("topRowSpacer", true);    
+        this.containerDiv.append("div").classed("topRowStartSpacer", true);
         
         var span = this.containerDiv.append("span");
         
@@ -7238,13 +7344,13 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     
     /**
     * Returns the fastest splits to a control.
-    * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - The age-class set
-    *     containing the splits data.
+    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet - The
+    *     course-class set containing the splits data.
     * @param {Number} controlIndex - The index of the control.
     * @return {Object} Fastest-split data.
     */
-    ChartPopupData.getFastestSplitsPopupData = function (ageClassSet, controlIndex) {
-        var data = ageClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, controlIndex);
+    ChartPopupData.getFastestSplitsPopupData = function (courseClassSet, controlIndex) {
+        var data = courseClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, controlIndex);
         data = data.map(function (comp) {
             return {time: comp.split, name: comp.name, highlight: false};
         });
@@ -7255,7 +7361,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     /**
     * Returns the fastest splits for the currently-shown leg.  The list
     * returned contains the fastest splits for the current leg for each class.
-    * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - The age-class set
+    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet - The course-class set
     *     containing the splits data.
     * @param {SplitsBrowser.Model.EventData} eventData - Data for the entire
     *     event.
@@ -7263,8 +7369,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @return {Object} Object that contains the title for the popup and the
     *     array of data to show within it.
     */
-    ChartPopupData.getFastestSplitsForLegPopupData = function (ageClassSet, eventData, controlIndex) {
-        var course = ageClassSet.getCourse();
+    ChartPopupData.getFastestSplitsForLegPopupData = function (courseClassSet, eventData, controlIndex) {
+        var course = courseClassSet.getCourse();
         var startCode = course.getControlCode(controlIndex - 1);
         var endCode = course.getControlCode(controlIndex);
         
@@ -7273,7 +7379,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         
         var title = getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": startControl, "$$END$$": endControl});
         
-        var primaryClass = ageClassSet.getPrimaryClassName();
+        var primaryClass = courseClassSet.getPrimaryClassName();
         var data = eventData.getFastestSplitsForLeg(startCode, endCode)
                             .map(function (row) { return { name: row.name, className: row.className, time: row.split, highlight: (row.className === primaryClass)}; });
         
@@ -7283,7 +7389,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     /**
     * Returns an object containing an array of the competitors visiting a
     * control at a given time.
-    * @param {SplitsBrowser.Model.AgeClassSet} ageClassSet - The age-class set
+    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet - The course-class set
     *     containing the splits data.
     * @param {SplitsBrowser.Model.EventData} eventData - Data for the entire
     *     event.
@@ -7291,13 +7397,13 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @param {Number} time - The current time, in units of seconds past midnight.
     * @return {Object} Object containing competitor data.
     */
-    ChartPopupData.getCompetitorsVisitingCurrentControlPopupData = function (ageClassSet, eventData, controlIndex, time) {
-        var controlCode = ageClassSet.getCourse().getControlCode(controlIndex);
+    ChartPopupData.getCompetitorsVisitingCurrentControlPopupData = function (courseClassSet, eventData, controlIndex, time) {
+        var controlCode = courseClassSet.getCourse().getControlCode(controlIndex);
         var intervalStart = Math.round(time) - RACE_GRAPH_COMPETITOR_WINDOW / 2;
         var intervalEnd = Math.round(time) + RACE_GRAPH_COMPETITOR_WINDOW / 2;
         var competitors = eventData.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
             
-        var primaryClass = ageClassSet.getPrimaryClassName();
+        var primaryClass = courseClassSet.getPrimaryClassName();
         var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}; });
         
         var controlName;
@@ -7648,6 +7754,31 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     }
 
     /**
+    * Returns the 'suffix' to use with the given competitor.
+    * The suffix indicates whether they are non-competitive or a mispuncher, 
+    * were disqualified or did not finish.  If none of the above apply, an
+    * empty string is returned.
+    * @return {String} Suffix to use with the given competitor.
+    */
+    function getSuffix(competitor) {
+        // Non-starters are not catered for here, as this is intended to only
+        // be used on the chart and non-starters shouldn't appear on the chart.
+        if (competitor.completed() && competitor.isNonCompetitive) {
+            return getMessage("NonCompetitiveShort");
+        } else if (competitor.isNonFinisher) {
+            return getMessage("DidNotFinishShort"); 
+        } else if (competitor.isDisqualified) {
+            return getMessage("DisqualifiedShort");
+        } else if (competitor.isOverMaxTime) {
+            return getMessage("OverMaxTimeShort");
+        } else if (competitor.completed()) {
+            return "";
+        } else {
+            return getMessage("MispunchedShort");
+        }
+    }
+
+    /**
     * A chart object in a window.
     * @constructor
     * @param {HTMLElement} parent - The parent object to create the element within.
@@ -7749,7 +7880,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @return {Array} Array of fastest-split data.
     */
     Chart.prototype.getFastestSplitsPopupData = function () {
-        return ChartPopupData.getFastestSplitsPopupData(this.ageClassSet, this.currentControlIndex);
+        return ChartPopupData.getFastestSplitsPopupData(this.courseClassSet, this.currentControlIndex);
     };
     
     /**
@@ -7759,7 +7890,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     *     array of data to show within it.
     */
     Chart.prototype.getFastestSplitsForCurrentLegPopupData = function () {
-        return ChartPopupData.getFastestSplitsForLegPopupData(this.ageClassSet, this.eventData, this.currentControlIndex);
+        return ChartPopupData.getFastestSplitsForLegPopupData(this.courseClassSet, this.eventData, this.currentControlIndex);
     };
     
     /**
@@ -7777,7 +7908,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @return {Array} Array of competitor data.
     */
     Chart.prototype.getCompetitorsVisitingCurrentControlPopupData = function () {
-        return ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(this.ageClassSet, this.eventData, this.currentControlIndex, this.currentChartTime);
+        return ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(this.courseClassSet, this.eventData, this.currentControlIndex, this.currentChartTime);
     };
     
     /**
@@ -7785,7 +7916,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @return {Array} Array of next-control data.
     */
     Chart.prototype.getNextControlData = function () {
-        return ChartPopupData.getNextControlData(this.ageClassSet.getCourse(), this.eventData, this.actualControlIndex);
+        return ChartPopupData.getNextControlData(this.courseClassSet.getCourse(), this.eventData, this.actualControlIndex);
     };
 
     /**
@@ -8018,7 +8149,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     *     behind the fastest time.
     */
     Chart.prototype.getTimesBehindFastest = function (controlIndex, indexes) {
-        var selectedCompetitors = indexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
+        var selectedCompetitors = indexes.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
         var fastestSplit = this.fastestCumTimes[controlIndex] - this.fastestCumTimes[controlIndex - 1];
         var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - fastestSplit; });
         return timesBehind;
@@ -8033,7 +8164,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     *     deemed to have lost at the given control.
     */
     Chart.prototype.getTimeLosses = function (controlIndex, indexes) {
-        var selectedCompetitors = indexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
+        var selectedCompetitors = indexes.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
         var timeLosses = selectedCompetitors.map(function (comp) { return comp.getTimeLossAt(controlIndex); });
         return timeLosses;
     };
@@ -8042,8 +8173,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * Updates the statistics text shown after the competitors.
     */
     Chart.prototype.updateCompetitorStatistics = function() {
-        var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
-        var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, comp.getSuffix()); });
+        var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
+        var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, getSuffix(comp)); });
         
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
             if (this.visibleStatistics.TotalTime) {
@@ -8128,8 +8259,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             return 0;
         } else {
             var nameWidths = this.selectedIndexes.map(function (index) {
-                var comp = this.ageClassSet.allCompetitors[index];
-                return this.getTextWidth(formatNameAndSuffix(comp.name, comp.getSuffix()));
+                var comp = this.courseClassSet.allCompetitors[index];
+                return this.getTextWidth(formatNameAndSuffix(comp.name, getSuffix(comp)));
             }, this);
             return d3.max(nameWidths) + this.determineMaxStatisticTextWidth();
         }
@@ -8160,7 +8291,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         var maxTime = 0;
         var maxRank = 0;
         
-        var selectedCompetitors = this.selectedIndexes.map(function (index) { return this.ageClassSet.allCompetitors[index]; }, this);
+        var selectedCompetitors = this.selectedIndexes.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
         
         d3.range(1, this.numControls + 2).forEach(function (controlIndex) {
             var times = selectedCompetitors.map(function (comp) { return comp[timeFuncName](controlIndex); });
@@ -8575,11 +8706,11 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             var finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
             this.currentCompetitorData = d3.range(this.numLines).map(function (i) {
                 var competitorIndex = this.selectedIndexes[i];
-                var name = this.ageClassSet.allCompetitors[competitorIndex].name;
+                var name = this.courseClassSet.allCompetitors[competitorIndex].name;
                 var textHeight = this.getTextHeight(name);
                 minLastY += textHeight;
                 return {
-                    label: formatNameAndSuffix(name, this.ageClassSet.allCompetitors[competitorIndex].getSuffix()),
+                    label: formatNameAndSuffix(name, getSuffix(this.courseClassSet.allCompetitors[competitorIndex])),
                     textHeight: textHeight,
                     y: (isNotNullNorNaN(finishColumn.ys[i])) ? this.yScale(finishColumn.ys[i]) : null,
                     colour: colours[competitorIndex % colours.length],
@@ -8716,7 +8847,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     *     must contain the following properties:
     *     * chartData {Object} - the data to plot on the chart
     *     * eventData {SplitsBrowser.Model.Event} - the overall Event object.
-    *     * ageClassSet {SplitsBrowser.Model.Event} - the age-class set.
+    *     * courseClassSet {SplitsBrowser.Model.Event} - the course-class set.
     *     * referenceCumTimes {Array} - Array of cumulative split times of the
     *       'reference'.
     *     * fastestCumTimes {Array} - Array of cumulative times of the
@@ -8736,8 +8867,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.referenceCumTimes = data.referenceCumTimes;
         this.fastestCumTimes = data.fastestCumTimes;
         this.eventData = data.eventData;
-        this.ageClassSet = data.ageClassSet;
-        this.hasControls = data.ageClassSet.getCourse().hasControls();
+        this.courseClassSet = data.courseClassSet;
+        this.hasControls = data.courseClassSet.getCourse().hasControls();
         this.isRaceGraph = chartType.isRaceGraph;
         this.minViewableControl = chartType.minViewableControl;
         this.visibleStatistics = visibleStatistics;
@@ -8784,7 +8915,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     */
     function ResultsTable(parent) {
         this.parent = parent;
-        this.ageClass = null;
+        this.courseClass = null;
         this.div = null;
         this.headerSpan = null;
         this.table = null;
@@ -8865,17 +8996,17 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     }
     
     /**
-    * Populates the contents of the table with the age-class data.
+    * Populates the contents of the table with the course-class data.
     */
     ResultsTable.prototype.populateTable = function () {
-        var headerText = this.ageClass.name + ", ";
-        if (this.ageClass.numControls === 1) {
+        var headerText = this.courseClass.name + ", ";
+        if (this.courseClass.numControls === 1) {
             headerText += getMessage("ResultsTableHeaderSingleControl");
         } else {
-            headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": this.ageClass.numControls});
+            headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": this.courseClass.numControls});
         }
 
-        var course = this.ageClass.course;
+        var course = this.courseClass.course;
         if (course.length !== null) {
             headerText += ", " + getMessageWithFormatting("ResultsTableHeaderCourseLength", {"$$DISTANCE$$": course.length.toFixed(1)});
         }
@@ -8891,9 +9022,9 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             getMessage("ResultsTableHeaderTime")
         ];
         
-        var controls = this.ageClass.course.controls;
+        var controls = this.courseClass.course.controls;
         if (controls === null) {
-            headerCellData = headerCellData.concat(d3.range(1, this.ageClass.numControls + 1));
+            headerCellData = headerCellData.concat(d3.range(1, this.courseClass.numControls + 1));
         } else {
             headerCellData = headerCellData.concat(controls.map(function (control, index) {
                 return (index + 1) + NON_BREAKING_SPACE_CHAR + "(" + control + ")";
@@ -8929,7 +9060,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             }
         }
         
-        var competitors = this.ageClass.competitors.slice(0);
+        var competitors = this.courseClass.competitors.slice(0);
         competitors.sort(compareCompetitors);
         
         var nonCompCount = 0;
@@ -8954,7 +9085,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             addCell(tableRow, competitor.name, competitor.club, false, false);
             addCell(tableRow, getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false);
             
-            d3.range(1, this.ageClass.numControls + 2).forEach(function (controlNum) {
+            d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {
                 var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
                 var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
                 addCell(tableRow, formatTime(competitor.getOriginalCumulativeTimeTo(controlNum), precision), formatTime(competitor.getOriginalSplitTimeTo(controlNum), precision), "time", isCumDubious, isSplitDubious);
@@ -8964,10 +9095,10 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     
     /**
     * Sets the class whose data is displayed.
-    * @param {SplitsBrowser.Model.AgeClass} ageClass - The class displayed.
+    * @param {SplitsBrowser.Model.CourseClass} courseClass - The class displayed.
     */
-    ResultsTable.prototype.setClass = function (ageClass) {
-        this.ageClass = ageClass;
+    ResultsTable.prototype.setClass = function (courseClass) {
+        this.courseClass = courseClass;
         this.populateTable();
         if (this.div.style("display") !== "none") {
             this.adjustTableCellWidths();
@@ -9014,7 +9145,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     "use strict";
     
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
-    var AgeClassSet = SplitsBrowser.Model.AgeClassSet;
+    var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     
     /**
     * Remove all matches of the given regular expression from the given string.
@@ -9035,7 +9166,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     *     from.
     * @param {Event} eventData - The event data read in, used to validate the 
     *     selected classes.
-    * @return {AgeClassSet|null} - Array of selected AgeClass objects, or null
+    * @return {CourseClassSet|null} - Array of selected CourseClass objects, or null
     *     if none were found.
     */
     function readSelectedClasses(queryString, eventData) {
@@ -9062,7 +9193,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
                 // first class.
                 var course = selectedClasses[0].course;
                 selectedClasses = selectedClasses.filter(function (selectedClass) { return selectedClass.course === course; });
-                return new AgeClassSet(selectedClasses);
+                return new CourseClassSet(selectedClasses);
             }
         }
     }
@@ -9129,12 +9260,12 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * Reads what to compare against.
     * @param {String} queryString - The query string to read the comparison
     *     type from.
-    * @param {AgeClassSet|null} ageClassSet - Age-class set containing selected
-    *     age-classes, or null if none are selected.
+    * @param {CourseClassSet|null} courseClassSet - Course-class set containing
+    *     selected course-classes, or null if none are selected.
     * @return {Object|null} Selected comparison type, or null if not
     *     recognised.
     */
-    function readComparison(queryString, ageClassSet) {
+    function readComparison(queryString, courseClassSet) {
         var comparisonMatch = COMPARE_WITH_REGEXP.exec(queryString);
         if (comparisonMatch === null) {
             return null;
@@ -9143,8 +9274,8 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             var defaultIndex = BUILTIN_COMPARISON_TYPES.indexOf(comparisonName);
             if (defaultIndex >= 1) {
                 return {index: defaultIndex, runner: null};
-            } else if (defaultIndex === 0 && ageClassSet !== null) {
-                var hasCompleters = ageClassSet.allCompetitors.some(function (competitor) {
+            } else if (defaultIndex === 0 && courseClassSet !== null) {
+                var hasCompleters = courseClassSet.allCompetitors.some(function (competitor) {
                     return competitor.completed();
                 });
                 
@@ -9154,13 +9285,13 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
                     // Cannot select 'Winner' as there was no winner.
                     return null;
                 }
-            } else if (ageClassSet === null) {
+            } else if (courseClassSet === null) {
                 // Not one of the recognised comparison types and we have no
                 // classes to look for competitor names within.
                 return null;
             } else {
-                for (var competitorIndex = 0; competitorIndex < ageClassSet.allCompetitors.length; competitorIndex += 1) {
-                    var competitor = ageClassSet.allCompetitors[competitorIndex];
+                for (var competitorIndex = 0; competitorIndex < courseClassSet.allCompetitors.length; competitorIndex += 1) {
+                    var competitor = courseClassSet.allCompetitors[competitorIndex];
                     if (competitor.name === comparisonName && competitor.completed()) {
                         return {index: BUILTIN_COMPARISON_TYPES.length, runner: competitor};
                     }
@@ -9200,13 +9331,13 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * Reads what to compare against.
     * @param {String} queryString - The query string to read the comparison
     *     type from.
-    * @param {AgeClassSet|null} ageClassSet - Age-class set containing selected
-    *     age-classes, or null if none are selected.
+    * @param {CourseClassSet|null} courseClassSet - Course-class set containing
+    *     selected course-classes, or null if none are selected.
     * @return {Array|null} Array of selected competitor indexes, or null if
     *     none found.
     */
-    function readSelectedCompetitors(queryString, ageClassSet) {
-        if (ageClassSet === null) {
+    function readSelectedCompetitors(queryString, courseClassSet) {
+        if (courseClassSet === null) {
             return null;
         } else {
             var selectedCompetitorsMatch = SELECTED_COMPETITORS_REGEXP.exec(queryString);
@@ -9216,11 +9347,11 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
                 var competitorNames = decodeURIComponent(selectedCompetitorsMatch[1]).split(";");
                 if (competitorNames.indexOf("*") >= 0) {
                     // All competitors selected.
-                    return d3.range(0, ageClassSet.allCompetitors.length);
+                    return d3.range(0, courseClassSet.allCompetitors.length);
                 }
                 
                 competitorNames = d3.set(competitorNames).values();
-                var allCompetitorNames = ageClassSet.allCompetitors.map(function (competitor) { return competitor.name; });
+                var allCompetitorNames = courseClassSet.allCompetitors.map(function (competitor) { return competitor.name; });
                 var selectedCompetitorIndexes = [];
                 competitorNames.forEach(function (competitorName) {
                     var index = allCompetitorNames.indexOf(competitorName);
@@ -9238,18 +9369,18 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     /**
     * Formats the given selected competitors into the given query-string.
     * @param {String} queryString - The original query-string.
-    * @param {AgeClassSet} ageClassSet - The current age-class set.
-    * @param {Array} selected - Array of indexes within the age-class set's
+    * @param {CourseClassSet} courseClassSet - The current course-class set.
+    * @param {Array} selected - Array of indexes within the course-class set's
     *     list of competitors of those that are selected.
     * @return {String} Query-string with the selected competitors formatted
     *     into it.
     */
-    function formatSelectedCompetitors(queryString, ageClassSet, selected) {
+    function formatSelectedCompetitors(queryString, courseClassSet, selected) {
         queryString = removeAll(queryString, SELECTED_COMPETITORS_REGEXP);
-        var selectedCompetitors = selected.map(function (index) { return ageClassSet.allCompetitors[index]; });
+        var selectedCompetitors = selected.map(function (index) { return courseClassSet.allCompetitors[index]; });
         if (selectedCompetitors.length === 0) {
             return queryString;
-        } else if (selectedCompetitors.length === ageClassSet.allCompetitors.length) {
+        } else if (selectedCompetitors.length === courseClassSet.allCompetitors.length) {
             // Assume all selected competitors are different, so all must be
             // selected.
             return queryString + "&selected=*";
@@ -9371,13 +9502,13 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @return {Object} The data parsed from the given query string.
     */
     function parseQueryString(queryString, eventData) {
-        var ageClassSet = readSelectedClasses(queryString, eventData);
-        var classIndexes = (ageClassSet === null) ? null : ageClassSet.ageClasses.map(function (ageClass) { return eventData.classes.indexOf(ageClass); });
+        var courseClassSet = readSelectedClasses(queryString, eventData);
+        var classIndexes = (courseClassSet === null) ? null : courseClassSet.classes.map(function (courseClass) { return eventData.classes.indexOf(courseClass); });
         return {
             classes: classIndexes,
             chartType: readChartType(queryString),
-            compareWith: readComparison(queryString, ageClassSet),
-            selected: readSelectedCompetitors(queryString, ageClassSet),
+            compareWith: readComparison(queryString, courseClassSet),
+            selected: readSelectedCompetitors(queryString, courseClassSet),
             stats: readSelectedStatistics(queryString),
             showOriginal: readShowOriginal(queryString),
             filterText: readFilterText(queryString)
@@ -9394,16 +9525,16 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     *
     * @param {String} queryString - The original query-string.
     * @param {Event} eventData - The event data.
-    * @param {AgeClassSet} ageClassSet - The current age-class set.
+    * @param {CourseClassSet} courseClassSet - The current course-class set.
     * @param {Object} data - Object containing the data to format into the
     *     query-string.
     * @return The formatted query-string.
     */
-    function formatQueryString(queryString, eventData, ageClassSet, data) {
+    function formatQueryString(queryString, eventData, courseClassSet, data) {
         queryString = formatSelectedClasses(queryString, eventData, data.classes);
         queryString = formatChartType(queryString, data.chartType);
         queryString = formatComparison(queryString, data.compareWith.index, data.compareWith.runner);
-        queryString = formatSelectedCompetitors(queryString, ageClassSet, data.selected);
+        queryString = formatSelectedCompetitors(queryString, courseClassSet, data.selected);
         queryString = formatSelectedStatistics(queryString, data.stats);
         queryString = formatShowOriginal(queryString, data.showOriginal);
         queryString = formatFilterText(queryString, data.filterText);
@@ -9433,7 +9564,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     
     var Model = SplitsBrowser.Model;
     var CompetitorSelection = Model.CompetitorSelection;
-    var AgeClassSet = Model.AgeClassSet;
+    var CourseClassSet = Model.CourseClassSet;
     var ChartTypes = Model.ChartTypes;
     
     var parseEventData = SplitsBrowser.Input.parseEventData;
@@ -9473,7 +9604,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.topBarHeight = (options && options.topBar && $(options.topBar).length > 0) ? $(options.topBar).outerHeight(true) : 0;
         
         this.selection = null;
-        this.ageClassSet = null;
+        this.courseClassSet = null;
         this.languageSelector = null;
         this.classSelector = null;
         this.comparisonSelector = null;
@@ -9485,6 +9616,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.mainPanel = null;
         this.buttonsPanel = null;
         this.competitorListContainer = null;
+        this.container = null;
         
         this.currentResizeTimeout = null;
     }
@@ -9515,7 +9647,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * depending on whether all visible competitors have start times.
     */
     Viewer.prototype.enableOrDisableRaceGraph = function () {
-        var anyStartTimesMissing = this.ageClassSet.allCompetitors.some(function (competitor) { return competitor.lacksStartTime(); });
+        var anyStartTimesMissing = this.courseClassSet.allCompetitors.some(function (competitor) { return competitor.lacksStartTime(); });
         this.chartTypeSelector.setRaceGraphDisabledNotifier((anyStartTimesMissing) ? alertRaceGraphDisabledAsStartTimesMissing : null);
     };
     
@@ -9536,7 +9668,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     */
     Viewer.prototype.drawLogo = function () {
         this.logoSvg = this.topPanel.append("svg")
-                                    .style("float", "left");
+                                    .classed("topRowStart", true);
 
         this.logoSvg.style("width", "19px")
                     .style("height", "19px")
@@ -9583,7 +9715,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * Adds a spacer between controls on the top row.
     */
     Viewer.prototype.addSpacer = function () {
-        this.topPanel.append("div").classed("topRowSpacer", true);    
+        this.topPanel.append("div").classed("topRowStartSpacer", true);
     };
     
     /**
@@ -9637,6 +9769,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     */
     Viewer.prototype.addDirectLink = function () {
         this.directLink = this.topPanel.append("a")
+                                       .classed("topRowStart", true)
                                        .attr("id", "directLinkAnchor")
                                        .attr("href", document.location.href);
         this.setDirectLinkMessages();
@@ -9661,12 +9794,12 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             compareWith: this.comparisonSelector.getComparisonType(),
             selected: this.selection.getSelectedIndexes(),
             stats: this.statisticsSelector.getVisibleStatistics(),
-            showOriginal: this.ageClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected(),
+            showOriginal: this.courseClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected(),
             filterText: this.competitorList.getFilterText()
         };
         
         var oldQueryString = document.location.search;
-        var newQueryString = formatQueryString(oldQueryString, this.eventData, this.ageClassSet, data);
+        var newQueryString = formatQueryString(oldQueryString, this.eventData, this.courseClassSet, data);
         var oldHref = document.location.href;        
         this.directLink.attr("href", oldHref.substring(0, oldHref.length - oldQueryString.length) + "?" + newQueryString.replace(/^\?+/, ""));
     };
@@ -9683,10 +9816,12 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     */
     Viewer.prototype.buildUi = function () {
         var body = d3.select("body");
-        
         body.style("overflow", "hidden");
+
+        this.container = body.append("div")
+                             .attr("id", "sbContainer");
         
-        this.topPanel = body.append("div");
+        this.topPanel = this.container.append("div");
         
         this.drawLogo();
         this.addLanguageSelector();
@@ -9707,12 +9842,12 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.topPanel.append("div")
                      .style("clear", "both");
         
-        this.mainPanel = body.append("div");
+        this.mainPanel = this.container.append("div");
                              
         this.addCompetitorList();
         this.chart = new Chart(this.mainPanel.node());
         
-        this.resultsTable = new ResultsTable(body.node());
+        this.resultsTable = new ResultsTable(this.container.node());
         this.resultsTable.hide();
         
         var outerThis = this;
@@ -9723,7 +9858,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         // This is mainly for the benefit of IE9, which doesn't support any
         // -*-user-select CSS style.
         $("input:text").bind("selectstart", function (evt) { evt.stopPropagation(); });
-        $("body").bind("selectstart", function () { return false; });
+        $(this.container.node()).bind("selectstart", function () { return false; });
     };
 
     /**
@@ -9737,33 +9872,6 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
         this.originalDataSelector.registerChangeHandler(function (showOriginalData) { outerThis.showOriginalOrRepairedData(showOriginalData); });
         this.competitorList.registerChangeHandler(function () { outerThis.handleFilterTextChanged(); });
-    };
-    
-    /**
-    * Select all of the competitors.
-    */
-    Viewer.prototype.selectAll = function () {
-        this.selection.selectAll();
-    };
-
-    /**
-    * Select none of the competitors.
-    */
-    Viewer.prototype.selectNone = function () {
-        this.selection.selectNone();
-    };
-
-    /**
-    * Select all of the competitors that cross the unique selected competitor.
-    */
-    Viewer.prototype.selectCrossingRunners = function () {
-        this.selection.selectCrossingRunners(this.ageClassSet.allCompetitors); 
-        if (this.selection.isSingleRunnerSelected()) {
-            // Only a single runner is still selected, so nobody crossed the
-            // selected runner.
-            var competitorName = this.ageClassSet.allCompetitors[this.selection.getSelectedIndexes()[0]].name;
-            alert(getMessageWithFormatting("RaceGraphNoCrossingRunners", {"$$NAME$$": competitorName}));
-        }
     };
 
     /**
@@ -9789,14 +9897,37 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     };
     
     /**
+    * Returns the horizontal margin around the container, i.e. the sum of the
+    * left and right margin, padding and border for the body element and the
+    * container element.
+    * @return {Number} Total horizontal margin.
+    */ 
+    Viewer.prototype.getHorizontalMargin = function () {
+        var body = $("body");
+        var container = $(this.container.node());
+        return (body.outerWidth(true) - body.width()) + (container.outerWidth() - container.width());
+    };
+    
+    /**
+    * Returns the vertical margin around the container, i.e. the sum of the top
+    * and bottom margin, padding and border for the body element and the
+    * container element.
+    * @return {Number} Total vertical margin.
+    */ 
+    Viewer.prototype.getVerticalMargin = function () {
+        var body = $("body");
+        var container = $(this.container.node());
+        return (body.outerHeight(true) - body.height()) + (container.outerHeight() - container.height());
+    };
+    
+    /**
     * Gets the usable height of the window, i.e. the height of the window minus
     * margin and the height of the top bar, if any.  This height is used for
     * the competitor list and the chart.
     * @return {Number} Usable height of the window.
     */
     Viewer.prototype.getUsableHeight = function () {
-        var vertMargin = parseInt($("body").css("margin-top"), 10) + parseInt($("body").css("margin-bottom"), 10);
-        var bodyHeight = $(window).height() - vertMargin - this.topBarHeight;
+        var bodyHeight = $(window).outerHeight() - this.getVerticalMargin() - this.topBarHeight;
         var topPanelHeight = $(this.topPanel.node()).height();
         return bodyHeight - topPanelHeight;
     };
@@ -9813,20 +9944,20 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     */
     Viewer.prototype.setChartSize = function () {
         // Margin around the body element.
-        var horzMargin = parseInt($("body").css("margin-left"), 10) + parseInt($("body").css("margin-right"), 10);
-        var vertMargin = parseInt($("body").css("margin-top"), 10) + parseInt($("body").css("margin-bottom"), 10);
+        var horzMargin = this.getHorizontalMargin();
+        var vertMargin = this.getVerticalMargin();
         
         // Extra amount subtracted off of the width of the chart in order to
         // prevent wrapping, in units of pixels.
         // 2 to prevent wrapping when zoomed out to 33% in Chrome.
         var EXTRA_WRAP_PREVENTION_SPACE = 2;
         
-        var bodyWidth = $(window).width() - horzMargin;
-        var bodyHeight = $(window).height() - vertMargin - this.topBarHeight;
+        var containerWidth = $(window).width() - horzMargin;
+        var containerHeight = $(window).height() - vertMargin - this.topBarHeight;
 
-        $("body").width(bodyWidth).height(bodyHeight);
+        $(this.container.node()).width(containerWidth).height(containerHeight);
         
-        var chartWidth = bodyWidth - this.competitorList.width() - EXTRA_WRAP_PREVENTION_SPACE;
+        var chartWidth = containerWidth - this.competitorList.width() - EXTRA_WRAP_PREVENTION_SPACE;
         var chartHeight = this.getUsableHeight();
         
         this.chart.setSize(chartWidth, chartHeight);
@@ -9870,9 +10001,9 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
 
         this.updateControlEnabledness();
         var comparisonFunction = this.comparisonSelector.getComparisonFunction();
-        this.referenceCumTimes = comparisonFunction(this.ageClassSet);
-        this.fastestCumTimes = this.ageClassSet.getFastestCumTimes();
-        this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType());
+        this.referenceCumTimes = comparisonFunction(this.courseClassSet);
+        this.fastestCumTimes = this.courseClassSet.getFastestCumTimes();
+        this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType());
         this.redrawChart();
     };
 
@@ -9883,7 +10014,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         var data = {
             chartData: this.chartData,
             eventData: this.eventData,
-            ageClassSet: this.ageClassSet,
+            courseClassSet: this.courseClassSet,
             referenceCumTimes: this.referenceCumTimes,
             fastestCumTimes: this.fastestCumTimes
         };
@@ -9897,7 +10028,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     Viewer.prototype.redraw = function () {
         var chartType = this.chartTypeSelector.getChartType();
         if (!chartType.isResultsTable) {
-            this.chartData = this.ageClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), chartType);
+            this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), chartType);
             this.redrawChart();
         }
     };
@@ -9923,16 +10054,16 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     
     /**
     * Sets the currently-selected classes in various objects that need it:
-    * current age-class set, comparison selector and results table.
+    * current course-class set, comparison selector and results table.
     * @param {Array} classIndexes - Array of selected class indexes.    
     */
     Viewer.prototype.setClasses = function (classIndexes) {
         this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
-        this.ageClassSet = new AgeClassSet(this.currentClasses);
-        this.comparisonSelector.setAgeClassSet(this.ageClassSet);
+        this.courseClassSet = new CourseClassSet(this.currentClasses);
+        this.comparisonSelector.setCourseClassSet(this.courseClassSet);
         this.resultsTable.setClass(this.currentClasses[0]);    
         this.enableOrDisableRaceGraph();
-        this.originalDataSelector.setVisible(this.ageClassSet.hasDubiousData());
+        this.originalDataSelector.setVisible(this.courseClassSet.hasDubiousData());
     };
     
     /**
@@ -9942,10 +10073,10 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     Viewer.prototype.initClasses = function (classIndexes) {
         this.classSelector.selectClasses(classIndexes);
         this.setClasses(classIndexes);
-        this.competitorList.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
-        this.selection = new CompetitorSelection(this.ageClassSet.allCompetitors.length);
+        this.competitorList.setCompetitorList(this.courseClassSet.allCompetitors, (this.currentClasses.length > 1));
+        this.selection = new CompetitorSelection(this.courseClassSet.allCompetitors.length);
         this.competitorList.setSelection(this.selection);
-        this.previousCompetitorList = this.ageClassSet.allCompetitors;
+        this.previousCompetitorList = this.courseClassSet.allCompetitors;
     };
     
     /**
@@ -9961,12 +10092,14 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         }
         
         this.setClasses(classIndexes);
-        this.competitorList.setCompetitorList(this.ageClassSet.allCompetitors, (this.currentClasses.length > 1));
-        this.selection.migrate(this.previousCompetitorList, this.ageClassSet.allCompetitors);
+        this.competitorList.setCompetitorList(this.courseClassSet.allCompetitors, (this.currentClasses.length > 1));
+        this.selection.migrate(this.previousCompetitorList, this.courseClassSet.allCompetitors);
         this.competitorList.selectionChanged();
-        this.setChartSize();
-        this.drawChart();
-        this.previousCompetitorList = this.ageClassSet.allCompetitors;
+        if (!this.chartTypeSelector.getChartType().isResultsTable) {
+            this.setChartSize();
+            this.drawChart();
+        }
+        this.previousCompetitorList = this.courseClassSet.allCompetitors;
         this.updateDirectLink();
     };
     
@@ -9986,11 +10119,12 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
         if (chartType.isResultsTable) {
             this.mainPanel.style("display", "none");
             
-            // Remove any fixed width and height on the body, as well as
-            // overflow:hidden, as we need the window to be able to scroll if
-            // the results table is too wide or too tall and also adjust size
-            // if one or both scrollbars appear.
-            d3.select("body").style("width", null).style("height", null).style("overflow", null);
+            // Remove any fixed width and height on the container, as well as
+            // overflow:hidden on the body, as we need the window to be able
+            // to scroll if the results table is too wide or too tall and also
+            // adjust size if one or both scrollbars appear.
+            this.container.style("width", null).style("height", null);
+            d3.select("body").style("overflow", null);
             
             this.resultsTable.show();
         } else {
@@ -10089,7 +10223,7 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
             this.statisticsSelector.setVisibleStatistics(parsedQueryString.stats);
         }
         
-        if (parsedQueryString.showOriginal && this.ageClassSet.hasDubiousData()) {
+        if (parsedQueryString.showOriginal && this.courseClassSet.hasDubiousData()) {
             this.originalDataSelector.selectOriginalData();
             this.selectOriginalOrRepairedData(true);
         }
@@ -10115,13 +10249,15 @@ var SplitsBrowser = { Version: "3.3.2", Model: {}, Input: {}, Controls: {}, Mess
     * @param {Object} params - Object mapping parameter names to values.
     */
     function showLoadFailureMessage(key, params) {
-        d3.select("body")
-          .append("h1")
-          .text(getMessage("LoadFailedHeader"));
+        var errorDiv = d3.select("body")
+                         .append("div")
+                         .classed("sbErrors", true);
+                         
+        errorDiv.append("h1")
+                .text(getMessage("LoadFailedHeader"));
           
-        d3.select("body")
-          .append("p")
-          .text(getMessageWithFormatting(key, params));
+        errorDiv.append("p")
+                .text(getMessageWithFormatting(key, params));
     }
     
     /**

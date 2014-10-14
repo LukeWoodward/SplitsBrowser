@@ -14,3 +14,4 @@ SplitsBrowser changelog:
 3.3.0:  Runner selection improvements, improve handling of non-starters
 3.3.1:  Allow SplitsBrowser to be used with multiple languages.
 3.3.2:  Read classifiers from SI-format files.
+3.3.3:  All, None and Crossing Runners buttons operate only on filtered competitors.
