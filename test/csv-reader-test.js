@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser - CSV reader tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -34,15 +34,13 @@
     });
 
     QUnit.test("Cannot parse single class with no competitors", function (assert) {
-
         SplitsBrowserTest.assertInvalidData(assert, function () {
             parseEventData("Example, 4");
         });
     });
 
     QUnit.test("Cannot parse single class with non-numeric control count", function (assert) {
-
-        var csvData = "Example, fifteen";
+        var csvData = "Example, four\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23";
         SplitsBrowserTest.assertInvalidData(assert, function () {
             parseEventData(csvData);
         });
@@ -50,31 +48,27 @@
 
     // Allow 0 controls, as that essentially means a start and a finish.
     QUnit.test("Cannot parse single class with negative control count", function (assert) {
-
-        var csvData = "Example, -1";
+        var csvData = "Example, -1\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23";
         SplitsBrowserTest.assertInvalidData(assert, function () {
             parseEventData(csvData);
         });
     });
 
     QUnit.test("Rejects single class with only one item on first line as being of the wrong format", function (assert) {
-
-        var csvData = "There is no control count here";
+        var csvData = "There is no control count here\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23";
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseEventData(csvData);
         });
     });
 
     QUnit.test("Rejects single class with too many items on first line as being of the wrong format", function (assert) {
-
-        var csvData = "Example, 4, 2";
+        var csvData = "Example, 4, 2\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23";
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseEventData(csvData);
         });
     });
 
     QUnit.test("Rejects HTML that happens to have a single comma on the first line as being of the wrong format", function (assert) {
-
         var csvData = "<html><head><title>Blah blah blah, blah blah</title>\n<head><body><p>blah blah blah</p>\n</body>\n</html>\n";
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseEventData(csvData);
@@ -82,7 +76,6 @@
     });
 
     QUnit.test("Rejects HTML in capitals that happens to have a single comma on the first line as being of the wrong format", function (assert) {
-
         var csvData = "<HTML><HEAD><TITLE>Blah blah blah, blah blah</TITLE>\n<HEAD><BODY><P>blah blah blah</P>\n</BODY>\n</HTML>\n";
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
             parseEventData(csvData);
@@ -164,6 +157,19 @@
 
     QUnit.test("Can parse a single class with a single valid competitor and an empty class", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n\r\nEmpty, 6\r\n";
+        var actualEvent = parseEventData(csvData);
+        var expectedClass = new CourseClass("Example", 4, [
+            fromSplitTimes(1, "John Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23])
+        ]);
+        
+        var expectedCourse = new Course("Example", [expectedClass], null, null, null);
+        expectedClass.setCourse(expectedCourse);
+        
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+    });
+
+    QUnit.test("Can parse a single class with a single valid competitor and an empty class with a negative control count", function (assert) {
+        var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n\r\nEmpty, -1\r\n";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
             fromSplitTimes(1, "John Smith", "ABC", 10 * 3600 + 34 * 60, [177, 99, 211, 121, 23])

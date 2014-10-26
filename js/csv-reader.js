@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser CSV - Reads in CSV result data files.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -79,8 +79,11 @@
             var controlCount = parseInt(controlCountStr, 10);
             if (isNaN(controlCount)) {
                 throwInvalidData("Could not read control count: '" + controlCountStr + "'");
-            } else if (controlCount < 0) {
-                throwInvalidData("Expected a positive control count, got " + controlCount + " instead");
+            } else if (controlCount < 0 && lines.length > 0) {
+                // Only complain about a negative control count if there are
+                // any competitors.  Event 7632 ends with a line 'NOCLAS,-1' -
+                // we may as well ignore this.
+                throwInvalidData("Expected a non-negative control count, got " + controlCount + " instead");
             } else {
                 var competitors = lines.map(function (line, index) { return parseCompetitors(index, line, controlCount); });
                 competitors.sort(compareCompetitors);
