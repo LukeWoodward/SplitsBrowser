@@ -54,8 +54,24 @@
                 startTime *= 60;
             }
             
-            var splitTimes = parts.map(parseTime);
-            return Competitor.fromSplitTimes(index + 1, forename + " " + surname, club, startTime, splitTimes);
+            
+            var cumTimes = [0];
+            var lastCumTimeRecorded = 0;
+            parts.map(function (part) {
+                var splitTime = parseTime(part);
+                if (splitTime !== null && splitTime > 0) {
+                    lastCumTimeRecorded += splitTime;
+                    cumTimes.push(lastCumTimeRecorded);
+                } else {
+                    cumTimes.push(null);
+                }
+            });
+            
+            var competitor = Competitor.fromCumTimes(index + 1, forename + " " + surname, club, startTime, cumTimes);
+            if (lastCumTimeRecorded === 0) {
+                competitor.setNonStarter();
+            }
+            return competitor;
         } else {
             throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor in class with " + controlCount + " controls, got " + (parts.length) + " instead.");
         }
