@@ -23,10 +23,11 @@
     
     var getMessage = SplitsBrowser.getMessage;
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
-    var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
+
+    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
     module("Results Table");
     

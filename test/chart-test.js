@@ -22,13 +22,14 @@
     "use strict";
 
     var Chart = SplitsBrowser.Controls.Chart;
-    var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
+
+    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
     function getIndexesAroundDubiousCumTimes(competitor) {
         return competitor.getControlIndexesAroundDubiousCumulativeTimes();

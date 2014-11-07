@@ -21,9 +21,10 @@
 (function (){
     "use strict";
 
-    var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var CourseClass = SplitsBrowser.Model.CourseClass;
+    
+    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
     module("Course-class");
     

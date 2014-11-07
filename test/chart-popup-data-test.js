@@ -26,13 +26,14 @@
     var formatTime = SplitsBrowser.formatTime;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
-    var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
 
     var ChartPopupData = SplitsBrowser.Model.ChartPopupData;
+
+    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
 
     function getTestCourseClassSet() {
         var competitors = d3.range(0, 11).map(function (num) {

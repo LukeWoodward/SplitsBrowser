@@ -22,9 +22,10 @@
     "use strict";
 
     var CompetitorList = SplitsBrowser.Controls.CompetitorList;
-    var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var CompetitorSelection = SplitsBrowser.Model.CompetitorSelection;
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
+
+    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
 
     // CSS selector for the Crossing Runners button.
     var CROSSING_RUNNERS_BUTTON_SELECTOR = "div#qunit-fixture button#selectCrossingRunners";

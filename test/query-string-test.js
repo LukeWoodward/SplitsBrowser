@@ -27,10 +27,11 @@
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
-    var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     
     var parseQueryString = SplitsBrowser.parseQueryString;
     var formatQueryString = SplitsBrowser.formatQueryString;
+    
+    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
     var VALID_SPLIT_TIMES = [177, 99, 211, 121];
     

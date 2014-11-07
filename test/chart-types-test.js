@@ -21,12 +21,13 @@
 (function () {
     "use strict";
     
-    var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
+
+    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
     module("Chart types");
 

@@ -78,31 +78,6 @@
     }
     
     /**
-    * Convert an array of split times into an array of cumulative times.
-    * If any null splits are given, all cumulative splits from that time
-    * onwards are null also.
-    *
-    * The returned array of cumulative split times includes a zero value for
-    * cumulative time at the start.
-    * @param {Array} splitTimes - Array of split times.
-    * @return {Array} Corresponding array of cumulative split times.
-    */
-    function cumTimesFromSplitTimes(splitTimes) {
-        if (!$.isArray(splitTimes)) {
-            throw new TypeError("Split times must be an array - got " + typeof splitTimes + " instead");
-        } else if (splitTimes.length === 0) {
-            throwInvalidData("Array of split times must not be empty");
-        }
-        
-        var cumTimes = [0];
-        for (var i = 0; i < splitTimes.length; i += 1) {
-            cumTimes.push(addIfNotNull(cumTimes[i], splitTimes[i]));
-        }
-
-        return cumTimes;
-    }
-    
-    /**
     * Convert an array of cumulative times into an array of split times.
     * If any null cumulative splits are given, the split times to and from that
     * control are null also.
@@ -247,31 +222,6 @@
     */
     Competitor.prototype.setGender = function (gender) {
         this.gender = gender;
-    };
-    
-    /**
-    * Create and return a Competitor object where the competitor's times are given
-    * as a list of split times.
-    *
-    * The first parameter (order) merely stores the order in which the competitor
-    * appears in the given list of results.  Its sole use is to stabilise sorts of
-    * competitors, as JavaScript's sort() method is not guaranteed to be a stable
-    * sort.  However, it is not strictly the finishing order of the competitors,
-    * as it has been known for them to be given not in the correct order.
-    *
-    * @param {Number} order - The position of the competitor within the list of results.
-    * @param {String} name - The name of the competitor.
-    * @param {String} club - The name of the competitor's club.
-    * @param {Number} startTime - The competitor's start time, as seconds past midnight.
-    * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
-    * @return {Competitor} Created competitor.
-    */
-    Competitor.fromSplitTimes = function (order, name, club, startTime, splitTimes) {
-        var cumTimes = cumTimesFromSplitTimes(splitTimes);
-        var competitor = new Competitor(order, name, club, startTime, splitTimes, cumTimes);
-        competitor.splitTimes = splitTimes;
-        competitor.cumTimes = cumTimes;
-        return competitor;
     };
     
     /**

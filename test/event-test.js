@@ -22,11 +22,12 @@
     "use strict";
     
     var isNotNull = SplitsBrowser.isNotNull;
-    var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var Event = SplitsBrowser.Model.Event;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
+
+    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
     module("Event");
     

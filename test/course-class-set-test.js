@@ -40,10 +40,11 @@
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
-    var fromSplitTimes = SplitsBrowser.Model.Competitor.fromSplitTimes;
     var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
+
+    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
     function getCompetitor1() {
         return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);

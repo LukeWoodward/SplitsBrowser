@@ -23,6 +23,7 @@ var SplitsBrowserTest = {};
 (function () {
 
     var isNaNStrict = SplitsBrowser.isNaNStrict;
+    var Competitor = SplitsBrowser.Model.Competitor;
 
     /**
     * Asserts that calling the given function throws an exception with the
@@ -83,5 +84,42 @@ var SplitsBrowserTest = {};
                 assert.strictEqual(actualArray[index], expectedArray[index], "Array values at index " + index + " should be strict-equal");
             }
         }
+    };
+    
+    /**
+    * Returns the sum of two numbers, or null if either is null.
+    * @param {?Number} a - One number, or null, to add.
+    * @param {?Number} b - The other number, or null, to add.
+    * @return {?Number} null if at least one of a or b is null,
+    *      otherwise a + b.
+    */
+    function addIfNotNull(a, b) {
+        return (a === null || b === null) ? null : (a + b);
+    }
+    
+    /**
+    * Convenience method to create a competitor from split times.
+    *
+    * This method has been moved out of Competitor because it is no longer used,
+    * by SplitsBrowser itself, but has been retained as it is used by plenty of
+    * tests.
+    *
+    * @param {Number} order - The position of the competitor within the list of results.
+    * @param {String} name - The name of the competitor.
+    * @param {String} club - The name of the competitor's club.
+    * @param {Number} startTime - The competitor's start time, as seconds past midnight.
+    * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
+    * @return {Competitor} Created competitor.
+    */
+    SplitsBrowserTest.fromSplitTimes = function (order, name, club, startTime, splitTimes) {
+        var cumTimes = [0];
+        for (var i = 0; i < splitTimes.length; i += 1) {
+            cumTimes.push(addIfNotNull(cumTimes[i], splitTimes[i]));
+        }
+        
+        var competitor = new Competitor(order, name, club, startTime, splitTimes, cumTimes);
+        competitor.splitTimes = splitTimes;
+        competitor.cumTimes = cumTimes;
+        return competitor;
     };
 })();
