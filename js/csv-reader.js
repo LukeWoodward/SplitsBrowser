@@ -48,7 +48,9 @@
             var club = parts.shift();
             var startTimeStr = parts.shift();
             var startTime = parseTime(startTimeStr);
-            if (!startTimeStr.match(/^\d+:\d\d:\d\d$/)) {
+            if (startTime === 0) {
+                startTime = null;
+            } else if (!startTimeStr.match(/^\d+:\d\d:\d\d$/)) {
                 // Start time given in hours and minutes instead of hours,
                 // minutes and seconds.
                 startTime *= 60;

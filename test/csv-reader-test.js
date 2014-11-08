@@ -203,6 +203,18 @@
         expectedClass.setCourse(expectedCourse);
         assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
     });
+    
+    QUnit.test("Can parse a single class with a single competitor with zero start time", function (assert) {
+        var csvData = "Example, 4\r\nJohn,Smith,ABC,00:00,02:57,01:39,03:31,02:01,00:23";
+        var actualEvent = parseEventData(csvData);
+        var expectedClass = new CourseClass("Example", 4, [
+            fromCumTimes(1, "John Smith", "ABC", null, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])
+        ]);
+        
+        var expectedCourse = new Course("Example", [expectedClass], null, null, null);
+        expectedClass.setCourse(expectedCourse);
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+    });
 
     QUnit.test("Can parse a single class with a single valid competitor and trailing end-of-line", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n";
