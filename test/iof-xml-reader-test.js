@@ -978,6 +978,17 @@
             {preprocessor: function (xml) { return xml.replace('<ControlCode>' + person.controls[1] + '</ControlCode>', ''); }}); 
     });
     
+    QUnit.test("Can parse a string that contains a competitor with an additional control, ignoring the additional control", function (assert) {
+        var person = getPerson();
+        runSingleCourseXmlFormatParseTest(assert, [{name: "Test Class", courseName: "Test Course", length: 2300, courseId: 1, competitors: [person]}],
+            function (course) {
+                assert.strictEqual(course.classes.length, 1);
+                assert.strictEqual(course.classes[0].numControls, 3);
+            },
+            {preprocessor: function (xml) { return xml.replace(/<\/Result>/, '<SplitTime status="Additional"><ControlCode>987</ControlCode><Time>234</Time></SplitTime></Result>'); },
+             formatters: [Version3Formatter]});
+    });
+    
     QUnit.test("Cannot parse a string that contains a competitor with a split with a missing time", function (assert) {
         var person = getPerson();      
         runFailingXmlFormatParseTest(assert, [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}],

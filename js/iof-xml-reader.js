@@ -271,6 +271,15 @@
     Version2Reader.StatusOverMaxTime = "OverTime";
     
     /**
+    * Unconditionally returns false - IOF XML version 2.0.3 appears not to
+    * support additional controls.
+    * @return {boolean} false.
+    */
+    Version2Reader.isAdditional = function () {
+        return false;
+    };
+    
+    /**
     * Reads a control code and split time from a SplitTime element.
     * @param {jQuery.selection} splitTimeElement - jQuery selection containing
     *     a SplitTime element.
@@ -480,6 +489,17 @@
     Version3Reader.StatusNonFinisher = "DidNotFinish";
     Version3Reader.StatusDisqualified = "Disqualified";
     Version3Reader.StatusOverMaxTime = "OverTime";
+    
+    /**
+    * Returns whether the given split-time element is for an additional
+    * control, and hence should be ignored.
+    * @param {jQuery.selection} splitTimeElement - jQuery selection containing
+    *     a SplitTime element.
+    * @return {boolean} True if the control is additional, false if not.
+    */
+    Version3Reader.isAdditional = function (splitTimeElement) {
+        return (splitTimeElement.attr("status") === "Additional");
+    };
 
     /**
     * Reads a control code and split time from a SplitTime element.
@@ -568,7 +588,8 @@
         var totalTime = reader.readTotalTime(resultElement);
         
         var splitTimes = $("> SplitTime", resultElement).toArray();
-        var splitData = splitTimes.map(function (splitTime) { return reader.readSplitTime($(splitTime)); });
+        var splitData = splitTimes.filter(function (splitTime) { return !reader.isAdditional($(splitTime)); })
+                                  .map(function (splitTime) { return reader.readSplitTime($(splitTime)); });
         
         var controls = splitData.map(function (datum) { return datum.code; });
         var cumTimes = splitData.map(function (datum) { return datum.time; });
