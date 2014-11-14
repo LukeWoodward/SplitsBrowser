@@ -15,3 +15,4 @@ SplitsBrowser changelog:
 3.3.1:  Allow SplitsBrowser to be used with multiple languages.
 3.3.2:  Read classifiers from SI-format files.
 3.3.3:  All, None and Crossing Runners buttons operate only on filtered competitors.
+3.3.4:  Zero splits in CSV files, ignore Additional controls in IOF XML v3 data.

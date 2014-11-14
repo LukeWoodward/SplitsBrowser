@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.3.3", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.3.4", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -479,31 +479,6 @@ var SplitsBrowser = { Version: "3.3.3", Model: {}, Input: {}, Controls: {}, Mess
     }
     
     /**
-    * Convert an array of split times into an array of cumulative times.
-    * If any null splits are given, all cumulative splits from that time
-    * onwards are null also.
-    *
-    * The returned array of cumulative split times includes a zero value for
-    * cumulative time at the start.
-    * @param {Array} splitTimes - Array of split times.
-    * @return {Array} Corresponding array of cumulative split times.
-    */
-    function cumTimesFromSplitTimes(splitTimes) {
-        if (!$.isArray(splitTimes)) {
-            throw new TypeError("Split times must be an array - got " + typeof splitTimes + " instead");
-        } else if (splitTimes.length === 0) {
-            throwInvalidData("Array of split times must not be empty");
-        }
-        
-        var cumTimes = [0];
-        for (var i = 0; i < splitTimes.length; i += 1) {
-            cumTimes.push(addIfNotNull(cumTimes[i], splitTimes[i]));
-        }
-
-        return cumTimes;
-    }
-    
-    /**
     * Convert an array of cumulative times into an array of split times.
     * If any null cumulative splits are given, the split times to and from that
     * control are null also.
@@ -648,31 +623,6 @@ var SplitsBrowser = { Version: "3.3.3", Model: {}, Input: {}, Controls: {}, Mess
     */
     Competitor.prototype.setGender = function (gender) {
         this.gender = gender;
-    };
-    
-    /**
-    * Create and return a Competitor object where the competitor's times are given
-    * as a list of split times.
-    *
-    * The first parameter (order) merely stores the order in which the competitor
-    * appears in the given list of results.  Its sole use is to stabilise sorts of
-    * competitors, as JavaScript's sort() method is not guaranteed to be a stable
-    * sort.  However, it is not strictly the finishing order of the competitors,
-    * as it has been known for them to be given not in the correct order.
-    *
-    * @param {Number} order - The position of the competitor within the list of results.
-    * @param {String} name - The name of the competitor.
-    * @param {String} club - The name of the competitor's club.
-    * @param {Number} startTime - The competitor's start time, as seconds past midnight.
-    * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
-    * @return {Competitor} Created competitor.
-    */
-    Competitor.fromSplitTimes = function (order, name, club, startTime, splitTimes) {
-        var cumTimes = cumTimesFromSplitTimes(splitTimes);
-        var competitor = new Competitor(order, name, club, startTime, splitTimes, cumTimes);
-        competitor.splitTimes = splitTimes;
-        competitor.cumTimes = cumTimes;
-        return competitor;
     };
     
     /**
@@ -2766,14 +2716,32 @@ var SplitsBrowser = { Version: "3.3.3", Model: {}, Input: {}, Controls: {}, Mess
             var club = parts.shift();
             var startTimeStr = parts.shift();
             var startTime = parseTime(startTimeStr);
-            if (!startTimeStr.match(/^\d+:\d\d:\d\d$/)) {
+            if (startTime === 0) {
+                startTime = null;
+            } else if (!startTimeStr.match(/^\d+:\d\d:\d\d$/)) {
                 // Start time given in hours and minutes instead of hours,
                 // minutes and seconds.
                 startTime *= 60;
             }
             
-            var splitTimes = parts.map(parseTime);
-            return Competitor.fromSplitTimes(index + 1, forename + " " + surname, club, startTime, splitTimes);
+            
+            var cumTimes = [0];
+            var lastCumTimeRecorded = 0;
+            parts.map(function (part) {
+                var splitTime = parseTime(part);
+                if (splitTime !== null && splitTime > 0) {
+                    lastCumTimeRecorded += splitTime;
+                    cumTimes.push(lastCumTimeRecorded);
+                } else {
+                    cumTimes.push(null);
+                }
+            });
+            
+            var competitor = Competitor.fromCumTimes(index + 1, forename + " " + surname, club, startTime, cumTimes);
+            if (lastCumTimeRecorded === 0) {
+                competitor.setNonStarter();
+            }
+            return competitor;
         } else {
             throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor in class with " + controlCount + " controls, got " + (parts.length) + " instead.");
         }
@@ -2797,8 +2765,11 @@ var SplitsBrowser = { Version: "3.3.3", Model: {}, Input: {}, Controls: {}, Mess
             var controlCount = parseInt(controlCountStr, 10);
             if (isNaN(controlCount)) {
                 throwInvalidData("Could not read control count: '" + controlCountStr + "'");
-            } else if (controlCount < 0) {
-                throwInvalidData("Expected a positive control count, got " + controlCount + " instead");
+            } else if (controlCount < 0 && lines.length > 0) {
+                // Only complain about a negative control count if there are
+                // any competitors.  Event 7632 ends with a line 'NOCLAS,-1' -
+                // we may as well ignore this.
+                throwInvalidData("Expected a non-negative control count, got " + controlCount + " instead");
             } else {
                 var competitors = lines.map(function (line, index) { return parseCompetitors(index, line, controlCount); });
                 competitors.sort(compareCompetitors);
@@ -5226,6 +5197,15 @@ var SplitsBrowser = { Version: "3.3.3", Model: {}, Input: {}, Controls: {}, Mess
     Version2Reader.StatusOverMaxTime = "OverTime";
     
     /**
+    * Unconditionally returns false - IOF XML version 2.0.3 appears not to
+    * support additional controls.
+    * @return {boolean} false.
+    */
+    Version2Reader.isAdditional = function () {
+        return false;
+    };
+    
+    /**
     * Reads a control code and split time from a SplitTime element.
     * @param {jQuery.selection} splitTimeElement - jQuery selection containing
     *     a SplitTime element.
@@ -5435,6 +5415,17 @@ var SplitsBrowser = { Version: "3.3.3", Model: {}, Input: {}, Controls: {}, Mess
     Version3Reader.StatusNonFinisher = "DidNotFinish";
     Version3Reader.StatusDisqualified = "Disqualified";
     Version3Reader.StatusOverMaxTime = "OverTime";
+    
+    /**
+    * Returns whether the given split-time element is for an additional
+    * control, and hence should be ignored.
+    * @param {jQuery.selection} splitTimeElement - jQuery selection containing
+    *     a SplitTime element.
+    * @return {boolean} True if the control is additional, false if not.
+    */
+    Version3Reader.isAdditional = function (splitTimeElement) {
+        return (splitTimeElement.attr("status") === "Additional");
+    };
 
     /**
     * Reads a control code and split time from a SplitTime element.
@@ -5523,7 +5514,8 @@ var SplitsBrowser = { Version: "3.3.3", Model: {}, Input: {}, Controls: {}, Mess
         var totalTime = reader.readTotalTime(resultElement);
         
         var splitTimes = $("> SplitTime", resultElement).toArray();
-        var splitData = splitTimes.map(function (splitTime) { return reader.readSplitTime($(splitTime)); });
+        var splitData = splitTimes.filter(function (splitTime) { return !reader.isAdditional($(splitTime)); })
+                                  .map(function (splitTime) { return reader.readSplitTime($(splitTime)); });
         
         var controls = splitData.map(function (datum) { return datum.code; });
         var cumTimes = splitData.map(function (datum) { return datum.time; });
