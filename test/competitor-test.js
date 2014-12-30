@@ -630,6 +630,40 @@
         assert.ok(!competitor1.crosses(competitor2), "Competitors should not cross");
     });
     
+    QUnit.test("Returns null value for cumulative rank when no ranks set", function (assert) {
+        var competitor1 = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 521]);
+        assert.strictEqual(competitor1.getCumulativeRankTo(2), null, "A null cumulative rank should be returned");
+    });
+    
+    QUnit.test("Returns non-null value for cumulative rank when ranks set", function (assert) {
+        var competitor1 = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 521]);
+        competitor1.setSplitAndCumulativeRanks([1, 1, 1, 1], [2, 2, 2, 2]);
+        assert.strictEqual(competitor1.getCumulativeRankTo(2), 2, "A non-null cumulative rank should be returned");
+    });
+    
+    QUnit.test("Returns null value for cumulative rank at start control", function (assert) {
+        var competitor1 = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 521]);
+        competitor1.setSplitAndCumulativeRanks([1, 1, 1, 1], [2, 2, 2, 2]);
+        assert.strictEqual(competitor1.getCumulativeRankTo(0), null, "A null cumulative rank should be returned for the start");
+    });
+    
+    QUnit.test("Returns null value for split rank when no ranks set", function (assert) {
+        var competitor1 = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 521]);
+        assert.strictEqual(competitor1.getSplitRankTo(2), null, "A null split rank should be returned");
+    });
+    
+    QUnit.test("Returns non-null value for split rank when ranks set", function (assert) {
+        var competitor1 = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 521]);
+        competitor1.setSplitAndCumulativeRanks([1, 1, 1, 1], [2, 2, 2, 2]);
+        assert.strictEqual(competitor1.getSplitRankTo(2), 1, "A non-null split rank should be returned");
+    });
+    
+    QUnit.test("Returns null value for split rank at start control", function (assert) {
+        var competitor1 = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 521]);
+        competitor1.setSplitAndCumulativeRanks([1, 1, 1, 1], [2, 2, 2, 2]);
+        assert.strictEqual(competitor1.getSplitRankTo(0), null, "A null split rank should be returned for the start");
+    });
+    
     QUnit.test("Competitor with no dubious times has no indexes around dubious cumulative times", function (assert) {
         var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 221, 384, 521]);
         assert.deepEqual(competitor.getControlIndexesAroundDubiousCumulativeTimes(), []);

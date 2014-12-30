@@ -287,6 +287,11 @@ span.resultsTableHeader
     color: #CCCCCC;
 }
 
+.resultsTable tbody td.time span.fastest
+{
+    color: red;
+}
+
 div.warningPanel
 {
     position: absolute;

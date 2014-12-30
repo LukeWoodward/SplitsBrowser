@@ -25,16 +25,27 @@
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var CourseClass = SplitsBrowser.Model.CourseClass;
+    var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var Course = SplitsBrowser.Model.Course;
 
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
     module("Results Table");
     
+    /**
+    * Computes the ranks within the course-class.
+    */
+    function calculateRanks(courseClass) {
+        // Course-class sets compute ranks on construction, so let's create one
+        // just for that purpose.
+        new CourseClassSet([courseClass]);
+    }
+    
     QUnit.test("Can create a results table with two competitors finishing", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
+        calculateRanks(courseClass);
         
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
@@ -56,16 +67,23 @@
         assert.strictEqual(table.selectAll("tbody tr:last-child td").size(), 7);    
         
         var topRowCells = $("tbody tr:first-child td", table.node());
+        var cum1Cell = $("span:first-child", topRowCells[3]);
+        assert.ok(cum1Cell.hasClass("fastest"));
+        var split1Cell = $("span:last-child", topRowCells[3]);
+        assert.ok(split1Cell.hasClass("fastest"));
         var cum2Cell = $("span:first-child", topRowCells[4]);
         assert.strictEqual(cum2Cell.text(), "04:46");
+        assert.ok(!cum2Cell.hasClass("fastest"));
         var split2Cell = $("span:last-child", topRowCells[4]);
         assert.strictEqual(split2Cell.text(), "03:41");
+        assert.ok(!split2Cell.hasClass("fastest"));
     });
     
     QUnit.test("Can create a results table with two competitors finishing and with control codes", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
+        calculateRanks(courseClass);
         
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, ["138", "152", "141"]));
         
@@ -85,6 +103,7 @@
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]);
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
+        calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
@@ -102,6 +121,7 @@
     QUnit.test("Can create a results table with one mispunching competitor", function (assert) {
         var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]);
         var courseClass = new CourseClass("Test", 3, [competitor]);
+        calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
@@ -120,6 +140,7 @@
         var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [null, null, null, null]);
         competitor.setNonStarter();
         var courseClass = new CourseClass("Test", 3, [competitor]);
+        calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
@@ -138,6 +159,7 @@
         var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, null]);
         competitor.setNonFinisher();
         var courseClass = new CourseClass("Test", 3, [competitor]);
+        calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
@@ -156,6 +178,7 @@
         var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         competitor.disqualify();
         var courseClass = new CourseClass("Test", 3, [competitor]);
+        calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
@@ -174,6 +197,7 @@
         var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         competitor.setOverMaxTime();
         var courseClass = new CourseClass("Test", 3, [competitor]);
+        calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
@@ -193,6 +217,7 @@
         competitor1.setNonCompetitive();
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
+        calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
@@ -209,6 +234,7 @@
         competitor1.disqualify();
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
+        calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         
@@ -224,6 +250,7 @@
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
+        calculateRanks(courseClass);
         
         courseClass.setCourse(new Course("Test", [courseClass], null, null, null));
         
@@ -239,6 +266,7 @@
         competitor1.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         var courseClass = new CourseClass("Test", 3, [competitor1]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
+        calculateRanks(courseClass);
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(courseClass);
@@ -266,6 +294,7 @@
         var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.5]);
         var courseClass = new CourseClass("Test", 3, [competitor]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
+        calculateRanks(courseClass);
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(courseClass);

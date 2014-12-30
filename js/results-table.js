@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser ResultsTable - Shows class results in a table.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -168,14 +168,16 @@
         var tableBody = this.table.select("tbody");
         tableBody.selectAll("tr").remove();
         
-        function addCell(tableRow, topLine, bottomLine, cssClass, cumDubious, splitDubious) {
+        function addCell(tableRow, topLine, bottomLine, cssClass, cumFastest, splitFastest, cumDubious, splitDubious) {
             var cell = tableRow.append("td");
             cell.append("span")
+                .classed("fastest", cumFastest)
                 .classed("dubious", cumDubious)
                 .text(topLine);
 
             cell.append("br");
             cell.append("span")
+                .classed("fastest", splitFastest)
                 .classed("dubious", splitDubious)
                 .text(bottomLine);
                 
@@ -206,13 +208,17 @@
                 numberCell.text(rank);
             }
             
-            addCell(tableRow, competitor.name, competitor.club, false, false);
-            addCell(tableRow, getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false);
+            addCell(tableRow, competitor.name, competitor.club, false, false, false, false);
+            addCell(tableRow, getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false, false, false);
             
             d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {
+                var formattedCumTime = formatTime(competitor.getOriginalCumulativeTimeTo(controlNum), precision);
+                var formattedSplitTime = formatTime(competitor.getOriginalSplitTimeTo(controlNum), precision);
+                var isCumTimeFastest = (competitor.getCumulativeRankTo(controlNum) === 1);
+                var isSplitTimeFastest = (competitor.getSplitRankTo(controlNum) === 1);
                 var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
                 var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
-                addCell(tableRow, formatTime(competitor.getOriginalCumulativeTimeTo(controlNum), precision), formatTime(competitor.getOriginalSplitTimeTo(controlNum), precision), "time", isCumDubious, isSplitDubious);
+                addCell(tableRow, formattedCumTime, formattedSplitTime, "time", isCumTimeFastest, isSplitTimeFastest, isCumDubious, isSplitDubious);
             });
         }, this);
     };
