@@ -1,7 +1,7 @@
 /*!
  *  SplitsBrowser - Orienteering results analysis.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.3.4", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.3.5", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -616,25 +616,27 @@ var SplitsBrowser = { Version: "3.3.4", Model: {}, Input: {}, Controls: {}, Mess
     /**
     * Returns the rank of the competitor's split to the given control.  If the
     * control index given is zero (i.e. the start), or if the competitor has no
-    * time recorded for that control, null is returned.
+    * time recorded for that control, or the ranks have not been set on this
+    * competitor, null is returned.
     * @param {Number} controlIndex - Index of the control (0 = start).
     * @return {Number} The split time in seconds for the competitor to the
     *      given control.
     */
     Competitor.prototype.getSplitRankTo = function (controlIndex) {
-        return (controlIndex === 0) ? null : this.splitRanks[controlIndex - 1];
+        return (this.splitRanks === null || controlIndex === 0) ? null : this.splitRanks[controlIndex - 1];
     };
     
     /**
     * Returns the rank of the competitor's cumulative split to the given
     * control.  If the control index given is zero (i.e. the start), or if the
-    * competitor has no time recorded for that control, null is returned.
+    * competitor has no time recorded for that control, or if the ranks have
+    * not been set on this competitor, null is returned.  
     * @param {Number} controlIndex - Index of the control (0 = start).
     * @return {Number} The split time in seconds for the competitor to the
     *      given control.
     */
     Competitor.prototype.getCumulativeRankTo = function (controlIndex) {
-        return (controlIndex === 0) ? null : this.cumRanks[controlIndex - 1];
+        return (this.cumRanks === null || controlIndex === 0) ? null : this.cumRanks[controlIndex - 1];
     };
     
     /**

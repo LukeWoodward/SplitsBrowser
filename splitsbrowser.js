@@ -1,7 +1,7 @@
 /*!
  *  SplitsBrowser - Orienteering results analysis.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.3.4", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.3.5", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -791,25 +791,27 @@ var SplitsBrowser = { Version: "3.3.4", Model: {}, Input: {}, Controls: {}, Mess
     /**
     * Returns the rank of the competitor's split to the given control.  If the
     * control index given is zero (i.e. the start), or if the competitor has no
-    * time recorded for that control, null is returned.
+    * time recorded for that control, or the ranks have not been set on this
+    * competitor, null is returned.
     * @param {Number} controlIndex - Index of the control (0 = start).
     * @return {Number} The split time in seconds for the competitor to the
     *      given control.
     */
     Competitor.prototype.getSplitRankTo = function (controlIndex) {
-        return (controlIndex === 0) ? null : this.splitRanks[controlIndex - 1];
+        return (this.splitRanks === null || controlIndex === 0) ? null : this.splitRanks[controlIndex - 1];
     };
     
     /**
     * Returns the rank of the competitor's cumulative split to the given
     * control.  If the control index given is zero (i.e. the start), or if the
-    * competitor has no time recorded for that control, null is returned.
+    * competitor has no time recorded for that control, or if the ranks have
+    * not been set on this competitor, null is returned.  
     * @param {Number} controlIndex - Index of the control (0 = start).
     * @return {Number} The split time in seconds for the competitor to the
     *      given control.
     */
     Competitor.prototype.getCumulativeRankTo = function (controlIndex) {
-        return (controlIndex === 0) ? null : this.cumRanks[controlIndex - 1];
+        return (this.cumRanks === null || controlIndex === 0) ? null : this.cumRanks[controlIndex - 1];
     };
     
     /**
@@ -5804,7 +5806,7 @@ var SplitsBrowser = { Version: "3.3.4", Model: {}, Input: {}, Controls: {}, Mess
                     .on("mousemove", function () { outerThis.mouseMove(CONTAINER_COMPETITOR_INDEX); })
                     .on("mouseup", function () { outerThis.stopDrag(); });
                               
-        d3.select(document).on("mouseup", function () { outerThis.stopDrag(); });
+        d3.select(document.body).on("mouseup", function () { outerThis.stopDrag(); });
         
         this.setMessages();
     };
@@ -9036,14 +9038,16 @@ var SplitsBrowser = { Version: "3.3.4", Model: {}, Input: {}, Controls: {}, Mess
         var tableBody = this.table.select("tbody");
         tableBody.selectAll("tr").remove();
         
-        function addCell(tableRow, topLine, bottomLine, cssClass, cumDubious, splitDubious) {
+        function addCell(tableRow, topLine, bottomLine, cssClass, cumFastest, splitFastest, cumDubious, splitDubious) {
             var cell = tableRow.append("td");
             cell.append("span")
+                .classed("fastest", cumFastest)
                 .classed("dubious", cumDubious)
                 .text(topLine);
 
             cell.append("br");
             cell.append("span")
+                .classed("fastest", splitFastest)
                 .classed("dubious", splitDubious)
                 .text(bottomLine);
                 
@@ -9074,13 +9078,17 @@ var SplitsBrowser = { Version: "3.3.4", Model: {}, Input: {}, Controls: {}, Mess
                 numberCell.text(rank);
             }
             
-            addCell(tableRow, competitor.name, competitor.club, false, false);
-            addCell(tableRow, getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false);
+            addCell(tableRow, competitor.name, competitor.club, false, false, false, false);
+            addCell(tableRow, getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false, false, false);
             
             d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {
+                var formattedCumTime = formatTime(competitor.getOriginalCumulativeTimeTo(controlNum), precision);
+                var formattedSplitTime = formatTime(competitor.getOriginalSplitTimeTo(controlNum), precision);
+                var isCumTimeFastest = (competitor.getCumulativeRankTo(controlNum) === 1);
+                var isSplitTimeFastest = (competitor.getSplitRankTo(controlNum) === 1);
                 var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
                 var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
-                addCell(tableRow, formatTime(competitor.getOriginalCumulativeTimeTo(controlNum), precision), formatTime(competitor.getOriginalSplitTimeTo(controlNum), precision), "time", isCumDubious, isSplitDubious);
+                addCell(tableRow, formattedCumTime, formattedSplitTime, "time", isCumTimeFastest, isSplitTimeFastest, isCumDubious, isSplitDubious);
             });
         }, this);
     };
