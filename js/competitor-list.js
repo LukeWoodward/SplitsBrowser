@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser CompetitorList - Lists the competitors down the left side.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -109,7 +109,7 @@
                     .on("mousemove", function () { outerThis.mouseMove(CONTAINER_COMPETITOR_INDEX); })
                     .on("mouseup", function () { outerThis.stopDrag(); });
                               
-        d3.select(document).on("mouseup", function () { outerThis.stopDrag(); });
+        d3.select(document.body).on("mouseup", function () { outerThis.stopDrag(); });
         
         this.setMessages();
     };
