@@ -693,6 +693,30 @@
             });
     });
     
+    QUnit.test("Can parse a string that has a single class with a single competitor and complete status in IOF v2.0.3 format", function (assert) {
+        runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [getPerson()]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+            },
+            {
+                preprocessor: function (xml) { return xml.replace(/<ResultList>/, '<ResultList status="complete">'); },
+                formatters: [Version2Formatter]
+            }
+        );
+    });
+    
+    QUnit.test("Can parse a string that has a single class with a single competitor and complete status in IOF v3.0 format", function (assert) {
+        runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [getPerson()]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+            },
+            {
+                preprocessor: function (xml) { return xml.replace(/<ResultList/, '<ResultList status="Complete"'); },
+                formatters: [Version3Formatter]
+            }
+        );
+    });
+    
     QUnit.test("Can parse a string that has a single class with a single competitor with forename only", function (assert) {
         var person = getPerson();
         delete person.surname;

@@ -346,7 +346,7 @@
         }
         
         var status = rootElement.attr("status");
-        if (!isUndefined(status) && status.toLowerCase() !== "Complete") {
+        if (!isUndefined(status) && status.toLowerCase() !== "complete") {
             throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
         }
     };
@@ -548,11 +548,6 @@
         }
         
         reader.checkVersion(rootElement);
-        
-        var status = rootElement.attr("status");
-        if (!isUndefined(status) && status.toLowerCase() !== reader.completeStatus) {
-            throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
-        }
     }
     
     /**
