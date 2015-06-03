@@ -21,4 +21,4 @@
 
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.3.5", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.3.6", Model: {}, Input: {}, Controls: {}, Messages: {} };

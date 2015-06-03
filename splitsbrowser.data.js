@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.3.5", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.3.6", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -4015,7 +4015,7 @@ var SplitsBrowser = { Version: "3.3.5", Model: {}, Input: {}, Controls: {}, Mess
         }
         
         var status = rootElement.attr("status");
-        if (!isUndefined(status) && status.toLowerCase() !== "Complete") {
+        if (!isUndefined(status) && status.toLowerCase() !== "complete") {
             throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
         }
     };
@@ -4217,11 +4217,6 @@ var SplitsBrowser = { Version: "3.3.5", Model: {}, Input: {}, Controls: {}, Mess
         }
         
         reader.checkVersion(rootElement);
-        
-        var status = rootElement.attr("status");
-        if (!isUndefined(status) && status.toLowerCase() !== reader.completeStatus) {
-            throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
-        }
     }
     
     /**

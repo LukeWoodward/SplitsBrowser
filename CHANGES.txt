@@ -16,3 +16,5 @@ SplitsBrowser changelog:
 3.3.2:  Read classifiers from SI-format files.
 3.3.3:  All, None and Crossing Runners buttons operate only on filtered competitors.
 3.3.4:  Zero splits in CSV files, ignore Additional controls in IOF XML v3 data.
+3.3.5:  Highlight fastest competitor times, work around d3.select(document) bug.
+3.3.6:  Fix handling of Complete status in IOF XML format files (issue #32).
