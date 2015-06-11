@@ -79,6 +79,7 @@
     * @return {?Number} The number of seconds.
     */
     SplitsBrowser.parseTime = function (time) {
+        time = time.trim();
         if (time.match(/^\d+:\d\d$/)) {
             return parseInt(time.substring(0, time.length - 3), 10) * 60 + parseInt(time.substring(time.length - 2), 10);
         } else if (time.match(/^\d+:\d\d:\d\d$/)) {

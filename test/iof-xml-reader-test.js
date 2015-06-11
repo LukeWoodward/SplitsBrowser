@@ -1013,15 +1013,37 @@
              formatters: [Version3Formatter]});
     });
     
-    QUnit.test("Cannot parse a string that contains a competitor with a split with a missing time", function (assert) {
+    QUnit.test("Can parse a string that contains a competitor with a split with a missing time", function (assert) {
         var person = getPerson();      
-        runFailingXmlFormatParseTest(assert, [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}],
+        runSingleCourseXmlFormatParseTest(assert, [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}],
+            function (course) {
+                assert.strictEqual(course.classes.length, 1);
+                assert.strictEqual(course.classes[0].numControls, 3);
+            },
             {preprocessor: function (xml) {
                 var timeRegex = /<Time>[^<]+<\/Time>/g;
                 timeRegex.exec(xml); // Skip the first match.
                 var secondMatch = timeRegex.exec(xml)[0];
                 return xml.replace(secondMatch, '');
             }}); 
+    });
+    
+    QUnit.test("Can parse a string that contains a competitor with their total time wrapped in a Clock element.", function (assert) {
+        var person = getPerson();      
+        runSingleCourseXmlFormatParseTest(assert, [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}],
+            function (course) {
+                assert.strictEqual(course.classes.length, 1);
+                assert.strictEqual(course.classes[0].competitors.length, 1);
+                assert.strictEqual(course.classes[0].competitors[0].totalTime, person.totalTime, "Should read competitor's total time");
+            },
+            {preprocessor: function (xml) {
+                var timeRegex = /<Time>[^<]+<\/Time>/g;
+                var firstMatch = timeRegex.exec(xml)[0];
+                var firstMatchTime = firstMatch.substring(6, firstMatch.length - 7);
+                xml = xml.replace(firstMatch, '<Time>\r\n<Clock>' + firstMatchTime + '</Clock>\r\n</Time>' );
+                return xml;
+            },
+            formatters: [Version2Formatter]});
     });
     
     QUnit.test("Can parse a string that contains a competitor that mispunched a control", function (assert) {

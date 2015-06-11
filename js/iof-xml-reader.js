@@ -297,12 +297,7 @@
         }
 
         var timeStr = $("> Time", splitTimeElement).text();
-        if (timeStr === "") {
-            throwInvalidData("Split time missing for control '" + code + "'");
-        }
-        
-        var time = parseTime(timeStr);
-        
+        var time = (timeStr === "") ? null : parseTime(timeStr);
         return {code: code, time: time};
     };
     
@@ -519,10 +514,7 @@
             time = null;
         } else {
             var timeStr = $("> Time", splitTimeElement).text();
-            if (timeStr === "") {
-                throwInvalidData("Split time missing for control '" + code + "'");
-            }
-            time = Version3Reader.readTime(timeStr);
+            time = (timeStr === "") ? null : Version3Reader.readTime(timeStr);
         }
         
         return {code: code, time: time};

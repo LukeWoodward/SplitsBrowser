@@ -152,6 +152,10 @@
     QUnit.test("Can parse large time in hours, minutes and seconds correctly", function (assert) {
         assert.strictEqual(parseTime("781:49:18"), 781 * 3600 + 49 * 60 + 18);
     });
+    
+    QUnit.test("Can parse a time with leading and trailing whitespace", function (assert) {
+        assert.strictEqual(parseTime("   \t    \r\n  \n  13:43   \t \r \r \r\n "), 13 * 60 + 43);
+    });
    
     QUnit.test("Can parse null value placeholder back to null", function (assert) {
         assert.strictEqual(parseTime(SplitsBrowser.NULL_TIME_PLACEHOLDER), null);
