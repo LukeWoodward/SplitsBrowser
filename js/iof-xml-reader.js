@@ -364,7 +364,7 @@
     */
     Version3Reader.readCourseFromClass = function (classResultElement) {
         var courseElement = $("> Course", classResultElement);
-        var id = $("> Id", courseElement).text();
+        var id = $("> Id", courseElement).text() || null;
         var name = $("> Name", courseElement).text();
         var lengthStr = $("> Length", courseElement).text();
         var length;
@@ -654,6 +654,21 @@
             }
             
             cls.competitors.push(competitor.competitor);
+        }
+        
+        if (cls.course.id === null && cls.controls.length > 0) {
+            // No course ID given, so join the controls together with commas
+            // and use that instead.  Course IDs are only used internally by
+            // this reader in order to merge classes, and the comma-separated
+            // list of controls ought to work as a substitute identifier in
+            // lieu of an 'official' course ID. 
+            //
+            // This is intended mainly for IOF XML v2.0.3 files in particular
+            // as they tend not to have course IDs.  However, this can also be
+            // used with IOF XML v3.0 files that happen not to have course IDs.
+            //
+            // Idea thanks to 'dfgeorge' (David George?)
+            cls.course.id = cls.controls.join(",");
         }
         
         return cls;

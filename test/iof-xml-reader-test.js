@@ -1135,4 +1135,48 @@
             },
             {formatters: [Version3Formatter]});
     });
+    
+    QUnit.test("Can parse a string that contains two classes each with one competitor, deducing that the courses are the same using control codes", function (assert) {
+        var person1 = getPerson();
+        var person2 = getPerson();
+        person2.forename = "Fred";
+        person2.surname = "Jones";
+        
+        var classes = [
+            {name: "Test Class 1", length: 2300, competitors: [person1]},
+            {name: "Test Class 2", length: 2300, competitors: [person2]}
+        ];
+        
+        runXmlFormatParseTest(classes,
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 2, "Expected two classes - " + formatterName);
+                assert.strictEqual(eventData.courses.length, 1, "Expected one course - " + formatterName);
+                if (eventData.classes.length === 2 && eventData.courses.length === 1) {
+                    assert.deepEqual(eventData.courses[0].classes, eventData.classes);
+                }
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains two classes each with one competitor and no controls, without deducing that the courses are the same", function (assert) {
+        var person1 = getPerson();
+        var person2 = getPerson();
+        person2.forename = "Fred";
+        person2.surname = "Jones";
+        [person1, person2].forEach(function (person) {
+            person.totalTime = 100;
+            person.controls = []
+            person.cumTimes = [];
+        });
+        
+        var classes = [
+            {name: "Test Class 1", length: 2300, competitors: [person1]},
+            {name: "Test Class 2", length: 2300, competitors: [person2]}
+        ];
+        
+        runXmlFormatParseTest(classes,
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 2, "Expected two classes - " + formatterName);
+                assert.strictEqual(eventData.courses.length, 2, "Expected two courses - " + formatterName);
+            });
+    });
 })();
