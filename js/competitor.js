@@ -607,7 +607,7 @@
     * Returns an array of objects that record the indexes around which times in
     * the given array are NaN.
     * @param {Array} times - Array of time values.
-    * @return {Array} Array of objects that 
+    * @return {Array} Array of objects that record indexes around dubious times.
     */
     function getIndexesAroundDubiousTimes(times) {
         var dubiousTimeInfo = [];
