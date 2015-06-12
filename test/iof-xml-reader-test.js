@@ -1109,9 +1109,6 @@
         var person2 = getPerson();
         person2.forename = "Fred";
         person2.surname = "Jones";
-        person2.controls.push("199");
-        person2.cumTimes.push(person2.cumTimes[2] + 177);
-        person2.totalTime = person2.cumTimes[2] + 177 + 94;
         
         var persons = [person1, person2];
         var classes = [
