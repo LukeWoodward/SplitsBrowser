@@ -983,8 +983,13 @@
             function (course) {
                 assert.deepEqual(course.controls, person.controls);
             },
-            {preprocessor: function (xml) { return xml.replace(/ControlCode>/g, "Control>"); },
-             formatters: [Version2Formatter]});
+            {
+                preprocessor: function (xml) {
+                    return xml.replace(/<ControlCode>/g, "<Control><ControlCode>")
+                              .replace(/<\/ControlCode>/g, "</ControlCode></Control>");
+                },
+                formatters: [Version2Formatter]
+            });
     });
     
     QUnit.test("Can parse a string that uses separate course names", function (assert) {

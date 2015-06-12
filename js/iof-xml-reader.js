@@ -289,7 +289,7 @@
         // IOF v2 allows ControlCode or Control elements.
         var code = $("> ControlCode", splitTimeElement).text();
         if (code === "") {
-            code = $("> Control", splitTimeElement).text();
+            code = $("> Control > ControlCode", splitTimeElement).text();
         }
         
         if (code === "") {
