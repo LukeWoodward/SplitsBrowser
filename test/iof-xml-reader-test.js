@@ -1161,7 +1161,7 @@
         person2.surname = "Jones";
         [person1, person2].forEach(function (person) {
             person.totalTime = 100;
-            person.controls = []
+            person.controls = [];
             person.cumTimes = [];
         });
         
