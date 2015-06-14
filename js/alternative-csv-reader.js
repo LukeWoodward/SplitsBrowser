@@ -64,6 +64,10 @@
     // Supported delimiters.
     var DELIMITERS = [",", ";"];
     
+    // All control codes except perhaps the finish are alphanumeric.
+    var controlCodeRegexp = /^[A-Za-z0-9]+$/;
+    
+    
     /**
     * Trim trailing empty-string entries from the given array.
     * The given array is mutated.
@@ -79,48 +83,234 @@
     }
     
     /**
-    * Some lines of some formats can have multiple delimited competitors, which
-    * will move the following columns out of their normal place.  Identify any
-    * such situations and merge them together.
-    * @param {Array} row - The row of data read from the file.
-    * @param {Object} format - The format of this CSV file.
+    * Object used to read data from an alternative CSV file.
+    * @constructor
+    * @param {Object} format - Object that describes the data format to read.
     */
-    function adjustLinePartsForMultipleCompetitors(row, format) {
-        if (format.allowMultipleCompetitorNames) {
-            while (row.length > format.name + 1 && row[format.name + 1].match(/^\s\S/)) {
-                row[format.name] += "," + row[format.name + 1];
-                row.splice(format.name + 1, 1);
-            }
-        }
+    function Reader (format) {
+        this.format = format;
+        this.classes = d3.map();
+        this.delimiter = null;
+        
+        // Return the offset within the control data that should be used when
+        // looking for control codes.  This will be 0 if the format specifies a
+        // finish time, and the format step if the format has no finish time.
+        // (In this case, the finish time is with the control data, but we
+        // don't wish to read any control code specified nor validate it.)
+        this.controlsTerminationOffset = (format.finishTime === null) ? format.step : 0;
     }
     
     /**
     * Determine the delimiter used to delimit data.
     * @param {String} firstDataLine - The first data line of the file.
-    * @param {Object} format - The data format.
     * @return {?String} The delimiter separating the data, or null if no
     *    suitable delimiter was found.
     */
-    function determineDelimiter(firstDataLine, format) {
+    Reader.prototype.determineDelimiter = function (firstDataLine) {
         for (var index = 0; index < DELIMITERS.length; index += 1) {
             var delimiter = DELIMITERS[index];
             var lineParts = firstDataLine.split(delimiter);
             trimTrailingEmptyCells(lineParts);
-            if (lineParts.length > format.controlsOffset) {
+            if (lineParts.length > this.format.controlsOffset) {
                 return delimiter;
             }
         }
         
         return null;
-    }
+    };
+    
+    /**
+    * Some lines of some formats can have multiple delimited competitors, which
+    * will move the following columns out of their normal place.  Identify any
+    * such situations and merge them together.
+    * @param {Array} row - The row of data read from the file.
+    */
+    Reader.prototype.adjustLinePartsForMultipleCompetitors = function (row) {
+        if (this.format.allowMultipleCompetitorNames) {
+            while (row.length > this.format.name + 1 && row[this.format.name + 1].match(/^\s\S/)) {
+                row[this.format.name] += "," + row[this.format.name + 1];
+                row.splice(this.format.name + 1, 1);
+            }
+        }
+    };
+    
+    /**
+    * Check the first line of data read in to verify that all of the control
+    * codes specified are alphanumeric.
+    * @param {String} firstLine - The first line of data from the file (not
+    *     the header line).
+    */
+    Reader.prototype.checkControlCodesAlphaNumeric = function (firstLine) {
+        var lineParts = firstLine.split(this.delimiter);
+        trimTrailingEmptyCells(lineParts);
+        this.adjustLinePartsForMultipleCompetitors(lineParts, this.format);
+        
+        for (var index = this.format.controlsOffset; index + this.controlsTerminationOffset < lineParts.length; index += this.format.step) {
+            if (!controlCodeRegexp.test(lineParts[index])) {
+                throwWrongFileFormat("Data appears not to be in an alternative CSV format - data in cell " + index + " of the first row ('" + lineParts[index] + "') is not an number");
+            }
+        }
+    };
+    
+    /**
+    * Checks that the given row has the expected length according to the
+    * format.  The expected length is the controls offset plus the number of
+    * controls times the step, provided the row has a number of controls.
+    * If the row is too short, an exception is thrown.  If the row is too long,
+    * it is shortened to have the expected length.
+    * @param {Array} row - Array of row data.
+    * @param {Number} rowIndex - The row index of the row of data.
+    */
+    Reader.prototype.checkRowLength = function (row, rowIndex) {
+        if (this.format.controlCount !== null) {
+            var controlCount = parseInt(row[this.format.controlCount], 10);
+            if (isNaNStrict(controlCount)) {
+                throwInvalidData("Control count '" + row[this.format.controlCount] + "' is not a valid number");
+            }
+            
+            var expectedRowLength = this.format.controlsOffset + controlCount * this.format.step;
+            if (row.length < expectedRowLength) {
+                throwInvalidData("Data in row " + rowIndex + " should have at least " + expectedRowLength + " parts (for " + controlCount + " controls) but only has " + row.length);
+            } else if (row.length > expectedRowLength) {
+                row.splice(expectedRowLength, row.length - expectedRowLength);
+            }
+        }
+    };
+    
+    /**
+    * Adds the competitor to the course with the given name.
+    * @param {Competitor} competitor - The competitor object read from the row.
+    * @param {String} courseName - The name of the course.
+    * @param {Array} row - Array of string parts making up the row of data read.
+    */
+    Reader.prototype.addCompetitorToCourse = function (competitor, courseName, row) {
+        if (this.classes.has(courseName)) {
+            var cls = this.classes.get(courseName);
+            var cumTimes = competitor.getAllOriginalCumulativeTimes();
+            // Subtract one from the list of cumulative times for the 
+            // cumulative time at the start (always 0), and add one on to
+            // the count of controls in the class to cater for the finish.
+            if (cumTimes.length - 1 !== (cls.controls.length + 1)) {
+                throwInvalidData("Competitor '" + competitor.name + "' has the wrong number of splits for course '" + courseName + "': " +
+                         "expected " + (cls.controls.length + 1) + ", actual " + (cumTimes.length - 1));
+            }
+            
+            cls.competitors.push(competitor);
+        } else {
+            // New course/class.
+            
+            // Determine the list of controls, ignoring the finish.
+            var controls = [];
+            for (var controlIndex = this.format.controlsOffset; controlIndex + this.controlsTerminationOffset < row.length; controlIndex += this.format.step) {
+                controls.push(row[controlIndex]);
+            }
+        
+            var courseLength = (this.format.length === null) ? null : parseCourseLength(row[this.format.length]);
+            var courseClimb = (this.format.climb === null) ? null : parseCourseClimb(row[this.format.climb]);
+        
+            this.classes.set(courseName, {length: courseLength, climb: courseClimb, controls: controls, competitors: [competitor]});
+        }
+    };
+    
+    /**
+    * Read a row of data from a line of the file.
+    * @param {String} line - The line of data read from the file.
+    * @param {Number} rowIndex - The row index of the row being read.
+    */
+    Reader.prototype.readDataRow = function (line, rowIndex) {
+        var row = line.split(this.delimiter);
+        trimTrailingEmptyCells(row);
+        this.adjustLinePartsForMultipleCompetitors(row);
+        
+        if (row.length < this.format.controlsOffset) {
+            // Probably a blank line.  Ignore it.
+            return;
+        }
+        
+        while ((row.length - this.format.controlsOffset) % this.format.step !== 0) {
+            // Competitor might be missing cumulative time to last control.
+            row.push("");
+        }
+        
+        this.checkRowLength(row, rowIndex);
+        
+        var competitorName = row[this.format.name];
+        var club = row[this.format.club];
+        var courseName = row[this.format.courseName];
+        var startTime = parseTime(row[this.format.startTime]);
+        
+        var cumTimes = [0];
+        for (var cumTimeIndex = this.format.controlsOffset + 1; cumTimeIndex < row.length; cumTimeIndex += this.format.step) {
+            cumTimes.push(parseTime(row[cumTimeIndex]));
+        }
+        
+        if (this.format.finishTime !== null) {
+            var finishTime = parseTime(row[this.format.finishTime]);
+            var totalTime = (startTime === null || finishTime === null) ? null : (finishTime - startTime);
+            cumTimes.push(totalTime);
+        }
+        
+        var order = (this.classes.has(courseName)) ? this.classes.get(courseName).competitors.length + 1 : 1;
+        
+        var competitor = fromOriginalCumTimes(order, competitorName, club, startTime, cumTimes);
+        if (this.format.placing !== null && competitor.completed()) {
+            var placing = row[this.format.placing];
+            if (!placing.match(/^\d*$/)) {
+                competitor.setNonCompetitive();
+            }
+        }
+        
+        if (!competitor.hasAnyTimes()) {
+            competitor.setNonStarter();
+        }
+        
+        this.addCompetitorToCourse(competitor, courseName, row);
+    };
+    
+    /**
+    * Given an array of objects containing information about each of the
+    * course-classes in the data, create CourseClass and Course objects,
+    * grouping classes by the list of controls
+    * @return {Object} Object that contains the courses and classes.
+    */
+    Reader.prototype.createClassesAndCourses = function () {
+        var courseClasses = [];
+
+        // Group the classes by the list of controls.  Two classes using the
+        // same list of controls can be assumed to be using the same course.
+        var coursesByControlsLists = d3.map();
+        
+        this.classes.entries().forEach(function (keyValuePair) {
+            var className = keyValuePair.key;
+            var cls = keyValuePair.value;
+            var courseClass = new CourseClass(className, cls.controls.length, cls.competitors);
+            courseClasses.push(courseClass);
+            
+            var controlsList = cls.controls.join(",");
+            if (coursesByControlsLists.has(controlsList)) {
+                coursesByControlsLists.get(controlsList).classes.push(courseClass);
+            } else {
+                coursesByControlsLists.set(
+                    controlsList, {name: className, classes: [courseClass], length: cls.length, climb: cls.climb, controls: cls.controls});
+            }
+        });
+        
+        var courses = [];
+        coursesByControlsLists.values().forEach(function (courseObject) {
+            var course = new Course(courseObject.name, courseObject.classes, courseObject.length, courseObject.climb, courseObject.controls);    
+            courseObject.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
+            courses.push(course);
+        });
+        
+        return {classes: courseClasses, courses: courses};
+    };
     
     /**
     * Parse alternative CSV data for an entire event.
     * @param {String} eventData - String containing the entire event data.
-    * @param {Object} format - The format object that describes the input format.
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */    
-    function parseEventDataWithFormat(eventData, format) {
+    Reader.prototype.parseEventData = function (eventData) {
         eventData = normaliseLineEndings(eventData);
         
         var lines = eventData.split(/\n/);
@@ -129,152 +319,27 @@
             throwWrongFileFormat("Data appears not to be in an alternative CSV format - too few lines");
         }
         
-        var delimiter = determineDelimiter(lines[1], format);
-        if (delimiter === null) {
-            throwWrongFileFormat("Data appears not to be in an alternative CSV format - first data line has fewer than " + format.controlsOffset + " parts when separated by any recognised delimiter");
-        }
-        
-        var lineParts = lines[1].split(delimiter);
-        trimTrailingEmptyCells(lineParts);
-        adjustLinePartsForMultipleCompetitors(lineParts, format);
-        
-        // Check that all control codes except perhaps the finish are alphanumeric.
-        var controlCodeRegexp = /^[A-Za-z0-9]+$/;
-        
-        // Don't check that the control code for the finish is alphanumeric if the
-        // finish time is specified elsewhere.
-        var terminationOffset = (format.finishTime === null) ? format.step : 0;
-        
-        for (var index = format.controlsOffset; index + terminationOffset < lineParts.length; index += format.step) {
-            if (!controlCodeRegexp.test(lineParts[index])) {
-                throwWrongFileFormat("Data appears not to be in an alternative CSV format - data in cell " + index + " of the first row ('" + lineParts[index] + "') is not an number");
-            }
-        }
-        
-        var classes = d3.map();
-        for (var rowIndex = 1; rowIndex < lines.length; rowIndex += 1) {
-            var row = lines[rowIndex].split(delimiter);
-            trimTrailingEmptyCells(row);
-            adjustLinePartsForMultipleCompetitors(row, format);
-            
-            if (row.length < format.controlsOffset) {
-                // Probably a blank line.  Ignore it.
-                continue;
-            }
-            
-            while ((row.length - format.controlsOffset) % format.step !== 0) {
-                // Competitor might be missing cumulative time to last control.
-                row.push("");
-            }
-            
-            var competitorName = row[format.name];
-            var club = row[format.club];
-            var courseName = row[format.courseName];
-            var startTime = parseTime(row[format.startTime]);
-            
-            var expectedRowLength;
-            if (format.controlCount === null) {
-                expectedRowLength = row.length;
-            } else {
-                var controlCount = parseInt(row[format.controlCount], 10);
-                if (isNaNStrict(controlCount)) {
-                    throwInvalidData("Control count '" + row[format.controlCount] + "' is not a valid number");
-                }
-                
-                expectedRowLength = format.controlsOffset + controlCount * format.step;
-                if (row.length < expectedRowLength) {
-                    throwInvalidData("Data in row " + rowIndex + " should have at least " + expectedRowLength + " parts (for " + controlCount + " controls) but only has " + row.length);
-                }
-            }
-            
-            var courseLength = (format.length === null) ? null : parseCourseLength(row[format.length]);
-            var courseClimb = (format.climb === null) ? null : parseCourseClimb(row[format.climb]);
-            
-            var cumTimes = [0];
-            for (var cumTimeIndex = format.controlsOffset + 1; cumTimeIndex < expectedRowLength; cumTimeIndex += format.step) {
-                cumTimes.push(parseTime(row[cumTimeIndex]));
-            }
-            
-            if (format.finishTime !== null) {
-                var finishTime = parseTime(row[format.finishTime]);
-                var totalTime = (startTime === null || finishTime === null) ? null : (finishTime - startTime);
-                cumTimes.push(totalTime);
-            }
-            
-            var order = (classes.has(courseName)) ? classes.get(courseName).competitors.length + 1 : 1;
-            
-            var competitor = fromOriginalCumTimes(order, competitorName, club, startTime, cumTimes);
-            if (format.placing !== null && competitor.completed()) {
-                var placing = row[format.placing];
-                if (!placing.match(/^\d*$/)) {
-                    competitor.setNonCompetitive();
-                }
-            }
-            
-            if (!competitor.hasAnyTimes()) {
-                competitor.setNonStarter();
-            }
-            
-            if (classes.has(courseName)) {
-                var cls = classes.get(courseName);
-                // Subtract one from the list of cumulative times for the 
-                // cumulative time at the start (always 0), and add one on to
-                // the count of controls in the class to cater for the finish.
-                if (cumTimes.length - 1 !== (cls.controls.length + 1)) {
-                    throwInvalidData("Competitor '" + competitorName + "' has the wrong number of splits for course '" + courseName + "': " +
-                             "expected " + (cls.controls.length + 1) + ", actual " + (cumTimes.length - 1));
-                }
-                
-                cls.competitors.push(competitor);
-            } else {
-                // New course/class.
-                
-                // Determine the list of controls, ignoring the finish.
-                var controls = [];
-                for (var controlIndex = format.controlsOffset; controlIndex + terminationOffset < expectedRowLength; controlIndex += format.step) {
-                    controls.push(row[controlIndex]);
-                }
-            
-                classes.set(courseName, {length: courseLength, climb: courseClimb, controls: controls, competitors: [competitor]});
-            }
-        }
-        
-        var courseClasses = [];
+        var firstDataLine = lines[1];
 
-        // Group the classes by the list of controls.  Two classes using the
-        // same list of controls can be assumed to be using the same course.
-        var controlsLists = [];
-        var coursesByControlsLists = d3.map();
+        this.delimiter = this.determineDelimiter(firstDataLine);
+        if (this.delimiter === null) {
+            throwWrongFileFormat("Data appears not to be in an alternative CSV format - first data line has fewer than " + this.format.controlsOffset + " parts when separated by any recognised delimiter");
+        }
         
-        classes.keys().forEach(function (className) {
-            var cls = classes.get(className);
-            var courseClass = new CourseClass(className, cls.controls.length, cls.competitors);
-            courseClasses.push(courseClass);
-            
-            var controlsList = cls.controls.join(",");
-            if (coursesByControlsLists.has(controlsList)) {
-                coursesByControlsLists.get(controlsList).classes.push(courseClass);
-            } else {
-                controlsLists.push(controlsList);
-                coursesByControlsLists.set(
-                    controlsList, {name: className, classes: [courseClass], length: cls.length, climb: cls.climb, controls: cls.controls});
-            }
-        });
+        this.checkControlCodesAlphaNumeric(firstDataLine);
         
-        var courses = [];
-        controlsLists.forEach(function(controlsList) {
-            var courseObject = coursesByControlsLists.get(controlsList);
-            var course = new Course(courseObject.name, courseObject.classes, courseObject.length, courseObject.climb, courseObject.controls);    
-            courseObject.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
-            courses.push(course);
-        });
-    
-        return new Event(courseClasses, courses);
-    }
+        for (var rowIndex = 1; rowIndex < lines.length; rowIndex += 1) {
+            this.readDataRow(lines[rowIndex], rowIndex);
+        }
+        
+        var classesAndCourses = this.createClassesAndCourses();
+        return new Event(classesAndCourses.classes, classesAndCourses.courses);
+    };
     
     SplitsBrowser.Input.AlternativeCSV = {
         parseTripleColumnEventData: function (eventData) {
-            return parseEventDataWithFormat(eventData, TRIPLE_COLUMN_FORMAT);
+            var reader = new Reader(TRIPLE_COLUMN_FORMAT);
+            return reader.parseEventData(eventData);
         }
     };
 })();
