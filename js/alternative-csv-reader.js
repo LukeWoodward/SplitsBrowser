@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Alternative CSV - Read in alternative CSV files.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -240,14 +240,32 @@
         }
         
         var courseClasses = [];
-        var courses = [];
+
+        // Group the classes by the list of controls.  Two classes using the
+        // same list of controls can be assumed to be using the same course.
+        var controlsLists = [];
+        var coursesByControlsLists = d3.map();
+        
         classes.keys().forEach(function (className) {
             var cls = classes.get(className);
             var courseClass = new CourseClass(className, cls.controls.length, cls.competitors);
-            
-            var course = new Course(className, [courseClass], cls.length, cls.climb, cls.controls);
-            courseClass.setCourse(course);
             courseClasses.push(courseClass);
+            
+            var controlsList = cls.controls.join(",");
+            if (coursesByControlsLists.has(controlsList)) {
+                coursesByControlsLists.get(controlsList).classes.push(courseClass);
+            } else {
+                controlsLists.push(controlsList);
+                coursesByControlsLists.set(
+                    controlsList, {name: className, classes: [courseClass], length: cls.length, climb: cls.climb, controls: cls.controls});
+            }
+        });
+        
+        var courses = [];
+        controlsLists.forEach(function(controlsList) {
+            var courseObject = coursesByControlsLists.get(controlsList);
+            var course = new Course(courseObject.name, courseObject.classes, courseObject.length, courseObject.climb, courseObject.controls);    
+            courseObject.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
             courses.push(course);
         });
     
@@ -259,5 +277,4 @@
             return parseEventDataWithFormat(eventData, TRIPLE_COLUMN_FORMAT);
         }
     };
-        
 })();
