@@ -759,7 +759,7 @@
     
     /**
     * Constructs a recognizer for formatting an HTML format supposedly from
-    * 'OEvent'.  The file contains exactly two tables, one of which contains
+    * 'OEvent'.
     *
     * Data in this format is contained within a single HTML table, with another
     * table before it containing various (ignored) header information.
