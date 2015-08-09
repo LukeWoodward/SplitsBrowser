@@ -136,6 +136,14 @@
     QUnit.test("Can parse a one minute two second string with two-digit minutes to 62 seconds", function (assert) {
         assert.strictEqual(parseTime("01:02"), 62);
     });
+    
+    QUnit.test("Can parse a one minute two point seven four second string to 62.47 seconds", function (assert) {
+        assert.strictEqual(parseTime("1:02.47"), 62.47);
+    });
+    
+    QUnit.test("Can parse a one minute two comma seven four second string to 62.47 seconds", function (assert) {
+        assert.strictEqual(parseTime("1:02,47"), 62.47);
+    });
    
     QUnit.test("Can parse large time in minutes and seconds correctly", function (assert) {
         assert.strictEqual(parseTime("1479:36"), 1479 * 60 + 36);
@@ -147,6 +155,14 @@
    
     QUnit.test("Can parse one hour two minute three second time correctly", function (assert) {
         assert.strictEqual(parseTime("1:02:03"), 3600 + 2 * 60 + 3);
+    });
+   
+    QUnit.test("Can parse one hour two minute three point nine four second time correctly", function (assert) {
+        assert.strictEqual(parseTime("1:02:03.94"), 3600 + 2 * 60 + 3.94);
+    });
+   
+    QUnit.test("Can parse one hour two minute three comma nine four second time correctly", function (assert) {
+        assert.strictEqual(parseTime("1:02:03,94"), 3600 + 2 * 60 + 3.94);
     });
    
     QUnit.test("Can parse large time in hours, minutes and seconds correctly", function (assert) {

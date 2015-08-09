@@ -80,10 +80,13 @@
     */
     SplitsBrowser.parseTime = function (time) {
         time = time.trim();
-        if (time.match(/^\d+:\d\d$/)) {
-            return parseInt(time.substring(0, time.length - 3), 10) * 60 + parseInt(time.substring(time.length - 2), 10);
-        } else if (time.match(/^\d+:\d\d:\d\d$/)) {
-            return parseInt(time.substring(0, time.length - 6), 10) * 3600 + parseInt(time.substring(time.length - 5, time.length - 3), 10) * 60 + parseInt(time.substring(time.length - 2), 10);
+        if (/^(\d+:)?\d+:\d\d([,.]\d+)?$/.test(time)) {
+            var timeParts = time.replace(",", ".").split(":");
+            var totalTime = 0;
+            timeParts.forEach(function (timePart) {
+                totalTime = totalTime * 60 + parseFloat(timePart);
+            });
+            return totalTime;
         } else {
             // Assume anything unrecognised is a missed split.
             return null;
