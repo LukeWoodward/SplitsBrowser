@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - SI reader tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -278,8 +278,35 @@
     });
     
     /**
+    * Formats some competitor data into a string that can be read by the reader.
+    * @param {Object} format - The format used to generate the data string.
+    * @param {Array} competitors - Array of 2-element arrays containing
+    *     competitor and control data.
+    * @param {Function} preprocessor - Function called on the event data string
+    *     immediately before it is passed to the parser.  If not specified,
+    *     no preprocessing is done.
+    */
+    function generateData(format, competitors, preprocessor) {
+        var text = format.header;
+        competitors.forEach(function (comp) {
+            var row = generateRow(comp[0], comp[1], format.template);
+            if (format.combineName) {
+                row = row.replace("name", comp[0].forename + " " + comp[0].surname);
+            }
+            
+            text += row + "\r\n";
+        });
+        
+        if (preprocessor) {
+            text = preprocessor(text);
+        }
+        
+        return text;
+    }
+    
+    /**
     * Calls a test function for the result of formatting the given competitor
-    * data using all formats.
+    * data using all formats.  The data is expected to be parsed successfully.
     * @param {Array} competitors - Array of 2-element arrays containing
     *     competitor and control data.
     * @param {Function} testFunc - Function called with the parsed event data
@@ -290,22 +317,26 @@
     */
     function runTestOverAllFormats (competitors, testFunc, preprocessor) {
         ALL_FORMATS.forEach(function (format) {
-            var text = format.header;
-            competitors.forEach(function (comp) {
-                var row = generateRow(comp[0], comp[1], format.template);
-                if (format.combineName) {
-                    row = row.replace("name", comp[0].forename + " " + comp[0].surname);
-                }
-                
-                text += row + "\r\n";
-            });
-            
-            if (preprocessor) {
-                text = preprocessor(text);
-            }
-            
+            var text = generateData(format, competitors, preprocessor);
             var eventData = parseEventData(text);
             testFunc(eventData, format);
+        });
+    }
+    
+    /**
+    * Calls a test function for the result of formatting the given competitor
+    * data using all formats.  The data is expected not to be parsed successfully.
+    * @param {QUnit.assert} assert - QUnit assert object.
+    * @param {Array} competitors - Array of 2-element arrays containing
+    *     competitor and control data.
+    * @param {String} what - Description of why the test should fail.
+    * @param {String} exception - Name of the exception to expect to be thrown.
+    *     If not specified, this defaults to 'InvalidData'.
+    */
+    function runInvalidDataTestOverAllFormats (assert, competitors, what, exceptionName) {
+        ALL_FORMATS.forEach(function (format) {
+            var text = generateData(format, competitors);
+            runInvalidDataTest(assert, text, what + " (format " + format.name + ")", exceptionName);
         });
     }
     
@@ -579,6 +610,14 @@
         });
     });
 
+    QUnit.test("Cannot parse a string that contains a single competitor's data followed by a junk line", function (assert) {
+        ALL_FORMATS.forEach(function (format) {
+            var eventDataStr = format.header + generateRow(getCompetitor1(), getControls1(), format.template);
+            eventDataStr = eventDataStr + "\r\nrubbish;more rubbish;\r\n";
+            runInvalidDataTest(assert, eventDataStr, "data with an unrecognised delimiter");
+        });
+    });
+
     QUnit.test("Cannot parse file that contains comma-separated numbers", function (assert) {
         var line1 = "";
         var line2 = "";
@@ -604,6 +643,26 @@
             var competitor = eventData.classes[0].competitors[0];
             assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
         });
+    });
+    
+    QUnit.test("Cannot parse a string that contains a single competitor's data with a non-numeric control count", function (assert) {
+        var comp = getCompetitor1();
+        comp.numControls = "This is not a valid number";
+        runInvalidDataTestOverAllFormats(assert, [[comp, getControls1()]], "data with non-numeric control count");
+    });
+    
+    QUnit.test("Cannot parse a string that contains a single competitor's data with a missing class name", function (assert) {
+        var comp = getCompetitor1();
+        comp.className = "";
+        comp.course = "";
+        runInvalidDataTestOverAllFormats(assert, [[comp, getControls1()]], "data with a missing class name");
+    });
+    
+    QUnit.test("Cannot parse a string that contains a single competitor's data with nothing recognisable as a control code at the end of the first line", function (assert) {
+        var controls = getControls1();
+        controls[controls.length - 1].code = "???";
+        controls[controls.length - 1].time = "???";
+        runInvalidDataTestOverAllFormats(assert, [[getCompetitor1(), controls]], "data with no control code at the end of the first line", "WrongFileFormat");
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control and remove the trailing 'mp' from the name", function (assert) {

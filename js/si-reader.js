@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser SI - Reads in 'SI' results data files.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -121,10 +121,6 @@
         // seems also that one class can be made up of multiple courses, e.g.
         // M21E at BOC 2013.)
         this.classCoursePairs = [];
-
-        // Whether any competitors have been read in at all.  Blank lines are
-        // ignored, as are competitors that have no times at all.
-        this.anyCompetitors = false;
         
         // The indexes of the columns that we read data from.
         this.columnIndexes = null;
@@ -190,9 +186,7 @@
             controlCodeColumn -= 2;
         }
         
-        if (controlCodeColumn === null) {
-            throwWrongFileFormat("Unable to find index of control 1 in SI CSV data");
-        } else if (!COLUMN_INDEXES.hasOwnProperty(controlCodeColumn)) {
+        if (!COLUMN_INDEXES.hasOwnProperty(controlCodeColumn)) {
             throwWrongFileFormat("Unsupported index of control 1: " + controlCodeColumn);
         } else {
             this.columnIndexes = COLUMN_INDEXES[controlCodeColumn];
@@ -241,7 +235,12 @@
         } else if (this.classes.has(className)) {
             return this.classes.get(className).numControls;
         } else {
-            return parseInt(row[this.columnIndexes.controlCount], 10);
+            var numControls = parseInt(row[this.columnIndexes.controlCount], 10);
+            if (isFinite(numControls)) {
+                return numControls;
+            } else {
+                throwInvalidData("Could not read control count '" + row[this.columnIndexes.controlCount] + "' from line " + lineNumber);
+            }
         }    
     };
     
@@ -434,7 +433,6 @@
         var numControls = this.getNumControls(row, lineNumber);
         
         var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
-        this.anyCompetitors = true;
         
         this.createClassIfNecessary(row, numControls);
         this.createCourseIfNecessary(row, numControls);
@@ -617,10 +615,6 @@
         this.lines.forEach(function (line, lineIndex) {
             this.readLine(line, lineIndex + 1, delimiter);
         }, this);
-        
-        if (!this.anyCompetitors) {
-            throwInvalidData("No competitors' data were found");
-        }
         
         var classes = this.createClasses();
         var courses = this.determineCourses(classes);
