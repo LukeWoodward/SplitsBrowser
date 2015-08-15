@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.3.7", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -234,10 +234,13 @@ var SplitsBrowser = { Version: "3.3.7", Model: {}, Input: {}, Controls: {}, Mess
     */
     SplitsBrowser.parseTime = function (time) {
         time = time.trim();
-        if (time.match(/^\d+:\d\d$/)) {
-            return parseInt(time.substring(0, time.length - 3), 10) * 60 + parseInt(time.substring(time.length - 2), 10);
-        } else if (time.match(/^\d+:\d\d:\d\d$/)) {
-            return parseInt(time.substring(0, time.length - 6), 10) * 3600 + parseInt(time.substring(time.length - 5, time.length - 3), 10) * 60 + parseInt(time.substring(time.length - 2), 10);
+        if (/^(\d+:)?\d+:\d\d([,.]\d+)?$/.test(time)) {
+            var timeParts = time.replace(",", ".").split(":");
+            var totalTime = 0;
+            timeParts.forEach(function (timePart) {
+                totalTime = totalTime * 60 + parseFloat(timePart);
+            });
+            return totalTime;
         } else {
             // Assume anything unrecognised is a missed split.
             return null;
@@ -1668,10 +1671,6 @@ var SplitsBrowser = { Version: "3.3.7", Model: {}, Input: {}, Controls: {}, Mess
         // seems also that one class can be made up of multiple courses, e.g.
         // M21E at BOC 2013.)
         this.classCoursePairs = [];
-
-        // Whether any competitors have been read in at all.  Blank lines are
-        // ignored, as are competitors that have no times at all.
-        this.anyCompetitors = false;
         
         // The indexes of the columns that we read data from.
         this.columnIndexes = null;
@@ -1737,9 +1736,7 @@ var SplitsBrowser = { Version: "3.3.7", Model: {}, Input: {}, Controls: {}, Mess
             controlCodeColumn -= 2;
         }
         
-        if (controlCodeColumn === null) {
-            throwWrongFileFormat("Unable to find index of control 1 in SI CSV data");
-        } else if (!COLUMN_INDEXES.hasOwnProperty(controlCodeColumn)) {
+        if (!COLUMN_INDEXES.hasOwnProperty(controlCodeColumn)) {
             throwWrongFileFormat("Unsupported index of control 1: " + controlCodeColumn);
         } else {
             this.columnIndexes = COLUMN_INDEXES[controlCodeColumn];
@@ -1788,7 +1785,12 @@ var SplitsBrowser = { Version: "3.3.7", Model: {}, Input: {}, Controls: {}, Mess
         } else if (this.classes.has(className)) {
             return this.classes.get(className).numControls;
         } else {
-            return parseInt(row[this.columnIndexes.controlCount], 10);
+            var numControls = parseInt(row[this.columnIndexes.controlCount], 10);
+            if (isFinite(numControls)) {
+                return numControls;
+            } else {
+                throwInvalidData("Could not read control count '" + row[this.columnIndexes.controlCount] + "' from line " + lineNumber);
+            }
         }    
     };
     
@@ -1981,7 +1983,6 @@ var SplitsBrowser = { Version: "3.3.7", Model: {}, Input: {}, Controls: {}, Mess
         var numControls = this.getNumControls(row, lineNumber);
         
         var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
-        this.anyCompetitors = true;
         
         this.createClassIfNecessary(row, numControls);
         this.createCourseIfNecessary(row, numControls);
@@ -2164,10 +2165,6 @@ var SplitsBrowser = { Version: "3.3.7", Model: {}, Input: {}, Controls: {}, Mess
         this.lines.forEach(function (line, lineIndex) {
             this.readLine(line, lineIndex + 1, delimiter);
         }, this);
-        
-        if (!this.anyCompetitors) {
-            throwInvalidData("No competitors' data were found");
-        }
         
         var classes = this.createClasses();
         var courses = this.determineCourses(classes);

@@ -19,3 +19,4 @@ SplitsBrowser changelog:
 3.3.5:  Highlight fastest competitor times, work around d3.select(document) bug.
 3.3.6:  Fix handling of Complete status in IOF XML format files (issue #32).
 3.3.7:  Further improvements to IOF XML format files (issues #33 and #34).
+3.3.8:  Support fractional seconds in SI-format files (issue #35).
