@@ -147,6 +147,16 @@
     };
     
     /**
+    * Returns whether the given string contains only dashes, after trimming
+    * leading and trailing whitespace.
+    * @param {String} text - The text to check.
+    * @return True if the text contains only dashes, false otherwise.
+    */
+    function containsNoNonDashes(text) {
+        return $.trim(text.replace(/-/g, "")) === "";
+    }
+    
+    /**
     * Identifies which variation on the SI CSV format we are parsing.
     *
     * At present, the only variations supported are 44-column, 46-column and
@@ -160,9 +170,9 @@
         
         var firstLine = this.lines[1].split(delimiter);
         
-        // Ignore trailing blanks.
+        // Ignore trailing blanks and dash-only cells.
         var endPos = firstLine.length - 1;
-        while (endPos > 0 && $.trim(firstLine[endPos]) === "") {
+        while (endPos > 0 && containsNoNonDashes(firstLine[endPos])) {
             endPos -= 1;
         }
         
@@ -181,7 +191,8 @@
             throwWrongFileFormat("Could not find control number in last two columns of first data line");
         }
         
-        while (controlCodeColumn >= 2 && controlCodeRegexp.test(firstLine[controlCodeColumn - 2])) { 
+        while ((controlCodeColumn >= 2 && controlCodeRegexp.test(firstLine[controlCodeColumn - 2])) ||
+                ($.trim(firstLine[controlCodeColumn - 2]) === "" && containsNoNonDashes(firstLine[controlCodeColumn - 1]))) { 
             // There's another control code before this one.
             controlCodeColumn -= 2;
         }

@@ -215,6 +215,24 @@
     }
     
     /**
+    * Returns an array of test controls for competitor 1, with an extra control
+    * with blank code and missing time.
+    * @return {Array} Test controls data.
+    */
+    function getControls1WithBlankCodeAndMissingTimeAtTheEnd() {
+        return [{code: "208", time: "01:50"}, {code: "227", time: "03:38"}, {code: "212", time: "06:02"}, {code: "", time: "-----"}];
+    }
+    
+    /**
+    * Returns an array of test controls for competitor 1, with an extra control
+    * with blank code and missing time, followed by an additional control.
+    * @return {Array} Test controls data.
+    */
+    function getControls1WithBlankCodeAndMissingTimeAtTheEndFollowedByAdditionalControl() {
+        return [{code: "208", time: "01:50"}, {code: "227", time: "03:38"}, {code: "212", time: "06:02"}, {code: "", time: "-----"}, {code: "223", time: "04:11"}];
+    }
+    
+    /**
     * Returns an array of test controls for competitor 2.
     * @return {Array} Test controls data.
     */ 
@@ -461,6 +479,28 @@
         var competitor1 = getCompetitor1();
         competitor1.placing = "";
         runTestOverAllFormats([[competitor1, getControls1WithNonNumericControlCode()]], function (eventData) {
+            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+            assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
+            var competitor = eventData.classes[0].competitors[0];
+            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
+        });
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor's data with blank code and missing time", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.placing = "";
+        runTestOverAllFormats([[competitor1, getControls1WithBlankCodeAndMissingTimeAtTheEnd()]], function (eventData) {
+            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+            assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
+            var competitor = eventData.classes[0].competitors[0];
+            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
+        });
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor's data with blank code and missing time followed by an additional control", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.placing = "";
+        runTestOverAllFormats([[competitor1, getControls1WithBlankCodeAndMissingTimeAtTheEndFollowedByAdditionalControl()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
             var competitor = eventData.classes[0].competitors[0];
