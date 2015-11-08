@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - CourseClassSet tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -295,6 +295,13 @@
                     "Class with one control mispunched by all should have dummy value for missing control");
     });
 
+    QUnit.test("Fastest cumulative times on course-class set when only competitor has missing time at last control has backpopulated values from that competitor", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, null, 65 + 221 + 209 + 100]);
+        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [competitor])]);
+        assert.deepEqual(courseClassSet.getFastestCumTimes(), [0, 65, 65 + 221, 65 + 221 + (209 + 100) / 2, 65 + 221 + 209 + 100],
+                    "Class with penultimate control mispunched by only competitor should have correct dummy value for missing control");
+    });
+    
     QUnit.test("Fastest cumulative times on course-class set with one control mispunched by all has dummy fastest split for missing control", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getCompetitor1WithNullSplitForControl2(), getCompetitor2WithNullSplitForControl2()])]);
         assert.deepEqual(courseClassSet.getFastestCumTimes(), [0, 65, 245, 429, 529], "Class with one control mispunched by all should have dummy value for missing control");

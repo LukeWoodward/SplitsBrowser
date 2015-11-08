@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Course-Class Set - A collection of selected course classes.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -145,10 +145,12 @@
     * Return a list of objects that describe when the given array of times has
     * null or NaN values.  This does not include trailing null or NaN values.
     * @param {Array} times - Array of times, which may include NaNs and nulls.
+    * @param {boolean} includeEnd - Whether to include a blank range that ends
+    *    at the end of the array.
     * @return {Array} Array of objects that describes when the given array has
     *    ranges of null and/or NaN values.
     */
-    function getBlankRanges(times) {
+    function getBlankRanges(times, includeEnd) {
         var blankRangeInfo = [];
         var startIndex = 1;
         while (startIndex + 1 < times.length) {
@@ -160,7 +162,7 @@
                     endIndex += 1;
                 }
                 
-                if (endIndex + 1 < times.length) {
+                if (endIndex + 1 < times.length || includeEnd) {
                     blankRangeInfo.push({start: startIndex - 1, end: endIndex + 1});
                 }
                 
@@ -179,7 +181,7 @@
     */
     function fillBlankRangesInCumulativeTimes(cumTimes) {
         cumTimes = cumTimes.slice(0);
-        var blankRanges = getBlankRanges(cumTimes);
+        var blankRanges = getBlankRanges(cumTimes, false);
         for (var rangeIndex = 0; rangeIndex < blankRanges.length; rangeIndex += 1) {
             var range = blankRanges[rangeIndex];
             var timeBefore = cumTimes[range.start];
@@ -263,13 +265,15 @@
             // control that either nobody punched or everybody had a dubious
             // split for.
             
-            // Find the blank-ranges of the fastest times.
-            var fastestBlankRanges = getBlankRanges(fastestSplits);
+            // Find the blank-ranges of the fastest times.  Include the end
+            // of the range in case there are no cumulative times at the last
+            // control but there is to the finish.
+            var fastestBlankRanges = getBlankRanges(fastestSplits, true);
             
             // Find all blank-ranges of competitors.
             var allCompetitorBlankRanges = [];
             this.allCompetitors.forEach(function (competitor) {
-                var competitorBlankRanges = getBlankRanges(competitor.getAllCumulativeTimes());
+                var competitorBlankRanges = getBlankRanges(competitor.getAllCumulativeTimes(), false);
                 competitorBlankRanges.forEach(function (range) {
                     allCompetitorBlankRanges.push({
                         start: range.start,
