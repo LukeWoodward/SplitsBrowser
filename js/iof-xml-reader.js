@@ -641,19 +641,19 @@
         }
         
         for (var index = 0; index < personResults.length; index += 1) {
-            var competitor = parseCompetitor(personResults[index], index + 1, reader);
+            var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader);
+            var competitor = competitorAndControls.competitor;
             if (cls.competitors.length === 0) {
-                cls.controls = competitor.controls;
-                cls.length = competitor.length;
+                cls.controls = competitorAndControls.controls;
             } else {
                 // Subtract 2 for the start and finish cumulative times.
-                var actualControlCount = competitor.competitor.getAllOriginalCumulativeTimes().length - 2;
+                var actualControlCount = competitor.getAllOriginalCumulativeTimes().length - 2;
                 if (actualControlCount !== cls.controls.length) {
-                    throwInvalidData("Inconsistent numbers of controls on course '" + className + "': " + cls.controls.length + " and " + actualControlCount);
+                    throwInvalidData("Unexpected number of controls for competitor '" + competitor.name + "' in class '" + className + "': expected " + cls.controls.length + ", actual " + actualControlCount);
                 }
             }
             
-            cls.competitors.push(competitor.competitor);
+            cls.competitors.push(competitor);
         }
         
         if (cls.course.id === null && cls.controls.length > 0) {
