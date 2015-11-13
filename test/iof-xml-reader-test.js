@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - IOF XML format parser tests.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -246,10 +246,8 @@
 
     /**
     * Returns a chunk of XML that contains course details.
-    * This formatter does not support course details, so this function returns
-    * an empty string.
     * @param {Object} clazz - Object containing class data.
-    * @returns {String} An empty string.
+    * @returns {String} XML string.
     */
     Version3Formatter.getCourseXml = function (clazz) {
         var xml = '<Course>\n';
@@ -269,6 +267,10 @@
         
         if (clazz.hasOwnProperty("climb")) {
             xml += '<Climb>' + clazz.climb + '</Climb>\n';
+        }
+        
+        if (clazz.hasOwnProperty("numberOfControls")) {
+            xml += '<NumberOfControls>' + clazz.numberOfControls + '</NumberOfControls>\n';
         }
 
         xml += '</Course>\n';
@@ -1071,6 +1073,29 @@
         person2.totalTime = person2.cumTimes[2] + 177 + 94;
         
         runFailingXmlFormatParseTest(assert, [{name: "Test Class", length: 2300, courseId: 1, competitors: [person1, person2]}]);
+    });
+    
+    QUnit.test("Can parse a string that contains a class with one competitor whose number of controls matches that specified by the course", function (assert) {
+        var person = getPerson();
+        runSingleCompetitorXmlFormatParseTest(
+            assert,
+            {name: "Test Class", length: 2300, courseId: 1, numberOfControls: person.controls.length, competitors: [person]},
+            // In this test we only really want to be sure that the
+            // competitor was read without the number-of-controls
+            // validation firing.  So there aren't any assertions we really
+            // need to run.
+            function () { /* empty */ },
+            {formatters: [Version3Formatter]}
+        );
+    });
+    
+    QUnit.test("Cannot parse a string that contains a class with one competitor whose number of controls doesn't match that specified by the course", function (assert) {
+        var person = getPerson();
+        runFailingXmlFormatParseTest(
+            assert,
+            [{name: "Test Class", length: 2300, courseId: 1, numberOfControls: person.controls.length + 2, competitors: [person]}],
+            {formatters: [Version3Formatter]}
+        );
     });
     
     QUnit.test("Can parse a string that contains two classes each with one competitor", function (assert) {

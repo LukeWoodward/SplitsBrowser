@@ -1,7 +1,7 @@
 /*
- *  SplitsBrowser IOF XML - Read event data in IOF v2.0.3 XML-format files.
+ *  SplitsBrowser IOF XML - Read event data in IOF XML-format files.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -154,7 +154,7 @@
     * Reads the course details from the given ClassResult element.
     * @param {jQuery.selection} classResultElement - ClassResult element
     *     containing the course details.
-    * @return {Object} Course details: id, name, length and climb.
+    * @return {Object} Course details: id, name, length, climb and numberOfControls
     */
     Version2Reader.readCourseFromClass = function (classResultElement) {
         // Although the IOF v2 format appears to support courses, they
@@ -191,8 +191,9 @@
             }
         }
         
-        // Climb does not appear in the per-competitor results.
-        return {id: null, name: courseName, length: length, climb: null};
+        // Climb does not appear in the per-competitor results, and there is
+        // no NumberOfControls.
+        return {id: null, name: courseName, length: length, climb: null, numberOfControls: null};
     };
     
     /**
@@ -360,7 +361,8 @@
     * Reads the course details from the given ClassResult element.
     * @param {jQuery.selection} classResultElement - ClassResult element
     *     containing the course details.
-    * @return {Object} Course details: id, name, length and climb.
+    * @return {Object} Course details: id, name, length, climb and number of
+    *     controls.
     */
     Version3Reader.readCourseFromClass = function (classResultElement) {
         var courseElement = $("> Course", classResultElement);
@@ -380,13 +382,19 @@
             }
         }
         
+        var numberOfControlsStr = $("> NumberOfControls", courseElement).text();
+        var numberOfControls = parseInt(numberOfControlsStr, 10);
+        if (isNaNStrict(numberOfControls)) {
+            numberOfControls = null;
+        }
+        
         var climbStr = $("> Climb", courseElement).text();
         var climb = parseInt(climbStr, 10);
         if (isNaNStrict(climb)) {
             climb = null;
         }
         
-        return {id: id, name: name, length: length, climb: climb};
+        return {id: id, name: name, length: length, climb: climb, numberOfControls: numberOfControls};
     };
     
     /**
@@ -644,13 +652,21 @@
             var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader);
             var competitor = competitorAndControls.competitor;
             if (cls.competitors.length === 0) {
+                // First competitor.  Record the list of controls.
                 cls.controls = competitorAndControls.controls;
-            } else {
-                // Subtract 2 for the start and finish cumulative times.
-                var actualControlCount = competitor.getAllOriginalCumulativeTimes().length - 2;
-                if (actualControlCount !== cls.controls.length) {
-                    throwInvalidData("Unexpected number of controls for competitor '" + competitor.name + "' in class '" + className + "': expected " + cls.controls.length + ", actual " + actualControlCount);
+                
+                // Set the number of controls on the course if we didn't read
+                // it from the XML.  Assume the first competitor's number of
+                // controls is correct.
+                if (cls.course.numberOfControls === null) {
+                    cls.course.numberOfControls = cls.controls.length;
                 }
+            }
+
+            // Subtract 2 for the start and finish cumulative times.
+            var actualControlCount = competitor.getAllOriginalCumulativeTimes().length - 2;
+            if (actualControlCount !== cls.course.numberOfControls) {
+                throwInvalidData("Unexpected number of controls for competitor '" + competitor.name + "' in class '" + className + "': expected " + cls.course.numberOfControls + ", actual " + actualControlCount);
             }
             
             cls.competitors.push(competitor);
