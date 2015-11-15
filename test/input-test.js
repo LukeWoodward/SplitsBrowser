@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Input tests
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -68,33 +68,33 @@
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");        
     });
     
-    QUnit.test("Can read in SI HTML preformatted data", function (assert) {
-        var siHtmlData = '<html><head></head><body>\n<pre>\n<font size="2"><b>   Test course 1 (2)</b></font><font size="2"><b>   2.7 km     35 m</b></font>\n' +
+    QUnit.test("Can read in HTML preformatted data", function (assert) {
+        var htmlData = '<html><head></head><body>\n<pre>\n<font size="2"><b>   Test course 1 (2)</b></font><font size="2"><b>   2.7 km     35 m</b></font>\n' +
             '<font size="2"><b> </b></font><font size="2"><b> </b></font><font size="2"><b> </b></font><font size="2"><b>   </b></font>   1(138)     2(152)     3(141)    F  \n' +
             '<font size="2"><b> 1</b></font><font size="2"><b> 165</b></font><font size="2"><b> Test runner</b></font><font size="2"><b>   09:25</b></font>  01:47    04:02    08:13    <font size="2"><b>   09:25</b></font>\n' +
             '<font size="2"><b>   </b></font><font size="2"><b>   </b></font><font size="2"><b>   TEST</b></font><font size="2"><b>   </b></font>  01:47    02:15    04:11    <font size="2"><b>   01:12</b></font>\n' +
             '</pre></body></html>';
-        var eventData = parseEventData(siHtmlData);
+        var eventData = parseEventData(htmlData);
         assert.ok(eventData instanceof Event, "An event should be returned");
         assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");
     });
     
     QUnit.test("Can read in SI HTML tabular data", function (assert) {
-        var siHtmlData = '<body>\n<div id=reporttop>\n<table width=1105px style="table-layout:auto;">\n<tr><td><nobr>Event title</nobr></td><td id=rb><nobr>Sun 01/02/2013 12:34</nobr></td></tr>\n</table>\n' +
-                         '<hr>\n</div>\n<table id=ln><tr><td>&nbsp</td></tr></table>\n<table width=1105px>\n<tbody>\n' +
-                         '<tr><td id=c12><nobr>   Test course 1 (21)</nobr></td><td id=c12><nobr>   2.7 Km</nobr></td><td id=c12><nobr>   35 m</nobr></td><td id="header" ></td>\n' +
-                         '</tr>\n</tbody>\n</table>\n<table width=1105px>\n<col width=32px>\n<col width=39px>\n<col width=133px>\n<thead>\n' + 
-                         '<tr><th id=rb>Pl</th><th id=rb>Stno</th><th>Name</th><th id=rb>Time</th><th id=rb></th><th id=rb></th></tr>\n' +
-                         '</thead><tbody></tbody></table>\n<table width=1105px>\n<col width=32px>\n<col width=39px>\n<col width=133px>\n<tbody>\n' +
-                         '<tr><td id=c12><nobr>   </nobr></td><td id=c12><nobr>   </nobr></td><td id=c12><nobr>   </nobr></td><td id=c12><nobr>   </nobr></td>' +
-                         '<td id=c12><nobr>   1(138)  </nobr></td><td id=c12><nobr>   2(152)  </nobr></td><td id=c12><nobr>   3(141)  </nobr></td><td id=c12><nobr>   F</nobr></td></tr>\n' +
-                         '<tr><td id=c12><nobr>   1</nobr></td><td id=c12><nobr>   165</nobr></td><td id=c12><nobr>   Test runner</nobr></td><td id=c12><nobr>   09:25</nobr></td>' +
-                         '<td id=c12><nobr>   01:47</nobr></td>  <td id=c12><nobr>   04:02</nobr></td>  <td id=c12><nobr>   08:13</nobr></td>  <td id=c12><nobr>   09:25</nobr></td></tr>\n' +
-                         '<tr><td id=c12><nobr>   </nobr></td><td id=c12><nobr>   </nobr></td><td id=c12><nobr>   TEST</nobr></td><td id=c12><nobr>   </nobr></td>' +
-                         '<td id=c12><nobr>   01:47</nobr></td>  <td id=c12><nobr>   02:15</nobr></td>  <td id=c12><nobr>   04:11</nobr></td>  <td id=c12><nobr>   01:12</nobr></td></tr>\n' +
-                         '<tr><td id=c10><nobr>&nbsp</nobr></td></tr>\n<tr><td id=c10><nobr>&nbsp</nobr></td></tr>\n</tbody>\n</table>\n</body>\n</html>';    
-        var eventData = parseEventData(siHtmlData);
+        var htmlData = '<body>\n<div id=reporttop>\n<table width=1105px style="table-layout:auto;">\n<tr><td><nobr>Event title</nobr></td><td id=rb><nobr>Sun 01/02/2013 12:34</nobr></td></tr>\n</table>\n' +
+            '<hr>\n</div>\n<table id=ln><tr><td>&nbsp</td></tr></table>\n<table width=1105px>\n<tbody>\n' +
+            '<tr><td id=c12><nobr>   Test course 1 (21)</nobr></td><td id=c12><nobr>   2.7 Km</nobr></td><td id=c12><nobr>   35 m</nobr></td><td id="header" ></td>\n' +
+            '</tr>\n</tbody>\n</table>\n<table width=1105px>\n<col width=32px>\n<col width=39px>\n<col width=133px>\n<thead>\n' + 
+            '<tr><th id=rb>Pl</th><th id=rb>Stno</th><th>Name</th><th id=rb>Time</th><th id=rb></th><th id=rb></th></tr>\n' +
+            '</thead><tbody></tbody></table>\n<table width=1105px>\n<col width=32px>\n<col width=39px>\n<col width=133px>\n<tbody>\n' +
+            '<tr><td id=c12><nobr>   </nobr></td><td id=c12><nobr>   </nobr></td><td id=c12><nobr>   </nobr></td><td id=c12><nobr>   </nobr></td>' +
+            '<td id=c12><nobr>   1(138)  </nobr></td><td id=c12><nobr>   2(152)  </nobr></td><td id=c12><nobr>   3(141)  </nobr></td><td id=c12><nobr>   F</nobr></td></tr>\n' +
+            '<tr><td id=c12><nobr>   1</nobr></td><td id=c12><nobr>   165</nobr></td><td id=c12><nobr>   Test runner</nobr></td><td id=c12><nobr>   09:25</nobr></td>' +
+            '<td id=c12><nobr>   01:47</nobr></td>  <td id=c12><nobr>   04:02</nobr></td>  <td id=c12><nobr>   08:13</nobr></td>  <td id=c12><nobr>   09:25</nobr></td></tr>\n' +
+            '<tr><td id=c12><nobr>   </nobr></td><td id=c12><nobr>   </nobr></td><td id=c12><nobr>   TEST</nobr></td><td id=c12><nobr>   </nobr></td>' +
+            '<td id=c12><nobr>   01:47</nobr></td>  <td id=c12><nobr>   02:15</nobr></td>  <td id=c12><nobr>   04:11</nobr></td>  <td id=c12><nobr>   01:12</nobr></td></tr>\n' +
+            '<tr><td id=c10><nobr>&nbsp</nobr></td></tr>\n<tr><td id=c10><nobr>&nbsp</nobr></td></tr>\n</tbody>\n</table>\n</body>\n</html>';    
+        var eventData = parseEventData(htmlData);
         assert.ok(eventData instanceof Event, "An event should be returned");
         assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");

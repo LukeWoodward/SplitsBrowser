@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Input - Top-level data file reading.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
     var PARSERS = [
         SplitsBrowser.Input.CSV.parseEventData,
         SplitsBrowser.Input.SI.parseEventData,
-        SplitsBrowser.Input.SIHtml.parseEventData,
+        SplitsBrowser.Input.Html.parseEventData,
         SplitsBrowser.Input.AlternativeCSV.parseTripleColumnEventData,
         SplitsBrowser.Input.IOFXml.parseEventData
     ];

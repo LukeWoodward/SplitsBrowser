@@ -1,7 +1,7 @@
 /*
- *  SplitsBrowser SI HTML - Reads in HTML-format 'SI' results data files.
+ *  SplitsBrowser HTML - Reads in HTML-format results data files.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -521,7 +521,7 @@
     };
     
     /**
-    * Constructs a recognizer for formatting the 'newer' format of SI HTML
+    * Constructs a recognizer for formatting the 'newer' format of HTML
     * event results data.
     *
     * Data in this format is given within a number of HTML tables, three per
@@ -1048,7 +1048,7 @@
     * @constructor
     * @param {Object} recognizer - The recognizer to use to parse the HTML.
     */
-    function SIHtmlFormatParser(recognizer) {
+    function HtmlFormatParser(recognizer) {
         this.recognizer = recognizer;
         this.courses = [];
         this.currentCourse = null;
@@ -1063,7 +1063,7 @@
     * @return {?String} The line read, or null if the end of the data has
     *     been reached.
     */
-    SIHtmlFormatParser.prototype.tryGetLine = function () {
+    HtmlFormatParser.prototype.tryGetLine = function () {
         if (this.linePos + 1 < this.lines.length) {
             this.linePos += 1;
             return this.lines[this.linePos];
@@ -1078,7 +1078,7 @@
     * 
     * If there is no current competitor, nothing happens.
     */
-    SIHtmlFormatParser.prototype.addCurrentCompetitorIfNecessary = function () {
+    HtmlFormatParser.prototype.addCurrentCompetitorIfNecessary = function () {
         if (this.currentCompetitor !== null) {
             this.currentCourse.addCompetitor(this.currentCompetitor);
             this.currentCompetitor = null;
@@ -1091,7 +1091,7 @@
     * 
     * If there is no current competitor nor no current course, nothing happens.
     */
-    SIHtmlFormatParser.prototype.addCurrentCompetitorAndCourseIfNecessary = function () {
+    HtmlFormatParser.prototype.addCurrentCompetitorAndCourseIfNecessary = function () {
         this.addCurrentCompetitorIfNecessary();
         if (this.currentCourse !== null) {
             this.courses.push(this.currentCourse);
@@ -1105,7 +1105,7 @@
     * @param {String} firstLine - The first of the two lines to read the
     *     competitor data from.
     */
-    SIHtmlFormatParser.prototype.readCompetitorLines = function (firstLine) {
+    HtmlFormatParser.prototype.readCompetitorLines = function (firstLine) {
         var secondLine = this.tryGetLine();
         if (secondLine === null) {
             throwInvalidData("Hit end of input data unexpectedly while parsing competitor: first line was '" + firstLine + "'");
@@ -1131,7 +1131,7 @@
     * @return {boolean} True if no two competitors in the same class are on
     *     different classes, false otherwise.
     */ 
-    SIHtmlFormatParser.prototype.areClassesUniqueWithinCourses = function () {
+    HtmlFormatParser.prototype.areClassesUniqueWithinCourses = function () {
         var classesToCoursesMap = d3.map();
         for (var courseIndex = 0; courseIndex < this.courses.length; courseIndex += 1) {
             var course = this.courses[courseIndex];
@@ -1155,7 +1155,7 @@
     * Event object with all of the courses and classes.
     * @return {Event} Event object containing all of the data.
     */
-    SIHtmlFormatParser.prototype.createOverallEventObject = function () {
+    HtmlFormatParser.prototype.createOverallEventObject = function () {
         // There is a complication here regarding classes.  Sometimes, classes
         // are repeated within multiple courses.  In this case, ignore the
         // classes given and create a CourseClass for each set.
@@ -1209,7 +1209,7 @@
     * @param {String} text - The HTML text to parse.
     * @return {Event} Event object containing all the parsed data.
     */
-    SIHtmlFormatParser.prototype.parse = function (text) {
+    HtmlFormatParser.prototype.parse = function (text) {
         this.lines = text.split("\n");
         while (true) {
             var line = this.tryGetLine();
@@ -1244,26 +1244,26 @@
     
     var RECOGNIZER_CLASSES = [OldHtmlFormatRecognizer, NewHtmlFormatRecognizer, OEventTabularHtmlFormatRecognizer];
     
-    SplitsBrowser.Input.SIHtml = {};
+    SplitsBrowser.Input.Html = {};
     
     /**
-    * Attempts to parse data as one of the supported SI HTML formats.
+    * Attempts to parse data as one of the supported HTML formats.
     *
-    * If the data appears not to be SI HTML data, a WrongFileFormat exception
-    * is thrown.  If the data appears to be SI HTML data but is invalid in some
+    * If the data appears not to be HTML data, a WrongFileFormat exception
+    * is thrown.  If the data appears to be HTML data but is invalid in some
     * way, an InvalidData exception is thrown.
     *
     * @param {String} data - The string containing event data.
     * @return {Event} The parsed event.
     */
-    SplitsBrowser.Input.SIHtml.parseEventData = function (data) {
+    SplitsBrowser.Input.Html.parseEventData = function (data) {
         data = normaliseLineEndings(data);
         for (var recognizerIndex = 0; recognizerIndex < RECOGNIZER_CLASSES.length; recognizerIndex += 1) {
             var RecognizerClass = RECOGNIZER_CLASSES[recognizerIndex];
             var recognizer = new RecognizerClass();
             if (recognizer.isTextOfThisFormat(data)) {
                 data = recognizer.preprocess(data);
-                var parser = new SIHtmlFormatParser(recognizer);
+                var parser = new HtmlFormatParser(recognizer);
                 var parsedEvent = parser.parse(data);
                 return parsedEvent;
             }

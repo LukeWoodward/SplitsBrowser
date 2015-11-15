@@ -1,7 +1,7 @@
 /*
- *  SplitsBrowser - SI HTML reader tests.
+ *  SplitsBrowser - HTML reader tests.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -21,9 +21,9 @@
 (function () {
     "use strict";
     
-    var parseEventData = SplitsBrowser.Input.SIHtml.parseEventData;
+    var parseEventData = SplitsBrowser.Input.Html.parseEventData;
     
-    module("Input.SIHtml");
+    module("Input.Html");
     
     /**
     * Runs a test for parsing invalid data that should fail.
