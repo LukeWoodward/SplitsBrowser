@@ -147,16 +147,6 @@
     };
     
     /**
-    * Returns whether the given string contains only dashes, after trimming
-    * leading and trailing whitespace.
-    * @param {String} text - The text to check.
-    * @return True if the text contains only dashes, false otherwise.
-    */
-    function containsNoNonDashes(text) {
-        return $.trim(text.replace(/-/g, "")) === "";
-    }
-    
-    /**
     * Identifies which variation on the SI CSV format we are parsing.
     *
     * At present, the only variations supported are 44-column, 46-column and
@@ -170,38 +160,33 @@
         
         var firstLine = this.lines[1].split(delimiter);
         
-        // Ignore trailing blanks and dash-only cells.
-        var endPos = firstLine.length - 1;
-        while (endPos > 0 && containsNoNonDashes(firstLine[endPos])) {
-            endPos -= 1;
-        }
-        
-        // Now, find the last column with a control code in.  This should be
-        // one of the last two columns.  (Normally, it will be the second last,
-        // but if there is no last split recorded, it may be the last.)
         var controlCodeRegexp = /^[A-Za-z0-9]+$/;
-        
-        var controlCodeColumn = null;
-        if (controlCodeRegexp.test(firstLine[endPos - 1])) {
-            controlCodeColumn = endPos - 1;
-        } else if (controlCodeRegexp.test(firstLine[endPos])) {
-            // No split for the last control.
-            controlCodeColumn = endPos;
-        } else {
-            throwWrongFileFormat("Could not find control number in last two columns of first data line");
+        for (var columnOffset in COLUMN_INDEXES) {
+            if (COLUMN_INDEXES.hasOwnProperty(columnOffset)) {
+                // Convert columnOffset to a number.  It will presently be a
+                // string because it is an object property.
+                columnOffset = parseInt(columnOffset, 10);
+                
+                // We want there to be a control code at columnOffset, with
+                // both preceding columns either blank or containing a valid
+                // time.
+                if (columnOffset < firstLine.length &&
+                        controlCodeRegexp.test(firstLine[columnOffset]) &&
+                        ($.trim(firstLine[columnOffset - 2]) === "" || parseTime(firstLine[columnOffset - 2]) !== null) &&
+                        ($.trim(firstLine[columnOffset - 1]) === "" || parseTime(firstLine[columnOffset - 1]) !== null)) {
+                           
+                    // Now check the control count exists.  If not, we've
+                    // probably got a triple-column CSV file instead.
+                    var controlCountColumnIndex = COLUMN_INDEXES[columnOffset].controlCount;
+                    if ($.trim(firstLine[controlCountColumnIndex]) !== "") {
+                        this.columnIndexes = COLUMN_INDEXES[columnOffset];
+                        return;
+                    }
+                }
+            }
         }
         
-        while ((controlCodeColumn >= 2 && controlCodeRegexp.test(firstLine[controlCodeColumn - 2])) ||
-                ($.trim(firstLine[controlCodeColumn - 2]) === "" && containsNoNonDashes(firstLine[controlCodeColumn - 1]))) { 
-            // There's another control code before this one.
-            controlCodeColumn -= 2;
-        }
-        
-        if (!COLUMN_INDEXES.hasOwnProperty(controlCodeColumn)) {
-            throwWrongFileFormat("Unsupported index of control 1: " + controlCodeColumn);
-        } else {
-            this.columnIndexes = COLUMN_INDEXES[controlCodeColumn];
-        }
+        throwWrongFileFormat("Did not find control 1 at any of the supported indexes");
     };
     
     /**

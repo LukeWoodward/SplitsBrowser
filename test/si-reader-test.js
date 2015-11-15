@@ -31,7 +31,7 @@
     var HEADER_46 = "Stno;SI card;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls.
-    var ROW_TEMPLATE_46 = "0;1;2;surname;forename;yearOfBirth;gender;7;nonComp;startTime;10;time;classifier;13;14;club;16;17;className;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;course;distance;climb;numControls;placing;startPunch;45";
+    var ROW_TEMPLATE_46 = "0;1;2;surname;forename;yearOfBirth;gender;7;nonComp;startTime;10;time;classifier;13;14;club;16;17;className;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;course;distance;climb;numControls;placing;startPunch;finish";
     
     // Header line when control 1 is in column 44.
     // Compared to the variant above, this line has no 'S' column and has the
@@ -39,7 +39,7 @@
     var HEADER_44 = "Stno;SI card;Database Id;Name;YB;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     // Template for the row data that precedes the controls.
-    var ROW_TEMPLATE_44 = "0;1;2;name;yearOfBirth;5;nonComp;startTime;8;time;classifier;11;12;club;14;15;className;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;course;distance;climb;numControls;placing;startPunch;43";
+    var ROW_TEMPLATE_44 = "0;1;2;name;yearOfBirth;5;nonComp;startTime;8;time;classifier;11;12;club;14;15;className;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;course;distance;climb;numControls;placing;startPunch;finish";
     
     // Header line when control 1 is in column 60.
     // This has various new columns.  It also doesn't always have competitor
@@ -404,6 +404,18 @@
         });
     });
     
+    QUnit.test("Can parse a string that contains a single competitor's data with no start nor finish", function (assert) {
+        var competitor1 = getCompetitor1();
+        competitor1.startTime = "";
+        competitor1.startPunch = "";
+        competitor1.finish = "";
+        runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
+            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].competitors[0].startTime, null, "Should read correct start time");
+        });
+    });
+    
     QUnit.test("Can parse a string that contains a single competitor's data with the course distance having a comma as the decimal separator", function (assert) {
         var competitor = getCompetitor1();
         competitor.distance = "4,1";
@@ -698,13 +710,6 @@
         runInvalidDataTestOverAllFormats(assert, [[comp, getControls1()]], "data with a missing class name");
     });
     
-    QUnit.test("Cannot parse a string that contains a single competitor's data with nothing recognisable as a control code at the end of the first line", function (assert) {
-        var controls = getControls1();
-        controls[controls.length - 1].code = "???";
-        controls[controls.length - 1].time = "???";
-        runInvalidDataTestOverAllFormats(assert, [[getCompetitor1(), controls]], "data with no control code at the end of the first line", "WrongFileFormat");
-    });
-    
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control and remove the trailing 'mp' from the name", function (assert) {
         var comp = getCompetitor1();
         comp.surname = "Smith mp";
@@ -759,8 +764,8 @@
     
     QUnit.test("Can parse a string that contains a single non-starting competitor's data", function (assert) {
         var competitor1 = getCompetitor1();
-        competitor1.time = null;
-        competitor1.finish = null;
+        competitor1.time = "";
+        competitor1.finish = "";
         runTestOverAllFormats([[competitor1, getControls1AllMissed()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
@@ -775,8 +780,8 @@
     
     QUnit.test("Can parse a string that contains a single non-starting competitor's data when flagged as non-starter", function (assert) {
         var competitor1 = getCompetitor1();
-        competitor1.time = null;
-        competitor1.finish = null;
+        competitor1.time = "";
+        competitor1.finish = "";
         competitor1.classifier = "1";
         runTestOverAllFormats([[competitor1, getControls1AllMissed()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
