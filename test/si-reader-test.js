@@ -1,5 +1,5 @@
 /*
- *  SplitsBrowser - SI reader tests.
+ *  SplitsBrowser - OE CSV reader tests.
  *  
  *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
@@ -22,7 +22,7 @@
     "use strict";
     
     var parseTime = SplitsBrowser.parseTime;
-    var parseEventData = SplitsBrowser.Input.SI.parseEventData;
+    var parseEventData = SplitsBrowser.Input.OE.parseEventData;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -56,7 +56,7 @@
     ];
     
     /**
-    * Generates a row of data for an SI-format file.
+    * Generates a row of data for an OE-format file.
     * @param {Object} data - Object that maps key names to the data for those
     *     keys.
     * @param {Array} controls - Array of objects, each of which contains a code
@@ -256,7 +256,7 @@
         return [{code: "208", time: "01:48"}, {code: "227", time: "03:46"}, {code: "212", time: "05:59"}];
     }
     
-    module("Input.SI");
+    module("Input.OE");
     
     /**
     * Runs a test for parsing invalid data that should fail.

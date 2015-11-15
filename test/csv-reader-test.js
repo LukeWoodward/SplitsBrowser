@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser - CSV reader tests.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -82,7 +82,7 @@
         });
     });
     
-    QUnit.test("Rejects SI-format file as being of the wrong format", function (assert) {
+    QUnit.test("Rejects OE-format file as being of the wrong format", function (assert) {
         var siData = "First name;Surname;City;Start;Time;Short;AgeClass controls;Punch1;Punch2;Punch3;\r\n" + 
                            "John;Smith;ABC;10:00:00;06:33;Test class;3;01:50;03:38;06:02;\r\n";
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {

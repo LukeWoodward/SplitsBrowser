@@ -1,5 +1,5 @@
 /*
- *  SplitsBrowser SI - Reads in 'SI' results data files.
+ *  SplitsBrowser OE Reader - Reads in OE CSV results data files.
  *  
  *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
@@ -100,11 +100,11 @@
     }
     
     /**
-    * Constructs an SI-format data reader.
+    * Constructs an OE-format data reader.
     *
     * NOTE: The reader constructed can only be used to read data in once.
     * @constructor
-    * @param {String} data - The SI data to read in.
+    * @param {String} data - The OE data to read in.
     */
     function Reader(data) {
         this.data = normaliseLineEndings(data);
@@ -143,11 +143,11 @@
             }
         }
         
-        throwWrongFileFormat("Data appears not to be in the SI CSV format");
+        throwWrongFileFormat("Data appears not to be in the OE CSV format");
     };
     
     /**
-    * Identifies which variation on the SI CSV format we are parsing.
+    * Identifies which variation on the OE CSV format we are parsing.
     *
     * At present, the only variations supported are 44-column, 46-column and
     * 60-column.  In all cases, the numbers count the columns before the
@@ -617,14 +617,14 @@
         return new Event(classes, courses);
     };
     
-    SplitsBrowser.Input.SI = {};
+    SplitsBrowser.Input.OE = {};
     
     /**
-    * Parse 'SI' data read from a semicolon-separated data string.
+    * Parse OE data read from a semicolon-separated data string.
     * @param {String} data - The input data string read.
     * @return {SplitsBrowser.Model.Event} All event data read.
     */
-    SplitsBrowser.Input.SI.parseEventData = function (data) {
+    SplitsBrowser.Input.OE.parseEventData = function (data) {
         var reader = new Reader(data);
         return reader.parseEventData();
     };

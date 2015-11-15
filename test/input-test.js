@@ -24,7 +24,7 @@
     var Event = SplitsBrowser.Model.Event;
     var parseEventData = SplitsBrowser.Input.parseEventData;
     
-    var SI_HEADER = "Stno;SI card;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
+    var OE_HEADER = "Stno;SI card;Database Id;Surname;First name;YB;S;Block;nc;Start;Finish;Time;Classifier;Club no.;Cl.name;City;Nat;Cl. no.;Short;Long;Num1;Num2;Num3;Text1;Text2;Text3;Adr. name;Street;Line2;Zip;City;Phone;Fax;Email;Id/Club;Rented;Start fee;Paid;Course no.;Course;Km;m;Course controls;Pl;Start punch;Finish punch;Control1;Punch1;Control2;Punch2;Control3;Punch3;Control4;Punch4;\r\n";
     
     module("Input");
     
@@ -38,24 +38,24 @@
         assert.strictEqual(eventData.courses.length, 2, "Two courses should be read in");
     });
     
-    QUnit.test("Can read in 'SI' semicolon-delimited data", function (assert) { 
-        var siData = SI_HEADER + "0;1;2;Smith;John;5;6;7;8;11:27:45;10;06:33;0;13;14;ABC;16;17;Test class;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;Test course;4.1;140;3;1;;;208;01:50;227;03:38;212;06:02";
-        var eventData = parseEventData(siData);
+    QUnit.test("Can read in OE semicolon-delimited data", function (assert) { 
+        var oeData = OE_HEADER + "0;1;2;Smith;John;5;6;7;8;11:27:45;10;06:33;0;13;14;ABC;16;17;Test class;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;Test course;4.1;140;3;1;;;208;01:50;227;03:38;212;06:02";
+        var eventData = parseEventData(oeData);
         assert.ok(eventData instanceof Event, "An event should be returned");
         assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");
     });
     
-    QUnit.test("Can read in 'SI' comma-delimited data", function (assert) { 
-        var siData = SI_HEADER + "0;1;2;Smith;John;5;6;7;8;11:27:45;10;06:33;0;13;14;ABC;16;17;Test class;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;Test course;4.1;140;3;1;;;208;01:50;227;03:38;212;06:02";
-        siData = siData.replace(/;/g, ",");
-        var eventData = parseEventData(siData);
+    QUnit.test("Can read in OE comma-delimited data", function (assert) { 
+        var oeData = OE_HEADER + "0;1;2;Smith;John;5;6;7;8;11:27:45;10;06:33;0;13;14;ABC;16;17;Test class;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;Test course;4.1;140;3;1;;;208;01:50;227;03:38;212;06:02";
+        oeData = oeData.replace(/;/g, ",");
+        var eventData = parseEventData(oeData);
         assert.ok(eventData instanceof Event, "An event should be returned");
         assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");
     });
     
-    QUnit.test("Can read in SI CSV data in nameless format", function (assert) {
+    QUnit.test("Can read in OE CSV data in nameless format", function (assert) {
         var namelessCSVData = "OE0014,Stno,XStno,Chipno,Database Id,Surname,First name,YB,S,Block,nc,Start,Finish,Time,Classifier,Credit -,Penalty +,Comment,Club no.," +
                               "Cl.name,City,Nat,Location,Region,Cl. no.,Short,Long,Entry cl. No,Entry class (short),Entry class (long),Rank,Ranking points,Num1,Num2,Num3," +
                               "Text1,Text2,Text3,Addr. surname,Addr. first name,Street,Line2,Zip,Addr. city,Phone,Mobile,Fax,EMail,Rented,Start fee,Paid,Team,Course no.," +
@@ -80,7 +80,7 @@
         assert.strictEqual(eventData.courses.length, 1, "One course should be read in");
     });
     
-    QUnit.test("Can read in SI HTML tabular data", function (assert) {
+    QUnit.test("Can read in HTML tabular data", function (assert) {
         var htmlData = '<body>\n<div id=reporttop>\n<table width=1105px style="table-layout:auto;">\n<tr><td><nobr>Event title</nobr></td><td id=rb><nobr>Sun 01/02/2013 12:34</nobr></td></tr>\n</table>\n' +
             '<hr>\n</div>\n<table id=ln><tr><td>&nbsp</td></tr></table>\n<table width=1105px>\n<tbody>\n' +
             '<tr><td id=c12><nobr>   Test course 1 (21)</nobr></td><td id=c12><nobr>   2.7 Km</nobr></td><td id=c12><nobr>   35 m</nobr></td><td id="header" ></td>\n' +
