@@ -55,7 +55,7 @@
     * @return True if the string contains a number, false if not.
     */
     function hasNumber(string) {
-        string = $.trim(string);
+        string = string.trim();
         // isFinite is not enough on its own: isFinite("") is true.
         return string !== "" && isFinite(string);
     }
@@ -124,7 +124,7 @@
     * @return {Array} Array of strings of text inside <td> elements.
     */
     function getTableDataBits(text) {
-        return getHtmlStrippedRegexMatches(/<td[^>]*>(.*?)<\/td>/g, text).map($.trim);
+        return getHtmlStrippedRegexMatches(/<td[^>]*>(.*?)<\/td>/g, text).map(function (s) { return s.trim(); });
     }
     
     /**
@@ -370,7 +370,7 @@
             
         lineEndPos = text.lastIndexOf("\n", closePrePos);
         text = text.substring(0, lineEndPos);
-        return $.trim(text);
+        return text.trim();
     };
     
     /**
@@ -432,7 +432,7 @@
         var climb = tryReadClimb(distanceAndClimb);
         
         return {
-            name: $.trim(courseName),
+            name: courseName.trim(),
             distance: distance,
             climb: climb
         };
@@ -452,7 +452,7 @@
         var lastFontPos = line.lastIndexOf("</font>");
         var controlsText = (lastFontPos === -1) ? line : line.substring(lastFontPos + "</font>".length);
 
-        var controlLabels = splitByWhitespace($.trim(controlsText));
+        var controlLabels = splitByWhitespace(controlsText.trim());
         return readControlCodes(controlLabels);
     };
     
@@ -487,14 +487,14 @@
         if (this.precedingColumnCount === null) {
             // If column 1 is blank or a number, we have four preceding
             // columns.  Otherwise we have three.
-            var column1 = $.trim(firstLineBits[1]); 
+            var column1 = firstLineBits[1].trim();
             this.precedingColumnCount = (column1.match(/^\d*$/)) ? 4 : 3;
         }
 
         var competitive = hasNumber(firstLineBits[0]);
-        var name = $.trim(firstLineBits[this.precedingColumnCount - 2]);
-        var totalTime = $.trim(firstLineBits[this.precedingColumnCount - 1]);
-        var club = $.trim(secondLineBits[this.precedingColumnCount - 2]);
+        var name = firstLineBits[this.precedingColumnCount - 2].trim();
+        var totalTime = firstLineBits[this.precedingColumnCount - 1].trim();
+        var club = secondLineBits[this.precedingColumnCount - 2].trim();
         
         var cumulativeTimes = this.readCompetitorSplitDataLine(firstLine);
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
@@ -603,7 +603,7 @@
         // Finally, remove the trailing </body> and </html> elements.
         text = text.replace("</body></html>", "");
         
-        return $.trim(text);
+        return text.trim();
     };
     
     /**
@@ -670,7 +670,7 @@
             name = name.substring(0, openParenPos);
         }
             
-        name = $.trim(name);
+        name = name.trim();
         
         var distance = null;
         var climb = null;
@@ -831,7 +831,7 @@
         // Finally, remove the trailing </body> and </html> elements.
         text = text.replace("</body>", "").replace("</html>", "");
         
-        return $.trim(text);
+        return text.trim();
     };
     
     /**
@@ -898,7 +898,7 @@
             climb = parseInt(match[3], 10);
         }
                     
-        return {name: $.trim(name), distance: distance, climb: climb };
+        return {name: name.trim(), distance: distance, climb: climb };
     };
 
     /**

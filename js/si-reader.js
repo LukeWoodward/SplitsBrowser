@@ -93,7 +93,7 @@
     */
     function dequote(value) {
         if (value[0] === '"' && value[value.length - 1] === '"') {
-            value = $.trim(value.substring(1, value.length - 1).replace(/""/g, '"'));
+            value = value.substring(1, value.length - 1).replace(/""/g, '"').trim();
         }
         
         return value;
@@ -172,13 +172,13 @@
                 // time.
                 if (columnOffset < firstLine.length &&
                         controlCodeRegexp.test(firstLine[columnOffset]) &&
-                        ($.trim(firstLine[columnOffset - 2]) === "" || parseTime(firstLine[columnOffset - 2]) !== null) &&
-                        ($.trim(firstLine[columnOffset - 1]) === "" || parseTime(firstLine[columnOffset - 1]) !== null)) {
+                        (firstLine[columnOffset - 2].trim() === "" || parseTime(firstLine[columnOffset - 2]) !== null) &&
+                        (firstLine[columnOffset - 1].trim() === "" || parseTime(firstLine[columnOffset - 1]) !== null)) {
                            
                     // Now check the control count exists.  If not, we've
                     // probably got a triple-column CSV file instead.
                     var controlCountColumnIndex = COLUMN_INDEXES[columnOffset].controlCount;
-                    if ($.trim(firstLine[controlCountColumnIndex]) !== "") {
+                    if (firstLine[controlCountColumnIndex].trim() !== "") {
                         this.columnIndexes = COLUMN_INDEXES[columnOffset];
                         return;
                     }
@@ -226,7 +226,7 @@
     */
     Reader.prototype.getNumControls = function (row, lineNumber) {
         var className = this.getClassName(row);
-        if ($.trim(className) === "") {
+        if (className.trim() === "") {
             throwInvalidData("Line " + lineNumber + " does not contain a class for the competitor");
         } else if (this.classes.has(className)) {
             return this.classes.get(className).numControls;
@@ -347,17 +347,17 @@
             // Some surnames have their placing appended to them, if their placing
             // isn't a number (e.g. mp, n/c).  If so, remove this.
             if (isPlacingNonNumeric && surname.substring(surname.length - placing.length) === placing) {
-                surname = $.trim(surname.substring(0, surname.length - placing.length));
+                surname = surname.substring(0, surname.length - placing.length).trim();
             }
             
-            name = $.trim(forename + " " + surname);
+            name = (forename + " " + surname).trim();
         }
         
         if (name === "" && this.columnIndexes.hasOwnProperty("combinedName")) {
             // 'Nameless' or 44-column variation.
             name = row[this.columnIndexes.combinedName];
             if (isPlacingNonNumeric && name.substring(name.length - placing.length) === placing) {
-                name = $.trim(name.substring(0, name.length - placing.length));
+                name = name.substring(0, name.length - placing.length).trim();
             }
         }
         
@@ -413,12 +413,12 @@
     */
     Reader.prototype.readLine = function (line, lineNumber, delimiter) {
     
-        if ($.trim(line) === "") {
+        if (line.trim() === "") {
             // Skip this blank line.
             return;
         }
     
-        var row = line.split(delimiter).map($.trim).map(dequote);
+        var row = line.split(delimiter).map(function (s) { return s.trim(); }).map(dequote);
         
         // Check the row is long enough to have all the data besides the
         // controls data.
