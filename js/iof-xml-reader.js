@@ -651,9 +651,10 @@
         for (var index = 0; index < personResults.length; index += 1) {
             var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader);
             var competitor = competitorAndControls.competitor;
+            var controls = competitorAndControls.controls;
             if (cls.competitors.length === 0) {
                 // First competitor.  Record the list of controls.
-                cls.controls = competitorAndControls.controls;
+                cls.controls = controls;
                 
                 // Set the number of controls on the course if we didn't read
                 // it from the XML.  Assume the first competitor's number of
@@ -667,6 +668,13 @@
             var actualControlCount = competitor.getAllOriginalCumulativeTimes().length - 2;
             if (actualControlCount !== cls.course.numberOfControls) {
                 throwInvalidData("Unexpected number of controls for competitor '" + competitor.name + "' in class '" + className + "': expected " + cls.course.numberOfControls + ", actual " + actualControlCount);
+            }
+            
+            for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
+                if (cls.controls[controlIndex] !== controls[controlIndex]) {
+                    throwInvalidData("Unexpected control code for competitor '" + competitor.name + "' at control " + (controlIndex + 1) + 
+                        ": expected '" + cls.controls[controlIndex] + "', actual '" + controls[controlIndex] + "'");
+                }
             }
             
             cls.competitors.push(competitor);
@@ -731,7 +739,10 @@
         // course data but not yet in a suitable form to return.
         var tempCourses = [];
         
-        // d3 map that maps course IDs to the temporary course with that ID.
+        // d3 map that maps course IDs plus comma-separated lists of controls
+        // to the temporary course with that ID and controls.
+        // (We expect that all classes with the same course ID have consistent
+        // controls, but we don't assume that.)
         var coursesMap = d3.map();
         
         classResultElements.forEach(function (classResultElement) {
@@ -741,17 +752,19 @@
             
             // Add to each temporary course object a list of all classes.
             var tempCourse = parsedClass.course;
-            if (tempCourse.id !== null && coursesMap.has(tempCourse.id)) {
+            var courseKey = tempCourse.id + "," + parsedClass.controls.join(",");
+            
+            if (tempCourse.id !== null && coursesMap.has(courseKey)) {
                 // We've come across this course before, so just add a class to
                 // it.
-                coursesMap.get(tempCourse.id).classes.push(courseClass);
+                coursesMap.get(courseKey).classes.push(courseClass);
             } else {
                 // New course.  Add some further details from the class.
                 tempCourse.classes = [courseClass];
                 tempCourse.controls = parsedClass.controls;
                 tempCourses.push(tempCourse);
                 if (tempCourse.id !== null) {
-                    coursesMap.set(tempCourse.id, tempCourse);
+                    coursesMap.set(courseKey, tempCourse);
                 }
             }
         });

@@ -1098,6 +1098,58 @@
         );
     });
     
+    QUnit.test("Cannot parse a string that contains one classes with two competitors having different control codes", function (assert) {
+        var person1 = getPerson();
+        var person2 = getPerson();
+        person2.forename = "Fred";
+        person2.surname = "Jones";
+        person2.controls[1] += "9";
+        
+        runFailingXmlFormatParseTest(assert, [{name: "Test Class 1", length: 2300, competitors: [person1, person2]}]);
+    });
+    
+    QUnit.test("Can parse a string that contains two classes nominally the same course each with one competitor but with different controls as two separate courses", function (assert) {
+        var person1 = getPerson();
+        var person2 = getPerson();
+        person2.forename = "Fred";
+        person2.surname = "Jones";
+        person2.controls[1] += "9";
+       
+        var classes = [
+            {name: "Test Class 1", length: 2300, courseId: 1, competitors: [person1]},
+            {name: "Test Class 2", length: 2300, courseId: 1, competitors: [person2]}
+        ];
+        
+        runXmlFormatParseTest(classes,
+            function (eventData) {
+                assert.strictEqual(eventData.courses.length, 2, "Should read the classes' courses as separate");
+            },        
+            {formatters: [Version3Formatter]}
+        );
+    });    
+    
+    QUnit.test("Cannot parse a string that contains two classes using the same course each with one competitor but with different numbers of controls", function (assert) {
+        var person1 = getPerson();
+        var person2 = getPerson();
+        person2.forename = "Fred";
+        person2.surname = "Jones";
+        person2.controls.push("199");
+        person2.cumTimes.push(person2.cumTimes[2] + 177);
+        person2.totalTime = person2.cumTimes[2] + 177 + 94;
+        
+        var classes = [
+            {name: "Test Class 1", length: 2300, courseId: 1, competitors: [person1]},
+            {name: "Test Class 2", length: 2300, courseId: 1, competitors: [person2]}
+        ];
+    
+        runXmlFormatParseTest(classes,
+            function (eventData) {
+                assert.strictEqual(eventData.courses.length, 2, "Should read the classes' courses as separate");
+            },        
+            {formatters: [Version3Formatter]}
+        );
+    });
+
     QUnit.test("Can parse a string that contains two classes each with one competitor", function (assert) {
         var person1 = getPerson();
         var person2 = getPerson();
