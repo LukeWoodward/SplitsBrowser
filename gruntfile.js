@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Grunt configuration.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ module.exports = function(grunt) {
                       'js/event.js',
                       'js/csv-reader.js',
                       'js/si-reader.js',
-                      'js/si-html-reader.js',
+                      'js/html-reader.js',
                       'js/alternative-csv-reader.js',
                       'js/iof-xml-reader.js',
                       'js/input.js'
@@ -61,7 +61,7 @@ module.exports = function(grunt) {
                       'js/data-repair.js',
                       'js/csv-reader.js',
                       'js/si-reader.js',
-                      'js/si-html-reader.js',
+                      'js/html-reader.js',
                       'js/alternative-csv-reader.js',
                       'js/iof-xml-reader.js',
                       'js/input.js',
