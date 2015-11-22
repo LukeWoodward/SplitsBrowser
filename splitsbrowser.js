@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.3.9", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -1314,10 +1314,12 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * Return a list of objects that describe when the given array of times has
     * null or NaN values.  This does not include trailing null or NaN values.
     * @param {Array} times - Array of times, which may include NaNs and nulls.
+    * @param {boolean} includeEnd - Whether to include a blank range that ends
+    *    at the end of the array.
     * @return {Array} Array of objects that describes when the given array has
     *    ranges of null and/or NaN values.
     */
-    function getBlankRanges(times) {
+    function getBlankRanges(times, includeEnd) {
         var blankRangeInfo = [];
         var startIndex = 1;
         while (startIndex + 1 < times.length) {
@@ -1329,7 +1331,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
                     endIndex += 1;
                 }
                 
-                if (endIndex + 1 < times.length) {
+                if (endIndex + 1 < times.length || includeEnd) {
                     blankRangeInfo.push({start: startIndex - 1, end: endIndex + 1});
                 }
                 
@@ -1348,7 +1350,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     */
     function fillBlankRangesInCumulativeTimes(cumTimes) {
         cumTimes = cumTimes.slice(0);
-        var blankRanges = getBlankRanges(cumTimes);
+        var blankRanges = getBlankRanges(cumTimes, false);
         for (var rangeIndex = 0; rangeIndex < blankRanges.length; rangeIndex += 1) {
             var range = blankRanges[rangeIndex];
             var timeBefore = cumTimes[range.start];
@@ -1432,13 +1434,15 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
             // control that either nobody punched or everybody had a dubious
             // split for.
             
-            // Find the blank-ranges of the fastest times.
-            var fastestBlankRanges = getBlankRanges(fastestSplits);
+            // Find the blank-ranges of the fastest times.  Include the end
+            // of the range in case there are no cumulative times at the last
+            // control but there is to the finish.
+            var fastestBlankRanges = getBlankRanges(fastestSplits, true);
             
             // Find all blank-ranges of competitors.
             var allCompetitorBlankRanges = [];
             this.allCompetitors.forEach(function (competitor) {
-                var competitorBlankRanges = getBlankRanges(competitor.getAllCumulativeTimes());
+                var competitorBlankRanges = getBlankRanges(competitor.getAllCumulativeTimes(), false);
                 competitorBlankRanges.forEach(function (range) {
                     allCompetitorBlankRanges.push({
                         start: range.start,
@@ -2802,7 +2806,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
         // Remove trailing commas.
         eventData = eventData.replace(/,+\n/g, "\n").replace(/,+$/, "");
 
-        var classSections = eventData.split(/\n\n/).map($.trim).filter(isTrue);
+        var classSections = eventData.split(/\n\n/).map(function (s) { return s.trim(); }).filter(isTrue);
        
         var classes = classSections.map(parseCourseClass);
         
@@ -2902,18 +2906,18 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     */
     function dequote(value) {
         if (value[0] === '"' && value[value.length - 1] === '"') {
-            value = $.trim(value.substring(1, value.length - 1).replace(/""/g, '"'));
+            value = value.substring(1, value.length - 1).replace(/""/g, '"').trim();
         }
         
         return value;
     }
     
     /**
-    * Constructs an SI-format data reader.
+    * Constructs an OE-format data reader.
     *
     * NOTE: The reader constructed can only be used to read data in once.
     * @constructor
-    * @param {String} data - The SI data to read in.
+    * @param {String} data - The OE data to read in.
     */
     function Reader(data) {
         this.data = normaliseLineEndings(data);
@@ -2952,11 +2956,11 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
             }
         }
         
-        throwWrongFileFormat("Data appears not to be in the SI CSV format");
+        throwWrongFileFormat("Data appears not to be in the OE CSV format");
     };
     
     /**
-    * Identifies which variation on the SI CSV format we are parsing.
+    * Identifies which variation on the OE CSV format we are parsing.
     *
     * At present, the only variations supported are 44-column, 46-column and
     * 60-column.  In all cases, the numbers count the columns before the
@@ -2969,37 +2973,33 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
         
         var firstLine = this.lines[1].split(delimiter);
         
-        // Ignore trailing blanks.
-        var endPos = firstLine.length - 1;
-        while (endPos > 0 && $.trim(firstLine[endPos]) === "") {
-            endPos -= 1;
-        }
-        
-        // Now, find the last column with a control code in.  This should be
-        // one of the last two columns.  (Normally, it will be the second last,
-        // but if there is no last split recorded, it may be the last.)
         var controlCodeRegexp = /^[A-Za-z0-9]+$/;
-        
-        var controlCodeColumn = null;
-        if (controlCodeRegexp.test(firstLine[endPos - 1])) {
-            controlCodeColumn = endPos - 1;
-        } else if (controlCodeRegexp.test(firstLine[endPos])) {
-            // No split for the last control.
-            controlCodeColumn = endPos;
-        } else {
-            throwWrongFileFormat("Could not find control number in last two columns of first data line");
+        for (var columnOffset in COLUMN_INDEXES) {
+            if (COLUMN_INDEXES.hasOwnProperty(columnOffset)) {
+                // Convert columnOffset to a number.  It will presently be a
+                // string because it is an object property.
+                columnOffset = parseInt(columnOffset, 10);
+                
+                // We want there to be a control code at columnOffset, with
+                // both preceding columns either blank or containing a valid
+                // time.
+                if (columnOffset < firstLine.length &&
+                        controlCodeRegexp.test(firstLine[columnOffset]) &&
+                        (firstLine[columnOffset - 2].trim() === "" || parseTime(firstLine[columnOffset - 2]) !== null) &&
+                        (firstLine[columnOffset - 1].trim() === "" || parseTime(firstLine[columnOffset - 1]) !== null)) {
+                           
+                    // Now check the control count exists.  If not, we've
+                    // probably got a triple-column CSV file instead.
+                    var controlCountColumnIndex = COLUMN_INDEXES[columnOffset].controlCount;
+                    if (firstLine[controlCountColumnIndex].trim() !== "") {
+                        this.columnIndexes = COLUMN_INDEXES[columnOffset];
+                        return;
+                    }
+                }
+            }
         }
         
-        while (controlCodeColumn >= 2 && controlCodeRegexp.test(firstLine[controlCodeColumn - 2])) { 
-            // There's another control code before this one.
-            controlCodeColumn -= 2;
-        }
-        
-        if (!COLUMN_INDEXES.hasOwnProperty(controlCodeColumn)) {
-            throwWrongFileFormat("Unsupported index of control 1: " + controlCodeColumn);
-        } else {
-            this.columnIndexes = COLUMN_INDEXES[controlCodeColumn];
-        }
+        throwWrongFileFormat("Did not find control 1 at any of the supported indexes");
     };
     
     /**
@@ -3039,7 +3039,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     */
     Reader.prototype.getNumControls = function (row, lineNumber) {
         var className = this.getClassName(row);
-        if ($.trim(className) === "") {
+        if (className.trim() === "") {
             throwInvalidData("Line " + lineNumber + " does not contain a class for the competitor");
         } else if (this.classes.has(className)) {
             return this.classes.get(className).numControls;
@@ -3160,17 +3160,17 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
             // Some surnames have their placing appended to them, if their placing
             // isn't a number (e.g. mp, n/c).  If so, remove this.
             if (isPlacingNonNumeric && surname.substring(surname.length - placing.length) === placing) {
-                surname = $.trim(surname.substring(0, surname.length - placing.length));
+                surname = surname.substring(0, surname.length - placing.length).trim();
             }
             
-            name = $.trim(forename + " " + surname);
+            name = (forename + " " + surname).trim();
         }
         
         if (name === "" && this.columnIndexes.hasOwnProperty("combinedName")) {
             // 'Nameless' or 44-column variation.
             name = row[this.columnIndexes.combinedName];
             if (isPlacingNonNumeric && name.substring(name.length - placing.length) === placing) {
-                name = $.trim(name.substring(0, name.length - placing.length));
+                name = name.substring(0, name.length - placing.length).trim();
             }
         }
         
@@ -3226,12 +3226,12 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     */
     Reader.prototype.readLine = function (line, lineNumber, delimiter) {
     
-        if ($.trim(line) === "") {
+        if (line.trim() === "") {
             // Skip this blank line.
             return;
         }
     
-        var row = line.split(delimiter).map($.trim).map(dequote);
+        var row = line.split(delimiter).map(function (s) { return s.trim(); }).map(dequote);
         
         // Check the row is long enough to have all the data besides the
         // controls data.
@@ -3430,14 +3430,14 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
         return new Event(classes, courses);
     };
     
-    SplitsBrowser.Input.SI = {};
+    SplitsBrowser.Input.OE = {};
     
     /**
-    * Parse 'SI' data read from a semicolon-separated data string.
+    * Parse OE data read from a semicolon-separated data string.
     * @param {String} data - The input data string read.
     * @return {SplitsBrowser.Model.Event} All event data read.
     */
-    SplitsBrowser.Input.SI.parseEventData = function (data) {
+    SplitsBrowser.Input.OE.parseEventData = function (data) {
         var reader = new Reader(data);
         return reader.parseEventData();
     };
@@ -3480,7 +3480,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * @return True if the string contains a number, false if not.
     */
     function hasNumber(string) {
-        string = $.trim(string);
+        string = string.trim();
         // isFinite is not enough on its own: isFinite("") is true.
         return string !== "" && isFinite(string);
     }
@@ -3549,7 +3549,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * @return {Array} Array of strings of text inside <td> elements.
     */
     function getTableDataBits(text) {
-        return getHtmlStrippedRegexMatches(/<td[^>]*>(.*?)<\/td>/g, text).map($.trim);
+        return getHtmlStrippedRegexMatches(/<td[^>]*>(.*?)<\/td>/g, text).map(function (s) { return s.trim(); });
     }
     
     /**
@@ -3795,7 +3795,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
             
         lineEndPos = text.lastIndexOf("\n", closePrePos);
         text = text.substring(0, lineEndPos);
-        return $.trim(text);
+        return text.trim();
     };
     
     /**
@@ -3857,7 +3857,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
         var climb = tryReadClimb(distanceAndClimb);
         
         return {
-            name: $.trim(courseName),
+            name: courseName.trim(),
             distance: distance,
             climb: climb
         };
@@ -3877,7 +3877,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
         var lastFontPos = line.lastIndexOf("</font>");
         var controlsText = (lastFontPos === -1) ? line : line.substring(lastFontPos + "</font>".length);
 
-        var controlLabels = splitByWhitespace($.trim(controlsText));
+        var controlLabels = splitByWhitespace(controlsText.trim());
         return readControlCodes(controlLabels);
     };
     
@@ -3912,14 +3912,14 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
         if (this.precedingColumnCount === null) {
             // If column 1 is blank or a number, we have four preceding
             // columns.  Otherwise we have three.
-            var column1 = $.trim(firstLineBits[1]); 
+            var column1 = firstLineBits[1].trim();
             this.precedingColumnCount = (column1.match(/^\d*$/)) ? 4 : 3;
         }
 
         var competitive = hasNumber(firstLineBits[0]);
-        var name = $.trim(firstLineBits[this.precedingColumnCount - 2]);
-        var totalTime = $.trim(firstLineBits[this.precedingColumnCount - 1]);
-        var club = $.trim(secondLineBits[this.precedingColumnCount - 2]);
+        var name = firstLineBits[this.precedingColumnCount - 2].trim();
+        var totalTime = firstLineBits[this.precedingColumnCount - 1].trim();
+        var club = secondLineBits[this.precedingColumnCount - 2].trim();
         
         var cumulativeTimes = this.readCompetitorSplitDataLine(firstLine);
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
@@ -3946,7 +3946,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     };
     
     /**
-    * Constructs a recognizer for formatting the 'newer' format of SI HTML
+    * Constructs a recognizer for formatting the 'newer' format of HTML
     * event results data.
     *
     * Data in this format is given within a number of HTML tables, three per
@@ -4028,7 +4028,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
         // Finally, remove the trailing </body> and </html> elements.
         text = text.replace("</body></html>", "");
         
-        return $.trim(text);
+        return text.trim();
     };
     
     /**
@@ -4095,7 +4095,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
             name = name.substring(0, openParenPos);
         }
             
-        name = $.trim(name);
+        name = name.trim();
         
         var distance = null;
         var climb = null;
@@ -4256,7 +4256,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
         // Finally, remove the trailing </body> and </html> elements.
         text = text.replace("</body>", "").replace("</html>", "");
         
-        return $.trim(text);
+        return text.trim();
     };
     
     /**
@@ -4323,7 +4323,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
             climb = parseInt(match[3], 10);
         }
                     
-        return {name: $.trim(name), distance: distance, climb: climb };
+        return {name: name.trim(), distance: distance, climb: climb };
     };
 
     /**
@@ -4473,7 +4473,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * @constructor
     * @param {Object} recognizer - The recognizer to use to parse the HTML.
     */
-    function SIHtmlFormatParser(recognizer) {
+    function HtmlFormatParser(recognizer) {
         this.recognizer = recognizer;
         this.courses = [];
         this.currentCourse = null;
@@ -4488,7 +4488,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * @return {?String} The line read, or null if the end of the data has
     *     been reached.
     */
-    SIHtmlFormatParser.prototype.tryGetLine = function () {
+    HtmlFormatParser.prototype.tryGetLine = function () {
         if (this.linePos + 1 < this.lines.length) {
             this.linePos += 1;
             return this.lines[this.linePos];
@@ -4503,7 +4503,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * 
     * If there is no current competitor, nothing happens.
     */
-    SIHtmlFormatParser.prototype.addCurrentCompetitorIfNecessary = function () {
+    HtmlFormatParser.prototype.addCurrentCompetitorIfNecessary = function () {
         if (this.currentCompetitor !== null) {
             this.currentCourse.addCompetitor(this.currentCompetitor);
             this.currentCompetitor = null;
@@ -4516,7 +4516,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * 
     * If there is no current competitor nor no current course, nothing happens.
     */
-    SIHtmlFormatParser.prototype.addCurrentCompetitorAndCourseIfNecessary = function () {
+    HtmlFormatParser.prototype.addCurrentCompetitorAndCourseIfNecessary = function () {
         this.addCurrentCompetitorIfNecessary();
         if (this.currentCourse !== null) {
             this.courses.push(this.currentCourse);
@@ -4530,7 +4530,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * @param {String} firstLine - The first of the two lines to read the
     *     competitor data from.
     */
-    SIHtmlFormatParser.prototype.readCompetitorLines = function (firstLine) {
+    HtmlFormatParser.prototype.readCompetitorLines = function (firstLine) {
         var secondLine = this.tryGetLine();
         if (secondLine === null) {
             throwInvalidData("Hit end of input data unexpectedly while parsing competitor: first line was '" + firstLine + "'");
@@ -4556,7 +4556,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * @return {boolean} True if no two competitors in the same class are on
     *     different classes, false otherwise.
     */ 
-    SIHtmlFormatParser.prototype.areClassesUniqueWithinCourses = function () {
+    HtmlFormatParser.prototype.areClassesUniqueWithinCourses = function () {
         var classesToCoursesMap = d3.map();
         for (var courseIndex = 0; courseIndex < this.courses.length; courseIndex += 1) {
             var course = this.courses[courseIndex];
@@ -4580,7 +4580,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * Event object with all of the courses and classes.
     * @return {Event} Event object containing all of the data.
     */
-    SIHtmlFormatParser.prototype.createOverallEventObject = function () {
+    HtmlFormatParser.prototype.createOverallEventObject = function () {
         // There is a complication here regarding classes.  Sometimes, classes
         // are repeated within multiple courses.  In this case, ignore the
         // classes given and create a CourseClass for each set.
@@ -4634,7 +4634,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * @param {String} text - The HTML text to parse.
     * @return {Event} Event object containing all the parsed data.
     */
-    SIHtmlFormatParser.prototype.parse = function (text) {
+    HtmlFormatParser.prototype.parse = function (text) {
         this.lines = text.split("\n");
         while (true) {
             var line = this.tryGetLine();
@@ -4669,26 +4669,26 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     
     var RECOGNIZER_CLASSES = [OldHtmlFormatRecognizer, NewHtmlFormatRecognizer, OEventTabularHtmlFormatRecognizer];
     
-    SplitsBrowser.Input.SIHtml = {};
+    SplitsBrowser.Input.Html = {};
     
     /**
-    * Attempts to parse data as one of the supported SI HTML formats.
+    * Attempts to parse data as one of the supported HTML formats.
     *
-    * If the data appears not to be SI HTML data, a WrongFileFormat exception
-    * is thrown.  If the data appears to be SI HTML data but is invalid in some
+    * If the data appears not to be HTML data, a WrongFileFormat exception
+    * is thrown.  If the data appears to be HTML data but is invalid in some
     * way, an InvalidData exception is thrown.
     *
     * @param {String} data - The string containing event data.
     * @return {Event} The parsed event.
     */
-    SplitsBrowser.Input.SIHtml.parseEventData = function (data) {
+    SplitsBrowser.Input.Html.parseEventData = function (data) {
         data = normaliseLineEndings(data);
         for (var recognizerIndex = 0; recognizerIndex < RECOGNIZER_CLASSES.length; recognizerIndex += 1) {
             var RecognizerClass = RECOGNIZER_CLASSES[recognizerIndex];
             var recognizer = new RecognizerClass();
             if (recognizer.isTextOfThisFormat(data)) {
                 data = recognizer.preprocess(data);
-                var parser = new SIHtmlFormatParser(recognizer);
+                var parser = new HtmlFormatParser(recognizer);
                 var parsedEvent = parser.parse(data);
                 return parsedEvent;
             }
@@ -5162,7 +5162,7 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * Reads the course details from the given ClassResult element.
     * @param {jQuery.selection} classResultElement - ClassResult element
     *     containing the course details.
-    * @return {Object} Course details: id, name, length and climb.
+    * @return {Object} Course details: id, name, length, climb and numberOfControls
     */
     Version2Reader.readCourseFromClass = function (classResultElement) {
         // Although the IOF v2 format appears to support courses, they
@@ -5199,8 +5199,9 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
             }
         }
         
-        // Climb does not appear in the per-competitor results.
-        return {id: null, name: courseName, length: length, climb: null};
+        // Climb does not appear in the per-competitor results, and there is
+        // no NumberOfControls.
+        return {id: null, name: courseName, length: length, climb: null, numberOfControls: null};
     };
     
     /**
@@ -5368,7 +5369,8 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     * Reads the course details from the given ClassResult element.
     * @param {jQuery.selection} classResultElement - ClassResult element
     *     containing the course details.
-    * @return {Object} Course details: id, name, length and climb.
+    * @return {Object} Course details: id, name, length, climb and number of
+    *     controls.
     */
     Version3Reader.readCourseFromClass = function (classResultElement) {
         var courseElement = $("> Course", classResultElement);
@@ -5388,13 +5390,19 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
             }
         }
         
+        var numberOfControlsStr = $("> NumberOfControls", courseElement).text();
+        var numberOfControls = parseInt(numberOfControlsStr, 10);
+        if (isNaNStrict(numberOfControls)) {
+            numberOfControls = null;
+        }
+        
         var climbStr = $("> Climb", courseElement).text();
         var climb = parseInt(climbStr, 10);
         if (isNaNStrict(climb)) {
             climb = null;
         }
         
-        return {id: id, name: name, length: length, climb: climb};
+        return {id: id, name: name, length: length, climb: climb, numberOfControls: numberOfControls};
     };
     
     /**
@@ -5649,19 +5657,35 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
         }
         
         for (var index = 0; index < personResults.length; index += 1) {
-            var competitor = parseCompetitor(personResults[index], index + 1, reader);
+            var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader);
+            var competitor = competitorAndControls.competitor;
+            var controls = competitorAndControls.controls;
             if (cls.competitors.length === 0) {
-                cls.controls = competitor.controls;
-                cls.length = competitor.length;
-            } else {
-                // Subtract 2 for the start and finish cumulative times.
-                var actualControlCount = competitor.competitor.getAllOriginalCumulativeTimes().length - 2;
-                if (actualControlCount !== cls.controls.length) {
-                    throwInvalidData("Inconsistent numbers of controls on course '" + className + "': " + cls.controls.length + " and " + actualControlCount);
+                // First competitor.  Record the list of controls.
+                cls.controls = controls;
+                
+                // Set the number of controls on the course if we didn't read
+                // it from the XML.  Assume the first competitor's number of
+                // controls is correct.
+                if (cls.course.numberOfControls === null) {
+                    cls.course.numberOfControls = cls.controls.length;
+                }
+            }
+
+            // Subtract 2 for the start and finish cumulative times.
+            var actualControlCount = competitor.getAllOriginalCumulativeTimes().length - 2;
+            if (actualControlCount !== cls.course.numberOfControls) {
+                throwInvalidData("Unexpected number of controls for competitor '" + competitor.name + "' in class '" + className + "': expected " + cls.course.numberOfControls + ", actual " + actualControlCount);
+            }
+            
+            for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
+                if (cls.controls[controlIndex] !== controls[controlIndex]) {
+                    throwInvalidData("Unexpected control code for competitor '" + competitor.name + "' at control " + (controlIndex + 1) + 
+                        ": expected '" + cls.controls[controlIndex] + "', actual '" + controls[controlIndex] + "'");
                 }
             }
             
-            cls.competitors.push(competitor.competitor);
+            cls.competitors.push(competitor);
         }
         
         if (cls.course.id === null && cls.controls.length > 0) {
@@ -5723,7 +5747,10 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
         // course data but not yet in a suitable form to return.
         var tempCourses = [];
         
-        // d3 map that maps course IDs to the temporary course with that ID.
+        // d3 map that maps course IDs plus comma-separated lists of controls
+        // to the temporary course with that ID and controls.
+        // (We expect that all classes with the same course ID have consistent
+        // controls, but we don't assume that.)
         var coursesMap = d3.map();
         
         classResultElements.forEach(function (classResultElement) {
@@ -5733,17 +5760,19 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
             
             // Add to each temporary course object a list of all classes.
             var tempCourse = parsedClass.course;
-            if (tempCourse.id !== null && coursesMap.has(tempCourse.id)) {
+            var courseKey = tempCourse.id + "," + parsedClass.controls.join(",");
+            
+            if (tempCourse.id !== null && coursesMap.has(courseKey)) {
                 // We've come across this course before, so just add a class to
                 // it.
-                coursesMap.get(tempCourse.id).classes.push(courseClass);
+                coursesMap.get(courseKey).classes.push(courseClass);
             } else {
                 // New course.  Add some further details from the class.
                 tempCourse.classes = [courseClass];
                 tempCourse.controls = parsedClass.controls;
                 tempCourses.push(tempCourse);
                 if (tempCourse.id !== null) {
-                    coursesMap.set(tempCourse.id, tempCourse);
+                    coursesMap.set(courseKey, tempCourse);
                 }
             }
         });
@@ -5767,8 +5796,8 @@ var SplitsBrowser = { Version: "3.3.8", Model: {}, Input: {}, Controls: {}, Mess
     // All the parsers for parsing event data that are known about.
     var PARSERS = [
         SplitsBrowser.Input.CSV.parseEventData,
-        SplitsBrowser.Input.SI.parseEventData,
-        SplitsBrowser.Input.SIHtml.parseEventData,
+        SplitsBrowser.Input.OE.parseEventData,
+        SplitsBrowser.Input.Html.parseEventData,
         SplitsBrowser.Input.AlternativeCSV.parseTripleColumnEventData,
         SplitsBrowser.Input.IOFXml.parseEventData
     ];
