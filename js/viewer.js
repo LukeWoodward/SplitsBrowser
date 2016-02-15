@@ -616,6 +616,7 @@
     */
     Viewer.prototype.selectChartTypeAndRedraw = function (chartType) {
         this.selectChartType(chartType);
+        this.setCompetitorListHeight();
         this.drawChart();
         this.updateDirectLink();
     };
