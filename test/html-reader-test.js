@@ -730,6 +730,27 @@
             });
     });
     
+    QUnit.test("Can parse event data with a single course and single non-starting competitor with no split times in all formats", function (assert) {
+        runHtmlFormatParseTest(
+            [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
+                ["1", "165", "Test runner", "TEST", false, "", "dns", [], []]
+            ]}],
+            function (eventData, formatName) {
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
+
+                var courseClass = eventData.classes[0];
+                assertCourseClass(assert, courseClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
+                
+                var competitor = courseClass.competitors[0];
+                assertCompetitor(assert, competitor, {name: "Test runner", club: "TEST", totalTime: null,
+                                                      originalCumTimes: [0, null, null, null, null],
+                                                      originalSplitTimes: [null, null, null, null],
+                                                      isNonCompetitive: false, completed: false,
+                                                      isNonStarter: true, isNonFinisher: false, isDisqualified: false});
+            });
+    });
+    
     QUnit.test("Can parse event data with a single course and single competitor with negative split in the old format only", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [

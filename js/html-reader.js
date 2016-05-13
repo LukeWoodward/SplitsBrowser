@@ -1035,7 +1035,13 @@
             // happened, fill the gap by adding a missing time for the finish.
             competitor.cumTimes.push(null);
         }
-        
+
+        if (parseTime(competitor.totalTime) === null && competitor.cumTimes.length === 0) {
+            while (competitor.cumTimes.length < this.controls.length) {
+                competitor.cumTimes.push(null);
+            }
+        }
+
         if (competitor.cumTimes.length === this.controls.length) {
             this.competitors.push(competitor);
         } else {
