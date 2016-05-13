@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.3.9", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.3.10", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -4024,6 +4024,13 @@ var SplitsBrowser = { Version: "3.3.9", Model: {}, Input: {}, Controls: {}, Mess
         // In the file I have, the &nbsp; entities are missing their
         // semicolons.  However, this could well be fixed in the future.
         text = text.replace(/<tr[^>]*><td[^>]*>(?:<nobr>)?&nbsp;?(?:<\/nobr>)?<\/td><\/tr>/g, "");
+
+        // Remove any anchor elements used for navigation...
+        text = text.replace(/<a id="[^"]*"><\/a>/g, "");
+        
+        // ... and the navigation div.  Use [\s\S] to match everything
+        // including newlines - JavaScript regexps have no /s modifier.
+        text = text.replace(/<div id="navigation">[\s\S]*?<\/div>/g, "");
         
         // Finally, remove the trailing </body> and </html> elements.
         text = text.replace("</body></html>", "");
@@ -4460,7 +4467,13 @@ var SplitsBrowser = { Version: "3.3.9", Model: {}, Input: {}, Controls: {}, Mess
             // happened, fill the gap by adding a missing time for the finish.
             competitor.cumTimes.push(null);
         }
-        
+
+        if (parseTime(competitor.totalTime) === null && competitor.cumTimes.length === 0) {
+            while (competitor.cumTimes.length < this.controls.length) {
+                competitor.cumTimes.push(null);
+            }
+        }
+
         if (competitor.cumTimes.length === this.controls.length) {
             this.competitors.push(competitor);
         } else {
@@ -10255,6 +10268,7 @@ var SplitsBrowser = { Version: "3.3.9", Model: {}, Input: {}, Controls: {}, Mess
     */
     Viewer.prototype.selectChartTypeAndRedraw = function (chartType) {
         this.selectChartType(chartType);
+        this.setCompetitorListHeight();
         this.drawChart();
         this.updateDirectLink();
     };

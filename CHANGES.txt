@@ -21,3 +21,4 @@ SplitsBrowser changelog:
 3.3.7:  Further improvements to IOF XML format files (issues #33 and #34).
 3.3.8:  Support fractional seconds in SI-format files (issue #35).
 3.3.9:  Fixes for various minor issues (issues #37, #38, #40).
+3.3.10:  Fixes for various minor issues (issues #41, #43, #44).
