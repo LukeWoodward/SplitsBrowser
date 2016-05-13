@@ -1208,4 +1208,29 @@
                                                            originalSplitTimes: [1 * 60 + 47, 2 * 60 + 15, null, null],
                                                            isNonCompetitive: false, completed: false});
     });
+    
+    QUnit.test("Can parse event data with two courses and navigation elements", function (assert) {
+        var html = NEW_FORMAT_DATA_HEADER +
+                   '<a id="1"></a>' +
+                   getCourseHeaderNew("Test course 1", "2.7", "35") +
+                   NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
+                   getControlsLineNew(["138", "152", "141"], 0, true) +
+                   getCompetitorLinesNew("1", "165", "Test runner 1", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) +
+                   NEW_FORMAT_COURSE_TABLE_FOOTER +
+                   '<a id="2"></a>' +
+                   getCourseHeaderNew("Test course 2", "2.7", "35") +
+                   NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
+                   getControlsLineNew(["164", "107", "133"], 0, true) +
+                   getCompetitorLinesNew("", "165", "Test runner 2", "ABCD", false, "", "09:58", ["01:47", "04:02", "05:27", "09:58"], ["01:47", "02:15", "01:25", "04:31"]) +
+                   NEW_FORMAT_COURSE_TABLE_FOOTER +
+                   '<div id="navigation">\n<table>\n' +
+                   '<tr>\n<td>etc. etc. etc.</td>\n</tr>\n' +
+                   '</table>\n</div>\n' +
+                   NEW_FORMAT_DATA_FOOTER;
+        var eventData = parseEventData(html);
+        assert.strictEqual(eventData.courses.length, 2, "Two courses should have been read");
+        assert.strictEqual(eventData.classes.length, 2, "Two classes should have been read");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should should have been read for course 1");
+        assert.strictEqual(eventData.classes[1].competitors.length, 1, "One competitor should should have been read for course 2");
+    });
 })();

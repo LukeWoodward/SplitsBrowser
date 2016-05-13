@@ -599,6 +599,13 @@
         // In the file I have, the &nbsp; entities are missing their
         // semicolons.  However, this could well be fixed in the future.
         text = text.replace(/<tr[^>]*><td[^>]*>(?:<nobr>)?&nbsp;?(?:<\/nobr>)?<\/td><\/tr>/g, "");
+
+        // Remove any anchor elements used for navigation...
+        text = text.replace(/<a id="[^"]*"><\/a>/g, "");
+        
+        // ... and the navigation div.  Use [\s\S] to match everything
+        // including newlines - JavaScript regexps have no /s modifier.
+        text = text.replace(/<div id="navigation">[\s\S]*?<\/div>/g, "");
         
         // Finally, remove the trailing </body> and </html> elements.
         text = text.replace("</body></html>", "");
