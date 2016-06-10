@@ -368,6 +368,9 @@
             throwInvalidData("Found opening <pre> but no closing </pre>");
         }
             
+        // Replace blank lines.
+        text = text.replace(/\n{2,}/g, "\n");
+            
         lineEndPos = text.lastIndexOf("\n", closePrePos);
         text = text.substring(0, lineEndPos);
         return text.trim();
@@ -529,7 +532,7 @@
     * @constructor
     */
     var NewHtmlFormatRecognizer = function () {
-        this.currentCourseHasClass = false;
+        this.timesOffset = null;
     };
 
     /**
@@ -589,7 +592,7 @@
         // Rejig the line endings so that each row of competitor data is on its
         // own line, with table and table-row tags starting on new lines,
         // and closing table and table-row tags at the end of lines.
-        text = text.replace(/>\n</g, "><").replace(/><tr>/g, ">\n<tr>").replace(/<\/tr></g, "</tr>\n<")
+        text = text.replace(/>\n+</g, "><").replace(/><tr>/g, ">\n<tr>").replace(/<\/tr></g, "</tr>\n<")
                    .replace(/><table/g, ">\n<table").replace(/<\/table></g, "</table>\n<");
         
         // Remove all <col> elements.
@@ -631,7 +634,7 @@
     NewHtmlFormatRecognizer.prototype.canIgnoreThisLine = function (line) {
         if (line.indexOf("<th>") > -1) {
             var bits = getNonEmptyTableHeaderBits(line);
-            this.currentCourseHasClass = (bits.length === 5);
+            this.timesOffset = bits.length;
             return true;
         } else {
             return (line === "" || line.indexOf("<table") > -1 || line.indexOf("</table>") > -1);
@@ -720,7 +723,7 @@
     NewHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (line) {
         var bits = getTableDataBits(line);
         
-        var startPos = (this.currentCourseHasClass) ? 5 : 4;
+        var startPos = this.timesOffset;
         
         // Discard the empty bits at the end.
         var endPos = bits.length;
@@ -743,11 +746,12 @@
         var secondLineBits = getTableDataBits(secondLine);
         
         var competitive = hasNumber(firstLineBits[0]);
-        var name = firstLineBits[2];
-        var totalTime = firstLineBits[(this.currentCourseHasClass) ? 4 : 3];
-        var club = secondLineBits[2];
+        var nameOffset = (this.timesOffset === 3) ? 1 : 2;
+        var name = firstLineBits[nameOffset];
+        var totalTime = firstLineBits[this.timesOffset - 1];
+        var club = secondLineBits[nameOffset];
         
-        var className = (this.currentCourseHasClass && name !== "") ? firstLineBits[3] : null;
+        var className = (this.timesOffset === 5 && name !== "") ? firstLineBits[3] : null;
         
         var cumulativeTimes = this.readCompetitorSplitDataLine(firstLine);
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
@@ -834,6 +838,9 @@
         
         // Remove all rows that contain only a single non-breaking space.
         text = text.replace(/<tr[^>]*><td colspan=[^>]*>&nbsp;<\/td><\/tr>/g, "");
+        
+        // Replace blank lines.
+        text = text.replace(/\n{2,}/g, "\n");
         
         // Finally, remove the trailing </body> and </html> elements.
         text = text.replace("</body>", "").replace("</html>", "");

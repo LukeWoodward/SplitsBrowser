@@ -331,8 +331,8 @@
             throw new Error("Cumulative times and split times must have the same length");
         }
     
-        var line1 = cellNew(posn) + cellNew(startNum) + cellNew(name) + ((useClasses) ? cellNew(className) : "") + cellNew(time);
-        var line2 = cellNew("") + cellNew("") + cellNew(club) + ((useClasses) ? cellNew("") : "") + cellNew("");
+        var line1 = cellNew(posn) + ((startNum === null) ? "" : cellNew(startNum)) + cellNew(name) + ((useClasses) ? cellNew(className) : "") + cellNew(time);
+        var line2 = cellNew("") + ((startNum === null) ? "" : cellNew("")) + cellNew(club) + ((useClasses) ? cellNew("") : "") + cellNew("");
         
         for (var index = 0; index < cumTimes.length; index += 1) {
             var splitTime = (cumTimes[index] === "-----") ? "" : splits[index];
@@ -355,6 +355,8 @@
     var NEW_FORMAT_COURSE_HEADER_TABLE_CLASS = "<table width=1105px>\n<col width=32px>\n<col width=39px>\n<col width=133px>\n<thead>\n<tr><th id=rb>Pl</th><th id=rb>Stno</th><th>Name</th><th>Cl.</th><th id=rb>Time</th><th id=rb></th><th id=rb></th></tr>\n</thead><tbody></tbody></table>\n";
 
     var NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS = "<table width=1105px>\n<col width=32px>\n<col width=39px>\n<col width=133px>\n<thead>\n<tr><th id=rb>Pl</th><th id=rb>Stno</th><th>Name</th><th id=rb>Time</th><th id=rb></th><th id=rb></th></tr>\n</thead><tbody></tbody></table>\n";
+
+    var NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS_NO_STARTNO = "<table width=1105px>\n<col width=32px>\n<col width=39px>\n<col width=133px>\n<thead>\n<tr><th id=rb>Pl</th><th>Name</th><th id=rb>Time</th><th id=rb></th><th id=rb></th></tr>\n</thead><tbody></tbody></table>\n";
     
     var NEW_FORMAT_RESULTS_TABLE_HEADER = "<table width=1105px>\n<col width=32px>\n<col width=39px>\n<col width=133px>\n<tbody>\n";
     
@@ -935,6 +937,21 @@
             {preprocessor: function (html) { return html.replace(/\n/g, "\r\n"); }});
     });
     
+    QUnit.test("Can parse event data with a single course and single competitor with doubled line endings in all formats", function (assert) {
+        runHtmlFormatParseTest(
+            [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
+                ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
+            ]}],
+            function (eventData, formatName) {
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
+                assert.strictEqual(eventData.classes[0].competitors.length, 1);
+                assert.deepEqual(eventData.courses[0].classes.length, 1);
+            },
+            {preprocessor: function (html) { return html.replace(/\n/g, "\n\n"); }}
+        );
+    });
+    
     QUnit.test("Can parse event data with a single course and single competitor with CR line endings in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
@@ -1232,5 +1249,21 @@
         assert.strictEqual(eventData.classes.length, 2, "Two classes should have been read");
         assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should should have been read for course 1");
         assert.strictEqual(eventData.classes[1].competitors.length, 1, "One competitor should should have been read for course 2");
+    });
+    
+    QUnit.test("Can parse event data in new-format with no start numbers", function (assert) {
+        var html = NEW_FORMAT_DATA_HEADER + 
+                   getCourseHeaderNew("Test course 1", "2.7", "35") + "\n" +
+                   NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS_NO_STARTNO + NEW_FORMAT_RESULTS_TABLE_HEADER +
+                   getControlsLineNew(["138", "152", "141"], 0, true) + "\n\n\n\n\n\n" +
+                   getCompetitorLinesNew("1", null, "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) + "\n\n\n" +
+                   NEW_FORMAT_COURSE_TABLE_FOOTER + NEW_FORMAT_DATA_FOOTER;
+        var eventData = parseEventData(html);
+        assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
+        assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
+        assert.strictEqual(eventData.classes[0].competitors.length, 1);
+        assert.strictEqual(eventData.classes[0].competitors[0].name, "Test runner");
+        assert.strictEqual(eventData.classes[0].competitors[0].club, "TEST");
+        assert.deepEqual(eventData.courses[0].classes.length, 1);
     });
 })();
