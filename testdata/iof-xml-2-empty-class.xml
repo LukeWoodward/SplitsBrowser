@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<!DOCTYPE ResultList SYSTEM "IOFdata.dtd">
+<ResultList>
+    <IOFVersion version="2.0.3" />
+    <ClassResult>
+        <ClassShortName>Class 1</ClassShortName>
+    </ClassResult>
+</ResultList>

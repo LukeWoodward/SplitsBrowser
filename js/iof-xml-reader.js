@@ -643,10 +643,6 @@
         cls.name = className;
         
         var personResults = $("> PersonResult", jqElement);
-
-        if (personResults.length === 0) {
-            throwInvalidData("Class '" + className + "' has no competitors");
-        }
         
         for (var index = 0; index < personResults.length; index += 1) {
             var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader);

@@ -651,8 +651,15 @@
         runFailingXmlFormatParseTest(assert, [{length: 2300, courseId: 1, competitors: [getPerson()]}]);
     });
     
-    QUnit.test("Cannot parse a string that has a single class with no competitors", function (assert) {
-        runFailingXmlFormatParseTest(assert, [{name: "Test Class", length: 2300, courseId: 1, competitors: []}]);
+    QUnit.test("Can parse a string that has a single class with no competitors", function (assert) {
+        runXmlFormatParseTest([{name: "Test Class", length: 2300, courseId: 1, competitors: []}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                if (eventData.classes.length === 1) {
+                    var courseClass = eventData.classes[0];
+                    assert.strictEqual(courseClass.competitors.length, 0, "No competitors should have been read - " + formatterName);
+                }
+            });
     });
     
     QUnit.test("Can parse a string that has a single class with a single competitor", function (assert) {

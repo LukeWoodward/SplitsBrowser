@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" iofVersion="3.0">
+    <ClassResult>
+        <Class>
+            <Name>Class 1</Name>
+        </Class>
+        <Course>
+            <Id>1</Id>
+            <Name>Course 1</Name>
+            <Length>4100</Length>
+            <Climb>35</Climb>
+        </Course>
+    </ClassResult>
+</ResultList>
