@@ -455,6 +455,7 @@
 
         competitorDivs.selectAll("span").remove();
         
+        competitorDivs = this.listDiv.selectAll("div.competitor").data(this.allCompetitors);
         if (multipleClasses) {
             competitorDivs.append("span")
                           .classed("competitorClassLabel", true)

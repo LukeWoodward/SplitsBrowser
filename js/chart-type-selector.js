@@ -46,6 +46,7 @@
         this.optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);
         this.optionsList.enter().append("option");
         
+        this.optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);
         this.optionsList.attr("value", function (_value, index) { return index.toString(); });
                    
         this.optionsList.exit().remove();

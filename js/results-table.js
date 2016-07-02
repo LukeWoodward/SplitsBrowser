@@ -162,8 +162,12 @@
                                     .data(headerCellData);
                                                        
         headerCells.enter().append("th");
-        headerCells.text(function (header) { return header; });
         headerCells.exit().remove();
+        headerCells = this.table.select("thead tr")
+                                .selectAll("th")
+                                .data(headerCellData);
+                                
+        headerCells.text(function (header) { return header; });
         
         var tableBody = this.table.select("tbody");
         tableBody.selectAll("tr").remove();

@@ -102,6 +102,8 @@
                                                    .data(ALL_COMPARISON_OPTIONS);
         this.optionsList.enter().append("option");
         
+        this.optionsList = d3.select(this.dropDown).selectAll("option")
+                                                   .data(ALL_COMPARISON_OPTIONS);
         this.optionsList.attr("value", function (_opt, index) { return index.toString(); });
                    
         this.optionsList.exit().remove();
@@ -182,6 +184,8 @@
                                                         .data(completingCompetitors);
         
         optionsList.enter().append("option");
+        optionsList = d3.select(this.runnerDropDown).selectAll("option")
+                                                    .data(completingCompetitors);
         optionsList.attr("value", function (_comp, complCompIndex) { return completingCompetitorIndexes[complCompIndex].toString(); })
                    .text(function (comp) { return comp.name; });
         optionsList.exit().remove();

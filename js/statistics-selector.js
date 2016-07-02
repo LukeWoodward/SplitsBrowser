@@ -139,7 +139,7 @@
     */
     StatisticsSelector.prototype.getVisibleStatistics = function () {
         var visibleStats = {};
-        this.div.selectAll("input")[0].forEach(function (checkbox, index) {
+        this.div.selectAll("input").nodes().forEach(function (checkbox, index) {
             visibleStats[STATISTIC_NAMES[index]] = checkbox.checked;
         });
         
@@ -151,7 +151,7 @@
     * @param {Object} visibleStats - The statistics to make visible.
     */
     StatisticsSelector.prototype.setVisibleStatistics = function (visibleStats) {
-        this.div.selectAll("input")[0].forEach(function (checkbox, index) {
+        this.div.selectAll("input").nodes().forEach(function (checkbox, index) {
             checkbox.checked = visibleStats[STATISTIC_NAMES[index]] || false;
         });
         

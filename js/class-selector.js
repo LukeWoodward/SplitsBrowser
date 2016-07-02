@@ -137,6 +137,7 @@
             var optionsList = d3.select(this.dropDown).selectAll("option").data(options);
             optionsList.enter().append("option");
             
+            optionsList = d3.select(this.dropDown).selectAll("option").data(options);
             optionsList.attr("value", function(_value, index) { return index.toString(); })
                        .text(function(value) { return value; });
                        
@@ -183,7 +184,7 @@
     */
     ClassSelector.prototype.getSelectedClasses = function () {
         var indexes = [this.dropDown.selectedIndex];
-        this.selectedOtherClassIndexes.forEach(function (index) { indexes.push(parseInt(index, 10)); });
+        this.selectedOtherClassIndexes.each(function (index) { indexes.push(parseInt(index, 10)); });
         return indexes;
     };
 
@@ -243,6 +244,9 @@
         
         otherClassesSelection.enter().append("div")
                                      .classed("otherClassItem", true);
+        
+        otherClassesSelection = this.otherClassesList.selectAll("div")
+                                                     .data(otherClassIndexes);
         
         otherClassesSelection.attr("id", function (classIdx) { return "courseClassIdx_" + classIdx; })
                              .classed("selected", function (classIdx) { return selectedOtherClassIndexes.has(classIdx); })

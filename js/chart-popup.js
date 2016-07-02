@@ -107,6 +107,8 @@
                                      
         rows.enter().append("tr");
         
+        rows = this.dataTable.selectAll("tr")
+                             .data(competitorData.data);
         rows.classed("highlighted", function (row) { return row.highlight; });
         
         rows.selectAll("td").remove();

@@ -58,9 +58,9 @@
         assert.strictEqual(table.selectAll("thead tr").size(), 1);
         var tableHeaders = table.selectAll("thead tr th");
         assert.strictEqual(tableHeaders.size(), 7);
-        assert.strictEqual(tableHeaders[0][3].innerHTML, "1");
-        assert.strictEqual(tableHeaders[0][4].innerHTML, "2");
-        assert.strictEqual(tableHeaders[0][5].innerHTML, "3");        
+        assert.strictEqual(tableHeaders.nodes()[3].innerHTML, "1");
+        assert.strictEqual(tableHeaders.nodes()[4].innerHTML, "2");
+        assert.strictEqual(tableHeaders.nodes()[5].innerHTML, "3");        
         assert.strictEqual(table.selectAll("tbody").size(), 1);
         assert.strictEqual(table.selectAll("tbody tr").size(), 2);
         assert.strictEqual(table.selectAll("tbody tr:first-child td").size(), 7);
@@ -94,9 +94,9 @@
         var table = d3.select("table.resultsTable");
         var tableHeaders = table.selectAll("thead tr th");
         assert.strictEqual(tableHeaders.size(), 7);
-        assert.strictEqual(tableHeaders[0][3].innerHTML, "1&nbsp;(138)");
-        assert.strictEqual(tableHeaders[0][4].innerHTML, "2&nbsp;(152)");
-        assert.strictEqual(tableHeaders[0][5].innerHTML, "3&nbsp;(141)");
+        assert.strictEqual(tableHeaders.nodes()[3].innerHTML, "1&nbsp;(138)");
+        assert.strictEqual(tableHeaders.nodes()[4].innerHTML, "2&nbsp;(152)");
+        assert.strictEqual(tableHeaders.nodes()[5].innerHTML, "3&nbsp;(141)");
     });
     
     QUnit.test("Can create a results table with one competitor not finishing sorted to the bottom", function (assert) {

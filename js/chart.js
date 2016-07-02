@@ -753,9 +753,9 @@
     * @param {object} chartData - Chart data object.
     */
     Chart.prototype.createScales = function (chartData) {
-        this.xScale = d3.scale.linear().domain(chartData.xExtent).range([0, this.contentWidth]);
-        this.yScale = d3.scale.linear().domain(chartData.yExtent).range([0, this.contentHeight]);
-        this.xScaleMinutes = d3.scale.linear().domain([chartData.xExtent[0] / 60, chartData.xExtent[1] / 60]).range([0, this.contentWidth]);
+        this.xScale = d3.scaleLinear().domain(chartData.xExtent).range([0, this.contentWidth]);
+        this.yScale = d3.scaleLinear().domain(chartData.yExtent).range([0, this.contentHeight]);
+        this.xScaleMinutes = d3.scaleLinear().domain([chartData.xExtent[0] / 60, chartData.xExtent[1] / 60]).range([0, this.contentWidth]);
     };
 
     /**
@@ -787,6 +787,8 @@
         
         rects.enter().append("rect");
 
+        rects = this.svgGroup.selectAll("rect")
+                                 .data(d3.range(refCumTimesSorted.length - 1));
         rects.attr("x", function (index) { return outerThis.xScale(refCumTimesSorted[index]); })
              .attr("y", 0)
              .attr("width", function (index) { return outerThis.xScale(refCumTimesSorted[index + 1]) - outerThis.xScale(refCumTimesSorted[index]); })
@@ -842,20 +844,17 @@
     
         var tickFormatter = this.determineYAxisTickFormatter(chartData);
         
-        var xAxis = d3.svg.axis()
-                          .scale(this.xScale)
-                          .orient("top")
-                          .tickFormat(this.getTickFormatter())
-                          .tickValues(this.referenceCumTimes);
+        var xAxis = d3.axisTop()
+                      .scale(this.xScale)
+                      .tickFormat(this.getTickFormatter())
+                      .tickValues(this.referenceCumTimes);
 
-        var yAxis = d3.svg.axis()
-                          .scale(this.yScale)
-                          .tickFormat(tickFormatter)
-                          .orient("left");
+        var yAxis = d3.axisLeft()
+                      .scale(this.yScale)
+                      .tickFormat(tickFormatter);
                      
-        var lowerXAxis = d3.svg.axis()
-                               .scale(this.xScaleMinutes)
-                               .orient("bottom");
+        var lowerXAxis = d3.axisBottom()
+                           .scale(this.xScaleMinutes);
 
         this.svgGroup.selectAll("g.axis").remove();
 
@@ -897,17 +896,16 @@
                 // to draw.  WebKit will report an error ('Error parsing d=""')
                 // if no points on the line are defined, as will happen in this
                 // case, so we substitute a single zero point instead.
-                return d3.svg.line()
-                             .x(0)
-                             .y(0)
-                             .defined(function (d, i) { return i === 0; });
+                return d3.line()
+                           .x(0)
+                           .y(0)
+                           .defined(function (d, i) { return i === 0; });
             }
             else {
-                return d3.svg.line()
-                             .x(function (d) { return outerThis.xScale(d.x); })
-                             .y(function (d) { return outerThis.yScale(d.ys[selCompIdx]); })
-                             .defined(function (d) { return isNotNullNorNaN(d.ys[selCompIdx]); })
-                             .interpolate("linear");
+                return d3.line()
+                           .x(function (d) { return outerThis.xScale(d.x); })
+                           .y(function (d) { return outerThis.yScale(d.ys[selCompIdx]); })
+                           .defined(function (d) { return isNotNullNorNaN(d.ys[selCompIdx]); });
             }
         };
         
@@ -980,6 +978,7 @@
         
         startLabels.enter().append("text");
         
+        startLabels = this.svgGroup.selectAll("text.startLabel").data(this.selectedIndexes);
         startLabels.attr("x", -7)
                    .attr("y", function (_compIndex, selCompIndex) { return outerThis.yScale(startColumn.ys[selCompIndex]) + outerThis.getTextHeight(chartData.competitorNames[selCompIndex]) / 4; })
                    .attr("class", function (compIndex) { return "startLabel competitor" + compIndex; })
@@ -1090,10 +1089,10 @@
         this.adjustCompetitorLegendLabelsUpwardsIfNecessary(minLastY);
 
         var legendLines = this.svgGroup.selectAll("line.competitorLegendLine").data(this.currentCompetitorData);
-        legendLines.enter()
-                   .append("line");
+        legendLines.enter().append("line").classed("competitorLegendLine", true);
 
         var outerThis = this;
+        legendLines = this.svgGroup.selectAll("line.competitorLegendLine").data(this.currentCompetitorData);
         legendLines.attr("x1", this.contentWidth + 1)
                    .attr("y1", function (data) { return data.y; })
                    .attr("x2", this.contentWidth + LEGEND_LINE_WIDTH + 1)
@@ -1106,9 +1105,9 @@
         legendLines.exit().remove();
 
         var labels = this.svgGroup.selectAll("text.competitorLabel").data(this.currentCompetitorData);
-        labels.enter()
-              .append("text");
+        labels.enter().append("text").classed("competitorLabel", true);
 
+        labels = this.svgGroup.selectAll("text.competitorLabel").data(this.currentCompetitorData);
         labels.attr("x", this.contentWidth + LEGEND_LINE_WIDTH + 2)
               .attr("y", function (data) { return data.y + data.textHeight / 4; })
               .attr("class", function (data) { return "competitorLabel competitor" + data.index; })

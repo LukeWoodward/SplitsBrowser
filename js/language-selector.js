@@ -59,6 +59,7 @@
         var optionsList = d3.select(this.dropDown).selectAll("option").data(this.allLanguages);
         optionsList.enter().append("option");
         
+        optionsList = d3.select(this.dropDown).selectAll("option").data(this.allLanguages);
         optionsList.attr("value", function (language) { return language; })
                    .text(function (language) { return getLanguageName(language); });
                    
