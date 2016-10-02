@@ -951,7 +951,7 @@
     QUnit.test("Cannot view the Crossing Runners button if not showing the race graph", function (assert) {
         var listAndSelection = createSampleList([], false);
         listAndSelection.list.setChartType(ChartTypes.SplitsGraph);
-        assert.strictEqual($(CROSSING_RUNNERS_BUTTON_SELECTOR).size(), 1);
+        assert.strictEqual($(CROSSING_RUNNERS_BUTTON_SELECTOR).length, 1);
         assert.ok(!$(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":visible"));
     });
     

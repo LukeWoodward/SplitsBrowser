@@ -278,7 +278,7 @@
         
         var selectedCompetitorIndexes = [];
         var dragClassName = this.getDragClassName();
-        for (var index = 0; index < this.allCompetitorDivs.size(); index += 1) {
+        for (var index = 0; index < this.allCompetitorDivs.length; index += 1) {
             if ($(this.allCompetitorDivs[index]).hasClass(dragClassName)) {
                 selectedCompetitorIndexes.push(index);
             }
