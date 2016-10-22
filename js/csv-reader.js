@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser CSV - Reads in CSV result data files.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -42,6 +42,15 @@
     function parseCompetitors(index, line, controlCount) {
         // Expect forename, surname, club, start time then (controlCount + 1) split times in the form MM:SS.
         var parts = line.split(",");
+        
+        while (parts.length > controlCount + 5 && parts[3].match(/[^0-9.,:-]/)) {
+            // As this line is too long and the 'start time' cell has something
+            // that appears not to be a start time, assume that the club name
+            // has a comma in it.
+            parts[2] += "," + parts[3];
+            parts.splice(3, 1);
+        }
+        
         if (parts.length === controlCount + 5) {
             var forename = parts.shift();
             var surname = parts.shift();

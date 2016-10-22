@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser - CSV reader tests.
  *  
- *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -221,6 +221,18 @@
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
             fromCumTimes(1, "John Smith", "ABC", 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])
+        ]);
+        
+        var expectedCourse = new Course("Example", [expectedClass], null, null, null);
+        expectedClass.setCourse(expectedCourse);
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+    });
+
+    QUnit.test("Can parse a single class with a single valid competitor with comma in club name", function (assert) {
+        var csvData = "Example, 4\r\nJohn,Smith,ABC,DEF,10:34,02:57,01:39,03:31,02:01,00:23\r\n";
+        var actualEvent = parseEventData(csvData);
+        var expectedClass = new CourseClass("Example", 4, [
+            fromCumTimes(1, "John Smith", "ABC,DEF", 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
