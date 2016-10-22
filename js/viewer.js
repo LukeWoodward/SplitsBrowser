@@ -57,6 +57,23 @@
     var ResultsTable = Controls.ResultsTable;
     
     /**
+    * Checks that D3 version 4 or later is present.
+    * @return {Boolean} true if D3 version 4 is present, false if no D3 was found
+    *     or a version of D3 older version 4 was found. 
+    */
+    function checkD3Version4() {
+        if (!window.d3) {
+            alert("D3 was not found.  SplitsBrowser requires D3 version 4 or later.");
+            return false;
+        } else if (parseFloat(d3.version) < 4) {
+            alert("D3 version " + d3.version + " was found.  SplitsBrowser requires D3 version 4 or later.");
+            return false;
+        } else {
+            return true;
+        }
+    }
+    
+    /**
     * The 'overall' viewer object responsible for viewing the splits graph.
     * @constructor
     * @param {?Object} options - Optional object containing various options
@@ -743,6 +760,10 @@
     *     the HTML element itself, although this behaviour is deprecated.
     */
     SplitsBrowser.readEvent = function (data, options) {
+        if (!checkD3Version4()) {
+            return;
+        }
+        
         var eventData;
         try {
             eventData = parseEventData(data);
@@ -832,6 +853,10 @@
     *     the HTML element itself, although this behaviour is deprecated.
     */
     SplitsBrowser.loadEvent = function (eventUrl, options) {
+        if (!checkD3Version4()) {
+            return;
+        }
+        
         $.ajax({
             url: eventUrl,
             data: "",
