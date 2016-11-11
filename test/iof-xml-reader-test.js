@@ -1107,9 +1107,9 @@
         runXmlFormatParseTest(
             [{name: "Test Class", length: 2300, courseId: 1, competitors: [person1, person2]}],
             function (eventData, formatterName) {
-                assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read - " + formatterName);
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued - " + formatterName);
             }
         );
     });
