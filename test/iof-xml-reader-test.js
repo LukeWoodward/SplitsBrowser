@@ -647,18 +647,19 @@
         runFailingXmlFormatParseTest(assert, []);
     });
     
-    QUnit.test("Cannot parse a string that has a class with no name", function (assert) {
-        runFailingXmlFormatParseTest(assert, [{length: 2300, courseId: 1, competitors: [getPerson()]}]);
+    QUnit.test("Can parse with warnings a string that has a class with no name", function (assert) {
+        runXmlFormatParseTest([{length: 2300, courseId: 1, competitors: [getPerson()]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                assert.ok(eventData.classes[0].name !== "");
+            });
     });
     
     QUnit.test("Can parse a string that has a single class with no competitors", function (assert) {
         runXmlFormatParseTest([{name: "Test Class", length: 2300, courseId: 1, competitors: []}],
             function (eventData, formatterName) {
-                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                if (eventData.classes.length === 1) {
-                    var courseClass = eventData.classes[0];
-                    assert.strictEqual(courseClass.competitors.length, 0, "No competitors should have been read - " + formatterName);
-                }
+                assert.strictEqual(eventData.classes.length, 0, "No classes should have been read - " + formatterName);
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
             });
     });
     
@@ -744,11 +745,17 @@
             });
     });
     
-    QUnit.test("Cannot parse a string that contains a competitor with no name", function (assert) {
+    QUnit.test("Can parse with warnings a string that contains a competitor with no name", function (assert) {
         var person = getPerson();
         delete person.forename;
         delete person.surname;
-        runFailingXmlFormatParseTest(assert, [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}]);
+        runXmlFormatParseTest(
+            [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors.length, 0, "No competitors should have been read - " + formatterName);
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued - " + formatterName);
+            });
     });
     
     QUnit.test("Can parse a string that contains a competitor with missing club", function (assert) {
@@ -816,10 +823,15 @@
             });
     });
     
-    QUnit.test("Cannot parse a string that contains a competitor with no Result", function (assert) {
+    QUnit.test("Can parse with warnings a string that contains a competitor with no Result", function (assert) {
         var person = getPerson();
         delete person.result;
-        runFailingXmlFormatParseTest(assert, [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}]);
+        runXmlFormatParseTest(
+            [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
+            });
     });
     
     QUnit.test("Can parse a string that contains a competitor with missing start time", function (assert) {
@@ -898,7 +910,13 @@
     });
     
     QUnit.test("Cannot parse a string that contains an invalid course length", function (assert) {
-        runFailingXmlFormatParseTest(assert, [{name: "Test Class", length: "This is not a valid number", competitors: [getPerson()]}]);
+        runXmlFormatParseTest(
+            [{name: "Test Class", length: "This is not a valid number", competitors: [getPerson()]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatterName);
+                assert.strictEqual(eventData.courses[0].length, null, "No course length should have been read - " + formatterName);
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
+            });
     });
     
     QUnit.test("Can parse a string that contains a course length specified in metres", function (assert) {
@@ -928,7 +946,14 @@
     });
     
     QUnit.test("Cannot parse a string that contains an unrecognised course length unit", function (assert) {
-        runFailingXmlFormatParseTest(assert, [{name: "Test Class", length: "100", lengthUnit: "furlong", competitors: [getPerson()]}], {formatters: [Version2Formatter]});
+        runXmlFormatParseTest(
+            [{name: "Test Class", length: "100", lengthUnit: "furlong", competitors: [getPerson()]}],
+            function (eventData) {
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
+                assert.strictEqual(eventData.courses[0].length, null, "No course length should have been read");
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
+            },
+            {formatters: [Version2Formatter]});
     });
     
     QUnit.test("Can parse a string that contains a course climb", function (assert) {
@@ -1079,7 +1104,14 @@
         person2.cumTimes.push(person2.cumTimes[2] + 177);
         person2.totalTime = person2.cumTimes[2] + 177 + 94;
         
-        runFailingXmlFormatParseTest(assert, [{name: "Test Class", length: 2300, courseId: 1, competitors: [person1, person2]}]);
+        runXmlFormatParseTest(
+            [{name: "Test Class", length: 2300, courseId: 1, competitors: [person1, person2]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
+                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
+            }
+        );
     });
     
     QUnit.test("Can parse a string that contains a class with one competitor whose number of controls matches that specified by the course", function (assert) {
@@ -1096,23 +1128,33 @@
         );
     });
     
-    QUnit.test("Cannot parse a string that contains a class with one competitor whose number of controls doesn't match that specified by the course", function (assert) {
+    QUnit.test("Can parse with warnings a string that contains a class with one competitor whose number of controls doesn't match that specified by the course", function (assert) {
         var person = getPerson();
-        runFailingXmlFormatParseTest(
-            assert,
+        runXmlFormatParseTest(
             [{name: "Test Class", length: 2300, courseId: 1, numberOfControls: person.controls.length + 2, competitors: [person]}],
+            function (eventData) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
+                assert.strictEqual(eventData.classes[0].competitors.length, 0, "No competitors should have been read");
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
+            },
             {formatters: [Version3Formatter]}
         );
     });
     
-    QUnit.test("Cannot parse a string that contains one classes with two competitors having different control codes", function (assert) {
+    QUnit.test("Can parse with warnings a string that contains one class with two competitors having different control codes", function (assert) {
         var person1 = getPerson();
         var person2 = getPerson();
         person2.forename = "Fred";
         person2.surname = "Jones";
         person2.controls[1] += "9";
         
-        runFailingXmlFormatParseTest(assert, [{name: "Test Class 1", length: 2300, competitors: [person1, person2]}]);
+        runXmlFormatParseTest(
+            [{name: "Test Class 1", length: 2300, competitors: [person1, person2]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - "  + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read - " + formatterName);
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued - " + formatterName);
+            });
     });
     
     QUnit.test("Can parse a string that contains two classes nominally the same course each with one competitor but with different controls as two separate courses", function (assert) {

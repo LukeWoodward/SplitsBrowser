@@ -220,12 +220,14 @@
         assert.strictEqual(eventData.courses.length, 2);
     });
 
-    QUnit.test("Cannot parse a string that contains two competitors on the same course with different numbers of controls", function (assert) {
+    QUnit.test("Issues a warning for a string that contains two competitors on the same course with different numbers of controls", function (assert) {
         var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
                                      fabricateTripleColumnRow("Fred Baker", "ABCD", "Course 1", ["152", "188", "163", "186", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 257, 282]);
-        SplitsBrowserTest.assertInvalidData(assert, function () {
-            parseTripleColumnEventData(data);
-        }, "Should throw an exception for two competitors on the same course with different numbers of controls");
+        var eventData = parseTripleColumnEventData(data);
+        assert.strictEqual(eventData.classes.length, 1);
+        assert.strictEqual(eventData.courses.length, 1);
+        assert.strictEqual(eventData.classes[0].competitors.length, 1);
+        assert.strictEqual(eventData.warnings.length, 1);
     });
     
     QUnit.test("Can parse a string that contains a single competitor missing an intermediate control", function (assert) {

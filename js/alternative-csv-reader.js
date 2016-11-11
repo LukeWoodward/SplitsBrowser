@@ -21,8 +21,6 @@
 (function () {
     "use strict";
     
-    var isNaNStrict = SplitsBrowser.isNaNStrict;
-    var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
@@ -55,7 +53,6 @@
         startTime: 8,
         length: null,
         climb: null,
-        controlCount: null,
         placing: null,
         finishTime: null,
         allowMultipleCompetitorNames: true
@@ -91,6 +88,7 @@
         this.format = format;
         this.classes = d3.map();
         this.delimiter = null;
+        this.warnings = [];
         
         // Return the offset within the control data that should be used when
         // looking for control codes.  This will be 0 if the format specifies a
@@ -153,31 +151,6 @@
     };
     
     /**
-    * Checks that the given row has the expected length according to the
-    * format.  The expected length is the controls offset plus the number of
-    * controls times the step, provided the row has a number of controls.
-    * If the row is too short, an exception is thrown.  If the row is too long,
-    * it is shortened to have the expected length.
-    * @param {Array} row - Array of row data.
-    * @param {Number} rowIndex - The row index of the row of data.
-    */
-    Reader.prototype.checkRowLength = function (row, rowIndex) {
-        if (this.format.controlCount !== null) {
-            var controlCount = parseInt(row[this.format.controlCount], 10);
-            if (isNaNStrict(controlCount)) {
-                throwInvalidData("Control count '" + row[this.format.controlCount] + "' is not a valid number");
-            }
-            
-            var expectedRowLength = this.format.controlsOffset + controlCount * this.format.step;
-            if (row.length < expectedRowLength) {
-                throwInvalidData("Data in row " + rowIndex + " should have at least " + expectedRowLength + " parts (for " + controlCount + " controls) but only has " + row.length);
-            } else if (row.length > expectedRowLength) {
-                row.splice(expectedRowLength, row.length - expectedRowLength);
-            }
-        }
-    };
-    
-    /**
     * Adds the competitor to the course with the given name.
     * @param {Competitor} competitor - The competitor object read from the row.
     * @param {String} courseName - The name of the course.
@@ -191,11 +164,11 @@
             // cumulative time at the start (always 0), and add one on to
             // the count of controls in the class to cater for the finish.
             if (cumTimes.length - 1 !== (cls.controls.length + 1)) {
-                throwInvalidData("Competitor '" + competitor.name + "' has the wrong number of splits for course '" + courseName + "': " +
-                         "expected " + (cls.controls.length + 1) + ", actual " + (cumTimes.length - 1));
+                this.warnings.push("Competitor '" + competitor.name + "' has the wrong number of splits for course '" + courseName + "': " +
+                                   "expected " + (cls.controls.length + 1) + ", actual " + (cumTimes.length - 1));
+            } else {
+                cls.competitors.push(competitor);
             }
-            
-            cls.competitors.push(competitor);
         } else {
             // New course/class.
             
@@ -215,9 +188,8 @@
     /**
     * Read a row of data from a line of the file.
     * @param {String} line - The line of data read from the file.
-    * @param {Number} rowIndex - The row index of the row being read.
     */
-    Reader.prototype.readDataRow = function (line, rowIndex) {
+    Reader.prototype.readDataRow = function (line) {
         var row = line.split(this.delimiter);
         trimTrailingEmptyCells(row);
         this.adjustLinePartsForMultipleCompetitors(row);
@@ -231,8 +203,6 @@
             // Competitor might be missing cumulative time to last control.
             row.push("");
         }
-        
-        this.checkRowLength(row, rowIndex);
         
         var competitorName = row[this.format.name];
         var club = row[this.format.club];
@@ -311,6 +281,7 @@
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */    
     Reader.prototype.parseEventData = function (eventData) {
+        this.warnings = [];
         eventData = normaliseLineEndings(eventData);
         
         var lines = eventData.split(/\n/);
@@ -329,11 +300,11 @@
         this.checkControlCodesAlphaNumeric(firstDataLine);
         
         for (var rowIndex = 1; rowIndex < lines.length; rowIndex += 1) {
-            this.readDataRow(lines[rowIndex], rowIndex);
+            this.readDataRow(lines[rowIndex]);
         }
         
         var classesAndCourses = this.createClassesAndCourses();
-        return new Event(classesAndCourses.classes, classesAndCourses.courses);
+        return new Event(classesAndCourses.classes, classesAndCourses.courses, this.warnings);
     };
     
     SplitsBrowser.Input.AlternativeCSV = {

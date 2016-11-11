@@ -341,23 +341,6 @@
         });
     }
     
-    /**
-    * Calls a test function for the result of formatting the given competitor
-    * data using all formats.  The data is expected not to be parsed successfully.
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Array} competitors - Array of 2-element arrays containing
-    *     competitor and control data.
-    * @param {String} what - Description of why the test should fail.
-    * @param {String} exception - Name of the exception to expect to be thrown.
-    *     If not specified, this defaults to 'InvalidData'.
-    */
-    function runInvalidDataTestOverAllFormats (assert, competitors, what, exceptionName) {
-        ALL_FORMATS.forEach(function (format) {
-            var text = generateData(format, competitors);
-            runInvalidDataTest(assert, text, what + " (format " + format.name + ")", exceptionName);
-        });
-    }
-    
     QUnit.test("Can parse a string that contains a single competitor's data in all formats", function (assert) {
         runTestOverAllFormats([[getCompetitor1(), getControls1()]], function (eventData, format) {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
@@ -697,17 +680,23 @@
         });
     });
     
-    QUnit.test("Cannot parse a string that contains a single competitor's data with a non-numeric control count", function (assert) {
+    QUnit.test("Can parse with competitor errors a string that contains a single competitor's data with a non-numeric control count", function (assert) {
         var comp = getCompetitor1();
         comp.numControls = "This is not a valid number";
-        runInvalidDataTestOverAllFormats(assert, [[comp, getControls1()]], "data with non-numeric control count");
+        runTestOverAllFormats([[comp, getControls1()]], function (eventData) {
+            assert.strictEqual(eventData.classes.length, 0, "There should be no classes");
+            assert.strictEqual(eventData.warnings.length, 1, "One compeitor error should have been read");
+        });
     });
     
-    QUnit.test("Cannot parse a string that contains a single competitor's data with a missing class name", function (assert) {
+    QUnit.test("Can parse with competitor errors a string that contains a single competitor's data with a missing class name", function (assert) {
         var comp = getCompetitor1();
         comp.className = "";
         comp.course = "";
-        runInvalidDataTestOverAllFormats(assert, [[comp, getControls1()]], "data with a missing class name");
+        runTestOverAllFormats([[comp, getControls1()]], function (eventData) {
+            assert.strictEqual(eventData.classes.length, 0, "There should be no classes");
+            assert.strictEqual(eventData.warnings.length, 1, "One compeitor error should have been read");
+        });
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control and remove the trailing 'mp' from the name", function (assert) {

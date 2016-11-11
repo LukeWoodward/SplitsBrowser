@@ -124,6 +124,9 @@
         
         // The indexes of the columns that we read data from.
         this.columnIndexes = null;
+        
+        // Warnings about competitors that cannot be read in.
+        this.warnings = [];
     }
 
     /**
@@ -222,12 +225,15 @@
     * Returns the number of controls to expect on the given line.
     * @param {Array} row - Array of row data items.
     * @param {Number} lineNumber - The line number of the line.
-    * @return {Number} Number of controls read.
+    * @return {Number?} The number of controls, or null if the count could not be read.
     */
     Reader.prototype.getNumControls = function (row, lineNumber) {
         var className = this.getClassName(row);
+        var name;
         if (className.trim() === "") {
-            throwInvalidData("Line " + lineNumber + " does not contain a class for the competitor");
+            name = this.getName(row) || "<name unknown>";
+            this.warnings.push("Could not find a class for competitor '" + name + "' (line " + lineNumber + ")");
+            return null;
         } else if (this.classes.has(className)) {
             return this.classes.get(className).numControls;
         } else {
@@ -235,7 +241,9 @@
             if (isFinite(numControls)) {
                 return numControls;
             } else {
-                throwInvalidData("Could not read control count '" + row[this.columnIndexes.controlCount] + "' from line " + lineNumber);
+                name = this.getName(row) || "<name unknown>";
+                this.warnings.push("Could not read the control count '" + row[this.columnIndexes.controlCount] + "' for competitor '" + name + "' from line " + lineNumber);
+                return null;
             }
         }    
     };
@@ -318,6 +326,28 @@
             this.classCoursePairs.push([className, courseName]);
         }
     };
+
+    /**
+    * Reads the name of the competitor from the row.
+    * @param {Array} row - Array of row data items.
+    * @return {String} The name of the competitor.
+    */
+    Reader.prototype.getName = function (row) {
+        var name = "";
+
+        if (this.columnIndexes.hasOwnProperty("forename") && this.columnIndexes.hasOwnProperty("surname")) {
+            var forename = row[this.columnIndexes.forename];
+            var surname = row[this.columnIndexes.surname];
+            name = (forename + " " + surname).trim();
+        }
+        
+        if (name === "" && this.columnIndexes.hasOwnProperty("combinedName")) {
+            // 'Nameless' or 44-column variation.
+            name = row[this.columnIndexes.combinedName];
+        }
+        
+        return name;
+    };
     
     /**
     * Reads in the competitor-specific data from the given row and adds it to
@@ -337,30 +367,12 @@
         
         var startTime = this.getStartTime(row);
 
+        var name = this.getName(row);
         var isPlacingNonNumeric = (placing !== "" && isNaNStrict(parseInt(placing, 10)));
-        
-        var name = "";
-        if (this.columnIndexes.hasOwnProperty("forename") && this.columnIndexes.hasOwnProperty("surname")) {
-            var forename = row[this.columnIndexes.forename];
-            var surname = row[this.columnIndexes.surname];
-        
-            // Some surnames have their placing appended to them, if their placing
-            // isn't a number (e.g. mp, n/c).  If so, remove this.
-            if (isPlacingNonNumeric && surname.substring(surname.length - placing.length) === placing) {
-                surname = surname.substring(0, surname.length - placing.length).trim();
-            }
-            
-            name = (forename + " " + surname).trim();
+        if (isPlacingNonNumeric && name.substring(name.length - placing.length) === placing) {
+            name = name.substring(0, name.length - placing.length).trim();
         }
-        
-        if (name === "" && this.columnIndexes.hasOwnProperty("combinedName")) {
-            // 'Nameless' or 44-column variation.
-            name = row[this.columnIndexes.combinedName];
-            if (isPlacingNonNumeric && name.substring(name.length - placing.length) === placing) {
-                name = name.substring(0, name.length - placing.length).trim();
-            }
-        }
-        
+
         var order = this.classes.get(className).competitors.length + 1;
         var competitor = fromOriginalCumTimes(order, name, club, startTime, cumTimes);
         if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && competitor.completed()) {
@@ -427,14 +439,15 @@
         }
         
         var numControls = this.getNumControls(row, lineNumber);
-        
-        var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
-        
-        this.createClassIfNecessary(row, numControls);
-        this.createCourseIfNecessary(row, numControls);
-        this.createClassCoursePairIfNecessary(row);
-        
-        this.addCompetitor(row, cumTimes);
+        if (numControls !== null) {
+            var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
+            
+            this.createClassIfNecessary(row, numControls);
+            this.createCourseIfNecessary(row, numControls);
+            this.createClassCoursePairIfNecessary(row);
+            
+            this.addCompetitor(row, cumTimes);
+        }
     };
     
     /**
@@ -599,6 +612,8 @@
     */
     Reader.prototype.parseEventData = function () {
         
+        this.warnings = [];
+        
         this.lines = this.data.split(/\n/);
         
         var delimiter = this.identifyDelimiter();
@@ -614,7 +629,7 @@
         
         var classes = this.createClasses();
         var courses = this.determineCourses(classes);
-        return new Event(classes, courses);
+        return new Event(classes, courses, this.warnings);
     };
     
     SplitsBrowser.Input.OE = {};

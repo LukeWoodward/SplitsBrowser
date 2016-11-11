@@ -100,7 +100,7 @@
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
         
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with a single valid competitor with start time including seconds", function (assert) {
@@ -113,7 +113,7 @@
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
         
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with a single valid competitor when file has LF line-endings", function (assert) {
@@ -126,7 +126,7 @@
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
         
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with a single valid competitor when file has CR line-endings", function (assert) {
@@ -139,7 +139,7 @@
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
         
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with a single valid competitor when file has trailing commas", function (assert) {
@@ -152,7 +152,7 @@
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
         
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with a single valid competitor and an empty class", function (assert) {
@@ -165,7 +165,7 @@
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
         
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with a single valid competitor and an empty class with a negative control count", function (assert) {
@@ -178,7 +178,7 @@
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
         
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with a single competitor with zero split converted to a missed control", function (assert) {
@@ -190,7 +190,7 @@
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with a single competitor with all zero splits, marking the competitor as a non-starter", function (assert) {
@@ -201,7 +201,7 @@
         var expectedClass = new CourseClass("Example", 4, [expectedCompetitor]);
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
     
     QUnit.test("Can parse a single class with a single competitor with zero start time", function (assert) {
@@ -213,7 +213,7 @@
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with a single valid competitor and trailing end-of-line", function (assert) {
@@ -225,7 +225,7 @@
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with a single valid competitor with comma in club name", function (assert) {
@@ -237,7 +237,7 @@
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with a single valid competitor and multiple trailing ends-of-line", function (assert) {
@@ -249,7 +249,7 @@
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with three valid competitors in correct time order", function (assert) {
@@ -263,7 +263,7 @@
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with three valid competitors not in correct time order", function (assert) {
@@ -277,7 +277,7 @@
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse two classes each with two valid competitors", function (assert) {
@@ -303,7 +303,7 @@
         expectedClasses[0].setCourse(expectedCourses[0]);
         expectedClasses[1].setCourse(expectedCourses[1]);
                 
-        assert.deepEqual(actualEvent, new Event(expectedClasses, expectedCourses));
+        assert.deepEqual(actualEvent, new Event(expectedClasses, expectedCourses, []));
     });
 
     QUnit.test("Can parse two classes each with two valid competitors with trailing commas", function (assert) {
@@ -339,7 +339,7 @@
         expectedClasses[0].setCourse(expectedCourses[0]);
         expectedClasses[1].setCourse(expectedCourses[1]);
                 
-        assert.deepEqual(actualEvent, new Event(expectedClasses, expectedCourses));
+        assert.deepEqual(actualEvent, new Event(expectedClasses, expectedCourses, []));
     });
 
     QUnit.test("Can parse a single class with two valid competitors and one mispuncher in correct order", function (assert) {
@@ -353,7 +353,7 @@
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with two valid competitors and one mispuncher not in correct order", function (assert) {
@@ -367,7 +367,7 @@
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Can parse a single class with two valid competitors and two mispunchers not in correct order", function (assert) {
@@ -382,13 +382,22 @@
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
-        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse]));
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
     });
 
     QUnit.test("Cannot parse a single class with two valid competitors and one competitor with the wrong number of items", function (assert) {
         var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\nFred,Baker,DEF,12:12,02:42,01:51,04:00,01:31,00:30,01:35\r\nJane,Palmer,GHI,11:22,02:50,01:44,03:29,01:40,00:28";
-        SplitsBrowserTest.assertInvalidData(assert, function () {
-            parseEventData(csvData);
-        });
+        var actualEvent = parseEventData(csvData);
+        assert.strictEqual(actualEvent.warnings.length, 1);
+        
+        var expectedClass = new CourseClass("Example", 4, [
+            fromCumTimes(3, "Jane Palmer", "GHI", 11 * 3600 + 22 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28]),
+            fromCumTimes(1, "John Smith", "ABC", 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])
+        ]);
+        
+        var expectedCourse = new Course("Example", [expectedClass], null, null, null);
+        expectedClass.setCourse(expectedCourse);
+        assert.strictEqual(actualEvent.warnings.length, 1);
+        assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], actualEvent.warnings));        
     });
 })();

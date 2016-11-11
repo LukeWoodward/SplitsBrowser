@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Event - Contains all of the courses for a single event.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -29,10 +29,13 @@
     *     the classes of competitors.
     * @param {Array} courses - Array of Course objects representing all of the
     *     courses of the event.
+    * @param {Array} warnings - Array of strings containing warning messages
+    *     encountered when reading in the event dara.
     */ 
-    function Event(classes, courses) {
+    function Event(classes, courses, warnings) {
         this.classes = classes;
         this.courses = courses;
+        this.warnings = warnings;
     }
     
     /**

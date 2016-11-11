@@ -22,6 +22,7 @@
     "use strict";
     
     var isTrue = SplitsBrowser.isTrue;
+    var isNotNull = SplitsBrowser.isNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
@@ -37,9 +38,11 @@
     * @param {Number} index - Index of the competitor line.
     * @param {string} line - The line of competitor data read from a CSV file.
     * @param {Number} controlCount - The number of controls (not including the finish).
+    * @param {string} className - The name of the class.
+    * @param {Array} warnings - Array of warnings to add any warnings found to.
     * @return {Object} Competitor object representing the competitor data read in.
     */
-    function parseCompetitors(index, line, controlCount) {
+    function parseCompetitors(index, line, controlCount, className, warnings) {
         // Expect forename, surname, club, start time then (controlCount + 1) split times in the form MM:SS.
         var parts = line.split(",");
         
@@ -51,9 +54,11 @@
             parts.splice(3, 1);
         }
         
-        if (parts.length === controlCount + 5) {
-            var forename = parts.shift();
-            var surname = parts.shift();
+        var originalPartCount = parts.length;
+        var forename = parts.shift() || "";
+        var surname = parts.shift() || "";
+        var name = (forename + " " + surname).trim() || "<name unknown>";
+        if (originalPartCount === controlCount + 5) {
             var club = parts.shift();
             var startTimeStr = parts.shift();
             var startTime = parseTime(startTimeStr);
@@ -64,7 +69,6 @@
                 // minutes and seconds.
                 startTime *= 60;
             }
-            
             
             var cumTimes = [0];
             var lastCumTimeRecorded = 0;
@@ -78,22 +82,26 @@
                 }
             });
             
-            var competitor = Competitor.fromCumTimes(index + 1, forename + " " + surname, club, startTime, cumTimes);
+            var competitor = Competitor.fromCumTimes(index + 1, name, club, startTime, cumTimes);
             if (lastCumTimeRecorded === 0) {
                 competitor.setNonStarter();
             }
             return competitor;
-        } else {
-            throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor in class with " + controlCount + " controls, got " + (parts.length) + " instead.");
+        } else {           
+            warnings.push("Competitor '" + name + "' appears to have the wrong number of controls: " + 
+                                  "expected " + (controlCount + 5) + " items, got " + originalPartCount +
+                                  " (row " + index + " of class '" + className + "')");
+            return null;
         }
     }
 
     /**
     * Parse CSV data for a class.
     * @param {string} courseClass - The string containing data for that class.
+    * @param {Array} warnings - Array of warnings to add any warnings found to.
     * @return {SplitsBrowser.Model.CourseClass} Parsed class data.
     */
-    function parseCourseClass (courseClass) {
+    function parseCourseClass (courseClass, warnings) {
         var lines = courseClass.split(/\r?\n/).filter(isTrue);
         if (lines.length === 0) {
             throwInvalidData("parseCourseClass got an empty list of lines");
@@ -111,8 +119,10 @@
                 // any competitors.  Event 7632 ends with a line 'NOCLAS,-1' -
                 // we may as well ignore this.
                 throwInvalidData("Expected a non-negative control count, got " + controlCount + " instead");
-            } else {
-                var competitors = lines.map(function (line, index) { return parseCompetitors(index, line, controlCount); });
+            } else {              
+                var competitors = lines.map(function (line, index) { return parseCompetitors(index, line, controlCount, className, warnings); })
+                                       .filter(isNotNull);
+
                 competitors.sort(compareCompetitors);
                 return new CourseClass(className, controlCount, competitors);
             }
@@ -138,8 +148,9 @@
         eventData = eventData.replace(/,+\n/g, "\n").replace(/,+$/, "");
 
         var classSections = eventData.split(/\n\n/).map(function (s) { return s.trim(); }).filter(isTrue);
+        var warnings = [];
        
-        var classes = classSections.map(parseCourseClass);
+        var classes = classSections.map(function (section) { return parseCourseClass(section, warnings); });
         
         classes = classes.filter(function (courseClass) { return !courseClass.isEmpty(); });
         
@@ -155,7 +166,7 @@
             classes[i].setCourse(courses[i]);
         }
         
-        return new Event(classes, courses);
+        return new Event(classes, courses, warnings);
     }
     
     SplitsBrowser.Input.CSV = { parseEventData: parseEventData };

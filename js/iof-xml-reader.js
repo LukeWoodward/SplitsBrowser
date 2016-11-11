@@ -79,10 +79,8 @@
         
         var forename = $("> Given", nameElement).text();
         var surname = $("> Family", nameElement).text();
-
-        if (forename === "" && surname === "") {
-            throwInvalidData("Cannot read competitor's name");
-        } else if (forename === "") {
+    
+        if (forename === "") {
             return surname;
         } else if (surname === "") {
             return forename;
@@ -154,9 +152,10 @@
     * Reads the course details from the given ClassResult element.
     * @param {jQuery.selection} classResultElement - ClassResult element
     *     containing the course details.
+    * @param {Array} warnings - Array that accumulates warning messages.
     * @return {Object} Course details: id, name, length, climb and numberOfControls
     */
-    Version2Reader.readCourseFromClass = function (classResultElement) {
+    Version2Reader.readCourseFromClass = function (classResultElement, warnings) {
         // Although the IOF v2 format appears to support courses, they
         // haven't been specified in any of the files I've seen.
         // So instead grab course details from the class and the first
@@ -183,10 +182,12 @@
                     } else if (unit === "ft") {
                         length /= FEET_PER_KILOMETRE;
                     } else {
-                        throwInvalidData("Unrecognised course-length unit: '" + unit + "'");
+                        warnings.push("Course '" + courseName + "' gives its length in a unit '" + unit + "', but this unit was not recognised");
+                        length = null;
                     }
                 } else {
-                    throwInvalidData("Invalid course length: '" + lengthStr + "'");
+                    warnings.push("Course '" + courseName + "' specifies a course length that was not understood: '" + lengthStr + "'");
+                    length = null;
                 }
             }
         }
@@ -361,10 +362,11 @@
     * Reads the course details from the given ClassResult element.
     * @param {jQuery.selection} classResultElement - ClassResult element
     *     containing the course details.
+    * @param {Array} warnings - Array that accumulates warning messages.
     * @return {Object} Course details: id, name, length, climb and number of
     *     controls.
     */
-    Version3Reader.readCourseFromClass = function (classResultElement) {
+    Version3Reader.readCourseFromClass = function (classResultElement, warnings) {
         var courseElement = $("> Course", classResultElement);
         var id = $("> Id", courseElement).text() || null;
         var name = $("> Name", courseElement).text();
@@ -375,7 +377,8 @@
         } else {
             length = parseInt(lengthStr, 10);
             if (isNaNStrict(length)) {
-                throwInvalidData("Unrecognised course length: '" + lengthStr + "'");
+                warnings.push("Course '" + name + "' specifies a course length that was not understood: '" + lengthStr + "'");
+                length = null;
             } else {
                 // Convert from metres to kilometres.
                 length /= 1000;
@@ -557,13 +560,20 @@
     *     of those read so far, 2 for the second, ...)
     * @param {Object} reader - XML reader used to assist with format-specific
     *     XML reading.
-    * @return {Object} Object containing the competitor data.
+    * @param {Array} warnings - Array that accumulates warning messages.
+    * @return {Object?} Object containing the competitor data, or null if no
+    *     competitor could be read.
     */
-    function parseCompetitor(element, number, reader) {
+    function parseCompetitor(element, number, reader, warnings) {
         var jqElement = $(element);
         
         var nameElement = reader.getCompetitorNameElement(jqElement);
         var name = readCompetitorName(nameElement);
+        
+        if (name === "") {
+            warnings.push("Could not find a name for a competitor");
+            return null;
+        }
         
         var club = reader.readClubName(jqElement);
         
@@ -575,7 +585,8 @@
         
         var resultElement = $("Result", jqElement);
         if (resultElement.length === 0) {
-            throwInvalidData("No result found for competitor '" + name + "'");
+            warnings.push("Could not find any result information for competitor '" + name + "'");
+            return null;
         }
         
         var startTime = reader.readStartTime(resultElement);
@@ -589,7 +600,7 @@
         var controls = splitData.map(function (datum) { return datum.code; });
         var cumTimes = splitData.map(function (datum) { return datum.time; });
         
-        cumTimes.splice(0, 0, 0); // Prepend a zero time for the start.
+        cumTimes.unshift(0); // Prepend a zero time for the start.
         cumTimes.push(totalTime);
         
         var competitor = fromOriginalCumTimes(number, name, club, startTime, cumTimes);
@@ -626,54 +637,67 @@
     * @param {XMLElement} element - XML ClassResult element
     * @param {Object} reader - XML reader used to assist with format-specific
     *     XML reading.
+    * @param {Array} warnings - Array to accumulate any warning messages within.
     * @return {Object} Object containing parsed data.
     */
-    function parseClassData(element, reader) {
+    function parseClassData(element, reader, warnings) {
         var jqElement = $(element);
         var cls = {name: null, competitors: [], controls: [], course: null};
         
-        cls.course = reader.readCourseFromClass(jqElement, reader);
+        cls.course = reader.readCourseFromClass(jqElement, warnings);
         
         var className = reader.readClassName(jqElement);
         
         if (className === "") {
-            throwInvalidData("Missing class name");
+            className = "<unnamed class>";
         }
         
         cls.name = className;
         
         var personResults = $("> PersonResult", jqElement);
+        if (personResults.length === 0) {
+            warnings.push("Class '" + className + "' has no competitors");
+            return null;
+        }
         
         for (var index = 0; index < personResults.length; index += 1) {
-            var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader);
-            var competitor = competitorAndControls.competitor;
-            var controls = competitorAndControls.controls;
-            if (cls.competitors.length === 0) {
-                // First competitor.  Record the list of controls.
-                cls.controls = controls;
-                
-                // Set the number of controls on the course if we didn't read
-                // it from the XML.  Assume the first competitor's number of
-                // controls is correct.
-                if (cls.course.numberOfControls === null) {
-                    cls.course.numberOfControls = cls.controls.length;
+            var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader, warnings);
+            if (competitorAndControls !== null) {
+                var competitor = competitorAndControls.competitor;
+                var controls = competitorAndControls.controls;
+                if (cls.competitors.length === 0) {
+                    // First competitor.  Record the list of controls.
+                    cls.controls = controls;
+                    
+                    // Set the number of controls on the course if we didn't read
+                    // it from the XML.  Assume the first competitor's number of
+                    // controls is correct.
+                    if (cls.course.numberOfControls === null) {
+                        cls.course.numberOfControls = cls.controls.length;
+                    }
                 }
-            }
 
-            // Subtract 2 for the start and finish cumulative times.
-            var actualControlCount = competitor.getAllOriginalCumulativeTimes().length - 2;
-            if (actualControlCount !== cls.course.numberOfControls) {
-                throwInvalidData("Unexpected number of controls for competitor '" + competitor.name + "' in class '" + className + "': expected " + cls.course.numberOfControls + ", actual " + actualControlCount);
-            }
-            
-            for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
-                if (cls.controls[controlIndex] !== controls[controlIndex]) {
-                    throwInvalidData("Unexpected control code for competitor '" + competitor.name + "' at control " + (controlIndex + 1) + 
-                        ": expected '" + cls.controls[controlIndex] + "', actual '" + controls[controlIndex] + "'");
+                // Subtract 2 for the start and finish cumulative times.
+                var actualControlCount = competitor.getAllOriginalCumulativeTimes().length - 2;
+                var warning = null;
+                if (actualControlCount !== cls.course.numberOfControls) {
+                    warning = "Competitor '" + competitor.name + "' in class '" + className + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;
+                }
+                
+                for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
+                    if (cls.controls[controlIndex] !== controls[controlIndex]) {
+                        warning = "Competitor '" + competitor.name + "' has an unexpected control code at control " + (controlIndex + 1) +
+                            ": expected '" + cls.controls[controlIndex] + "', actual '" + controls[controlIndex] + "'";
+                        break;
+                    }
+                }
+                
+                if (warning === null) {
+                    cls.competitors.push(competitor);
+                } else {
+                    warnings.push(warning);
                 }
             }
-            
-            cls.competitors.push(competitor);
         }
         
         if (cls.course.id === null && cls.controls.length > 0) {
@@ -711,7 +735,8 @@
     }
    
     /**
-    * Parses IOF XML data in the 2.0.3 format and returns the data.
+    * Parses IOF XML data in either the 2.0.3 format or the 3.0 format and
+    * returns the data.
     * @param {String} data - String to parse as XML.
     * @return {Event} Parsed event object.
     */
@@ -741,8 +766,15 @@
         // controls, but we don't assume that.)
         var coursesMap = d3.map();
         
+        var warnings = [];
+        
         classResultElements.forEach(function (classResultElement) {
-            var parsedClass = parseClassData(classResultElement, reader);
+            var parsedClass = parseClassData(classResultElement, reader, warnings);
+            if (parsedClass === null) {
+                // Class could not be parsed.
+                return;
+            }
+            
             var courseClass = new CourseClass(parsedClass.name, parsedClass.controls.length, parsedClass.competitors);
             classes.push(courseClass);
             
@@ -772,7 +804,7 @@
             return course;
         });
         
-        return new Event(classes, courses);
+        return new Event(classes, courses, warnings);
     }
     
     SplitsBrowser.Input.IOFXml = { parseEventData: parseEventData };

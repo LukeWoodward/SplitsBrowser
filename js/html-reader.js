@@ -1221,7 +1221,9 @@
             });
         }, this);
         
-        return new Event(classes, newCourses);
+        // Empty array is for warnings, which aren't supported by the HTML
+        // format parsers.
+        return new Event(classes, newCourses, []);
     };
     
     /**
