@@ -91,7 +91,7 @@
         var shouldOrShouldNot = (isVisible) ? "should" : "should not";
         var list = d3.selectAll("#qunit-fixture .otherClassList");
         assert.strictEqual(list.size(), 1, "One other-class list should be present");
-        assert.strictEqual(list.style("display"), "none", "Other-class list element " + shouldOrShouldNot + "  be displayed");
+        assert.strictEqual(list.style("display"), (isVisible) ? "block" : "none", "Other-class list element " + shouldOrShouldNot + "  be displayed");
     
         if (typeof itemCount !== "undefined") {
             var items = d3.selectAll("#qunit-fixture .otherClassList div.otherClassItem");
@@ -275,10 +275,10 @@
         assertOtherClassSelectorVisibility(assert, true);
         assertOtherClassListVisibility(assert, false, 1);
         
-        htmlSelect.click();
+        $("div.otherClassSelector").click();
         assertOtherClassListVisibility(assert, true, 1);
         
-        htmlSelect.click();
+        $("div.otherClassSelector").click();
         assertOtherClassListVisibility(assert, false, 1);
     });
 
@@ -296,7 +296,7 @@
         assertOtherClassSelectorVisibility(assert, true);
         assertOtherClassListVisibility(assert, false, 1);
         
-        htmlSelect.click();
+        $("div.otherClassSelector").click();
         assertOtherClassListVisibility(assert, true, 1);
         
         $("body").click();
@@ -320,7 +320,7 @@
         
         selector.registerChangeHandler(handleClassChanged);
         
-        htmlSelect.click();
+        $("div.otherClassSelector").click();
         assertOtherClassListVisibility(assert, true, 1);
         
         assert.strictEqual($("div.otherClassItem.selected").length, 0, "The other class item should not be selected");
@@ -350,7 +350,7 @@
         
         selector.registerChangeHandler(handleClassChanged);
         
-        htmlSelect.click();
+        $("div.otherClassSelector").click();
         assertOtherClassListVisibility(assert, true, 1);
         
         assert.strictEqual($("div.otherClassItem.selected").length, 0, "The other class item should not be selected");
@@ -382,7 +382,7 @@
         
         selector.registerChangeHandler(handleClassChanged);
         
-        htmlSelect.click();
+        $("div.otherClassSelector").click();
         assertOtherClassListVisibility(assert, true, 1);
         
         assert.strictEqual($("div.otherClassItem.selected").length, 0, "The other class item should not be selected");
@@ -459,5 +459,4 @@
         
         assert.strictEqual(callCount, 0);
     });
-    
 })();
