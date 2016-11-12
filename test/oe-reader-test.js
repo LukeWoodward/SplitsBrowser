@@ -680,22 +680,22 @@
         });
     });
     
-    QUnit.test("Can parse with competitor errors a string that contains a single competitor's data with a non-numeric control count", function (assert) {
+    QUnit.test("Can parse with warnings a string that contains a single competitor's data with a non-numeric control count", function (assert) {
         var comp = getCompetitor1();
         comp.numControls = "This is not a valid number";
         runTestOverAllFormats([[comp, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 0, "There should be no classes");
-            assert.strictEqual(eventData.warnings.length, 1, "One compeitor error should have been read");
+            assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
         });
     });
     
-    QUnit.test("Can parse with competitor errors a string that contains a single competitor's data with a missing class name", function (assert) {
+    QUnit.test("Can parse with warnings a string that contains a single competitor's data with a missing class name", function (assert) {
         var comp = getCompetitor1();
         comp.className = "";
         comp.course = "";
         runTestOverAllFormats([[comp, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 0, "There should be no classes");
-            assert.strictEqual(eventData.warnings.length, 1, "One compeitor error should have been read");
+            assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
         });
     });
     
