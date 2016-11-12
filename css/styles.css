@@ -304,6 +304,11 @@ div.warningPanel
     text-align: center;
 }
 
+div#warningTriangleContainer
+{
+    float: left;
+}
+
 div.warningList
 {
     background-color: #eeeeee;
