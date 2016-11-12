@@ -52,6 +52,7 @@
     var ComparisonSelector = Controls.ComparisonSelector;
     var OriginalDataSelector = Controls.OriginalDataSelector;
     var StatisticsSelector = Controls.StatisticsSelector;
+    var WarningViewer = Controls.WarningViewer;
     var CompetitorList = Controls.CompetitorList;
     var Chart = Controls.Chart;
     var ResultsTable = Controls.ResultsTable;
@@ -100,6 +101,7 @@
         this.originalDataSelector = null;
         this.statisticsSelector = null;
         this.competitorList = null;
+        this.warningViewer = null;
         this.chart = null;
         this.topPanel = null;
         this.mainPanel = null;
@@ -150,6 +152,8 @@
         if (this.classSelector !== null) {
             this.classSelector.setClasses(this.classes);
         }
+        
+        this.warningViewer.setWarnings(eventData.warnings);
     };
 
     /**
@@ -265,6 +269,13 @@
     };
     
     /**
+    * Adds the warning viewer to the top panel.
+    */
+    Viewer.prototype.addWarningViewer = function () {
+        this.warningViewer = new WarningViewer(this.topPanel);
+    };
+    
+    /**
     * Sets the text in the direct-link, following either its creation or a
     * change in selected language.
     */
@@ -323,6 +334,7 @@
         this.addOriginalDataSelector();
         this.addSpacer();
         this.addDirectLink();
+        this.addWarningViewer();
         
         this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
 
@@ -534,6 +546,7 @@
         this.originalDataSelector.setMessages();
         this.setDirectLinkMessages();
         this.statisticsSelector.setMessages();
+        this.warningViewer.setMessages();
         this.competitorList.retranslate();
         this.resultsTable.retranslate();
         if (!this.chartTypeSelector.getChartType().isResultsTable) {

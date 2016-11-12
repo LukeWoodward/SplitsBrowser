@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Grunt configuration.
  *  
- *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -77,6 +77,7 @@ module.exports = function(grunt) {
                       'js/chart.js',
                       'js/results-table.js',
                       'js/query-string.js',
+                      'js/warning-viewer.js',
                       'js/viewer.js'
                 ],
                 dest: '<%= pkg.name %>.js',
@@ -137,7 +138,10 @@ module.exports = function(grunt) {
                     expect: false,
                   
                     // Test namespace.
-                    SplitsBrowserTest: true
+                    SplitsBrowserTest: true,
+                    
+                    // Required for PhantomJS polyfill in tests.
+                    HTMLElement: false
                 }
             }
         }
@@ -153,5 +157,4 @@ module.exports = function(grunt) {
     grunt.registerTask('data', ['jshint', 'qunit:src', 'concat:data', 'uglify:data', 'qunit:minified-data']);
     grunt.registerTask('default', ['jshint', 'qunit:src', 'qunit:languages', 'concat:dist', 'uglify:dist', 'qunit:minified']);
     grunt.registerTask('all', ['jshint', 'qunit:src', 'qunit:languages', 'concat:dist', 'uglify:dist', 'qunit:minified', 'concat:data', 'uglify:data', 'qunit:minified-data']);
-
 };

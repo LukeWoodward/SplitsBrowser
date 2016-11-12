@@ -1,7 +1,7 @@
 ﻿/*
  *  Messages - UK English messages for SplitsBrowser
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -158,5 +158,9 @@ SplitsBrowser.Messages.en_gb = {
 
     // Alert message shown when you click 'Crossing runners' but there are no
     // crossing runners to show and also a filter is active.
-    RaceGraphNoCrossingRunnersFiltered: "$$NAME$$ has no crossing runners among the filtered competitors."
+    RaceGraphNoCrossingRunnersFiltered: "$$NAME$$ has no crossing runners among the filtered competitors.",
+    
+    // Tooltip of the warning-triangle shown along the top if warnings were
+    // issued reading in the file.
+    WarningsTooltip: "It was not possible to read all of the data within this file.  One or more competitors or classes have been omitted from this event.  Click for more details."
 };

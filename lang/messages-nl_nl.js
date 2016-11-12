@@ -164,5 +164,10 @@ SplitsBrowser.Messages.nl_nl = {
     // Alert message shown when you click 'Crossing runners' but there are no
     // crossing runners to show and also a filter is active.
     // TO BE TRANSLATED
-    RaceGraphNoCrossingRunnersFiltered: "$$NAME$$ has no crossing runners among the filtered competitors."
+    RaceGraphNoCrossingRunnersFiltered: "$$NAME$$ has no crossing runners among the filtered competitors.",
+   
+    // Tooltip of the warning-triangle shown along the top if warnings were
+    // issued reading in the file.
+    // TO BE TRANSLATED
+    WarningsTooltip: "It was not possible to read all of the data within this file.  One or more competitors or classes have been omitted from this event.  Click for more details."
 };
