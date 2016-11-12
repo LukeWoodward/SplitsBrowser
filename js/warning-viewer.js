@@ -47,6 +47,7 @@
                                   
         this.warningList = parent.append("div")
                                  .classed("warningList", true)
+                                 .classed("transient", true)
                                  .style("position", "absolute")
                                  .style("display", "none");
         
@@ -60,14 +61,6 @@
                 if (!container.is(e.target) && container.has(e.target).length === 0) { 
                     outerThis.warningList.style("display", "none");
                 }
-            }
-        });
-        
-        // Close the class selector if Escape is pressed.
-        // 27 is the key code for the Escape key.
-        $(document).keydown(function (e) {
-            if (e.which === 27) {
-                outerThis.warningList.style("display", "none");
             }
         });
         

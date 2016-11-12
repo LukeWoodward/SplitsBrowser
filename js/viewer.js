@@ -360,6 +360,14 @@
         // -*-user-select CSS style.
         $("input:text").bind("selectstart", function (evt) { evt.stopPropagation(); });
         $(this.container.node()).bind("selectstart", function () { return false; });
+       
+        // Hide 'transient' elements such as the list of other classes in the
+        // class selector or warning list when the Escape key is pressed.
+        $(document).keydown(function (e) {
+            if (e.which === 27) {
+                outerThis.hideTransientElements();
+            }
+        });
     };
 
     /**
@@ -394,7 +402,15 @@
         this.currentResizeTimeout = null;
         this.setCompetitorListHeight();
         this.setChartSize();
+        this.hideTransientElements();
         this.redraw();
+    };
+
+    /**
+    * Hides all transient elements that happen to be open.
+    */
+    Viewer.prototype.hideTransientElements = function () {
+        d3.selectAll(".transient").style("display", "none");
     };
     
     /**
