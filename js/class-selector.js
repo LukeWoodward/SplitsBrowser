@@ -176,9 +176,13 @@
     * @param {Array} Indexes of selected classes.
     */
     ClassSelector.prototype.getSelectedClasses = function () {
-        var indexes = [this.dropDown.selectedIndex];
-        this.selectedOtherClassIndexes.each(function (index) { indexes.push(parseInt(index, 10)); });
-        return indexes;
+        if (this.dropDown.disabled) {
+            return [];
+        } else {
+            var indexes = [this.dropDown.selectedIndex];
+            this.selectedOtherClassIndexes.each(function (index) { indexes.push(parseInt(index, 10)); });
+            return indexes;
+        }
     };
 
     /**

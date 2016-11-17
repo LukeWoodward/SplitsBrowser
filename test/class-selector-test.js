@@ -112,6 +112,11 @@
         assertOtherClassSelectorVisibility(assert, false);
     });
 
+    QUnit.test("Empty class selector has no selected classes", function(assert) {
+        var selector = new ClassSelector(d3.select("#qunit-fixture").node());
+        assert.deepEqual(selector.getSelectedClasses(), []);
+    });
+
     QUnit.test("Can create class selector with course in single class and with other-class selector hidden", function(assert) {
         var selector = new ClassSelector(d3.select("#qunit-fixture").node());
         

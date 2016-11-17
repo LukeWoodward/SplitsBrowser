@@ -517,11 +517,13 @@
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
         this.updateControlEnabledness();
-        var comparisonFunction = this.comparisonSelector.getComparisonFunction();
-        this.referenceCumTimes = comparisonFunction(this.courseClassSet);
-        this.fastestCumTimes = this.courseClassSet.getFastestCumTimes();
-        this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType());
-        this.redrawChart();
+        if (this.classes.length > 0) {
+            var comparisonFunction = this.comparisonSelector.getComparisonFunction();
+            this.referenceCumTimes = comparisonFunction(this.courseClassSet);
+            this.fastestCumTimes = this.courseClassSet.getFastestCumTimes();
+            this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType());
+            this.redrawChart();
+        }
     };
 
     /**
@@ -579,7 +581,7 @@
         this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
         this.courseClassSet = new CourseClassSet(this.currentClasses);
         this.comparisonSelector.setCourseClassSet(this.courseClassSet);
-        this.resultsTable.setClass(this.currentClasses[0]);    
+        this.resultsTable.setClass(this.currentClasses.length > 0 ? this.currentClasses[0] : null);
         this.enableOrDisableRaceGraph();
         this.originalDataSelector.setVisible(this.courseClassSet.hasDubiousData());
     };
@@ -720,7 +722,7 @@
     */
     Viewer.prototype.updateFromQueryString = function (parsedQueryString) {
         if (parsedQueryString.classes === null) {
-            this.initClasses([0]);
+            this.setDefaultSelectedClass();
         } else {
             this.initClasses(parsedQueryString.classes);
         }
@@ -756,7 +758,7 @@
     * Sets the default selected class.
     */
     Viewer.prototype.setDefaultSelectedClass = function () {
-        this.initClasses([0]);
+        this.initClasses((this.classes.length > 0) ? [0] : []);
     };
     
     SplitsBrowser.Viewer = Viewer;

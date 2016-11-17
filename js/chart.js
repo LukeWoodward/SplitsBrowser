@@ -136,6 +136,7 @@
 
         this.xScale = null;
         this.yScale = null;
+        this.hasData = false;
         this.overallWidth = -1;
         this.overallHeight = -1;
         this.contentWidth = -1;
@@ -278,7 +279,9 @@
         }
         
         this.isMouseIn = true;
-        this.updateControlLineLocation(event);            
+        if (this.hasData) {
+            this.updateControlLineLocation(event);            
+        }
     };
 
     /**
@@ -286,7 +289,7 @@
     * @param {jQuery.event} event - jQuery event object.
     */
     Chart.prototype.onMouseMove = function (event) {
-        if (this.isMouseIn && this.xScale !== null) {
+        if (this.hasData&& this.isMouseIn && this.xScale !== null) {
             this.updateControlLineLocation(event);
         }
     };
@@ -553,7 +556,9 @@
         }
         
         // Update the current competitor data.
-        this.currentCompetitorData.forEach(function (data, index) { data.label = labelTexts[index]; });
+        if (this.hasData) {
+            this.currentCompetitorData.forEach(function (data, index) { data.label = labelTexts[index]; });
+        }
         
         // This data is already joined to the labels; just update the text.
         d3.selectAll("text.competitorLabel").text(function (data) { return data.label; });
@@ -1186,7 +1191,6 @@
 
         this.referenceCumTimeIndexes = this.referenceCumTimesSorted.map(function (cumTime) { return cumTimesToControlIndex.get(cumTime); });
     };
-
     
     /**
     * Draws the chart.
@@ -1219,6 +1223,7 @@
         this.isRaceGraph = chartType.isRaceGraph;
         this.minViewableControl = chartType.minViewableControl;
         this.visibleStatistics = visibleStatistics;
+        this.hasData = true;
         
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
         this.maxStartTimeLabelWidth = (this.isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;

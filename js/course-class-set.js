@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Course-Class Set - A collection of selected course classes.
  *  
- *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@
     */
     function mergeCompetitors(classes) {
         if (classes.length === 0) {
-            throwInvalidData("Cannot create a CourseClassSet from an empty set of competitors");
+            return [];
         }
         
         var allCompetitors = [];
@@ -91,7 +91,7 @@
     function CourseClassSet(classes) {
         this.allCompetitors = mergeCompetitors(classes);
         this.classes = classes;
-        this.numControls = classes[0].numControls;
+        this.numControls = (classes.length > 0) ? classes[0].numControls : null;
         this.computeRanks();
     }
     
@@ -106,20 +106,22 @@
     };
     
     /**
-    * Returns the course used by all of the classes that make up this set.
-    * @return {SplitsBrowser.Model.Course} The course used by all classes.
+    * Returns the course used by all of the classes that make up this set.  If
+    * there are no classes, null is returned instead.
+    * @return {?SplitsBrowser.Model.Course} The course used by all classes.
     */
     CourseClassSet.prototype.getCourse = function () {
-        return this.classes[0].course;
+        return (this.classes.length > 0) ? this.classes[0].course : null;
     };
     
     /**
     * Returns the name of the 'primary' class, i.e. that that has been
-    * chosen in the drop-down list.
-    * @return {String} Name of the primary class.
+    * chosen in the drop-down list.  If there are no classes, null is returned
+    * instead.
+    * @return {?String} Name of the primary class.
     */
     CourseClassSet.prototype.getPrimaryClassName = function () {
-        return this.classes[0].name;
+        return (this.classes.length > 0) ? this.classes[0].name : null;
     };
     
     /**
@@ -224,7 +226,7 @@
     * Return the imaginary competitor who recorded the fastest time on each leg
     * of the class.
     * If at least one control has no competitors recording a time for it, null
-    * is returned.
+    * is returned.  If there are no classes at all, null is returned.
     * @returns {?Array} Cumulative splits of the imaginary competitor with
     *           fastest time, if any.
     */
@@ -236,12 +238,15 @@
     * Return the imaginary competitor who recorded the fastest time on each leg
     * of the given classes, with a given percentage of their time added.
     * If at least one control has no competitors recording a time for it, null
-    * is returned.
+    * is returned.  If there are no classes at all, null is returned.
     * @param {Number} percent - The percentage of time to add.
     * @returns {?Array} Cumulative splits of the imaginary competitor with
     *           fastest time, if any, after adding a percentage.
     */
     CourseClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
+        if (this.numControls === null) {
+            return null;
+        }
     
         var ratio = 1 + percent / 100;
         
@@ -350,6 +355,11 @@
     * Compute the ranks of each competitor within their class.
     */
     CourseClassSet.prototype.computeRanks = function () {
+        if (this.allCompetitors.length === 0) {
+            // Nothing to compute.
+            return;
+        }
+        
         var splitRanksByCompetitor = [];
         var cumRanksByCompetitor = [];
         

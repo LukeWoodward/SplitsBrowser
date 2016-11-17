@@ -140,10 +140,13 @@
         return fromSplitTimes(3, "Bill Baker", "GHI", 11 * 3600, [78, 209, 199, null]);
     }
     
-    QUnit.test("Cannot create a CourseClassSet from an empty array of of course-classes", function (assert) {
-        SplitsBrowserTest.assertInvalidData(assert, function() {
-            new CourseClassSet([]);
-        });
+    QUnit.test("Can create a CourseClassSet from an empty array of course-classes", function (assert) {
+        var emptySet = new CourseClassSet([]);
+        assert.ok(emptySet.isEmpty());
+        assert.strictEqual(emptySet.getCourse(), null);
+        assert.strictEqual(emptySet.getPrimaryClassName(), null);
+        assert.strictEqual(emptySet.getNumClasses(), 0);
+        assert.strictEqual(emptySet.getFastestCumTimes(), null);
     });
     
     QUnit.test("Can create a CourseClassSet from a single course-class", function (assert) {

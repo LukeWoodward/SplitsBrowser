@@ -233,9 +233,11 @@
     */
     ResultsTable.prototype.setClass = function (courseClass) {
         this.courseClass = courseClass;
-        this.populateTable();
-        if (this.div.style("display") !== "none") {
-            this.adjustTableCellWidths();
+        if (this.courseClass !== null) {
+            this.populateTable();
+            if (this.div.style("display") !== "none") {
+                this.adjustTableCellWidths();
+            }
         }
     };
     

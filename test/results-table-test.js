@@ -41,6 +41,12 @@
         new CourseClassSet([courseClass]);
     }
     
+    QUnit.test("Can create a results table for an empty course-class", function (assert) {
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(null);
+        assert.strictEqual(d3.selectAll("table.resultsTable tbody tr").size(), 0, "There should be no table rows in the body");
+    });
+    
     QUnit.test("Can create a results table with two competitors finishing", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
