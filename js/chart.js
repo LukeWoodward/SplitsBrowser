@@ -981,7 +981,8 @@
         
         var startLabels = this.svgGroup.selectAll("text.startLabel").data(this.selectedIndexes);
         
-        startLabels.enter().append("text");
+        startLabels.enter().append("text")
+                           .classed("startLabel", true);
         
         startLabels = this.svgGroup.selectAll("text.startLabel").data(this.selectedIndexes);
         startLabels.attr("x", -7)
