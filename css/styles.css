@@ -313,6 +313,8 @@ div.warningList
 {
     background-color: #eeeeee;
     border: 2px solid #cccccc;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 div.warning
