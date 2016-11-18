@@ -909,7 +909,7 @@
             });
     });
     
-    QUnit.test("Cannot parse a string that contains an invalid course length", function (assert) {
+    QUnit.test("Can parse with warnings a string that contains an invalid course length", function (assert) {
         runXmlFormatParseTest(
             [{name: "Test Class", length: "This is not a valid number", competitors: [getPerson()]}],
             function (eventData, formatterName) {
@@ -945,7 +945,7 @@
             {formatters: [Version2Formatter]});
     });
     
-    QUnit.test("Cannot parse a string that contains an unrecognised course length unit", function (assert) {
+    QUnit.test("Can parse with warnings a string that contains an unrecognised course length unit", function (assert) {
         runXmlFormatParseTest(
             [{name: "Test Class", length: "100", lengthUnit: "furlong", competitors: [getPerson()]}],
             function (eventData) {
@@ -1110,6 +1110,7 @@
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
                 assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read - " + formatterName);
                 assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued - " + formatterName);
+                assert.ok(eventData.warnings[0].match(/number of controls/));
             }
         );
     });

@@ -87,10 +87,11 @@
                 competitor.setNonStarter();
             }
             return competitor;
-        } else {           
-            warnings.push("Competitor '" + name + "' appears to have the wrong number of controls: " + 
-                                  "expected " + (controlCount + 5) + " items, got " + originalPartCount +
-                                  " (row " + index + " of class '" + className + "')");
+        } else {
+            var difference = originalPartCount - (controlCount + 5);
+            var error = (difference < 0) ? (-difference) + " too few" : difference + " too many";
+            warnings.push("Competitor '" + name + "' appears to have the wrong number of split times - " + error + 
+                                  " (row " + (index + 1) + " of class '" + className + "')");
             return null;
         }
     }

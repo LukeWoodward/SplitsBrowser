@@ -682,13 +682,13 @@
                 var warning = null;
                 if (actualControlCount !== cls.course.numberOfControls) {
                     warning = "Competitor '" + competitor.name + "' in class '" + className + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;
-                }
-                
-                for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
-                    if (cls.controls[controlIndex] !== controls[controlIndex]) {
-                        warning = "Competitor '" + competitor.name + "' has an unexpected control code at control " + (controlIndex + 1) +
-                            ": expected '" + cls.controls[controlIndex] + "', actual '" + controls[controlIndex] + "'";
-                        break;
+                } else {
+                    for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
+                        if (cls.controls[controlIndex] !== controls[controlIndex]) {
+                            warning = "Competitor '" + competitor.name + "' has an unexpected control code at control " + (controlIndex + 1) +
+                                ": expected '" + cls.controls[controlIndex] + "', actual '" + controls[controlIndex] + "'";
+                            break;
+                        }
                     }
                 }
                 
