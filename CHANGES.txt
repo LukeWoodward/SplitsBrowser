@@ -23,3 +23,5 @@ SplitsBrowser changelog:
 3.3.9:  Fixes for various minor issues (issues #37, #38, #40).
 3.3.10:  Fixes for various minor issues (issues #41, #43, #44).
 3.3.11:  Fixes for a couple of minor issues (issues #45, #46).
+3.4.0:  Add 'warnings' for slightly bad data (issue #49), support D3 v4 (#47),
+        also other improvements (#27, #48).

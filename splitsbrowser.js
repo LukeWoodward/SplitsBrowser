@@ -1204,7 +1204,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     */
     function mergeCompetitors(classes) {
         if (classes.length === 0) {
-            throwInvalidData("Cannot create a CourseClassSet from an empty set of competitors");
+            return [];
         }
         
         var allCompetitors = [];
@@ -1260,7 +1260,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     function CourseClassSet(classes) {
         this.allCompetitors = mergeCompetitors(classes);
         this.classes = classes;
-        this.numControls = classes[0].numControls;
+        this.numControls = (classes.length > 0) ? classes[0].numControls : null;
         this.computeRanks();
     }
     
@@ -1275,20 +1275,22 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     };
     
     /**
-    * Returns the course used by all of the classes that make up this set.
-    * @return {SplitsBrowser.Model.Course} The course used by all classes.
+    * Returns the course used by all of the classes that make up this set.  If
+    * there are no classes, null is returned instead.
+    * @return {?SplitsBrowser.Model.Course} The course used by all classes.
     */
     CourseClassSet.prototype.getCourse = function () {
-        return this.classes[0].course;
+        return (this.classes.length > 0) ? this.classes[0].course : null;
     };
     
     /**
     * Returns the name of the 'primary' class, i.e. that that has been
-    * chosen in the drop-down list.
-    * @return {String} Name of the primary class.
+    * chosen in the drop-down list.  If there are no classes, null is returned
+    * instead.
+    * @return {?String} Name of the primary class.
     */
     CourseClassSet.prototype.getPrimaryClassName = function () {
-        return this.classes[0].name;
+        return (this.classes.length > 0) ? this.classes[0].name : null;
     };
     
     /**
@@ -1393,7 +1395,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * Return the imaginary competitor who recorded the fastest time on each leg
     * of the class.
     * If at least one control has no competitors recording a time for it, null
-    * is returned.
+    * is returned.  If there are no classes at all, null is returned.
     * @returns {?Array} Cumulative splits of the imaginary competitor with
     *           fastest time, if any.
     */
@@ -1405,12 +1407,15 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * Return the imaginary competitor who recorded the fastest time on each leg
     * of the given classes, with a given percentage of their time added.
     * If at least one control has no competitors recording a time for it, null
-    * is returned.
+    * is returned.  If there are no classes at all, null is returned.
     * @param {Number} percent - The percentage of time to add.
     * @returns {?Array} Cumulative splits of the imaginary competitor with
     *           fastest time, if any, after adding a percentage.
     */
     CourseClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
+        if (this.numControls === null) {
+            return null;
+        }
     
         var ratio = 1 + percent / 100;
         
@@ -1519,6 +1524,11 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * Compute the ranks of each competitor within their class.
     */
     CourseClassSet.prototype.computeRanks = function () {
+        if (this.allCompetitors.length === 0) {
+            // Nothing to compute.
+            return;
+        }
+        
         var splitRanksByCompetitor = [];
         var cumRanksByCompetitor = [];
         
@@ -1986,10 +1996,13 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     *     the classes of competitors.
     * @param {Array} courses - Array of Course objects representing all of the
     *     courses of the event.
+    * @param {Array} warnings - Array of strings containing warning messages
+    *     encountered when reading in the event dara.
     */ 
-    function Event(classes, courses) {
+    function Event(classes, courses, warnings) {
         this.classes = classes;
         this.courses = courses;
+        this.warnings = warnings;
     }
     
     /**
@@ -2700,6 +2713,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     "use strict";
     
     var isTrue = SplitsBrowser.isTrue;
+    var isNotNull = SplitsBrowser.isNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
@@ -2715,14 +2729,27 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * @param {Number} index - Index of the competitor line.
     * @param {string} line - The line of competitor data read from a CSV file.
     * @param {Number} controlCount - The number of controls (not including the finish).
+    * @param {string} className - The name of the class.
+    * @param {Array} warnings - Array of warnings to add any warnings found to.
     * @return {Object} Competitor object representing the competitor data read in.
     */
-    function parseCompetitors(index, line, controlCount) {
+    function parseCompetitors(index, line, controlCount, className, warnings) {
         // Expect forename, surname, club, start time then (controlCount + 1) split times in the form MM:SS.
         var parts = line.split(",");
-        if (parts.length === controlCount + 5) {
-            var forename = parts.shift();
-            var surname = parts.shift();
+        
+        while (parts.length > controlCount + 5 && parts[3].match(/[^0-9.,:-]/)) {
+            // As this line is too long and the 'start time' cell has something
+            // that appears not to be a start time, assume that the club name
+            // has a comma in it.
+            parts[2] += "," + parts[3];
+            parts.splice(3, 1);
+        }
+        
+        var originalPartCount = parts.length;
+        var forename = parts.shift() || "";
+        var surname = parts.shift() || "";
+        var name = (forename + " " + surname).trim() || "<name unknown>";
+        if (originalPartCount === controlCount + 5) {
             var club = parts.shift();
             var startTimeStr = parts.shift();
             var startTime = parseTime(startTimeStr);
@@ -2733,7 +2760,6 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                 // minutes and seconds.
                 startTime *= 60;
             }
-            
             
             var cumTimes = [0];
             var lastCumTimeRecorded = 0;
@@ -2747,22 +2773,27 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                 }
             });
             
-            var competitor = Competitor.fromCumTimes(index + 1, forename + " " + surname, club, startTime, cumTimes);
+            var competitor = Competitor.fromCumTimes(index + 1, name, club, startTime, cumTimes);
             if (lastCumTimeRecorded === 0) {
                 competitor.setNonStarter();
             }
             return competitor;
         } else {
-            throwInvalidData("Expected " + (controlCount + 5) + " items in row for competitor in class with " + controlCount + " controls, got " + (parts.length) + " instead.");
+            var difference = originalPartCount - (controlCount + 5);
+            var error = (difference < 0) ? (-difference) + " too few" : difference + " too many";
+            warnings.push("Competitor '" + name + "' appears to have the wrong number of split times - " + error + 
+                                  " (row " + (index + 1) + " of class '" + className + "')");
+            return null;
         }
     }
 
     /**
     * Parse CSV data for a class.
     * @param {string} courseClass - The string containing data for that class.
+    * @param {Array} warnings - Array of warnings to add any warnings found to.
     * @return {SplitsBrowser.Model.CourseClass} Parsed class data.
     */
-    function parseCourseClass (courseClass) {
+    function parseCourseClass (courseClass, warnings) {
         var lines = courseClass.split(/\r?\n/).filter(isTrue);
         if (lines.length === 0) {
             throwInvalidData("parseCourseClass got an empty list of lines");
@@ -2780,8 +2811,10 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                 // any competitors.  Event 7632 ends with a line 'NOCLAS,-1' -
                 // we may as well ignore this.
                 throwInvalidData("Expected a non-negative control count, got " + controlCount + " instead");
-            } else {
-                var competitors = lines.map(function (line, index) { return parseCompetitors(index, line, controlCount); });
+            } else {              
+                var competitors = lines.map(function (line, index) { return parseCompetitors(index, line, controlCount, className, warnings); })
+                                       .filter(isNotNull);
+
                 competitors.sort(compareCompetitors);
                 return new CourseClass(className, controlCount, competitors);
             }
@@ -2807,8 +2840,9 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         eventData = eventData.replace(/,+\n/g, "\n").replace(/,+$/, "");
 
         var classSections = eventData.split(/\n\n/).map(function (s) { return s.trim(); }).filter(isTrue);
+        var warnings = [];
        
-        var classes = classSections.map(parseCourseClass);
+        var classes = classSections.map(function (section) { return parseCourseClass(section, warnings); });
         
         classes = classes.filter(function (courseClass) { return !courseClass.isEmpty(); });
         
@@ -2824,7 +2858,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
             classes[i].setCourse(courses[i]);
         }
         
-        return new Event(classes, courses);
+        return new Event(classes, courses, warnings);
     }
     
     SplitsBrowser.Input.CSV = { parseEventData: parseEventData };
@@ -2937,6 +2971,9 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         
         // The indexes of the columns that we read data from.
         this.columnIndexes = null;
+        
+        // Warnings about competitors that cannot be read in.
+        this.warnings = [];
     }
 
     /**
@@ -3035,12 +3072,15 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * Returns the number of controls to expect on the given line.
     * @param {Array} row - Array of row data items.
     * @param {Number} lineNumber - The line number of the line.
-    * @return {Number} Number of controls read.
+    * @return {Number?} The number of controls, or null if the count could not be read.
     */
     Reader.prototype.getNumControls = function (row, lineNumber) {
         var className = this.getClassName(row);
+        var name;
         if (className.trim() === "") {
-            throwInvalidData("Line " + lineNumber + " does not contain a class for the competitor");
+            name = this.getName(row) || "<name unknown>";
+            this.warnings.push("Could not find a class for competitor '" + name + "' (line " + lineNumber + ")");
+            return null;
         } else if (this.classes.has(className)) {
             return this.classes.get(className).numControls;
         } else {
@@ -3048,7 +3088,9 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
             if (isFinite(numControls)) {
                 return numControls;
             } else {
-                throwInvalidData("Could not read control count '" + row[this.columnIndexes.controlCount] + "' from line " + lineNumber);
+                name = this.getName(row) || "<name unknown>";
+                this.warnings.push("Could not read the control count '" + row[this.columnIndexes.controlCount] + "' for competitor '" + name + "' from line " + lineNumber);
+                return null;
             }
         }    
     };
@@ -3131,6 +3173,28 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
             this.classCoursePairs.push([className, courseName]);
         }
     };
+
+    /**
+    * Reads the name of the competitor from the row.
+    * @param {Array} row - Array of row data items.
+    * @return {String} The name of the competitor.
+    */
+    Reader.prototype.getName = function (row) {
+        var name = "";
+
+        if (this.columnIndexes.hasOwnProperty("forename") && this.columnIndexes.hasOwnProperty("surname")) {
+            var forename = row[this.columnIndexes.forename];
+            var surname = row[this.columnIndexes.surname];
+            name = (forename + " " + surname).trim();
+        }
+        
+        if (name === "" && this.columnIndexes.hasOwnProperty("combinedName")) {
+            // 'Nameless' or 44-column variation.
+            name = row[this.columnIndexes.combinedName];
+        }
+        
+        return name;
+    };
     
     /**
     * Reads in the competitor-specific data from the given row and adds it to
@@ -3150,30 +3214,12 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         
         var startTime = this.getStartTime(row);
 
+        var name = this.getName(row);
         var isPlacingNonNumeric = (placing !== "" && isNaNStrict(parseInt(placing, 10)));
-        
-        var name = "";
-        if (this.columnIndexes.hasOwnProperty("forename") && this.columnIndexes.hasOwnProperty("surname")) {
-            var forename = row[this.columnIndexes.forename];
-            var surname = row[this.columnIndexes.surname];
-        
-            // Some surnames have their placing appended to them, if their placing
-            // isn't a number (e.g. mp, n/c).  If so, remove this.
-            if (isPlacingNonNumeric && surname.substring(surname.length - placing.length) === placing) {
-                surname = surname.substring(0, surname.length - placing.length).trim();
-            }
-            
-            name = (forename + " " + surname).trim();
+        if (isPlacingNonNumeric && name.substring(name.length - placing.length) === placing) {
+            name = name.substring(0, name.length - placing.length).trim();
         }
-        
-        if (name === "" && this.columnIndexes.hasOwnProperty("combinedName")) {
-            // 'Nameless' or 44-column variation.
-            name = row[this.columnIndexes.combinedName];
-            if (isPlacingNonNumeric && name.substring(name.length - placing.length) === placing) {
-                name = name.substring(0, name.length - placing.length).trim();
-            }
-        }
-        
+
         var order = this.classes.get(className).competitors.length + 1;
         var competitor = fromOriginalCumTimes(order, name, club, startTime, cumTimes);
         if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && competitor.completed()) {
@@ -3240,14 +3286,15 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         }
         
         var numControls = this.getNumControls(row, lineNumber);
-        
-        var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
-        
-        this.createClassIfNecessary(row, numControls);
-        this.createCourseIfNecessary(row, numControls);
-        this.createClassCoursePairIfNecessary(row);
-        
-        this.addCompetitor(row, cumTimes);
+        if (numControls !== null) {
+            var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
+            
+            this.createClassIfNecessary(row, numControls);
+            this.createCourseIfNecessary(row, numControls);
+            this.createClassCoursePairIfNecessary(row);
+            
+            this.addCompetitor(row, cumTimes);
+        }
     };
     
     /**
@@ -3412,6 +3459,8 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     */
     Reader.prototype.parseEventData = function () {
         
+        this.warnings = [];
+        
         this.lines = this.data.split(/\n/);
         
         var delimiter = this.identifyDelimiter();
@@ -3427,7 +3476,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         
         var classes = this.createClasses();
         var courses = this.determineCourses(classes);
-        return new Event(classes, courses);
+        return new Event(classes, courses, this.warnings);
     };
     
     SplitsBrowser.Input.OE = {};
@@ -4646,7 +4695,9 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
             });
         }, this);
         
-        return new Event(classes, newCourses);
+        // Empty array is for warnings, which aren't supported by the HTML
+        // format parsers.
+        return new Event(classes, newCourses, []);
     };
     
     /**
@@ -4723,8 +4774,6 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
 (function () {
     "use strict";
     
-    var isNaNStrict = SplitsBrowser.isNaNStrict;
-    var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
@@ -4757,7 +4806,6 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         startTime: 8,
         length: null,
         climb: null,
-        controlCount: null,
         placing: null,
         finishTime: null,
         allowMultipleCompetitorNames: true
@@ -4793,6 +4841,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         this.format = format;
         this.classes = d3.map();
         this.delimiter = null;
+        this.warnings = [];
         
         // Return the offset within the control data that should be used when
         // looking for control codes.  This will be 0 if the format specifies a
@@ -4855,31 +4904,6 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     };
     
     /**
-    * Checks that the given row has the expected length according to the
-    * format.  The expected length is the controls offset plus the number of
-    * controls times the step, provided the row has a number of controls.
-    * If the row is too short, an exception is thrown.  If the row is too long,
-    * it is shortened to have the expected length.
-    * @param {Array} row - Array of row data.
-    * @param {Number} rowIndex - The row index of the row of data.
-    */
-    Reader.prototype.checkRowLength = function (row, rowIndex) {
-        if (this.format.controlCount !== null) {
-            var controlCount = parseInt(row[this.format.controlCount], 10);
-            if (isNaNStrict(controlCount)) {
-                throwInvalidData("Control count '" + row[this.format.controlCount] + "' is not a valid number");
-            }
-            
-            var expectedRowLength = this.format.controlsOffset + controlCount * this.format.step;
-            if (row.length < expectedRowLength) {
-                throwInvalidData("Data in row " + rowIndex + " should have at least " + expectedRowLength + " parts (for " + controlCount + " controls) but only has " + row.length);
-            } else if (row.length > expectedRowLength) {
-                row.splice(expectedRowLength, row.length - expectedRowLength);
-            }
-        }
-    };
-    
-    /**
     * Adds the competitor to the course with the given name.
     * @param {Competitor} competitor - The competitor object read from the row.
     * @param {String} courseName - The name of the course.
@@ -4893,11 +4917,11 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
             // cumulative time at the start (always 0), and add one on to
             // the count of controls in the class to cater for the finish.
             if (cumTimes.length - 1 !== (cls.controls.length + 1)) {
-                throwInvalidData("Competitor '" + competitor.name + "' has the wrong number of splits for course '" + courseName + "': " +
-                         "expected " + (cls.controls.length + 1) + ", actual " + (cumTimes.length - 1));
+                this.warnings.push("Competitor '" + competitor.name + "' has the wrong number of splits for course '" + courseName + "': " +
+                                   "expected " + (cls.controls.length + 1) + ", actual " + (cumTimes.length - 1));
+            } else {
+                cls.competitors.push(competitor);
             }
-            
-            cls.competitors.push(competitor);
         } else {
             // New course/class.
             
@@ -4917,9 +4941,8 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     /**
     * Read a row of data from a line of the file.
     * @param {String} line - The line of data read from the file.
-    * @param {Number} rowIndex - The row index of the row being read.
     */
-    Reader.prototype.readDataRow = function (line, rowIndex) {
+    Reader.prototype.readDataRow = function (line) {
         var row = line.split(this.delimiter);
         trimTrailingEmptyCells(row);
         this.adjustLinePartsForMultipleCompetitors(row);
@@ -4933,8 +4956,6 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
             // Competitor might be missing cumulative time to last control.
             row.push("");
         }
-        
-        this.checkRowLength(row, rowIndex);
         
         var competitorName = row[this.format.name];
         var club = row[this.format.club];
@@ -5013,6 +5034,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */    
     Reader.prototype.parseEventData = function (eventData) {
+        this.warnings = [];
         eventData = normaliseLineEndings(eventData);
         
         var lines = eventData.split(/\n/);
@@ -5031,11 +5053,11 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         this.checkControlCodesAlphaNumeric(firstDataLine);
         
         for (var rowIndex = 1; rowIndex < lines.length; rowIndex += 1) {
-            this.readDataRow(lines[rowIndex], rowIndex);
+            this.readDataRow(lines[rowIndex]);
         }
         
         var classesAndCourses = this.createClassesAndCourses();
-        return new Event(classesAndCourses.classes, classesAndCourses.courses);
+        return new Event(classesAndCourses.classes, classesAndCourses.courses, this.warnings);
     };
     
     SplitsBrowser.Input.AlternativeCSV = {
@@ -5107,10 +5129,8 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         
         var forename = $("> Given", nameElement).text();
         var surname = $("> Family", nameElement).text();
-
-        if (forename === "" && surname === "") {
-            throwInvalidData("Cannot read competitor's name");
-        } else if (forename === "") {
+    
+        if (forename === "") {
             return surname;
         } else if (surname === "") {
             return forename;
@@ -5182,9 +5202,10 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * Reads the course details from the given ClassResult element.
     * @param {jQuery.selection} classResultElement - ClassResult element
     *     containing the course details.
+    * @param {Array} warnings - Array that accumulates warning messages.
     * @return {Object} Course details: id, name, length, climb and numberOfControls
     */
-    Version2Reader.readCourseFromClass = function (classResultElement) {
+    Version2Reader.readCourseFromClass = function (classResultElement, warnings) {
         // Although the IOF v2 format appears to support courses, they
         // haven't been specified in any of the files I've seen.
         // So instead grab course details from the class and the first
@@ -5211,10 +5232,12 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                     } else if (unit === "ft") {
                         length /= FEET_PER_KILOMETRE;
                     } else {
-                        throwInvalidData("Unrecognised course-length unit: '" + unit + "'");
+                        warnings.push("Course '" + courseName + "' gives its length in a unit '" + unit + "', but this unit was not recognised");
+                        length = null;
                     }
                 } else {
-                    throwInvalidData("Invalid course length: '" + lengthStr + "'");
+                    warnings.push("Course '" + courseName + "' specifies a course length that was not understood: '" + lengthStr + "'");
+                    length = null;
                 }
             }
         }
@@ -5389,10 +5412,11 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * Reads the course details from the given ClassResult element.
     * @param {jQuery.selection} classResultElement - ClassResult element
     *     containing the course details.
+    * @param {Array} warnings - Array that accumulates warning messages.
     * @return {Object} Course details: id, name, length, climb and number of
     *     controls.
     */
-    Version3Reader.readCourseFromClass = function (classResultElement) {
+    Version3Reader.readCourseFromClass = function (classResultElement, warnings) {
         var courseElement = $("> Course", classResultElement);
         var id = $("> Id", courseElement).text() || null;
         var name = $("> Name", courseElement).text();
@@ -5403,7 +5427,8 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         } else {
             length = parseInt(lengthStr, 10);
             if (isNaNStrict(length)) {
-                throwInvalidData("Unrecognised course length: '" + lengthStr + "'");
+                warnings.push("Course '" + name + "' specifies a course length that was not understood: '" + lengthStr + "'");
+                length = null;
             } else {
                 // Convert from metres to kilometres.
                 length /= 1000;
@@ -5585,13 +5610,20 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     *     of those read so far, 2 for the second, ...)
     * @param {Object} reader - XML reader used to assist with format-specific
     *     XML reading.
-    * @return {Object} Object containing the competitor data.
+    * @param {Array} warnings - Array that accumulates warning messages.
+    * @return {Object?} Object containing the competitor data, or null if no
+    *     competitor could be read.
     */
-    function parseCompetitor(element, number, reader) {
+    function parseCompetitor(element, number, reader, warnings) {
         var jqElement = $(element);
         
         var nameElement = reader.getCompetitorNameElement(jqElement);
         var name = readCompetitorName(nameElement);
+        
+        if (name === "") {
+            warnings.push("Could not find a name for a competitor");
+            return null;
+        }
         
         var club = reader.readClubName(jqElement);
         
@@ -5603,7 +5635,8 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         
         var resultElement = $("Result", jqElement);
         if (resultElement.length === 0) {
-            throwInvalidData("No result found for competitor '" + name + "'");
+            warnings.push("Could not find any result information for competitor '" + name + "'");
+            return null;
         }
         
         var startTime = reader.readStartTime(resultElement);
@@ -5617,7 +5650,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         var controls = splitData.map(function (datum) { return datum.code; });
         var cumTimes = splitData.map(function (datum) { return datum.time; });
         
-        cumTimes.splice(0, 0, 0); // Prepend a zero time for the start.
+        cumTimes.unshift(0); // Prepend a zero time for the start.
         cumTimes.push(totalTime);
         
         var competitor = fromOriginalCumTimes(number, name, club, startTime, cumTimes);
@@ -5654,54 +5687,67 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * @param {XMLElement} element - XML ClassResult element
     * @param {Object} reader - XML reader used to assist with format-specific
     *     XML reading.
+    * @param {Array} warnings - Array to accumulate any warning messages within.
     * @return {Object} Object containing parsed data.
     */
-    function parseClassData(element, reader) {
+    function parseClassData(element, reader, warnings) {
         var jqElement = $(element);
         var cls = {name: null, competitors: [], controls: [], course: null};
         
-        cls.course = reader.readCourseFromClass(jqElement, reader);
+        cls.course = reader.readCourseFromClass(jqElement, warnings);
         
         var className = reader.readClassName(jqElement);
         
         if (className === "") {
-            throwInvalidData("Missing class name");
+            className = "<unnamed class>";
         }
         
         cls.name = className;
         
         var personResults = $("> PersonResult", jqElement);
+        if (personResults.length === 0) {
+            warnings.push("Class '" + className + "' has no competitors");
+            return null;
+        }
         
         for (var index = 0; index < personResults.length; index += 1) {
-            var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader);
-            var competitor = competitorAndControls.competitor;
-            var controls = competitorAndControls.controls;
-            if (cls.competitors.length === 0) {
-                // First competitor.  Record the list of controls.
-                cls.controls = controls;
-                
-                // Set the number of controls on the course if we didn't read
-                // it from the XML.  Assume the first competitor's number of
-                // controls is correct.
-                if (cls.course.numberOfControls === null) {
-                    cls.course.numberOfControls = cls.controls.length;
+            var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader, warnings);
+            if (competitorAndControls !== null) {
+                var competitor = competitorAndControls.competitor;
+                var controls = competitorAndControls.controls;
+                if (cls.competitors.length === 0) {
+                    // First competitor.  Record the list of controls.
+                    cls.controls = controls;
+                    
+                    // Set the number of controls on the course if we didn't read
+                    // it from the XML.  Assume the first competitor's number of
+                    // controls is correct.
+                    if (cls.course.numberOfControls === null) {
+                        cls.course.numberOfControls = cls.controls.length;
+                    }
                 }
-            }
 
-            // Subtract 2 for the start and finish cumulative times.
-            var actualControlCount = competitor.getAllOriginalCumulativeTimes().length - 2;
-            if (actualControlCount !== cls.course.numberOfControls) {
-                throwInvalidData("Unexpected number of controls for competitor '" + competitor.name + "' in class '" + className + "': expected " + cls.course.numberOfControls + ", actual " + actualControlCount);
-            }
-            
-            for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
-                if (cls.controls[controlIndex] !== controls[controlIndex]) {
-                    throwInvalidData("Unexpected control code for competitor '" + competitor.name + "' at control " + (controlIndex + 1) + 
-                        ": expected '" + cls.controls[controlIndex] + "', actual '" + controls[controlIndex] + "'");
+                // Subtract 2 for the start and finish cumulative times.
+                var actualControlCount = competitor.getAllOriginalCumulativeTimes().length - 2;
+                var warning = null;
+                if (actualControlCount !== cls.course.numberOfControls) {
+                    warning = "Competitor '" + competitor.name + "' in class '" + className + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;
+                } else {
+                    for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
+                        if (cls.controls[controlIndex] !== controls[controlIndex]) {
+                            warning = "Competitor '" + competitor.name + "' has an unexpected control code at control " + (controlIndex + 1) +
+                                ": expected '" + cls.controls[controlIndex] + "', actual '" + controls[controlIndex] + "'";
+                            break;
+                        }
+                    }
+                }
+                
+                if (warning === null) {
+                    cls.competitors.push(competitor);
+                } else {
+                    warnings.push(warning);
                 }
             }
-            
-            cls.competitors.push(competitor);
         }
         
         if (cls.course.id === null && cls.controls.length > 0) {
@@ -5739,7 +5785,8 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     }
    
     /**
-    * Parses IOF XML data in the 2.0.3 format and returns the data.
+    * Parses IOF XML data in either the 2.0.3 format or the 3.0 format and
+    * returns the data.
     * @param {String} data - String to parse as XML.
     * @return {Event} Parsed event object.
     */
@@ -5769,8 +5816,15 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         // controls, but we don't assume that.)
         var coursesMap = d3.map();
         
+        var warnings = [];
+        
         classResultElements.forEach(function (classResultElement) {
-            var parsedClass = parseClassData(classResultElement, reader);
+            var parsedClass = parseClassData(classResultElement, reader, warnings);
+            if (parsedClass === null) {
+                // Class could not be parsed.
+                return;
+            }
+            
             var courseClass = new CourseClass(parsedClass.name, parsedClass.controls.length, parsedClass.competitors);
             classes.push(courseClass);
             
@@ -5800,7 +5854,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
             return course;
         });
         
-        return new Event(classes, courses);
+        return new Event(classes, courses, warnings);
     }
     
     SplitsBrowser.Input.IOFXml = { parseEventData: parseEventData };
@@ -6102,7 +6156,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         
         var selectedCompetitorIndexes = [];
         var dragClassName = this.getDragClassName();
-        for (var index = 0; index < this.allCompetitorDivs.size(); index += 1) {
+        for (var index = 0; index < this.allCompetitorDivs.length; index += 1) {
             if ($(this.allCompetitorDivs[index]).hasClass(dragClassName)) {
                 selectedCompetitorIndexes.push(index);
             }
@@ -6279,6 +6333,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
 
         competitorDivs.selectAll("span").remove();
         
+        competitorDivs = this.listDiv.selectAll("div.competitor").data(this.allCompetitors);
         if (multipleClasses) {
             competitorDivs.append("span")
                           .classed("competitorClassLabel", true)
@@ -6424,6 +6479,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         var optionsList = d3.select(this.dropDown).selectAll("option").data(this.allLanguages);
         optionsList.enter().append("option");
         
+        optionsList = d3.select(this.dropDown).selectAll("option").data(this.allLanguages);
         optionsList.attr("value", function (language) { return language; })
                    .text(function (language) { return getLanguageName(language); });
                    
@@ -6522,6 +6578,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         
         this.otherClassesList = d3.select(parent).append("div")
                                                  .classed("otherClassList", true)
+                                                 .classed("transient", true)
                                                  .style("position", "absolute")
                                                  .style("display", "none");
                                    
@@ -6542,14 +6599,6 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                 if (!container.is(e.target) && container.has(e.target).length === 0) { 
                     listDiv.style.display = "none";
                 }
-            }
-        });
-        
-        // Close the class selector if Escape is pressed.
-        // 27 is the key code for the Escape key.
-        $(document).keydown(function (e) {
-            if (e.which === 27) {
-                outerThis.otherClassesList.style("display", "none");
             }
         });
         
@@ -6599,6 +6648,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
             var optionsList = d3.select(this.dropDown).selectAll("option").data(options);
             optionsList.enter().append("option");
             
+            optionsList = d3.select(this.dropDown).selectAll("option").data(options);
             optionsList.attr("value", function(_value, index) { return index.toString(); })
                        .text(function(value) { return value; });
                        
@@ -6644,9 +6694,13 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * @param {Array} Indexes of selected classes.
     */
     ClassSelector.prototype.getSelectedClasses = function () {
-        var indexes = [this.dropDown.selectedIndex];
-        this.selectedOtherClassIndexes.forEach(function (index) { indexes.push(parseInt(index, 10)); });
-        return indexes;
+        if (this.dropDown.disabled) {
+            return [];
+        } else {
+            var indexes = [this.dropDown.selectedIndex];
+            this.selectedOtherClassIndexes.each(function (index) { indexes.push(parseInt(index, 10)); });
+            return indexes;
+        }
     };
 
     /**
@@ -6705,6 +6759,9 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         
         otherClassesSelection.enter().append("div")
                                      .classed("otherClassItem", true);
+        
+        otherClassesSelection = this.otherClassesList.selectAll("div")
+                                                     .data(otherClassIndexes);
         
         otherClassesSelection.attr("id", function (classIdx) { return "courseClassIdx_" + classIdx; })
                              .classed("selected", function (classIdx) { return selectedOtherClassIndexes.has(classIdx); })
@@ -6854,6 +6911,8 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                                                    .data(ALL_COMPARISON_OPTIONS);
         this.optionsList.enter().append("option");
         
+        this.optionsList = d3.select(this.dropDown).selectAll("option")
+                                                   .data(ALL_COMPARISON_OPTIONS);
         this.optionsList.attr("value", function (_opt, index) { return index.toString(); });
                    
         this.optionsList.exit().remove();
@@ -6934,6 +6993,8 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                                                         .data(completingCompetitors);
         
         optionsList.enter().append("option");
+        optionsList = d3.select(this.runnerDropDown).selectAll("option")
+                                                    .data(completingCompetitors);
         optionsList.attr("value", function (_comp, complCompIndex) { return completingCompetitorIndexes[complCompIndex].toString(); })
                    .text(function (comp) { return comp.name; });
         optionsList.exit().remove();
@@ -7169,7 +7230,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     */
     StatisticsSelector.prototype.getVisibleStatistics = function () {
         var visibleStats = {};
-        this.div.selectAll("input")[0].forEach(function (checkbox, index) {
+        this.div.selectAll("input").nodes().forEach(function (checkbox, index) {
             visibleStats[STATISTIC_NAMES[index]] = checkbox.checked;
         });
         
@@ -7181,7 +7242,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * @param {Object} visibleStats - The statistics to make visible.
     */
     StatisticsSelector.prototype.setVisibleStatistics = function (visibleStats) {
-        this.div.selectAll("input")[0].forEach(function (checkbox, index) {
+        this.div.selectAll("input").nodes().forEach(function (checkbox, index) {
             checkbox.checked = visibleStats[STATISTIC_NAMES[index]] || false;
         });
         
@@ -7228,6 +7289,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         this.optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);
         this.optionsList.enter().append("option");
         
+        this.optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);
         this.optionsList.attr("value", function (_value, index) { return index.toString(); });
                    
         this.optionsList.exit().remove();
@@ -7701,6 +7763,8 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                                      
         rows.enter().append("tr");
         
+        rows = this.dataTable.selectAll("tr")
+                             .data(competitorData.data);
         rows.classed("highlighted", function (row) { return row.highlight; });
         
         rows.selectAll("td").remove();
@@ -7909,6 +7973,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
 
         this.xScale = null;
         this.yScale = null;
+        this.hasData = false;
         this.overallWidth = -1;
         this.overallHeight = -1;
         this.contentWidth = -1;
@@ -8051,7 +8116,9 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         }
         
         this.isMouseIn = true;
-        this.updateControlLineLocation(event);            
+        if (this.hasData) {
+            this.updateControlLineLocation(event);            
+        }
     };
 
     /**
@@ -8059,7 +8126,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * @param {jQuery.event} event - jQuery event object.
     */
     Chart.prototype.onMouseMove = function (event) {
-        if (this.isMouseIn && this.xScale !== null) {
+        if (this.hasData&& this.isMouseIn && this.xScale !== null) {
             this.updateControlLineLocation(event);
         }
     };
@@ -8326,7 +8393,9 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         }
         
         // Update the current competitor data.
-        this.currentCompetitorData.forEach(function (data, index) { data.label = labelTexts[index]; });
+        if (this.hasData) {
+            this.currentCompetitorData.forEach(function (data, index) { data.label = labelTexts[index]; });
+        }
         
         // This data is already joined to the labels; just update the text.
         d3.selectAll("text.competitorLabel").text(function (data) { return data.label; });
@@ -8526,9 +8595,9 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * @param {object} chartData - Chart data object.
     */
     Chart.prototype.createScales = function (chartData) {
-        this.xScale = d3.scale.linear().domain(chartData.xExtent).range([0, this.contentWidth]);
-        this.yScale = d3.scale.linear().domain(chartData.yExtent).range([0, this.contentHeight]);
-        this.xScaleMinutes = d3.scale.linear().domain([chartData.xExtent[0] / 60, chartData.xExtent[1] / 60]).range([0, this.contentWidth]);
+        this.xScale = d3.scaleLinear().domain(chartData.xExtent).range([0, this.contentWidth]);
+        this.yScale = d3.scaleLinear().domain(chartData.yExtent).range([0, this.contentHeight]);
+        this.xScaleMinutes = d3.scaleLinear().domain([chartData.xExtent[0] / 60, chartData.xExtent[1] / 60]).range([0, this.contentWidth]);
     };
 
     /**
@@ -8560,6 +8629,8 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         
         rects.enter().append("rect");
 
+        rects = this.svgGroup.selectAll("rect")
+                                 .data(d3.range(refCumTimesSorted.length - 1));
         rects.attr("x", function (index) { return outerThis.xScale(refCumTimesSorted[index]); })
              .attr("y", 0)
              .attr("width", function (index) { return outerThis.xScale(refCumTimesSorted[index + 1]) - outerThis.xScale(refCumTimesSorted[index]); })
@@ -8615,20 +8686,17 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     
         var tickFormatter = this.determineYAxisTickFormatter(chartData);
         
-        var xAxis = d3.svg.axis()
-                          .scale(this.xScale)
-                          .orient("top")
-                          .tickFormat(this.getTickFormatter())
-                          .tickValues(this.referenceCumTimes);
+        var xAxis = d3.axisTop()
+                      .scale(this.xScale)
+                      .tickFormat(this.getTickFormatter())
+                      .tickValues(this.referenceCumTimes);
 
-        var yAxis = d3.svg.axis()
-                          .scale(this.yScale)
-                          .tickFormat(tickFormatter)
-                          .orient("left");
+        var yAxis = d3.axisLeft()
+                      .scale(this.yScale)
+                      .tickFormat(tickFormatter);
                      
-        var lowerXAxis = d3.svg.axis()
-                               .scale(this.xScaleMinutes)
-                               .orient("bottom");
+        var lowerXAxis = d3.axisBottom()
+                           .scale(this.xScaleMinutes);
 
         this.svgGroup.selectAll("g.axis").remove();
 
@@ -8645,6 +8713,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                      .attr("y", 6)
                      .attr("dy", ".71em")
                      .style("text-anchor", "start")
+                     .style("fill", "black")
                      .text(yAxisLabel);
 
         this.svgGroup.append("g")
@@ -8655,6 +8724,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                      .attr("x", 60)
                      .attr("y", -5)
                      .style("text-anchor", "start")
+                     .style("fill", "black")
                      .text(getMessage("LowerXAxisChartLabel"));
     };
     
@@ -8670,17 +8740,16 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                 // to draw.  WebKit will report an error ('Error parsing d=""')
                 // if no points on the line are defined, as will happen in this
                 // case, so we substitute a single zero point instead.
-                return d3.svg.line()
-                             .x(0)
-                             .y(0)
-                             .defined(function (d, i) { return i === 0; });
+                return d3.line()
+                           .x(0)
+                           .y(0)
+                           .defined(function (d, i) { return i === 0; });
             }
             else {
-                return d3.svg.line()
-                             .x(function (d) { return outerThis.xScale(d.x); })
-                             .y(function (d) { return outerThis.yScale(d.ys[selCompIdx]); })
-                             .defined(function (d) { return isNotNullNorNaN(d.ys[selCompIdx]); })
-                             .interpolate("linear");
+                return d3.line()
+                           .x(function (d) { return outerThis.xScale(d.x); })
+                           .y(function (d) { return outerThis.yScale(d.ys[selCompIdx]); })
+                           .defined(function (d) { return isNotNullNorNaN(d.ys[selCompIdx]); });
             }
         };
         
@@ -8751,8 +8820,10 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         
         var startLabels = this.svgGroup.selectAll("text.startLabel").data(this.selectedIndexes);
         
-        startLabels.enter().append("text");
+        startLabels.enter().append("text")
+                           .classed("startLabel", true);
         
+        startLabels = this.svgGroup.selectAll("text.startLabel").data(this.selectedIndexes);
         startLabels.attr("x", -7)
                    .attr("y", function (_compIndex, selCompIndex) { return outerThis.yScale(startColumn.ys[selCompIndex]) + outerThis.getTextHeight(chartData.competitorNames[selCompIndex]) / 4; })
                    .attr("class", function (compIndex) { return "startLabel competitor" + compIndex; })
@@ -8863,10 +8934,10 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         this.adjustCompetitorLegendLabelsUpwardsIfNecessary(minLastY);
 
         var legendLines = this.svgGroup.selectAll("line.competitorLegendLine").data(this.currentCompetitorData);
-        legendLines.enter()
-                   .append("line");
+        legendLines.enter().append("line").classed("competitorLegendLine", true);
 
         var outerThis = this;
+        legendLines = this.svgGroup.selectAll("line.competitorLegendLine").data(this.currentCompetitorData);
         legendLines.attr("x1", this.contentWidth + 1)
                    .attr("y1", function (data) { return data.y; })
                    .attr("x2", this.contentWidth + LEGEND_LINE_WIDTH + 1)
@@ -8879,9 +8950,9 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         legendLines.exit().remove();
 
         var labels = this.svgGroup.selectAll("text.competitorLabel").data(this.currentCompetitorData);
-        labels.enter()
-              .append("text");
+        labels.enter().append("text").classed("competitorLabel", true);
 
+        labels = this.svgGroup.selectAll("text.competitorLabel").data(this.currentCompetitorData);
         labels.attr("x", this.contentWidth + LEGEND_LINE_WIDTH + 2)
               .attr("y", function (data) { return data.y + data.textHeight / 4; })
               .attr("class", function (data) { return "competitorLabel competitor" + data.index; })
@@ -8960,7 +9031,6 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
 
         this.referenceCumTimeIndexes = this.referenceCumTimesSorted.map(function (cumTime) { return cumTimesToControlIndex.get(cumTime); });
     };
-
     
     /**
     * Draws the chart.
@@ -8993,6 +9063,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         this.isRaceGraph = chartType.isRaceGraph;
         this.minViewableControl = chartType.minViewableControl;
         this.visibleStatistics = visibleStatistics;
+        this.hasData = true;
         
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
         this.maxStartTimeLabelWidth = (this.isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
@@ -9115,6 +9186,16 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
             return getMessage("MispunchedShort");
         }
     }
+
+    /**
+    * Escapes a piece of text as HTML so that it can be concatenated into an
+    * HTML string without the risk of any injection.
+    * @param {String} value The HTML value to escape.
+    * @return {String} The HTML value escaped.
+    */ 
+    function escapeHtml(value) {
+        return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
     
     /**
     * Populates the contents of the table with the course-class data.
@@ -9159,28 +9240,42 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                                     .data(headerCellData);
                                                        
         headerCells.enter().append("th");
-        headerCells.text(function (header) { return header; });
         headerCells.exit().remove();
+        headerCells = this.table.select("thead tr")
+                                .selectAll("th")
+                                .data(headerCellData);
+                                
+        headerCells.text(function (header) { return header; });
         
-        var tableBody = this.table.select("tbody");
-        tableBody.selectAll("tr").remove();
+        // Array that accumulates bits of HTML for the table body.
+        var htmlBits = [];
         
-        function addCell(tableRow, topLine, bottomLine, cssClass, cumFastest, splitFastest, cumDubious, splitDubious) {
-            var cell = tableRow.append("td");
-            cell.append("span")
-                .classed("fastest", cumFastest)
-                .classed("dubious", cumDubious)
-                .text(topLine);
-
-            cell.append("br");
-            cell.append("span")
-                .classed("fastest", splitFastest)
-                .classed("dubious", splitDubious)
-                .text(bottomLine);
-                
+        // Adds a two-line cell to the array of table-body HTML parts.
+        // If truthy, cssClass is assumed to be HTML-safe and not require
+        // escaping.
+        function addCell(topLine, bottomLine, cssClass, cumFastest, splitFastest, cumDubious, splitDubious) {
+            htmlBits.push("<td");
             if (cssClass) {
-                cell.classed(cssClass, true);
+                htmlBits.push(" class=\"" + cssClass + "\"");
             }
+            
+            htmlBits.push("><span");
+            var className = (((cumFastest) ? "fastest" : "") + " " + ((cumDubious) ? "dubious" : "")).trim();
+            if (className !== "") {
+                htmlBits.push(" class=\"" + className + "\"");
+            }
+            
+            htmlBits.push(">");
+            htmlBits.push(escapeHtml(topLine));
+            htmlBits.push("</span><br><span");
+            className = (((splitFastest) ? "fastest" : "") + " " + ((splitDubious) ? "dubious" : "")).trim();
+            if (className !== "") {
+                htmlBits.push(" class=\"" + className + "\"");
+            }
+            
+            htmlBits.push(">");
+            htmlBits.push(escapeHtml(bottomLine));
+            htmlBits.push("</span></td>\n");
         }
         
         var competitors = this.courseClass.competitors.slice(0);
@@ -9192,21 +9287,23 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         var precision = determinePrecision(competitors);
         
         competitors.forEach(function (competitor, index) {
-            var tableRow = tableBody.append("tr");
-            var numberCell = tableRow.append("td");
+            htmlBits.push("<tr><td>");
+            
             if (competitor.isNonCompetitive) {
-                numberCell.text(getMessage("NonCompetitiveShort"));
+                htmlBits.push(escapeHtml(getMessage("NonCompetitiveShort")));
                 nonCompCount += 1;
             } else if (competitor.completed()) {
                 if (index === 0 || competitors[index - 1].totalTime !== competitor.totalTime) {
                     rank = index + 1 - nonCompCount;
                 }
                 
-                numberCell.text(rank);
+                htmlBits.push("" + rank);
             }
             
-            addCell(tableRow, competitor.name, competitor.club, false, false, false, false);
-            addCell(tableRow, getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false, false, false);
+            htmlBits.push("</td>");
+            
+            addCell(competitor.name, competitor.club, false, false, false, false);
+            addCell(getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false, false, false);
             
             d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {
                 var formattedCumTime = formatTime(competitor.getOriginalCumulativeTimeTo(controlNum), precision);
@@ -9215,9 +9312,14 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
                 var isSplitTimeFastest = (competitor.getSplitRankTo(controlNum) === 1);
                 var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
                 var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
-                addCell(tableRow, formattedCumTime, formattedSplitTime, "time", isCumTimeFastest, isSplitTimeFastest, isCumDubious, isSplitDubious);
+                addCell(formattedCumTime, formattedSplitTime, "time", isCumTimeFastest, isSplitTimeFastest, isCumDubious, isSplitDubious);
             });
+            
+            htmlBits.push("</tr>\n");
+            
         }, this);
+        
+        this.table.select("tbody").node().innerHTML = htmlBits.join("");
     };
     
     /**
@@ -9226,18 +9328,9 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     */
     ResultsTable.prototype.setClass = function (courseClass) {
         this.courseClass = courseClass;
-        this.populateTable();
-        if (this.div.style("display") !== "none") {
-            this.adjustTableCellWidths();
+        if (this.courseClass !== null) {
+            this.populateTable();
         }
-    };
-    
-    /**
-    * Adjust the widths of the time table cells so that they have the same width.
-    */
-    ResultsTable.prototype.adjustTableCellWidths = function () {
-        var lastCellOnFirstRow = d3.select("tbody tr td:last-child").node();
-        $("tbody td.time").width($(lastCellOnFirstRow).width());
     };
     
     /**
@@ -9245,7 +9338,6 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     */
     ResultsTable.prototype.show = function () {
         this.div.style("display", null);
-        this.adjustTableCellWidths();
     };
     
     /**
@@ -9260,9 +9352,6 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     */
     ResultsTable.prototype.retranslate = function () {
         this.populateTable();
-        if (this.div.style("display") !== "none") {
-            this.adjustTableCellWidths();
-        }    
     };
     
     SplitsBrowser.Controls.ResultsTable = ResultsTable;
@@ -9675,6 +9764,132 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
 
 (function () {
     "use strict";
+
+    var getMessage = SplitsBrowser.getMessage;
+
+    var CONTAINER_DIV_ID = "warningViewerContainer";
+
+    /**
+    * Constructs a new WarningViewer object.
+    * @constructor
+    * @param {d3.selection} parent - d3 selection containing the parent to
+    *     insert the selector into.
+    */
+    function WarningViewer(parent) {
+        this.parent = parent;
+        this.warnings = [];
+        
+        this.containerDiv = parent.append("div")
+                                  .classed("topRowStart", true)
+                                  .attr("id", CONTAINER_DIV_ID)
+                                  .style("display", "none");
+                                  
+        this.containerDiv.append("div").classed("topRowStartSpacer", true);
+        
+        this.warningTriangle = this.createWarningTriangle(this.containerDiv);
+                                  
+        this.warningList = parent.append("div")
+                                 .classed("warningList", true)
+                                 .classed("transient", true)
+                                 .style("position", "absolute")
+                                 .style("display", "none");
+        
+        // Ensure that a click outside of the warning list or the selector
+        // box closes it.
+        // Taken from http://stackoverflow.com/questions/1403615 and adjusted.
+        var outerThis = this;
+        $(document).click(function (e) {
+            if (outerThis.warningList.style("display") !== "none") {
+                var container = $("div#warningTriangleContainer,div.warningList");
+                if (!container.is(e.target) && container.has(e.target).length === 0) { 
+                    outerThis.warningList.style("display", "none");
+                }
+            }
+        });
+        
+        this.setMessages();
+    }
+    
+    /**
+    * Sets the message shown in the tooltip, either as part of initialisation or
+    * following a change of selected language.
+    */
+    WarningViewer.prototype.setMessages = function () {
+        this.containerDiv.attr("title", getMessage("WarningsTooltip"));
+    };
+    
+    /**
+    * Creates the warning triangle.
+    * @return {Object} d3 selection containing the warning triangle.
+    */
+    WarningViewer.prototype.createWarningTriangle = function () {
+        var svgContainer = this.containerDiv.append("div")
+                                   .attr("id", "warningTriangleContainer");
+        var svg = svgContainer.append("svg");
+        
+        svg.style("width", "21px")
+           .style("height", "19px")
+           .style("margin-bottom", "-3px");
+           
+        svg.append("polygon")
+           .attr("points", "1,18 10,0 19,18")
+           .style("stroke", "black")
+           .style("stroke-width", "1.5px")
+           .style("fill", "#ffd426");
+           
+        svg.append("text")
+           .attr("x", 10)
+           .attr("y", 16)
+           .attr("text-anchor", "middle")
+           .style("font-size", "14px")
+           .text("!");
+           
+        var outerThis = this;
+        svgContainer.on("click", function () { outerThis.showHideErrorList(); });
+        
+        return svg;
+    };
+    
+    /**
+    * Sets the list of visible warnings.
+    * @param {Array} warnings - Array of warning messages.
+    */
+    WarningViewer.prototype.setWarnings = function (warnings) {
+        var errorsSelection = this.warningList.selectAll("div")
+                                              .data(warnings);
+        
+        errorsSelection.enter().append("div")
+                               .classed("warning", true);
+        
+        errorsSelection = this.warningList.selectAll("div")
+                                          .data(warnings);
+        
+        errorsSelection.text(function (errorMessage) { return errorMessage; });
+        errorsSelection.exit().remove();
+        this.containerDiv.style("display", (warnings && warnings.length > 0) ? "block" : "none");
+    };
+    
+    /**
+    * Shows or hides the list of warnings.
+    */
+    WarningViewer.prototype.showHideErrorList = function () {
+        if (this.warningList.style("display") === "none") {
+            var offset = $(this.warningTriangle.node()).offset();
+            var height = $(this.warningTriangle.node()).outerHeight();
+            var width = $(this.warningList.node()).outerWidth();
+            this.warningList.style("left", (offset.left - width / 2) + "px")
+                                    .style("top", (offset.top + height + 5) + "px")
+                                    .style("display", "block");
+        } else {
+            this.warningList.style("display", "none");
+        }
+    };
+    
+    SplitsBrowser.Controls.WarningViewer = WarningViewer;
+})();
+
+(function () {
+    "use strict";
     // Delay in milliseconds between a resize event being triggered and the
     // page responding to it.
     // (Resize events tend to come more than one at a time; if a resize event
@@ -9707,9 +9922,27 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     var ComparisonSelector = Controls.ComparisonSelector;
     var OriginalDataSelector = Controls.OriginalDataSelector;
     var StatisticsSelector = Controls.StatisticsSelector;
+    var WarningViewer = Controls.WarningViewer;
     var CompetitorList = Controls.CompetitorList;
     var Chart = Controls.Chart;
     var ResultsTable = Controls.ResultsTable;
+    
+    /**
+    * Checks that D3 version 4 or later is present.
+    * @return {Boolean} true if D3 version 4 is present, false if no D3 was found
+    *     or a version of D3 older version 4 was found. 
+    */
+    function checkD3Version4() {
+        if (!window.d3) {
+            alert("D3 was not found.  SplitsBrowser requires D3 version 4 or later.");
+            return false;
+        } else if (parseFloat(d3.version) < 4) {
+            alert("D3 version " + d3.version + " was found.  SplitsBrowser requires D3 version 4 or later.");
+            return false;
+        } else {
+            return true;
+        }
+    }
     
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
@@ -9738,6 +9971,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         this.originalDataSelector = null;
         this.statisticsSelector = null;
         this.competitorList = null;
+        this.warningViewer = null;
         this.chart = null;
         this.topPanel = null;
         this.mainPanel = null;
@@ -9788,6 +10022,8 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         if (this.classSelector !== null) {
             this.classSelector.setClasses(this.classes);
         }
+        
+        this.warningViewer.setWarnings(eventData.warnings);
     };
 
     /**
@@ -9903,6 +10139,13 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     };
     
     /**
+    * Adds the warning viewer to the top panel.
+    */
+    Viewer.prototype.addWarningViewer = function () {
+        this.warningViewer = new WarningViewer(this.topPanel);
+    };
+    
+    /**
     * Sets the text in the direct-link, following either its creation or a
     * change in selected language.
     */
@@ -9961,6 +10204,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         this.addOriginalDataSelector();
         this.addSpacer();
         this.addDirectLink();
+        this.addWarningViewer();
         
         this.statisticsSelector = new StatisticsSelector(this.topPanel.node());
 
@@ -9986,6 +10230,14 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         // -*-user-select CSS style.
         $("input:text").bind("selectstart", function (evt) { evt.stopPropagation(); });
         $(this.container.node()).bind("selectstart", function () { return false; });
+       
+        // Hide 'transient' elements such as the list of other classes in the
+        // class selector or warning list when the Escape key is pressed.
+        $(document).keydown(function (e) {
+            if (e.which === 27) {
+                outerThis.hideTransientElements();
+            }
+        });
     };
 
     /**
@@ -10020,7 +10272,15 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         this.currentResizeTimeout = null;
         this.setCompetitorListHeight();
         this.setChartSize();
+        this.hideTransientElements();
         this.redraw();
+    };
+
+    /**
+    * Hides all transient elements that happen to be open.
+    */
+    Viewer.prototype.hideTransientElements = function () {
+        d3.selectAll(".transient").style("display", "none");
     };
     
     /**
@@ -10127,11 +10387,13 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
 
         this.updateControlEnabledness();
-        var comparisonFunction = this.comparisonSelector.getComparisonFunction();
-        this.referenceCumTimes = comparisonFunction(this.courseClassSet);
-        this.fastestCumTimes = this.courseClassSet.getFastestCumTimes();
-        this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType());
-        this.redrawChart();
+        if (this.classes.length > 0) {
+            var comparisonFunction = this.comparisonSelector.getComparisonFunction();
+            this.referenceCumTimes = comparisonFunction(this.courseClassSet);
+            this.fastestCumTimes = this.courseClassSet.getFastestCumTimes();
+            this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType());
+            this.redrawChart();
+        }
     };
 
     /**
@@ -10172,6 +10434,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         this.originalDataSelector.setMessages();
         this.setDirectLinkMessages();
         this.statisticsSelector.setMessages();
+        this.warningViewer.setMessages();
         this.competitorList.retranslate();
         this.resultsTable.retranslate();
         if (!this.chartTypeSelector.getChartType().isResultsTable) {
@@ -10188,7 +10451,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
         this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
         this.courseClassSet = new CourseClassSet(this.currentClasses);
         this.comparisonSelector.setCourseClassSet(this.courseClassSet);
-        this.resultsTable.setClass(this.currentClasses[0]);    
+        this.resultsTable.setClass(this.currentClasses.length > 0 ? this.currentClasses[0] : null);
         this.enableOrDisableRaceGraph();
         this.originalDataSelector.setVisible(this.courseClassSet.hasDubiousData());
     };
@@ -10271,8 +10534,11 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     */
     Viewer.prototype.selectChartTypeAndRedraw = function (chartType) {
         this.selectChartType(chartType);
-        this.setCompetitorListHeight();
-        this.drawChart();
+        if (!chartType.isResultsTable) {
+            this.setCompetitorListHeight();
+            this.drawChart();
+        }
+        
         this.updateDirectLink();
     };
     
@@ -10329,7 +10595,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     */
     Viewer.prototype.updateFromQueryString = function (parsedQueryString) {
         if (parsedQueryString.classes === null) {
-            this.initClasses([0]);
+            this.setDefaultSelectedClass();
         } else {
             this.initClasses(parsedQueryString.classes);
         }
@@ -10365,7 +10631,7 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     * Sets the default selected class.
     */
     Viewer.prototype.setDefaultSelectedClass = function () {
-        this.initClasses([0]);
+        this.initClasses((this.classes.length > 0) ? [0] : []);
     };
     
     SplitsBrowser.Viewer = Viewer;
@@ -10398,6 +10664,10 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     *     the HTML element itself, although this behaviour is deprecated.
     */
     SplitsBrowser.readEvent = function (data, options) {
+        if (!checkD3Version4()) {
+            return;
+        }
+        
         var eventData;
         try {
             eventData = parseEventData(data);
@@ -10487,6 +10757,10 @@ var SplitsBrowser = { Version: "3.3.11", Model: {}, Input: {}, Controls: {}, Mes
     *     the HTML element itself, although this behaviour is deprecated.
     */
     SplitsBrowser.loadEvent = function (eventUrl, options) {
+        if (!checkD3Version4()) {
+            return;
+        }
+        
         $.ajax({
             url: eventUrl,
             data: "",
