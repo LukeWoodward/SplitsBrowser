@@ -262,18 +262,7 @@
         this.courseClass = courseClass;
         if (this.courseClass !== null) {
             this.populateTable();
-            if (this.div.style("display") !== "none") {
-                this.adjustTableCellWidths();
-            }
         }
-    };
-    
-    /**
-    * Adjust the widths of the time table cells so that they have the same width.
-    */
-    ResultsTable.prototype.adjustTableCellWidths = function () {
-        var lastCellOnFirstRow = d3.select("tbody tr td:last-child").node();
-        $("tbody td.time").width($(lastCellOnFirstRow).width());
     };
     
     /**
@@ -281,7 +270,6 @@
     */
     ResultsTable.prototype.show = function () {
         this.div.style("display", null);
-        this.adjustTableCellWidths();
     };
     
     /**
@@ -296,9 +284,6 @@
     */
     ResultsTable.prototype.retranslate = function () {
         this.populateTable();
-        if (this.div.style("display") !== "none") {
-            this.adjustTableCellWidths();
-        }    
     };
     
     SplitsBrowser.Controls.ResultsTable = ResultsTable;
