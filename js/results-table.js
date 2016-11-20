@@ -118,6 +118,16 @@
             return getMessage("MispunchedShort");
         }
     }
+
+    /**
+    * Escapes a piece of text as HTML so that it can be concatenated into an
+    * HTML string without the risk of any injection.
+    * @param {String} value The HTML value to escape.
+    * @return {String} The HTML value escaped.
+    */ 
+    function escapeHtml(value) {
+        return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
     
     /**
     * Populates the contents of the table with the course-class data.
@@ -169,25 +179,35 @@
                                 
         headerCells.text(function (header) { return header; });
         
-        var tableBody = this.table.select("tbody");
-        tableBody.selectAll("tr").remove();
+        // Array that accumulates bits of HTML for the table body.
+        var htmlBits = [];
         
-        function addCell(tableRow, topLine, bottomLine, cssClass, cumFastest, splitFastest, cumDubious, splitDubious) {
-            var cell = tableRow.append("td");
-            cell.append("span")
-                .classed("fastest", cumFastest)
-                .classed("dubious", cumDubious)
-                .text(topLine);
-
-            cell.append("br");
-            cell.append("span")
-                .classed("fastest", splitFastest)
-                .classed("dubious", splitDubious)
-                .text(bottomLine);
-                
+        // Adds a two-line cell to the array of table-body HTML parts.
+        // If truthy, cssClass is assumed to be HTML-safe and not require
+        // escaping.
+        function addCell(topLine, bottomLine, cssClass, cumFastest, splitFastest, cumDubious, splitDubious) {
+            htmlBits.push("<td");
             if (cssClass) {
-                cell.classed(cssClass, true);
+                htmlBits.push(" class=\"" + cssClass + "\"");
             }
+            
+            htmlBits.push("><span");
+            var className = (((cumFastest) ? "fastest" : "") + " " + ((cumDubious) ? "dubious" : "")).trim();
+            if (className !== "") {
+                htmlBits.push(" class=\"" + className + "\"");
+            }
+            
+            htmlBits.push(">");
+            htmlBits.push(escapeHtml(topLine));
+            htmlBits.push("</span><br><span");
+            className = (((splitFastest) ? "fastest" : "") + " " + ((splitDubious) ? "dubious" : "")).trim();
+            if (className !== "") {
+                htmlBits.push(" class=\"" + className + "\"");
+            }
+            
+            htmlBits.push(">");
+            htmlBits.push(escapeHtml(bottomLine));
+            htmlBits.push("</span></td>\n");
         }
         
         var competitors = this.courseClass.competitors.slice(0);
@@ -199,21 +219,23 @@
         var precision = determinePrecision(competitors);
         
         competitors.forEach(function (competitor, index) {
-            var tableRow = tableBody.append("tr");
-            var numberCell = tableRow.append("td");
+            htmlBits.push("<tr><td>");
+            
             if (competitor.isNonCompetitive) {
-                numberCell.text(getMessage("NonCompetitiveShort"));
+                htmlBits.push(escapeHtml(getMessage("NonCompetitiveShort")));
                 nonCompCount += 1;
             } else if (competitor.completed()) {
                 if (index === 0 || competitors[index - 1].totalTime !== competitor.totalTime) {
                     rank = index + 1 - nonCompCount;
                 }
                 
-                numberCell.text(rank);
+                htmlBits.push("" + rank);
             }
             
-            addCell(tableRow, competitor.name, competitor.club, false, false, false, false);
-            addCell(tableRow, getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false, false, false);
+            htmlBits.push("</td>");
+            
+            addCell(competitor.name, competitor.club, false, false, false, false);
+            addCell(getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false, false, false);
             
             d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {
                 var formattedCumTime = formatTime(competitor.getOriginalCumulativeTimeTo(controlNum), precision);
@@ -222,9 +244,14 @@
                 var isSplitTimeFastest = (competitor.getSplitRankTo(controlNum) === 1);
                 var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
                 var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
-                addCell(tableRow, formattedCumTime, formattedSplitTime, "time", isCumTimeFastest, isSplitTimeFastest, isCumDubious, isSplitDubious);
+                addCell(formattedCumTime, formattedSplitTime, "time", isCumTimeFastest, isSplitTimeFastest, isCumDubious, isSplitDubious);
             });
+            
+            htmlBits.push("</tr>\n");
+            
         }, this);
+        
+        this.table.select("tbody").node().innerHTML = htmlBits.join("");
     };
     
     /**
