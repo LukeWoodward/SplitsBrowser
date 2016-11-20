@@ -876,6 +876,7 @@
                      .attr("y", 6)
                      .attr("dy", ".71em")
                      .style("text-anchor", "start")
+                     .style("fill", "black")
                      .text(yAxisLabel);
 
         this.svgGroup.append("g")
@@ -886,6 +887,7 @@
                      .attr("x", 60)
                      .attr("y", -5)
                      .style("text-anchor", "start")
+                     .style("fill", "black")
                      .text(getMessage("LowerXAxisChartLabel"));
     };
     
