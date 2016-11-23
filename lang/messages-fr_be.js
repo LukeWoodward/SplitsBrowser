@@ -162,6 +162,5 @@ SplitsBrowser.Messages.fr_be = {
     
     // Tooltip of the warning-triangle shown along the top if warnings were
     // issued reading in the file.
-    // TO BE TRANSLATED
-    WarningsTooltip: "It was not possible to read all of the data for this event.  One or more competitors or classes may have been omitted.  Click for more details."
+    WarningsTooltip: "Impossible de lire toutes les données de cette compétition.  Un(e) ou plusieurs coureurs ou catégories peuvent avoir été omis.  Cliquer pour d'autres détails."
 };
