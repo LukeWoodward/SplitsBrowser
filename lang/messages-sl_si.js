@@ -1,8 +1,8 @@
 ﻿/*
- *  Messages - UK English messages for SplitsBrowser
+ *  Messages - Slovenian messages for SplitsBrowser
  *
  *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
- *                          Ed Nash, Luke Woodward
+ *                          Ed Nash, Luke Woodward, Klemen Kenda
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
