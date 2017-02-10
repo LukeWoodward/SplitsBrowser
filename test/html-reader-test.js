@@ -795,7 +795,7 @@
                 preprocessor: function (html) {
                     // Six newlines (the length of the closing tag) should be enough
                     // to trigger the bug that caused this.
-                    return html.replace("</pre>", "\n".repeat(6) + "</pre>\n");
+                    return html.replace("</pre>", "\n\n\n\n\n\n</pre>\n");
                 }
             });
     });
