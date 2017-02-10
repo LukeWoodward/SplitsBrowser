@@ -362,14 +362,14 @@
             
         var lineEndPos = text.indexOf("\n", prePos);
         text = text.substring(lineEndPos + 1);
+            
+        // Replace blank lines.
+        text = text.replace(/\n{2,}/g, "\n");
         
         var closePrePos = text.lastIndexOf("</pre>");
         if (closePrePos === -1) {
             throwInvalidData("Found opening <pre> but no closing </pre>");
         }
-            
-        // Replace blank lines.
-        text = text.replace(/\n{2,}/g, "\n");
             
         lineEndPos = text.lastIndexOf("\n", closePrePos);
         text = text.substring(0, lineEndPos);

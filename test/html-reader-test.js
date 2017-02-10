@@ -778,6 +778,28 @@
             {templates: [OLD_FORMAT]});
     });
     
+    QUnit.test("Can parse event data with a single course and single competitor with plenty of blank lines in the old format only", function (assert) {
+        runHtmlFormatParseTest(
+            [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
+                ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "03:57", "09:25"], ["01:47", "02:15", "", "05:28"]]
+            ]}],
+            function (eventData, formatName) {
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatName);
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatName);
+
+                var courseClass = eventData.classes[0];
+                assertCourseClass(assert, courseClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
+            },
+            {
+                templates: [OLD_FORMAT],
+                preprocessor: function (html) {
+                    // Six newlines (the length of the closing tag) should be enough
+                    // to trigger the bug that caused this.
+                    return html.replace("</pre>", "\n".repeat(6) + "</pre>\n");
+                }
+            });
+    });
+    
     QUnit.test("Can parse event data with a single course and single competitor in a different class in all formats", function (assert) {
         runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
