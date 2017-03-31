@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Alternative CSV - Read in alternative CSV files.
  *  
- *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2017 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -218,6 +218,16 @@
             var finishTime = parseTime(row[this.format.finishTime]);
             var totalTime = (startTime === null || finishTime === null) ? null : (finishTime - startTime);
             cumTimes.push(totalTime);
+        }
+        
+        if (cumTimes.length === 1) {
+            // Only cumulative time is the zero.
+            if (competitorName !== "") {
+                this.warnings.push(
+                    "Competitor '" + competitorName + "' on course '" + (courseName === "" ? "(unnamed)" : courseName) + "' has no times recorded");
+            }
+            
+            return;
         }
         
         var order = (this.classes.has(courseName)) ? this.classes.get(courseName).competitors.length + 1 : 1;

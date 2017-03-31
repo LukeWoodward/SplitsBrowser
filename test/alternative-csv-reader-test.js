@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Alternative CSV Reader tests.
  *  
- *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2017 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -199,7 +199,18 @@
         
         assert.strictEqual(eventData.courses.length, 1);
     });
-    
+        
+    QUnit.test("Can parse a string that contains one valid competitor and issue warning for one competitor that contains no times and some other nonsense", function (assert) {
+        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
+        var secondLine = fabricateTripleColumnRow("Fred Baker", "ABCD", "Course 1", [], null, []);
+        var secondLineParts = secondLine.split(",");
+        secondLineParts[37] = "10";
+        secondLine = secondLineParts.join(",");
+        var eventData = parseTripleColumnEventData(data + secondLine);
+        assert.strictEqual(eventData.classes.length, 1);
+        assert.strictEqual(eventData.warnings.length, 1);
+    });
+
     QUnit.test("Can parse a string that contains two valid competitors on the same course but in different classes", function (assert) {
         var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Class 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
                                      fabricateTripleColumnRow("Fred Baker", "ABCD", "Class 2", ["152", "188", "163", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 217]);
