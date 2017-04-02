@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - OE CSV reader tests.
  *  
- *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2017 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -645,6 +645,18 @@
         });
     });
 
+    QUnit.test("Cannot parse a string that contains competitor data where all competitors have warnings", function (assert) {
+        var comp1 = getCompetitor1();
+        var comp2 = getCompetitor2();
+        comp1.numControls = "Not a valid number";
+        comp2.numControls = "Not a valid number";
+        
+        ALL_FORMATS.forEach(function (format) {
+            var eventDataStr = format.header + generateRow(comp1, getControls1(), format.template) + generateRow(comp2, getControls1(), format.template);
+            runInvalidDataTest(assert, eventDataStr, "data where all competitors have warnings", "WrongFileFormat");
+        });
+    });
+
     QUnit.test("Cannot parse a string that contains a single competitor's data followed by a junk line", function (assert) {
         ALL_FORMATS.forEach(function (format) {
             var eventDataStr = format.header + generateRow(getCompetitor1(), getControls1(), format.template);
@@ -680,21 +692,21 @@
         });
     });
     
-    QUnit.test("Can parse with warnings a string that contains a single competitor's data with a non-numeric control count", function (assert) {
-        var comp = getCompetitor1();
-        comp.numControls = "This is not a valid number";
-        runTestOverAllFormats([[comp, getControls1()]], function (eventData) {
-            assert.strictEqual(eventData.classes.length, 0, "There should be no classes");
+    QUnit.test("Can parse with warnings a string that contains a competitor with a non-numeric control count", function (assert) {
+        var comp1 = getCompetitor1();
+        comp1.numControls = "This is not a valid number";
+        runTestOverAllFormats([[comp1, getControls1()], [getCompetitor2(), getControls1()]], function (eventData) {
+            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
         });
     });
     
     QUnit.test("Can parse with warnings a string that contains a single competitor's data with a missing class name", function (assert) {
-        var comp = getCompetitor1();
-        comp.className = "";
-        comp.course = "";
-        runTestOverAllFormats([[comp, getControls1()]], function (eventData) {
-            assert.strictEqual(eventData.classes.length, 0, "There should be no classes");
+        var comp1 = getCompetitor1();
+        comp1.className = "";
+        comp1.course = "";
+        runTestOverAllFormats([[comp1, getControls1()], [getCompetitor2(), getControls1()]], function (eventData) {
+            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
         });
     });

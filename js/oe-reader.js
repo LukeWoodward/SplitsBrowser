@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser OE Reader - Reads in OE CSV results data files.
  *  
- *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2017 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -628,6 +628,12 @@
         }, this);
         
         var classes = this.createClasses();
+        if (classes.length === 0 && this.warnings.length > 0) {
+            // A warning was generated for every single competitor in the file.
+            // This file is quite probably not an OE-CSV file.
+            throwWrongFileFormat("This file may have looked vaguely like an OE CSV file but no data could be read out of it");
+        }
+        
         var courses = this.determineCourses(classes);
         return new Event(classes, courses, this.warnings);
     };
