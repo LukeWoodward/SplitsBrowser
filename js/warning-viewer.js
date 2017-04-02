@@ -134,7 +134,7 @@
             var offset = $(this.warningTriangle.node()).offset();
             var height = $(this.warningTriangle.node()).outerHeight();
             var width = $(this.warningList.node()).outerWidth();
-            this.warningList.style("left", (offset.left - width / 2) + "px")
+            this.warningList.style("left", Math.max(offset.left - width / 2, 0) + "px")
                                     .style("top", (offset.top + height + 5) + "px")
                                     .style("display", "block");
         } else {
