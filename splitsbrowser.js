@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.4.0", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.4.1", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -3475,6 +3475,12 @@ var SplitsBrowser = { Version: "3.4.0", Model: {}, Input: {}, Controls: {}, Mess
         }, this);
         
         var classes = this.createClasses();
+        if (classes.length === 0 && this.warnings.length > 0) {
+            // A warning was generated for every single competitor in the file.
+            // This file is quite probably not an OE-CSV file.
+            throwWrongFileFormat("This file may have looked vaguely like an OE CSV file but no data could be read out of it");
+        }
+        
         var courses = this.determineCourses(classes);
         return new Event(classes, courses, this.warnings);
     };
@@ -3836,14 +3842,14 @@ var SplitsBrowser = { Version: "3.4.0", Model: {}, Input: {}, Controls: {}, Mess
             
         var lineEndPos = text.indexOf("\n", prePos);
         text = text.substring(lineEndPos + 1);
+            
+        // Replace blank lines.
+        text = text.replace(/\n{2,}/g, "\n");
         
         var closePrePos = text.lastIndexOf("</pre>");
         if (closePrePos === -1) {
             throwInvalidData("Found opening <pre> but no closing </pre>");
         }
-            
-        // Replace blank lines.
-        text = text.replace(/\n{2,}/g, "\n");
             
         lineEndPos = text.lastIndexOf("\n", closePrePos);
         text = text.substring(0, lineEndPos);
@@ -4971,6 +4977,16 @@ var SplitsBrowser = { Version: "3.4.0", Model: {}, Input: {}, Controls: {}, Mess
             var finishTime = parseTime(row[this.format.finishTime]);
             var totalTime = (startTime === null || finishTime === null) ? null : (finishTime - startTime);
             cumTimes.push(totalTime);
+        }
+        
+        if (cumTimes.length === 1) {
+            // Only cumulative time is the zero.
+            if (competitorName !== "") {
+                this.warnings.push(
+                    "Competitor '" + competitorName + "' on course '" + (courseName === "" ? "(unnamed)" : courseName) + "' has no times recorded");
+            }
+            
+            return;
         }
         
         var order = (this.classes.has(courseName)) ? this.classes.get(courseName).competitors.length + 1 : 1;
@@ -9877,7 +9893,7 @@ var SplitsBrowser = { Version: "3.4.0", Model: {}, Input: {}, Controls: {}, Mess
             var offset = $(this.warningTriangle.node()).offset();
             var height = $(this.warningTriangle.node()).outerHeight();
             var width = $(this.warningList.node()).outerWidth();
-            this.warningList.style("left", (offset.left - width / 2) + "px")
+            this.warningList.style("left", Math.max(offset.left - width / 2, 0) + "px")
                                     .style("top", (offset.top + height + 5) + "px")
                                     .style("display", "block");
         } else {
