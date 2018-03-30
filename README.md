@@ -42,8 +42,8 @@ SplitsBrowser depends on D3 (http://d3js.org), and as such it supports the same
 browsers as D3 (https://github.com/mbostock/d3/wiki#browser-support).
 
 SplitsBrowser works with 'modern' browsers such as the latest Firefox, Chrome
-or Opera, Internet Explorer 9 or later, or Edge.  It will not work in Internet
-Explorer 8 or earlier.
+or Opera, Internet Explorer 10 or later, or Edge.  It will not work in Internet
+Explorer 8 or earlier, and Internet Explorer 9 is no longer supported.
 
 It may also work on Safari on Mac, or on tablet browsers.  I haven't tested it,
 on these platforms, though.
