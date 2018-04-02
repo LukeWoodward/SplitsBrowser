@@ -161,6 +161,5 @@ SplitsBrowser.Messages.nb_no = {
     
     // Tooltip of the warning-triangle shown along the top if warnings were
     // issued reading in the file.
-    // TO BE TRANSLATED
-    WarningsTooltip: "It was not possible to read all of the data for this event.  One or more competitors or classes may have been omitted.  Click for more details."
+    WarningsTooltip: "Det var ikke mulig å lese all data fra dette arrangementet. En eller flere utøvere eller klasser kan ha blitt utelatt. Klikk for mer informasjon."
 };
