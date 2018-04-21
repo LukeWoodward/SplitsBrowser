@@ -1,7 +1,7 @@
 /*!
  *  SplitsBrowser - Orienteering results analysis.
  *  
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.4.1", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -2530,11 +2530,13 @@ var SplitsBrowser = { Version: "3.4.1", Model: {}, Input: {}, Controls: {}, Mess
     Repairer.prototype.removeCumulativeTimesEqualToPrevious = function (cumTimes) {
         var lastCumTime = cumTimes[0];
         for (var index = 1; index + 1 < cumTimes.length; index += 1) {
-            if (cumTimes[index] !== null && cumTimes[index] === lastCumTime) {
-                cumTimes[index] = NaN;
-                this.madeAnyChanges = true;
-            } else {
-                lastCumTime = cumTimes[index];
+            if (cumTimes[index] !== null) {
+                if (cumTimes[index] === lastCumTime) {
+                    cumTimes[index] = NaN;
+                    this.madeAnyChanges = true;
+                } else {
+                    lastCumTime = cumTimes[index];
+                }
             }
         }
     };
