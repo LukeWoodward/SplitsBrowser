@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - data-repair tests.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -164,6 +164,13 @@
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(!hasDubiousData);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
+    });
+
+    QUnit.test("Can repair competitor with zero cumulative times separated by two runs of nulls", function (assert) {
+        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, null, null, null, 0, null, 0, 842, 1647]);
+        var hasDubiousData = wrapInEventAndRepair([competitor]);
+        assert.ok(hasDubiousData);
+        assert.deepEqual(competitor.cumTimes, [0, null, null, null, NaN, null, NaN, 842, 1647]);
     });
     
     QUnit.test("Can transfer competitor with ascending cumulative times leaving them in ascending order", function (assert) {

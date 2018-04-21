@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser data-repair - Attempt to work around nonsensical data.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -79,11 +79,13 @@
     Repairer.prototype.removeCumulativeTimesEqualToPrevious = function (cumTimes) {
         var lastCumTime = cumTimes[0];
         for (var index = 1; index + 1 < cumTimes.length; index += 1) {
-            if (cumTimes[index] !== null && cumTimes[index] === lastCumTime) {
-                cumTimes[index] = NaN;
-                this.madeAnyChanges = true;
-            } else {
-                lastCumTime = cumTimes[index];
+            if (cumTimes[index] !== null) {
+                if (cumTimes[index] === lastCumTime) {
+                    cumTimes[index] = NaN;
+                    this.madeAnyChanges = true;
+                } else {
+                    lastCumTime = cumTimes[index];
+                }
             }
         }
     };
