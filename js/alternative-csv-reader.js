@@ -88,6 +88,7 @@
         this.format = format;
         this.classes = d3.map();
         this.delimiter = null;
+        this.hasAnyStarters = false;
         this.warnings = [];
         
         // Return the offset within the control data that should be used when
@@ -240,7 +241,10 @@
             }
         }
         
-        if (!competitor.hasAnyTimes()) {
+        if (competitor.hasAnyTimes()) {
+            this.hasAnyStarters = true;
+        }
+        else {
             competitor.setNonStarter();
         }
         
@@ -314,6 +318,13 @@
         }
         
         var classesAndCourses = this.createClassesAndCourses();
+        
+        if (!this.hasAnyStarters) {
+            // Everyone marked as a non-starter.  This file is probably not of this
+            // format.
+            throwWrongFileFormat("Data appears not to be in an alternative CSV format - data apparently could be read but everyone was a non-starter");
+        }
+        
         return new Event(classesAndCourses.classes, classesAndCourses.courses, this.warnings);
     };
     

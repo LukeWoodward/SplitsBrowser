@@ -274,10 +274,13 @@
     });
     
     QUnit.test("Can parse a string that contains a single competitor missing all controls and mark said competitor as a non-starter", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [null, null, null, null]);
+        // Add a second okay competitor as if all competitors have no times the
+        // file is assumed not to be alternative CSV.
+        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [null, null, null, null])
+                                        + "\r\n" + fabricateTripleColumnRow("Fred Baker", "ABCD", "Class 2", ["152", "174", "119", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 217]);
         var eventData = parseTripleColumnEventData(data);
         
-        assert.strictEqual(eventData.classes.length, 1);
+        assert.strictEqual(eventData.classes.length, 2);
         var courseClass = eventData.classes[0];
         
         assert.strictEqual(courseClass.competitors.length, 1);
@@ -287,5 +290,13 @@
         assert.ok(competitor.isNonStarter);
         assert.ok(!competitor.isNonFinisher);
         assert.ok(!competitor.isDisqualified);
+    });
+    
+    QUnit.test("Cannot parse a string that contains two competitors missing all controls", function (assert) {
+        SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
+            var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("John Smith", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [null, null, null, null])
+                                            + "\r\n" + fabricateTripleColumnRow("Fred Baker", "ABCD", "Class 2", ["152", "174", "119", "F1"], 11 * 3600 + 19 * 60, [null, null, null, null]);
+            var eventData = parseTripleColumnEventData(data);
+        }, "Should throw an exception for parsing a string containing only non-starting competitors");
     });
 })();
