@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser CompetitorList - Lists the competitors down the left side.
  *  
- *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -428,6 +428,23 @@
     function normaliseName(name) {
         return name.toLowerCase().replace(/\W/g, "");
     }
+    
+    /**
+    * Returns the text to show for a competitor's name.
+    * @param {Competitor} The competitor.
+    * @return {String} The text to show for a competitor's name.
+    */
+    function competitorText(comp) {
+        if (comp.completed()) {
+            // \u00a0 is a non-breaking space.  We substitute this in place of
+            // a blank name to prevent the height of the item being dropped to
+            // a few pixels.
+            return (comp.name === "") ? "\u00a0" : comp.name;
+        }
+        else {
+            return "* " + comp.name;
+        }
+    }
 
     /**
     * Sets the list of competitors.
@@ -459,12 +476,12 @@
         if (multipleClasses) {
             competitorDivs.append("span")
                           .classed("competitorClassLabel", true)
-                          .text(function (comp) { return comp.className; });
+                          .text(competitorText);
         }
         
         competitorDivs.append("span")
                       .classed("nonfinisher", function (comp) { return !comp.completed(); })
-                      .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });
+                      .text(function (comp) { return (comp.completed()) ? (comp.name === "" ? "\u00a0" : comp.name) : "* " + comp.name; });
 
         competitorDivs.exit().remove();
         
