@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Course-Class Set - A collection of selected course classes.
  *  
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -481,9 +481,10 @@
             yMax = d3.max(selectedCompetitorData.map(function (values) { return d3.max(values); }));
         }
 
-        if (yMax === yMin) {
+        if (Math.abs(yMax - yMin) < 1e-8) {
             // yMin and yMax will be used to scale a y-axis, so we'd better
-            // make sure that they're not equal.
+            // make sure that they're not equal, optionally give-or-take some
+            // floating-point noise.
             yMax = yMin + 1;
         }
         
