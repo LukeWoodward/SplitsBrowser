@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser IOF XML - Read event data in IOF XML-format files.
  *  
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -662,7 +662,7 @@
         
         for (var index = 0; index < personResults.length; index += 1) {
             var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader, warnings);
-            if (competitorAndControls !== null) {
+            if (competitorAndControls !== null && !competitorAndControls.competitor.isNonStarter) {
                 var competitor = competitorAndControls.competitor;
                 var controls = competitorAndControls.controls;
                 if (cls.competitors.length === 0) {
