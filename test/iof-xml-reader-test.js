@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - IOF XML format parser tests.
  *  
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -1303,4 +1303,41 @@
                 assert.strictEqual(eventData.courses.length, 2, "Expected two courses - " + formatterName);
             });
     });
+    
+    QUnit.test("Can parse with no warnings a string that contains a normal competitor and a non-starting competitor with no controls", function (assert) {
+        var person1 = getPerson();
+        var person2 = getPerson();
+        person2.forename = "Non";
+        person2.surname = "Starter";
+        person2.controls = [];
+        person2.cumTimes = [];
+        person2.nonStarter = true;
+        
+        runXmlFormatParseTest(
+            [{name: "Test Class", length: 2300, courseId: 1, competitors: [person1, person2]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].competitors.length, 2, "Two competitors should have been read - " + formatterName);
+                assert.strictEqual(eventData.warnings.length, 0, "No warning should have been issued: " + eventData.warnings[0]);
+            });
+    });
+    
+    QUnit.test("Can parse with no warnings a string that contains only a non-starting competitor with no controls", function (assert) {
+        var person = getPerson();
+        person.controls = [];
+        person.cumTimes = [];
+        person.nonStarter = true;
+        
+        runXmlFormatParseTest(
+            [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                if (eventData.classes.length === 1) {
+                    var courseClass = eventData.classes[0];
+                    assert.strictEqual(courseClass.competitors.length, 1, "One competitor should have been read - " + formatterName);
+                    assert.strictEqual(courseClass.numControls, 0);
+                    assert.strictEqual(eventData.warnings.length, 0, "No warning should have been issued: " + eventData.warnings[0]);
+                }
+            });
+    });    
 })();

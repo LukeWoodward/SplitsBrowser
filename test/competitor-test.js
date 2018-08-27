@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Competitor tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -139,6 +139,13 @@
         assert.ok(competitor.isNonFinisher, "Competitor should be a non-finisher");
         assert.ok(!competitor.isDisqualified, "Competitor should not be disqualified");        
         assert.ok(!competitor.isOverMaxTime, "Competitor should not be over max time");
+    });
+
+    QUnit.test("Can obtain null cumulative and split times for non-starting competitor beyond the end of their controls", function (assert) {
+        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, null]);
+        competitor.setNonStarter();
+        assert.strictEqual(null, competitor.getOriginalCumulativeTimeTo(6));
+        assert.strictEqual(null, competitor.getOriginalSplitTimeTo(6));
     });
 
     QUnit.test("Can create a disqualified competitor from cumulative times", function (assert) {

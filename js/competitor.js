@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Competitor - An individual competitor who competed at an event.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -336,7 +336,11 @@
     *      given control.
     */
     Competitor.prototype.getOriginalSplitTimeTo = function (controlIndex) {
-        return (controlIndex === 0) ? 0 : this.originalSplitTimes[controlIndex - 1];
+        if (this.isNonStarter) {
+            return null;
+        } else {
+            return (controlIndex === 0) ? 0 : this.originalSplitTimes[controlIndex - 1];
+        }
     };
     
     /**
@@ -373,7 +377,7 @@
     *      to the given control.
     */
     Competitor.prototype.getOriginalCumulativeTimeTo = function (controlIndex) {
-        return this.originalCumTimes[controlIndex];
+        return (this.isNonStarter) ? null : this.originalCumTimes[controlIndex];
     };
     
     /**

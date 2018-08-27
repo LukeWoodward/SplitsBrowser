@@ -662,11 +662,12 @@
         
         for (var index = 0; index < personResults.length; index += 1) {
             var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader, warnings);
-            if (competitorAndControls !== null && !competitorAndControls.competitor.isNonStarter) {
+            if (competitorAndControls !== null) {
                 var competitor = competitorAndControls.competitor;
                 var controls = competitorAndControls.controls;
-                if (cls.competitors.length === 0) {
-                    // First competitor.  Record the list of controls.
+                if (cls.competitors.length === 0 && !(competitor.isNonStarter && controls.length === 0)) {
+                    // First competitor (not including non-starters with no controls).
+                    // Record the list of controls.
                     cls.controls = controls;
                     
                     // Set the number of controls on the course if we didn't read
@@ -680,7 +681,9 @@
                 // Subtract 2 for the start and finish cumulative times.
                 var actualControlCount = competitor.getAllOriginalCumulativeTimes().length - 2;
                 var warning = null;
-                if (actualControlCount !== cls.course.numberOfControls) {
+                if (competitor.isNonStarter && actualControlCount === 0) {
+                    // Don't generate warnings for non-starting competitors with no controls.
+                } else if (actualControlCount !== cls.course.numberOfControls) {
                     warning = "Competitor '" + competitor.name + "' in class '" + className + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;
                 } else {
                     for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
