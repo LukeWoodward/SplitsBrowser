@@ -476,12 +476,12 @@
         if (multipleClasses) {
             competitorDivs.append("span")
                           .classed("competitorClassLabel", true)
-                          .text(competitorText);
+                          .text(function (comp) { return comp.className; });
         }
         
         competitorDivs.append("span")
                       .classed("nonfinisher", function (comp) { return !comp.completed(); })
-                      .text(function (comp) { return (comp.completed()) ? (comp.name === "" ? "\u00a0" : comp.name) : "* " + comp.name; });
+                      .text(competitorText);
 
         competitorDivs.exit().remove();
         
