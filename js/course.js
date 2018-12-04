@@ -237,12 +237,20 @@
         } else if (controlCode === FINISH) {
             return this.getCompetitorsAtControlNumInTimeRange(this.controls.length + 1, intervalStart, intervalEnd);
         } else {
-            var controlIdx = this.controls.indexOf(controlCode);
-            if (controlIdx >= 0) {
-                return this.getCompetitorsAtControlNumInTimeRange(controlIdx + 1, intervalStart, intervalEnd);
-            } else {
-                // Control not in this course.
-                return [];
+            // Be aware that the same control might be used more than once on a course.
+            var lastControlIdx = -1;
+            var matchingCompetitors = [];
+            var appendMatchingCompetitor = function (comp) { matchingCompetitors.push(comp); };
+            while (true) {
+                var controlIdx = this.controls.indexOf(controlCode, lastControlIdx + 1);
+                if (controlIdx < 0) {
+                    // No more occurrences of this control.
+                    return matchingCompetitors;
+                } else {
+                    var competitors = this.getCompetitorsAtControlNumInTimeRange(controlIdx + 1, intervalStart, intervalEnd);
+                    competitors.forEach(appendMatchingCompetitor);
+                    lastControlIdx = controlIdx;
+                }
             }
         }
     };

@@ -256,6 +256,20 @@
              {name: competitor2.name, time: competitor2Time, className: courseClass2.name}]);
     });
     
+    QUnit.test("Returns list of competitors punching both occurrences of a control when attempting to fetch competitors visiting a control in an interval", function (assert) {
+        var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 163]);
+        var competitor2 = fromSplitTimes(2, "Anna James", "DEF", 10 * 3600 + 35 * 60, [99, 184, 230, 111, 158]);
+        
+        var courseClass1 = new CourseClass("Test class 1", 3, [competitor1]);
+        var courseClass2 = new CourseClass("Test class 2", 3, [competitor2]);
+        var course = new Course("Test course", [courseClass1, courseClass2], null, null, ["235", "212", "235", "189"]);
+        var competitor1Time = 10 * 3600 + 30 * 60 + 81 + 197 + 212;
+        var competitor2Time = 10 * 3600 + 35 * 60 + 99;
+        assert.deepEqual(course.getCompetitorsAtControlInTimeRange("235", competitor2Time - 1, competitor1Time + 1),
+            [{name: competitor2.name, time: competitor2Time, className: courseClass2.name},
+             {name: competitor1.name, time: competitor1Time, className: courseClass1.name}]);
+    });
+    
     QUnit.test("Returns singleton list of competitors from two different classes when attempting to fetch competitor times at the start for an interval", function (assert) {
         var competitor1 = getCompetitor1();
         var courseClass1 = new CourseClass("Test class 1", 3, [competitor1]);
