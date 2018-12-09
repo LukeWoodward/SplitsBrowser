@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.4.3", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
@@ -741,7 +741,11 @@ var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Mess
     *      given control.
     */
     Competitor.prototype.getOriginalSplitTimeTo = function (controlIndex) {
-        return (controlIndex === 0) ? 0 : this.originalSplitTimes[controlIndex - 1];
+        if (this.isNonStarter) {
+            return null;
+        } else {
+            return (controlIndex === 0) ? 0 : this.originalSplitTimes[controlIndex - 1];
+        }
     };
     
     /**
@@ -778,7 +782,7 @@ var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Mess
     *      to the given control.
     */
     Competitor.prototype.getOriginalCumulativeTimeTo = function (controlIndex) {
-        return this.originalCumTimes[controlIndex];
+        return (this.isNonStarter) ? null : this.originalCumTimes[controlIndex];
     };
     
     /**
@@ -1650,9 +1654,10 @@ var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Mess
             yMax = d3.max(selectedCompetitorData.map(function (values) { return d3.max(values); }));
         }
 
-        if (yMax === yMin) {
+        if (Math.abs(yMax - yMin) < 1e-8) {
             // yMin and yMax will be used to scale a y-axis, so we'd better
-            // make sure that they're not equal.
+            // make sure that they're not equal, optionally give-or-take some
+            // floating-point noise.
             yMax = yMin + 1;
         }
         
@@ -1899,12 +1904,20 @@ var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Mess
         } else if (controlCode === FINISH) {
             return this.getCompetitorsAtControlNumInTimeRange(this.controls.length + 1, intervalStart, intervalEnd);
         } else {
-            var controlIdx = this.controls.indexOf(controlCode);
-            if (controlIdx >= 0) {
-                return this.getCompetitorsAtControlNumInTimeRange(controlIdx + 1, intervalStart, intervalEnd);
-            } else {
-                // Control not in this course.
-                return [];
+            // Be aware that the same control might be used more than once on a course.
+            var lastControlIdx = -1;
+            var matchingCompetitors = [];
+            var appendMatchingCompetitor = function (comp) { matchingCompetitors.push(comp); };
+            while (true) {
+                var controlIdx = this.controls.indexOf(controlCode, lastControlIdx + 1);
+                if (controlIdx < 0) {
+                    // No more occurrences of this control.
+                    return matchingCompetitors;
+                } else {
+                    var competitors = this.getCompetitorsAtControlNumInTimeRange(controlIdx + 1, intervalStart, intervalEnd);
+                    competitors.forEach(appendMatchingCompetitor);
+                    lastControlIdx = controlIdx;
+                }
             }
         }
     };
@@ -4849,6 +4862,7 @@ var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Mess
         this.format = format;
         this.classes = d3.map();
         this.delimiter = null;
+        this.hasAnyStarters = false;
         this.warnings = [];
         
         // Return the offset within the control data that should be used when
@@ -5001,7 +5015,10 @@ var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Mess
             }
         }
         
-        if (!competitor.hasAnyTimes()) {
+        if (competitor.hasAnyTimes()) {
+            this.hasAnyStarters = true;
+        }
+        else {
             competitor.setNonStarter();
         }
         
@@ -5075,6 +5092,13 @@ var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Mess
         }
         
         var classesAndCourses = this.createClassesAndCourses();
+        
+        if (!this.hasAnyStarters) {
+            // Everyone marked as a non-starter.  This file is probably not of this
+            // format.
+            throwWrongFileFormat("Data appears not to be in an alternative CSV format - data apparently could be read but everyone was a non-starter");
+        }
+        
         return new Event(classesAndCourses.classes, classesAndCourses.courses, this.warnings);
     };
     
@@ -5733,8 +5757,9 @@ var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Mess
             if (competitorAndControls !== null) {
                 var competitor = competitorAndControls.competitor;
                 var controls = competitorAndControls.controls;
-                if (cls.competitors.length === 0) {
-                    // First competitor.  Record the list of controls.
+                if (cls.competitors.length === 0 && !(competitor.isNonStarter && controls.length === 0)) {
+                    // First competitor (not including non-starters with no controls).
+                    // Record the list of controls.
                     cls.controls = controls;
                     
                     // Set the number of controls on the course if we didn't read
@@ -5748,7 +5773,9 @@ var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Mess
                 // Subtract 2 for the start and finish cumulative times.
                 var actualControlCount = competitor.getAllOriginalCumulativeTimes().length - 2;
                 var warning = null;
-                if (actualControlCount !== cls.course.numberOfControls) {
+                if (competitor.isNonStarter && actualControlCount === 0) {
+                    // Don't generate warnings for non-starting competitors with no controls.
+                } else if (actualControlCount !== cls.course.numberOfControls) {
                     warning = "Competitor '" + competitor.name + "' in class '" + className + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;
                 } else {
                     for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
@@ -6324,6 +6351,23 @@ var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Mess
     function normaliseName(name) {
         return name.toLowerCase().replace(/\W/g, "");
     }
+    
+    /**
+    * Returns the text to show for a competitor's name.
+    * @param {Competitor} The competitor.
+    * @return {String} The text to show for a competitor's name.
+    */
+    function competitorText(comp) {
+        if (comp.completed()) {
+            // \u00a0 is a non-breaking space.  We substitute this in place of
+            // a blank name to prevent the height of the item being dropped to
+            // a few pixels.
+            return (comp.name === "") ? "\u00a0" : comp.name;
+        }
+        else {
+            return "* " + comp.name;
+        }
+    }
 
     /**
     * Sets the list of competitors.
@@ -6360,7 +6404,7 @@ var SplitsBrowser = { Version: "3.4.2", Model: {}, Input: {}, Controls: {}, Mess
         
         competitorDivs.append("span")
                       .classed("nonfinisher", function (comp) { return !comp.completed(); })
-                      .text(function (comp) { return (comp.completed()) ? comp.name : "* " + comp.name; });
+                      .text(competitorText);
 
         competitorDivs.exit().remove();
         

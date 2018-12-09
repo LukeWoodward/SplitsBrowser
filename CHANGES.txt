@@ -27,3 +27,4 @@ SplitsBrowser changelog:
         also other improvements (#27, #48).
 3.4.1: Fix a couple of minor issues (#51, #52, #53).
 3.4.2: Fix an issue loading data (#56).
+3.4.3: Fix various minor issues (#58, #59, #60, #61, #62).
