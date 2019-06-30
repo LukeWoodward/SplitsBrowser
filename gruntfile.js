@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Grunt configuration.
  *  
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -86,10 +86,12 @@ module.exports = function(grunt) {
         },    
         uglify: {
             options: {
-                preserveComments: "some",
-                beautify: {
-                    "ascii_only": true
-                }
+				banner: grunt.file.read("banner.txt"),
+				output: {
+					"ascii_only": true,
+					"max_line_len": 32767,
+					comments: "some"
+				}
             },
             dist: {
                 files: {
