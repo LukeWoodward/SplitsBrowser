@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser CompetitorList - Lists the competitors down the left side.
  *  
- *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -310,7 +310,7 @@
     * @returns {Number} Width of the list.
     */
     CompetitorList.prototype.width = function () {
-        return $(this.listDiv.node()).width();
+        return $(this.containerDiv.node()).width();
     };
     
     /**
