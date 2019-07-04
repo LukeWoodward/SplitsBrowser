@@ -20,7 +20,7 @@
  */
 // Tell JSHint not to complain that this isn't used anywhere.
 /* exported SplitsBrowser */
-var SplitsBrowser = { Version: "3.4.3", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.4.4", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 
 (function () {
