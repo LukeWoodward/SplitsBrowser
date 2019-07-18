@@ -80,7 +80,7 @@
     */
     SplitsBrowser.parseTime = function (time) {
         time = time.trim();
-        if (/^(\d+:)?\d+:\d\d([,.]\d+)?$/.test(time)) {
+        if (/^(-?\d+:)?-?\d+:-?\d\d([,.]\d+)?$/.test(time)) {
             var timeParts = time.replace(",", ".").split(":");
             var totalTime = 0;
             timeParts.forEach(function (timePart) {

@@ -168,6 +168,22 @@
     QUnit.test("Can parse large time in hours, minutes and seconds correctly", function (assert) {
         assert.strictEqual(parseTime("781:49:18"), 781 * 3600 + 49 * 60 + 18);
     });
+   
+    QUnit.test("Can parse time with negative hours correctly", function (assert) {
+        assert.strictEqual(parseTime("-2:49:18"), -2 * 3600 + 49 * 60 + 18);
+    });
+   
+    QUnit.test("Can parse time with negative minutes correctly", function (assert) {
+        assert.strictEqual(parseTime("2:-27:18"), 2 * 3600 - 27 * 60 + 18);
+    });
+   
+    QUnit.test("Can parse time with negative seconds correctly", function (assert) {
+        assert.strictEqual(parseTime("1:08:-44"), 1 * 3600 + 8 * 60 - 44);
+    });
+   
+    QUnit.test("Can parse time with all components negative correctly", function (assert) {
+        assert.strictEqual(parseTime("-3:-56:-22"), -3 * 3600 - 56 * 60 - 22);
+    });
     
     QUnit.test("Can parse a time with leading and trailing whitespace", function (assert) {
         assert.strictEqual(parseTime("   \t    \r\n  \n  13:43   \t \r \r \r\n "), 13 * 60 + 43);
