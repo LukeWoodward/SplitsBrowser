@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - StatisticsSelector tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 
     var Selector = SplitsBrowser.Controls.StatisticsSelector;
 
-    module("Statistics selector");
+    QUnit.module("Statistics selector");
 
     var lastVisibleStats = null;
     var callCount = 0;
@@ -117,14 +117,14 @@
         assert.strictEqual(1, callCount);
     });
 
-    QUnit.test("Can deregister change handler that was never registered without error", function () {
+    QUnit.test("Can deregister change handler that was never registered without error", function (assert) {
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
         
         selector.deregisterChangeHandler(testChangeHandler);
         
-        expect(0); // Tell QUnit to expect no assertions.
+        assert.expect(0); // Tell QUnit to expect no assertions.
     });
 
     QUnit.test("Can set selected statistics", function (assert) {

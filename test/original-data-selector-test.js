@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Original Data Selector tests.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 (function () {
     "use strict";
 
-    module("Original Data Selector");
+    QUnit.module("Original Data Selector");
     
     var OriginalDataSelector = SplitsBrowser.Controls.OriginalDataSelector;
     
@@ -83,11 +83,11 @@
         assert.strictEqual(callCount, 1, "Handler should have been called once");
     });
     
-    QUnit.test("Can deregister handler that was never registered without error", function () {
+    QUnit.test("Can deregister handler that was never registered without error", function (assert) {
         var parent = d3.select("#qunit-fixture");
         var selector = new OriginalDataSelector(parent);
         selector.deregisterChangeHandler(testChangeHandler);
-        expect(0); // No assertions
+        assert.expect(0); // No assertions
     });
     
     QUnit.test("Calls multiple change handlers when unchecked and clicked", function (assert) {

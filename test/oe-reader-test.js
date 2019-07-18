@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - OE CSV reader tests.
  *  
- *  Copyright (C) 2000-2017 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -256,7 +256,7 @@
         return [{code: "208", time: "01:48"}, {code: "227", time: "03:46"}, {code: "212", time: "05:59"}];
     }
     
-    module("Input.OE");
+    QUnit.module("Input.OE");
     
     /**
     * Runs a test for parsing invalid data that should fail.

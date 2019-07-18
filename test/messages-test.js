@@ -1,7 +1,7 @@
 ﻿/*
  *  Messages Tests - Tests for the messages.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 (function () {
     "use strict";
     
-    module("Messages");
+    QUnit.module("Messages");
     
     var alerterCalled = false;
     

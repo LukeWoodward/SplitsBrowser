@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - data-repair tests.
  *  
- *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 (function () {
     "use strict";
 
-    module("Data Repair");
+    QUnit.module("Data Repair");
     
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
     var transferCompetitorData = SplitsBrowser.DataRepair.transferCompetitorData;

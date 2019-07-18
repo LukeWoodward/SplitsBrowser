@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser - CompetitorSelection tests.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 (function() {
     "use strict";
 
-    module("Competitor Selection");
+    QUnit.module("Competitor Selection");
 
     var CompetitorSelection = SplitsBrowser.Model.CompetitorSelection;
 
@@ -227,11 +227,11 @@
         assert.strictEqual(callCount, 1, "Handler should still only have been called once");
     });
 
-    QUnit.test("Can deregister handler that was never registered without error", function () {
+    QUnit.test("Can deregister handler that was never registered without error", function (assert) {
         reset();
         var selection = new CompetitorSelection(3);
         selection.deregisterChangeHandler(testHandler);
-        expect(0); // No assertions here, but there should also have been no errors.
+        assert.expect(0); // No assertions here, but there should also have been no errors.
     });
 
     QUnit.test("A single runner is not selected if no runners are selected", function (assert) {

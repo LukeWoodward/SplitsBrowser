@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - IOF XML format parser tests.
  *  
- *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@
     
     var V3_HEADER = '<?xml version="1.0" encoding="UTF-8"?>\n<ResultList xmlns="http://www.orienteering.org/datastandard/3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" iofVersion="3.0">\n';
     
-    module("Input.IOFXml");
+    QUnit.module("Input.IOFXml");
     
     /**
     * Returns a person object with the forename, surname, club, startTime,

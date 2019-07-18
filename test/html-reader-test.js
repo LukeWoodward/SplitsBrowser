@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - HTML reader tests.
  *  
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
     
     var parseEventData = SplitsBrowser.Input.Html.parseEventData;
     
-    module("Input.Html");
+    QUnit.module("Input.Html");
     
     /**
     * Runs a test for parsing invalid data that should fail.
@@ -100,7 +100,7 @@
         var optionalProps = ["name", "club", "totalTime", "originalCumTimes", "originalSplitTimes", "isNonCompetitive", "isNonStarter", "isNonFinisher", "isDisqualified"];
         optionalProps.forEach(function (propName) {
             if (expectedDetails.hasOwnProperty(propName)) {
-                var assertion = (propName === "originalCumTimes" || propName === "originalSplitTimes") ? assert.deepEqual : assert.strictEqual;
+                var assertion = (propName === "originalCumTimes" || propName === "originalSplitTimes") ? assert.deepEqual.bind(assert) : assert.strictEqual.bind(assert);
                 assertion(actualCompetitor[propName], expectedDetails[propName], "Should have correct value for property '" + propName + "'");    
             }
         });

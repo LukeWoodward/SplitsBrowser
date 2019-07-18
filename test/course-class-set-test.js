@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - CourseClassSet tests.
  *  
- *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 (function () {
     "use strict";
     
-    module("Course-class set");
+    QUnit.module("Course-class set");
 
     var _DUMMY_CHART_TYPE = {
         name: "dummy",

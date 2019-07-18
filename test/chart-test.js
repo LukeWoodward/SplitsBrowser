@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser - Chart tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -109,7 +109,7 @@
         return chart;
     }
 
-    module("Chart");
+    QUnit.module("Chart");
     
     /**
     * Creates and returns a CourseClassSet object and event object populated with
@@ -136,10 +136,11 @@
     /**
     * Runs a test for creating a chart.  The test doesn't make any assertions;
     * it just checks that the chart gets created successfully.
+	* @param {QUnit.assert} assert - QUnit assert object.
     * @param {Object} chartType - The chart type.
     * @param {Array} competitors - Optional array of competitors.
     */
-    function runChartCreationTest(chartType, competitors) {
+    function runChartCreationTest(assert, chartType, competitors) {
         var courseClassSetAndEvent = getTestCourseClassSetAndEvent(competitors);
         var fastestCumTimes = courseClassSetAndEvent.courseClassSet.getFastestCumTimes();
         var chart = createTestChart(chartType);
@@ -152,7 +153,7 @@
         };
         
         chart.drawChart(data, [0, 1], [true, true, true], chartType);
-        expect(0);
+        assert.expect(0);
     }
 
     // Most of the testing of the chart functionality is visual, so it isn't
@@ -164,19 +165,19 @@
     // expected.  If we don't do this, it will complain that the test isn't
     // testing anything.
 
-    QUnit.test("Can create a chart without skipping the start", function () {
-        runChartCreationTest(DUMMY_CHART_TYPE_NO_SKIP);
+    QUnit.test("Can create a chart without skipping the start", function (assert) {
+        runChartCreationTest(assert, DUMMY_CHART_TYPE_NO_SKIP);
     });
 
-    QUnit.test("Can create a chart with a chart type skipping the start", function () {
-        runChartCreationTest(DUMMY_CHART_TYPE_SKIP);
+    QUnit.test("Can create a chart with a chart type skipping the start", function (assert) {
+        runChartCreationTest(assert, DUMMY_CHART_TYPE_SKIP);
     });
 
-    QUnit.test("Can create a chart with start-time labels", function () {
-        runChartCreationTest(DUMMY_CHART_TYPE_RACE_GRAPH);
+    QUnit.test("Can create a chart with start-time labels", function (assert) {
+        runChartCreationTest(assert, DUMMY_CHART_TYPE_RACE_GRAPH);
     });
     
-    QUnit.test("Can create a chart with dubious info", function () {
+    QUnit.test("Can create a chart with dubious info", function (assert) {
         var competitors = [
             fromCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]),
             fromOriginalCumTimes(2, "John Smith", "ABC", 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100])
@@ -184,7 +185,7 @@
         
         competitors[1].setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         
-        runChartCreationTest(DUMMY_CHART_TYPE_NO_SKIP);
+        runChartCreationTest(assert, DUMMY_CHART_TYPE_NO_SKIP);
     });
     
 })();

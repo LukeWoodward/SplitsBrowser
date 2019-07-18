@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - ComparisonSelector tests.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 
     var ComparisonSelector = SplitsBrowser.Controls.ComparisonSelector;
 
-    module("Comparison Selector");
+    QUnit.module("Comparison Selector");
 
     var lastSelector = null;
     var callCount = 0;

@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - ResultsTable tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@
 
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
-    module("Results Table");
+    QUnit.module("Results Table");
     
     /**
     * Computes the ranks within the course-class.
@@ -252,7 +252,7 @@
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
     });
     
-    QUnit.test("Can create a results table with course with no length and climb", function () {
+    QUnit.test("Can create a results table with course with no length and climb", function (assert) {
         var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
@@ -264,7 +264,7 @@
         resultsTable.setClass(courseClass);
             
         // We don't expect any errors, but we also make no assertions here.
-        expect(0);
+        assert.expect(0);
     });
     
     QUnit.test("Can create a results table with one competitor with suspicious times appropriately classed", function (assert) {

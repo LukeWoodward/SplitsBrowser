@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Alternative CSV Reader tests.
  *  
- *  Copyright (C) 2000-2017 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -68,7 +68,7 @@
         return row.join(",") + "\r\n";
     }
    
-    module("Input.AlternativeCSV.TripleColumn");
+    QUnit.module("Input.AlternativeCSV.TripleColumn");
     
     QUnit.test("Cannot parse an empty string", function (assert) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {

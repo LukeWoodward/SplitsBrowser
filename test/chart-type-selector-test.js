@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - ChartTypeSelector tests.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 
     var ChartTypeSelector = SplitsBrowser.Controls.ChartTypeSelector;
 
-    module("Chart Type Selector");
+    QUnit.module("Chart Type Selector");
 
     var chartTypes = [
         SplitsBrowser.Model.ChartTypes.SplitsGraph,

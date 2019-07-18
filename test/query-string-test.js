@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Query-string tests
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -91,7 +91,7 @@
         };
     }
     
-    module("Query-string");
+    QUnit.module("Query-string");
     
     QUnit.test("Parsing an empty string should return all-null values", function (assert) {
         var eventData = makeEvent([{name: "Course1", classes: [{name: "Test class 1"}]}]);

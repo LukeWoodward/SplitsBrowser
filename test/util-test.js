@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser - Utilities tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@
     var parseCourseClimb = SplitsBrowser.parseCourseClimb;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
 
-    module("Utilities - isNotNull");
+    QUnit.module("Utilities - isNotNull");
 
     QUnit.test("null is not not-null", function (assert) {
         assert.ok(!isNotNull(null));
@@ -40,7 +40,7 @@
         assert.ok(isNotNull("this is not null"));
     });
     
-    module("Utilities - isNaNStrict");
+    QUnit.module("Utilities - isNaNStrict");
     
     QUnit.test("NaN is strictly NaN", function (assert) {
         assert.ok(isNaNStrict(NaN));
@@ -54,7 +54,7 @@
         assert.ok(!isNaNStrict("xyz"));
     });
 
-    module("Utilities - isNotNullNorNaN");
+    QUnit.module("Utilities - isNotNullNorNaN");
 
     QUnit.test("null is not not-null-nor-NaN", function (assert) {
         assert.ok(!isNotNullNorNaN(null));
@@ -72,7 +72,7 @@
         assert.ok(isNotNullNorNaN("abc"));
     });
     
-    module("Utilities - throwInvalidData");
+    QUnit.module("Utilities - throwInvalidData");
 
     QUnit.test("throwInvalidData throws an InvalidData exception", function (assert) {
 
@@ -85,7 +85,7 @@
         }
     });
 
-    module("Utilities - throwWrongFileFormat");
+    QUnit.module("Utilities - throwWrongFileFormat");
 
     QUnit.test("throwWrongFileFormat throws a WrongFileFormat exception", function (assert) {
 
@@ -98,7 +98,7 @@
         }
     });
     
-    module("Utilities - parseCourseLength");
+    QUnit.module("Utilities - parseCourseLength");
     
     QUnit.test("Can parse course length with no decimal separator", function (assert) {
         assert.strictEqual(parseCourseLength("17"), 17);
@@ -120,7 +120,7 @@
         assert.strictEqual(parseCourseLength("nonsense"), null);
     });
     
-    module("Utilities - parseCourseClimb");
+    QUnit.module("Utilities - parseCourseClimb");
     
     QUnit.test("Can parse course climb with no decimal separator", function (assert) {
         assert.strictEqual(parseCourseClimb("145"), 145);
@@ -130,7 +130,7 @@
         assert.strictEqual(parseCourseClimb("nonsense"), null);
     });
     
-    module("Utilities - normaliseLineEndings");
+    QUnit.module("Utilities - normaliseLineEndings");
     
     QUnit.test("Can normalise line endings in an empty string", function (assert) {
         assert.strictEqual(normaliseLineEndings(""), "");

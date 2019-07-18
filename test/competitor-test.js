@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Competitor tests.
  *  
- *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@
         return (n < 0) ? -1 : ((n > 0) ? 1 : 0);
     }
 
-    module("Competitor");
+    QUnit.module("Competitor");
     
     var assertSplitTimes = function (assert, competitor, expectedSplitTimes) {
         expectedSplitTimes.forEach(function (splitTime, controlIdx) {

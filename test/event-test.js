@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Event tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@
 
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
-    module("Event");
+    QUnit.module("Event");
     
     function getCompetitor1() {
         return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);

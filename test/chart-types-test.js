@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - ChartTypes tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@
 
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
-    module("Chart types");
+    QUnit.module("Chart types");
 
     var ALL_CHART_TYPES = [];
     for (var type in ChartTypes) {

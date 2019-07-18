@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Time-handling functions tests.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
     var formatTime = SplitsBrowser.formatTime;
     var parseTime = SplitsBrowser.parseTime;
 
-    module("Time");
+    QUnit.module("Time");
 
     QUnit.test("Can format a null number of seconds ", function(assert) {
         assert.strictEqual(formatTime(null), SplitsBrowser.NULL_TIME_PLACEHOLDER);
