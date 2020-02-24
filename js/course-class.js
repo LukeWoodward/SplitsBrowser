@@ -99,7 +99,9 @@
         var fastestCompetitor = null;
         this.competitors.forEach(function (comp) {
             var compSplit = comp.getSplitTimeTo(controlIdx);
-            if (isNotNullNorNaN(compSplit)) {
+            // MODIFIED only completed
+//            if (isNotNullNorNaN(compSplit)) {
+            if (comp.completed() && isNotNullNorNaN(compSplit)) {
                 if (fastestSplit === null || compSplit < fastestSplit) {
                     fastestSplit = compSplit;
                     fastestCompetitor = comp;

@@ -631,35 +631,150 @@
             controls: controls
         };
     }
-    
     /**
-    * Parses data for a single class.
-    * @param {XMLElement} element - XML ClassResult element
-    * @param {Object} reader - XML reader used to assist with format-specific
-    *     XML reading.
+     * 
+     * @param {XMLElement} element 
+     * @param {*} index 
+     * @param {Object} reader - XML reader used to assist with format-specific XML reading.
     * @param {Array} warnings - Array to accumulate any warning messages within.
-    * @return {Object} Object containing parsed data.
     */
-    function parseClassData(element, reader, warnings) {
+    function parseTeamResults(element , cls , reader, warnings) {
         var jqElement = $(element);
-        var cls = {name: null, competitors: [], controls: [], course: null};
+        var teamResults = $("> TeamResult" , jqElement);
+        for (var index = 0; index < teamResults.length; index += 1) {
+            var team = {name : null , club: null , members: []   };
         
-        cls.course = reader.readCourseFromClass(jqElement, warnings);
+            var name = $("> Name" ,teamResults[index]).text();
+            team.name = name;
+            if (name === "") {
+                warnings.push("Could not find a name for a competitor");
+                return null;
+            }
         
-        var className = reader.readClassName(jqElement);
+            var club = $("> Organisation > Name" ,teamResults[index]).text();
+            team.club = club;
         
-        if (className === "") {
-            className = "<unnamed class>";
+            var concorrenteFittizio ;
+            var teamMemberResults = $("> TeamMemberResult" , teamResults[index]);
+            var indexTeam;
+            for (indexTeam = 0; indexTeam < teamMemberResults.length; indexTeam += 1) {
+                var teamMembersAndControls = parseTeamMember(teamMemberResults[indexTeam] , club , index * teamMemberResults.length + indexTeam + 1, reader, warnings);
+                if (indexTeam === 0) {
+                    concorrenteFittizio = teamMembersAndControls;
+                    concorrenteFittizio.startTime = teamMembersAndControls.competitor.startTime;
+                }
+                else {
+                    if (indexTeam < teamMemberResults.length ) {
+                        concorrenteFittizio.competitor.name = concorrenteFittizio.competitor.name + "-";
+                    }
+                    concorrenteFittizio.competitor.name = concorrenteFittizio.competitor.name + teamMembersAndControls.competitor.name ;
+
+                    concorrenteFittizio.controls.push("F");
+                    concorrenteFittizio.controls = concorrenteFittizio.controls.concat(teamMembersAndControls.controls);
+                    teamMembersAndControls.competitor.originalCumTimes.shift();
+                    concorrenteFittizio.competitor.originalSplitTimes = concorrenteFittizio.competitor.originalSplitTimes.concat(teamMembersAndControls.competitor.originalSplitTimes) ;
+                    var nuoviVal = teamMembersAndControls.competitor.originalCumTimes.map( function (cum) {return cum + concorrenteFittizio.competitor.totalTime;} ) ;
+                    concorrenteFittizio.competitor.originalCumTimes = concorrenteFittizio.competitor.originalCumTimes.concat(nuoviVal) ;
+
+                    concorrenteFittizio.competitor.totalTime = concorrenteFittizio.competitor.totalTime + teamMembersAndControls.competitor.totalTime ;
+                    concorrenteFittizio.competitor.isNonCompetitive = teamMembersAndControls.competitor.isNonCompetitive || concorrenteFittizio.competitor.isNonCompetitive;
+                    concorrenteFittizio.competitor.isNonStarter = teamMembersAndControls.competitor.isNonStarter || concorrenteFittizio.competitor.isNonStarter;
+                    concorrenteFittizio.competitor.isNonFinisher = teamMembersAndControls.competitor.isNonFinisher ||  concorrenteFittizio.competitor.isNonFinisher;
+                    concorrenteFittizio.competitor.isDisqualified = teamMembersAndControls.competitor.isDisqualified || concorrenteFittizio.competitor.isDisqualified;
+                    concorrenteFittizio.competitor.isOverMaxTime = teamMembersAndControls.competitor.isOverMaxTime ||  concorrenteFittizio.competitor.isOverMaxTime;
+                  }               
+            }
+            // costruisco il concorrente fittizio
+            var attuale = fromOriginalCumTimes(index+1, concorrenteFittizio.competitor.name, club, concorrenteFittizio.startTime, concorrenteFittizio.competitor.originalCumTimes);
+            attuale.isNonCompetitive = concorrenteFittizio.competitor.isNonCompetitive;
+            attuale.isNonStarter = concorrenteFittizio.competitor.isNonStarter;
+            attuale.isNonFinisher = concorrenteFittizio.competitor.isNonFinisher;
+            attuale.isDisqualified = concorrenteFittizio.competitor.isDisqualified;
+            attuale.isOverMaxTime = concorrenteFittizio.competitor.isOverMaxTime;
+
+            attuale.startTime = concorrenteFittizio.competitor.startTime ;
+            if (index === 0) {
+                cls.controls = concorrenteFittizio.controls;
+                cls.course.numberOfControls = cls.controls.length;
+                cls.course.id = cls.controls.join(",");
+                cls.teamMembers = teamMemberResults.length;
+            }
+            if (indexTeam !== cls.teamMembers ) {
+                attuale.setNonFinisher();
+            }
+            cls.competitors.push(attuale);
+            cls.teams.push(team);
         }
+        return null;
+    }
+    /**
+     * 
+     * @param {*} element 
+     * @param {*} index 
+     * @param {*} reader 
+     * @param {*} warnings 
+     */
+    function parseTeamMember(element , club , number , reader, warnings) {
+        var jqElement = $(element);
+        var nameElement = reader.getCompetitorNameElement(jqElement);
+        var name = readCompetitorName(nameElement);
+        //var dateOfBirth =  reader.readDateOfBirth(jqElement);
+        //var regexResult = yearRegexp.exec(dateOfBirth);
+        //var yearOfBirth = (regexResult === null) ? null : parseInt(regexResult[0], 10);
         
-        cls.name = className;
+        //var gender = $("> Person", jqElement).attr("sex");
         
-        var personResults = $("> PersonResult", jqElement);
-        if (personResults.length === 0) {
-            warnings.push("Class '" + className + "' has no competitors");
+        var resultElement = $("Result", jqElement);
+        if (resultElement.length === 0) {
+            warnings.push("Could not find any result information for competitor '" + name + "'");
             return null;
         }
         
+        var startTime = reader.readStartTime(resultElement);
+        
+        var totalTime = reader.readTotalTime(resultElement);
+        
+        var splitTimes = $("> SplitTime", resultElement).toArray();
+        var splitData = splitTimes.filter(function (splitTime) { return !reader.isAdditional($(splitTime)); })
+                                  .map(function (splitTime) { return reader.readSplitTime($(splitTime)); });
+        
+        var controls = splitData.map(function (datum) { return datum.code; });
+        var cumTimes = splitData.map(function (datum) { return datum.time; });
+        
+        cumTimes.unshift(0); // Prepend a zero time for the start.
+        cumTimes.push(totalTime);
+        
+        var competitor = fromOriginalCumTimes(number, name, club, startTime, cumTimes);
+               
+        var status = reader.getStatus(resultElement);
+        if (status === reader.StatusNonCompetitive) {
+            competitor.setNonCompetitive();
+        } else if (status === reader.StatusNonStarter) {
+            competitor.setNonStarter();
+        } else if (status === reader.StatusNonFinisher) {
+            competitor.setNonFinisher();
+        } else if (status === reader.StatusDisqualified) {
+            competitor.disqualify();
+        } else if (status === reader.StatusOverMaxTime) {
+            competitor.setOverMaxTime();
+        }
+        
+        return {
+            competitor: competitor,
+            controls: controls
+        };       
+    }
+    /**
+    * Parses data for a single class when the race is single competitor. 
+    * @param {XMLElement} element - XML ClassResult element
+    * @param {Object} cls - the class object
+    * @param {Object} reader - XML reader used to assist with format-specific XML reading.
+    * @param {Array} warnings - Array to accumulate any warning messages within.
+    * @return {Object} Object containing parsed data.
+    */
+    function parseCompetitorResults(element , cls , reader , warnings) {
+        var jqElement = $(element);
+        var personResults = $("> PersonResult", jqElement);
         for (var index = 0; index < personResults.length; index += 1) {
             var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader, warnings);
             if (competitorAndControls !== null) {
@@ -717,8 +832,45 @@
             // Idea thanks to 'dfgeorge' (David George?)
             cls.course.id = cls.controls.join(",");
         }
+        return null;
+    }
+    /**
+    * Parses data for a single class. 
+    * @param {XMLElement} element - XML ClassResult element
+    * @param {Object} reader - XML reader used to assist with format-specific
+    *     XML reading.
+    * @param {Array} warnings - Array to accumulate any warning messages within.
+    * @return {Object} Object containing parsed data.
+    */
+    function parseClassData(element, reader, warnings) {
+        var jqElement = $(element);
+        var cls = {name: null, competitors: [], controls: [], course: null , typeRace: null, teams: [] ,teamMembers: null};
         
+        cls.course = reader.readCourseFromClass(jqElement, warnings);
+        
+        var className = reader.readClassName(jqElement);
+        
+        if (className === "") {
+            className = "<unnamed class>";
+        }
+        
+        cls.name = className;
+        
+        var teamResults = $("> TeamResult" , jqElement);
+        if (teamResults.length !== 0) {
+            cls.typeRace = "relay";
+            parseTeamResults(element , cls , reader , warnings);
         return cls;
+    }
+        var personResults = $("> PersonResult", jqElement);
+        if (personResults.length !== 0) {
+            cls.typeRace = "single";
+           parseCompetitorResults(element , cls , reader , warnings);
+           return cls;
+        } 
+
+        warnings.push("Class '" + className + "' has no competitors");
+        return null;
     }
    
     /**

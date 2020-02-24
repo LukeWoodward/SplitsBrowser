@@ -295,7 +295,9 @@
     *     or got disqualified.
     */
     Competitor.prototype.completed = function () {
-        return this.totalTime !== null && !this.isDisqualified && !this.isOverMaxTime;
+ //       return this.totalTime !== null && !this.isDisqualified && !this.isOverMaxTime;
+ // MODIFIED
+        return this.totalTime !== null  && !this.isDisqualified  && !this.isOverMaxTime && !this.isNonFinisher && !this.isNonCompetitive;
     };
 
     /**
