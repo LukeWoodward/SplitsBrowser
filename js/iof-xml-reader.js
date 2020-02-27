@@ -654,55 +654,63 @@
             var club = $("> Organisation > Name" ,teamResults[index]).text();
             team.club = club;
         
-            var concorrenteFittizio ;
+            var virtualCompetitor ;
             var teamMemberResults = $("> TeamMemberResult" , teamResults[index]);
             var indexTeam;
             for (indexTeam = 0; indexTeam < teamMemberResults.length; indexTeam += 1) {
                 var teamMembersAndControls = parseTeamMember(teamMemberResults[indexTeam] , club , index * teamMemberResults.length + indexTeam + 1, reader, warnings);
                 if (indexTeam === 0) {
-                    concorrenteFittizio = teamMembersAndControls;
-                    concorrenteFittizio.startTime = teamMembersAndControls.competitor.startTime;
+                    virtualCompetitor = teamMembersAndControls;
+                    virtualCompetitor.startTime = teamMembersAndControls.competitor.startTime;
                 }
                 else {
                     if (indexTeam < teamMemberResults.length ) {
-                        concorrenteFittizio.competitor.name = concorrenteFittizio.competitor.name + "-";
+                        virtualCompetitor.competitor.name = virtualCompetitor.competitor.name + "-";
                     }
-                    concorrenteFittizio.competitor.name = concorrenteFittizio.competitor.name + teamMembersAndControls.competitor.name ;
+                    virtualCompetitor.competitor.name = virtualCompetitor.competitor.name + teamMembersAndControls.competitor.name ;
 
-                    concorrenteFittizio.controls.push("F");
-                    concorrenteFittizio.controls = concorrenteFittizio.controls.concat(teamMembersAndControls.controls);
+                    virtualCompetitor.controls.push("F");
+                    virtualCompetitor.controls = virtualCompetitor.controls.concat(teamMembersAndControls.controls);
                     teamMembersAndControls.competitor.originalCumTimes.shift();
-                    concorrenteFittizio.competitor.originalSplitTimes = concorrenteFittizio.competitor.originalSplitTimes.concat(teamMembersAndControls.competitor.originalSplitTimes) ;
-                    var nuoviVal = teamMembersAndControls.competitor.originalCumTimes.map( function (cum) {return cum + concorrenteFittizio.competitor.totalTime;} ) ;
-                    concorrenteFittizio.competitor.originalCumTimes = concorrenteFittizio.competitor.originalCumTimes.concat(nuoviVal) ;
+                    virtualCompetitor.competitor.originalSplitTimes = virtualCompetitor.competitor.originalSplitTimes.concat(teamMembersAndControls.competitor.originalSplitTimes) ;
 
-                    concorrenteFittizio.competitor.totalTime = concorrenteFittizio.competitor.totalTime + teamMembersAndControls.competitor.totalTime ;
-                    concorrenteFittizio.competitor.isNonCompetitive = teamMembersAndControls.competitor.isNonCompetitive || concorrenteFittizio.competitor.isNonCompetitive;
-                    concorrenteFittizio.competitor.isNonStarter = teamMembersAndControls.competitor.isNonStarter || concorrenteFittizio.competitor.isNonStarter;
-                    concorrenteFittizio.competitor.isNonFinisher = teamMembersAndControls.competitor.isNonFinisher ||  concorrenteFittizio.competitor.isNonFinisher;
-                    concorrenteFittizio.competitor.isDisqualified = teamMembersAndControls.competitor.isDisqualified || concorrenteFittizio.competitor.isDisqualified;
-                    concorrenteFittizio.competitor.isOverMaxTime = teamMembersAndControls.competitor.isOverMaxTime ||  concorrenteFittizio.competitor.isOverMaxTime;
+                    var addedNewCumTimes = [];
+                    var j;
+                    for (j = 0 ; j < teamMembersAndControls.competitor.originalCumTimes.length ; j += 1) {
+                        addedNewCumTimes[j] = teamMembersAndControls.competitor.originalCumTimes[j] + virtualCompetitor.competitor.totalTime;
+                    }
+                    // var addedNewCumTimes = teamMembersAndControls.competitor.originalCumTimes.map( function(cum) {
+                    //     return cum + virtualCompetitor.competitor.totalTime;
+                    // }) ;
+                    virtualCompetitor.competitor.originalCumTimes = virtualCompetitor.competitor.originalCumTimes.concat(addedNewCumTimes) ;
+
+                    virtualCompetitor.competitor.totalTime = virtualCompetitor.competitor.totalTime + teamMembersAndControls.competitor.totalTime ;
+                    virtualCompetitor.competitor.isNonCompetitive = teamMembersAndControls.competitor.isNonCompetitive || virtualCompetitor.competitor.isNonCompetitive;
+                    virtualCompetitor.competitor.isNonStarter = teamMembersAndControls.competitor.isNonStarter || virtualCompetitor.competitor.isNonStarter;
+                    virtualCompetitor.competitor.isNonFinisher = teamMembersAndControls.competitor.isNonFinisher ||  virtualCompetitor.competitor.isNonFinisher;
+                    virtualCompetitor.competitor.isDisqualified = teamMembersAndControls.competitor.isDisqualified || virtualCompetitor.competitor.isDisqualified;
+                    virtualCompetitor.competitor.isOverMaxTime = teamMembersAndControls.competitor.isOverMaxTime ||  virtualCompetitor.competitor.isOverMaxTime;
                   }               
             }
-            // costruisco il concorrente fittizio
-            var attuale = fromOriginalCumTimes(index+1, concorrenteFittizio.competitor.name, club, concorrenteFittizio.startTime, concorrenteFittizio.competitor.originalCumTimes);
-            attuale.isNonCompetitive = concorrenteFittizio.competitor.isNonCompetitive;
-            attuale.isNonStarter = concorrenteFittizio.competitor.isNonStarter;
-            attuale.isNonFinisher = concorrenteFittizio.competitor.isNonFinisher;
-            attuale.isDisqualified = concorrenteFittizio.competitor.isDisqualified;
-            attuale.isOverMaxTime = concorrenteFittizio.competitor.isOverMaxTime;
 
-            attuale.startTime = concorrenteFittizio.competitor.startTime ;
+            var finalCOmpetitor = fromOriginalCumTimes(index+1, virtualCompetitor.competitor.name, club, virtualCompetitor.startTime, virtualCompetitor.competitor.originalCumTimes);
+            finalCOmpetitor.isNonCompetitive = virtualCompetitor.competitor.isNonCompetitive;
+            finalCOmpetitor.isNonStarter = virtualCompetitor.competitor.isNonStarter;
+            finalCOmpetitor.isNonFinisher = virtualCompetitor.competitor.isNonFinisher;
+            finalCOmpetitor.isDisqualified = virtualCompetitor.competitor.isDisqualified;
+            finalCOmpetitor.isOverMaxTime = virtualCompetitor.competitor.isOverMaxTime;
+
+            finalCOmpetitor.startTime = virtualCompetitor.competitor.startTime ;
             if (index === 0) {
-                cls.controls = concorrenteFittizio.controls;
+                cls.controls = virtualCompetitor.controls;
                 cls.course.numberOfControls = cls.controls.length;
                 cls.course.id = cls.controls.join(",");
                 cls.teamMembers = teamMemberResults.length;
             }
             if (indexTeam !== cls.teamMembers ) {
-                attuale.setNonFinisher();
+                finalCOmpetitor.setNonFinisher();
             }
-            cls.competitors.push(attuale);
+            cls.competitors.push(finalCOmpetitor);
             cls.teams.push(team);
         }
         return null;
@@ -799,7 +807,7 @@
                 if (competitor.isNonStarter && actualControlCount === 0) {
                     // Don't generate warnings for non-starting competitors with no controls.
                 } else if (actualControlCount !== cls.course.numberOfControls) {
-                    warning = "Competitor '" + competitor.name + "' in class '" + className + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;
+                    warning = "Competitor '" + competitor.name + "' in class '" + cls.className + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;
                 } else {
                     for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
                         if (cls.controls[controlIndex] !== controls[controlIndex]) {

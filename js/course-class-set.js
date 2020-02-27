@@ -259,7 +259,8 @@
                 var thisTime = this.allCompetitors[competitorIdx].getSplitTimeTo(controlIdx);
                 // modified
                 if (this.allCompetitors[competitorIdx].completed()  && isNotNullNorNaN(thisTime) && (fastestForThisControl === null || thisTime < fastestForThisControl)) {
-                    fastestForThisControl = thisTime;
+//                if ( thisTime >0 && isNotNullNorNaN(thisTime) && (fastestForThisControl === null || thisTime < fastestForThisControl)) {
+                        fastestForThisControl = thisTime;
                 }
             }
             
