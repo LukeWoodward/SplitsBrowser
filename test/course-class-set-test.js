@@ -333,6 +333,9 @@
 
     QUnit.test("Fastest cumulative times on single-class set should be made up of fastest split times ignoring nulls", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getCompetitor1WithNullFinishSplit(), getCompetitor2WithNullSplitForControl2()])]);
+        // modified
+        courseClassSet.classes[0].competitors[0].totalTime = 65 + 221 + 184 + 12;
+        courseClassSet.classes[0].competitors[1].totalTime = 81+ 20 + 212 + 106 ;
         assert.deepEqual(courseClassSet.getFastestCumTimes(), [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 106],
                             "Fastest cumulative times should be made up of fastest splits where not null");
     });
