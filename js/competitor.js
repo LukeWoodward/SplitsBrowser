@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Competitor - An individual competitor who competed at an event.
  *  
- *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -143,6 +143,7 @@
         this.name = name;
         this.club = club;
         this.startTime = startTime;
+        this.isOKDespiteMissingTimes = false;
         this.isNonCompetitive = false;
         this.isNonStarter = false;
         this.isNonFinisher = false;
@@ -162,6 +163,16 @@
 
         this.totalTime = (originalCumTimes === null || originalCumTimes.indexOf(null) > -1) ? null : originalCumTimes[originalCumTimes.length - 1];
     }
+    
+    /**
+    * Marks this competitor as having completed the course despite having missing times.
+    */
+    Competitor.prototype.setOKDespiteMissingTimes = function () {
+        this.isOKDespiteMissingTimes = true;
+        if (this.originalCumTimes !== null) {
+            this.totalTime = this.originalCumTimes[this.originalCumTimes.length - 1];
+        }
+    };
     
     /**
     * Marks this competitor as being non-competitive.
@@ -541,9 +552,9 @@
                 // Someone registered a zero split on this course.  In this
                 // situation the time losses don't really make sense.
                 this.timeLosses = this.splitTimes.map(function () { return NaN; });
-            } else if (this.splitTimes.some(isNaNStrict)) {
-                // Competitor has some dubious times.  Unfortunately this
-                // means we cannot sensibly calculate the time losses.
+            } else if (this.isOKDespiteMissingTimes || this.splitTimes.some(isNaNStrict)) {
+                // Competitor has some missing or dubious times.  Unfortunately
+                // this means we cannot sensibly calculate the time losses.
                 this.timeLosses = this.splitTimes.map(function () { return NaN; });
             } else {
                 // We use the same algorithm for calculating time loss as the
@@ -609,22 +620,22 @@
     
     /**
     * Returns an array of objects that record the indexes around which times in
-    * the given array are NaN.
+    * the given array are omitted, due to the times being dubious or missing.
     * @param {Array} times - Array of time values.
-    * @return {Array} Array of objects that record indexes around dubious times.
+    * @return {Array} Array of objects that record indexes around omitted times.
     */
-    function getIndexesAroundDubiousTimes(times) {
-        var dubiousTimeInfo = [];
+    Competitor.prototype.getIndexesAroundOmittedTimes = function (times) {
+        var omittedTimeInfo = [];
         var startIndex = 1;
         while (startIndex + 1 < times.length) {
-            if (isNaNStrict(times[startIndex])) {
+            if (isNaNStrict(times[startIndex]) || (this.isOKDespiteMissingTimes && times[startIndex] === null)) {
                 var endIndex = startIndex;
-                while (endIndex + 1 < times.length && isNaNStrict(times[endIndex + 1])) {
+                while (endIndex + 1 < times.length && (isNaNStrict(times[endIndex + 1]) || (this.isOKDespiteMissingTimes && times[endIndex + 1] === null))) {
                     endIndex += 1;
                 }
                 
                 if (endIndex + 1 < times.length && times[startIndex - 1] !== null && times[endIndex + 1] !== null) {
-                    dubiousTimeInfo.push({start: startIndex - 1, end: endIndex + 1});
+                    omittedTimeInfo.push({start: startIndex - 1, end: endIndex + 1});
                 }
                 
                 startIndex = endIndex + 1;
@@ -634,27 +645,27 @@
             }
         }
         
-        return dubiousTimeInfo;
-    }
-    
-    /**
-    * Returns an array of objects that list the controls around those that have
-    * dubious cumulative times.
-    * @return {Array} Array of objects that detail the start and end indexes
-    *     around dubious cumulative times.
-    */
-    Competitor.prototype.getControlIndexesAroundDubiousCumulativeTimes = function () {
-        return getIndexesAroundDubiousTimes(this.cumTimes);
+        return omittedTimeInfo;
     };
     
     /**
     * Returns an array of objects that list the controls around those that have
-    * dubious cumulative times.
+    * omitted cumulative times.
     * @return {Array} Array of objects that detail the start and end indexes
-    *     around dubious cumulative times.
+    *     around omitted cumulative times.
     */
-    Competitor.prototype.getControlIndexesAroundDubiousSplitTimes = function () {
-        return getIndexesAroundDubiousTimes([0].concat(this.splitTimes));
+    Competitor.prototype.getControlIndexesAroundOmittedCumulativeTimes = function () {
+        return this.getIndexesAroundOmittedTimes(this.cumTimes);
+    };
+    
+    /**
+    * Returns an array of objects that list the controls around those that have
+    * omitted split times.
+    * @return {Array} Array of objects that detail the start and end indexes
+    *     around omitted split times.
+    */
+    Competitor.prototype.getControlIndexesAroundOmittedSplitTimes = function () {
+        return this.getIndexesAroundOmittedTimes([0].concat(this.splitTimes));
     };
     
     SplitsBrowser.Model.Competitor = Competitor;

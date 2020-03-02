@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - ChartTypes tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -148,7 +148,7 @@
 
         ALL_CHART_TYPES.forEach(function (chartType) {
             if (chartType !== ChartTypes.ResultsTable) {
-                assert.strictEqual(typeof chartType.indexesAroundDubiousTimesFunc, "function");
+                assert.strictEqual(typeof chartType.indexesAroundOmittedTimesFunc, "function");
                 var expectedDubiousTimeInfo;
                 if (chartType === ChartTypes.SplitsGraph || chartType === ChartTypes.RaceGraph || chartType === ChartTypes.PositionAfterLeg) {
                     expectedDubiousTimeInfo = [{start: 1, end: 3}];
@@ -159,11 +159,11 @@
                     expectedDubiousTimeInfo = null;
                 }
                 
-                assert.deepEqual(chartType.indexesAroundDubiousTimesFunc(competitor), expectedDubiousTimeInfo, "Dubious-time info for " + chartType.nameKey + " should be correct");
+                assert.deepEqual(chartType.indexesAroundOmittedTimesFunc(competitor), expectedDubiousTimeInfo, "Dubious-time info for " + chartType.nameKey + " should be correct");
             }
         });
         
-        assert.strictEqual(ChartTypes.ResultsTable.indexesAroundDubiousTimesFunc, null);
+        assert.strictEqual(ChartTypes.ResultsTable.indexesAroundOmittedTimesFunc, null);
     });
     
 })();

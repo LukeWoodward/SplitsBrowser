@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Course-Class Set - A collection of selected course classes.
  *  
- *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -380,11 +380,12 @@
             var cumSplitsByCompetitor = this.allCompetitors.map(function (comp, idx) {
                 // -1 for previous control, another -1 because the cumulative
                 // time to control N is cumRanksByCompetitor[idx][N - 1].
-                if (control > 1 && cumRanksByCompetitor[idx][control - 1 - 1] === null) {
+                if (control > 1 && cumRanksByCompetitor[idx][control - 1 - 1] === null && !comp.isOKDespiteMissingTimes) {
                     // This competitor has no cumulative rank for the previous
-                    // control, so either they mispunched it or mispunched a
-                    // previous one.  Give them a null time here, so that they
-                    // end up with another null cumulative rank.
+                    // control, and is not recorded as OK despite missing times,
+                    // so either they mispunched it or mispunched a previous one.
+                    // Give them a null time here, so that they end up with
+                    // another null cumulative rank.
                     return null;
                 } else {
                     return comp.getCumulativeTimeTo(control);
@@ -490,7 +491,7 @@
         
         var controlIndexAdjust = (chartType.skipStart) ? 1 : 0;
         var dubiousTimesInfo = currentIndexes.map(function (competitorIndex) {
-            var indexPairs = chartType.indexesAroundDubiousTimesFunc(this.allCompetitors[competitorIndex]);
+            var indexPairs = chartType.indexesAroundOmittedTimesFunc(this.allCompetitors[competitorIndex]);
             return indexPairs.filter(function (indexPair) { return indexPair.start >= controlIndexAdjust; })
                              .map(function (indexPair) { return { start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust }; });
         }, this);

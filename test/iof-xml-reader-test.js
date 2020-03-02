@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - IOF XML format parser tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -152,7 +152,9 @@
         var totalTimeXml = (exists("totalTime")) ? '<Time>' + formatTime(personData.totalTime) + '</Time>\n' : '';
         
         var status;
-        if (exists("nonStarter")) {
+        if (exists("okDespiteMissingTimes")) {
+            status = "OK";
+        } else if (exists("nonStarter")) {
             status = "DidNotStart";
         } else if (exists("nonFinisher")) {
             status = "DidNotFinish";
@@ -357,7 +359,9 @@
         var totalTimeXml = (exists("totalTime")) ? '<Time>' + personData.totalTime + '</Time>' : '';
         
         var status;
-        if (exists("nonStarter")) {
+        if (exists("okDespiteMissingTimes")) {
+            status = "OK";
+        } else if (exists("nonStarter")) {
             status = "DidNotStart";
         } else if (exists("nonFinisher")) {
             status = "DidNotFinish";
@@ -1008,6 +1012,16 @@
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
                 assert.strictEqual(competitor.isOverMaxTime, true);        
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains an competitor that is OK despite missing times", function (assert) {
+        var person = getPerson();
+        person.cumTimes[1] = null;
+        person.okDespiteMissingTimes = true;
+        runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
+            function (competitor) {
+                assert.strictEqual(competitor.isOKDespiteMissingTimes, true);        
             });
     });
     

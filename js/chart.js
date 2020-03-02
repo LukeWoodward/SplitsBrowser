@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser Chart - Draws a chart of data on an SVG element.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -75,9 +75,15 @@
     * as appropriate.
     * @param {?Number} time - The time, in seconds, or null.
     * @param {?Number} rank - The rank, or null.
+    * @param {Boolean} isOKDespiteMissingTimes - True if the competitor is marked as
+    *     OK despite having missing controls.
     * @returns Time and rank formatted as a string.
     */
-    function formatTimeAndRank(time, rank) {
+    function formatTimeAndRank(time, rank, isOKDespiteMissingTimes) {
+        if (isOKDespiteMissingTimes && time === null) {
+            return formatTimeAndRank(NaN, NaN, false);
+        }
+        
         var rankStr;
         if (rank === null) {
             rankStr = "-";
@@ -528,24 +534,25 @@
         var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, getSuffix(comp)); });
         
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
+            var okDespites = selectedCompetitors.map(function (comp) { return comp.isOKDespiteMissingTimes; });
             if (this.visibleStatistics.TotalTime) {
                 var cumTimes = selectedCompetitors.map(function (comp) { return comp.getCumulativeTimeTo(this.currentControlIndex); }, this);
                 var cumRanks = selectedCompetitors.map(function (comp) { return comp.getCumulativeRankTo(this.currentControlIndex); }, this);
-                labelTexts = d3.zip(labelTexts, cumTimes, cumRanks)
-                               .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
+                labelTexts = d3.zip(labelTexts, cumTimes, cumRanks, okDespites)
+                               .map(function(quad) { return quad[0] + formatTimeAndRank(quad[1], quad[2], quad[3]); });
             }
                            
             if (this.visibleStatistics.SplitTime) {
                 var splitTimes = selectedCompetitors.map(function (comp) { return comp.getSplitTimeTo(this.currentControlIndex); }, this);
                 var splitRanks = selectedCompetitors.map(function (comp) { return comp.getSplitRankTo(this.currentControlIndex); }, this);
-                labelTexts = d3.zip(labelTexts, splitTimes, splitRanks)
-                               .map(function(triple) { return triple[0] + formatTimeAndRank(triple[1], triple[2]); });
+                labelTexts = d3.zip(labelTexts, splitTimes, splitRanks, okDespites)
+                               .map(function(quad) { return quad[0] + formatTimeAndRank(quad[1], quad[2], quad[3]); });
             }
              
             if (this.visibleStatistics.BehindFastest) {
                 var timesBehind = this.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
-                labelTexts = d3.zip(labelTexts, timesBehind)
-                               .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
+                labelTexts = d3.zip(labelTexts, timesBehind, okDespites)
+                               .map(function(triple) { return triple[0] + SPACER + formatTime((triple[2] && triple[1] === null) ? NaN : triple[1]); });
             }
              
             if (this.visibleStatistics.TimeLoss) {
@@ -918,7 +925,7 @@
         
         this.svgGroup.selectAll("path.graphLine").remove();
         
-        this.svgGroup.selectAll("line.aroundDubiousTimes").remove();
+        this.svgGroup.selectAll("line.aroundOmittedTimes").remove();
         
         d3.range(this.numLines).forEach(function (selCompIdx) {
             var strokeColour = colours[this.selectedIndexes[selCompIdx] % colours.length];
@@ -941,7 +948,7 @@
                              .attr("x2", this.xScale(chartData.dataColumns[dubiousTimeInfo.end].x))
                              .attr("y2", this.yScale(chartData.dataColumns[dubiousTimeInfo.end].ys[selCompIdx]))
                              .attr("stroke", strokeColour)
-                             .attr("class", "aroundDubiousTimes competitor" + this.selectedIndexes[selCompIdx])
+                             .attr("class", "aroundOmittedTimes competitor" + this.selectedIndexes[selCompIdx])
                              .on("mouseenter", highlighter)
                              .on("mouseleave", unhighlighter)
                              .append("title")
@@ -959,7 +966,7 @@
         this.svg.selectAll("line.competitorLegendLine.competitor" + competitorIdx).classed("selected", true);
         this.svg.selectAll("text.competitorLabel.competitor" + competitorIdx).classed("selected", true);
         this.svg.selectAll("text.startLabel.competitor" + competitorIdx).classed("selected", true);
-        this.svg.selectAll("line.aroundDubiousTimes.competitor" + competitorIdx).classed("selected", true);
+        this.svg.selectAll("line.aroundOmittedTimes.competitor" + competitorIdx).classed("selected", true);
     };
 
     /**
@@ -970,7 +977,7 @@
         this.svg.selectAll("line.competitorLegendLine.selected").classed("selected", false);
         this.svg.selectAll("text.competitorLabel.selected").classed("selected", false);
         this.svg.selectAll("text.startLabel.selected").classed("selected", false);
-        this.svg.selectAll("line.aroundDubiousTimes.selected").classed("selected", false);
+        this.svg.selectAll("line.aroundOmittedTimes.selected").classed("selected", false);
     };
 
     /**

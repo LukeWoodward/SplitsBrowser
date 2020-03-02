@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - CourseClassSet tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -27,14 +27,14 @@
         name: "dummy",
         dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
         skipStart: false,
-        indexesAroundDubiousTimesFunc: function (comp) { return comp.getControlIndexesAroundDubiousCumulativeTimes(); }
+        indexesAroundOmittedTimesFunc: function (comp) { return comp.getControlIndexesAroundOmittedCumulativeTimes(); }
     };
     
     var DUMMY_CHART_TYPE_SKIP = {
         name: "dummy",
         dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
         skipStart: true,
-        indexesAroundDubiousTimesFunc: function (comp) { return comp.getControlIndexesAroundDubiousCumulativeTimes(); }    
+        indexesAroundOmittedTimesFunc: function (comp) { return comp.getControlIndexesAroundOmittedCumulativeTimes(); }    
     };
     
     var isNaNStrict = SplitsBrowser.isNaNStrict;
@@ -106,6 +106,10 @@
     
     function getCompetitor2WithNullSplitForControl2() {
         return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, null, 212, 106]);
+    }
+    
+    function getCompetitor2FromCumulativeTimesWithNullSplitForControl2() {
+        return fromCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     }
     
     function getCompetitor2WithNullFinishSplit() {
@@ -370,20 +374,22 @@
     
     function assertSplitRanks(assert, competitor, expectedSplitRanks) {
         expectedSplitRanks.forEach(function (splitRank, index) {
+            var message = "Split rank " + (index + 1) + " for competitor " + competitor.name;
             if (isNaNStrict(splitRank)) {
-                assert.ok(isNaNStrict(competitor.getSplitRankTo(index + 1)));
+                assert.ok(isNaNStrict(competitor.getSplitRankTo(index + 1)), message);
             } else {
-                assert.strictEqual(competitor.getSplitRankTo(index + 1), splitRank);
+                assert.strictEqual(competitor.getSplitRankTo(index + 1), splitRank, message);
             }
         });
     }
     
     function assertCumulativeRanks(assert, competitor, expectedCumulativeRanks) {
         expectedCumulativeRanks.forEach(function (cumulativeRank, index) {
+            var message = "Cumulative rank " + (index + 1) + " for competitor " + competitor.name;
             if (isNaNStrict(cumulativeRank)) {
-                assert.ok(isNaNStrict(competitor.getCumulativeRankTo(index + 1)));
+                assert.ok(isNaNStrict(competitor.getCumulativeRankTo(index + 1)), message);
             } else {
-                assert.strictEqual(competitor.getCumulativeRankTo(index + 1), cumulativeRank);
+                assert.strictEqual(competitor.getCumulativeRankTo(index + 1), cumulativeRank, message);
             }
         });
     }
@@ -459,6 +465,18 @@
         assertSplitAndCumulativeRanks(assert, competitor1, [1, 2, 2, 1], [1, 1, 2, 1]);
         assertSplitAndCumulativeRanks(assert, competitor2, [3, null, 3, 2], [3, null, null, null]);
         assertSplitAndCumulativeRanks(assert, competitor3, [2, 1, 1, 3], [2, 2, 1, 2]);
+    });
+        
+    QUnit.test("Can compute ranks when there are three competitors with one marked as OK despite missing split times", function (assert) {
+        var competitor1 = getCompetitor1();
+        var competitor2 = getCompetitor2FromCumulativeTimesWithNullSplitForControl2();
+        competitor2.setOKDespiteMissingTimes();
+        var competitor3 = getCompetitor3();
+        new CourseClassSet([new CourseClass("Test", 3, [competitor1, competitor2, competitor3])]);
+        
+        assertSplitAndCumulativeRanks(assert, competitor1, [1, 2, 2, 1], [1, 1, 3, 1]);
+        assertSplitAndCumulativeRanks(assert, competitor2, [3, null, null, 2], [3, null, 2, 2]);
+        assertSplitAndCumulativeRanks(assert, competitor3, [2, 1, 1, 3], [2, 2, 1, 3]);
     });
     
     QUnit.test("Can compute ranks when there is one control that all three competitors mispunch", function (assert) {
