@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - ResultsTable tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -321,5 +321,25 @@
         assert.strictEqual(cum3Cell.text(), "07:51.0");
         var split3Cell = $("span:last-child", tableCells[5]);
         assert.strictEqual(split3Cell.text(), "03:04.7");
+    });
+    
+    QUnit.test("Can create a results table with one competitor with fractional split times and a finish time with a whole number of seconds appropriately formatted", function (assert) {
+        var competitor = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.0]);
+        var courseClass = new CourseClass("Test", 3, [competitor]);
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
+        calculateRanks(courseClass);
+        
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(courseClass);
+        
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
+        var table = d3.select("table.resultsTable").node();
+        assert.strictEqual($("tbody", table).length, 1);
+        assert.strictEqual($("tbody tr", table).length, 1);
+        var tableCells = $("tbody tr td", table);
+        assert.strictEqual(tableCells.length, 7);
+        
+        var cum2Cell = $("span:first-child", tableCells[2]);
+        assert.strictEqual(cum2Cell.text(), "09:31.0");
     });
 })();

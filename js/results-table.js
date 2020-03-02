@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser ResultsTable - Shows class results in a table.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -101,9 +101,10 @@
     * The status may be a string that indicates the competitor mispunched.
     *
     * @param {Competitor} competitor The competitor to get the status of.
+    * @param {Number} precision The precision to use.
     * @return {String} Time or status for the given competitor.
     */
-    function getTimeOrStatus (competitor) {
+    function getTimeOrStatus (competitor, precision) {
         if (competitor.isNonStarter) {
             return getMessage("DidNotStartShort");
         } else if (competitor.isNonFinisher) {
@@ -113,7 +114,7 @@
         } else if (competitor.isOverMaxTime) {
             return getMessage("OverMaxTimeShort");
         } else if (competitor.completed()) {
-            return formatTime(competitor.totalTime);
+            return formatTime(competitor.totalTime, precision);
         } else {
             return getMessage("MispunchedShort");
         }
@@ -235,7 +236,7 @@
             htmlBits.push("</td>");
             
             addCell(competitor.name, competitor.club, false, false, false, false);
-            addCell(getTimeOrStatus(competitor), NON_BREAKING_SPACE_CHAR, "time", false, false, false, false);
+            addCell(getTimeOrStatus(competitor, precision), NON_BREAKING_SPACE_CHAR, "time", false, false, false, false);
             
             d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {
                 var formattedCumTime = formatTime(competitor.getOriginalCumulativeTimeTo(controlNum), precision);
