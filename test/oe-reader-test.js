@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - OE CSV reader tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -689,6 +689,22 @@
         
             var competitor = eventData.classes[0].competitors[0];
             assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
+        });
+    });
+    
+    QUnit.test("Can parse a string that contains a single competitor's data with a missed control but marked as OK", function (assert) {
+        var comp = getCompetitor1();
+        comp.classifier = "0";
+        var controls = getControls1();
+        controls[1].time = "-----";
+        runTestOverAllFormats([[comp, controls]], function (eventData) {
+            assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
+            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+        
+            var competitor = eventData.classes[0].competitors[0];
+            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
+            assert.ok(competitor.isOKDespiteMissingTimes, "Should be marked as OK despite having a missing time");
         });
     });
     
