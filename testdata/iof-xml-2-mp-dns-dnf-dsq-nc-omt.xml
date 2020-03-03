@@ -38,6 +38,36 @@
         <PersonResult>
             <Person>
                 <PersonName>
+                    <Given>OKDespite</Given>
+                    <Family>MissingTime</Family>
+                </PersonName>
+            </Person>
+            <Club>
+                <ShortName>VWX</ShortName>
+            </Club>
+            <Result>
+                <StartTime>
+                    <Clock>11:30:00</Clock>
+                </StartTime>
+                <Time>16:04</Time>
+                <CompetitorStatus value="OK"/>
+                <SplitTime sequence="1">
+                    <ControlCode>212</ControlCode>
+                    <Time>3:33</Time>
+                </SplitTime>
+                <SplitTime sequence="2">
+                    <ControlCode>229</ControlCode>
+                    <Time>-----</Time>
+                </SplitTime>
+                <SplitTime sequence="3">
+                    <ControlCode>208</ControlCode>
+                    <Time>12:40</Time>
+                </SplitTime>
+            </Result>
+        </PersonResult>
+        <PersonResult>
+            <Person>
+                <PersonName>
                     <Given>Mis</Given>
                     <Family>Puncher</Family>
                 </PersonName>

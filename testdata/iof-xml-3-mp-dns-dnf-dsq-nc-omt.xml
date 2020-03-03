@@ -69,6 +69,33 @@
         <PersonResult>
             <Person>
                 <Name>
+                    <Given>OKDespite</Given>
+                    <Family>MissingTime</Family>
+                </Name>
+            </Person>
+            <Organisation>
+                <ShortName>VWX</ShortName>
+            </Organisation>
+            <Result>
+                <StartTime>2014-060-07T11:30:00</StartTime>
+                <Time>964</Time>
+                <Status>OK</Status>
+                <SplitTime>
+                    <ControlCode>212</ControlCode>
+                    <Time>213</Time>
+                </SplitTime>
+                <SplitTime status="Missing">
+                    <ControlCode>229</ControlCode>
+                </SplitTime>
+                <SplitTime>
+                    <ControlCode>208</ControlCode>
+                    <Time>760</Time>
+                </SplitTime>
+            </Result>
+        </PersonResult>        
+        <PersonResult>
+            <Person>
+                <Name>
                     <Given>Nasty</Given>
                     <Family>Cheater</Family>
                 </Name>
