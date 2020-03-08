@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Input tests
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -29,8 +29,8 @@
     QUnit.module("Input");
     
     QUnit.test("Can read in CSV data", function (assert) {
-        var csvData = "Example, 4\r\nJohn,Smith,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\nFred,Baker,DEF,12:12,02:42,01:51,04:00,01:31,00:30\r\n\r\n" + 
-                      "Another example class, 5\r\nJane,Palmer,GHI,11:22,02:50,01:44,03:29,01:40,03:09,00:28\r\nFaye,Claidey,JKL,10:58,02:55,02:00,03:48,01:49,03:32,00:37";
+        var csvData = "Example, 4\r\nFirst,Runner,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\nSecond,Runner,DEF,12:12,02:42,01:51,04:00,01:31,00:30\r\n\r\n" + 
+                      "Another example class, 5\r\nThird,Runner,GHI,11:22,02:50,01:44,03:29,01:40,03:09,00:28\r\nFourth,Runner,JKL,10:58,02:55,02:00,03:48,01:49,03:32,00:37";
         
         var eventData = parseEventData(csvData);
         assert.ok(eventData instanceof Event, "An event should be returned");
@@ -39,7 +39,7 @@
     });
     
     QUnit.test("Can read in OE semicolon-delimited data", function (assert) { 
-        var oeData = OE_HEADER + "0;1;2;Smith;John;5;6;7;8;11:27:45;10;06:33;0;13;14;ABC;16;17;Test class;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;Test course;4.1;140;3;1;;;208;01:50;227;03:38;212;06:02";
+        var oeData = OE_HEADER + "0;1;2;Runner;First;5;6;7;8;11:27:45;10;06:33;0;13;14;ABC;16;17;Test class;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;Test course;4.1;140;3;1;;;208;01:50;227;03:38;212;06:02";
         var eventData = parseEventData(oeData);
         assert.ok(eventData instanceof Event, "An event should be returned");
         assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
@@ -47,7 +47,7 @@
     });
     
     QUnit.test("Can read in OE comma-delimited data", function (assert) { 
-        var oeData = OE_HEADER + "0;1;2;Smith;John;5;6;7;8;11:27:45;10;06:33;0;13;14;ABC;16;17;Test class;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;Test course;4.1;140;3;1;;;208;01:50;227;03:38;212;06:02";
+        var oeData = OE_HEADER + "0;1;2;Runner;First;5;6;7;8;11:27:45;10;06:33;0;13;14;ABC;16;17;Test class;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;Test course;4.1;140;3;1;;;208;01:50;227;03:38;212;06:02";
         oeData = oeData.replace(/;/g, ",");
         var eventData = parseEventData(oeData);
         assert.ok(eventData instanceof Event, "An event should be returned");
@@ -105,7 +105,7 @@
                                   "Position,Status,Handicap,PenaltyScore,ManualScoreAdjust,FinalScore,HandicapTime,HandicapScore,AwardLevel,SiEntriesIDs,Eligibility," +
                                   "NotUsed3,NotUsed4,NotUsed5,NotUsed6,NotUsed7,NotUsed8,NotUsed9,NotUsed10,NumSplits,ControlCode1,Split1,Points1,ControlCode2,Split2," +
                                   "Points2,ControlCode3,Split3,Points3,ControlCode4,Split4,Points4,ControlCode5,Split5,Points5,ControlCode6,Split6,Points6\r\n" + 
-                                  ",,,John Smith,,TEST,,Course 1,10:38:00,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,152,01:12,,188,02:21,,163,03:06,,F1,03:22,,,,,,,,,\r\n";
+                                  ",,,First Runner,,TEST,,Course 1,10:38:00,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,152,01:12,,188,02:21,,163,03:06,,F1,03:22,,,,,,,,,\r\n";
         var eventData = parseEventData(tripleColumnCSVData);
         assert.ok(eventData instanceof Event, "An event should be returned");
         assert.strictEqual(eventData.classes.length, 1, "One class should be read in");
@@ -115,7 +115,7 @@
     QUnit.test("Can read in IOF v2.0.3 XML data", function (assert) {
         var iofXmlData = '<?xml version="1.0" ?>\n<!DOCTYPE ResultList SYSTEM "IOFdata.dtd">\n<ResultList><IOFVersion version="2.0.3" />\n' +
                          '<ClassResult><ClassShortName>Test Class</ClassShortName><PersonResult>' +
-                         '<Person><PersonName><Given>John</Given><Family>Smith</Family></PersonName></Person>' +
+                         '<Person><PersonName><Given>First</Given><Family>Runner</Family></PersonName></Person>' +
                          '<Club><ShortName>TestClub</ShortName></Club>' +
                          '<Result>' + 
                          '<StartTime><Clock>10:11:00</Clock></StartTime><Time>09:30</Time><CompetitorStatus value="OK" /><CourseLength>2300</CourseLength>' +
@@ -134,7 +134,7 @@
                          'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\niofVersion="3.0">\n' + 
                          '<ClassResult><Class><Name>Test Class</Name></Class>' +
                          '<Course><Id>1</Id><Length>2300</Length></Course>' +
-                         '<PersonResult><Person><Name><Given>John</Given><Family>Smith</Family></Name></Person>' +
+                         '<PersonResult><Person><Name><Given>First</Given><Family>Runner</Family></Name></Person>' +
                          '<Organisation><ShortName>TestClub</ShortName></Organisation>' +
                          '<Result>' + 
                          '<StartTime>2014-06-07T10:11:00</StartTime><Time>570</Time><Status>OK</Status>' +

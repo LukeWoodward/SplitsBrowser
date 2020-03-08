@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - CourseClass tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -29,25 +29,25 @@
     QUnit.module("Course-class");
     
     function getCompetitor1() {
-        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        return fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
     function getCompetitor1WithNullSplitForControl3() {
-        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
+        return fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
     }
     
     function getCompetitor1WithNaNSplitForControl3() {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 - 30, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 - 30, 81 + 197 + 212 + 106]);
         competitor.setRepairedCumulativeTimes([0, 81, 81 + 197, NaN, 81 + 197 + 212 + 106]);
         return competitor;
     }
     
     function getCompetitor2() {
-        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        return fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
     function getCompetitor2WithNullSplitForControl3() {
-        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, null, 100]);
+        return fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, null, 100]);
     }
     
     function getTestClass() {

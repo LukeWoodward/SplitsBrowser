@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Course tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -29,11 +29,11 @@
     QUnit.module("Course");
     
     function getCompetitor1() {
-        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        return fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
     function getCompetitor2() {
-        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        return fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
     QUnit.test("Getting other classes of a course with one class returns empty list when given that one class", function (assert) {
@@ -257,8 +257,8 @@
     });
     
     QUnit.test("Returns list of competitors punching both occurrences of a control when attempting to fetch competitors visiting a control in an interval", function (assert) {
-        var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 163]);
-        var competitor2 = fromSplitTimes(2, "Anna James", "DEF", 10 * 3600 + 35 * 60, [99, 184, 230, 111, 158]);
+        var competitor1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 163]);
+        var competitor2 = fromSplitTimes(2, "Second Runner", "DEF", 10 * 3600 + 35 * 60, [99, 184, 230, 111, 158]);
         
         var courseClass1 = new CourseClass("Test class 1", 3, [competitor1]);
         var courseClass2 = new CourseClass("Test class 2", 3, [competitor2]);

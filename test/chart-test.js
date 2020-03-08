@@ -63,18 +63,18 @@
     };
 
     var TEXT_WIDTHS = {
-        "Fred Brown": 85,
-        "John Smith": 100,
+        "Second Runner": 85,
+        "First Runner": 100,
         "00:28": 58,
         "03:41 (2)": 77,
         "09:56 (2)": 77,
-        "00:00:00 Fred Brown": 175,
-        "00:00:00 John Smith": 190
+        "00:00:00 Second Runner": 175,
+        "00:00:00 First Runner": 190
     };
 
     var TEXT_HEIGHTS = {
-        "Fred Brown": 12,
-        "John Smith": 12
+        "Second Runner": 12,
+        "First Runner": 12
     };
 
     // Dummy functions for returning the width/height of pieces of text.
@@ -120,8 +120,8 @@
     */
     function getTestCourseClassSetAndEvent(competitors) {
         if (typeof competitors === "undefined") {
-            var competitor1 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-            var competitor2 = fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+            var competitor1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+            var competitor2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
             competitors = [competitor1, competitor2];
         }
         
@@ -179,8 +179,8 @@
     
     QUnit.test("Can create a chart with dubious info", function (assert) {
         var competitors = [
-            fromCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]),
-            fromOriginalCumTimes(2, "John Smith", "ABC", 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100])
+            fromCumTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]),
+            fromOriginalCumTimes(2, "First Runner", "ABC", 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100])
         ];
         
         competitors[1].setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);

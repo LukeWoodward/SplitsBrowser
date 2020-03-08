@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - data-repair tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -55,150 +55,150 @@
     }
     
     QUnit.test("Can repair competitor with ascending cumulative times leaving them in ascending order", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(!hasDubiousData);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);    
     });
     
     QUnit.test("Can repair competitor by setting second equal cumulative time to NaN", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(hasDubiousData);
         SplitsBrowserTest.assertStrictEqualArrays(assert, competitor.cumTimes, [0, 81, 81 + 197, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);        
     });
     
     QUnit.test("Can repair competitor by setting second and third equal cumulative time to NaN", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(hasDubiousData);
         SplitsBrowserTest.assertStrictEqualArrays(assert, competitor.cumTimes, [0, 81, 81 + 197, NaN, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);        
     });
     
     QUnit.test("Can repair competitor with multiple missed splits by doing nothing", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, null, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, null, 81 + 197 + 212 + 106]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(!hasDubiousData);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });
     
     QUnit.test("Can repair competitor with finish time equal to last control by doing nothing", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(!hasDubiousData);
         SplitsBrowserTest.assertStrictEqualArrays(assert, competitor.cumTimes, competitor.originalCumTimes);        
     });
 
     QUnit.test("Can repair competitor with absurdly high cumulative time by removing the offending time", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(hasDubiousData);
         assert.deepEqual(competitor.cumTimes, [0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     });
 
     QUnit.test("Can repair competitor with multiple absurdly high cumulative times by removing the offending times", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(hasDubiousData);
         assert.deepEqual(competitor.cumTimes, [0, 81, NaN, 81 + 197, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     });
 
     QUnit.test("Can repair competitor with absurdly high cumulative time followed by nulls by removing the offending time", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, null, null, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, null, null, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(hasDubiousData);
         assert.deepEqual(competitor.cumTimes, [0, 81, NaN, null, null, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     });
 
     QUnit.test("Can repair competitor with absurdly low cumulative time by removing the offending time", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(hasDubiousData);
         assert.deepEqual(competitor.cumTimes, [0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     });
 
     QUnit.test("Can repair competitor with multiple absurdly low cumulative times by removing the offending times", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197, 1, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197, 1, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(hasDubiousData);
         assert.deepEqual(competitor.cumTimes, [0, 81, NaN, 81 + 197, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     });
 
     QUnit.test("Can repair competitor with absurdly low cumulative time preceded by nulls by removing the offending time", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, null, 1, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, null, 1, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(hasDubiousData);
         assert.deepEqual(competitor.cumTimes, [0, 81, null, null, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     });
 
     QUnit.test("Removes ridiculously low finish time of competitor if competitor mispunched but punches the last control and the finish", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 1]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 1]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(hasDubiousData);
         assert.deepEqual(competitor.cumTimes, [0, 81, null, 81 + 197 + 212, NaN]);
     });
 
     QUnit.test("Makes no changes to a competitor that has failed to punch the finish but all other cumulative times are in order", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, null]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, null]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(!hasDubiousData);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });
 
     QUnit.test("Does not remove ridiculously low finish time from mispunching competitor if they did not punch the last control", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, null, 1]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, null, 1]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(!hasDubiousData);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });
     
     QUnit.test("Can repair competitor with two consecutive absurdly high cumulative times by removing them", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 5000, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 5000, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(hasDubiousData);
         assert.deepEqual(competitor.cumTimes, [0, NaN, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     });
     
     QUnit.test("Does not repair competitor with two absurdly high cumulative times separated only by a missing split", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 5000, null, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 5000, null, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(!hasDubiousData);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });
 
     QUnit.test("Can repair competitor with zero cumulative times separated by two runs of nulls", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, null, null, null, 0, null, 0, 842, 1647]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, null, null, null, 0, null, 0, 842, 1647]);
         var hasDubiousData = wrapInEventAndRepair([competitor]);
         assert.ok(hasDubiousData);
         assert.deepEqual(competitor.cumTimes, [0, null, null, null, NaN, null, NaN, 842, 1647]);
     });
     
     QUnit.test("Can transfer competitor with ascending cumulative times leaving them in ascending order", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         wrapInEventAndTransfer([competitor]);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });
 
     QUnit.test("Can transfer competitor data with absurdly high cumulative time by leaving it as it is", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         wrapInEventAndTransfer([competitor]);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });
 
     QUnit.test("Can transfer competitor data with absurdly low cumulative time by leaving it as it is", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         wrapInEventAndTransfer([competitor]);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });
 
     QUnit.test("Can transfer competitor data with ridiculously low finish time by leaving it as it is", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 1]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 1]);
         wrapInEventAndTransfer([competitor]);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });
     
     QUnit.test("Can transfer competitor data with two consecutive absurdly high cumulative times by leaving them as they are", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 5000, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 5000, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         wrapInEventAndTransfer([competitor]);
         assert.deepEqual(competitor.cumTimes, competitor.originalCumTimes);
     });

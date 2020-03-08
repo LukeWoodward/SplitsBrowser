@@ -40,8 +40,8 @@
     */
     function getPerson() {
         return {
-            forename: "John",
-            surname: "Smith",
+            forename: "First",
+            surname: "Runner",
             club: "TestClub",
             gender: "M",
             birthDate: "1976-04-11",
@@ -795,7 +795,6 @@
     
     QUnit.test("Can parse a string that contains a female competitor", function (assert) {
         var person = getPerson();
-        person.forename = "Joan";
         person.gender = "F";
         runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
             function (eventData, formatterName) {
@@ -1112,8 +1111,8 @@
     QUnit.test("Cannot parse a string that contains a class with two competitors with different numbers of controls", function (assert) {
         var person1 = getPerson();
         var person2 = getPerson();
-        person2.forename = "Fred";
-        person2.surname = "Jones";
+        person2.forename = "Second";
+        person2.surname = "Runner";
         person2.controls.push("199");
         person2.cumTimes.push(person2.cumTimes[2] + 177);
         person2.totalTime = person2.cumTimes[2] + 177 + 94;
@@ -1159,8 +1158,8 @@
     QUnit.test("Can parse with warnings a string that contains one class with two competitors having different control codes", function (assert) {
         var person1 = getPerson();
         var person2 = getPerson();
-        person2.forename = "Fred";
-        person2.surname = "Jones";
+        person2.forename = "Second";
+        person2.surname = "Runner";
         person2.controls[1] += "9";
         
         runXmlFormatParseTest(
@@ -1175,8 +1174,8 @@
     QUnit.test("Can parse a string that contains two classes nominally the same course each with one competitor but with different controls as two separate courses", function (assert) {
         var person1 = getPerson();
         var person2 = getPerson();
-        person2.forename = "Fred";
-        person2.surname = "Jones";
+        person2.forename = "Second";
+        person2.surname = "Runner";
         person2.controls[1] += "9";
        
         var classes = [
@@ -1195,8 +1194,8 @@
     QUnit.test("Cannot parse a string that contains two classes using the same course each with one competitor but with different numbers of controls", function (assert) {
         var person1 = getPerson();
         var person2 = getPerson();
-        person2.forename = "Fred";
-        person2.surname = "Jones";
+        person2.forename = "Second";
+        person2.surname = "Runner";
         person2.controls.push("199");
         person2.cumTimes.push(person2.cumTimes[2] + 177);
         person2.totalTime = person2.cumTimes[2] + 177 + 94;
@@ -1217,8 +1216,8 @@
     QUnit.test("Can parse a string that contains two classes each with one competitor", function (assert) {
         var person1 = getPerson();
         var person2 = getPerson();
-        person2.forename = "Fred";
-        person2.surname = "Jones";
+        person2.forename = "Second";
+        person2.surname = "Runner";
         person2.controls.push("199");
         person2.cumTimes.push(person2.cumTimes[2] + 177);
         person2.totalTime = person2.cumTimes[2] + 177 + 94;
@@ -1248,8 +1247,8 @@
     QUnit.test("Can parse a string that contains two classes each with one competitor, both on the same course", function (assert) {
         var person1 = getPerson();
         var person2 = getPerson();
-        person2.forename = "Fred";
-        person2.surname = "Jones";
+        person2.forename = "Second";
+        person2.surname = "Runner";
         
         var persons = [person1, person2];
         var classes = [
@@ -1277,8 +1276,8 @@
     QUnit.test("Can parse a string that contains two classes each with one competitor, deducing that the courses are the same using control codes", function (assert) {
         var person1 = getPerson();
         var person2 = getPerson();
-        person2.forename = "Fred";
-        person2.surname = "Jones";
+        person2.forename = "Second";
+        person2.surname = "Runner";
         
         var classes = [
             {name: "Test Class 1", length: 2300, competitors: [person1]},
@@ -1298,8 +1297,8 @@
     QUnit.test("Can parse a string that contains two classes each with one competitor and no controls, without deducing that the courses are the same", function (assert) {
         var person1 = getPerson();
         var person2 = getPerson();
-        person2.forename = "Fred";
-        person2.surname = "Jones";
+        person2.forename = "Second";
+        person2.surname = "Runner";
         [person1, person2].forEach(function (person) {
             person.totalTime = 100;
             person.controls = [];

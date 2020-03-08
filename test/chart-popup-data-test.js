@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser - ChartPopupData tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -70,7 +70,7 @@
         var course1 = new Course("Test course", courseClassSet1.classes, null, null, ["235", "189", "212"]);
         courseClassSet1.classes.forEach(function (courseClass) { courseClass.setCourse(course1); });
 
-        var courseClassSet2 = new CourseClassSet([new CourseClass("Test class 2", 3, [fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [75, 242, 200, 157])])]);
+        var courseClassSet2 = new CourseClassSet([new CourseClass("Test class 2", 3, [fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [75, 242, 200, 157])])]);
         var course2 = new Course("Test course 2", courseClassSet2.classes, null, null, ["235", "189", "212"]);
         courseClassSet2.classes[0].setCourse(course2);
         
@@ -88,7 +88,7 @@
             {
                 className: "Test class 2",
                 highlight: false,
-                name: "John Smith",
+                name: "First Runner",
                 time: 242
             }],
             placeholder: null

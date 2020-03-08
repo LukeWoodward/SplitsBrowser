@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - CompetitorList tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -182,9 +182,9 @@
         var parent = d3.select("div#qunit-fixture").node();
         
         var compList = [
-            fromSplitTimes(1, "John Watson", "CDO", 10 * 3600, [13, 96, 35]),
-            fromSplitTimes(2, "Mark O'Connor", "GHO", 10 * 3600 + 6, [15, 79, 41]),
-            fromSplitTimes(3, "Keith Wilson", "KLO", 10 * 3600 + 33, [18, 81, 37])
+            fromSplitTimes(1, "First Runnerson", "CDO", 10 * 3600, [13, 96, 35]),
+            fromSplitTimes(2, "Second O'Runner", "GHO", 10 * 3600 + 6, [15, 79, 41]),
+            fromSplitTimes(3, "Third Runnerson", "KLO", 10 * 3600 + 33, [18, 81, 37])
         ];
         
         var selection = new CompetitorSelection(compList.length);
@@ -325,7 +325,7 @@
         list.setSelection(new CompetitorSelection(0));
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitorListPlaceholder").size(), 1);
         
-        var compList = [fromSplitTimes(1, "John Watson", "CDO", 10 * 3600, [13, 96, 35])];
+        var compList = [fromSplitTimes(1, "First Runner", "CDO", 10 * 3600, [13, 96, 35])];
         list.setCompetitorList(compList);
         list.setSelection(new CompetitorSelection(1));
         assert.ok(!$("div#qunit-fixture button")[0].disabled);
@@ -1015,7 +1015,7 @@
     QUnit.test("Filtering by a string contained in one competitor only matches only that competitor", function (assert) {
         var listAndSelection = createSampleList([], false);
             
-        listAndSelection.list.setFilterText("John");
+        listAndSelection.list.setFilterText("First");
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 0), "Only the first competitor should be visible");
@@ -1025,7 +1025,7 @@
     QUnit.test("Filtering by a string contained in one competitor but not matching case only matches only that competitor", function (assert) {
         var listAndSelection = createSampleList([], false);
             
-        listAndSelection.list.setFilterText("joHn");
+        listAndSelection.list.setFilterText("fiRst");
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 0), "Only the first competitor should be visible");
@@ -1035,7 +1035,7 @@
     QUnit.test("Filtering by a string contained in one competitor with apostrophe in name but not in search string matches only that competitor", function (assert) {
         var listAndSelection = createSampleList([], false);
             
-        listAndSelection.list.setFilterText("OConnor");
+        listAndSelection.list.setFilterText("ORunner");
         
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 1), "Only the second competitor should be visible");
@@ -1082,9 +1082,9 @@
         }
         
         var newCompetitors = [
-            fromSplitTimes(1, "Jane Smith", "CDO", 10 * 3600, [13, 96, 35]),
-            fromSplitTimes(2, "Lucy Watson", "GHO", 10 * 3600 + 6, [15, 79, 41]),
-            fromSplitTimes(3, "Kate Jones", "KLO", 10 * 3600 + 33, [18, 81, 37])
+            fromSplitTimes(1, "Fourth Runner", "CDO", 10 * 3600, [13, 96, 35]),
+            fromSplitTimes(2, "Fifth Runnerson", "GHO", 10 * 3600 + 6, [15, 79, 41]),
+            fromSplitTimes(3, "Sixth O'Runner", "KLO", 10 * 3600 + 33, [18, 81, 37])
         ];
         
         listAndSelection.list.setCompetitorList(newCompetitors, false);
@@ -1106,7 +1106,7 @@
         reset();
         var listAndSelection = createSampleListWithChangeHandler([], false);
         listAndSelection.list.setFilterText("son");
-        listAndSelection.list.setFilterText("smi");
+        listAndSelection.list.setFilterText("fif");
         assert.strictEqual(callCount, 2, "Handler should have been called twice");
     });
 
@@ -1142,7 +1142,7 @@
         assert.strictEqual(callCount, 1, "Handler should only have been called once");
 
         listAndSelection.list.deregisterChangeHandler(testHandler);
-        listAndSelection.list.setFilterText("smi");
+        listAndSelection.list.setFilterText("fif");
         assert.strictEqual(callCount, 1, "Handler should still only have been called once");
     });
 
@@ -1154,7 +1154,7 @@
 
         listAndSelection.list.deregisterChangeHandler(testHandler);
         listAndSelection.list.deregisterChangeHandler(testHandler);
-        listAndSelection.list.setFilterText("smi");
+        listAndSelection.list.setFilterText("fif");
         assert.strictEqual(callCount, 1, "Handler should still only have been called once");
     });
 

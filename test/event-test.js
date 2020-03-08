@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Event tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -32,15 +32,15 @@
     QUnit.module("Event");
     
     function getCompetitor1() {
-        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        return fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
     function getCompetitor2() {
-        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        return fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
     function getCompetitor2WithExtraSplit() {
-        return fromSplitTimes(2, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 157, 100]);
+        return fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [65, 221, 184, 157, 100]);
     }
     
     QUnit.test("Returns empty list of fastest splits to a leg if the event has no competitors", function (assert) {
@@ -168,7 +168,7 @@
     });
     
     QUnit.test("Event that does need repairing reports that it does", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 0, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 0, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var courseClass = new CourseClass("Test class", 3, [competitor]);
         var course = new Course("Test course", [courseClass], null, null, ["235", "212", "189"]);
     

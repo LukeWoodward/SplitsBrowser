@@ -47,101 +47,101 @@
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
     function getCompetitor1() {
-        return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, 209, 100]);
     }
     
     function getFasterCompetitor1() {
-        return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, 184, 100]);
+        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
     function getCompetitor1WithNullSplitForControl2() {
-        return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, null, 184, 100]);
+        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, null, 184, 100]);
     }
     
     function getCompetitor1WithDubiousSplitForControl1() {
-        var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 0, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "ABC", 10 * 3600, [0, 0, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         competitor.setRepairedCumulativeTimes([0, NaN, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         return competitor;
     }
     
     function getCompetitor1WithDubiousSplitForControl2() {
-        var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "ABC", 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         competitor.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         return competitor;
     }
     
     function getCompetitor1WithDubiousFinishTime() {
-        var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184]);
         competitor.setRepairedCumulativeTimes([0, 65, 65 + 221, 65 + 221 + 184, NaN]);
         return competitor;
     }
     
     function getCompetitor1WithDubiousTimeToLastControlAndFinish() {
-        var competitor = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221, 65 + 221]);
+        var competitor = fromOriginalCumTimes(1, "First Runner", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221, 65 + 221]);
         competitor.setRepairedCumulativeTimes([0, 65, 65 + 221, NaN, NaN]);
         return competitor;
     }
     
     function getCompetitor1WithNullSplitForControl3() {
-        return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, null, 100]);
+        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, null, 100]);
     }
     
     function getCompetitor1WithNullFinishSplit() {
-        return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 221, 184, null]);
+        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, 184, null]);
     }
     
     function getCompetitor1WithSameControl2SplitAsThatOfCompetitor2() {
-        return fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [65, 197, 209, 100]);
+        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 197, 209, 100]);
     }
     
     function getNonStartingCompetitor1() {
-        var competitor = fromSplitTimes(1, "John Smith", "ABC", 10 * 3600, [null, null, null, null]);
+        var competitor = fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [null, null, null, null]);
         competitor.setNonStarter();
         return competitor;
     }
     
     function getCompetitor2() {
-        return fromSplitTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        return fromSplitTimes(2, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
     function getCompetitor2WithNullSplitForControl2() {
-        return fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, null, 212, 106]);
+        return fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, null, 212, 106]);
     }
     
     function getCompetitor2FromCumulativeTimesWithNullSplitForControl2() {
-        return fromCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        return fromCumTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     }
     
     function getCompetitor2WithNullFinishSplit() {
-        return fromSplitTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, null]);
+        return fromSplitTimes(2, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, null]);
     }
     
     function getCompetitor2WithFinishCumTimeNotTheLargest() {
-        return fromCumTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 - 73]);
+        return fromCumTimes(2, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 - 73]);
     }
     
     function getCompetitor2WithFirstControlLargerThanAllOthers() {
-        return fromCumTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 4103, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        return fromCumTimes(2, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [0, 4103, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
     }
     
     function getCompetitor3() {
-        return fromSplitTimes(3, "Bill Baker", "GHI", 11 * 3600, [78, 209, 199, 117]);    
+        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, 199, 117]);    
     }
     
     function getCompetitor3WithSameTotalTimeAsCompetitor1() {
-        return fromSplitTimes(3, "Bill Baker", "GHI", 11 * 3600, [78, 209, 199, 109]);
+        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, 199, 109]);
     }
     
     function getCompetitor3WithNullSplitForControl2() {
-        return fromSplitTimes(3, "Bill Baker", "GHI", 11 * 3600, [78, null, 199, 117]);
+        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, null, 199, 117]);
     }
     
     function getCompetitor3WithNullSplitForControl3() {
-        return fromSplitTimes(3, "Bill Baker", "GHI", 11 * 3600, [78, 209, null, 117]);
+        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, null, 117]);
     }
     
     function getCompetitor3WithNullFinishSplit() {
-        return fromSplitTimes(3, "Bill Baker", "GHI", 11 * 3600, [78, 209, 199, null]);
+        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, 199, null]);
     }
     
     QUnit.test("Can create a CourseClassSet from an empty array of course-classes", function (assert) {
@@ -208,7 +208,7 @@
     });
     
     QUnit.test("Cannot create a CourseClassSet from two course-classes with different numbers of controls", function (assert) {
-        var competitor2 = fromSplitTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 108]);
+        var competitor2 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 108]);
         var courseClass1 = new CourseClass("Test", 3, [getCompetitor1()]);
         var courseClass2 = new CourseClass("Test", 4, [competitor2]);
         SplitsBrowserTest.assertInvalidData(assert, function () {
@@ -259,13 +259,13 @@
     QUnit.test("Cumulative times of the winner of a single-class set are those with quickest time", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getCompetitor2(), getFasterCompetitor1()])]);
         var winTimes = courseClassSet.getWinnerCumTimes();
-        assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], "John Smith (second competitor) should be the winner");
+        assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], "First Runner (second competitor) should be the winner");
     });
 
     QUnit.test("Cumulative times of the winner of a multiple-class set are those with quickest time", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getCompetitor2()]), new CourseClass("Test 2", 3, [getFasterCompetitor1()])]);
         var winTimes = courseClassSet.getWinnerCumTimes();
-        assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], "John Smith (second competitor) from the second course should be the winner");
+        assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], "First Runner (second competitor) from the second course should be the winner");
     });
     
     QUnit.test("Cumulative times of the winner of a class containing only a single competitor with a dubious cumulative time include a filled gap", function (assert) {
@@ -292,9 +292,9 @@
     });
 
     QUnit.test("Fastest cumulative times on course-class set when both competitors have dubious time at one control has backpopulated value for missing control", function (assert) {
-        var competitor1 = fromOriginalCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65, 65 + 221 + 209, 65 + 221 + 209 + 100]);
+        var competitor1 = fromOriginalCumTimes(1, "First Runner", "ABC", 10 * 3600, [0, 65, 65, 65 + 221 + 209, 65 + 221 + 209 + 100]);
         competitor1.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 209, 65 + 221 + 209 + 100]);
-        var competitor2 = fromOriginalCumTimes(2, "Fred Brown", "DEF", 10 * 3600 + 30, [0, 81, 81, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor2 = fromOriginalCumTimes(2, "Second Runner", "DEF", 10 * 3600 + 30, [0, 81, 81, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         competitor2.setRepairedCumulativeTimes([0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [competitor1, competitor2])]);
         
@@ -303,7 +303,7 @@
     });
 
     QUnit.test("Fastest cumulative times on course-class set when only competitor has missing time at last control has backpopulated values from that competitor", function (assert) {
-        var competitor = fromCumTimes(1, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, null, 65 + 221 + 209 + 100]);
+        var competitor = fromCumTimes(1, "First Runner", "ABC", 10 * 3600, [0, 65, 65 + 221, null, 65 + 221 + 209 + 100]);
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [competitor])]);
         assert.deepEqual(courseClassSet.getFastestCumTimes(), [0, 65, 65 + 221, 65 + 221 + (209 + 100) / 2, 65 + 221 + 209 + 100],
                     "Class with penultimate control mispunched by only competitor should have correct dummy value for missing control");
@@ -345,13 +345,13 @@
     QUnit.test("Cumulative times of the second competitor in a single-class set are those of the second competitor", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getCompetitor2(), getFasterCompetitor1()])]);
         var competitorTimes = courseClassSet.getCumulativeTimesForCompetitor(1);
-        assert.deepEqual(competitorTimes, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], "Fred Brown (first competitor) should be the second competitor");
+        assert.deepEqual(competitorTimes, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], "Second Runner (first competitor) should be the second competitor");
     });
 
     QUnit.test("Cumulative times of the second competitor of a multiple-class set are those of the second competitor", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getCompetitor2()]), new CourseClass("Test 2", 3, [getFasterCompetitor1()])]);
         var competitorTimes = courseClassSet.getCumulativeTimesForCompetitor(1);
-        assert.deepEqual(competitorTimes, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], "Fred Brown (first competitor) from the first course should be the second competitor");
+        assert.deepEqual(competitorTimes, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], "Second Runner (first competitor) from the first course should be the second competitor");
     });
     
     QUnit.test("Cumulative times of the competitor in a class containing only a single competitor with a dubious cumulative time include a filled gap", function (assert) {
@@ -491,9 +491,9 @@
     });
     
     QUnit.test("Can compute ranks when there are three competitors specified by cumulative times with one missing split times", function (assert) {
-        var competitor1 = fromCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
-        var competitor2 = fromCumTimes(2, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100]);
-        var competitor3 = fromCumTimes(2, "Bill Baker", "GHI", 11 * 3600, [0, 78, null,     78 + 209 + 199, 78 + 209 + 199 + 117]);
+        var competitor1 = fromCumTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor2 = fromCumTimes(2, "First Runner", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100]);
+        var competitor3 = fromCumTimes(2, "Third Runner", "GHI", 11 * 3600, [0, 78, null,     78 + 209 + 199, 78 + 209 + 199 + 117]);
         new CourseClassSet([new CourseClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
         assertSplitAndCumulativeRanks(assert, competitor1, [3, 1, 2, 2], [3, 1, 1, 2]);
@@ -506,9 +506,9 @@
     });
     
     QUnit.test("Can compute ranks when there are three competitors specified by cumulative times with one having a dubious split time", function (assert) {
-        var competitor1 = fromCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
-        var competitor2 = fromCumTimes(2, "John Smith", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100]);
-        var competitor3 = fromOriginalCumTimes(2, "Bill Baker", "GHI", 11 * 3600, [0, 78, 78 - 30, 78 + 209 + 199, 78 + 209 + 199 + 117]);
+        var competitor1 = fromCumTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor2 = fromCumTimes(2, "First Runner", "ABC", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100]);
+        var competitor3 = fromOriginalCumTimes(2, "Third Runner", "GHI", 11 * 3600, [0, 78, 78 - 30, 78 + 209 + 199, 78 + 209 + 199 + 117]);
         competitor3.setRepairedCumulativeTimes([0, 78, NaN, 78 + 209 + 199, 78 + 209 + 199 + 117]);
         new CourseClassSet([new CourseClass("Test", 3, [competitor1, competitor2, competitor3])]);
         
@@ -650,7 +650,7 @@
             xExtent: [0, 65 + 197 + 184 + 100],
             yExtent: [0, 50],
             numControls: 3,
-            competitorNames: ["John Smith", "Fred Brown"],
+            competitorNames: ["First Runner", "Second Runner"],
             dubiousTimesInfo: [[], []]
         };
 
@@ -674,7 +674,7 @@
             xExtent: [0, 65 + 197 + 212 + 100],
             yExtent: [-4, 22],
             numControls: 3,
-            competitorNames: ["John Smith", "Fred Brown"],
+            competitorNames: ["First Runner", "Second Runner"],
             dubiousTimesInfo: [[{start: 1, end: 3}], []]
         };
 
@@ -697,7 +697,7 @@
             xExtent: [0, 65 + 197 + 212 + 100],
             yExtent: [-4, 22],
             numControls: 3,
-            competitorNames: ["John Smith", "Fred Brown"],
+            competitorNames: ["First Runner", "Second Runner"],
             dubiousTimesInfo: [[{start: 0, end: 2}], []]
         };
 
@@ -721,7 +721,7 @@
             xExtent: [0, 81 + 197 + 184 + 100],
             yExtent: [0, 34],
             numControls: 3,
-            competitorNames: ["John Smith", "Fred Brown"],
+            competitorNames: ["First Runner", "Second Runner"],
             dubiousTimesInfo: [[/* none */], []]
         };
 
@@ -745,7 +745,7 @@
             xExtent: [0, 65 + 197 + 184],
             yExtent: [0, 197],
             numControls: 3,
-            competitorNames: ["Fred Brown", "John Smith"],
+            competitorNames: ["Second Runner", "First Runner"],
             dubiousTimesInfo: [[], []]
         };
 
@@ -770,7 +770,7 @@
             xExtent: [65 + (81 + 197 - 4103), 65],
             yExtent: [0, 4072],
             numControls: 3,
-            competitorNames: ["John Smith", "Fred Brown"],
+            competitorNames: ["First Runner", "Second Runner"],
             dubiousTimesInfo: [[], []]
         };
 
@@ -794,7 +794,7 @@
             xExtent: [0, 65 + 197 + 184 + 100],
             yExtent: [0, 50],
             numControls: 3,
-            competitorNames: ["John Smith", "Fred Brown"],
+            competitorNames: ["First Runner", "Second Runner"],
             dubiousTimesInfo: [[], []]
         };
 
@@ -818,7 +818,7 @@
             xExtent: [0, 65 + 197 + 184 + 100],
             yExtent: [0, 24],
             numControls: 3,
-            competitorNames: ["John Smith"],
+            competitorNames: ["First Runner"],
             dubiousTimesInfo: [[]]
         };
 
@@ -842,7 +842,7 @@
             xExtent: [0, 65 + 197 + 184 + 100],
             yExtent: [0, 50],
             numControls: 3,
-            competitorNames: ["Fred Brown"],
+            competitorNames: ["Second Runner"],
             dubiousTimesInfo: [[]]
         };
 
