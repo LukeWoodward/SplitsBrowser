@@ -619,6 +619,16 @@
     };
     
     /**
+    * Returns whether the given time has been omitted: i.e. it is dubious, or
+    * it is missing but the competitor has been marked as OK despite that.
+    * @param {?Number} time The time to test.
+    * @return {Boolean} true if the time is dubious or missing, false if not.
+    */
+    Competitor.prototype.isTimeOmitted = function (time) {
+        return isNaNStrict(time) || (this.isOKDespiteMissingTimes && time === null);
+    };
+    
+    /**
     * Returns an array of objects that record the indexes around which times in
     * the given array are omitted, due to the times being dubious or missing.
     * @param {Array} times - Array of time values.
@@ -628,9 +638,9 @@
         var omittedTimeInfo = [];
         var startIndex = 1;
         while (startIndex + 1 < times.length) {
-            if (isNaNStrict(times[startIndex]) || (this.isOKDespiteMissingTimes && times[startIndex] === null)) {
+            if (this.isTimeOmitted(times[startIndex])) {
                 var endIndex = startIndex;
-                while (endIndex + 1 < times.length && (isNaNStrict(times[endIndex + 1]) || (this.isOKDespiteMissingTimes && times[endIndex + 1] === null))) {
+                while (endIndex + 1 < times.length && this.isTimeOmitted(times[endIndex + 1])) {
                     endIndex += 1;
                 }
                 

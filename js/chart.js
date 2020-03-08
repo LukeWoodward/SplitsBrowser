@@ -81,7 +81,8 @@
     */
     function formatTimeAndRank(time, rank, isOKDespiteMissingTimes) {
         if (isOKDespiteMissingTimes && time === null) {
-            return formatTimeAndRank(NaN, NaN, false);
+            time = NaN;
+            rank = NaN;
         }
         
         var rankStr;

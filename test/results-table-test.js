@@ -25,11 +25,11 @@
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
     var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
-    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var Course = SplitsBrowser.Model.Course;
 
+    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
     QUnit.module("Results Table");
     
