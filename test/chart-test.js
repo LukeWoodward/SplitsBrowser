@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser - Chart tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
-    function getIndexesAroundDubiousCumTimes(competitor) {
-        return competitor.getControlIndexesAroundDubiousCumulativeTimes();
+    function getIndexesAroundOmittedCumTimes(competitor) {
+        return competitor.getControlIndexesAroundOmittedCumulativeTimes();
     }
 
     var DUMMY_CHART_TYPE_NO_SKIP = {
@@ -41,7 +41,7 @@
         skipStart: false,
         yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: false,
-        indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumTimes
+        indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumTimes
     };
     
     var DUMMY_CHART_TYPE_SKIP = {
@@ -50,7 +50,7 @@
         skipStart: true,
         yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: false,
-        indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumTimes
+        indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumTimes
     };
 
     var DUMMY_CHART_TYPE_RACE_GRAPH = {
@@ -59,7 +59,7 @@
         skipStart: false,
         yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: true,
-        indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumTimes
+        indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumTimes
     };
 
     var TEXT_WIDTHS = {

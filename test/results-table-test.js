@@ -24,6 +24,7 @@
     var getMessage = SplitsBrowser.getMessage;
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
     var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var Course = SplitsBrowser.Model.Course;
@@ -267,7 +268,7 @@
         assert.expect(0);
     });
     
-    QUnit.test("Can create a results table with one competitor with suspicious times appropriately classed", function (assert) {
+    QUnit.test("Can create a results table with one competitor with dubious times appropriately classed", function (assert) {
         var competitor1 = fromOriginalCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 65, 65 + 0, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         competitor1.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         var courseClass = new CourseClass("Test", 3, [competitor1]);
@@ -293,6 +294,35 @@
             // and away from it.
             assert.strictEqual($("span:first-child", cell).hasClass("dubious"), (cellIndex === 4));
             assert.strictEqual($("span:last-child", cell).hasClass("dubious"), (cellIndex === 4 || cellIndex === 5));
+        }
+    });
+    
+    QUnit.test("Can create a results table with one competitor with missing times appropriately classed", function (assert) {
+        var competitor = fromCumTimes(1, "Fred Brown", "DEF", 10 * 3600 + 30 * 60, [0, 65, null, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        competitor.setOKDespiteMissingTimes();
+        var courseClass = new CourseClass("Test", 3, [competitor]);
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
+        calculateRanks(courseClass);
+        
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(courseClass);
+        
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
+        var table = d3.select("table.resultsTable").node();
+        assert.strictEqual($("tbody", table).length, 1);
+        assert.strictEqual($("tbody tr", table).length, 1);
+        var tableCells = $("tbody tr td", table);
+        assert.strictEqual(tableCells.length, 7);
+        
+        for (var cellIndex = 0; cellIndex < 7; cellIndex += 1) {
+            var cell = tableCells[cellIndex];
+            
+            // Cell index 4 is control 2, and index 5 is control 3.
+            // As the cumulative time to control 2 is missing, this cumulative time
+            // should be regarded as omitted, as should the split times to it
+            // and away from it.
+            assert.strictEqual($("span:first-child", cell).hasClass("missing"), (cellIndex === 4));
+            assert.strictEqual($("span:last-child", cell).hasClass("missing"), (cellIndex === 4 || cellIndex === 5));
         }
     });
     

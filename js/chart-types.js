@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Chart Types - Defines the types of charts that can be plotted.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -31,23 +31,23 @@
     }
     
     /**
-    * Returns indexes around the given competitor's dubious cumulative times.
+    * Returns indexes around the given competitor's omitted cumulative times.
     * @param {Competitor} competitor - The competitor to get the indexes for.
-    * @return {Array} Array of objects containing indexes around dubious
+    * @return {Array} Array of objects containing indexes around omitted
     *     cumulative times.
     */
-    function getIndexesAroundDubiousCumulativeTimes(competitor) {
-        return competitor.getControlIndexesAroundDubiousCumulativeTimes();
+    function getIndexesAroundOmittedCumulativeTimes(competitor) {
+        return competitor.getControlIndexesAroundOmittedCumulativeTimes();
     }
     
     /**
-    * Returns indexes around the given competitor's dubious split times.
+    * Returns indexes around the given competitor's omitted split times.
     * @param {Competitor} competitor - The competitor to get the indexes for.
-    * @return {Array} Array of objects containing indexes around dubious split
+    * @return {Array} Array of objects containing indexes around omitted split
     *     times.
     */
-    function getIndexesAroundDubiousSplitTimes(competitor) {
-        return competitor.getControlIndexesAroundDubiousSplitTimes();
+    function getIndexesAroundOmittedSplitTimes(competitor) {
+        return competitor.getControlIndexesAroundOmittedSplitTimes();
     }
 
     SplitsBrowser.Model.ChartTypes = {
@@ -59,7 +59,7 @@
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1,
-            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumulativeTimes
+            indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumulativeTimes
         },
         RaceGraph: {
             nameKey: "RaceGraphChartType",
@@ -69,7 +69,7 @@
             isRaceGraph: true,
             isResultsTable: false,
             minViewableControl: 0,
-            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumulativeTimes
+            indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumulativeTimes
         },
         PositionAfterLeg: {
             nameKey:  "PositionAfterLegChartType",
@@ -79,7 +79,7 @@
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1,
-            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousCumulativeTimes
+            indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumulativeTimes
         },
         SplitPosition: {
             nameKey: "SplitPositionChartType",
@@ -89,7 +89,7 @@
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1,
-            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousSplitTimes
+            indexesAroundOmittedTimesFunc: getIndexesAroundOmittedSplitTimes
         },
         PercentBehind: {
             nameKey: "PercentBehindChartType",
@@ -99,7 +99,7 @@
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1,
-            indexesAroundDubiousTimesFunc: getIndexesAroundDubiousSplitTimes
+            indexesAroundOmittedTimesFunc: getIndexesAroundOmittedSplitTimes
         },
         ResultsTable: {
             nameKey: "ResultsTableChartType",
@@ -109,7 +109,7 @@
             isRaceGraph: false,
             isResultsTable: true,
             minViewableControl: 1,
-            indexesAroundDubiousTimesFunc: null
+            indexesAroundOmittedTimesFunc: null
         }
     };
 })();

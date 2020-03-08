@@ -131,6 +131,24 @@
     }
     
     /**
+    * Formats a time (cumulative or split) for a competitor.  If the competitor is
+    * deemed as completed despite having missing times, any such missing times are
+    * replaced with "??:??".
+    * @param {Number|null} time The time to format, in seconds.
+    * @param {Number} precision The precision to format the time to.
+    * @param {Boolean} competitorOKDespiteMissingTimes True if the competitor is known to
+    *       have completed the course despite having missing times, false otherwise.
+    * @return Formatted time
+    */
+    function formatPossiblyMissingTime(time, precision, competitorOKDespiteMissingTimes) {
+        if (time === null && competitorOKDespiteMissingTimes) {
+            return "??:??";
+        } else {
+            return formatTime(time, precision);
+        }
+    }
+    
+    /**
     * Populates the contents of the table with the course-class data.
     */
     ResultsTable.prototype.populateTable = function () {
@@ -183,27 +201,40 @@
         // Array that accumulates bits of HTML for the table body.
         var htmlBits = [];
         
+        function timeClasses(isFastest, isDubious, isMissing) {
+            var classes = [];
+            if (isFastest) {
+                classes.push("fastest");
+            }
+            if (isDubious) {
+                classes.push("dubious");
+            }
+            if (isMissing) {
+                classes.push("missing");
+            }
+            
+            return classes.join(" ");
+        }
+        
         // Adds a two-line cell to the array of table-body HTML parts.
         // If truthy, cssClass is assumed to be HTML-safe and not require
         // escaping.
-        function addCell(topLine, bottomLine, cssClass, cumFastest, splitFastest, cumDubious, splitDubious) {
+        function addCell(topLine, bottomLine, cssClass, cumClasses, splitClasses) {
             htmlBits.push("<td");
             if (cssClass) {
                 htmlBits.push(" class=\"" + cssClass + "\"");
             }
             
             htmlBits.push("><span");
-            var className = (((cumFastest) ? "fastest" : "") + " " + ((cumDubious) ? "dubious" : "")).trim();
-            if (className !== "") {
-                htmlBits.push(" class=\"" + className + "\"");
+            if (cumClasses !== "") {
+                htmlBits.push(" class=\"" + cumClasses + "\"");
             }
             
             htmlBits.push(">");
             htmlBits.push(escapeHtml(topLine));
             htmlBits.push("</span><br><span");
-            className = (((splitFastest) ? "fastest" : "") + " " + ((splitDubious) ? "dubious" : "")).trim();
-            if (className !== "") {
-                htmlBits.push(" class=\"" + className + "\"");
+            if (splitClasses !== "") {
+                htmlBits.push(" class=\"" + splitClasses + "\"");
             }
             
             htmlBits.push(">");
@@ -235,17 +266,21 @@
             
             htmlBits.push("</td>");
             
-            addCell(competitor.name, competitor.club, false, false, false, false);
-            addCell(getTimeOrStatus(competitor, precision), NON_BREAKING_SPACE_CHAR, "time", false, false, false, false);
+            addCell(competitor.name, competitor.club, null, "", "");
+            addCell(getTimeOrStatus(competitor, precision), NON_BREAKING_SPACE_CHAR, "time", "", "");
             
             d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {
-                var formattedCumTime = formatTime(competitor.getOriginalCumulativeTimeTo(controlNum), precision);
-                var formattedSplitTime = formatTime(competitor.getOriginalSplitTimeTo(controlNum), precision);
+                var cumTime = competitor.getOriginalCumulativeTimeTo(controlNum);
+                var splitTime = competitor.getOriginalSplitTimeTo(controlNum);
+                var formattedCumTime = formatPossiblyMissingTime(cumTime, precision, competitor.isOKDespiteMissingTimes);
+                var formattedSplitTime = formatPossiblyMissingTime(splitTime, precision, competitor.isOKDespiteMissingTimes);
                 var isCumTimeFastest = (competitor.getCumulativeRankTo(controlNum) === 1);
                 var isSplitTimeFastest = (competitor.getSplitRankTo(controlNum) === 1);
                 var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
                 var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
-                addCell(formattedCumTime, formattedSplitTime, "time", isCumTimeFastest, isSplitTimeFastest, isCumDubious, isSplitDubious);
+                var isCumMissing = competitor.isOKDespiteMissingTimes && cumTime === null;
+                var isSplitMissing = competitor.isOKDespiteMissingTimes && splitTime === null;
+                addCell(formattedCumTime, formattedSplitTime, "time", timeClasses(isCumTimeFastest, isCumDubious, isCumMissing), timeClasses(isSplitTimeFastest, isSplitDubious, isSplitMissing));
             });
             
             htmlBits.push("</tr>\n");

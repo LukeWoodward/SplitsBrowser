@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser OE Reader - Reads in OE CSV results data files.
  *  
- *  Copyright (C) 2000-2017 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -383,8 +383,10 @@
         }
         
         var classifier = row[this.columnIndexes.classifier];
-        if (classifier !== "" && classifier !== "0") {
-            if (classifier === "1") {
+        if (classifier !== "") {
+            if (classifier === "0" && cumTimes.indexOf(null) >= 0 && cumTimes[cumTimes.length - 1] !== null) {
+                competitor.setOKDespiteMissingTimes();
+            } else if (classifier === "1") {
                 competitor.setNonStarter();
             } else if (classifier === "2") {
                 competitor.setNonFinisher();

@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - CSS styles.
  *  
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -162,13 +162,13 @@ text.startLabel.selected
     font-weight: bold;
 }
 
-line.aroundDubiousTimes 
+line.aroundOmittedTimes 
 {
     stroke-width: 2;
     stroke-dasharray: 6, 3;
 }
 
-path.graphLine.selected, line.competitorLegendLine.selected, line.aroundDubiousTimes.selected
+path.graphLine.selected, line.competitorLegendLine.selected, line.aroundOmittedTimes.selected
 {
     stroke-width: 6;
 }
@@ -285,6 +285,11 @@ span.resultsTableHeader
 {
     font-style: italic;
     color: #CCCCCC;
+}
+
+.resultsTable tbody td.time span.missing
+{
+    color: #999999;
 }
 
 .resultsTable tbody td.time span.fastest
