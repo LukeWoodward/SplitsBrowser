@@ -684,13 +684,15 @@
                         var competitor = courseClass.competitors[0];
                         assert.strictEqual(competitor.name, person.forename + " " + person.surname);
                         assert.strictEqual(competitor.club, person.club);
-                        assert.strictEqual(competitor.startTime, person.startTime);
-                        assert.strictEqual(competitor.totalTime, person.totalTime);
                         assert.strictEqual(competitor.gender, "M");
                         assert.strictEqual(competitor.yearOfBirth, 1976);
-                        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat(person.totalTime));
-                        assert.ok(competitor.completed());
-                        assert.ok(!competitor.isNonCompetitive);
+                        
+                        var result = competitor.result;
+                        assert.strictEqual(result.startTime, person.startTime);
+                        assert.strictEqual(result.totalTime, person.totalTime);
+                        assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat(person.totalTime));
+                        assert.ok(result.completed());
+                        assert.ok(!result.isNonCompetitive);
                     }
                 
                     assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatterName);
@@ -842,7 +844,7 @@
         delete person.startTime;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.strictEqual(competitor.startTime, null);
+                assert.strictEqual(competitor.result.startTime, null);
             });
     });
     
@@ -851,7 +853,7 @@
         person.startTime = null;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.strictEqual(competitor.startTime, null);
+                assert.strictEqual(competitor.result.startTime, null);
             });
     });
     
@@ -860,7 +862,7 @@
         person.startTimeBasic = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.strictEqual(competitor.startTime, person.startTime);
+                assert.strictEqual(competitor.result.startTime, person.startTime);
             },
             {formatters: [Version3Formatter]});
     });
@@ -870,7 +872,7 @@
         person.startTimeNoSeconds = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.strictEqual(competitor.startTime, person.startTime - (person.startTime % 60));
+                assert.strictEqual(competitor.result.startTime, person.startTime - (person.startTime % 60));
             },
             {formatters: [Version3Formatter]});
     });
@@ -880,8 +882,8 @@
         delete person.totalTime;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.strictEqual(competitor.totalTime, null);
-                assert.ok(!competitor.completed());
+                assert.strictEqual(competitor.result.totalTime, null);
+                assert.ok(!competitor.result.completed());
             });
     });
     
@@ -890,8 +892,8 @@
         person.totalTime = null;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.strictEqual(competitor.totalTime, null);
-                assert.ok(!competitor.completed());
+                assert.strictEqual(competitor.result.totalTime, null);
+                assert.ok(!competitor.result.completed());
             });
     });
     
@@ -900,7 +902,7 @@
         person.cumTimes = [65.7, 65.7 + 221.4, 65.7 + 221.4 + 184.6];
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat(person.totalTime));
+                assert.deepEqual(competitor.result.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat(person.totalTime));
             },
             {formatters: [Version3Formatter]});
     });
@@ -972,7 +974,7 @@
         person.competitive = false;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.strictEqual(competitor.isNonCompetitive, true);        
+                assert.strictEqual(competitor.result.isNonCompetitive, true);        
             });
     });
     
@@ -982,7 +984,7 @@
         person.cumTimes = [null, null, null];
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.strictEqual(competitor.isNonStarter, true);        
+                assert.strictEqual(competitor.result.isNonStarter, true);        
             });
     });
     
@@ -992,7 +994,7 @@
         person.cumTimes[2] = null;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.strictEqual(competitor.isNonFinisher, true);        
+                assert.strictEqual(competitor.result.isNonFinisher, true);        
             });
     });
     
@@ -1001,7 +1003,7 @@
         person.disqualified = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.strictEqual(competitor.isDisqualified, true);        
+                assert.strictEqual(competitor.result.isDisqualified, true);        
             });
     });
     
@@ -1010,7 +1012,7 @@
         person.overMaxTime = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.strictEqual(competitor.isOverMaxTime, true);        
+                assert.strictEqual(competitor.result.isOverMaxTime, true);        
             });
     });
     
@@ -1020,7 +1022,7 @@
         person.okDespiteMissingTimes = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.strictEqual(competitor.isOKDespiteMissingTimes, true);        
+                assert.strictEqual(competitor.result.isOKDespiteMissingTimes, true);        
             });
     });
     
@@ -1086,7 +1088,7 @@
             function (course) {
                 assert.strictEqual(course.classes.length, 1);
                 assert.strictEqual(course.classes[0].competitors.length, 1);
-                assert.strictEqual(course.classes[0].competitors[0].totalTime, person.totalTime, "Should read competitor's total time");
+                assert.strictEqual(course.classes[0].competitors[0].result.totalTime, person.totalTime, "Should read competitor's total time");
             },
             {preprocessor: function (xml) {
                 var timeRegex = /<Time>[^<]+<\/Time>/g;
@@ -1103,8 +1105,8 @@
         person.cumTimes[1] = null;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (competitor) {
-                assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat([person.totalTime]));
-                assert.ok(!competitor.completed());
+                assert.deepEqual(competitor.result.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat([person.totalTime]));
+                assert.ok(!competitor.result.completed());
             });
     });
     

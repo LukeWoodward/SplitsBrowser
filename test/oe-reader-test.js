@@ -361,16 +361,18 @@
             var competitor = eventData.classes[0].competitors[0];
             assert.strictEqual(competitor.name, "First Runner", "Should read correct name");
             assert.strictEqual(competitor.club, "ABC", "Should read correct club");
-            assert.strictEqual(competitor.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
             assert.strictEqual(competitor.yearOfBirth, 1984, "Should read correct year of birth");
             if (format.hasGender) {
                 assert.strictEqual(competitor.gender, "M", "Should read correct gender");
             }
-            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
-            assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
-            assert.ok(!competitor.isNonStarter, "Competitor should not be marked as a non-starter");
-            assert.ok(!competitor.isNonFinisher, "Competitor should not be marked as a non-finisher");
-            assert.ok(!competitor.isDisqualified, "Competitor should not be marked as disqualified");        
+            
+            var result = competitor.result;
+            assert.strictEqual(result.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
+            assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
+            assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
+            assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
+            assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
+            assert.ok(!result.isDisqualified, "Competitor result should not be marked as disqualified");        
             
             assert.strictEqual(eventData.classes[0].course, course, "Class should refer to its course");
         });
@@ -383,7 +385,7 @@
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            assert.strictEqual(eventData.classes[0].competitors[0].startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
+            assert.strictEqual(eventData.classes[0].competitors[0].result.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
         });
     });
     
@@ -395,7 +397,7 @@
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            assert.strictEqual(eventData.classes[0].competitors[0].startTime, null, "Should read correct start time");
+            assert.strictEqual(eventData.classes[0].competitors[0].result.startTime, null, "Should read correct start time");
         });
     });
     
@@ -447,9 +449,9 @@
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            var competitor = eventData.classes[0].competitors[0];
-            assert.ok(!competitor.completed());
-            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, null, null, 393]);
+            var result = eventData.classes[0].competitors[0].result;
+            assert.ok(!result.completed());
+            assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, null, null, 393]);
         }, function (eventDataStr) {
             for (var i = 0; i < 4; i += 1) {
                 eventDataStr = eventDataStr.substring(0, eventDataStr.lastIndexOf(";"));
@@ -464,9 +466,9 @@
         runTestOverAllFormats([[competitor1, getControls1WithBlankTimeForLast()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            var competitor = eventData.classes[0].competitors[0];
-            assert.ok(!competitor.completed());
-            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, null, 393]);
+            var result = eventData.classes[0].competitors[0].result;
+            assert.ok(!result.completed());
+            assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, null, 393]);
         });
     });
     
@@ -476,8 +478,8 @@
         runTestOverAllFormats([[competitor1, getControls1WithNonNumericControlCode()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            var competitor = eventData.classes[0].competitors[0];
-            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
+            var result = eventData.classes[0].competitors[0].result;
+            assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
         });
     });
     
@@ -487,8 +489,8 @@
         runTestOverAllFormats([[competitor1, getControls1WithBlankCodeAndMissingTimeAtTheEnd()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            var competitor = eventData.classes[0].competitors[0];
-            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
+            var result = eventData.classes[0].competitors[0].result;
+            assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
         });
     });
     
@@ -498,8 +500,8 @@
         runTestOverAllFormats([[competitor1, getControls1WithBlankCodeAndMissingTimeAtTheEndFollowedByAdditionalControl()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            var competitor = eventData.classes[0].competitors[0];
-            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
+            var result = eventData.classes[0].competitors[0].result;
+            assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
         });
     });
     
@@ -568,8 +570,8 @@
         runTestOverAllFormats([[getCompetitor1(), getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            var competitor = eventData.classes[0].competitors[0];
-            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
+            var result = eventData.classes[0].competitors[0].result;
+            assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
             assert.strictEqual(eventData.courses.length, 1, "There should be one course");
         }, function (eventDataStr) {
             return eventDataStr.replace(/\r\n/g, "\n");
@@ -605,8 +607,8 @@
         var competitor = eventData.classes[0].competitors[0];
         assert.strictEqual(competitor.name, competitor1.compno, "Should read competitor name as ID");
         assert.strictEqual(competitor.club, competitor1.noOfClub, "Should read club name as ID");
-        assert.deepEqual(competitor.startTime, parseTime(competitor1.startTime), "Should read correct start time");
-        assert.deepEqual(competitor.totalTime, 393, "Should read correct total time");
+        assert.deepEqual(competitor.result.startTime, parseTime(competitor1.startTime), "Should read correct start time");
+        assert.deepEqual(competitor.result.totalTime, 393, "Should read correct total time");
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with commas as column separators", function (assert) {
@@ -686,8 +688,8 @@
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
         
-            var competitor = eventData.classes[0].competitors[0];
-            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
+            var result = eventData.classes[0].competitors[0].result;
+            assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
         });
     });
     
@@ -701,9 +703,9 @@
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
         
-            var competitor = eventData.classes[0].competitors[0];
-            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
-            assert.ok(competitor.isOKDespiteMissingTimes, "Should be marked as OK despite having a missing time");
+            var result = eventData.classes[0].competitors[0].result;
+            assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
+            assert.ok(result.isOKDespiteMissingTimes, "Should be marked as OK despite having a missing time");
         });
     });
     
@@ -739,7 +741,7 @@
             
             var competitor = eventData.classes[0].competitors[0];
             assert.strictEqual(competitor.name, "First Runner", "Should read correct name without 'mp' suffix");
-            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
+            assert.deepEqual(competitor.result.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
         });
     });
     
@@ -754,12 +756,14 @@
             
             var competitor = eventData.classes[0].competitors[0];
             assert.strictEqual(competitor.name, "First Runner", "Should read correct name without 'n/c' suffix");
-            assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
-            assert.ok(competitor.isNonCompetitive, "Competitor should be marked as non-competitive");
-            assert.ok(!competitor.isNonStarter, "Competitor should not be marked as a non-starter");
-            assert.ok(!competitor.isNonFinisher, "Competitor should not be marked as a non-finisher");
-            assert.ok(!competitor.isDisqualified, "Competitor should not be marked as disqualified");
-            assert.ok(!competitor.isOverMaxTime, "Competitor should not be marked as over max time");
+            
+            var result = competitor.result;
+            assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
+            assert.ok(result.isNonCompetitive, "Competitor result should be marked as non-competitive");
+            assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
+            assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
+            assert.ok(!result.isDisqualified, "Competitor result should not be marked as disqualified");
+            assert.ok(!result.isOverMaxTime, "Competitor result should not be marked as over max time");
         });
     });
     
@@ -769,12 +773,12 @@
         runTestOverAllFormats([[comp, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            var competitor = eventData.classes[0].competitors[0];
-            assert.ok(competitor.isNonCompetitive, "Competitor should be marked as non-competitive");
-            assert.ok(!competitor.isNonStarter, "Competitor should not be marked as a non-starter");
-            assert.ok(!competitor.isNonFinisher, "Competitor should not be marked as a non-finisher");
-            assert.ok(!competitor.isDisqualified, "Competitor should not be marked as disqualified");
-            assert.ok(!competitor.isOverMaxTime, "Competitor should not be marked as over max time");
+            var result = eventData.classes[0].competitors[0].result;
+            assert.ok(result.isNonCompetitive, "Competitor result should be marked as non-competitive");
+            assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
+            assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
+            assert.ok(!result.isDisqualified, "Competitor result should not be marked as disqualified");
+            assert.ok(!result.isOverMaxTime, "Competitor result should not be marked as over max time");
         });
     });
     
@@ -785,12 +789,12 @@
         runTestOverAllFormats([[competitor1, getControls1AllMissed()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            var competitor = eventData.classes[0].competitors[0];
-            assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
-            assert.ok(competitor.isNonStarter, "Competitor should be marked as a non-starter");
-            assert.ok(!competitor.isNonFinisher, "Competitor should not be marked as a non-finisher");
-            assert.ok(!competitor.isDisqualified, "Competitor should not be marked as disqualified");
-            assert.ok(!competitor.isOverMaxTime, "Competitor should not be marked as over max time");
+            var result = eventData.classes[0].competitors[0].result;
+            assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
+            assert.ok(result.isNonStarter, "Competitor result should be marked as a non-starter");
+            assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
+            assert.ok(!result.isDisqualified, "Competitor result should not be marked as disqualified");
+            assert.ok(!result.isOverMaxTime, "Competitor result should not be marked as over max time");
         });
     });
     
@@ -802,12 +806,12 @@
         runTestOverAllFormats([[competitor1, getControls1AllMissed()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            var competitor = eventData.classes[0].competitors[0];
-            assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
-            assert.ok(competitor.isNonStarter, "Competitor should be marked as a non-starter");
-            assert.ok(!competitor.isNonFinisher, "Competitor should not be marked as a non-finisher");
-            assert.ok(!competitor.isDisqualified, "Competitor should not be marked as disqualified");
-            assert.ok(!competitor.isOverMaxTime, "Competitor should not be marked as over max time");
+            var result = eventData.classes[0].competitors[0].result;
+            assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
+            assert.ok(result.isNonStarter, "Competitor result should be marked as a non-starter");
+            assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
+            assert.ok(!result.isDisqualified, "Competitor result should not be marked as disqualified");
+            assert.ok(!result.isOverMaxTime, "Competitor result should not be marked as over max time");
         });
     });
     
@@ -819,12 +823,12 @@
         runTestOverAllFormats([[competitor1, controls]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            var competitor = eventData.classes[0].competitors[0];
-            assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
-            assert.ok(!competitor.isNonStarter, "Competitor should not be marked as a non-starter");
-            assert.ok(competitor.isNonFinisher, "Competitor should be marked as a non-finisher");
-            assert.ok(!competitor.isDisqualified, "Competitor should not be marked as disqualified");
-            assert.ok(!competitor.isOverMaxTime, "Competitor should not be marked as over max time");
+            var result = eventData.classes[0].competitors[0].result;
+            assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
+            assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
+            assert.ok(result.isNonFinisher, "Competitor result should be marked as a non-finisher");
+            assert.ok(!result.isDisqualified, "Competitor result should not be marked as disqualified");
+            assert.ok(!result.isOverMaxTime, "Competitor result should not be marked as over max time");
         });
     });
     
@@ -834,12 +838,12 @@
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            var competitor = eventData.classes[0].competitors[0];
-            assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
-            assert.ok(!competitor.isNonStarter, "Competitor should not be marked as a non-starter");
-            assert.ok(!competitor.isNonFinisher, "Competitor should not be marked as a non-finisher");
-            assert.ok(competitor.isDisqualified, "Competitor should be marked as disqualified");
-            assert.ok(!competitor.isOverMaxTime, "Competitor should not be marked as over max time");
+            var result = eventData.classes[0].competitors[0].result;
+            assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
+            assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
+            assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
+            assert.ok(result.isDisqualified, "Competitor result should be marked as disqualified");
+            assert.ok(!result.isOverMaxTime, "Competitor result should not be marked as over max time");
         });
     });
     
@@ -849,12 +853,12 @@
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            var competitor = eventData.classes[0].competitors[0];
-            assert.ok(!competitor.isNonCompetitive, "Competitor should not be marked as non-competitive");
-            assert.ok(!competitor.isNonStarter, "Competitor should not be marked as a non-starter");
-            assert.ok(!competitor.isNonFinisher, "Competitor should not be marked as a non-finisher");
-            assert.ok(!competitor.isDisqualified, "Competitor should not be marked as disqualified");
-            assert.ok(competitor.isOverMaxTime, "Competitor should be marked as over max time");
+            var result = eventData.classes[0].competitors[0].result;
+            assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
+            assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
+            assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
+            assert.ok(!result.isDisqualified, "Competitor result should not be marked as disqualified");
+            assert.ok(result.isOverMaxTime, "Competitor result should be marked as over max time");
         });
     });
     

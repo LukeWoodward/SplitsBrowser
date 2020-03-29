@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - HTML reader tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -97,16 +97,23 @@
     * @param {Object} expectedDetails - The expected details.
     */
     function assertCompetitor(assert, actualCompetitor, expectedDetails) {
-        var optionalProps = ["name", "club", "totalTime", "originalCumTimes", "originalSplitTimes", "isNonCompetitive", "isNonStarter", "isNonFinisher", "isDisqualified"];
-        optionalProps.forEach(function (propName) {
+        ["name", "club"].forEach(function (propName) {
             if (expectedDetails.hasOwnProperty(propName)) {
                 var assertion = (propName === "originalCumTimes" || propName === "originalSplitTimes") ? assert.deepEqual.bind(assert) : assert.strictEqual.bind(assert);
                 assertion(actualCompetitor[propName], expectedDetails[propName], "Should have correct value for property '" + propName + "'");    
             }
         });
         
+        var resultOptionalProps = ["totalTime", "originalCumTimes", "originalSplitTimes", "isNonCompetitive", "isNonStarter", "isNonFinisher", "isDisqualified"];
+        resultOptionalProps.forEach(function (propName) {
+            if (expectedDetails.hasOwnProperty(propName)) {
+                var assertion = (propName === "originalCumTimes" || propName === "originalSplitTimes") ? assert.deepEqual.bind(assert) : assert.strictEqual.bind(assert);
+                assertion(actualCompetitor.result[propName], expectedDetails[propName], "Should have correct value for property '" + propName + "'");    
+            }
+        });
+        
         if (expectedDetails.hasOwnProperty("completed")) {
-            assert.strictEqual(actualCompetitor.completed(), expectedDetails.completed);
+            assert.strictEqual(actualCompetitor.result.completed(), expectedDetails.completed);
         }
     }
     

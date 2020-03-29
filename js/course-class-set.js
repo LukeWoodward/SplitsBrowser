@@ -46,7 +46,7 @@
             }
             
             courseClass.competitors.forEach(function (comp) {
-                if (!comp.isNonStarter) { 
+                if (!comp.result.isNonStarter) { 
                     allCompetitors.push(comp);
                 }
             });
@@ -219,7 +219,7 @@
         }
         
         var firstCompetitor = this.allCompetitors[0];
-        return (firstCompetitor.completed()) ? fillBlankRangesInCumulativeTimes(firstCompetitor.cumTimes) : null;
+        return (firstCompetitor.result.completed()) ? fillBlankRangesInCumulativeTimes(firstCompetitor.result.cumTimes) : null;
     };
 
     /**
@@ -256,7 +256,7 @@
         for (var controlIdx = 1; controlIdx <= this.numControls + 1; controlIdx += 1) {
             var fastestForThisControl = null;
             for (var competitorIdx = 0; competitorIdx < this.allCompetitors.length; competitorIdx += 1) {
-                var thisTime = this.allCompetitors[competitorIdx].getSplitTimeTo(controlIdx);
+                var thisTime = this.allCompetitors[competitorIdx].result.getSplitTimeTo(controlIdx);
                 if (isNotNullNorNaN(thisTime) && (fastestForThisControl === null || thisTime < fastestForThisControl)) {
                     fastestForThisControl = thisTime;
                 }
@@ -278,13 +278,13 @@
             // Find all blank-ranges of competitors.
             var allCompetitorBlankRanges = [];
             this.allCompetitors.forEach(function (competitor) {
-                var competitorBlankRanges = getBlankRanges(competitor.getAllCumulativeTimes(), false);
+                var competitorBlankRanges = getBlankRanges(competitor.result.getAllCumulativeTimes(), false);
                 competitorBlankRanges.forEach(function (range) {
                     allCompetitorBlankRanges.push({
                         start: range.start,
                         end: range.end,
                         size: range.end - range.start,
-                        overallSplit: competitor.getCumulativeTimeTo(range.end) - competitor.getCumulativeTimeTo(range.start)
+                        overallSplit: competitor.result.getCumulativeTimeTo(range.end) - competitor.result.getCumulativeTimeTo(range.start)
                     });
                 });
             });
@@ -348,7 +348,7 @@
     * @return {Array} Array of cumulative times.
     */
     CourseClassSet.prototype.getCumulativeTimesForCompetitor = function (competitorIndex) {
-        return fillBlankRangesInCumulativeTimes(this.allCompetitors[competitorIndex].getAllCumulativeTimes());
+        return fillBlankRangesInCumulativeTimes(this.allCompetitors[competitorIndex].result.getAllCumulativeTimes());
     };
 
     /**
@@ -369,7 +369,7 @@
         });
         
         d3.range(1, this.numControls + 2).forEach(function (control) {
-            var splitsByCompetitor = this.allCompetitors.map(function(comp) { return comp.getSplitTimeTo(control); });
+            var splitsByCompetitor = this.allCompetitors.map(function(comp) { return comp.result.getSplitTimeTo(control); });
             var splitRanksForThisControl = getRanks(splitsByCompetitor);
             this.allCompetitors.forEach(function (_comp, idx) { splitRanksByCompetitor[idx].push(splitRanksForThisControl[idx]); });
         }, this);
@@ -380,7 +380,7 @@
             var cumSplitsByCompetitor = this.allCompetitors.map(function (comp, idx) {
                 // -1 for previous control, another -1 because the cumulative
                 // time to control N is cumRanksByCompetitor[idx][N - 1].
-                if (control > 1 && cumRanksByCompetitor[idx][control - 1 - 1] === null && !comp.isOKDespiteMissingTimes) {
+                if (control > 1 && cumRanksByCompetitor[idx][control - 1 - 1] === null && !comp.result.isOKDespiteMissingTimes) {
                     // This competitor has no cumulative rank for the previous
                     // control, and is not recorded as OK despite missing times,
                     // so either they mispunched it or mispunched a previous one.
@@ -388,7 +388,7 @@
                     // another null cumulative rank.
                     return null;
                 } else {
-                    return comp.getCumulativeTimeTo(control);
+                    return comp.result.getCumulativeTimeTo(control);
                 }
             });
             var cumRanksForThisControl = getRanks(cumSplitsByCompetitor);
@@ -396,7 +396,7 @@
         }, this);
         
         this.allCompetitors.forEach(function (comp, idx) {
-            comp.setSplitAndCumulativeRanks(splitRanksByCompetitor[idx], cumRanksByCompetitor[idx]);
+            comp.result.setSplitAndCumulativeRanks(splitRanksByCompetitor[idx], cumRanksByCompetitor[idx]);
         });
     };
     
@@ -424,16 +424,16 @@
             // Compare competitors by split time at this control, and, if those
             // are equal, total time.
             var comparator = function (compA, compB) {
-                var compASplit = compA.getSplitTimeTo(controlIdx);
-                var compBSplit = compB.getSplitTimeTo(controlIdx);
-                return (compASplit === compBSplit) ? d3.ascending(compA.totalTime, compB.totalTime) : d3.ascending(compASplit, compBSplit);
+                var compASplit = compA.result.getSplitTimeTo(controlIdx);
+                var compBSplit = compB.result.getSplitTimeTo(controlIdx);
+                return (compASplit === compBSplit) ? d3.ascending(compA.result.totalTime, compB.result.totalTime) : d3.ascending(compASplit, compBSplit);
             };
             
-            var competitors = this.allCompetitors.filter(function (comp) { return comp.completed() && !isNaNStrict(comp.getSplitTimeTo(controlIdx)); });
+            var competitors = this.allCompetitors.filter(function (comp) { return comp.result.completed() && !isNaNStrict(comp.result.getSplitTimeTo(controlIdx)); });
             competitors.sort(comparator);
             var results = [];
             for (var i = 0; i < competitors.length && i < numSplits; i += 1) {
-                results.push({name: competitors[i].name, split: competitors[i].getSplitTimeTo(controlIdx)});
+                results.push({name: competitors[i].name, split: competitors[i].result.getSplitTimeTo(controlIdx)});
             }
             
             return results;
@@ -458,7 +458,7 @@
             throw new TypeError("chartType undefined or missing");
         }
 
-        var competitorData = this.allCompetitors.map(function (comp) { return chartType.dataSelector(comp, referenceCumTimes); });
+        var competitorData = this.allCompetitors.map(function (comp) { return chartType.dataSelector(comp.result, referenceCumTimes); });
         var selectedCompetitorData = currentIndexes.map(function (index) { return competitorData[index]; });
 
         var xMin = d3.min(referenceCumTimes);
@@ -491,7 +491,7 @@
         
         var controlIndexAdjust = (chartType.skipStart) ? 1 : 0;
         var dubiousTimesInfo = currentIndexes.map(function (competitorIndex) {
-            var indexPairs = chartType.indexesAroundOmittedTimesFunc(this.allCompetitors[competitorIndex]);
+            var indexPairs = chartType.indexesAroundOmittedTimesFunc(this.allCompetitors[competitorIndex].result);
             return indexPairs.filter(function (indexPair) { return indexPair.start >= controlIndexAdjust; })
                              .map(function (indexPair) { return { start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust }; });
         }, this);

@@ -22,8 +22,9 @@
     "use strict";
 
     var Chart = SplitsBrowser.Controls.Chart;
-    var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var Competitor = SplitsBrowser.Model.Competitor;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var Course = SplitsBrowser.Model.Course;
@@ -31,13 +32,13 @@
 
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
-    function getIndexesAroundOmittedCumTimes(competitor) {
-        return competitor.getControlIndexesAroundOmittedCumulativeTimes();
+    function getIndexesAroundOmittedCumTimes(result) {
+        return result.getControlIndexesAroundOmittedCumulativeTimes();
     }
 
     var DUMMY_CHART_TYPE_NO_SKIP = {
         name: "dummy",
-        dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
+        dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes); },
         skipStart: false,
         yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: false,
@@ -46,7 +47,7 @@
     
     var DUMMY_CHART_TYPE_SKIP = {
         name: "dummy skip",
-        dataSelector: function (comp) { return comp.splitRanks; },
+        dataSelector: function (result) { return result.splitRanks; },
         skipStart: true,
         yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: false,
@@ -55,7 +56,7 @@
 
     var DUMMY_CHART_TYPE_RACE_GRAPH = {
         name: "dummy race graph",
-        dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes); },
+        dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes); },
         skipStart: false,
         yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: true,
@@ -179,11 +180,11 @@
     
     QUnit.test("Can create a chart with dubious info", function (assert) {
         var competitors = [
-            fromCumTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106]),
-            fromOriginalCumTimes(2, "First Runner", "ABC", 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100])
+            new Competitor("Second Runner", "DEF", fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106])),
+            new Competitor("First Runner", "ABC", fromOriginalCumTimes(2, 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100]))
         ];
         
-        competitors[1].setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        competitors[1].result.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         
         runChartCreationTest(assert, DUMMY_CHART_TYPE_NO_SKIP);
     });

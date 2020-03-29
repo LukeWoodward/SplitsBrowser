@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser CourseClass - A collection of runners competing against each other.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -60,7 +60,7 @@
         }, this);
         
         this.competitors.forEach(function (comp) {
-            comp.determineTimeLosses(fastestSplitTimes);
+            comp.result.determineTimeLosses(fastestSplitTimes);
         });
     };
     
@@ -98,7 +98,7 @@
         var fastestSplit = null;
         var fastestCompetitor = null;
         this.competitors.forEach(function (comp) {
-            var compSplit = comp.getSplitTimeTo(controlIdx);
+            var compSplit = comp.result.getSplitTimeTo(controlIdx);
             if (isNotNullNorNaN(compSplit)) {
                 if (fastestSplit === null || compSplit < fastestSplit) {
                     fastestSplit = compSplit;
@@ -129,9 +129,9 @@
         
         var matchingCompetitors = [];
         this.competitors.forEach(function (comp) {
-            var cumTime = comp.getCumulativeTimeTo(controlNum);
-            if (cumTime !== null && comp.startTime !== null) {
-                var actualTimeAtControl = cumTime + comp.startTime;
+            var cumTime = comp.result.getCumulativeTimeTo(controlNum);
+            if (cumTime !== null && comp.result.startTime !== null) {
+                var actualTimeAtControl = cumTime + comp.result.startTime;
                 if (intervalStart <= actualTimeAtControl && actualTimeAtControl <= intervalEnd) {
                     matchingCompetitors.push({name: comp.name, time: actualTimeAtControl});
                 }

@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser CompetitorList - Lists the competitors down the left side.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -435,7 +435,7 @@
     * @return {String} The text to show for a competitor's name.
     */
     function competitorText(comp) {
-        if (comp.completed()) {
+        if (comp.result.completed()) {
             // \u00a0 is a non-breaking space.  We substitute this in place of
             // a blank name to prevent the height of the item being dropped to
             // a few pixels.
@@ -480,7 +480,7 @@
         }
         
         competitorDivs.append("span")
-                      .classed("nonfinisher", function (comp) { return !comp.completed(); })
+                      .classed("nonfinisher", function (comp) { return !comp.result.completed(); })
                       .text(competitorText);
 
         competitorDivs.exit().remove();

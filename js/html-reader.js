@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser HTML - Reads in HTML-format results data files.
  *  
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,8 @@
     var parseCourseLength = SplitsBrowser.parseCourseLength;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var Competitor = SplitsBrowser.Model.Competitor;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -284,16 +285,16 @@
         var cumTimes = [0].concat(this.cumTimes);
         
         // The null is for the start time.
-        var competitor = fromOriginalCumTimes(order, this.name, this.club, null, cumTimes);
-        if (competitor.completed() && !this.competitive) {
-            competitor.setNonCompetitive();
+        var result =  fromOriginalCumTimes(order, null, cumTimes);
+        if (result.completed() && !this.competitive) {
+            result.setNonCompetitive();
         }
         
-        if (!competitor.hasAnyTimes()) {
-            competitor.setNonStarter();
+        if (!result.hasAnyTimes()) {
+            result.setNonStarter();
         }
         
-        return competitor;
+        return new Competitor(this.name, this.club, result);
     };
 
     /*

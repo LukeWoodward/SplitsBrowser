@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser data-repair - Attempt to work around nonsensical data.
  *  
- *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -190,17 +190,17 @@
     *     wish to repair.
     */
     Repairer.prototype.repairCompetitor = function (competitor) {
-        var cumTimes = competitor.originalCumTimes.slice(0);
+        var cumTimes = competitor.result.originalCumTimes.slice(0);
         
         this.removeCumulativeTimesEqualToPrevious(cumTimes);
         
         cumTimes = this.removeCumulativeTimesCausingNegativeSplits(cumTimes);
         
-        if (!competitor.completed()) {
+        if (!competitor.result.completed()) {
             this.removeFinishTimeIfAbsurd(cumTimes);
         }
         
-        competitor.setRepairedCumulativeTimes(cumTimes);
+        competitor.result.setRepairedCumulativeTimes(cumTimes);
     };
     
     /**
@@ -249,7 +249,7 @@
     function transferCompetitorData(eventData) {
         eventData.classes.forEach(function (courseClass) {
             courseClass.competitors.forEach(function (competitor) {
-                competitor.setRepairedCumulativeTimes(competitor.getAllOriginalCumulativeTimes());
+                competitor.result.setRepairedCumulativeTimes(competitor.result.getAllOriginalCumulativeTimes());
             });
         });
     }

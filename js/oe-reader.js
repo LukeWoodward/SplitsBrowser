@@ -28,7 +28,8 @@
     var parseCourseClimb = SplitsBrowser.parseCourseClimb;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var Competitor = SplitsBrowser.Model.Competitor;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -374,30 +375,32 @@
         }
 
         var order = this.classes.get(className).competitors.length + 1;
-        var competitor = fromOriginalCumTimes(order, name, club, startTime, cumTimes);
-        if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && competitor.completed()) {
+        var result = fromOriginalCumTimes(order, startTime, cumTimes);
+        if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && result.completed()) {
             // Competitor either marked as non-competitive, or has completed
             // the course but has a non-numeric placing.  In the latter case,
             // assume that they are non-competitive.
-            competitor.setNonCompetitive();
+            result.setNonCompetitive();
         }
         
         var classifier = row[this.columnIndexes.classifier];
         if (classifier !== "") {
             if (classifier === "0" && cumTimes.indexOf(null) >= 0 && cumTimes[cumTimes.length - 1] !== null) {
-                competitor.setOKDespiteMissingTimes();
+                result.setOKDespiteMissingTimes();
             } else if (classifier === "1") {
-                competitor.setNonStarter();
+                result.setNonStarter();
             } else if (classifier === "2") {
-                competitor.setNonFinisher();
+                result.setNonFinisher();
             } else if (classifier === "4") {
-                competitor.disqualify();
+                result.disqualify();
             } else if (classifier === "5") {
-                competitor.setOverMaxTime();
+                result.setOverMaxTime();
             }
-        } else if (!competitor.hasAnyTimes()) {
-            competitor.setNonStarter();
+        } else if (!result.hasAnyTimes()) {
+            result.setNonStarter();
         }
+        
+        var competitor = new Competitor(name, club, result);
         
         var yearOfBirthStr = row[this.columnIndexes.yearOfBirth];
         if (yearOfBirthStr !== "") {

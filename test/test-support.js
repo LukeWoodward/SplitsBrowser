@@ -24,6 +24,7 @@ var SplitsBrowserTest = {};
 
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var Competitor = SplitsBrowser.Model.Competitor;
+    var Result = SplitsBrowser.Model.Result;
 
     /**
     * Asserts that calling the given function throws an exception with the
@@ -117,10 +118,10 @@ var SplitsBrowserTest = {};
             cumTimes.push(addIfNotNull(cumTimes[i], splitTimes[i]));
         }
         
-        var competitor = new Competitor(order, name, club, startTime, splitTimes, cumTimes);
-        competitor.splitTimes = splitTimes;
-        competitor.cumTimes = cumTimes;
-        return competitor;
+        var result = new Result(order, startTime, splitTimes, cumTimes);
+        result.splitTimes = splitTimes;
+        result.cumTimes = cumTimes;
+        return new Competitor(name, club, result);
     };
     
     // Polyfill HTMLElement.prototype.click for the benefit of PhantomJS.

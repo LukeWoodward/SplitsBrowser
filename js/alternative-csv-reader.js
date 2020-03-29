@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Alternative CSV - Read in alternative CSV files.
  *  
- *  Copyright (C) 2000-2017 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,8 @@
     var parseTime = SplitsBrowser.parseTime;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
     var parseCourseClimb = SplitsBrowser.parseCourseClimb;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var Competitor = SplitsBrowser.Model.Competitor;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -160,7 +161,7 @@
     Reader.prototype.addCompetitorToCourse = function (competitor, courseName, row) {
         if (this.classes.has(courseName)) {
             var cls = this.classes.get(courseName);
-            var cumTimes = competitor.getAllOriginalCumulativeTimes();
+            var cumTimes = competitor.result.getAllOriginalCumulativeTimes();
             // Subtract one from the list of cumulative times for the 
             // cumulative time at the start (always 0), and add one on to
             // the count of controls in the class to cater for the finish.
@@ -233,22 +234,22 @@
         
         var order = (this.classes.has(courseName)) ? this.classes.get(courseName).competitors.length + 1 : 1;
         
-        var competitor = fromOriginalCumTimes(order, competitorName, club, startTime, cumTimes);
-        if (this.format.placing !== null && competitor.completed()) {
+        var result = fromOriginalCumTimes(order, startTime, cumTimes);
+        if (this.format.placing !== null && result.completed()) {
             var placing = row[this.format.placing];
             if (!placing.match(/^\d*$/)) {
-                competitor.setNonCompetitive();
+                result.setNonCompetitive();
             }
         }
         
-        if (competitor.hasAnyTimes()) {
+        if (result.hasAnyTimes()) {
             this.hasAnyStarters = true;
         }
         else {
-            competitor.setNonStarter();
+            result.setNonStarter();
         }
         
-        this.addCompetitorToCourse(competitor, courseName, row);
+        this.addCompetitorToCourse(new Competitor(competitorName, club, result), courseName, row);
     };
     
     /**

@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser - Utilities tests.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,8 @@
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var addIfNotNull = SplitsBrowser.addIfNotNull;
+    var subtractIfNotNull = SplitsBrowser.subtractIfNotNull;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
     var parseCourseClimb = SplitsBrowser.parseCourseClimb;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
@@ -96,6 +98,42 @@
             assert.strictEqual(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
             assert.strictEqual(e.message, "Test message", "Exception message should be the test message in the function call");
         }
+    });
+    
+    QUnit.module("Utilities - addIfNotNull");
+    
+    QUnit.test("Can add two not-null numbers to get a not null result", function (assert) {
+        assert.strictEqual(addIfNotNull(2, 3), 5);
+    });
+
+    QUnit.test("Can add a number and null to get a null result", function (assert) {
+        assert.strictEqual(addIfNotNull(2, null), null);
+    });
+    
+    QUnit.test("Can add null and a number to get a null result", function (assert) {
+        assert.strictEqual(addIfNotNull(null, 3), null);
+    });
+    
+    QUnit.test("Can add two nulls to get a null result", function (assert) {
+        assert.strictEqual(addIfNotNull(null, null), null);
+    });
+    
+    QUnit.module("Utilities - subtractIfNotNull");
+    
+    QUnit.test("Can subtract a number from a number to get a not null result", function (assert) {
+        assert.strictEqual(subtractIfNotNull(7, 4), 3);
+    });
+
+    QUnit.test("Can subtract null from a number to get a null result", function (assert) {
+        assert.strictEqual(subtractIfNotNull(7, null), null);
+    });
+    
+    QUnit.test("Can subtract a number from null to get a null result", function (assert) {
+        assert.strictEqual(subtractIfNotNull(null, 4), null);
+    });
+    
+    QUnit.test("Can subtract two nulls to get a null result", function (assert) {
+        assert.strictEqual(subtractIfNotNull(null, null), null);
     });
     
     QUnit.module("Utilities - parseCourseLength");

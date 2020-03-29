@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Event - Contains all of the courses for a single event.
  *  
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -62,7 +62,7 @@
     Event.prototype.needsRepair = function () {
         return this.classes.some(function (courseClass) {
             return courseClass.competitors.some(function (competitor) {
-                return (competitor.getAllCumulativeTimes() === null);
+                return (competitor.result.getAllCumulativeTimes() === null);
             });
         });
     };

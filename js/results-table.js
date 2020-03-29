@@ -81,7 +81,7 @@
         var maxPrecision = 0;
         var maxPrecisionFactor = 1;        
         competitors.forEach(function (competitor) {
-            competitor.getAllOriginalCumulativeTimes().forEach(function (cumTime) {
+            competitor.result.getAllOriginalCumulativeTimes().forEach(function (cumTime) {
                 if (isNotNullNorNaN(cumTime)) {
                     while (maxPrecision < MAX_PERMITTED_PRECISION && Math.abs(cumTime - Math.round(cumTime * maxPrecisionFactor) / maxPrecisionFactor) > 1e-7 * cumTime) {
                         maxPrecision += 1;
@@ -96,25 +96,25 @@
     
     /**
     * Returns the contents of the time or status column for the given
-    * competitor.
+    * result.
     * 
     * The status may be a string that indicates the competitor mispunched.
     *
-    * @param {Competitor} competitor The competitor to get the status of.
+    * @param {Result} result The result to get the status of.
     * @param {Number} precision The precision to use.
     * @return {String} Time or status for the given competitor.
     */
-    function getTimeOrStatus (competitor, precision) {
-        if (competitor.isNonStarter) {
+    function getTimeOrStatus (result, precision) {
+        if (result.isNonStarter) {
             return getMessage("DidNotStartShort");
-        } else if (competitor.isNonFinisher) {
+        } else if (result.isNonFinisher) {
             return getMessage("DidNotFinishShort");
-        } else if (competitor.isDisqualified) {
+        } else if (result.isDisqualified) {
             return getMessage("DisqualifiedShort");
-        } else if (competitor.isOverMaxTime) {
+        } else if (result.isOverMaxTime) {
             return getMessage("OverMaxTimeShort");
-        } else if (competitor.completed()) {
-            return formatTime(competitor.totalTime, precision);
+        } else if (result.completed()) {
+            return formatTime(result.totalTime, precision);
         } else {
             return getMessage("MispunchedShort");
         }
@@ -252,12 +252,13 @@
         
         competitors.forEach(function (competitor, index) {
             htmlBits.push("<tr><td>");
+            var result = competitor.result;
             
-            if (competitor.isNonCompetitive) {
+            if (result.isNonCompetitive) {
                 htmlBits.push(escapeHtml(getMessage("NonCompetitiveShort")));
                 nonCompCount += 1;
-            } else if (competitor.completed()) {
-                if (index === 0 || competitors[index - 1].totalTime !== competitor.totalTime) {
+            } else if (result.completed()) {
+                if (index === 0 || competitors[index - 1].totalTime !== result.totalTime) {
                     rank = index + 1 - nonCompCount;
                 }
                 
@@ -267,19 +268,19 @@
             htmlBits.push("</td>");
             
             addCell(competitor.name, competitor.club, null, "", "");
-            addCell(getTimeOrStatus(competitor, precision), NON_BREAKING_SPACE_CHAR, "time", "", "");
+            addCell(getTimeOrStatus(result, precision), NON_BREAKING_SPACE_CHAR, "time", "", "");
             
             d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {
-                var cumTime = competitor.getOriginalCumulativeTimeTo(controlNum);
-                var splitTime = competitor.getOriginalSplitTimeTo(controlNum);
-                var formattedCumTime = formatPossiblyMissingTime(cumTime, precision, competitor.isOKDespiteMissingTimes);
-                var formattedSplitTime = formatPossiblyMissingTime(splitTime, precision, competitor.isOKDespiteMissingTimes);
-                var isCumTimeFastest = (competitor.getCumulativeRankTo(controlNum) === 1);
-                var isSplitTimeFastest = (competitor.getSplitRankTo(controlNum) === 1);
-                var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
-                var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
-                var isCumMissing = competitor.isOKDespiteMissingTimes && cumTime === null;
-                var isSplitMissing = competitor.isOKDespiteMissingTimes && splitTime === null;
+                var cumTime = result.getOriginalCumulativeTimeTo(controlNum);
+                var splitTime = result.getOriginalSplitTimeTo(controlNum);
+                var formattedCumTime = formatPossiblyMissingTime(cumTime, precision, result.isOKDespiteMissingTimes);
+                var formattedSplitTime = formatPossiblyMissingTime(splitTime, precision, result.isOKDespiteMissingTimes);
+                var isCumTimeFastest = (result.getCumulativeRankTo(controlNum) === 1);
+                var isSplitTimeFastest = (result.getSplitRankTo(controlNum) === 1);
+                var isCumDubious = result.isCumulativeTimeDubious(controlNum);
+                var isSplitDubious = result.isSplitTimeDubious(controlNum);
+                var isCumMissing = result.isOKDespiteMissingTimes && cumTime === null;
+                var isSplitMissing = result.isOKDespiteMissingTimes && splitTime === null;
                 addCell(formattedCumTime, formattedSplitTime, "time", timeClasses(isCumTimeFastest, isCumDubious, isCumMissing), timeClasses(isSplitTimeFastest, isSplitDubious, isSplitMissing));
             });
             

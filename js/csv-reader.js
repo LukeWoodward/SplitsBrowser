@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser CSV - Reads in CSV result data files.
  *  
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
+    var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
     var Competitor = SplitsBrowser.Model.Competitor;
     var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
     var CourseClass = SplitsBrowser.Model.CourseClass;
@@ -82,11 +83,11 @@
                 }
             });
             
-            var competitor = Competitor.fromCumTimes(index + 1, name, club, startTime, cumTimes);
+            var result = fromCumTimes(index + 1, startTime, cumTimes);
             if (lastCumTimeRecorded === 0) {
-                competitor.setNonStarter();
+                result.setNonStarter();
             }
-            return competitor;
+            return new Competitor(name, club, result);
         } else {
             var difference = originalPartCount - (controlCount + 5);
             var error = (difference < 0) ? (-difference) + " too few" : difference + " too many";

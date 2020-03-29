@@ -32,28 +32,28 @@
     
     /**
     * Returns indexes around the given competitor's omitted cumulative times.
-    * @param {Competitor} competitor - The competitor to get the indexes for.
+    * @param {Result} result - The result to get the indexes for.
     * @return {Array} Array of objects containing indexes around omitted
     *     cumulative times.
     */
-    function getIndexesAroundOmittedCumulativeTimes(competitor) {
-        return competitor.getControlIndexesAroundOmittedCumulativeTimes();
+    function getIndexesAroundOmittedCumulativeTimes(result) {
+        return result.getControlIndexesAroundOmittedCumulativeTimes();
     }
     
     /**
     * Returns indexes around the given competitor's omitted split times.
-    * @param {Competitor} competitor - The competitor to get the indexes for.
+    * @param {Result} result - The result to get the indexes for.
     * @return {Array} Array of objects containing indexes around omitted split
     *     times.
     */
-    function getIndexesAroundOmittedSplitTimes(competitor) {
-        return competitor.getControlIndexesAroundOmittedSplitTimes();
+    function getIndexesAroundOmittedSplitTimes(result) {
+        return result.getControlIndexesAroundOmittedSplitTimes();
     }
 
     SplitsBrowser.Model.ChartTypes = {
         SplitsGraph: {
             nameKey: "SplitsGraphChartType",
-            dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
+            dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
             yAxisLabelKey: "SplitsGraphYAxisLabel",
             isRaceGraph: false,
@@ -63,7 +63,7 @@
         },
         RaceGraph: {
             nameKey: "RaceGraphChartType",
-            dataSelector: function (comp, referenceCumTimes) { return comp.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
+            dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
             skipStart: false,
             yAxisLabelKey: "RaceGraphYAxisLabel",
             isRaceGraph: true,
@@ -73,7 +73,7 @@
         },
         PositionAfterLeg: {
             nameKey:  "PositionAfterLegChartType",
-            dataSelector: function (comp) { return comp.cumRanks; },
+            dataSelector: function (result) { return result.cumRanks; },
             skipStart: true,
             yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
@@ -83,7 +83,7 @@
         },
         SplitPosition: {
             nameKey: "SplitPositionChartType",
-            dataSelector: function (comp) { return comp.splitRanks; },
+            dataSelector: function (result) { return result.splitRanks; },
             skipStart: true,
             yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
@@ -93,7 +93,7 @@
         },
         PercentBehind: {
             nameKey: "PercentBehindChartType",
-            dataSelector: function (comp, referenceCumTimes) { return comp.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
+            dataSelector: function (result, referenceCumTimes) { return result.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
             skipStart: false,
             yAxisLabelKey: "PercentBehindYAxisLabel",
             isRaceGraph: false,

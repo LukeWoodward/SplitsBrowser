@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Query-string - Query-string parsing and merging
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -154,7 +154,7 @@
                 return {index: defaultIndex, runner: null};
             } else if (defaultIndex === 0 && courseClassSet !== null) {
                 var hasCompleters = courseClassSet.allCompetitors.some(function (competitor) {
-                    return competitor.completed();
+                    return competitor.result.completed();
                 });
                 
                 if (hasCompleters) {
@@ -170,7 +170,7 @@
             } else {
                 for (var competitorIndex = 0; competitorIndex < courseClassSet.allCompetitors.length; competitorIndex += 1) {
                     var competitor = courseClassSet.allCompetitors[competitorIndex];
-                    if (competitor.name === comparisonName && competitor.completed()) {
+                    if (competitor.name === comparisonName && competitor.result.completed()) {
                         return {index: BUILTIN_COMPARISON_TYPES.length, runner: competitor};
                     }
                 }

@@ -113,13 +113,15 @@
         var competitor = courseClass.competitors[0];
         assert.strictEqual(competitor.name, "First Runner");
         assert.strictEqual(competitor.club, "TEST");
-        assert.strictEqual(competitor.startTime, 10 * 3600 + 38 * 60);
-        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, 202]);
-        assert.ok(competitor.completed());
-        assert.ok(!competitor.isNonCompetitive);
-        assert.ok(!competitor.isNonStarter);
-        assert.ok(!competitor.isNonFinisher);
-        assert.ok(!competitor.isDisqualified);
+        
+        var result = competitor.result;
+        assert.strictEqual(result.startTime, 10 * 3600 + 38 * 60);
+        assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, 202]);
+        assert.ok(result.completed());
+        assert.ok(!result.isNonCompetitive);
+        assert.ok(!result.isNonStarter);
+        assert.ok(!result.isNonFinisher);
+        assert.ok(!result.isDisqualified);
         
         assert.strictEqual(eventData.courses.length, 1);
         var course = eventData.courses[0];
@@ -188,14 +190,14 @@
         var competitor1 = courseClass.competitors[0];
         assert.strictEqual(competitor1.name, "First Runner");
         assert.strictEqual(competitor1.club, "TEST");
-        assert.strictEqual(competitor1.startTime, 10 * 3600 + 38 * 60);
-        assert.deepEqual(competitor1.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, 202]);
+        assert.strictEqual(competitor1.result.startTime, 10 * 3600 + 38 * 60);
+        assert.deepEqual(competitor1.result.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, 202]);
         
         var competitor2 = courseClass.competitors[1];
         assert.strictEqual(competitor2.name, "Second Runner");
         assert.strictEqual(competitor2.club, "ABCD");
-        assert.strictEqual(competitor2.startTime, 11 * 3600 + 19 * 60);
-        assert.deepEqual(competitor2.getAllOriginalCumulativeTimes(), [0, 84, 139, 199, 217]);
+        assert.strictEqual(competitor2.result.startTime, 11 * 3600 + 19 * 60);
+        assert.deepEqual(competitor2.result.getAllOriginalCumulativeTimes(), [0, 84, 139, 199, 217]);
         
         assert.strictEqual(eventData.courses.length, 1);
     });
@@ -249,12 +251,12 @@
         var courseClass = eventData.classes[0];
         
         assert.strictEqual(courseClass.competitors.length, 1);
-        var competitor = courseClass.competitors[0];
-        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 72, null, 186, 202]);
-        assert.ok(!competitor.completed());
-        assert.ok(!competitor.isNonStarter);
-        assert.ok(!competitor.isNonFinisher);
-        assert.ok(!competitor.isDisqualified);
+        var result = courseClass.competitors[0].result;
+        assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 72, null, 186, 202]);
+        assert.ok(!result.completed());
+        assert.ok(!result.isNonStarter);
+        assert.ok(!result.isNonFinisher);
+        assert.ok(!result.isDisqualified);
     });
     
     QUnit.test("Can parse a string that contains a single competitor missing the finish control", function (assert) {
@@ -265,12 +267,12 @@
         var courseClass = eventData.classes[0];
         
         assert.strictEqual(courseClass.competitors.length, 1);
-        var competitor = courseClass.competitors[0];
-        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, null]);
-        assert.ok(!competitor.completed());
-        assert.ok(!competitor.isNonStarter);
-        assert.ok(!competitor.isNonFinisher);
-        assert.ok(!competitor.isDisqualified);
+        var result = courseClass.competitors[0].result;
+        assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, null]);
+        assert.ok(!result.completed());
+        assert.ok(!result.isNonStarter);
+        assert.ok(!result.isNonFinisher);
+        assert.ok(!result.isDisqualified);
     });
     
     QUnit.test("Can parse a string that contains a single competitor missing all controls and mark said competitor as a non-starter", function (assert) {
@@ -284,12 +286,12 @@
         var courseClass = eventData.classes[0];
         
         assert.strictEqual(courseClass.competitors.length, 1);
-        var competitor = courseClass.competitors[0];
-        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0, null, null, null, null]);
-        assert.ok(!competitor.completed());
-        assert.ok(competitor.isNonStarter);
-        assert.ok(!competitor.isNonFinisher);
-        assert.ok(!competitor.isDisqualified);
+        var result = courseClass.competitors[0].result;
+        assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, null, null, null, null]);
+        assert.ok(!result.completed());
+        assert.ok(result.isNonStarter);
+        assert.ok(!result.isNonFinisher);
+        assert.ok(!result.isDisqualified);
     });
     
     QUnit.test("Cannot parse a string that contains two competitors missing all controls", function (assert) {

@@ -23,8 +23,9 @@
     
     var getMessage = SplitsBrowser.getMessage;
     var ResultsTable = SplitsBrowser.Controls.ResultsTable;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
-    var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
+    var Competitor = SplitsBrowser.Model.Competitor;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var Course = SplitsBrowser.Model.Course;
@@ -145,7 +146,7 @@
     
     QUnit.test("Can create a results table with one non-starting competitor", function (assert) {
         var competitor = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [null, null, null, null]);
-        competitor.setNonStarter();
+        competitor.result.setNonStarter();
         var courseClass = new CourseClass("Test", 3, [competitor]);
         calculateRanks(courseClass);
 
@@ -164,7 +165,7 @@
 
     QUnit.test("Can create a results table with one non-finishing competitor", function (assert) {
         var competitor = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, null]);
-        competitor.setNonFinisher();
+        competitor.result.setNonFinisher();
         var courseClass = new CourseClass("Test", 3, [competitor]);
         calculateRanks(courseClass);
 
@@ -183,7 +184,7 @@
 
     QUnit.test("Can create a results table with one disqualified competitor", function (assert) {
         var competitor = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        competitor.disqualify();
+        competitor.result.disqualify();
         var courseClass = new CourseClass("Test", 3, [competitor]);
         calculateRanks(courseClass);
 
@@ -202,7 +203,7 @@
 
     QUnit.test("Can create a results table with one over-max-time competitor", function (assert) {
         var competitor = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        competitor.setOverMaxTime();
+        competitor.result.setOverMaxTime();
         var courseClass = new CourseClass("Test", 3, [competitor]);
         calculateRanks(courseClass);
 
@@ -221,7 +222,7 @@
 
     QUnit.test("Can create a results table with one non-competitive competitor and the other competitor getting rank 1", function (assert) {
         var competitor1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        competitor1.setNonCompetitive();
+        competitor1.result.setNonCompetitive();
         var competitor2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
         calculateRanks(courseClass);
@@ -238,7 +239,7 @@
 
     QUnit.test("Can create a results table with one disqualified competitor and the other competitor getting rank 1", function (assert) {
         var competitor1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        competitor1.disqualify();
+        competitor1.result.disqualify();
         var competitor2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
         calculateRanks(courseClass);
@@ -269,9 +270,9 @@
     });
     
     QUnit.test("Can create a results table with one competitor with dubious times appropriately classed", function (assert) {
-        var competitor1 = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 65, 65 + 0, 65 + 221 + 184, 65 + 221 + 184 + 100]);
-        competitor1.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
-        var courseClass = new CourseClass("Test", 3, [competitor1]);
+        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 65, 65 + 0, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        result.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        var courseClass = new CourseClass("Test", 3, [new Competitor("First Runner", "DEF", result)]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         calculateRanks(courseClass);
         
@@ -298,9 +299,9 @@
     });
     
     QUnit.test("Can create a results table with one competitor with missing times appropriately classed", function (assert) {
-        var competitor = fromCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 65, null, 65 + 221 + 184, 65 + 221 + 184 + 100]);
-        competitor.setOKDespiteMissingTimes();
-        var courseClass = new CourseClass("Test", 3, [competitor]);
+        var result = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 65, null, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        result.setOKDespiteMissingTimes();
+        var courseClass = new CourseClass("Test", 3, [new Competitor("First Runner", "DEF", result)]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         calculateRanks(courseClass);
         

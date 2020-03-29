@@ -25,7 +25,8 @@
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var parseTime = SplitsBrowser.parseTime;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var Competitor = SplitsBrowser.Model.Competitor;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -602,33 +603,35 @@
         
         cumTimes.unshift(0); // Prepend a zero time for the start.
         cumTimes.push(totalTime);
-        
-        var competitor = fromOriginalCumTimes(number, name, club, startTime, cumTimes);
-        
-        if (yearOfBirth !== null) {
-            competitor.setYearOfBirth(yearOfBirth);
-        }
-        
-        if (gender === "M" || gender === "F") {
-            competitor.setGender(gender);
-        }
-        
+
+        var result = fromOriginalCumTimes(number, startTime, cumTimes);
+
         var status = reader.getStatus(resultElement);
         
         if (status === "OK" && totalTime !== null && cumTimes.indexOf(null) >= 0) {
-            competitor.setOKDespiteMissingTimes();
+            result.setOKDespiteMissingTimes();
         } else if (status === reader.StatusNonCompetitive) {
-            competitor.setNonCompetitive();
+            result.setNonCompetitive();
         } else if (status === reader.StatusNonStarter) {
-            competitor.setNonStarter();
+            result.setNonStarter();
         } else if (status === reader.StatusNonFinisher) {
-            competitor.setNonFinisher();
+            result.setNonFinisher();
         } else if (status === reader.StatusDisqualified) {
-            competitor.disqualify();
+            result.disqualify();
         } else if (status === reader.StatusOverMaxTime) {
-            competitor.setOverMaxTime();
+            result.setOverMaxTime();
         }
-        
+
+        var competitor = new Competitor(name, club, result);
+
+        if (yearOfBirth !== null) {
+            competitor.setYearOfBirth(yearOfBirth);
+        }
+
+        if (gender === "M" || gender === "F") {
+            competitor.setGender(gender);
+        }
+
         return {
             competitor: competitor,
             controls: controls
@@ -682,9 +685,9 @@
                 }
 
                 // Subtract 2 for the start and finish cumulative times.
-                var actualControlCount = competitor.getAllOriginalCumulativeTimes().length - 2;
+                var actualControlCount = competitor.result.getAllOriginalCumulativeTimes().length - 2;
                 var warning = null;
-                if (competitor.isNonStarter && actualControlCount === 0) {
+                if (competitor.result.isNonStarter && actualControlCount === 0) {
                     // Don't generate warnings for non-starting competitors with no controls.
                 } else if (actualControlCount !== cls.course.numberOfControls) {
                     warning = "Competitor '" + competitor.name + "' in class '" + className + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;

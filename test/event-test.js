@@ -22,7 +22,8 @@
     "use strict";
     
     var isNotNull = SplitsBrowser.isNotNull;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var Competitor = SplitsBrowser.Model.Competitor;
     var Event = SplitsBrowser.Model.Event;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
@@ -151,11 +152,11 @@
         var course2 = new Course("Test course 2", [courseClass2], null, null, ["226", "212", "189"]);
     
         var event = new Event([courseClass1, courseClass2], [course1, course2]);
-        assert.strictEqual(competitor1.getTimeLossAt(2), null);
-        assert.strictEqual(competitor2.getTimeLossAt(2), null);
+        assert.strictEqual(competitor1.result.getTimeLossAt(2), null);
+        assert.strictEqual(competitor2.result.getTimeLossAt(2), null);
         event.determineTimeLosses();
-        assert.ok(isNotNull(competitor1.getTimeLossAt(2)));
-        assert.ok(isNotNull(competitor2.getTimeLossAt(2)));
+        assert.ok(isNotNull(competitor1.result.getTimeLossAt(2)));
+        assert.ok(isNotNull(competitor2.result.getTimeLossAt(2)));
     });
     
     QUnit.test("Event that does not need repairing reports that it doesn't", function (assert) {
@@ -168,7 +169,7 @@
     });
     
     QUnit.test("Event that does need repairing reports that it does", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 0, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        var competitor = new Competitor("First Runner", "DEF", fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 0, 81 + 197 + 212, 81 + 197 + 212 + 106]));
         var courseClass = new CourseClass("Test class", 3, [competitor]);
         var course = new Course("Test course", [courseClass], null, null, ["235", "212", "189"]);
     

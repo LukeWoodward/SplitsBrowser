@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser CompetitorSelection - The currently-selected competitors.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -81,10 +81,10 @@
     */    
     CompetitorSelection.prototype.selectCrossingRunners = function (competitorDetails) {
         if (this.isSingleRunnerSelected()) {
-            var refCompetitor = competitorDetails[this.currentIndexes[0]].competitor;
+            var refResult = competitorDetails[this.currentIndexes[0]].competitor.result;
             
             competitorDetails.forEach(function (compDetails, idx) {
-                if (compDetails.visible && compDetails.competitor.crosses(refCompetitor)) {
+                if (compDetails.visible && compDetails.competitor.result.crosses(refResult)) {
                     this.currentIndexes.push(idx);
                 }
             }, this);

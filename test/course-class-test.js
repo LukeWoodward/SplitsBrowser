@@ -21,7 +21,8 @@
 (function (){
     "use strict";
 
-    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var Competitor = SplitsBrowser.Model.Competitor;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
@@ -37,9 +38,9 @@
     }
     
     function getCompetitor1WithNaNSplitForControl3() {
-        var competitor = fromOriginalCumTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 - 30, 81 + 197 + 212 + 106]);
-        competitor.setRepairedCumulativeTimes([0, 81, 81 + 197, NaN, 81 + 197 + 212 + 106]);
-        return competitor;
+        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 - 30, 81 + 197 + 212 + 106]);
+        result.setRepairedCumulativeTimes([0, 81, 81 + 197, NaN, 81 + 197 + 212 + 106]);
+        return new Competitor("Second Runner", "DEF", result);
     }
     
     function getCompetitor2() {
@@ -187,7 +188,7 @@
         courseClass.determineTimeLosses();
         courseClass.competitors.forEach(function (comp) {
             [1, 2, 3, 4].forEach(function (controlIdx) {
-                assert.ok(comp.getTimeLossAt(controlIdx) !== null, "Time-loss for competitor '" + comp.name + "' at control '" + controlIdx + "' should not be null");
+                assert.ok(comp.result.getTimeLossAt(controlIdx) !== null, "Time-loss for competitor '" + comp.name + "' at control '" + controlIdx + "' should not be null");
             });
         });
     });
@@ -197,7 +198,7 @@
         courseClass.determineTimeLosses();
         courseClass.competitors.forEach(function (comp) {
             [1, 2, 3, 4].forEach(function (controlIdx) {
-                assert.strictEqual(comp.getTimeLossAt(controlIdx), null, "Time-loss for competitor '" + comp.name + "' at control '" + controlIdx + "' should be null");
+                assert.strictEqual(comp.result.getTimeLossAt(controlIdx), null, "Time-loss for competitor '" + comp.name + "' at control '" + controlIdx + "' should be null");
             });
         });
     });
