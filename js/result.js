@@ -617,5 +617,143 @@
         return this.getIndexesAroundOmittedTimes([0].concat(this.splitTimes));
     };
     
+    /**
+    * Calculates and returns the offsets of the results.  The returned array
+    * contains one offset for each result plus the overall total time in the
+    * last element.
+    * @param {Array} results The array of results.
+    * @return Array of offsets.
+    */
+    function calculateOffsets(results) {
+        var offsets = [0];
+        results.forEach(function (comp, resultIndex) {
+            
+            // Calculate the offset for result resultIndex + 1.
+            var lastOffset = offsets[offsets.length - 1];
+            var nextResult = (resultIndex + 1 < results.length) ? results[resultIndex + 1] : null;
+            var nextFinishTime;
+            if (lastOffset !== null && comp.totalTime !== null) {
+                // We have an offset for the last result and their total time.
+                nextFinishTime = lastOffset + comp.totalTime;
+            } else if (nextResult !== null && nextResult.startTime !== null && results[0].startTime !== null) {
+                // Use the start time of the next result.
+                nextFinishTime = nextResult.startTime - results[0].startTime;
+            } else {
+                nextFinishTime = null;
+            }
+            
+            offsets.push(nextFinishTime);
+        });
+        
+        // The above loop will add an item to the end of 'offsets' for the
+        // finish time of the last competitor, but we don't need that.
+        return offsets.slice(0, offsets.length - 1);         
+    }
+    
+    /**
+    * Calculate the full list of cumulative times for a collection of results.
+    * @param {Array} results The list of results.
+    * @param {Array} offsets The offsets of the results.
+    * @param {Function} cumulativeTimesGetter Function that returns a list of
+    *     cumulative times from a result.
+    * @return The full list of cumulative times.
+    */
+    function calculateCumulativeTimesFromResults(results, offsets, cumulativeTimesGetter) {
+        var times = [0];
+        for (var resultIndex = 0; resultIndex < results.length; resultIndex += 1) {
+            var resultTimes = cumulativeTimesGetter(results[resultIndex]);
+            for (var controlIndex = 1; controlIndex < resultTimes.length; controlIndex += 1) {
+                times.push(addIfNotNull(offsets[resultIndex], resultTimes[controlIndex]));
+            }                
+        }
+        
+        return times;
+    }
+    
+    /**
+    * Determines the status of a relay result from the status of the component
+    * results.
+    * @param {Array} results The array of component results.
+    * @return The overall status.
+    */
+    Result.prototype.determineAggregateStatus = function (results) {
+        if (results.some(function (result) { return result.isDisqualified; })) {
+            this.isDisqualified = true;
+            return;
+        }
+
+        if (results.every(function (result) { return result.isNonStarter; })) {
+            this.isNonStarter = true;
+            return;
+        }
+
+        // After this loop, okResultIndex points to the last OK result, or -1 if none.
+        for (var okResultIndex = -1; okResultIndex + 1 < results.length; okResultIndex += 1) {
+            var nextResult = results[okResultIndex + 1];
+            if (nextResult.isNonStarter || nextResult.isNonFinisher || !nextResult.completed()) {
+                break;
+            }
+        }
+
+        // After this loop, dnsResultIndex points to the last DNS result, or the end of the list if none.
+        for (var dnsResultIndex = results.length; dnsResultIndex > 0; dnsResultIndex -= 1) {
+            var prevResult = results[dnsResultIndex - 1];
+            if (!prevResult.isNonStarter) {
+                break;
+            }
+        }
+
+        if (okResultIndex < results.length - 1) {
+            if (okResultIndex + 1 === dnsResultIndex) {
+                // A run of OK results then some DNS ones.
+                this.isNonFinisher = true;
+                return;
+            }
+
+            if (okResultIndex + 2 === dnsResultIndex && results[okResultIndex + 1].isNonFinisher) {
+                // A run of OK results then a DNF and then possibly some DNS ones.
+                this.isNonFinisher = true;
+                return;
+            }
+        }
+
+        if (results.some(function (result) { return result.isOverMaxTime; })) {
+            this.isOverMaxTime = true;
+            return;
+        }
+
+        if (results.some(function (result) { return result.isNonCompetitive; })) {
+            this.isNonCompetitive = true;
+        }
+    };
+
+    
+    /**
+    * Creates and returns a result object representing the combined result of all
+    * of the given results.
+    * @param {Number} order - The order of the team among the others.
+    * @param {Array} results The individual team member results.
+    * @return {Result} A result object for the entire team.
+    */ 
+    Result.createTeamResult = function (order, results) {
+        if (results.length < 2) {
+            throwInvalidData("Team results can only be created from at least two other results");
+        }
+
+        // Firstly, compute offsets for each of the component results.
+        var offsets = calculateOffsets(results);
+        
+        var originalCumTimes = calculateCumulativeTimesFromResults(
+            results, offsets, function (result) { return result.originalCumTimes; });
+            
+        var result = Result.fromOriginalCumTimes(order, results[0].startTime, originalCumTimes);
+        result.cumTimes = calculateCumulativeTimesFromResults(
+            results, offsets, function (result) { return result.cumTimes; });
+        
+        result.splitTimes = splitTimesFromCumTimes(result.cumTimes);
+        result.determineAggregateStatus(results);
+        return result;
+    };
+    
     SplitsBrowser.Model.Result = Result;
 })();

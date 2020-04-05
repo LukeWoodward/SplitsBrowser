@@ -25,6 +25,7 @@
     var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
     var compareResults = SplitsBrowser.Model.compareResults;
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
 
     function signum(n) {
         return (n < 0) ? -1 : ((n > 0) ? 1 : 0);
@@ -848,4 +849,229 @@
         var result = fromCumTimes(1, 10 * 3600, [0, 65, NaN, 384, 512, null, 655]);
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), [{start: 1, end: 4}]);
     });   
+
+    var teamResult1 = createTeamResult(1, [
+        fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570]),
+        fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533])
+    ]);
+
+    var teamResultWithMissingTime = createTeamResult(1, [
+        fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570]),
+        fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, null, 533])
+    ]);
+    
+    var dubiousTeamResult = (function () {
+        var cumTimes1 = [0, 65, 286, 470, 570];
+        var result1 = fromOriginalCumTimes(1, 10 * 3600, cumTimes1);
+        result1.setRepairedCumulativeTimes([0, 65, 286, NaN, 570]);
+        
+        var cumTimes2 = [0, 61, 254, 430, 533];
+        var result2 = fromOriginalCumTimes(1, 10 * 3600, cumTimes2);
+        result2.setRepairedCumulativeTimes([0, 61, NaN, 430 ,533]);
+    
+        return createTeamResult(1, [result1, result2]);
+    })();
+    
+    QUnit.test("Cannot create an empty team", function (assert) {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            createTeamResult(1, []);
+        });
+    });
+    
+    QUnit.test("Cannot create an empty team", function (assert) {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            createTeamResult(1, []);
+        });
+    });
+    
+    QUnit.test("Cannot create a team with only one member", function (assert) {
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            createTeamResult(1, [fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570])]);
+        });
+    });
+
+    QUnit.test("Can get cumulative times of a team", function (assert) {
+        assert.deepEqual(teamResult1.getAllCumulativeTimes(), [0, 65, 286, 470, 570, 631, 824, 1000, 1103]); 
+        assert.deepEqual(teamResult1.getAllOriginalCumulativeTimes(), teamResult1.getAllCumulativeTimes()); 
+    });
+
+    QUnit.test("Can get all split times of a team", function (assert) {
+        assert.deepEqual(teamResult1.getAllSplitTimes(),  [65, 221, 184, 100, 61, 193, 176, 103]);
+    });
+
+
+    QUnit.test("Can get cumulative times of a team with missing times", function (assert) {
+        assert.deepEqual(teamResultWithMissingTime.getAllCumulativeTimes(), [0, 65, 286, 470, 570, 631, 824, null, 1103]); 
+    });
+
+    QUnit.test("Can get cumulative times of a team with dubious times", function (assert) {
+        assert.deepEqual(dubiousTeamResult.getAllCumulativeTimes(), [0, 65, 286, NaN, 570, 631, NaN, 1000, 1103]); 
+    });
+
+    QUnit.test("Can get split times of a team with dubious times", function (assert) {
+        assert.deepEqual(dubiousTeamResult.getAllSplitTimes(), [65, 221, NaN, NaN, 61, NaN, NaN, 103]); 
+    });
+
+    QUnit.test("Can get original cumulative times of a team with dubious times", function (assert) {
+        assert.deepEqual(dubiousTeamResult.getAllOriginalCumulativeTimes(), [0, 65, 286, 470, 570, 631, 824, 1000, 1103]); 
+    });
+    
+    function createModifiedTeamResult(member1Action, member2Action) {
+        var result1 = fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570]);
+        var result2 = fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533]);
+        if (member1Action) {
+            member1Action(result1);
+        }
+        if (member2Action) {
+            member2Action(result2);
+        }
+        return createTeamResult(1, [result1, result2]);
+    }
+    
+    QUnit.test("Ordinary team is not disqualified, non-starter, over-max-time nor non-competitive", function (assert) {
+        assert.ok(!teamResult1.isDisqualified);
+        assert.ok(!teamResult1.isNonStarter);
+        assert.ok(!teamResult1.isNonFinisher);
+        assert.ok(!teamResult1.isOverMaxTime);
+        assert.ok(!teamResult1.isNonCompetitive);
+        assert.ok(teamResult1.completed());
+    });
+    
+    QUnit.test("Disqualified team member causes the entire team to be disqualified", function (assert) {
+        var teamResult = createModifiedTeamResult(function (result) { result.disqualify(); }, null);
+        assert.ok(teamResult.isDisqualified);
+        assert.ok(!teamResult.isNonStarter);
+        assert.ok(!teamResult.isNonFinisher);
+        assert.ok(!teamResult.isOverMaxTime);
+        assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.completed());
+    });
+    
+    QUnit.test("Entire team of non-starters is a non-starter", function (assert) {
+        var result1 = fromCumTimes(1, 10 * 3600, [0, null, null, null, null]);
+        var result2 = fromCumTimes(1, 10 * 3600 + 570, [0, null, null, null, null]);
+        result1.setNonStarter();
+        result2.setNonStarter();
+        var teamResult = createTeamResult(1, [result1, result2]);
+        
+        assert.ok(!teamResult.isDisqualified);
+        assert.ok(teamResult.isNonStarter);
+        assert.ok(!teamResult.isNonFinisher);
+        assert.ok(!teamResult.isOverMaxTime);
+        assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.completed());        
+    });
+    
+    QUnit.test("Team with only one non-starter is not a non-starter", function (assert) {
+        var result1 = fromCumTimes(1, 10 * 3600, [0, null, null, null, null]);
+        var result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, 61, 254, 430, 533]);
+        result2.setNonStarter();
+        var teamResult = createTeamResult(1, [result1, result2]);
+        
+        assert.ok(!teamResult.isDisqualified);
+        assert.ok(!teamResult.isNonStarter);
+        assert.ok(!teamResult.isNonFinisher);
+        assert.ok(!teamResult.isOverMaxTime);
+        assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.completed());
+    });
+    
+    QUnit.test("Team with two finishers and a non-finisher is a non-finishing team.", function (assert) {
+        var result1 = fromCumTimes(1, 10 * 3600,        [0, 65, 286, 470, 570]);
+        var result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, 61, 254, 430, 533]);
+        var result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, 71, 278, null, null]);
+        result3.setNonFinisher();
+        var teamResult = createTeamResult(1, [result1, result2, result3]);
+        
+        assert.ok(!teamResult.isDisqualified);
+        assert.ok(!teamResult.isNonStarter);
+        assert.ok(teamResult.isNonFinisher);
+        assert.ok(!teamResult.isOverMaxTime);
+        assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.completed());
+    });
+    
+    QUnit.test("Team with two finishers and a non-starter is a non-finishing team.", function (assert) {
+        var result1 = fromCumTimes(1, 10 * 3600,        [0, 65, 286, 470, 570]);
+        var result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, 61, 254, 430, 533]);
+        var result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, null, null, null, null]);
+        result3.setNonStarter();
+        var teamResult = createTeamResult(1, [result1, result2, result3]);
+        
+        assert.ok(!teamResult.isDisqualified);
+        assert.ok(!teamResult.isNonStarter);
+        assert.ok(teamResult.isNonFinisher);
+        assert.ok(!teamResult.isOverMaxTime);
+        assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.completed());
+    });
+    
+    QUnit.test("Team with a finisher, a non-finisher and a non-starter is a non-finishing team.", function (assert) {
+        var result1 = fromCumTimes(1, 10 * 3600,        [0, 65, 286, 470, 570]);
+        var result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, 61, 254, null, null]);
+        var result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, null, null, null, null]);
+        result2.setNonFinisher();
+        result3.setNonStarter();
+        var teamResult = createTeamResult(1, [result1, result2, result3]);
+        
+        assert.ok(!teamResult.isDisqualified);
+        assert.ok(!teamResult.isNonStarter);
+        assert.ok(teamResult.isNonFinisher);
+        assert.ok(!teamResult.isOverMaxTime);
+        assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.completed());
+    });
+    
+    QUnit.test("Team with a finisher and two non-starters is a non-finishing team.", function (assert) {
+        var result1 = fromCumTimes(1, 10 * 3600,        [0, 65, 286, 470, 570]);
+        var result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, null, null, null, null]);
+        var result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, null, null, null, null]);
+        result2.setNonStarter();
+        result3.setNonStarter();
+        var teamResult = createTeamResult(1, [result1, result2, result3]);
+        
+        assert.ok(!teamResult.isDisqualified);
+        assert.ok(!teamResult.isNonStarter);
+        assert.ok(teamResult.isNonFinisher);
+        assert.ok(!teamResult.isOverMaxTime);
+        assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.completed());
+    });
+    
+    QUnit.test("Team with a non-finisher and two non-starters is a non-finishing team.", function (assert) {
+        var result1 = fromCumTimes(1, 10 * 3600,        [0, 65, 286, null, null]);
+        var result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, null, null, null, null]);
+        var result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, null, null, null, null]);
+        result1.setNonFinisher();
+        result2.setNonStarter();
+        result3.setNonStarter();
+        var teamResult = createTeamResult(1, [result1, result2, result3]);
+        
+        assert.ok(!teamResult.isDisqualified);
+        assert.ok(!teamResult.isNonStarter);
+        assert.ok(teamResult.isNonFinisher);
+        assert.ok(!teamResult.isOverMaxTime);
+        assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.completed());
+    });
+    
+    QUnit.test("Team with an over-max-time member is over max time", function (assert) {
+        var teamResult = createModifiedTeamResult(null, function (result) { result.setOverMaxTime(); });
+        assert.ok(!teamResult.isDisqualified);
+        assert.ok(!teamResult.isNonStarter);
+        assert.ok(!teamResult.isNonFinisher);
+        assert.ok(teamResult.isOverMaxTime);
+        assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.completed());
+    });
+    
+    QUnit.test("Team with a non-competitive team member is non-competitive", function (assert) {
+        var teamResult = createModifiedTeamResult(function (result) { result.setNonCompetitive(); }, null);
+        assert.ok(!teamResult.isDisqualified);
+        assert.ok(!teamResult.isNonStarter);
+        assert.ok(!teamResult.isNonFinisher);
+        assert.ok(!teamResult.isOverMaxTime);
+        assert.ok(teamResult.isNonCompetitive);
+        assert.ok(teamResult.completed());
+    });
 })();
