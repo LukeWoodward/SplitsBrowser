@@ -136,6 +136,7 @@
         this.splitRanks = null;
         this.cumRanks = null;
         this.timeLosses = null;
+        this.className = null;
 
         this.totalTime = (originalCumTimes === null || originalCumTimes.indexOf(null) > -1) ? null : originalCumTimes[originalCumTimes.length - 1];
     }
@@ -184,6 +185,15 @@
     */
     Result.prototype.setOverMaxTime = function () {
         this.isOverMaxTime = true;
+    };
+    
+    /**
+    * Sets the name of the class that the result belongs to.
+    * This is the course-class, not the result's age class.
+    * @param {String} className - The name of the class.
+    */
+    Result.prototype.setClassName = function (className) {
+        this.className = className;
     };
     
     /**

@@ -38,7 +38,7 @@
         this.course = null;
         this.hasDubiousData = false;
         this.competitors.forEach(function (comp) {
-            comp.setClassName(name);
+            comp.result.setClassName(name);
         });
     }
     

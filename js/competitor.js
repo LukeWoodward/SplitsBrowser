@@ -50,19 +50,9 @@
         
         this.result = result;
         
-        this.className = null;
         this.yearOfBirth = null;
         this.gender = null; // "M" or "F" for male or female.
     }
-    
-    /**
-    * Sets the name of the class that the competitor belongs to.
-    * This is the course-class, not the competitor's age class.
-    * @param {String} className - The name of the class.
-    */
-    Competitor.prototype.setClassName = function (className) {
-        this.className = className;
-    };
     
     /**
     * Sets the competitor's year of birth.

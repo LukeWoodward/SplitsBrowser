@@ -76,12 +76,12 @@
         assert.ok(courseClass.hasDubiousData, "Original-data option should be available");
     });
     
-    QUnit.test("Creating a class with competitors sets the class name in each competitor", function (assert) {
+    QUnit.test("Creating a class with competitors sets the class name in each competitor's result", function (assert) {
         var competitor1 = getCompetitor1();
         var competitor2 = getCompetitor2();
         var courseClass = new CourseClass("Test class name", 3, [competitor1, competitor2]);
-        assert.strictEqual(competitor1.className, courseClass.name);
-        assert.strictEqual(competitor2.className, courseClass.name);
+        assert.strictEqual(competitor1.result.className, courseClass.name);
+        assert.strictEqual(competitor2.result.className, courseClass.name);
     });
     
     QUnit.test("Can return fastest split for a control", function (assert) {
