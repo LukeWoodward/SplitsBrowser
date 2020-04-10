@@ -61,8 +61,8 @@
     */
     Event.prototype.needsRepair = function () {
         return this.classes.some(function (courseClass) {
-            return courseClass.competitors.some(function (competitor) {
-                return (competitor.result.getAllCumulativeTimes() === null);
+            return courseClass.getAllResults().some(function (result) {
+                return (result.getAllCumulativeTimes() === null);
             });
         });
     };

@@ -80,6 +80,14 @@
     CourseClass.prototype.setCourse = function (course) {
         this.course = course;
     };
+    
+    /**
+    * Returns an array of all results from the competitors in this course-class.
+    * @return {Array} Array of competitor results.
+    */ 
+    CourseClass.prototype.getAllResults = function () {
+        return this.competitors.map(function (comp) { return comp.result; });
+    };
 
     /**
     * Returns the fastest split time recorded by competitors in this class.  If

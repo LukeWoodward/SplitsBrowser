@@ -183,24 +183,23 @@
     };
     
     /**
-    * Attempts to repair the cumulative times for a competitor.  The repaired
-    * cumulative times are written back into the competitor.
+    * Attempts to repair the cumulative times within a result.  The repaired
+    * cumulative times are written back into the result.
     *
-    * @param {Competitor} competitor - Competitor whose cumulative times we
-    *     wish to repair.
+    * @param {Result} result Result whose cumulative times we wish to repair.
     */
-    Repairer.prototype.repairCompetitor = function (competitor) {
-        var cumTimes = competitor.result.originalCumTimes.slice(0);
+    Repairer.prototype.repairResult = function (result) {
+        var cumTimes = result.originalCumTimes.slice(0);
         
         this.removeCumulativeTimesEqualToPrevious(cumTimes);
         
         cumTimes = this.removeCumulativeTimesCausingNegativeSplits(cumTimes);
         
-        if (!competitor.result.completed()) {
+        if (!result.completed()) {
             this.removeFinishTimeIfAbsurd(cumTimes);
         }
         
-        competitor.result.setRepairedCumulativeTimes(cumTimes);
+        result.setRepairedCumulativeTimes(cumTimes);
     };
     
     /**
@@ -210,8 +209,8 @@
     */
     Repairer.prototype.repairCourseClass = function (courseClass) {
         this.madeAnyChanges = false;
-        courseClass.competitors.forEach(function (competitor) {
-            this.repairCompetitor(competitor);
+        courseClass.getAllResults().forEach(function (result) {
+            this.repairResult(result);
         }, this);
         
         if (this.madeAnyChanges) {
