@@ -147,7 +147,15 @@
             personNameXml += '</Person>\n';
         }
         
-        var clubXml = (exists("club")) ? '<Club><ShortName>' + personData.club + '</ShortName></Club>\n' : '';
+        var clubXml;
+        if (exists("club")) {
+            clubXml = '<Club><ShortName>' + personData.club + '</ShortName></Club>\n';
+        } else if (exists("clubFull")) {
+            clubXml = '<Club><Name>' + personData.clubFull + '</Name></Club>\n';
+        } else {
+            clubXml = '';
+        }
+
         var startTimeXml = (exists("startTime")) ? '<StartTime><Clock>' + formatTime(personData.startTime) + '</Clock></StartTime>\n' : '';
         var totalTimeXml = (exists("totalTime")) ? '<Time>' + formatTime(personData.totalTime) + '</Time>\n' : '';
         
@@ -342,7 +350,14 @@
             personNameXml += '</Person>\n';
         }
         
-        var clubXml = (exists("club")) ? '<Organisation><ShortName>' + personData.club + '</ShortName></Organisation>\n' : '';
+        var clubXml;
+        if (exists("club")) {
+            clubXml = '<Organisation><ShortName>' + personData.club + '</ShortName></Organisation>\n';
+        } else if (exists("clubFull")) {
+            clubXml = '<Organisation><Name>' + personData.clubFull + '</Name></Organisation>\n';
+        } else {
+            clubXml = '';
+        }
         
         var startTimeStr;
         if (personData.startTime === null) {
@@ -761,6 +776,16 @@
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
                 assert.strictEqual(eventData.classes[0].competitors.length, 0, "No competitors should have been read - " + formatterName);
                 assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued - " + formatterName);
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains a competitor with a full club name", function (assert) {
+        var person = getPerson();
+        delete person.club;
+        person.clubFull = "Test Full Club Name";
+        runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
+            function (competitor) {
+                assert.strictEqual(competitor.club, person.clubFull);
             });
     });
     

@@ -217,7 +217,8 @@
     * @return {String} Competitor's club name.
     */
     Version2Reader.readClubName = function (element) {
-        return $("> Club > ShortName", element).text();
+        var clubName = $("> Club > ShortName", element).text();
+        return (clubName === "") ?  $("> Club > Name", element).text() : clubName;
     };
         
     /**
@@ -420,7 +421,8 @@
     * @return {String} Competitor's club name.
     */
     Version3Reader.readClubName = function (element) {
-        return $("> Organisation > ShortName", element).text();
+        var clubName = $("> Organisation > ShortName", element).text();
+        return (clubName === "") ? $("> Organisation > Name", element).text() : clubName;
     };
     
     /**
