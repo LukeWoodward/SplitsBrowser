@@ -746,13 +746,15 @@
         var originalCumTimes = calculateCumulativeTimesFromResults(
             results, offsets, function (result) { return result.originalCumTimes; });
             
-        var result = Result.fromOriginalCumTimes(order, results[0].startTime, originalCumTimes);
-        result.cumTimes = calculateCumulativeTimesFromResults(
-            results, offsets, function (result) { return result.cumTimes; });
+        var teamResult = Result.fromOriginalCumTimes(order, results[0].startTime, originalCumTimes);
+        if (results.every(function (result) { return result.cumTimes !== null; })) {
+            teamResult.cumTimes = calculateCumulativeTimesFromResults(
+                results, offsets, function (r) { return r.cumTimes; });
+            teamResult.splitTimes = splitTimesFromCumTimes(teamResult.cumTimes);
+        }
         
-        result.splitTimes = splitTimesFromCumTimes(result.cumTimes);
-        result.determineAggregateStatus(results);
-        return result;
+        teamResult.determineAggregateStatus(results);
+        return teamResult;
     };
     
     SplitsBrowser.Model.Result = Result;

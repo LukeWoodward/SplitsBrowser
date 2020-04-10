@@ -1074,4 +1074,14 @@
         assert.ok(teamResult.isNonCompetitive);
         assert.ok(teamResult.completed());
     });
+    
+    QUnit.test("Can build team built from original cumulative times only", function (assert) {
+        var teamResultOriginalTimesOnly = createTeamResult(1, [
+            fromOriginalCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570]),
+            fromOriginalCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533])
+        ]);
+        
+        assert.deepEqual(teamResultOriginalTimesOnly.getAllOriginalCumulativeTimes(), [0, 65, 286, 470, 570, 631, 824, 1000, 1103]); 
+        assert.strictEqual(teamResultOriginalTimesOnly.getAllCumulativeTimes(), null); 
+    });
 })();
