@@ -495,7 +495,7 @@
         classNames.sort();
         return classNames.map(function (className) {
             var courseClass = this.classes.get(className);
-            return new CourseClass(className, courseClass.numControls, courseClass.competitors);
+            return new CourseClass(className, courseClass.numControls, courseClass.competitors.map(function (comp) { return comp.result; }));
         }, this);
     };
     

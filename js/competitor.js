@@ -50,6 +50,7 @@
         
         this.result = result;
         
+        this.result.owner = this;
         this.yearOfBirth = null;
         this.gender = null; // "M" or "F" for male or female.
     }

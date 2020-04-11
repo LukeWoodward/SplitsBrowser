@@ -25,7 +25,7 @@
     var throwInvalidData = SplitsBrowser.throwInvalidData;
 
     // Maximum number of minutes added to finish splits to ensure that all
-    // competitors have sensible finish splits.
+    // results have sensible finish splits.
     var MAX_FINISH_SPLIT_MINS_ADDED = 5;
     
     /**
@@ -110,7 +110,7 @@
             // So, we have a pair of cumulative times that are not in strict
             // ascending order, with the second one not being the finish.  If
             // the second time is not the finish cumulative time for a
-            // completing competitor, try the following in order until we get a
+            // completing result, try the following in order until we get a
             // list of cumulative times in ascending order:
             // * Remove the second cumulative time,
             // * Remove the first cumulative time.
@@ -118,8 +118,8 @@
             // beyond the second, remove the offending time and keep going.  By
             // 'remove' we mean 'replace with NaN'.
             //
-            // We don't want to remove the finish time for a competitor as that
-            // removes their total time as well.  If the competitor didn't
+            // We don't want to remove the finish time for a result as that
+            // removes their total time as well.  If the result didn't
             // complete the course, then we're not so bothered; they've
             // mispunched so they don't have a total time anyway.
             
@@ -165,7 +165,7 @@
     };
     
     /**
-    * Removes the finish cumulative time from a competitor if it is absurd.
+    * Removes the finish cumulative time from a result if it is absurd.
     *
     * It is absurd if it is less than the time at the previous control by at
     * least the maximum amount of time that can be added to finish splits.
@@ -209,7 +209,7 @@
     */
     Repairer.prototype.repairCourseClass = function (courseClass) {
         this.madeAnyChanges = false;
-        courseClass.getAllResults().forEach(function (result) {
+        courseClass.results.forEach(function (result) {
             this.repairResult(result);
         }, this);
         
@@ -238,23 +238,23 @@
     }
     
     /**
-    * Transfer the 'original' data for each competitor to the 'final' data.
+    * Transfer the 'original' data for each result to the 'final' data.
     *
     * This is used if the input data has been read in a format that requires
     * the data to be checked, but the user has opted not to perform any such
     * reparations and wishes to view the 
     * @param {Event} eventData - The event data to repair.
     */
-    function transferCompetitorData(eventData) {
+    function transferResultData(eventData) {
         eventData.classes.forEach(function (courseClass) {
-            courseClass.competitors.forEach(function (competitor) {
-                competitor.result.setRepairedCumulativeTimes(competitor.result.getAllOriginalCumulativeTimes());
+            courseClass.results.forEach(function (result) {
+                result.setRepairedCumulativeTimes(result.getAllOriginalCumulativeTimes());
             });
         });
     }
     
     SplitsBrowser.DataRepair = {
         repairEventData: repairEventData,
-        transferCompetitorData: transferCompetitorData
+        transferResultData: transferResultData
     };
 })();

@@ -268,7 +268,7 @@
         this.classes.entries().forEach(function (keyValuePair) {
             var className = keyValuePair.key;
             var cls = keyValuePair.value;
-            var courseClass = new CourseClass(className, cls.controls.length, cls.competitors);
+            var courseClass = new CourseClass(className, cls.controls.length, cls.competitors.map(function (comp) { return comp.result; }));
             courseClasses.push(courseClass);
             
             var controlsList = cls.controls.join(",");

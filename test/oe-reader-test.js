@@ -348,7 +348,7 @@
             assert.ok(eventData.classes[0] instanceof CourseClass, "Class element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
             assert.strictEqual(eventData.classes[0].name, "Test class", "Class should have correct name");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
             
             assert.strictEqual(eventData.courses.length, 1, "There should be one course");
             var course = eventData.courses[0];
@@ -358,15 +358,14 @@
             assert.deepEqual(course.classes, [eventData.classes[0]], "The one class in the course should be the one course");
             assert.deepEqual(course.controls, ["208", "227", "212"]);
             
-            var competitor = eventData.classes[0].competitors[0];
-            assert.strictEqual(competitor.name, "First Runner", "Should read correct name");
-            assert.strictEqual(competitor.club, "ABC", "Should read correct club");
-            assert.strictEqual(competitor.yearOfBirth, 1984, "Should read correct year of birth");
+            var result = eventData.classes[0].results[0];
+            assert.strictEqual(result.owner.name, "First Runner", "Should read correct name");
+            assert.strictEqual(result.owner.club, "ABC", "Should read correct club");
+            assert.strictEqual(result.owner.yearOfBirth, 1984, "Should read correct year of birth");
             if (format.hasGender) {
-                assert.strictEqual(competitor.gender, "M", "Should read correct gender");
+                assert.strictEqual(result.owner.gender, "M", "Should read correct gender");
             }
             
-            var result = competitor.result;
             assert.strictEqual(result.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
             assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
@@ -384,8 +383,8 @@
         competitor1.startPunch = "";
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            assert.strictEqual(eventData.classes[0].competitors[0].result.startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results[0].startTime, 11 * 3600 + 27 * 60 + 45, "Should read correct start time");
         });
     });
     
@@ -396,8 +395,8 @@
         competitor1.finish = "";
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            assert.strictEqual(eventData.classes[0].competitors[0].result.startTime, null, "Should read correct start time");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results[0].startTime, null, "Should read correct start time");
         });
     });
     
@@ -438,8 +437,8 @@
         competitor.placing = "";
         runTestOverAllFormats([[competitor, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            assert.ok(!eventData.classes[0].competitors[0].isNonCompetitive);
+            assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
+            assert.ok(!eventData.classes[0].results[0].isNonCompetitive);
         });
     });
     
@@ -448,8 +447,8 @@
         competitor1.placing = "";
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            var result = eventData.classes[0].competitors[0].result;
+            assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
+            var result = eventData.classes[0].results[0];
             assert.ok(!result.completed());
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, null, null, 393]);
         }, function (eventDataStr) {
@@ -465,8 +464,8 @@
         competitor1.placing = "";
         runTestOverAllFormats([[competitor1, getControls1WithBlankTimeForLast()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            var result = eventData.classes[0].competitors[0].result;
+            assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
+            var result = eventData.classes[0].results[0];
             assert.ok(!result.completed());
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, null, 393]);
         });
@@ -477,8 +476,8 @@
         competitor1.placing = "";
         runTestOverAllFormats([[competitor1, getControls1WithNonNumericControlCode()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            var result = eventData.classes[0].competitors[0].result;
+            assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
+            var result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
         });
     });
@@ -488,8 +487,8 @@
         competitor1.placing = "";
         runTestOverAllFormats([[competitor1, getControls1WithBlankCodeAndMissingTimeAtTheEnd()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            var result = eventData.classes[0].competitors[0].result;
+            assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
+            var result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
         });
     });
@@ -499,8 +498,8 @@
         competitor1.placing = "";
         runTestOverAllFormats([[competitor1, getControls1WithBlankCodeAndMissingTimeAtTheEndFollowedByAdditionalControl()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            var result = eventData.classes[0].competitors[0].result;
+            assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
+            var result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
         });
     });
@@ -511,8 +510,8 @@
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            assert.strictEqual(eventData.classes[0].competitors[0].yearOfBirth, null, "No year of birth should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results[0].owner.yearOfBirth, null, "No year of birth should have been read");
         });
     });
     
@@ -522,8 +521,8 @@
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            assert.strictEqual(eventData.classes[0].competitors[0].yearOfBirth, null, "No year of birth should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results[0].owner.yearOfBirth, null, "No year of birth should have been read");
         });
     });
     
@@ -533,9 +532,9 @@
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData, format) {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
             if (format.hasGender) {
-                assert.strictEqual(eventData.classes[0].competitors[0].gender, "F", "Should read correct gender");
+                assert.strictEqual(eventData.classes[0].results[0].owner.gender, "F", "Should read correct gender");
             }
         });
     });
@@ -546,9 +545,9 @@
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData, format) {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
             if (format.hasGender) {
-                assert.strictEqual(eventData.classes[0].competitors[0].gender, null, "No gender should have been read");
+                assert.strictEqual(eventData.classes[0].results[0].owner.gender, null, "No gender should have been read");
             }
         });
     });
@@ -559,9 +558,9 @@
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData, format) {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
             if (format.hasGender) {
-                assert.strictEqual(eventData.classes[0].competitors[0].gender, null, "No gender should have been read");
+                assert.strictEqual(eventData.classes[0].results[0].owner.gender, null, "No gender should have been read");
             }
         });
     });
@@ -569,8 +568,8 @@
     QUnit.test("Can parse a string that contains a single competitor's data with LF line-endings", function (assert) {
         runTestOverAllFormats([[getCompetitor1(), getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "There should be one competitor");
-            var result = eventData.classes[0].competitors[0].result;
+            assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
+            var result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
             assert.strictEqual(eventData.courses.length, 1, "There should be one course");
         }, function (eventDataStr) {
@@ -599,22 +598,22 @@
         var eventData = parseEventData(HEADER_60 + generateRow(competitor1, getControls1(), ROW_TEMPLATE_60));
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.strictEqual(eventData.classes[0].name, "Test course", "Class should have same name as course");
-        assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+        assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
         
         assert.strictEqual(eventData.courses.length, 1, "There should be one course");
         assert.strictEqual(eventData.courses[0].name, "Test course", "Course name should be correct");
         
-        var competitor = eventData.classes[0].competitors[0];
-        assert.strictEqual(competitor.name, competitor1.compno, "Should read competitor name as ID");
-        assert.strictEqual(competitor.club, competitor1.noOfClub, "Should read club name as ID");
-        assert.deepEqual(competitor.result.startTime, parseTime(competitor1.startTime), "Should read correct start time");
-        assert.deepEqual(competitor.result.totalTime, 393, "Should read correct total time");
+        var result = eventData.classes[0].results[0];
+        assert.strictEqual(result.owner.name, competitor1.compno, "Should read competitor name as ID");
+        assert.strictEqual(result.owner.club, competitor1.noOfClub, "Should read club name as ID");
+        assert.deepEqual(result.startTime, parseTime(competitor1.startTime), "Should read correct start time");
+        assert.deepEqual(result.totalTime, 393, "Should read correct total time");
     });
     
     QUnit.test("Can parse a string that contains a single competitor's data with commas as column separators", function (assert) {
         runTestOverAllFormats([[getCompetitor1(), getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
         }, function (eventDataStr) {
             return eventDataStr.replace(/;/g, ",");
         });
@@ -623,7 +622,7 @@
     QUnit.test("Can parse a string that contains a single competitor's data with tabs as column separators", function (assert) {
         runTestOverAllFormats([[getCompetitor1(), getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
         }, function (eventDataStr) {
             return eventDataStr.replace(/;/g, "\t");
         });
@@ -632,7 +631,7 @@
     QUnit.test("Can parse a string that contains a single competitor's data with backslash characters as column separators", function (assert) {
         runTestOverAllFormats([[getCompetitor1(), getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
         }, function (eventDataStr) {
             return eventDataStr.replace(/;/g, "\\");
         });
@@ -686,9 +685,9 @@
         runTestOverAllFormats([[comp, controls]], function (eventData) {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
         
-            var result = eventData.classes[0].competitors[0].result;
+            var result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
         });
     });
@@ -701,9 +700,9 @@
         runTestOverAllFormats([[comp, controls]], function (eventData) {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
         
-            var result = eventData.classes[0].competitors[0].result;
+            var result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
             assert.ok(result.isOKDespiteMissingTimes, "Should be marked as OK despite having a missing time");
         });
@@ -737,11 +736,11 @@
         runTestOverAllFormats([[comp, controls]], function (eventData) {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
             
-            var competitor = eventData.classes[0].competitors[0];
-            assert.strictEqual(competitor.name, "First Runner", "Should read correct name without 'mp' suffix");
-            assert.deepEqual(competitor.result.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
+            var result = eventData.classes[0].results[0];
+            assert.strictEqual(result.owner.name, "First Runner", "Should read correct name without 'mp' suffix");
+            assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
         });
     });
     
@@ -752,12 +751,10 @@
         runTestOverAllFormats([[comp, getControls1()]], function (eventData) {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
             
-            var competitor = eventData.classes[0].competitors[0];
-            assert.strictEqual(competitor.name, "First Runner", "Should read correct name without 'n/c' suffix");
-            
-            var result = competitor.result;
+            var result = eventData.classes[0].results[0];
+            assert.strictEqual(result.owner.name, "First Runner", "Should read correct name without 'n/c' suffix");
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
             assert.ok(result.isNonCompetitive, "Competitor result should be marked as non-competitive");
             assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
@@ -772,8 +769,8 @@
         comp.nonComp = "1";
         runTestOverAllFormats([[comp, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            var result = eventData.classes[0].competitors[0].result;
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            var result = eventData.classes[0].results[0];
             assert.ok(result.isNonCompetitive, "Competitor result should be marked as non-competitive");
             assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
             assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
@@ -788,8 +785,8 @@
         competitor1.finish = "";
         runTestOverAllFormats([[competitor1, getControls1AllMissed()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            var result = eventData.classes[0].competitors[0].result;
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            var result = eventData.classes[0].results[0];
             assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
             assert.ok(result.isNonStarter, "Competitor result should be marked as a non-starter");
             assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
@@ -805,8 +802,8 @@
         competitor1.classifier = "1";
         runTestOverAllFormats([[competitor1, getControls1AllMissed()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            var result = eventData.classes[0].competitors[0].result;
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            var result = eventData.classes[0].results[0];
             assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
             assert.ok(result.isNonStarter, "Competitor result should be marked as a non-starter");
             assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
@@ -822,8 +819,8 @@
         controls[1].time = "-----";
         runTestOverAllFormats([[competitor1, controls]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            var result = eventData.classes[0].competitors[0].result;
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            var result = eventData.classes[0].results[0];
             assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
             assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
             assert.ok(result.isNonFinisher, "Competitor result should be marked as a non-finisher");
@@ -837,8 +834,8 @@
         competitor1.classifier = "4";
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            var result = eventData.classes[0].competitors[0].result;
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            var result = eventData.classes[0].results[0];
             assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
             assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
             assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
@@ -852,8 +849,8 @@
         competitor1.classifier = "5";
         runTestOverAllFormats([[competitor1, getControls1()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read");
-            var result = eventData.classes[0].competitors[0].result;
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            var result = eventData.classes[0].results[0];
             assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
             assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
             assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
@@ -867,9 +864,9 @@
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.ok(eventData.classes[0] instanceof CourseClass, "Array element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
-            assert.strictEqual(eventData.classes[0].competitors.length, 2, "Two competitors should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 2, "Two competitors should have been read");
             
-            assert.strictEqual(eventData.classes[0].competitors[0].name, "First Runner", "Should read correct name for first competitor");
+            assert.strictEqual(eventData.classes[0].results[0].owner.name, "First Runner", "Should read correct name for first competitor");
             assert.strictEqual(eventData.classes[0].course, eventData.courses[0], "Course should be set on the class");
             assert.deepEqual(eventData.courses[0].controls, ["208", "227", "212"]);
         });
@@ -884,10 +881,10 @@
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.ok(eventData.classes[0] instanceof CourseClass, "Array element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
-            assert.strictEqual(eventData.classes[0].competitors.length, 2, "Two competitors should have been read");
+            assert.strictEqual(eventData.classes[0].results.length, 2, "Two competitors should have been read");
             
-            assert.strictEqual(eventData.classes[0].competitors[0].name, "First Runner", "Should read correct name for first competitor");
-            assert.strictEqual(eventData.classes[0].competitors[1].name, "Second Runner", "Should read correct name for second competitor");
+            assert.strictEqual(eventData.classes[0].results[0].owner.name, "First Runner", "Should read correct name for first competitor");
+            assert.strictEqual(eventData.classes[0].results[1].owner.name, "Second Runner", "Should read correct name for second competitor");
             
             assert.strictEqual(eventData.courses.length, 1, "There should be one element in the courses array");
             assert.strictEqual(eventData.courses[0].name, "Test course 1", "The course name should be the first course");
@@ -904,11 +901,11 @@
         comp2.className = "Test class 2";
         runTestOverAllFormats([[comp1, getControls1()], [comp2, getControls2()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 2, "There should be two classes");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "First class should have two competitors");
-            assert.strictEqual(eventData.classes[1].competitors.length, 1, "Second class should have two competitors");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "First class should have two competitors");
+            assert.strictEqual(eventData.classes[1].results.length, 1, "Second class should have two competitors");
             
-            assert.strictEqual(eventData.classes[0].competitors[0].name, "First Runner", "Should read correct name for first competitor");
-            assert.strictEqual(eventData.classes[1].competitors[0].name, "Second Runner", "Should read correct name for second competitor");
+            assert.strictEqual(eventData.classes[0].results[0].owner.name, "First Runner", "Should read correct name for first competitor");
+            assert.strictEqual(eventData.classes[1].results[0].owner.name, "Second Runner", "Should read correct name for second competitor");
             
             assert.strictEqual(eventData.courses.length, 1, "There should be one element in the courses array");
             assert.strictEqual(eventData.courses[0].name, "Test course", "The course name should be correct");
@@ -932,11 +929,11 @@
         
         runTestOverAllFormats([[comp1, getControls1()], [comp2, getControls2()], [comp3, getControls3()]], function (eventData) {
             assert.strictEqual(eventData.classes.length, 2, "There should be two classes");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "First class should have two competitors");
-            assert.strictEqual(eventData.classes[1].competitors.length, 2, "Second class should have two competitors");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "First class should have two competitors");
+            assert.strictEqual(eventData.classes[1].results.length, 2, "Second class should have two competitors");
             
-            assert.strictEqual(eventData.classes[0].competitors[0].name, "First Runner", "Should read correct name for competitor in first class");
-            assert.strictEqual(eventData.classes[1].competitors[0].name, "Second Runner", "Should read correct name for first competitor in second class");
+            assert.strictEqual(eventData.classes[0].results[0].owner.name, "First Runner", "Should read correct name for competitor in first class");
+            assert.strictEqual(eventData.classes[1].results[0].owner.name, "Second Runner", "Should read correct name for first competitor in second class");
             
             assert.strictEqual(eventData.courses.length, 1, "There should be one element in the courses array");
             assert.strictEqual(eventData.courses[0].name, "Test course 1", "The course name should be correct");
@@ -966,10 +963,10 @@
             assert.ok(eventData.classes[1] instanceof CourseClass, "Second array element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].numControls, 3, "First class should have three controls");
             assert.strictEqual(eventData.classes[1].numControls, 4, "Second class should have four controls");
-            assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read for the first class");
-            assert.strictEqual(eventData.classes[1].competitors.length, 1, "One competitor should have been read for the second class");
-            assert.strictEqual(eventData.classes[0].competitors[0].name, "First Runner", "Should read correct name for competitor on first class");
-            assert.strictEqual(eventData.classes[1].competitors[0].name, "Second Runner", "Should read correct name for competitor on second class");
+            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read for the first class");
+            assert.strictEqual(eventData.classes[1].results.length, 1, "One competitor should have been read for the second class");
+            assert.strictEqual(eventData.classes[0].results[0].owner.name, "First Runner", "Should read correct name for competitor on first class");
+            assert.strictEqual(eventData.classes[1].results[0].owner.name, "Second Runner", "Should read correct name for competitor on second class");
             
             assert.strictEqual(eventData.courses.length, 2, "There should be two elements in the courses array");
             assert.ok(eventData.courses[0] instanceof Course, "First array element should be a Course object");
@@ -1004,8 +1001,8 @@
             assert.ok(eventData.classes[1] instanceof CourseClass, "Second array element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].name, "Test class 1", "First class should be first class alphabetically");
             assert.strictEqual(eventData.classes[1].name, "Test class 2", "Second class should be second class alphabetically");
-            assert.strictEqual(eventData.classes[0].competitors[0].name, "Second Runner", "Should read correct name for competitor on first class");
-            assert.strictEqual(eventData.classes[1].competitors[0].name, "First Runner", "Should read correct name for competitor on second class");
+            assert.strictEqual(eventData.classes[0].results[0].owner.name, "Second Runner", "Should read correct name for competitor on first class");
+            assert.strictEqual(eventData.classes[1].results[0].owner.name, "First Runner", "Should read correct name for competitor on second class");
             
             assert.strictEqual(eventData.courses.length, 2, "There should be two elements in the courses array");
             assert.ok(eventData.courses[0] instanceof Course, "First array element should be a Course object");
@@ -1034,8 +1031,8 @@
             assert.ok(eventData.classes[1] instanceof CourseClass, "Second array element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].name, "Test class 1", "First class should be first class alphabetically");
             assert.strictEqual(eventData.classes[1].name, "Test class 2", "Second class should be second class alphabetically");
-            assert.strictEqual(eventData.classes[0].competitors[0].name, "Second Runner", "Should read correct name for competitor on first class");
-            assert.strictEqual(eventData.classes[1].competitors[0].name, "First Runner", "Should read correct name for competitor on second class");
+            assert.strictEqual(eventData.classes[0].results[0].owner.name, "Second Runner", "Should read correct name for competitor on first class");
+            assert.strictEqual(eventData.classes[1].results[0].owner.name, "First Runner", "Should read correct name for competitor on second class");
             
             assert.strictEqual(eventData.courses.length, 2, "There should be two elements in the courses array");
             assert.ok(eventData.courses[0] instanceof Course, "First array element should be a Course object");

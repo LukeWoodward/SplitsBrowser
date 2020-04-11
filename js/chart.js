@@ -42,9 +42,9 @@
 
     var LEGEND_LINE_WIDTH = 10;
     
-    // Minimum distance between a Y-axis tick label and a competitor's start
+    // Minimum distance between a Y-axis tick label and a result's start
     // time, in pixels.
-    var MIN_COMPETITOR_TICK_MARK_DISTANCE = 10;
+    var MIN_RESULT_TICK_MARK_DISTANCE = 10;
     
     // The number that identifies the left mouse button in a jQuery event.
     var JQUERY_EVENT_LEFT_BUTTON = 1;
@@ -75,7 +75,7 @@
     * as appropriate.
     * @param {?Number} time - The time, in seconds, or null.
     * @param {?Number} rank - The rank, or null.
-    * @param {Boolean} isOKDespiteMissingTimes - True if the competitor is marked as
+    * @param {Boolean} isOKDespiteMissingTimes - True if the result is marked as
     *     OK despite having missing controls.
     * @returns Time and rank formatted as a string.
     */
@@ -98,11 +98,11 @@
     }
     
     /**
-    * Formats and returns a competitor's name and optional suffix.
-    * @param {String} name - The name of the competitor.
-    * @param {String} suffix - The optional suffix of the competitor (may be an
+    * Formats and returns a result's name and optional suffix.
+    * @param {String} name - The name associated with the result.
+    * @param {String} suffix - The optional suffix of the result (may be an
     *      empty string to indicate no suffix).
-    * @return Competitor name and suffix, formatted.
+    * @return Result's associated name and suffix, formatted.
     */
     function formatNameAndSuffix(name, suffix) {
         return (suffix === "") ? name : name + " (" + suffix + ")";
@@ -151,14 +151,14 @@
         this.contentHeight = -1;
         this.numControls = -1;
         this.selectedIndexes = [];
-        this.currentCompetitorData = null;
+        this.currentResultData = null;
         this.isPopupOpen = false;
         this.popupUpdateFunc = null;
         this.maxStartTimeLabelWidth = 0;
         
         this.mouseOutTimeout = null;
         
-        // Indexes of the currently-selected competitors, in the order that
+        // Indexes of the currently-selected results, in the order that
         // they appear in the list of labels.
         this.selectedIndexesOrderedByLastYValue = [];
         this.referenceCumTimes = [];
@@ -260,12 +260,12 @@
     };
     
     /**
-    * Returns an array of the competitors visiting the current control at the
+    * Returns an array of the results visiting the current control at the
     * current time.
-    * @return {Array} Array of competitor data.
+    * @return {Array} Array of result data.
     */
-    Chart.prototype.getCompetitorsVisitingCurrentControlPopupData = function () {
-        return ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(this.courseClassSet, this.eventData, this.currentControlIndex, this.currentChartTime);
+    Chart.prototype.getResultsVisitingCurrentControlPopupData = function () {
+        return ChartPopupData.getResultsVisitingCurrentControlPopupData(this.courseClassSet, this.eventData, this.currentControlIndex, this.currentChartTime);
     };
     
     /**
@@ -360,7 +360,7 @@
             if (this.isRaceGraph && (event.which === JQUERY_EVENT_LEFT_BUTTON || event.which === JQUERY_EVENT_RIGHT_BUTTON)) {
                 if (this.hasControls) {
                     this.setCurrentChartTime(event);
-                    this.popupUpdateFunc = function () { outerThis.popup.setData(outerThis.getCompetitorsVisitingCurrentControlPopupData(), true); };
+                    this.popupUpdateFunc = function () { outerThis.popup.setData(outerThis.getResultsVisitingCurrentControlPopupData(), true); };
                     showPopup = true;
                 }
             } else if (event.which === JQUERY_EVENT_LEFT_BUTTON) {
@@ -416,7 +416,7 @@
     */
     Chart.prototype.drawControlLine = function(controlIndex) {
         this.currentControlIndex = controlIndex;
-        this.updateCompetitorStatistics();    
+        this.updateResultStatistics();    
         var xPosn = this.xScale(this.referenceCumTimes[controlIndex]);
         this.controlLine = this.svgGroup.append("line")
                                         .attr("x1", xPosn)
@@ -492,7 +492,7 @@
     Chart.prototype.removeControlLine = function() {
         this.currentControlIndex = null;
         this.actualControlIndex = null;
-        this.updateCompetitorStatistics();
+        this.updateResultStatistics();
         if (this.controlLine !== null) {
             d3.select(this.controlLine).remove();
             this.controlLine = null;
@@ -500,53 +500,53 @@
     };
 
     /**
-    * Returns an array of the the times that the selected competitors are
-    * behind the fastest time at the given control.
+    * Returns an array of the the times that the selected results are behind
+    * the fastest time at the given control.
     * @param {Number} controlIndex - Index of the given control.
-    * @param {Array} indexes - Array of indexes of selected competitors.
-    * @return {Array} Array of times in seconds that the given competitors are
+    * @param {Array} indexes - Array of indexes of selected results.
+    * @return {Array} Array of times in seconds that the given results are
     *     behind the fastest time.
     */
     Chart.prototype.getTimesBehindFastest = function (controlIndex, indexes) {
-        var selectedCompetitors = indexes.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
+        var selectedResults = indexes.map(function (index) { return this.courseClassSet.allResults[index]; }, this);
         var fastestSplit = this.fastestCumTimes[controlIndex] - this.fastestCumTimes[controlIndex - 1];
-        var timesBehind = selectedCompetitors.map(function (comp) { var compSplit = comp.getSplitTimeTo(controlIndex); return (compSplit === null) ? null : compSplit - fastestSplit; });
+        var timesBehind = selectedResults.map(function (result) { var resultSplit = result.getSplitTimeTo(controlIndex); return (resultSplit === null) ? null : resultSplit - fastestSplit; });
         return timesBehind;
     };
 
     /**
-    * Returns an array of the the time losses of the selected competitors at
-    * the given control.
+    * Returns an array of the the time losses of the selected results at the
+    * given control.
     * @param {Number} controlIndex - Index of the given control.
-    * @param {Array} indexes - Array of indexes of selected competitors.
-    * @return {Array} Array of times in seconds that the given competitors are
+    * @param {Array} indexes - Array of indexes of selected results.
+    * @return {Array} Array of times in seconds that the given results are
     *     deemed to have lost at the given control.
     */
     Chart.prototype.getTimeLosses = function (controlIndex, indexes) {
-        var selectedCompetitors = indexes.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
-        var timeLosses = selectedCompetitors.map(function (comp) { return comp.getTimeLossAt(controlIndex); });
+        var selectedResults = indexes.map(function (index) { return this.courseClassSet.allResults[index]; }, this);
+        var timeLosses = selectedResults.map(function (result) { return result.getTimeLossAt(controlIndex); });
         return timeLosses;
     };
     
     /**
-    * Updates the statistics text shown after the competitors.
+    * Updates the statistics text shown after the results.
     */
-    Chart.prototype.updateCompetitorStatistics = function() {
-        var selectedCompetitors = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
-        var labelTexts = selectedCompetitors.map(function (comp) { return formatNameAndSuffix(comp.name, getSuffix(comp.result)); });
+    Chart.prototype.updateResultStatistics = function() {
+        var selectedResults = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.courseClassSet.allResults[index]; }, this);
+        var labelTexts = selectedResults.map(function (result) { return formatNameAndSuffix(result.owner.name, getSuffix(result)); });
         
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
-            var okDespites = selectedCompetitors.map(function (comp) { return comp.isOKDespiteMissingTimes; });
+            var okDespites = selectedResults.map(function (result) { return result.isOKDespiteMissingTimes; });
             if (this.visibleStatistics.TotalTime) {
-                var cumTimes = selectedCompetitors.map(function (comp) { return comp.getCumulativeTimeTo(this.currentControlIndex); }, this);
-                var cumRanks = selectedCompetitors.map(function (comp) { return comp.getCumulativeRankTo(this.currentControlIndex); }, this);
+                var cumTimes = selectedResults.map(function (result) { return result.getCumulativeTimeTo(this.currentControlIndex); }, this);
+                var cumRanks = selectedResults.map(function (result) { return result.getCumulativeRankTo(this.currentControlIndex); }, this);
                 labelTexts = d3.zip(labelTexts, cumTimes, cumRanks, okDespites)
                                .map(function(quad) { return quad[0] + formatTimeAndRank(quad[1], quad[2], quad[3]); });
             }
                            
             if (this.visibleStatistics.SplitTime) {
-                var splitTimes = selectedCompetitors.map(function (comp) { return comp.getSplitTimeTo(this.currentControlIndex); }, this);
-                var splitRanks = selectedCompetitors.map(function (comp) { return comp.getSplitRankTo(this.currentControlIndex); }, this);
+                var splitTimes = selectedResults.map(function (result) { return result.getSplitTimeTo(this.currentControlIndex); }, this);
+                var splitRanks = selectedResults.map(function (result) { return result.getSplitRankTo(this.currentControlIndex); }, this);
                 labelTexts = d3.zip(labelTexts, splitTimes, splitRanks, okDespites)
                                .map(function(quad) { return quad[0] + formatTimeAndRank(quad[1], quad[2], quad[3]); });
             }
@@ -564,13 +564,13 @@
             }
         }
         
-        // Update the current competitor data.
+        // Update the current result data.
         if (this.hasData) {
-            this.currentCompetitorData.forEach(function (data, index) { data.label = labelTexts[index]; });
+            this.currentResultData.forEach(function (data, index) { data.label = labelTexts[index]; });
         }
         
         // This data is already joined to the labels; just update the text.
-        d3.selectAll("text.competitorLabel").text(function (data) { return data.label; });
+        d3.selectAll("text.resultLabel").text(function (data) { return data.label; });
     };
 
     /**
@@ -610,19 +610,19 @@
     /**
     * Return the maximum width of the end-text shown to the right of the graph.
     *
-    * This function considers only the competitors whose indexes are in the
-    * list given.  This method returns zero if the list is empty.
+    * This function considers only the results whose indexes are in the list
+    * given.  This method returns zero if the list is empty.
     * @returns {Number} Maximum width of text, in pixels.
     */
     Chart.prototype.getMaxGraphEndTextWidth = function () {
         if (this.selectedIndexes.length === 0) {
-            // No competitors selected.  Avoid problems caused by trying to
-            // find the maximum of an empty array.
+            // No results selected.  Avoid problems caused by trying to find
+            // the maximum of an empty array.
             return 0;
         } else {
             var nameWidths = this.selectedIndexes.map(function (index) {
-                var comp = this.courseClassSet.allCompetitors[index];
-                return this.getTextWidth(formatNameAndSuffix(comp.name, getSuffix(comp.result)));
+                var result = this.courseClassSet.allResults[index];
+                return this.getTextWidth(formatNameAndSuffix(result.owner.name, getSuffix(result)));
             }, this);
             return d3.max(nameWidths) + this.determineMaxStatisticTextWidth();
         }
@@ -642,7 +642,7 @@
 
     /**
     * Return the maximum width of a piece of time and rank text shown to the right
-    * of each competitor 
+    * of each result. 
     * @param {string} timeFuncName - Name of the function to call to get the time
                                      data.
     * @param {string} rankFuncName - Name of the function to call to get the rank
@@ -653,13 +653,13 @@
         var maxTime = 0;
         var maxRank = 0;
         
-        var selectedCompetitors = this.selectedIndexes.map(function (index) { return this.courseClassSet.allCompetitors[index]; }, this);
+        var selectedResults = this.selectedIndexes.map(function (index) { return this.courseClassSet.allResults[index]; }, this);
         
         d3.range(1, this.numControls + 2).forEach(function (controlIndex) {
-            var times = selectedCompetitors.map(function (comp) { return comp[timeFuncName](controlIndex); });
+            var times = selectedResults.map(function (result) { return result[timeFuncName](controlIndex); });
             maxTime = Math.max(maxTime, maxNonNullNorNaNValue(times));
             
-            var ranks = selectedCompetitors.map(function (comp) { return comp[rankFuncName](controlIndex); });
+            var ranks = selectedResults.map(function (result) { return result[rankFuncName](controlIndex); });
             maxRank = Math.max(maxRank, maxNonNullNorNaNValue(ranks));
         });
         
@@ -669,7 +669,7 @@
 
     /**
     * Return the maximum width of the split-time and rank text shown to the right
-    * of each competitor 
+    * of each result. 
     * @returns {Number} Maximum width of split-time and rank text, in pixels.
     */
     Chart.prototype.getMaxSplitTimeAndRankTextWidth = function() {
@@ -678,7 +678,7 @@
 
     /**
     * Return the maximum width of the cumulative time and cumulative-time rank text
-    * shown to the right of each competitor 
+    * shown to the right of each result.
     * @returns {Number} Maximum width of cumulative time and cumulative-time rank text, in
     *                   pixels.
     */
@@ -688,7 +688,7 @@
 
     /**
     * Return the maximum width of the behind-fastest time shown to the right of
-    * each competitor 
+    * each result.
     * @returns {Number} Maximum width of behind-fastest time rank text, in pixels.
     */
     Chart.prototype.getMaxTimeBehindFastestWidth = function() {
@@ -704,7 +704,7 @@
 
     /**
     * Return the maximum width of the behind-fastest time shown to the right of
-    * each competitor 
+    * each result.
     * @returns {Number} Maximum width of behind-fastest time rank text, in pixels.
     */
     Chart.prototype.getMaxTimeLossWidth = function() {
@@ -724,7 +724,7 @@
     };
 
     /**
-    * Determines the maximum width of the statistics text at the end of the competitor.
+    * Determines the maximum width of the statistics text at the end of the result.
     * @returns {Number} Maximum width of the statistics text, in pixels.
     */
     Chart.prototype.determineMaxStatisticTextWidth = function() {
@@ -753,8 +753,8 @@
     */
     Chart.prototype.determineMaxStartTimeLabelWidth = function (chartData) {
         var maxWidth;
-        if (chartData.competitorNames.length > 0) {
-            maxWidth = d3.max(chartData.competitorNames.map(function (name) { return this.getTextWidth("00:00:00 " + name); }, this));
+        if (chartData.resultNames.length > 0) {
+            maxWidth = d3.max(chartData.resultNames.map(function (name) { return this.getTextWidth("00:00:00 " + name); }, this));
         } else {
             maxWidth = 0;
         }
@@ -817,7 +817,7 @@
     *
     * If start times are to be shown (i.e. for the race graph), then the Y-axis
     * values are start times.  We format these as times, as long as there isn't
-    * a competitor's start time too close to it.
+    * a result's start time too close to it.
     *
     * For other graph types, this method returns null, which tells d3 to use
     * its default tick formatter.
@@ -836,11 +836,11 @@
                 return function (time) { return formatTime(time * 60); };
             } else {
                 // Some start times are to be drawn - only draw tick marks if
-                // they are far enough away from competitors.
+                // they are far enough away from results.
                 var yScale = this.yScale;
                 return function (time) {
                     var nearestOffset = d3.min(startTimes.map(function (startTime) { return Math.abs(yScale(startTime) - yScale(time)); }));
-                    return (nearestOffset >= MIN_COMPETITOR_TICK_MARK_DISTANCE) ? formatTime(Math.round(time * 60)) : "";
+                    return (nearestOffset >= MIN_RESULT_TICK_MARK_DISTANCE) ? formatTime(Math.round(time * 60)) : "";
                 };
             }
         } else {
@@ -906,11 +906,11 @@
     */
     Chart.prototype.drawChartLines = function (chartData) {
         var outerThis = this;
-        var lineFunctionGenerator = function (selCompIdx) {
-            if (!chartData.dataColumns.some(function (col) { return isNotNullNorNaN(col.ys[selCompIdx]); })) {
-                // This competitor's entire row is null/NaN, so there's no data
-                // to draw.  WebKit will report an error ('Error parsing d=""')
-                // if no points on the line are defined, as will happen in this
+        var lineFunctionGenerator = function (selResultIdx) {
+            if (!chartData.dataColumns.some(function (col) { return isNotNullNorNaN(col.ys[selResultIdx]); })) {
+                // This result's entire row is null/NaN, so there's no data to
+                // draw.  WebKit will report an error ('Error parsing d=""') if
+                // no points on the line are defined, as will happen in this
                 // case, so we substitute a single zero point instead.
                 return d3.line()
                            .x(0)
@@ -920,8 +920,8 @@
             else {
                 return d3.line()
                            .x(function (d) { return outerThis.xScale(d.x); })
-                           .y(function (d) { return outerThis.yScale(d.ys[selCompIdx]); })
-                           .defined(function (d) { return isNotNullNorNaN(d.ys[selCompIdx]); });
+                           .y(function (d) { return outerThis.yScale(d.ys[selResultIdx]); })
+                           .defined(function (d) { return isNotNullNorNaN(d.ys[selResultIdx]); });
             }
         };
         
@@ -929,64 +929,64 @@
         
         this.svgGroup.selectAll("line.aroundOmittedTimes").remove();
         
-        d3.range(this.numLines).forEach(function (selCompIdx) {
-            var strokeColour = colours[this.selectedIndexes[selCompIdx] % colours.length];
-            var highlighter = function () { outerThis.highlight(outerThis.selectedIndexes[selCompIdx]); };
+        d3.range(this.numLines).forEach(function (selResultIdx) {
+            var strokeColour = colours[this.selectedIndexes[selResultIdx] % colours.length];
+            var highlighter = function () { outerThis.highlight(outerThis.selectedIndexes[selResultIdx]); };
             var unhighlighter = function () { outerThis.unhighlight(); };
             
             this.svgGroup.append("path")
-                         .attr("d", lineFunctionGenerator(selCompIdx)(chartData.dataColumns))
+                         .attr("d", lineFunctionGenerator(selResultIdx)(chartData.dataColumns))
                          .attr("stroke", strokeColour)
-                         .attr("class", "graphLine competitor" + this.selectedIndexes[selCompIdx])
+                         .attr("class", "graphLine result" + this.selectedIndexes[selResultIdx])
                          .on("mouseenter", highlighter)
                          .on("mouseleave", unhighlighter)
                          .append("title")
-                         .text(chartData.competitorNames[selCompIdx]);
+                         .text(chartData.resultNames[selResultIdx]);
                          
-            chartData.dubiousTimesInfo[selCompIdx].forEach(function (dubiousTimeInfo) {
+            chartData.dubiousTimesInfo[selResultIdx].forEach(function (dubiousTimeInfo) {
                 this.svgGroup.append("line")
                              .attr("x1", this.xScale(chartData.dataColumns[dubiousTimeInfo.start].x))
-                             .attr("y1", this.yScale(chartData.dataColumns[dubiousTimeInfo.start].ys[selCompIdx]))
+                             .attr("y1", this.yScale(chartData.dataColumns[dubiousTimeInfo.start].ys[selResultIdx]))
                              .attr("x2", this.xScale(chartData.dataColumns[dubiousTimeInfo.end].x))
-                             .attr("y2", this.yScale(chartData.dataColumns[dubiousTimeInfo.end].ys[selCompIdx]))
+                             .attr("y2", this.yScale(chartData.dataColumns[dubiousTimeInfo.end].ys[selResultIdx]))
                              .attr("stroke", strokeColour)
-                             .attr("class", "aroundOmittedTimes competitor" + this.selectedIndexes[selCompIdx])
+                             .attr("class", "aroundOmittedTimes result" + this.selectedIndexes[selResultIdx])
                              .on("mouseenter", highlighter)
                              .on("mouseleave", unhighlighter)
                              .append("title")
-                             .text(chartData.competitorNames[selCompIdx]);
+                             .text(chartData.resultNames[selResultIdx]);
             }, this);
         }, this);
     };
 
     /**
-    * Highlights the competitor with the given index.
-    * @param {Number} competitorIdx - The index of the competitor to highlight.
+    * Highlights the result with the given index.
+    * @param {Number} resultIdx - The index of the result to highlight.
     */
-    Chart.prototype.highlight = function (competitorIdx) {
-        this.svg.selectAll("path.graphLine.competitor" + competitorIdx).classed("selected", true);
-        this.svg.selectAll("line.competitorLegendLine.competitor" + competitorIdx).classed("selected", true);
-        this.svg.selectAll("text.competitorLabel.competitor" + competitorIdx).classed("selected", true);
-        this.svg.selectAll("text.startLabel.competitor" + competitorIdx).classed("selected", true);
-        this.svg.selectAll("line.aroundOmittedTimes.competitor" + competitorIdx).classed("selected", true);
+    Chart.prototype.highlight = function (resultIdx) {
+        this.svg.selectAll("path.graphLine.result" + resultIdx).classed("selected", true);
+        this.svg.selectAll("line.resultLegendLine.result" + resultIdx).classed("selected", true);
+        this.svg.selectAll("text.resultLabel.result" + resultIdx).classed("selected", true);
+        this.svg.selectAll("text.startLabel.result" + resultIdx).classed("selected", true);
+        this.svg.selectAll("line.aroundOmittedTimes.result" + resultIdx).classed("selected", true);
     };
 
     /**
-    * Removes any competitor-specific higlighting.
+    * Removes any result-specific higlighting.
     */
     Chart.prototype.unhighlight = function () {
         this.svg.selectAll("path.graphLine.selected").classed("selected", false);
-        this.svg.selectAll("line.competitorLegendLine.selected").classed("selected", false);
-        this.svg.selectAll("text.competitorLabel.selected").classed("selected", false);
+        this.svg.selectAll("line.resultLegendLine.selected").classed("selected", false);
+        this.svg.selectAll("text.resultLabel.selected").classed("selected", false);
         this.svg.selectAll("text.startLabel.selected").classed("selected", false);
         this.svg.selectAll("line.aroundOmittedTimes.selected").classed("selected", false);
     };
 
     /**
-    * Draws the start-time labels for the currently-selected competitors.
+    * Draws the start-time labels for the currently-selected results.
     * @param {object} chartData - The chart data that contains the start offsets.
     */ 
-    Chart.prototype.drawCompetitorStartTimeLabels = function (chartData) {
+    Chart.prototype.drawResultStartTimeLabels = function (chartData) {
         var startColumn = chartData.dataColumns[0];
         var outerThis = this;
         
@@ -997,19 +997,19 @@
         
         startLabels = this.svgGroup.selectAll("text.startLabel").data(this.selectedIndexes);
         startLabels.attr("x", -7)
-                   .attr("y", function (_compIndex, selCompIndex) { return outerThis.yScale(startColumn.ys[selCompIndex]) + outerThis.getTextHeight(chartData.competitorNames[selCompIndex]) / 4; })
-                   .attr("class", function (compIndex) { return "startLabel competitor" + compIndex; })
-                   .on("mouseenter", function (compIndex) { outerThis.highlight(compIndex); })
+                   .attr("y", function (_resultIndex, selResultIndex) { return outerThis.yScale(startColumn.ys[selResultIndex]) + outerThis.getTextHeight(chartData.resultNames[selResultIndex]) / 4; })
+                   .attr("class", function (resultIndex) { return "startLabel result" + resultIndex; })
+                   .on("mouseenter", function (resultIndex) { outerThis.highlight(resultIndex); })
                    .on("mouseleave", function () { outerThis.unhighlight(); })
-                   .text(function (_compIndex, selCompIndex) { return formatTime(Math.round(startColumn.ys[selCompIndex] * 60)) + " " + chartData.competitorNames[selCompIndex]; });
+                   .text(function (_resultIndex, selResultIndex) { return formatTime(Math.round(startColumn.ys[selResultIndex] * 60)) + " " + chartData.resultNames[selResultIndex]; });
         
         startLabels.exit().remove();
     };
     
     /**
-    * Removes all of the competitor start-time labels from the chart.
+    * Removes all of the result start-time labels from the chart.
     */ 
-    Chart.prototype.removeCompetitorStartTimeLabels = function () {
+    Chart.prototype.removeResultStartTimeLabels = function () {
         this.svgGroup.selectAll("text.startLabel").remove();
     };
 
@@ -1017,38 +1017,37 @@
     * Adjust the locations of the legend labels downwards so that two labels
     * do not overlap.
     */
-    Chart.prototype.adjustCompetitorLegendLabelsDownwardsIfNecessary = function () {
+    Chart.prototype.adjustResultLegendLabelsDownwardsIfNecessary = function () {
         for (var i = 1; i < this.numLines; i += 1) {
-            var prevComp = this.currentCompetitorData[i - 1];
-            var thisComp = this.currentCompetitorData[i];
-            if (thisComp.y < prevComp.y + prevComp.textHeight) {
-                thisComp.y = prevComp.y + prevComp.textHeight;
+            var prevResult = this.currentResultData[i - 1];
+            var thisResult = this.currentResultData[i];
+            if (thisResult.y < prevResult.y + prevResult.textHeight) {
+                thisResult.y = prevResult.y + prevResult.textHeight;
             }
         }
     };
 
     /**
     * Adjusts the locations of the legend labels upwards so that as many as
-    * possible can fit on the chart.  If all competitor labels are already on
-    * the chart, then this method does nothing.
+    * possible can fit on the chart.  If all result labels are already on the
+    * chart, then this method does nothing.
     *
     * This method does not move off the chart any label that is currently on
     * the chart.
     *
     * @param {Number} minLastY - The minimum Y-coordinate of the lowest label.
     */
-    Chart.prototype.adjustCompetitorLegendLabelsUpwardsIfNecessary = function (minLastY) {
-        if (this.numLines > 0 && this.currentCompetitorData[this.numLines - 1].y > this.contentHeight) {
-            // The list of competitors runs off the bottom.
-            // Put the last competitor at the bottom, or at its minimum
-            // Y-offset, whichever is larger, and move all labels up as
-            // much as we can.
-            this.currentCompetitorData[this.numLines - 1].y = Math.max(minLastY, this.contentHeight);
+    Chart.prototype.adjustResultLegendLabelsUpwardsIfNecessary = function (minLastY) {
+        if (this.numLines > 0 && this.currentResultData[this.numLines - 1].y > this.contentHeight) {
+            // The list of results runs off the bottom.
+            // Put the last result at the bottom, or at its minimum Y-offset,
+            // whichever is larger, and move all labels up as much as we can.
+            this.currentResultData[this.numLines - 1].y = Math.max(minLastY, this.contentHeight);
             for (var i = this.numLines - 2; i >= 0; i -= 1) {
-                var nextComp = this.currentCompetitorData[i + 1];
-                var thisComp = this.currentCompetitorData[i];
-                if (thisComp.y + thisComp.textHeight > nextComp.y) {
-                    thisComp.y = nextComp.y - thisComp.textHeight;
+                var nextResult = this.currentResultData[i + 1];
+                var thisResult = this.currentResultData[i];
+                if (thisResult.y + thisResult.textHeight > nextResult.y) {
+                    thisResult.y = nextResult.y - thisResult.textHeight;
                 } else {
                     // No more adjustments need to be made.
                     break;
@@ -1061,73 +1060,73 @@
     * Draw legend labels to the right of the chart.
     * @param {object} chartData - The chart data that contains the final time offsets.
     */
-    Chart.prototype.drawCompetitorLegendLabels = function (chartData) {
+    Chart.prototype.drawResultLegendLabels = function (chartData) {
         
         var minLastY = 0;
         if (chartData.dataColumns.length === 0) {
-            this.currentCompetitorData = [];
+            this.currentResultData = [];
         } else {
             var finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
-            this.currentCompetitorData = d3.range(this.numLines).map(function (i) {
-                var competitorIndex = this.selectedIndexes[i];
-                var name = this.courseClassSet.allCompetitors[competitorIndex].name;
+            this.currentResultData = d3.range(this.numLines).map(function (i) {
+                var resultIndex = this.selectedIndexes[i];
+                var name = this.courseClassSet.allResults[resultIndex].owner.name;
                 var textHeight = this.getTextHeight(name);
                 minLastY += textHeight;
                 return {
-                    label: formatNameAndSuffix(name, getSuffix(this.courseClassSet.allCompetitors[competitorIndex].result)),
+                    label: formatNameAndSuffix(name, getSuffix(this.courseClassSet.allResults[resultIndex])),
                     textHeight: textHeight,
                     y: (isNotNullNorNaN(finishColumn.ys[i])) ? this.yScale(finishColumn.ys[i]) : null,
-                    colour: colours[competitorIndex % colours.length],
-                    index: competitorIndex
+                    colour: colours[resultIndex % colours.length],
+                    index: resultIndex
                 };
             }, this);
             
-            minLastY -= this.currentCompetitorData[this.numLines - 1].textHeight;
+            minLastY -= this.currentResultData[this.numLines - 1].textHeight;
             
             // Draw the mispunchers at the bottom of the chart, with the last
             // one of them at the bottom.
             var lastMispuncherY = null;
-            for (var selCompIdx = this.numLines - 1; selCompIdx >= 0; selCompIdx -= 1) {
-                if (this.currentCompetitorData[selCompIdx].y === null) {
-                    this.currentCompetitorData[selCompIdx].y = (lastMispuncherY === null) ? this.contentHeight : lastMispuncherY - this.currentCompetitorData[selCompIdx].textHeight;
-                    lastMispuncherY = this.currentCompetitorData[selCompIdx].y;
+            for (var selResultIdx = this.numLines - 1; selResultIdx >= 0; selResultIdx -= 1) {
+                if (this.currentResultData[selResultIdx].y === null) {
+                    this.currentResultData[selResultIdx].y = (lastMispuncherY === null) ? this.contentHeight : lastMispuncherY - this.currentResultData[selResultIdx].textHeight;
+                    lastMispuncherY = this.currentResultData[selResultIdx].y;
                 }
             }
         }
         
         // Sort by the y-offset values, which doesn't always agree with the end
-        // positions of the competitors.
-        this.currentCompetitorData.sort(function (a, b) { return a.y - b.y; });
+        // positions of the results.
+        this.currentResultData.sort(function (a, b) { return a.y - b.y; });
         
-        this.selectedIndexesOrderedByLastYValue = this.currentCompetitorData.map(function (comp) { return comp.index; });
+        this.selectedIndexesOrderedByLastYValue = this.currentResultData.map(function (result) { return result.index; });
 
-        this.adjustCompetitorLegendLabelsDownwardsIfNecessary();
+        this.adjustResultLegendLabelsDownwardsIfNecessary();
         
-        this.adjustCompetitorLegendLabelsUpwardsIfNecessary(minLastY);
+        this.adjustResultLegendLabelsUpwardsIfNecessary(minLastY);
 
-        var legendLines = this.svgGroup.selectAll("line.competitorLegendLine").data(this.currentCompetitorData);
-        legendLines.enter().append("line").classed("competitorLegendLine", true);
+        var legendLines = this.svgGroup.selectAll("line.resultLegendLine").data(this.currentResultData);
+        legendLines.enter().append("line").classed("resultLegendLine", true);
 
         var outerThis = this;
-        legendLines = this.svgGroup.selectAll("line.competitorLegendLine").data(this.currentCompetitorData);
+        legendLines = this.svgGroup.selectAll("line.resultLegendLine").data(this.currentResultData);
         legendLines.attr("x1", this.contentWidth + 1)
                    .attr("y1", function (data) { return data.y; })
                    .attr("x2", this.contentWidth + LEGEND_LINE_WIDTH + 1)
                    .attr("y2", function (data) { return data.y; })
                    .attr("stroke", function (data) { return data.colour; })
-                   .attr("class", function (data) { return "competitorLegendLine competitor" + data.index; })
+                   .attr("class", function (data) { return "resultLegendLine result" + data.index; })
                    .on("mouseenter", function (data) { outerThis.highlight(data.index); })
                    .on("mouseleave", function () { outerThis.unhighlight(); });
 
         legendLines.exit().remove();
 
-        var labels = this.svgGroup.selectAll("text.competitorLabel").data(this.currentCompetitorData);
-        labels.enter().append("text").classed("competitorLabel", true);
+        var labels = this.svgGroup.selectAll("text.resultLabel").data(this.currentResultData);
+        labels.enter().append("text").classed("resultLabel", true);
 
-        labels = this.svgGroup.selectAll("text.competitorLabel").data(this.currentCompetitorData);
+        labels = this.svgGroup.selectAll("text.resultLabel").data(this.currentResultData);
         labels.attr("x", this.contentWidth + LEGEND_LINE_WIDTH + 2)
               .attr("y", function (data) { return data.y + data.textHeight / 4; })
-              .attr("class", function (data) { return "competitorLabel competitor" + data.index; })
+              .attr("class", function (data) { return "resultLabel result" + data.index; })
               .on("mouseenter", function (data) { outerThis.highlight(data.index); })
               .on("mouseleave", function () { outerThis.unhighlight(); })
               .text(function (data) { return data.label; });
@@ -1214,9 +1213,9 @@
     *     * referenceCumTimes {Array} - Array of cumulative split times of the
     *       'reference'.
     *     * fastestCumTimes {Array} - Array of cumulative times of the
-    *       imaginary 'fastest' competitor.
-    * @param {Array} selectedIndexes - Array of indexes of selected competitors
-    *                (0 in this array means the first competitor is selected, 1
+    *       imaginary 'fastest' result.
+    * @param {Array} selectedIndexes - Array of indexes of selected results
+    *                (0 in this array means the first result is selected, 1
     *                means the second is selected, and so on.)
     * @param {Array} visibleStatistics - Array of boolean flags indicating whether
     *                                    certain statistics are visible.
@@ -1225,7 +1224,7 @@
     Chart.prototype.drawChart = function (data, selectedIndexes, visibleStatistics, chartType) {
         var chartData = data.chartData;
         this.numControls = chartData.numControls;
-        this.numLines = chartData.competitorNames.length;
+        this.numLines = chartData.resultNames.length;
         this.selectedIndexes = selectedIndexes;
         this.referenceCumTimes = data.referenceCumTimes;
         this.fastestCumTimes = data.fastestCumTimes;
@@ -1245,12 +1244,12 @@
         this.drawBackgroundRectangles();
         this.drawAxes(getMessage(chartType.yAxisLabelKey), chartData);
         this.drawChartLines(chartData);
-        this.drawCompetitorLegendLabels(chartData);
+        this.drawResultLegendLabels(chartData);
         this.removeControlLine();
         if (this.isRaceGraph) {
-            this.drawCompetitorStartTimeLabels(chartData);
+            this.drawResultStartTimeLabels(chartData);
         } else {
-            this.removeCompetitorStartTimeLabels();
+            this.removeResultStartTimeLabels();
         }
     };
     

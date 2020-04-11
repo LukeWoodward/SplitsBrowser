@@ -49,10 +49,10 @@
         assert.strictEqual(d3.selectAll("table.resultsTable tbody tr").size(), 0, "There should be no table rows in the body");
     });
     
-    QUnit.test("Can create a results table with two competitors finishing", function (assert) {
-        var competitor1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        var competitor2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
+    QUnit.test("Can create a results table with two results finishing", function (assert) {
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
+        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]).result;
+        var courseClass = new CourseClass("Test", 3, [result1, result2]);
         calculateRanks(courseClass);
         
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
@@ -87,10 +87,10 @@
         assert.ok(!split2Cell.hasClass("fastest"));
     });
     
-    QUnit.test("Can create a results table with two competitors finishing and with control codes", function (assert) {
-        var competitor1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        var competitor2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
+    QUnit.test("Can create a results table with two results finishing and with control codes", function (assert) {
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
+        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]).result;
+        var courseClass = new CourseClass("Test", 3, [result1, result2]);
         calculateRanks(courseClass);
         
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, ["138", "152", "141"]));
@@ -107,10 +107,10 @@
         assert.strictEqual(tableHeaders.nodes()[5].innerHTML, "3&nbsp;(141)");
     });
     
-    QUnit.test("Can create a results table with one competitor not finishing sorted to the bottom", function (assert) {
-        var competitor1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]);
-        var competitor2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
+    QUnit.test("Can create a results table with one result not finishing sorted to the bottom", function (assert) {
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]).result;
+        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]).result;
+        var courseClass = new CourseClass("Test", 3, [result1, result2]);
         calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
@@ -123,12 +123,12 @@
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
         
         var lastRow = $("tbody tr:last-child td", table.node());
-        assert.strictEqual($("span:first-child", lastRow[2]).text(), getMessage("MispunchedShort"), "Mispunching competitor should be marked as such");
+        assert.strictEqual($("span:first-child", lastRow[2]).text(), getMessage("MispunchedShort"), "Mispunching result should be marked as such");
     });
     
-    QUnit.test("Can create a results table with one mispunching competitor", function (assert) {
-        var competitor = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]);
-        var courseClass = new CourseClass("Test", 3, [competitor]);
+    QUnit.test("Can create a results table with one mispunching result", function (assert) {
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]).result;
+        var courseClass = new CourseClass("Test", 3, [result]);
         calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
@@ -141,13 +141,13 @@
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
         
         var row = $("tbody tr:last-child td", table.node());
-        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("MispunchedShort"), "Mispunching competitor should be marked as such");
+        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("MispunchedShort"), "Mispunching result should be marked as such");
     });
     
-    QUnit.test("Can create a results table with one non-starting competitor", function (assert) {
-        var competitor = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [null, null, null, null]);
-        competitor.result.setNonStarter();
-        var courseClass = new CourseClass("Test", 3, [competitor]);
+    QUnit.test("Can create a results table with one non-starting result", function (assert) {
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [null, null, null, null]).result;
+        result.setNonStarter();
+        var courseClass = new CourseClass("Test", 3, [result]);
         calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
@@ -160,13 +160,13 @@
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
         
         var row = $("tbody tr:last-child td", table.node());
-        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DidNotStartShort"), "Non-starting competitor should be marked as such");
+        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DidNotStartShort"), "Non-starting result should be marked as such");
     });
 
-    QUnit.test("Can create a results table with one non-finishing competitor", function (assert) {
-        var competitor = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, null]);
-        competitor.result.setNonFinisher();
-        var courseClass = new CourseClass("Test", 3, [competitor]);
+    QUnit.test("Can create a results table with one non-finishing result", function (assert) {
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, null]).result;
+        result.setNonFinisher();
+        var courseClass = new CourseClass("Test", 3, [result]);
         calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
@@ -179,13 +179,13 @@
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
         
         var row = $("tbody tr:last-child td", table.node());
-        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DidNotFinishShort"), "Non-finishing competitor should be marked as such");
+        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DidNotFinishShort"), "Non-finishing result should be marked as such");
     });
 
-    QUnit.test("Can create a results table with one disqualified competitor", function (assert) {
-        var competitor = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        competitor.result.disqualify();
-        var courseClass = new CourseClass("Test", 3, [competitor]);
+    QUnit.test("Can create a results table with one disqualified result", function (assert) {
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
+        result.disqualify();
+        var courseClass = new CourseClass("Test", 3, [result]);
         calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
@@ -198,13 +198,13 @@
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
         
         var row = $("tbody tr:last-child td", table.node());
-        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DisqualifiedShort"), "Disqualified competitor should be marked as such");
+        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DisqualifiedShort"), "Disqualified result should be marked as such");
     });
 
-    QUnit.test("Can create a results table with one over-max-time competitor", function (assert) {
-        var competitor = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        competitor.result.setOverMaxTime();
-        var courseClass = new CourseClass("Test", 3, [competitor]);
+    QUnit.test("Can create a results table with one over-max-time result", function (assert) {
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
+        result.setOverMaxTime();
+        var courseClass = new CourseClass("Test", 3, [result]);
         calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
@@ -217,14 +217,14 @@
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
         
         var row = $("tbody tr:last-child td", table.node());
-        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("OverMaxTimeShort"), "Over-max-time competitor should be marked as such");
+        assert.strictEqual($("span:first-child", row[2]).text(), getMessage("OverMaxTimeShort"), "Over-max-time result should be marked as such");
     });
 
-    QUnit.test("Can create a results table with one non-competitive competitor and the other competitor getting rank 1", function (assert) {
-        var competitor1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        competitor1.result.setNonCompetitive();
-        var competitor2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
+    QUnit.test("Can create a results table with one non-competitive result and the other result getting rank 1", function (assert) {
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
+        result1.setNonCompetitive();
+        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]).result;
+        var courseClass = new CourseClass("Test", 3, [result1, result2]);
         calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
@@ -237,11 +237,11 @@
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "1");
     });
 
-    QUnit.test("Can create a results table with one disqualified competitor and the other competitor getting rank 1", function (assert) {
-        var competitor1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        competitor1.result.disqualify();
-        var competitor2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
+    QUnit.test("Can create a results table with one disqualified result and the other result getting rank 1", function (assert) {
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
+        result1.disqualify();
+        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]).result;
+        var courseClass = new CourseClass("Test", 3, [result1, result2]);
         calculateRanks(courseClass);
 
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
@@ -255,9 +255,9 @@
     });
     
     QUnit.test("Can create a results table with course with no length and climb", function (assert) {
-        var competitor1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        var competitor2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var courseClass = new CourseClass("Test", 3, [competitor1, competitor2]);
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
+        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]).result;
+        var courseClass = new CourseClass("Test", 3, [result1, result2]);
         calculateRanks(courseClass);
         
         courseClass.setCourse(new Course("Test", [courseClass], null, null, null));
@@ -269,10 +269,10 @@
         assert.expect(0);
     });
     
-    QUnit.test("Can create a results table with one competitor with dubious times appropriately classed", function (assert) {
+    QUnit.test("Can create a results table with one result with dubious times appropriately classed", function (assert) {
         var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 65, 65 + 0, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         result.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
-        var courseClass = new CourseClass("Test", 3, [new Competitor("First Runner", "DEF", result)]);
+        var courseClass = new CourseClass("Test", 3, [new Competitor("First Runner", "DEF", result).result]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         calculateRanks(courseClass);
         
@@ -298,10 +298,10 @@
         }
     });
     
-    QUnit.test("Can create a results table with one competitor with missing times appropriately classed", function (assert) {
+    QUnit.test("Can create a results table with one result with missing times appropriately classed", function (assert) {
         var result = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 65, null, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         result.setOKDespiteMissingTimes();
-        var courseClass = new CourseClass("Test", 3, [new Competitor("First Runner", "DEF", result)]);
+        var courseClass = new CourseClass("Test", 3, [new Competitor("First Runner", "DEF", result).result]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         calculateRanks(courseClass);
         
@@ -327,9 +327,9 @@
         }
     });
     
-    QUnit.test("Can create a results table with one competitor with fractional times appropriately formatted", function (assert) {
-        var competitor = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.5]);
-        var courseClass = new CourseClass("Test", 3, [competitor]);
+    QUnit.test("Can create a results table with one result with fractional times appropriately formatted", function (assert) {
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.5]).result;
+        var courseClass = new CourseClass("Test", 3, [result]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         calculateRanks(courseClass);
         
@@ -354,9 +354,9 @@
         assert.strictEqual(split3Cell.text(), "03:04.7");
     });
     
-    QUnit.test("Can create a results table with one competitor with fractional split times and a finish time with a whole number of seconds appropriately formatted", function (assert) {
-        var competitor = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.0]);
-        var courseClass = new CourseClass("Test", 3, [competitor]);
+    QUnit.test("Can create a results table with one result with fractional split times and a finish time with a whole number of seconds appropriately formatted", function (assert) {
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.0]).result;
+        var courseClass = new CourseClass("Test", 3, [result]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         calculateRanks(courseClass);
         

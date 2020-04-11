@@ -137,6 +137,8 @@
         this.cumRanks = null;
         this.timeLosses = null;
         this.className = null;
+        
+        this.owner = null;
 
         this.totalTime = (originalCumTimes === null || originalCumTimes.indexOf(null) > -1) ? null : originalCumTimes[originalCumTimes.length - 1];
     }

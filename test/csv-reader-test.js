@@ -95,7 +95,7 @@
         var csvData = "Example, 4\r\nFirst,Runner,ABC,10:34,02:57,01:39,03:31,02:01,00:23";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -108,7 +108,7 @@
         var csvData = "Example, 4\r\nFirst,Runner,ABC,10:34:47,02:57,01:39,03:31,02:01,00:23";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60 + 47, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60 + 47, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -121,7 +121,7 @@
         var csvData = "Example, 4\nFirst,Runner,ABC,10:34,02:57,01:39,03:31,02:01,00:23";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -134,7 +134,7 @@
         var csvData = "Example, 4\rFirst,Runner,ABC,10:34,02:57,01:39,03:31,02:01,00:23";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -147,7 +147,7 @@
         var csvData = "Example, 4,,,,,,,,,,,\r\nFirst,Runner,ABC,10:34,02:57,01:39,03:31,02:01,00:23,,,,,,,,";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -160,7 +160,7 @@
         var csvData = "Example, 4\r\nFirst,Runner,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n\r\nEmpty, 6\r\n";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -173,7 +173,7 @@
         var csvData = "Example, 4\r\nFirst,Runner,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n\r\nEmpty, -1\r\n";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -186,7 +186,7 @@
         var csvData = "Example, 4\r\nFirst,Runner,ABC,10:34,02:57,00:00,03:31,02:01,00:23";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, null, 177 + 211, 177 + 211 + 121, 177 + 211 + 121 + 23]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, null, 177 + 211, 177 + 211 + 121, 177 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -197,9 +197,9 @@
     QUnit.test("Can parse a single class with a single competitor with all zero splits, marking the competitor as a non-starter", function (assert) {
         var csvData = "Example, 4\r\nFirst,Runner,ABC,10:34,00:00,00:00,00:00,00:00,00:00";
         var actualEvent = parseEventData(csvData);
-        var expectedCompetitor = new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, null, null, null, null, null]));
-        expectedCompetitor.result.setNonStarter();
-        var expectedClass = new CourseClass("Example", 4, [expectedCompetitor]);
+        var expectedResult = new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, null, null, null, null, null])).result;
+        expectedResult.setNonStarter();
+        var expectedClass = new CourseClass("Example", 4, [expectedResult]);
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
         expectedClass.setCourse(expectedCourse);
         assert.deepEqual(actualEvent, new Event([expectedClass], [expectedCourse], []));
@@ -209,7 +209,7 @@
         var csvData = "Example, 4\r\nFirst,Runner,ABC,00:00,02:57,01:39,03:31,02:01,00:23";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, null, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, null, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -221,7 +221,7 @@
         var csvData = "Example, 4\r\nFirst,Runner,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -233,7 +233,7 @@
         var csvData = "Example, 4\r\nFirst,Runner,ABC,DEF,10:34,02:57,01:39,03:31,02:01,00:23\r\n";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC,DEF", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23]))
+            new Competitor("First Runner", "ABC,DEF", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -245,7 +245,7 @@
         var csvData = "Example, 4\r\nFirst,Runner,ABC,10:34,02:57,01:39,03:31,02:01,00:23\r\n\r\n\r\n";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -257,9 +257,9 @@
         var csvData = "Example, 4\r\nFirst,Runner,ABC,10:34,02:50,01:44,03:29,01:40,00:28\r\nSecond,Runner,DEF,12:12,02:57,01:39,03:31,02:01,00:23\r\nThird,Runner,GHI,11:22,02:42,01:51,04:00,01:31,00:30";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28])),
-            new Competitor("Second Runner", "DEF", fromCumTimes(2, 12 * 3600 + 12 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])),
-            new Competitor("Third Runner", "GHI", fromCumTimes(3, 11 * 3600 + 22 * 60, [0, 162, 162 + 111, 162 + 111 + 240, 162 + 111 + 240 + 91, 162 + 111 + 240 + 91 + 30]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28])).result,
+            new Competitor("Second Runner", "DEF", fromCumTimes(2, 12 * 3600 + 12 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result,
+            new Competitor("Third Runner", "GHI", fromCumTimes(3, 11 * 3600 + 22 * 60, [0, 162, 162 + 111, 162 + 111 + 240, 162 + 111 + 240 + 91, 162 + 111 + 240 + 91 + 30])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -271,9 +271,9 @@
         var csvData = "Example, 4\r\nSecond,Runner,DEF,12:12,02:57,01:39,03:31,02:01,00:23\r\nThird,Runner,GHI,11:22,02:42,01:51,04:00,01:31,00:30\r\nFirst,Runner,ABC,10:34,02:50,01:44,03:29,01:40,00:28";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(3, 10 * 3600 + 34 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28])),
-            new Competitor("Second Runner", "DEF", fromCumTimes(1, 12 * 3600 + 12 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])),
-            new Competitor("Third Runner", "GHI", fromCumTimes(2, 11 * 3600 + 22 * 60, [0, 162, 162 + 111, 162 + 111 + 240, 162 + 111 + 240 + 91, 162 + 111 + 240 + 91 + 30]))
+            new Competitor("First Runner", "ABC", fromCumTimes(3, 10 * 3600 + 34 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28])).result,
+            new Competitor("Second Runner", "DEF", fromCumTimes(1, 12 * 3600 + 12 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result,
+            new Competitor("Third Runner", "GHI", fromCumTimes(2, 11 * 3600 + 22 * 60, [0, 162, 162 + 111, 162 + 111 + 240, 162 + 111 + 240 + 91, 162 + 111 + 240 + 91 + 30])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -287,12 +287,12 @@
         var actualEvent = parseEventData(csvData);
         var expectedClasses = [
             new CourseClass("Example", 4, [
-                new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])),
-                new Competitor("Second Runner", "DEF", fromCumTimes(2, 12 * 3600 + 12 * 60, [0, 162, 162 + 111, 162 + 111 + 240, 162 + 111 + 240 + 91, 162 + 111 + 240 + 91 + 30]))
+                new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result,
+                new Competitor("Second Runner", "DEF", fromCumTimes(2, 12 * 3600 + 12 * 60, [0, 162, 162 + 111, 162 + 111 + 240, 162 + 111 + 240 + 91, 162 + 111 + 240 + 91 + 30])).result
             ]),
             new CourseClass("Another example class", 5, [
-                new Competitor("Third Runner", "GHI", fromCumTimes(1, 11 * 3600 + 22 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 189, 170 + 104 + 209 + 100 + 189 + 28])),
-                new Competitor("Fourth Runner", "JKL", fromCumTimes(2, 10 * 3600 + 58 * 60, [0, 175, 175 + 120, 175 + 120 + 228, 175 + 120 + 228 + 109, 175 + 120 + 228 + 109 + 212, 175 + 120 + 228 + 109 + 212 + 37]))
+                new Competitor("Third Runner", "GHI", fromCumTimes(1, 11 * 3600 + 22 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 189, 170 + 104 + 209 + 100 + 189 + 28])).result,
+                new Competitor("Fourth Runner", "JKL", fromCumTimes(2, 10 * 3600 + 58 * 60, [0, 175, 175 + 120, 175 + 120 + 228, 175 + 120 + 228 + 109, 175 + 120 + 228 + 109 + 212, 175 + 120 + 228 + 109 + 212 + 37])).result
             ])
         ];
                 
@@ -313,8 +313,8 @@
         var actualEvent = parseEventData(csvData);
         assert.strictEqual(actualEvent.classes.length, 2);
         assert.strictEqual(actualEvent.courses.length, 2);
-        assert.strictEqual(actualEvent.classes[0].competitors.length, 2);
-        assert.strictEqual(actualEvent.classes[1].competitors.length, 2);
+        assert.strictEqual(actualEvent.classes[0].results.length, 2);
+        assert.strictEqual(actualEvent.classes[1].results.length, 2);
     });
 
     QUnit.test("Can parse two classes each with two valid competitors using LF line-endings", function (assert) {
@@ -323,12 +323,12 @@
         var actualEvent = parseEventData(csvData);
         var expectedClasses = [
             new CourseClass("Example", 4, [
-                new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])),
-                new Competitor("Second Runner", "DEF", fromCumTimes(2, 12 * 3600 + 12 * 60, [0, 162, 162 + 111, 162 + 111 + 240, 162 + 111 + 240 + 91, 162 + 111 + 240 + 91 + 30]))
+                new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result,
+                new Competitor("Second Runner", "DEF", fromCumTimes(2, 12 * 3600 + 12 * 60, [0, 162, 162 + 111, 162 + 111 + 240, 162 + 111 + 240 + 91, 162 + 111 + 240 + 91 + 30])).result
             ]),
             new CourseClass("Another example class", 5, [
-                new Competitor("Third Runner", "GHI", fromCumTimes(1, 11 * 3600 + 22 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 189, 170 + 104 + 209 + 100 + 189 + 28])),
-                new Competitor("Fourth Runner", "JKL", fromCumTimes(2, 10 * 3600 + 58 * 60, [0, 175, 175 + 120, 175 + 120 + 228, 175 + 120 + 228 + 109, 175 + 120 + 228 + 109 + 212, 175 + 120 + 228 + 109 + 212 + 37]))
+                new Competitor("Third Runner", "GHI", fromCumTimes(1, 11 * 3600 + 22 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 189, 170 + 104 + 209 + 100 + 189 + 28])).result,
+                new Competitor("Fourth Runner", "JKL", fromCumTimes(2, 10 * 3600 + 58 * 60, [0, 175, 175 + 120, 175 + 120 + 228, 175 + 120 + 228 + 109, 175 + 120 + 228 + 109 + 212, 175 + 120 + 228 + 109 + 212 + 37])).result
             ])
         ];
                 
@@ -347,9 +347,9 @@
         var csvData = "Example, 4\r\nFirst,Runner,ABC,10:34,02:50,01:44,03:29,01:40,00:28\r\nThird,Runner,GHI,11:22,02:57,01:39,03:31,02:01,00:23\r\nSecond,Runner,DEF,12:12,02:42,01:51,-----,01:31,00:30";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28])),
-            new Competitor("Third Runner", "GHI", fromCumTimes(2, 11 * 3600 + 22 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])),
-            new Competitor("Second Runner", "DEF", fromCumTimes(3, 12 * 3600 + 12 * 60, [0, 162, 162 + 111, null, 162 + 111 + 91, 162 + 111 + 91 + 30]))
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28])).result,
+            new Competitor("Third Runner", "GHI", fromCumTimes(2, 11 * 3600 + 22 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result,
+            new Competitor("Second Runner", "DEF", fromCumTimes(3, 12 * 3600 + 12 * 60, [0, 162, 162 + 111, null, 162 + 111 + 91, 162 + 111 + 91 + 30])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -361,9 +361,9 @@
         var csvData = "Example, 4\r\nSecond,Runner,DEF,12:12,02:42,01:51,-----,01:31,00:30\r\nFirst,Runner,ABC,10:34,02:50,01:44,03:29,01:40,00:28\r\nThird,Runner,GHI,11:22,02:57,01:39,03:31,02:01,00:23";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(2, 10 * 3600 + 34 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28])),
-            new Competitor("Third Runner", "GHI", fromCumTimes(3, 11 * 3600 + 22 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])),
-            new Competitor("Second Runner", "DEF", fromCumTimes(1, 12 * 3600 + 12 * 60, [0, 162, 162 + 111, null, 162 + 111 + 91, 162 + 111 + 91 + 30]))
+            new Competitor("First Runner", "ABC", fromCumTimes(2, 10 * 3600 + 34 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28])).result,
+            new Competitor("Third Runner", "GHI", fromCumTimes(3, 11 * 3600 + 22 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result,
+            new Competitor("Second Runner", "DEF", fromCumTimes(1, 12 * 3600 + 12 * 60, [0, 162, 162 + 111, null, 162 + 111 + 91, 162 + 111 + 91 + 30])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -375,10 +375,10 @@
         var csvData = "Example, 4\r\nSecond,Runner,DEF,12:12,02:42,01:51,-----,01:31,00:30\r\nFirst,Runner,ABC,10:34,02:50,01:44,03:29,01:40,00:28\r\nFourth,Runner,JKL,10:37,03:51,-----,-----,08:23,00:49\r\nThird,Runner,GHI,11:22,02:57,01:39,03:31,02:01,00:23";
         var actualEvent = parseEventData(csvData);
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("First Runner", "ABC", fromCumTimes(2, 10 * 3600 + 34 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28])),
-            new Competitor("Third Runner", "GHI", fromCumTimes(4, 11 * 3600 + 22 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])),
-            new Competitor("Second Runner", "DEF", fromCumTimes(1, 12 * 3600 + 12 * 60, [0, 162, 162 + 111, null, 162 + 111 + 91, 162 + 111 + 91 + 30])),
-            new Competitor("Fourth Runner", "JKL", fromCumTimes(3, 10 * 3600 + 37 * 60, [0, 231, null, null, 231 + 503, 231 + 503 + 49]))
+            new Competitor("First Runner", "ABC", fromCumTimes(2, 10 * 3600 + 34 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28])).result,
+            new Competitor("Third Runner", "GHI", fromCumTimes(4, 11 * 3600 + 22 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result,
+            new Competitor("Second Runner", "DEF", fromCumTimes(1, 12 * 3600 + 12 * 60, [0, 162, 162 + 111, null, 162 + 111 + 91, 162 + 111 + 91 + 30])).result,
+            new Competitor("Fourth Runner", "JKL", fromCumTimes(3, 10 * 3600 + 37 * 60, [0, 231, null, null, 231 + 503, 231 + 503 + 49])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);
@@ -392,8 +392,8 @@
         assert.strictEqual(actualEvent.warnings.length, 1);
         
         var expectedClass = new CourseClass("Example", 4, [
-            new Competitor("Third Runner", "GHI", fromCumTimes(3, 11 * 3600 + 22 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28])),
-            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23]))
+            new Competitor("Third Runner", "GHI", fromCumTimes(3, 11 * 3600 + 22 * 60, [0, 170, 170 + 104, 170 + 104 + 209, 170 + 104 + 209 + 100, 170 + 104 + 209 + 100 + 28])).result,
+            new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600 + 34 * 60, [0, 177, 177 + 99, 177 + 99 + 211, 177 + 99 + 211 + 121, 177 + 99 + 211 + 121 + 23])).result
         ]);
         
         var expectedCourse = new Course("Example", [expectedClass], null, null, null);

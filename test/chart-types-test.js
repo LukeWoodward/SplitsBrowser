@@ -71,7 +71,7 @@
         var chartType = ChartTypes.PositionAfterLeg;
         var result1 = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 278, 490, 596]);
         var result2 = fromCumTimes(2, 10 * 3600, [0, 65, 286, 495, 595]);
-        new CourseClassSet([new CourseClass("Test", 3, [new Competitor("First Runner", "ABC", result1), new Competitor("Second Runner", "DEF", result2)])]);
+        new CourseClassSet([new CourseClass("Test", 3, [new Competitor("First Runner", "ABC", result1).result, new Competitor("Second Runner", "DEF", result2).result])]);
 
         assert.deepEqual(chartType.dataSelector(result1), [2, 1, 1, 2]);
         assert.deepEqual(chartType.dataSelector(result2), [1, 2, 2, 1]);
@@ -81,7 +81,7 @@
         var chartType = ChartTypes.SplitPosition;
         var result1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]).result;
         var result2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 209, 100]).result;
-        new CourseClassSet([new CourseClass("Test", 3, [new Competitor("First Runner", "ABC", result1), new Competitor("Second Runner", "DEF", result2)])]);
+        new CourseClassSet([new CourseClass("Test", 3, [new Competitor("First Runner", "ABC", result1).result, new Competitor("Second Runner", "DEF", result2).result])]);
         
         assert.deepEqual(chartType.dataSelector(result1), [2, 1, 2, 2]);
         assert.deepEqual(chartType.dataSelector(result2), [1, 2, 1, 1]);
@@ -144,8 +144,8 @@
     });
    
     QUnit.test("All chart types except the results table have the correct dubious-indexes function", function (assert) {
-        var competitor = new Competitor("First Runner", "ABC", fromOriginalCumTimes(1, 10 * 3600, [0, 96, 96, 96 + 221 + 184, 96 + 221 + 184 + 100]));
-        competitor.result.setRepairedCumulativeTimes([0, 96, NaN, 96 + 221 + 184, 96 + 221 + 184 + 100]);
+        var result = new Competitor("First Runner", "ABC", fromOriginalCumTimes(1, 10 * 3600, [0, 96, 96, 96 + 221 + 184, 96 + 221 + 184 + 100])).result;
+        result.setRepairedCumulativeTimes([0, 96, NaN, 96 + 221 + 184, 96 + 221 + 184 + 100]);
 
         ALL_CHART_TYPES.forEach(function (chartType) {
             if (chartType !== ChartTypes.ResultsTable) {
@@ -160,7 +160,7 @@
                     expectedDubiousTimeInfo = null;
                 }
                 
-                assert.deepEqual(chartType.indexesAroundOmittedTimesFunc(competitor.result), expectedDubiousTimeInfo, "Dubious-time info for " + chartType.nameKey + " should be correct");
+                assert.deepEqual(chartType.indexesAroundOmittedTimesFunc(result), expectedDubiousTimeInfo, "Dubious-time info for " + chartType.nameKey + " should be correct");
             }
         });
         

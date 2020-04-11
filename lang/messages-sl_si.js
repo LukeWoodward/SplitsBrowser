@@ -1,7 +1,7 @@
 ﻿/*
  *  Messages - Slovenian messages for SplitsBrowser
  *
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward, Klemen Kenda
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -35,8 +35,8 @@ SplitsBrowser.Messages.sl_si = {
     FinishNameShort: "C",
 
     // Button labels.
-    SelectAllCompetitors: "Vsi",
-    SelectNoCompetitors: "Nihče",
+    SelectAllResults: "Vsi",
+    SelectNoResults: "Nihče",
     SelectCrossingRunners: "Križanje",
 
     LowerXAxisChartLabel: "Čas (min)",
@@ -114,45 +114,45 @@ SplitsBrowser.Messages.sl_si = {
     SelectedClassesPopupHeader: "Izbrane kategorije",
 
     // Placeholder text shown when the Selected classes dialog is empty,
-    // because no competitors registered a split for the control, or those
+    // because no results registered a split for the control, or those
     // that did only registered a dubious split.
     SelectedClassesPopupPlaceholder: "Ni tekmovalcev",
 
     // Header for the 'Fastest leg time' popup dialog.
     FastestLegTimePopupHeader: "Najhitrejši čas etape $$START$$ do $$END$$",
 
-    // Header for the nearby-competitors dialog on the race graph.
-    NearbyCompetitorsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
+    // Header for the nearby-results dialog on the race graph.
+    NearbyResultsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
 
-    // Placeholder text shown in the nearby-competitors dialog on the race
-    // graph when there aren't any competitors visiting the control within the
+    // Placeholder text shown in the nearby-results dialog on the race
+    // graph when there aren't any results visiting the control within the
     // +/- 2 minute window.
-    NoNearbyCompetitors: "Ni tekmovalcev",
+    NoNearbyResults: "Ni tekmovalcev",
 
     // Link that appears at the top and opens SplitsBrowser with the settings
-    // (selected classes, competitors, comparison, chart type, etc.) that are
+    // (selected classes, results, comparison, chart type, etc.) that are
     // currently shown.
     DirectLink: "Povezava",
     DirectLinkToolTip: "Povezava odpre SplitsBrowser s trenutnimi nastavitvami",
 
-    // The placeholder text shown in the competitor-list filter box when no
+    // The placeholder text shown in the result-list filter box when no
     // text has been entered into this box.
-    CompetitorListFilter: "Filter",
+    ResultListFilter: "Filter",
 
-    // Labels that appear beside a competitor on the Results Table to indicate
+    // Labels that appear beside a result on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
     DidNotStartShort: "dns",
     DidNotFinishShort: "dnf",
     DisqualifiedShort: "dsq",
 
-    // Placeholder message shown inside the competitor list if all competitors
+    // Placeholder message shown inside the result list if all results
     // in the class did not start.
-    NoCompetitorsStarted: "Noben tekmovalec ni startal",
+    NoResultsStarted: "Noben tekmovalec ni startal",
 
     // Label of the language-selector control.
     LanguageSelectorLabel: "Jezik:",
 
-    // Label that appears beside a competitor on the Results Table to indicate
+    // Label that appears beside a result on the Results Table to indicate
     // that they were over the maximum time.
     OverMaxTimeShort: "čez maksimalni dovoljeni čas",
 

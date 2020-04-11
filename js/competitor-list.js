@@ -1,5 +1,5 @@
 ﻿/*
- *  SplitsBrowser CompetitorList - Lists the competitors down the left side.
+ *  SplitsBrowser ResultList - Lists the results down the left side.
  *  
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
@@ -21,59 +21,59 @@
 (function (){
     "use strict";
 
-    // ID of the competitor list div.
+    // ID of the result list div.
     // Must match that used in styles.css.
-    var COMPETITOR_LIST_ID = "competitorList";
+    var RESULT_LIST_ID = "resultList";
     
     // The number that identifies the left mouse button.
     var LEFT_BUTTON = 1;
     
     // Dummy index used to represent the mouse being let go off the bottom of
-    // the list of competitors.
-    var CONTAINER_COMPETITOR_INDEX = -1;
+    // the list of results.
+    var CONTAINER_RESULT_INDEX = -1;
     
     // ID of the container that contains the list and the filter textbox.
-    var COMPETITOR_LIST_CONTAINER_ID = "competitorListContainer";
+    var RESULT_LIST_CONTAINER_ID = "resultListContainer";
     
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
 
     /**
-    * Object that controls a list of competitors from which the user can select.
+    * Object that controls a list of results from which the user can select.
     * @constructor
     * @param {HTMLElement} parent - Parent element to add this list to.
     * @param {Function} alerter - Function to call to issue an alert message.
     */
-    var CompetitorList = function (parent, alerter) {
+    var ResultList = function (parent, alerter) {
         this.parent = parent;
         this.alerter = alerter;
         this.handler = null;
-        this.competitorSelection = null;
+        this.resultSelection = null;
         this.lastFilterString = "";
-        this.allCompetitors = [];
-        this.allCompetitorDetails = [];
+        this.allResults = [];
+        this.allResultDetails = [];
         this.dragging = false;
-        this.dragStartCompetitorIndex = null;
-        this.currentDragCompetitorIndex = null;
-        this.allCompetitorDivs = [];
+        this.dragStartResultIndex = null;
+        this.currentDragResultIndex = null;
+        this.allResultDivs = [];
         this.inverted = false;
         this.placeholderDiv = null;
         
         this.changeHandlers = [];
         
         this.containerDiv = d3.select(parent).append("div")
-                                             .attr("id", COMPETITOR_LIST_CONTAINER_ID);
+                                             .attr("id", RESULT_LIST_CONTAINER_ID);
                                                
         this.buttonsPanel = this.containerDiv.append("div");
                            
         var outerThis = this;
         this.allButton = this.buttonsPanel.append("button")
-                                          .attr("id", "selectAllCompetitors")
+                                          .attr("id", "selectAllResults")
                                           .style("width", "50%")
                                           .on("click", function () { outerThis.selectAllFiltered(); });
                         
         this.noneButton = this.buttonsPanel.append("button")
-                                           .attr("id", "selectNoCompetitors")
+                                           .attr("id", "selectNoResults")
                                            .style("width", "50%")
                                            .on("click", function () { outerThis.selectNoneFiltered(); });
                                            
@@ -91,22 +91,22 @@
         this.filter = this.buttonsPanel.append("input")
                                        .attr("type", "text");
 
-        // Update the filtered list of competitors on any change to the
-        // contents of the filter textbox.  The last two are for the benefit of
-        // IE9 which doesn't fire the input event upon text being deleted via
-        // selection or the X button at the right.  Instead, we use delayed
-        // updates to filter on key-up and mouse-up, which I believe *should*
-        // catch every change.  It's not a problem to update the filter too
-        // often: if the filter text hasn't changed, nothing happens.
+        // Update the filtered list of result on any change to the contents of
+        // the filter textbox.  The last two are for the benefit of IE9 which
+        // doesn't fire the input event upon text being deleted via selection
+        // or the X button at the right.  Instead, we use delayed updates to
+        // filter on key-up and mouse-up, which I believe *should* catch every
+        // change.  It's not a problem to update the filter too often: if the
+        // filter text hasn't changed, nothing happens.
         this.filter.on("input", function () { outerThis.updateFilterIfChanged(); })
                    .on("keyup", function () { outerThis.updateFilterIfChangedDelayed(); })
                    .on("mouseup", function () { outerThis.updateFilterIfChangedDelayed(); });
                                       
         this.listDiv = this.containerDiv.append("div")
-                                        .attr("id", COMPETITOR_LIST_ID);
+                                        .attr("id", RESULT_LIST_ID);
                                         
-        this.listDiv.on("mousedown", function () { outerThis.startDrag(CONTAINER_COMPETITOR_INDEX); })
-                    .on("mousemove", function () { outerThis.mouseMove(CONTAINER_COMPETITOR_INDEX); })
+        this.listDiv.on("mousedown", function () { outerThis.startDrag(CONTAINER_RESULT_INDEX); })
+                    .on("mousemove", function () { outerThis.mouseMove(CONTAINER_RESULT_INDEX); })
                     .on("mouseup", function () { outerThis.stopDrag(); });
                               
         d3.select(document.body).on("mouseup", function () { outerThis.stopDrag(); });
@@ -118,20 +118,20 @@
     * Sets messages within this control, following either its creation or a
     * change of language.
     */
-    CompetitorList.prototype.setMessages = function () {
-        this.allButton.text(getMessage("SelectAllCompetitors"));
-        this.noneButton.text(getMessage("SelectNoCompetitors"));
+    ResultList.prototype.setMessages = function () {
+        this.allButton.text(getMessage("SelectAllResults"));
+        this.noneButton.text(getMessage("SelectNoResults"));
         this.crossingRunnersButton.text(getMessage("SelectCrossingRunners"));
-        this.filter.attr("placeholder", getMessage("CompetitorListFilter"));
+        this.filter.attr("placeholder", getMessage("ResultListFilter"));
     };
     
     /**
     * Retranslates this control following a change of language.
     */
-    CompetitorList.prototype.retranslate = function () {
+    ResultList.prototype.retranslate = function () {
         this.setMessages();
         if (this.placeholderDiv !== null) {
-            this.placeholderDiv.text(getMessage("NoCompetitorsStarted"));
+            this.placeholderDiv.text(getMessage("NoResultsStarted"));
             this.fireChangeHandlers();
         }
     };
@@ -145,7 +145,7 @@
     *
     * @param {Function} handler - The handler to register.
     */
-    CompetitorList.prototype.registerChangeHandler = function (handler) {
+    ResultList.prototype.registerChangeHandler = function (handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
             this.changeHandlers.push(handler);
         }
@@ -158,7 +158,7 @@
     *
     * @param {Function} handler - The handler to register.
     */
-    CompetitorList.prototype.deregisterChangeHandler = function (handler) {
+    ResultList.prototype.deregisterChangeHandler = function (handler) {
         var index = this.changeHandlers.indexOf(handler);
         if (index > -1) {
             this.changeHandlers.splice(index, 1);
@@ -168,50 +168,50 @@
     /**
     * Fires all of the change handlers currently registered.
     */
-    CompetitorList.prototype.fireChangeHandlers = function () {
+    ResultList.prototype.fireChangeHandlers = function () {
         this.changeHandlers.forEach(function (handler) { handler(); }, this);
     };
     
     /**
     * Returns whether the current mouse event is off the bottom of the list of
-    * competitor divs.
+    * result divs.
     * @return {boolean} True if the mouse is below the last visible div, false
     *     if not.
     */
-    CompetitorList.prototype.isMouseOffBottomOfCompetitorList = function () {
+    ResultList.prototype.isMouseOffBottomOfResultList = function () {
         return this.lastVisibleDiv === null || d3.mouse(this.lastVisibleDiv)[1] >= $(this.lastVisibleDiv).height();
     };
     
     /**
-    * Returns the name of the CSS class to apply to competitor divs currently
+    * Returns the name of the CSS class to apply to result divs currently
     * part of the selection/deselection.
     * @return {String} CSS class name;
     */
-    CompetitorList.prototype.getDragClassName = function () {
+    ResultList.prototype.getDragClassName = function () {
         return (this.inverted) ? "dragDeselected" : "dragSelected";
     };
     
     /**
-    * Handles the start of a drag over the list of competitors.
-    * @param {Number} index - Index of the competitor div that the drag started
-    *     over, or COMPETITOR_CONTAINER_INDEX if below the list of competitors.
+    * Handles the start of a drag over the list of results.
+    * @param {Number} index - Index of the result div that the drag started
+    *     over, or RESULT_CONTAINER_INDEX if below the list of results.
     */
-    CompetitorList.prototype.startDrag = function (index) {
+    ResultList.prototype.startDrag = function (index) {
         if (d3.event.which === LEFT_BUTTON) {
-            this.dragStartCompetitorIndex = index;
-            this.currentDragCompetitorIndex = index;
-            this.allCompetitorDivs = $("div.competitor");
-            var visibleDivs = this.allCompetitorDivs.filter(":visible");
+            this.dragStartResultIndex = index;
+            this.currentDragResultIndex = index;
+            this.allResultDivs = $("div.result");
+            var visibleDivs = this.allResultDivs.filter(":visible");
             this.lastVisibleDiv = (visibleDivs.length === 0) ? null : visibleDivs[visibleDivs.length - 1];
             this.inverted = d3.event.shiftKey;
-            if (index === CONTAINER_COMPETITOR_INDEX) {
-                // Drag not starting on one of the competitors.
-                if (!this.isMouseOffBottomOfCompetitorList()) {
+            if (index === CONTAINER_RESULT_INDEX) {
+                // Drag not starting on one of the results.
+                if (!this.isMouseOffBottomOfResultList()) {
                     // User has started the drag in the scrollbar.  Ignore it.
                     return;
                 }
             } else {
-                d3.select(this.allCompetitorDivs[index]).classed(this.getDragClassName(), true);
+                d3.select(this.allResultDivs[index]).classed(this.getDragClassName(), true);
             }
             
             d3.event.stopPropagation();
@@ -220,87 +220,87 @@
     };
     
     /**
-    * Handles a mouse-move event. by adjust the range of dragged competitors to
+    * Handles a mouse-move event. by adjust the range of dragged results to
     * include the current index.
     * @param {Number} dragIndex - The index to which the drag has now moved.
     */
-    CompetitorList.prototype.mouseMove = function (dragIndex) {
+    ResultList.prototype.mouseMove = function (dragIndex) {
         if (this.dragging) {
             d3.event.stopPropagation();
-            if (dragIndex !== this.currentDragCompetitorIndex) {
+            if (dragIndex !== this.currentDragResultIndex) {
                 var dragClassName = this.getDragClassName();
-                d3.selectAll("div.competitor." + dragClassName).classed(dragClassName, false);
+                d3.selectAll("div.result." + dragClassName).classed(dragClassName, false);
                 
-                if (this.dragStartCompetitorIndex === CONTAINER_COMPETITOR_INDEX && dragIndex === CONTAINER_COMPETITOR_INDEX) {
+                if (this.dragStartResultIndex === CONTAINER_RESULT_INDEX && dragIndex === CONTAINER_RESULT_INDEX) {
                     // Drag is currently all off the list, so do nothing further.
                     return;
-                } else if (dragIndex === CONTAINER_COMPETITOR_INDEX && !this.isMouseOffBottomOfCompetitorList()) {
+                } else if (dragIndex === CONTAINER_RESULT_INDEX && !this.isMouseOffBottomOfResultList()) {
                     // Drag currently goes onto the div's scrollbar.
                     return;
                 }
                 
                 var leastIndex, greatestIndex;
-                if (this.dragStartCompetitorIndex === CONTAINER_COMPETITOR_INDEX || dragIndex === CONTAINER_COMPETITOR_INDEX) {
+                if (this.dragStartResultIndex === CONTAINER_RESULT_INDEX || dragIndex === CONTAINER_RESULT_INDEX) {
                     // One of the ends is off the bottom.
-                    leastIndex = this.dragStartCompetitorIndex + dragIndex - CONTAINER_COMPETITOR_INDEX;
-                    greatestIndex = this.allCompetitorDivs.length - 1;
+                    leastIndex = this.dragStartResultIndex + dragIndex - CONTAINER_RESULT_INDEX;
+                    greatestIndex = this.allResultDivs.length - 1;
                 } else {
-                    leastIndex = Math.min(this.dragStartCompetitorIndex, dragIndex);
-                    greatestIndex  = Math.max(this.dragStartCompetitorIndex, dragIndex);
+                    leastIndex = Math.min(this.dragStartResultIndex, dragIndex);
+                    greatestIndex  = Math.max(this.dragStartResultIndex, dragIndex);
                 }
                 
-                var selectedCompetitors = [];
+                var selectedResults = [];
                 for (var index = leastIndex; index <= greatestIndex; index += 1) {
-                    if (this.allCompetitorDetails[index].visible) {
-                        selectedCompetitors.push(this.allCompetitorDivs[index]);
+                    if (this.allResultDetails[index].visible) {
+                        selectedResults.push(this.allResultDivs[index]);
                     }
                 }
                 
-                d3.selectAll(selectedCompetitors).classed(dragClassName, true);
-                this.currentDragCompetitorIndex = dragIndex;
+                d3.selectAll(selectedResults).classed(dragClassName, true);
+                this.currentDragResultIndex = dragIndex;
             }
         }
     };
 
     /**
-    * Handles the end of a drag in the competitor list.
+    * Handles the end of a drag in the result list.
     */
-    CompetitorList.prototype.stopDrag = function () {
+    ResultList.prototype.stopDrag = function () {
         if (!this.dragging) {
             // This handler is wired up to mouseUp on the entire document, in
             // order to cancel the drag if it is let go away from the list.  If
             // we're not dragging then we have a mouse-up after a mouse-down
-            // somewhere outside of this competitor list.  Ignore it.
+            // somewhere outside of this result list.  Ignore it.
             return;
         }
         
         this.dragging = false;
         
-        var selectedCompetitorIndexes = [];
+        var selectedResultIndexes = [];
         var dragClassName = this.getDragClassName();
-        for (var index = 0; index < this.allCompetitorDivs.length; index += 1) {
-            if ($(this.allCompetitorDivs[index]).hasClass(dragClassName)) {
-                selectedCompetitorIndexes.push(index);
+        for (var index = 0; index < this.allResultDivs.length; index += 1) {
+            if ($(this.allResultDivs[index]).hasClass(dragClassName)) {
+                selectedResultIndexes.push(index);
             }
         }
         
-        d3.selectAll("div.competitor." + dragClassName).classed(dragClassName, false);
+        d3.selectAll("div.result." + dragClassName).classed(dragClassName, false);
         
         if (d3.event.currentTarget === document) {
             // Drag ended outside the list.
-        } else if (this.currentDragCompetitorIndex === CONTAINER_COMPETITOR_INDEX && !this.isMouseOffBottomOfCompetitorList()) {
+        } else if (this.currentDragResultIndex === CONTAINER_RESULT_INDEX && !this.isMouseOffBottomOfResultList()) {
             // Drag ended in the scrollbar.
-        } else if (selectedCompetitorIndexes.length === 1) {
-            // User clicked, or maybe dragged within the same competitor.
-            this.toggleCompetitor(selectedCompetitorIndexes[0]);
+        } else if (selectedResultIndexes.length === 1) {
+            // User clicked, or maybe dragged within the same result.
+            this.toggleResult(selectedResultIndexes[0]);
         } else if (this.inverted) {
-            this.competitorSelection.bulkDeselect(selectedCompetitorIndexes);
+            this.resultSelection.bulkDeselect(selectedResultIndexes);
         } else {
-            this.competitorSelection.bulkSelect(selectedCompetitorIndexes);
+            this.resultSelection.bulkSelect(selectedResultIndexes);
         }
         
-        this.dragStartCompetitorIndex = null;
-        this.currentDragCompetitorIndex = null;
+        this.dragStartResultIndex = null;
+        this.currentDragResultIndex = null;
         
         d3.event.stopPropagation();
     };
@@ -309,107 +309,107 @@
     * Returns the width of the list, in pixels.
     * @returns {Number} Width of the list.
     */
-    CompetitorList.prototype.width = function () {
+    ResultList.prototype.width = function () {
         return $(this.containerDiv.node()).width();
     };
     
     /**
-    * Sets the overall height of the competitor list.
+    * Sets the overall height of the result list.
     * @param {Number} height - The height of the control, in pixels.
     */
-    CompetitorList.prototype.setHeight = function (height) {
+    ResultList.prototype.setHeight = function (height) {
         $(this.listDiv.node()).height(height - $(this.buttonsPanel.node()).height());
     };
     
     /**
-    * Returns all visible indexes.  This is the indexes of all competitors that
+    * Returns all visible indexes.  This is the indexes of all results that
     * have not been excluded by the filters.
-    * @returns {Array} Array of indexes of visible competitors.
+    * @returns {Array} Array of indexes of visible results.
     */
-    CompetitorList.prototype.getAllVisibleIndexes = function () {
-        return d3.range(this.allCompetitorDetails.length).filter(function (index) {
-            return this.allCompetitorDetails[index].visible;
+    ResultList.prototype.getAllVisibleIndexes = function () {
+        return d3.range(this.allResultDetails.length).filter(function (index) {
+            return this.allResultDetails[index].visible;
         }, this);
     };
 
     /**
-    * Selects all of the competitors that are matched by the filter.
+    * Selects all of the result that are matched by the filter.
     */
-    CompetitorList.prototype.selectAllFiltered = function () {
-        this.competitorSelection.bulkSelect(this.getAllVisibleIndexes());
+    ResultList.prototype.selectAllFiltered = function () {
+        this.resultSelection.bulkSelect(this.getAllVisibleIndexes());
     };
 
     /**
-    * Selects none of the competitors that are matched by the filter.
+    * Selects none of the results that are matched by the filter.
     */
-    CompetitorList.prototype.selectNoneFiltered = function () {
-        this.competitorSelection.bulkDeselect(this.getAllVisibleIndexes());
+    ResultList.prototype.selectNoneFiltered = function () {
+        this.resultSelection.bulkDeselect(this.getAllVisibleIndexes());
     };
 
     /**
-    * Selects none of the competitors at all.
+    * Selects none of the results at all.
     */
-    CompetitorList.prototype.selectNone = function () {
-        this.competitorSelection.selectNone();
+    ResultList.prototype.selectNone = function () {
+        this.resultSelection.selectNone();
     };
     
     /**
-    * Returns whether the competitor with the given index is selected.
-    * @param {Number} index - Index of the competitor within the list.
-    * @return True if the competitor is selected, false if not.
+    * Returns whether the result with the given index is selected.
+    * @param {Number} index - Index of the result within the list.
+    * @return True if the result is selected, false if not.
     */
-    CompetitorList.prototype.isSelected = function (index) {
-        return this.competitorSelection !== null && this.competitorSelection.isSelected(index);
+    ResultList.prototype.isSelected = function (index) {
+        return this.resultSelection !== null && this.resultSelection.isSelected(index);
     };
     
     /**
-    * Select all of the competitors that cross the unique selected competitor.
+    * Select all of the results that cross the unique selected result.
     */
-    CompetitorList.prototype.selectCrossingRunners = function () {
-        this.competitorSelection.selectCrossingRunners(this.allCompetitorDetails);
-        if (this.competitorSelection.isSingleRunnerSelected()) {
+    ResultList.prototype.selectCrossingRunners = function () {
+        this.resultSelection.selectCrossingRunners(this.allResultDetails);
+        if (this.resultSelection.isSingleRunnerSelected()) {
             // Only a single runner is still selected, so nobody crossed the
             // selected runner.
-            var competitorName = this.allCompetitors[this.competitorSelection.getSingleRunnerIndex()].name;
+            var resultName = this.allResults[this.resultSelection.getSingleRunnerIndex()].owner.name;
             var filterInEffect = (this.lastFilterString.length > 0);
             var messageKey = (filterInEffect) ? "RaceGraphNoCrossingRunnersFiltered" : "RaceGraphNoCrossingRunners";
-            this.alerter(getMessageWithFormatting(messageKey, {"$$NAME$$": competitorName}));
+            this.alerter(getMessageWithFormatting(messageKey, {"$$NAME$$": resultName}));
         }
     };
     
     /**
     * Enables or disables the crossing-runners button as appropriate.
     */
-    CompetitorList.prototype.enableOrDisableCrossingRunnersButton = function () {
-        this.crossingRunnersButton.node().disabled = !this.competitorSelection.isSingleRunnerSelected();
+    ResultList.prototype.enableOrDisableCrossingRunnersButton = function () {
+        this.crossingRunnersButton.node().disabled = !this.resultSelection.isSingleRunnerSelected();
     };
     
     /**
-    * Sets the chart type, so that the competitor list knows whether to show or
+    * Sets the chart type, so that the result list knows whether to show or
     * hide the Crossing Runners button.
     * @param {Object} chartType - The chart type selected.
     */
-    CompetitorList.prototype.setChartType = function (chartType) {
+    ResultList.prototype.setChartType = function (chartType) {
         this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "block" : "none");    
     };
 
     /**
-    * Handles a change to the selection of competitors, by highlighting all
+    * Handles a change to the selection of results, by highlighting all
     * those selected and unhighlighting all those no longer selected.
     */
-    CompetitorList.prototype.selectionChanged = function () {
+    ResultList.prototype.selectionChanged = function () {
         var outerThis = this;
-        this.listDiv.selectAll("div.competitor")
-                    .data(d3.range(this.competitorSelection.count))
-                    .classed("selected", function (comp, index) { return outerThis.isSelected(index); });
+        this.listDiv.selectAll("div.result")
+                    .data(d3.range(this.resultSelection.count))
+                    .classed("selected", function (result, index) { return outerThis.isSelected(index); });
     };
 
     /**
-    * Toggle the selectedness of a competitor.
-    * @param {Number} index - The index of the competitor.
+    * Toggle the selectedness of a result.
+    * @param {Number} index - The index of the result to toggle.
     */
-    CompetitorList.prototype.toggleCompetitor = function (index) {
-        this.competitorSelection.toggle(index);
+    ResultList.prototype.toggleResult = function (index) {
+        this.resultSelection.toggle(index);
     };
 
     /**
@@ -430,32 +430,32 @@
     }
     
     /**
-    * Returns the text to show for a competitor's name.
-    * @param {Competitor} The competitor.
-    * @return {String} The text to show for a competitor's name.
+    * Returns the text to show for a result's name.
+    * @param {Result} The result.
+    * @return {String} The text to show for a result's name.
     */
-    function competitorText(comp) {
-        if (comp.result.completed()) {
+    function resultText(result) {
+        if (result.completed()) {
             // \u00a0 is a non-breaking space.  We substitute this in place of
             // a blank name to prevent the height of the item being dropped to
             // a few pixels.
-            return (comp.name === "") ? "\u00a0" : comp.name;
+            return (result.owner.name === "") ? "\u00a0" : result.owner.name;
         }
         else {
-            return "* " + comp.name;
+            return "* " + result.owner.name;
         }
     }
 
     /**
-    * Sets the list of competitors.
-    * @param {Array} competitors - Array of competitor data.
-    * @param {boolean} multipleClasses - Whether the list of competitors is
+    * Sets the list of results.
+    * @param {Array} results - Array of result data.
+    * @param {boolean} multipleClasses - Whether the list of results is
     *      made up from those in multiple classes.
     */
-    CompetitorList.prototype.setCompetitorList = function (competitors, multipleClasses) {
-        this.allCompetitors = competitors;
-        this.allCompetitorDetails = this.allCompetitors.map(function (comp) {
-            return { competitor: comp, normedName: normaliseName(comp.name), visible: true };
+    ResultList.prototype.setResultList = function (results, multipleClasses) {
+        this.allResults = results;
+        this.allResultDetails = this.allResults.map(function (result) {
+            return { result: result, normedName: normaliseName(result.owner.name), visible: true };
         });
         
         if (this.placeholderDiv !== null) {
@@ -463,59 +463,59 @@
             this.placeholderDiv = null;
         }
         
-        var competitorDivs = this.listDiv.selectAll("div.competitor").data(this.allCompetitors);
+        var resultDivs = this.listDiv.selectAll("div.result").data(this.allResults);
 
         var outerThis = this;
-        competitorDivs.enter().append("div")
-                              .classed("competitor", true)
-                              .classed("selected", function (comp, index) { return outerThis.isSelected(index); });
+        resultDivs.enter().append("div")
+                          .classed("result", true)
+                          .classed("selected", function (result, index) { return outerThis.isSelected(index); });
 
-        competitorDivs.selectAll("span").remove();
+        resultDivs.selectAll("span").remove();
         
-        competitorDivs = this.listDiv.selectAll("div.competitor").data(this.allCompetitors);
+        resultDivs = this.listDiv.selectAll("div.result").data(this.allResults);
         if (multipleClasses) {
-            competitorDivs.append("span")
-                          .classed("competitorClassLabel", true)
-                          .text(function (comp) { return comp.className; });
+            resultDivs.append("span")
+                      .classed("resultClassLabel", true)
+                      .text(function (result) { return result.className; });
         }
         
-        competitorDivs.append("span")
-                      .classed("nonfinisher", function (comp) { return !comp.result.completed(); })
-                      .text(competitorText);
+        resultDivs.append("span")
+                  .classed("nonfinisher", function (result) { return !result.completed(); })
+                  .text(resultText);
 
-        competitorDivs.exit().remove();
+        resultDivs.exit().remove();
         
-        if (this.allCompetitors.length === 0) {
+        if (this.allResults.length === 0) {
             this.placeholderDiv = this.listDiv.append("div")
-                                              .classed("competitorListPlaceholder", true)
-                                              .text(getMessage("NoCompetitorsStarted"));
+                                              .classed("resultListPlaceholder", true)
+                                              .text(getMessage("NoResultsStarted"));
         }
         
-        this.allButton.property("disabled", this.allCompetitors.length === 0);
-        this.noneButton.property("disabled", this.allCompetitors.length === 0);
-        this.filter.property("disabled", this.allCompetitors.length === 0);
+        this.allButton.property("disabled", this.allResults.length === 0);
+        this.noneButton.property("disabled", this.allResults.length === 0);
+        this.filter.property("disabled", this.allResults.length === 0);
         
-        competitorDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
-                      .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })
-                      .on("mouseup", function () { outerThis.stopDrag(); });
+        resultDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
+                  .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })
+                  .on("mouseup", function () { outerThis.stopDrag(); });
 
         // Force an update on the filtering.
         this.updateFilter();
     };
 
     /**
-    * Sets the competitor selection object.
-    * @param {SplitsBrowser.Controls.CompetitorSelection} selection - Competitor selection.
+    * Sets the result selection object.
+    * @param {SplitsBrowser.Controls.ResultSelection} selection - Result selection.
     */
-    CompetitorList.prototype.setSelection = function (selection) {
-        if (this.competitorSelection !== null) {
-            this.competitorSelection.deregisterChangeHandler(this.handler);
+    ResultList.prototype.setSelection = function (selection) {
+        if (this.resultSelection !== null) {
+            this.resultSelection.deregisterChangeHandler(this.handler);
         }
 
         var outerThis = this;
-        this.competitorSelection = selection;
+        this.resultSelection = selection;
         this.handler = function () { outerThis.selectionChanged(); };
-        this.competitorSelection.registerChangeHandler(this.handler);
+        this.resultSelection.registerChangeHandler(this.handler);
         this.selectionChanged();
     };
     
@@ -523,7 +523,7 @@
     * Returns the filter text currently being used.
     * @return {String} Filter text.
     */
-    CompetitorList.prototype.getFilterText = function () {
+    ResultList.prototype.getFilterText = function () {
         return this.filter.node().value;
     };
     
@@ -531,7 +531,7 @@
     * Sets the filter text to use.
     * @param {String} filterText - The filter text to use.
     */
-    CompetitorList.prototype.setFilterText = function (filterText) {
+    ResultList.prototype.setFilterText = function (filterText) {
         this.filter.node().value = filterText;
         this.updateFilterIfChanged();
     };
@@ -539,23 +539,23 @@
     /**
     * Updates the filtering.
     */
-    CompetitorList.prototype.updateFilter = function () {
+    ResultList.prototype.updateFilter = function () {
         var currentFilterString = this.filter.node().value;
         var normedFilter = normaliseName(currentFilterString);
-        this.allCompetitorDetails.forEach(function (comp) {
-            comp.visible = (comp.normedName.indexOf(normedFilter) >= 0);
+        this.allResultDetails.forEach(function (result) {
+            result.visible = (result.normedName.indexOf(normedFilter) >= 0);
         });
         
         var outerThis = this;
-        this.listDiv.selectAll("div.competitor")
-                    .style("display", function (div, index) { return (outerThis.allCompetitorDetails[index].visible) ? null : "none"; });
+        this.listDiv.selectAll("div.result")
+                    .style("display", function (div, index) { return (outerThis.allResultDetails[index].visible) ? null : "none"; });
     };
     
     /**
     * Updates the filtering following a change in the filter text input, if the
     * filter text has changed since last time.  If not, nothing happens.
     */
-    CompetitorList.prototype.updateFilterIfChanged = function () {
+    ResultList.prototype.updateFilterIfChanged = function () {
         var currentFilterString = this.getFilterText();
         if (currentFilterString !== this.lastFilterString) {
             this.updateFilter();
@@ -568,10 +568,10 @@
     * Updates the filtering following a change in the filter text input
     * in a short whiie.
     */
-    CompetitorList.prototype.updateFilterIfChangedDelayed = function () {
+    ResultList.prototype.updateFilterIfChangedDelayed = function () {
         var outerThis = this;
         setTimeout(function () { outerThis.updateFilterIfChanged(); }, 1);
     };
     
-    SplitsBrowser.Controls.CompetitorList = CompetitorList;
+    SplitsBrowser.Controls.ResultList = ResultList;
 })();

@@ -36,12 +36,12 @@
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
 
     function getTestCourseClassSet() {
-        var competitors = d3.range(0, 11).map(function (num) {
+        var results = d3.range(0, 11).map(function (num) {
             var timeOffset = (num * 7) % 11;
-            return fromSplitTimes(1, "Name" + num, "Club" + num, 10 * 3600 + 127 * num, [65 + 10 * timeOffset, 221 + 20 * timeOffset, 209 + 15 * timeOffset, 100 + 5 * timeOffset]);
+            return fromSplitTimes(1, "Name" + num, "Club" + num, 10 * 3600 + 127 * num, [65 + 10 * timeOffset, 221 + 20 * timeOffset, 209 + 15 * timeOffset, 100 + 5 * timeOffset]).result;
         });
     
-        return new CourseClassSet([new CourseClass("Test class", 3, competitors)]);
+        return new CourseClassSet([new CourseClass("Test class", 3, results)]);
     }
     
     QUnit.test("Can get selected classes popup data", function (assert) {
@@ -70,7 +70,7 @@
         var course1 = new Course("Test course", courseClassSet1.classes, null, null, ["235", "189", "212"]);
         courseClassSet1.classes.forEach(function (courseClass) { courseClass.setCourse(course1); });
 
-        var courseClassSet2 = new CourseClassSet([new CourseClass("Test class 2", 3, [fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [75, 242, 200, 157])])]);
+        var courseClassSet2 = new CourseClassSet([new CourseClass("Test class 2", 3, [fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [75, 242, 200, 157]).result])]);
         var course2 = new Course("Test course 2", courseClassSet2.classes, null, null, ["235", "189", "212"]);
         courseClassSet2.classes[0].setCourse(course2);
         
@@ -143,7 +143,7 @@
         assert.deepEqual(actualData, expectedData);
     });
     
-    QUnit.test("Can get competitors near intermediate control", function (assert) {
+    QUnit.test("Can get results near intermediate control", function (assert) {
         var courseClassSet = getTestCourseClassSet();
         var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
@@ -153,7 +153,7 @@
         var testTime = 10 * 3600 + 12 * 60;
         
         var expectedData = {
-            title: getMessageWithFormatting("NearbyCompetitorsPopupHeader", {
+            title: getMessageWithFormatting("NearbyResultsPopupHeader", {
                 "$$START$$": formatTime(testTime - 120),
                 "$$END$$": formatTime(testTime + 120),
                 "$$CONTROL$$": getMessageWithFormatting("ControlName", {"$$CODE$$": "189"})
@@ -162,15 +162,15 @@
                 { className: "Test class", highlight: true, name: "Name1", time: 36623 },
                 { className: "Test class", highlight: true, name: "Name2", time: 36630 }
             ],
-            placeholder: getMessage("NoNearbyCompetitors")
+            placeholder: getMessage("NoNearbyResults")
         };
         
-        var actualData = ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(courseClassSet, eventData, 2, testTime);
+        var actualData = ChartPopupData.getResultsVisitingCurrentControlPopupData(courseClassSet, eventData, 2, testTime);
         
         assert.deepEqual(actualData, expectedData);
     });
     
-    QUnit.test("Can get competitors near start control", function (assert) {
+    QUnit.test("Can get results near start control", function (assert) {
         var courseClassSet = getTestCourseClassSet();
         var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
@@ -180,7 +180,7 @@
         var testTime = 10 * 3600 + 12 * 60;
         
         var expectedData = {
-            title: getMessageWithFormatting("NearbyCompetitorsPopupHeader", {
+            title: getMessageWithFormatting("NearbyResultsPopupHeader", {
                 "$$START$$": formatTime(testTime - 120),
                 "$$END$$": formatTime(testTime + 120),
                 "$$CONTROL$$": getMessage("StartName")
@@ -189,15 +189,15 @@
                 { className: "Test class", highlight: true, name: "Name5", time: 36635 },
                 { className: "Test class", highlight: true, name: "Name6", time: 36762 }
             ],
-            placeholder: getMessage("NoNearbyCompetitors")
+            placeholder: getMessage("NoNearbyResults")
         };
         
-        var actualData = ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(courseClassSet, eventData, 0, testTime);
+        var actualData = ChartPopupData.getResultsVisitingCurrentControlPopupData(courseClassSet, eventData, 0, testTime);
         
         assert.deepEqual(actualData, expectedData);
     });
     
-    QUnit.test("Can get competitors near finish control", function (assert) {
+    QUnit.test("Can get results near finish control", function (assert) {
         var courseClassSet = getTestCourseClassSet();
         var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
@@ -207,7 +207,7 @@
         var testTime = 10 * 3600 + 28 * 60;
         
         var expectedData = {
-            title: getMessageWithFormatting("NearbyCompetitorsPopupHeader", {
+            title: getMessageWithFormatting("NearbyResultsPopupHeader", {
                 "$$START$$": formatTime(testTime - 120),
                 "$$END$$": formatTime(testTime + 120),
                 "$$CONTROL$$": getMessage("FinishName")
@@ -216,10 +216,10 @@
                 { className: "Test class", highlight: true, name: "Name8", time: 37661 },
                 { className: "Test class", highlight: true, name: "Name7", time: 37734 }
             ],
-            placeholder: getMessage("NoNearbyCompetitors")
+            placeholder: getMessage("NoNearbyResults")
         };
         
-        var actualData = ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(courseClassSet, eventData, 4, testTime);
+        var actualData = ChartPopupData.getResultsVisitingCurrentControlPopupData(courseClassSet, eventData, 4, testTime);
         
         assert.deepEqual(actualData, expectedData);
     });

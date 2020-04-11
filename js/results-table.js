@@ -22,7 +22,7 @@
     "use strict";
     
     var formatTime = SplitsBrowser.formatTime;
-    var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
+    var compareResults = SplitsBrowser.Model.compareResults;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
@@ -74,14 +74,14 @@
     * a split time between controls punched after 62.7 and 108.7 seconds must
     * be shown as 46.0 seconds, not 46.
     *
-    * @param {Array} competitors - Array of Competitor objects.
+    * @param {Array} results - Array of Result objects.
     * @return {Number} Maximum precision to use.
     */
-    function determinePrecision(competitors) {
+    function determinePrecision(results) {
         var maxPrecision = 0;
         var maxPrecisionFactor = 1;        
-        competitors.forEach(function (competitor) {
-            competitor.result.getAllOriginalCumulativeTimes().forEach(function (cumTime) {
+        results.forEach(function (result) {
+            result.getAllOriginalCumulativeTimes().forEach(function (cumTime) {
                 if (isNotNullNorNaN(cumTime)) {
                     while (maxPrecision < MAX_PERMITTED_PRECISION && Math.abs(cumTime - Math.round(cumTime * maxPrecisionFactor) / maxPrecisionFactor) > 1e-7 * cumTime) {
                         maxPrecision += 1;
@@ -98,11 +98,11 @@
     * Returns the contents of the time or status column for the given
     * result.
     * 
-    * The status may be a string that indicates the competitor mispunched.
+    * The status may be a string that indicates the result mispunched.
     *
     * @param {Result} result The result to get the status of.
     * @param {Number} precision The precision to use.
-    * @return {String} Time or status for the given competitor.
+    * @return {String} Time or status for the given result.
     */
     function getTimeOrStatus (result, precision) {
         if (result.isNonStarter) {
@@ -131,17 +131,17 @@
     }
     
     /**
-    * Formats a time (cumulative or split) for a competitor.  If the competitor is
+    * Formats a time (cumulative or split) for a result.  If the result is
     * deemed as completed despite having missing times, any such missing times are
     * replaced with "??:??".
     * @param {Number|null} time The time to format, in seconds.
     * @param {Number} precision The precision to format the time to.
-    * @param {Boolean} competitorOKDespiteMissingTimes True if the competitor is known to
+    * @param {Boolean} resultOKDespiteMissingTimes True if the result is known to
     *       have completed the course despite having missing times, false otherwise.
     * @return Formatted time
     */
-    function formatPossiblyMissingTime(time, precision, competitorOKDespiteMissingTimes) {
-        if (time === null && competitorOKDespiteMissingTimes) {
+    function formatPossiblyMissingTime(time, precision, resultOKDespiteMissingTimes) {
+        if (time === null && resultOKDespiteMissingTimes) {
             return "??:??";
         } else {
             return formatTime(time, precision);
@@ -242,23 +242,22 @@
             htmlBits.push("</span></td>\n");
         }
         
-        var competitors = this.courseClass.competitors.slice(0);
-        competitors.sort(compareCompetitors);
+        var results = this.courseClass.results.slice(0);
+        results.sort(compareResults);
         
         var nonCompCount = 0;
         var rank = 0;
         
-        var precision = determinePrecision(competitors);
+        var precision = determinePrecision(results);
         
-        competitors.forEach(function (competitor, index) {
+        results.forEach(function (result, index) {
             htmlBits.push("<tr><td>");
-            var result = competitor.result;
-            
+
             if (result.isNonCompetitive) {
                 htmlBits.push(escapeHtml(getMessage("NonCompetitiveShort")));
                 nonCompCount += 1;
             } else if (result.completed()) {
-                if (index === 0 || competitors[index - 1].totalTime !== result.totalTime) {
+                if (index === 0 || results[index - 1].totalTime !== result.totalTime) {
                     rank = index + 1 - nonCompCount;
                 }
                 
@@ -267,7 +266,7 @@
             
             htmlBits.push("</td>");
             
-            addCell(competitor.name, competitor.club, null, "", "");
+            addCell(result.owner.name, result.owner.club, null, "", "");
             addCell(getTimeOrStatus(result, precision), NON_BREAKING_SPACE_CHAR, "time", "", "");
             
             d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {

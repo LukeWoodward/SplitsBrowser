@@ -1,5 +1,5 @@
 ﻿/*
- *  SplitsBrowser CompetitorSelection - The currently-selected competitors.
+ *  SplitsBrowser ResultSelection - The currently-selected results.
  *  
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
@@ -26,16 +26,16 @@
     var throwInvalidData = SplitsBrowser.throwInvalidData;
 
     /**
-    * Represents the currently-selected competitors, and offers a callback
+    * Represents the currently-selected results, and offers a callback
     * mechanism for when the selection changes.
     * @constructor
-    * @param {Number} count - The number of competitors that can be chosen.
+    * @param {Number} count - The number of results that can be chosen.
     */
-    function CompetitorSelection(count) {
+    function ResultSelection(count) {
         if (typeof count !== NUMBER_TYPE) {
-            throwInvalidData("Competitor count must be a number");
+            throwInvalidData("Result count must be a number");
         } else if (count < 0) {
-            throwInvalidData("Competitor count must be a non-negative number");
+            throwInvalidData("Result count must be a non-negative number");
         }
 
         this.count = count;
@@ -44,47 +44,46 @@
     }
 
     /**
-    * Returns whether the competitor at the given index is selected.
-    * @param {Number} index - The index of the competitor.
-    * @returns {boolean} True if the competitor is selected, false if not.
+    * Returns whether the R at the given index is selected.
+    * @param {Number} index - The index of the result.
+    * @returns {boolean} True if the result is selected, false if not.
     */
-    CompetitorSelection.prototype.isSelected = function (index) {
+    ResultSelection.prototype.isSelected = function (index) {
         return this.currentIndexes.indexOf(index) > -1;
     };
     
     /**
-    * Returns whether the selection consists of exactly one competitor.
-    * @returns {boolean} True if precisely one competitor is selected, false if
-    *     either no competitors, or two or more competitors, are selected.
+    * Returns whether the selection consists of exactly one result.
+    * @returns {boolean} True if precisely one result is selected, false if
+    *     either no results, or two or more results, are selected.
     */
-    CompetitorSelection.prototype.isSingleRunnerSelected = function () {
+    ResultSelection.prototype.isSingleRunnerSelected = function () {
         return this.currentIndexes.length === 1;
     };
     
     /**
-    * Returns the index of the single selected competitor.
+    * Returns the index of the single selected result.
     *
-    * If no competitors, or more than two competitors, are selected, null is
+    * If no results, or more than two results, are selected, null is
     * returned
     *
-    * @return {Number|null} Index of the single selected competitor, or null.
+    * @return {Number|null} Index of the single selected result, or null.
     */
-    CompetitorSelection.prototype.getSingleRunnerIndex = function () {
+    ResultSelection.prototype.getSingleRunnerIndex = function () {
         return (this.isSingleRunnerSelected()) ? this.currentIndexes[0] : null;
     };
 
     /**
     * Given that a single runner is selected, select also all of the runners
     * that 'cross' this runner and are also marked as visible.
-    * @param {Array} competitorDetails - Array of competitor details to
-    *     check within.
+    * @param {Array} resultDetails - Array of result details to check within.
     */    
-    CompetitorSelection.prototype.selectCrossingRunners = function (competitorDetails) {
+    ResultSelection.prototype.selectCrossingRunners = function (resultDetails) {
         if (this.isSingleRunnerSelected()) {
-            var refResult = competitorDetails[this.currentIndexes[0]].competitor.result;
+            var refResult = resultDetails[this.currentIndexes[0]].result;
             
-            competitorDetails.forEach(function (compDetails, idx) {
-                if (compDetails.visible && compDetails.competitor.result.crosses(refResult)) {
+            resultDetails.forEach(function (resultDetails, idx) {
+                if (resultDetails.visible && resultDetails.result.crosses(refResult)) {
                     this.currentIndexes.push(idx);
                 }
             }, this);
@@ -97,40 +96,40 @@
     /**
     * Fires all of the change handlers currently registered.
     */
-    CompetitorSelection.prototype.fireChangeHandlers = function () {
+    ResultSelection.prototype.fireChangeHandlers = function () {
         // Call slice(0) to return a copy of the list.
         this.changeHandlers.forEach(function (handler) { handler(this.currentIndexes.slice(0)); }, this);
     };
 
     /**
-    * Select all of the competitors.
+    * Select all of the results.
     */
-    CompetitorSelection.prototype.selectAll = function () {
+    ResultSelection.prototype.selectAll = function () {
         this.currentIndexes = d3.range(this.count);
         this.fireChangeHandlers();
     };
 
     /**
-    * Select none of the competitors.
+    * Select none of the results.
     */
-    CompetitorSelection.prototype.selectNone = function () {
+    ResultSelection.prototype.selectNone = function () {
         this.currentIndexes = [];
         this.fireChangeHandlers();
     };
 
     /**
-    * Returns an array of all currently-selected competitor indexes.
+    * Returns an array of all currently-selected result indexes.
     * @return {Array} Array of selected indexes.
     */
-    CompetitorSelection.prototype.getSelectedIndexes = function () {
+    ResultSelection.prototype.getSelectedIndexes = function () {
         return this.currentIndexes.slice(0);
     };
     
     /**
-    * Set the selected competitors to those in the given array.
-    * @param {Array} selectedIndex - Array of indexes of selected competitors.
+    * Set the selected results to those in the given array.
+    * @param {Array} selectedIndex - Array of indexes of selected results.
     */
-    CompetitorSelection.prototype.setSelectedIndexes = function (selectedIndexes) {
+    ResultSelection.prototype.setSelectedIndexes = function (selectedIndexes) {
         if (selectedIndexes.every(function (index) { return 0 <= index && index < this.count; }, this)) {
             this.currentIndexes = selectedIndexes;
             this.fireChangeHandlers();
@@ -149,7 +148,7 @@
     *
     * @param {Function} handler - The handler to register.
     */
-    CompetitorSelection.prototype.registerChangeHandler = function (handler) {
+    ResultSelection.prototype.registerChangeHandler = function (handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
             this.changeHandlers.push(handler);
         }
@@ -162,7 +161,7 @@
     *
     * @param {Function} handler - The handler to register.
     */
-    CompetitorSelection.prototype.deregisterChangeHandler = function (handler) {
+    ResultSelection.prototype.deregisterChangeHandler = function (handler) {
         var index = this.changeHandlers.indexOf(handler);
         if (index > -1) {
             this.changeHandlers.splice(index, 1);
@@ -170,10 +169,10 @@
     };
 
     /**
-    * Toggles whether the competitor at the given index is selected.
-    * @param {Number} index - The index of the competitor.
+    * Toggles whether the result at the given index is selected.
+    * @param {Number} index - The index of the result.
     */
-    CompetitorSelection.prototype.toggle = function (index) {
+    ResultSelection.prototype.toggle = function (index) {
         if (typeof index === NUMBER_TYPE) {
             if (0 <= index && index < this.count) {
                 var position = this.currentIndexes.indexOf(index);
@@ -194,11 +193,11 @@
     };
     
     /**
-    * Selects a number of competitors, firing the change handlers once at the
+    * Selects a number of results, firing the change handlers once at the
     * end if any indexes were added.
-    * @param {Array} indexes - Array of indexes of competitors to select.
+    * @param {Array} indexes - Array of indexes of results to select.
     */
-    CompetitorSelection.prototype.bulkSelect = function (indexes) {
+    ResultSelection.prototype.bulkSelect = function (indexes) {
         if (indexes.some(function (index) {
             return (typeof index !== NUMBER_TYPE || index < 0 || index >= this.count);
         }, this)) {
@@ -217,11 +216,11 @@
     };
     
     /**
-    * Deselects a number of competitors, firing the change handlers once at the
+    * Deselects a number of results, firing the change handlers once at the
     * end if any indexes were removed.
-    * @param {Array} indexes - Array of indexes of competitors to deselect.
+    * @param {Array} indexes - Array of indexes of results to deselect.
     */
-    CompetitorSelection.prototype.bulkDeselect = function (indexes) {
+    ResultSelection.prototype.bulkDeselect = function (indexes) {
         if (indexes.some(function (index) {
             return (typeof index !== NUMBER_TYPE || index < 0 || index >= this.count);
         }, this)) {
@@ -246,42 +245,42 @@
     };
     
     /**
-    * Migrates the selected competitors from one list to another.
+    * Migrates the selected results from one list to another.
     *
-    * After the migration, any competitors in the old list that were selected
-    * and are also in the new competitors list remain selected.
+    * After the migration, any results in the old list that were selected
+    * and are also in the new results list remain selected.
     *
     * Note that this method does NOT fire change handlers when it runs.  This
     * is typically used during a change of class, when the application may be
     * making other changes.
     *
-    * @param {Array} oldCompetitors - Array of Competitor objects for the old
+    * @param {Array} oldResults - Array of Result objects for the old
     *      selection.  The length of this must match the current count of
-    *      competitors.
-    * @param {Array} newCompetitors - Array of Competitor objects for the new
+    *      results.
+    * @param {Array} newResults - Array of Result objects for the new
     *      selection.  This array must not be empty.
     */
-    CompetitorSelection.prototype.migrate = function (oldCompetitors, newCompetitors) {
-        if (!$.isArray(oldCompetitors)) {
-            throwInvalidData("CompetitorSelection.migrate: oldCompetitors not an array");
-        } else if (!$.isArray(newCompetitors)) {
-            throwInvalidData("CompetitorSelection.migrate: newCompetitors not an array");
-        } else if (oldCompetitors.length !== this.count) {
-            throwInvalidData("CompetitorSelection.migrate: oldCompetitors list must have the same length as the current count"); 
-        } else if (newCompetitors.length === 0 && this.currentIndexes.length > 0) {
-            throwInvalidData("CompetitorSelection.migrate: newCompetitors list must not be empty if current list has competitors selected");
+    ResultSelection.prototype.migrate = function (oldResults, newResults) {
+        if (!$.isArray(oldResults)) {
+            throwInvalidData("ResultSelection.migrate: oldResults not an array");
+        } else if (!$.isArray(newResults)) {
+            throwInvalidData("ResultSelection.migrate: newResults not an array");
+        } else if (oldResults.length !== this.count) {
+            throwInvalidData("ResultSelection.migrate: oldResults list must have the same length as the current count"); 
+        } else if (newResults.length === 0 && this.currentIndexes.length > 0) {
+            throwInvalidData("ResultSelection.migrate: newResults list must not be empty if current list has results selected");
         }
     
-        var selectedCompetitors = this.currentIndexes.map(function (index) { return oldCompetitors[index]; });
+        var selectedResults = this.currentIndexes.map(function (index) { return oldResults[index]; });
         
-        this.count = newCompetitors.length;
+        this.count = newResults.length;
         this.currentIndexes = [];
-        newCompetitors.forEach(function (comp, idx) {
-            if (selectedCompetitors.indexOf(comp) >= 0) {
+        newResults.forEach(function (result, idx) {
+            if (selectedResults.indexOf(result) >= 0) {
                 this.currentIndexes.push(idx);
             }
         }, this);
     };
 
-    SplitsBrowser.Model.CompetitorSelection = CompetitorSelection;
+    SplitsBrowser.Model.ResultSelection = ResultSelection;
 })();

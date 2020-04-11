@@ -25,35 +25,35 @@
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData; 
-    var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
+    var compareResults = SplitsBrowser.Model.compareResults;
     
     /**
-    * Utility function to merge the lists of all competitors in a number of
+    * Utility function to merge the lists of all results in a number of
     * classes.  All classes must contain the same number of controls.
     * @param {Array} classes - Array of CourseClass objects.
-    * @return {Array} Merged array of competitors.
+    * @return {Array} Merged array of results.
     */
-    function mergeCompetitors(classes) {
+    function mergeResults(classes) {
         if (classes.length === 0) {
             return [];
         }
         
-        var allCompetitors = [];
+        var allResults = [];
         var expectedControlCount = classes[0].numControls;
         classes.forEach(function (courseClass) {
             if (courseClass.numControls !== expectedControlCount) {
                 throwInvalidData("Cannot merge classes with " + expectedControlCount + " and " + courseClass.numControls + " controls");
             }
             
-            courseClass.competitors.forEach(function (comp) {
-                if (!comp.result.isNonStarter) { 
-                    allCompetitors.push(comp);
+            courseClass.results.forEach(function (result) {
+                if (!result.isNonStarter) { 
+                    allResults.push(result);
                 }
             });
         });
 
-        allCompetitors.sort(compareCompetitors);
-        return allCompetitors;
+        allResults.sort(compareResults);
+        return allResults;
     }
 
     /**
@@ -89,7 +89,7 @@
     * @param {Array} classes - Array of currently-selected classes.
     */
     function CourseClassSet(classes) {
-        this.allCompetitors = mergeCompetitors(classes);
+        this.allResults = mergeResults(classes);
         this.classes = classes;
         this.numControls = (classes.length > 0) ? classes[0].numControls : null;
         this.computeRanks();
@@ -97,12 +97,12 @@
     
     /**
     * Returns whether this course-class set is empty, i.e. whether it has no
-    * competitors at all.
+    * results at all.
     * @return {boolean} True if the course-class set is empty, false if it is not
     *     empty.
     */    
     CourseClassSet.prototype.isEmpty = function () {
-        return this.allCompetitors.length === 0;
+        return this.allResults.length === 0;
     };
     
     /**
@@ -214,34 +214,34 @@
     * @return {Array} Array of the winner's cumulative times.
     */
     CourseClassSet.prototype.getWinnerCumTimes = function () {
-        if (this.allCompetitors.length === 0) {
+        if (this.allResults.length === 0) {
             return null;
         }
         
-        var firstCompetitor = this.allCompetitors[0];
-        return (firstCompetitor.result.completed()) ? fillBlankRangesInCumulativeTimes(firstCompetitor.result.cumTimes) : null;
+        var firstResult = this.allResults[0];
+        return (firstResult.completed()) ? fillBlankRangesInCumulativeTimes(firstResult.cumTimes) : null;
     };
 
     /**
-    * Return the imaginary competitor who recorded the fastest time on each leg
-    * of the class.
-    * If at least one control has no competitors recording a time for it, null
-    * is returned.  If there are no classes at all, null is returned.
-    * @returns {?Array} Cumulative splits of the imaginary competitor with
-    *           fastest time, if any.
+    * Return the imaginary result who recorded the fastest time on each leg of
+    * the class.
+    * If at least one control has no results recording a time for it, null is
+    * returned.  If there are no classes at all, null is returned.
+    * @returns {?Array} Cumulative splits of the imaginary result with fastest
+    *           time, if any.
     */
     CourseClassSet.prototype.getFastestCumTimes = function () {
         return this.getFastestCumTimesPlusPercentage(0);
     };
     
     /**
-    * Return the imaginary competitor who recorded the fastest time on each leg
-    * of the given classes, with a given percentage of their time added.
-    * If at least one control has no competitors recording a time for it, null
+    * Return the imaginary result who recorded the fastest time on each leg of
+    * the given classes, with a given percentage of their time added.
+    * If at least one control has no results recording a time for it, null is
     * is returned.  If there are no classes at all, null is returned.
     * @param {Number} percent - The percentage of time to add.
-    * @returns {?Array} Cumulative splits of the imaginary competitor with
-    *           fastest time, if any, after adding a percentage.
+    * @returns {?Array} Cumulative splits of the imaginary result with fastest
+    *           time, if any, after adding a percentage.
     */
     CourseClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
         if (this.numControls === null) {
@@ -255,8 +255,8 @@
         
         for (var controlIdx = 1; controlIdx <= this.numControls + 1; controlIdx += 1) {
             var fastestForThisControl = null;
-            for (var competitorIdx = 0; competitorIdx < this.allCompetitors.length; competitorIdx += 1) {
-                var thisTime = this.allCompetitors[competitorIdx].result.getSplitTimeTo(controlIdx);
+            for (var resultIdx = 0; resultIdx < this.allResults.length; resultIdx += 1) {
+                var thisTime = this.allResults[resultIdx].getSplitTimeTo(controlIdx);
                 if (isNotNullNorNaN(thisTime) && (fastestForThisControl === null || thisTime < fastestForThisControl)) {
                     fastestForThisControl = thisTime;
                 }
@@ -275,31 +275,31 @@
             // control but there is to the finish.
             var fastestBlankRanges = getBlankRanges(fastestSplits, true);
             
-            // Find all blank-ranges of competitors.
-            var allCompetitorBlankRanges = [];
-            this.allCompetitors.forEach(function (competitor) {
-                var competitorBlankRanges = getBlankRanges(competitor.result.getAllCumulativeTimes(), false);
-                competitorBlankRanges.forEach(function (range) {
-                    allCompetitorBlankRanges.push({
+            // Find all blank-ranges of results.
+            var allResultBlankRanges = [];
+            this.allResults.forEach(function (result) {
+                var resultBlankRanges = getBlankRanges(result.getAllCumulativeTimes(), false);
+                resultBlankRanges.forEach(function (range) {
+                    allResultBlankRanges.push({
                         start: range.start,
                         end: range.end,
                         size: range.end - range.start,
-                        overallSplit: competitor.result.getCumulativeTimeTo(range.end) - competitor.result.getCumulativeTimeTo(range.start)
+                        overallSplit: result.getCumulativeTimeTo(range.end) - result.getCumulativeTimeTo(range.start)
                     });
                 });
             });
             
             // Now, for each blank range of the fastest times, find the
-            // size of the smallest competitor blank range that covers it,
-            // and then the fastest split among those competitors.
+            // size of the smallest result blank range that covers it,
+            // and then the fastest split among those results.
             fastestBlankRanges.forEach(function (fastestRange) {
-                var coveringCompetitorRanges = allCompetitorBlankRanges.filter(function (compRange) {
+                var coveringResultRanges = allResultBlankRanges.filter(function (compRange) {
                     return compRange.start <= fastestRange.start && fastestRange.end <= compRange.end + 1;
                 });
                 
                 var minSize = null;
                 var minOverallSplit = null;
-                coveringCompetitorRanges.forEach(function (coveringRange) {
+                coveringResultRanges.forEach(function (coveringRange) {
                     if (minSize === null || coveringRange.size < minSize) {
                         minSize = coveringRange.size;
                         minOverallSplit = null;
@@ -310,9 +310,9 @@
                     }
                 });
                 
-                // Assume that the fastest competitor across the range had
-                // equal splits for all controls on the range.  This won't
-                // always make sense but it's the best we can do.
+                // Assume that the fastest result across the range had equal
+                // splits for all controls on the range.  This won't always
+                // make sense but it's the best we can do.
                 if (minSize !== null && minOverallSplit !== null) {
                     for (var index = fastestRange.start + 1; index < fastestRange.end; index += 1) {
                         fastestSplits[index] = minOverallSplit / minSize;
@@ -322,10 +322,10 @@
         }
                 
         if (!fastestSplits.every(isNotNull)) {
-            // Could happen if the competitors are created from split times and
-            // the splits are not complete, and also if nobody punches the
-            // final few controls.  Set any remaining missing splits to 3
-            // minutes for intermediate controls and 1 minute for the finish.
+            // Could happen if the results are created from split times and the
+            // splits are not complete, and also if nobody punches the final
+            // few controls.  Set any remaining missing splits to 3 minutes for
+            // intermediate controls and 1 minute for the finish.
             for (var index = 0; index < fastestSplits.length; index += 1) {
                 if (fastestSplits[index] === null) {
                     fastestSplits[index] = (index === fastestSplits.length - 1) ? 60 : 180;
@@ -342,61 +342,61 @@
     };
 
     /**
-    * Returns the cumulative times for the competitor with the given index,
-    * with any runs of blanks filled in.
-    * @param {Number} competitorIndex - The index of the competitor.
+    * Returns the cumulative times for the result with the given index, with
+    * any runs of blanks filled in.
+    * @param {Number} resultIndex - The index of the result.
     * @return {Array} Array of cumulative times.
     */
-    CourseClassSet.prototype.getCumulativeTimesForCompetitor = function (competitorIndex) {
-        return fillBlankRangesInCumulativeTimes(this.allCompetitors[competitorIndex].result.getAllCumulativeTimes());
+    CourseClassSet.prototype.getCumulativeTimesForResult = function (resultIndex) {
+        return fillBlankRangesInCumulativeTimes(this.allResults[resultIndex].getAllCumulativeTimes());
     };
 
     /**
-    * Compute the ranks of each competitor within their class.
+    * Compute the ranks of each result within their class.
     */
     CourseClassSet.prototype.computeRanks = function () {
-        if (this.allCompetitors.length === 0) {
+        if (this.allResults.length === 0) {
             // Nothing to compute.
             return;
         }
         
-        var splitRanksByCompetitor = [];
-        var cumRanksByCompetitor = [];
+        var splitRanksByResult = [];
+        var cumRanksByResult = [];
         
-        this.allCompetitors.forEach(function () {
-            splitRanksByCompetitor.push([]);
-            cumRanksByCompetitor.push([]);
+        this.allResults.forEach(function () {
+            splitRanksByResult.push([]);
+            cumRanksByResult.push([]);
         });
         
         d3.range(1, this.numControls + 2).forEach(function (control) {
-            var splitsByCompetitor = this.allCompetitors.map(function(comp) { return comp.result.getSplitTimeTo(control); });
-            var splitRanksForThisControl = getRanks(splitsByCompetitor);
-            this.allCompetitors.forEach(function (_comp, idx) { splitRanksByCompetitor[idx].push(splitRanksForThisControl[idx]); });
+            var splitsByResult = this.allResults.map(function(result) { return result.getSplitTimeTo(control); });
+            var splitRanksForThisControl = getRanks(splitsByResult);
+            this.allResults.forEach(function (_result, idx) { splitRanksByResult[idx].push(splitRanksForThisControl[idx]); });
         }, this);
         
         d3.range(1, this.numControls + 2).forEach(function (control) {
             // We want to null out all subsequent cumulative ranks after a
-            // competitor mispunches.
-            var cumSplitsByCompetitor = this.allCompetitors.map(function (comp, idx) {
+            // result mispunches.
+            var cumSplitsByResult = this.allResults.map(function (result, idx) {
                 // -1 for previous control, another -1 because the cumulative
-                // time to control N is cumRanksByCompetitor[idx][N - 1].
-                if (control > 1 && cumRanksByCompetitor[idx][control - 1 - 1] === null && !comp.result.isOKDespiteMissingTimes) {
-                    // This competitor has no cumulative rank for the previous
+                // time to control N is cumRanksByResult[idx][N - 1].
+                if (control > 1 && cumRanksByResult[idx][control - 1 - 1] === null && !result.isOKDespiteMissingTimes) {
+                    // This result has no cumulative rank for the previous
                     // control, and is not recorded as OK despite missing times,
                     // so either they mispunched it or mispunched a previous one.
                     // Give them a null time here, so that they end up with
                     // another null cumulative rank.
                     return null;
                 } else {
-                    return comp.result.getCumulativeTimeTo(control);
+                    return result.getCumulativeTimeTo(control);
                 }
             });
-            var cumRanksForThisControl = getRanks(cumSplitsByCompetitor);
-            this.allCompetitors.forEach(function (_comp, idx) { cumRanksByCompetitor[idx].push(cumRanksForThisControl[idx]); });
+            var cumRanksForThisControl = getRanks(cumSplitsByResult);
+            this.allResults.forEach(function (_res, idx) { cumRanksByResult[idx].push(cumRanksForThisControl[idx]); });
         }, this);
         
-        this.allCompetitors.forEach(function (comp, idx) {
-            comp.result.setSplitAndCumulativeRanks(splitRanksByCompetitor[idx], cumRanksByCompetitor[idx]);
+        this.allResults.forEach(function (result, idx) {
+            result.setSplitAndCumulativeRanks(splitRanksByResult[idx], cumRanksByResult[idx]);
         });
     };
     
@@ -421,22 +421,22 @@
         } else if (typeof controlIdx !== "number" || controlIdx <= 0 || controlIdx > this.numControls + 1) {
             throwInvalidData("Control " + controlIdx + " out of range");
         } else {
-            // Compare competitors by split time at this control, and, if those
-            // are equal, total time.
-            var comparator = function (compA, compB) {
-                var compASplit = compA.result.getSplitTimeTo(controlIdx);
-                var compBSplit = compB.result.getSplitTimeTo(controlIdx);
-                return (compASplit === compBSplit) ? d3.ascending(compA.result.totalTime, compB.result.totalTime) : d3.ascending(compASplit, compBSplit);
+            // Compare results by split time at this control, and, if those are
+            // equal, total time.
+            var comparator = function (resultA, resultB) {
+                var resultASplit = resultA.getSplitTimeTo(controlIdx);
+                var resultBSplit = resultB.getSplitTimeTo(controlIdx);
+                return (resultASplit === resultBSplit) ? d3.ascending(resultA.totalTime, resultB.totalTime) : d3.ascending(resultASplit, resultBSplit);
             };
             
-            var competitors = this.allCompetitors.filter(function (comp) { return comp.result.completed() && !isNaNStrict(comp.result.getSplitTimeTo(controlIdx)); });
-            competitors.sort(comparator);
-            var results = [];
-            for (var i = 0; i < competitors.length && i < numSplits; i += 1) {
-                results.push({name: competitors[i].name, split: competitors[i].result.getSplitTimeTo(controlIdx)});
+            var results = this.allResults.filter(function (result) { return result.completed() && !isNaNStrict(result.getSplitTimeTo(controlIdx)); });
+            results.sort(comparator);
+            var fastestSplits = [];
+            for (var i = 0; i < results.length && i < numSplits; i += 1) {
+                fastestSplits.push({name: results[i].owner.name, split: results[i].getSplitTimeTo(controlIdx)});
             }
             
-            return results;
+            return fastestSplits;
         }
     };    
 
@@ -445,7 +445,7 @@
     * @param {Array} referenceCumTimes - 'Reference' cumulative time data, such
     *            as that of the winner, or the fastest time.
     * @param {Array} currentIndexes - Array of indexes that indicate which
-    *           competitors from the overall list are plotted.
+    *           results from the overall list are plotted.
     * @param {Object} chartType - The type of chart to draw.
     * @returns {Object} Array of data.
     */
@@ -458,28 +458,28 @@
             throw new TypeError("chartType undefined or missing");
         }
 
-        var competitorData = this.allCompetitors.map(function (comp) { return chartType.dataSelector(comp.result, referenceCumTimes); });
-        var selectedCompetitorData = currentIndexes.map(function (index) { return competitorData[index]; });
+        var resultData = this.allResults.map(function (result) { return chartType.dataSelector(result, referenceCumTimes); });
+        var selectedResultData = currentIndexes.map(function (index) { return resultData[index]; });
 
         var xMin = d3.min(referenceCumTimes);
         var xMax = d3.max(referenceCumTimes);
         var yMin;
         var yMax;
         if (currentIndexes.length === 0) {
-            // No competitors selected.  
+            // No results selected.  
             if (this.isEmpty()) {
-                // No competitors at all.  Make up some values.
+                // No results at all.  Make up some values.
                 yMin = 0;
                 yMax = 60;
             } else {
-                // Set yMin and yMax to the boundary values of the first competitor.
-                var firstCompetitorTimes = competitorData[0];
-                yMin = d3.min(firstCompetitorTimes);
-                yMax = d3.max(firstCompetitorTimes);
+                // Set yMin and yMax to the boundary values of the first result.
+                var firstResultTimes = resultData[0];
+                yMin = d3.min(firstResultTimes);
+                yMax = d3.max(firstResultTimes);
             }
         } else {
-            yMin = d3.min(selectedCompetitorData.map(function (values) { return d3.min(values); }));
-            yMax = d3.max(selectedCompetitorData.map(function (values) { return d3.max(values); }));
+            yMin = d3.min(selectedResultData.map(function (values) { return d3.min(values); }));
+            yMax = d3.max(selectedResultData.map(function (values) { return d3.max(values); }));
         }
 
         if (Math.abs(yMax - yMin) < 1e-8) {
@@ -490,19 +490,19 @@
         }
         
         var controlIndexAdjust = (chartType.skipStart) ? 1 : 0;
-        var dubiousTimesInfo = currentIndexes.map(function (competitorIndex) {
-            var indexPairs = chartType.indexesAroundOmittedTimesFunc(this.allCompetitors[competitorIndex].result);
+        var dubiousTimesInfo = currentIndexes.map(function (resultIndex) {
+            var indexPairs = chartType.indexesAroundOmittedTimesFunc(this.allResults[resultIndex]);
             return indexPairs.filter(function (indexPair) { return indexPair.start >= controlIndexAdjust; })
                              .map(function (indexPair) { return { start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust }; });
         }, this);
 
-        var cumulativeTimesByControl = d3.transpose(selectedCompetitorData);
+        var cumulativeTimesByControl = d3.transpose(selectedResultData);
         var xData = (chartType.skipStart) ? referenceCumTimes.slice(1) : referenceCumTimes;
         var zippedData = d3.zip(xData, cumulativeTimesByControl);
-        var competitorNames = currentIndexes.map(function (index) { return this.allCompetitors[index].name; }, this);
+        var resultNames = currentIndexes.map(function (index) { return this.allResults[index].owner.name; }, this);
         return {
             dataColumns: zippedData.map(function (data) { return { x: data[0], ys: data[1] }; }),
-            competitorNames: competitorNames,
+            resultNames: resultNames,
             numControls: this.numControls,
             xExtent: [xMin, xMax],
             yExtent: [yMin, yMax],

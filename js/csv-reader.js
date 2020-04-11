@@ -126,7 +126,7 @@
                                        .filter(isNotNull);
 
                 competitors.sort(compareCompetitors);
-                return new CourseClass(className, controlCount, competitors);
+                return new CourseClass(className, controlCount, competitors.map(function (comp) { return comp.result; }));
             }
         } else {
             throwWrongFileFormat("Expected first line to have two parts (class name and number of controls), got " + firstLineParts.length + " part(s) instead");

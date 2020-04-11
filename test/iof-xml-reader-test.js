@@ -437,24 +437,24 @@
     }
     
     /**
-    * Returns the single competitor in the given event.
+    * Returns the single result in the given event.
     *
     * This function also asserts that the event has exactly one course-class and
-    * exactly one competitor within that class.  This one competitor is what
+    * exactly one result within that class.  This one result is what
     * it returns.
     * @param {QUnit.assert} assert - QUnit assert object.
     * @param {Event} eventData - Event data parsed by the reader.
     * @param {String} formatterName - Name of the formatter used to generate
     *     the XML.
-    * @return {Competitor} The single competitor.
+    * @return {Result} The single result.
     */
-    function getSingleCompetitor(assert, eventData, formatterName) {
+    function getSingleResult(assert, eventData, formatterName) {
         assert.strictEqual(eventData.classes.length, 1, "Expected one class - " + formatterName);
         if (eventData.classes.length === 1) {
             var courseClass = eventData.classes[0];
-            assert.strictEqual(courseClass.competitors.length, 1, "Expected one competitor - " + formatterName);
-            if (courseClass.competitors.length === 1) {
-                return eventData.classes[0].competitors[0];
+            assert.strictEqual(courseClass.results.length, 1, "Expected one result - " + formatterName);
+            if (courseClass.results.length === 1) {
+                return eventData.classes[0].results[0];
             } else {
                 return null;
             }
@@ -528,24 +528,23 @@
     /**
     * Generates XML using each available formatter, parses the resulting XML,
     * and calls the given checking function on the result.  This function
-    * asserts that the resulting data contains only a single competitor, and
-    * then calls the check function with the parsed competitor.
+    * asserts that the resulting data contains only a single result, and
+    * then calls the check function with the parsed result.
     *
     * The options supported are the same as those for runXmlFormatParseTest.
     *
     * @param {QUnit.assert] assert - QUnit assert object.
     * @param {Object} clazz - Class object to generate the XML from.
     * @param {Function} checkFunc - Checking function called for the parsed
-    *     competitor, if a single competitor results.  It is passed the parsed
-    *     competitor.
+    *     result, if a single result results.  It is passed the parsed result.
     * @param {Object} options - Options object, the contents of which are
     *     described above.
     */
     function runSingleCompetitorXmlFormatParseTest(assert, clazz, checkFunc, options) {
         runXmlFormatParseTest([clazz], function (eventData, formatterName) {
-            var competitor = getSingleCompetitor(assert, eventData, formatterName);
-            if (competitor !== null) {
-                checkFunc(competitor);
+            var result = getSingleResult(assert, eventData, formatterName);
+            if (result !== null) {
+                checkFunc(result);
             }
         }, options);
     }
@@ -692,17 +691,15 @@
                 if (eventData.classes.length === 1) {
                     var courseClass = eventData.classes[0];
                     assert.strictEqual(courseClass.name, className);
-                    assert.strictEqual(courseClass.competitors.length, 1, "One competitor should have been read -  " + formatterName);
+                    assert.strictEqual(courseClass.results.length, 1, "One competitor should have been read -  " + formatterName);
                     assert.strictEqual(courseClass.numControls, 3);
                     
-                    if (courseClass.competitors.length === 1) {
-                        var competitor = courseClass.competitors[0];
-                        assert.strictEqual(competitor.name, person.forename + " " + person.surname);
-                        assert.strictEqual(competitor.club, person.club);
-                        assert.strictEqual(competitor.gender, "M");
-                        assert.strictEqual(competitor.yearOfBirth, 1976);
-                        
-                        var result = competitor.result;
+                    if (courseClass.results.length === 1) {
+                        var result = courseClass.results[0];
+                        assert.strictEqual(result.owner.name, person.forename + " " + person.surname);
+                        assert.strictEqual(result.owner.club, person.club);
+                        assert.strictEqual(result.owner.gender, "M");
+                        assert.strictEqual(result.owner.yearOfBirth, 1976);
                         assert.strictEqual(result.startTime, person.startTime);
                         assert.strictEqual(result.totalTime, person.totalTime);
                         assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat(person.totalTime));
@@ -752,8 +749,8 @@
         var person = getPerson();
         delete person.surname;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.name, person.forename);
+            function (result) {
+                assert.strictEqual(result.owner.name, person.forename);
             });
     });
     
@@ -761,8 +758,8 @@
         var person = getPerson();
         delete person.forename;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.name, person.surname);
+            function (result) {
+                assert.strictEqual(result.owner.name, person.surname);
             });
     });
     
@@ -774,7 +771,7 @@
             [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 0, "No competitors should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results.length, 0, "No competitors should have been read - " + formatterName);
                 assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued - " + formatterName);
             });
     });
@@ -784,8 +781,8 @@
         delete person.club;
         person.clubFull = "Test Full Club Name";
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.club, person.clubFull);
+            function (result) {
+                assert.strictEqual(result.owner.club, person.clubFull);
             });
     });
     
@@ -793,8 +790,8 @@
         var person = getPerson();
         delete person.club;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.club, "");
+            function (result) {
+                assert.strictEqual(result.owner.club, "");
             });
     });
     
@@ -804,8 +801,8 @@
         runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors[0].yearOfBirth, null);
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read -  " + formatterName);
+                assert.strictEqual(eventData.classes[0].results[0].owner.yearOfBirth, null);
             });
     });
     
@@ -815,8 +812,8 @@
         runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors[0].yearOfBirth, null);
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read -  " + formatterName);
+                assert.strictEqual(eventData.classes[0].results[0].owner.yearOfBirth, null);
             });
     });
     
@@ -826,8 +823,8 @@
         runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors[0].gender, "F");
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read -  " + formatterName);
+                assert.strictEqual(eventData.classes[0].results[0].owner.gender, "F");
             });
     });
     
@@ -837,8 +834,8 @@
         runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors[0].gender, null);
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read -  " + formatterName);
+                assert.strictEqual(eventData.classes[0].results[0].owner.gender, null);
             });
     });
     
@@ -848,8 +845,8 @@
         runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors[0].gender, null);
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read -  " + formatterName);
+                assert.strictEqual(eventData.classes[0].results[0].owner.gender, null);
             });
     });
     
@@ -868,8 +865,8 @@
         var person = getPerson();
         delete person.startTime;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.result.startTime, null);
+            function (result) {
+                assert.strictEqual(result.startTime, null);
             });
     });
     
@@ -877,8 +874,8 @@
         var person = getPerson();
         person.startTime = null;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.result.startTime, null);
+            function (result) {
+                assert.strictEqual(result.startTime, null);
             });
     });
     
@@ -886,8 +883,8 @@
         var person = getPerson();
         person.startTimeBasic = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.result.startTime, person.startTime);
+            function (result) {
+                assert.strictEqual(result.startTime, person.startTime);
             },
             {formatters: [Version3Formatter]});
     });
@@ -896,8 +893,8 @@
         var person = getPerson();
         person.startTimeNoSeconds = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.result.startTime, person.startTime - (person.startTime % 60));
+            function (result) {
+                assert.strictEqual(result.startTime, person.startTime - (person.startTime % 60));
             },
             {formatters: [Version3Formatter]});
     });
@@ -906,9 +903,9 @@
         var person = getPerson();
         delete person.totalTime;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.result.totalTime, null);
-                assert.ok(!competitor.result.completed());
+            function (result) {
+                assert.strictEqual(result.totalTime, null);
+                assert.ok(!result.completed());
             });
     });
     
@@ -916,9 +913,9 @@
         var person = getPerson();
         person.totalTime = null;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.result.totalTime, null);
-                assert.ok(!competitor.result.completed());
+            function (result) {
+                assert.strictEqual(result.totalTime, null);
+                assert.ok(!result.completed());
             });
     });
     
@@ -926,8 +923,8 @@
         var person = getPerson();
         person.cumTimes = [65.7, 65.7 + 221.4, 65.7 + 221.4 + 184.6];
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.deepEqual(competitor.result.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat(person.totalTime));
+            function (result) {
+                assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat(person.totalTime));
             },
             {formatters: [Version3Formatter]});
     });
@@ -998,8 +995,8 @@
         var person = getPerson();
         person.competitive = false;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.result.isNonCompetitive, true);        
+            function (result) {
+                assert.strictEqual(result.isNonCompetitive, true);        
             });
     });
     
@@ -1008,8 +1005,8 @@
         person.nonStarter = true;
         person.cumTimes = [null, null, null];
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.result.isNonStarter, true);        
+            function (result) {
+                assert.strictEqual(result.isNonStarter, true);        
             });
     });
     
@@ -1018,8 +1015,8 @@
         person.nonFinisher = true;
         person.cumTimes[2] = null;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.result.isNonFinisher, true);        
+            function (result) {
+                assert.strictEqual(result.isNonFinisher, true);        
             });
     });
     
@@ -1027,8 +1024,8 @@
         var person = getPerson();
         person.disqualified = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.result.isDisqualified, true);        
+            function (result) {
+                assert.strictEqual(result.isDisqualified, true);        
             });
     });
     
@@ -1036,8 +1033,8 @@
         var person = getPerson();
         person.overMaxTime = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.result.isOverMaxTime, true);        
+            function (result) {
+                assert.strictEqual(result.isOverMaxTime, true);        
             });
     });
     
@@ -1046,8 +1043,8 @@
         person.cumTimes[1] = null;
         person.okDespiteMissingTimes = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.result.isOKDespiteMissingTimes, true);        
+            function (result) {
+                assert.strictEqual(result.isOKDespiteMissingTimes, true);        
             });
     });
     
@@ -1112,8 +1109,8 @@
         runSingleCourseXmlFormatParseTest(assert, [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}],
             function (course) {
                 assert.strictEqual(course.classes.length, 1);
-                assert.strictEqual(course.classes[0].competitors.length, 1);
-                assert.strictEqual(course.classes[0].competitors[0].result.totalTime, person.totalTime, "Should read competitor's total time");
+                assert.strictEqual(course.classes[0].results.length, 1);
+                assert.strictEqual(course.classes[0].results[0].totalTime, person.totalTime, "Should read competitor's total time");
             },
             {preprocessor: function (xml) {
                 var timeRegex = /<Time>[^<]+<\/Time>/g;
@@ -1129,9 +1126,9 @@
         var person = getPerson();
         person.cumTimes[1] = null;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.deepEqual(competitor.result.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat([person.totalTime]));
-                assert.ok(!competitor.result.completed());
+            function (result) {
+                assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat([person.totalTime]));
+                assert.ok(!result.completed());
             });
     });
     
@@ -1148,7 +1145,7 @@
             [{name: "Test Class", length: 2300, courseId: 1, competitors: [person1, person2]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read - " + formatterName);
                 assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued - " + formatterName);
                 assert.ok(eventData.warnings[0].match(/number of controls/));
             }
@@ -1175,7 +1172,7 @@
             [{name: "Test Class", length: 2300, courseId: 1, numberOfControls: person.controls.length + 2, competitors: [person]}],
             function (eventData) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
-                assert.strictEqual(eventData.classes[0].competitors.length, 0, "No competitors should have been read");
+                assert.strictEqual(eventData.classes[0].results.length, 0, "No competitors should have been read");
                 assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
             },
             {formatters: [Version3Formatter]}
@@ -1193,7 +1190,7 @@
             [{name: "Test Class 1", length: 2300, competitors: [person1, person2]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - "  + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read - " + formatterName);
                 assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued - " + formatterName);
             });
     });
@@ -1264,8 +1261,8 @@
                     for (var i = 0; i < 2; i += 1) {
                         assert.deepEqual(eventData.classes[i].course, eventData.courses[i]);
                         assert.deepEqual(eventData.courses[i].classes, [eventData.classes[i]]);
-                        assert.strictEqual(eventData.classes[i].competitors.length, 1);
-                        assert.deepEqual(eventData.classes[i].competitors[0].name, persons[i].forename + " " + persons[i].surname);
+                        assert.strictEqual(eventData.classes[i].results.length, 1);
+                        assert.deepEqual(eventData.classes[i].results[0].owner.name, persons[i].forename + " " + persons[i].surname);
                     }
                 }
             });
@@ -1291,8 +1288,8 @@
                 if (eventData.classes.length === 2 && eventData.courses.length === 1) {
                     for (var i = 0; i < 2; i += 1) {
                         assert.deepEqual(eventData.classes[i].course, eventData.courses[0]);
-                        assert.strictEqual(eventData.classes[i].competitors.length, 1);
-                        assert.deepEqual(eventData.classes[i].competitors[0].name, persons[i].forename + " " + persons[i].surname);
+                        assert.strictEqual(eventData.classes[i].results.length, 1);
+                        assert.deepEqual(eventData.classes[i].results[0].owner.name, persons[i].forename + " " + persons[i].surname);
                     }
                     assert.deepEqual(eventData.courses[0].classes, eventData.classes);
                 }
@@ -1357,7 +1354,7 @@
             [{name: "Test Class", length: 2300, courseId: 1, competitors: [person1, person2]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 2, "Two competitors should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results.length, 2, "Two competitors should have been read - " + formatterName);
                 assert.strictEqual(eventData.warnings.length, 0, "No warning should have been issued: " + eventData.warnings[0]);
             });
     });
@@ -1374,7 +1371,7 @@
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
                 if (eventData.classes.length === 1) {
                     var courseClass = eventData.classes[0];
-                    assert.strictEqual(courseClass.competitors.length, 1, "One competitor should have been read - " + formatterName);
+                    assert.strictEqual(courseClass.results.length, 1, "One competitor should have been read - " + formatterName);
                     assert.strictEqual(courseClass.numControls, 0);
                     assert.strictEqual(eventData.warnings.length, 0, "No warning should have been issued: " + eventData.warnings[0]);
                 }

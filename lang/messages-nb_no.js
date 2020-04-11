@@ -1,7 +1,8 @@
 /*
  *  Messages - NB Norwegian messages for SplitsBrowser
  *
- *  Copyright (C) 2000-2015 Luke Woodward
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,8 +35,8 @@ SplitsBrowser.Messages.nb_no = {
     FinishNameShort: "M",
 
     // Button labels.
-    SelectAllCompetitors: "Alle",
-    SelectNoCompetitors: "Ingen",
+    SelectAllResults: "Alle",
+    SelectNoResults: "Ingen",
     SelectCrossingRunners: "Kryssende løpere",
 
     LowerXAxisChartLabel: "Tid (min)",
@@ -113,45 +114,45 @@ SplitsBrowser.Messages.nb_no = {
     SelectedClassesPopupHeader: "Valgte klasser",
 
     // Placeholder text shown when the Selected classes dialog is empty,
-    // because no competitors registered a split for the control, or those
+    // because no results registered a split for the control, or those
     // that did only registered a dubious split.
     SelectedClassesPopupPlaceholder: "Ingen deltakere",
 
     // Header for the 'Fastest leg time' popup dialog.
     FastestLegTimePopupHeader: "Raskeste strekktid $$START$$ til $$END$$",
 
-    // Header for the nearby-competitors dialog on the race graph.
-    NearbyCompetitorsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
+    // Header for the nearby-results dialog on the race graph.
+    NearbyResultsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
 
-    // Placeholder text shown in the nearby-competitors dialog on the race
-    // graph when there aren't any competitors visiting the control within the
+    // Placeholder text shown in the nearby-results dialog on the race
+    // graph when there aren't any results visiting the control within the
     // +/- 2 minute window.
-    NoNearbyCompetitors: "Ingen deltakere",
+    NoNearbyResults: "Ingen deltakere",
 
     // Link that appears at the top and opens SplitsBrowser with the settings
-    // (selected classes, competitors, comparison, chart type, etc.) that are
+    // (selected classes, results, comparison, chart type, etc.) that are
     // currently shown.
     DirectLink: "Lenke",
     DirectLinkToolTip: "Lenke til en URL som åpner SplitsBrowser med valgte innstillinger",
 
-    // The placeholder text shown in the competitor-list filter box when no
+    // The placeholder text shown in the result-list filter box when no
     // text has been entered into this box.
-    CompetitorListFilter: "Filtrer",
+    ResultListFilter: "Filtrer",
 
-    // Labels that appear beside a competitor on the Results Table to indicate
+    // Labels that appear beside a result on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
     DidNotStartShort: "dns",
     DidNotFinishShort: "dnf",
     DisqualifiedShort: "dsq",
 
-    // Placeholder message shown inside the competitor list if all competitors
+    // Placeholder message shown inside the result list if all result
     // in the class did not start.
-    NoCompetitorsStarted: "Ingen deltakere startet",
+    NoResultsStarted: "Ingen deltakere startet",
 
     // Label of the language-selector control.
     LanguageSelectorLabel: "Språk:",
 
-    // Label that appears beside a competitor on the Results Table to indicate
+    // Label that appears beside a result on the Results Table to indicate
     // that they were over the maximum time.
     OverMaxTimeShort: "over makstiden",
 

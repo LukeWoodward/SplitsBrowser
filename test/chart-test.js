@@ -119,14 +119,14 @@
     * @param {Array} competitors - Optional array of competitors.
     * @return {Object} Object containing a course-class set and event data.
     */
-    function getTestCourseClassSetAndEvent(competitors) {
-        if (typeof competitors === "undefined") {
-            var competitor1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-            var competitor2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
-            competitors = [competitor1, competitor2];
+    function getTestCourseClassSetAndEvent(results) {
+        if (typeof results === "undefined") {
+            var result1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]).result;
+            var result2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]).result;
+            results = [result1, result2];
         }
         
-        var courseClass = new CourseClass("Test", 3, competitors);
+        var courseClass = new CourseClass("Test", 3, results);
         var courseClassSet = new CourseClassSet([courseClass]);
         var course = new Course("Test course", [courseClass], null, null, null);
         courseClass.setCourse(course);
@@ -139,10 +139,10 @@
     * it just checks that the chart gets created successfully.
 	* @param {QUnit.assert} assert - QUnit assert object.
     * @param {Object} chartType - The chart type.
-    * @param {Array} competitors - Optional array of competitors.
+    * @param {Array} results - Optional array of results.
     */
-    function runChartCreationTest(assert, chartType, competitors) {
-        var courseClassSetAndEvent = getTestCourseClassSetAndEvent(competitors);
+    function runChartCreationTest(assert, chartType, results) {
+        var courseClassSetAndEvent = getTestCourseClassSetAndEvent(results);
         var fastestCumTimes = courseClassSetAndEvent.courseClassSet.getFastestCumTimes();
         var chart = createTestChart(chartType);
         var data = {

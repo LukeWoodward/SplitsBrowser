@@ -109,12 +109,10 @@
         assert.strictEqual(courseClass.name, "Course 1");
         assert.strictEqual(courseClass.numControls, 3);
         
-        assert.strictEqual(courseClass.competitors.length, 1);
-        var competitor = courseClass.competitors[0];
-        assert.strictEqual(competitor.name, "First Runner");
-        assert.strictEqual(competitor.club, "TEST");
-        
-        var result = competitor.result;
+        assert.strictEqual(courseClass.results.length, 1);
+        var result = courseClass.results[0];
+        assert.strictEqual(result.owner.name, "First Runner");
+        assert.strictEqual(result.owner.club, "TEST");
         assert.strictEqual(result.startTime, 10 * 3600 + 38 * 60);
         assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, 202]);
         assert.ok(result.completed());
@@ -172,10 +170,10 @@
         assert.strictEqual(eventData.classes.length, 1);
         
         var courseClass = eventData.classes[0];
-        assert.strictEqual(courseClass.competitors.length, 1);
+        assert.strictEqual(courseClass.results.length, 1);
         
-        var competitor = courseClass.competitors[0];
-        assert.strictEqual(competitor.name, "First Runner, Second Runner");
+        var result = courseClass.results[0];
+        assert.strictEqual(result.owner.name, "First Runner, Second Runner");
     });
     
     QUnit.test("Can parse a string that contains two valid competitors on the same course", function (assert) {
@@ -186,18 +184,18 @@
         assert.strictEqual(eventData.classes.length, 1);
         var courseClass = eventData.classes[0];
         
-        assert.strictEqual(courseClass.competitors.length, 2);
-        var competitor1 = courseClass.competitors[0];
-        assert.strictEqual(competitor1.name, "First Runner");
-        assert.strictEqual(competitor1.club, "TEST");
-        assert.strictEqual(competitor1.result.startTime, 10 * 3600 + 38 * 60);
-        assert.deepEqual(competitor1.result.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, 202]);
+        assert.strictEqual(courseClass.results.length, 2);
+        var result1 = courseClass.results[0];
+        assert.strictEqual(result1.owner.name, "First Runner");
+        assert.strictEqual(result1.owner.club, "TEST");
+        assert.strictEqual(result1.startTime, 10 * 3600 + 38 * 60);
+        assert.deepEqual(result1.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, 202]);
         
-        var competitor2 = courseClass.competitors[1];
-        assert.strictEqual(competitor2.name, "Second Runner");
-        assert.strictEqual(competitor2.club, "ABCD");
-        assert.strictEqual(competitor2.result.startTime, 11 * 3600 + 19 * 60);
-        assert.deepEqual(competitor2.result.getAllOriginalCumulativeTimes(), [0, 84, 139, 199, 217]);
+        var result2 = courseClass.results[1];
+        assert.strictEqual(result2.owner.name, "Second Runner");
+        assert.strictEqual(result2.owner.club, "ABCD");
+        assert.strictEqual(result2.startTime, 11 * 3600 + 19 * 60);
+        assert.deepEqual(result2.getAllOriginalCumulativeTimes(), [0, 84, 139, 199, 217]);
         
         assert.strictEqual(eventData.courses.length, 1);
     });
@@ -239,7 +237,7 @@
         var eventData = parseTripleColumnEventData(data);
         assert.strictEqual(eventData.classes.length, 1);
         assert.strictEqual(eventData.courses.length, 1);
-        assert.strictEqual(eventData.classes[0].competitors.length, 1);
+        assert.strictEqual(eventData.classes[0].results.length, 1);
         assert.strictEqual(eventData.warnings.length, 1);
     });
     
@@ -250,8 +248,8 @@
         assert.strictEqual(eventData.classes.length, 1);
         var courseClass = eventData.classes[0];
         
-        assert.strictEqual(courseClass.competitors.length, 1);
-        var result = courseClass.competitors[0].result;
+        assert.strictEqual(courseClass.results.length, 1);
+        var result = courseClass.results[0];
         assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 72, null, 186, 202]);
         assert.ok(!result.completed());
         assert.ok(!result.isNonStarter);
@@ -266,8 +264,8 @@
         assert.strictEqual(eventData.classes.length, 1);
         var courseClass = eventData.classes[0];
         
-        assert.strictEqual(courseClass.competitors.length, 1);
-        var result = courseClass.competitors[0].result;
+        assert.strictEqual(courseClass.results.length, 1);
+        var result = courseClass.results[0];
         assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, null]);
         assert.ok(!result.completed());
         assert.ok(!result.isNonStarter);
@@ -285,8 +283,8 @@
         assert.strictEqual(eventData.classes.length, 2);
         var courseClass = eventData.classes[0];
         
-        assert.strictEqual(courseClass.competitors.length, 1);
-        var result = courseClass.competitors[0].result;
+        assert.strictEqual(courseClass.results.length, 1);
+        var result = courseClass.results[0];
         assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, null, null, null, null]);
         assert.ok(!result.completed());
         assert.ok(result.isNonStarter);

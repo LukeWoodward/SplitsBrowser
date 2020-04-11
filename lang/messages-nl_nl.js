@@ -1,7 +1,7 @@
 ﻿/* 
  *  Messages - NL Dutch messages for SplitsBrowser 
  *   
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins, 
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins, 
  *                          Ed Nash, Luke Woodward, Jan-Gerard van der Toorn
  * 
  *  This program is free software; you can redistribute it and/or modify 
@@ -35,8 +35,8 @@ SplitsBrowser.Messages.nl_nl = {
     FinishNameShort: "F", 
       
     // Button labels. 
-    SelectAllCompetitors: "Allen", 
-    SelectNoCompetitors: "Geen", 
+    SelectAllResults: "Allen", 
+    SelectNoResults: "Geen", 
     SelectCrossingRunners: "Kruisende lopers", 
       
     LowerXAxisChartLabel: "Tijd (min)", 
@@ -114,49 +114,49 @@ SplitsBrowser.Messages.nl_nl = {
     SelectedClassesPopupHeader: "Geselecteerde routes", 
       
     // Placeholder text shown when the Selected classes dialog is empty, 
-    // because no competitors registered a split for the control, or those 
+    // because no results registered a split for the control, or those 
     // that did only registered a dubious split. 
     SelectedClassesPopupPlaceholder: "Geen deelnemers", 
       
     // Header for the 'Fastest leg time' popup dialog. 
     FastestLegTimePopupHeader: "Snelste tijd $$START$$ tot $$END$$", 
   
-    // Header for the nearby-competitors dialog on the race graph. 
-    NearbyCompetitorsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$", 
+    // Header for the nearby-results dialog on the race graph. 
+    NearbyResultsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$", 
       
-    // Placeholder text shown in the nearby-competitors dialog on the race 
-    // graph when there aren't any competitors visiting the control within the 
+    // Placeholder text shown in the nearby-results dialog on the race 
+    // graph when there aren't any results visiting the control within the 
     // +/- 2 minute window. 
-    NoNearbyCompetitors: "Geen deelnemers",
+    NoNearbyResults: "Geen deelnemers",
     
     // Link that appears at the top and opens SplitsBrowser with the settings
-    // (selected classes, competitors, comparison, chart type, etc.) that are
+    // (selected classes, results, comparison, chart type, etc.) that are
     // currently shown.
     DirectLink: "Link",
     DirectLinkToolTip: "Linkt naar een URL die SplitsBrowser opent met de huidige weergave",
     
-    // The placeholder text shown in the competitor-list filter box when no
+    // The placeholder text shown in the result-list filter box when no
     // text has been entered into this box.
     // TO BE TRANSLATED
-    CompetitorListFilter: "Filter",
+    ResultListFilter: "Filter",
     
-    // Labels that appear beside a competitor on the Results Table to indicate
+    // Labels that appear beside a result on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
     // TO BE TRANSLATED
     DidNotStartShort: "dns",
     DidNotFinishShort: "dnf",
     DisqualifiedShort: "dsq",
     
-    // Placeholder message shown inside the competitor list if all competitors
+    // Placeholder message shown inside the result list if all results
     // in the class did not start.
     // TO BE TRANSLATED
-    NoCompetitorsStarted: "No competitors started",
+    NoResultsStarted: "No competitors started",
     
     // Label of the language-selector control.
     // TO BE TRANSLATED
     LanguageSelectorLabel: "Language:",
     
-    // Label that appears beside a competitor on the Results Table to indicate
+    // Label that appears beside a result on the Results Table to indicate
     // that they were over the maximum time.
     // TO BE TRANSLATED
     OverMaxTimeShort: "over max time",

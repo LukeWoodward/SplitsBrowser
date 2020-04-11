@@ -786,7 +786,7 @@
                 return;
             }
             
-            var courseClass = new CourseClass(parsedClass.name, parsedClass.controls.length, parsedClass.competitors);
+            var courseClass = new CourseClass(parsedClass.name, parsedClass.controls.length, parsedClass.competitors.map(function (comp) { return comp.result; }));
             classes.push(courseClass);
             
             // Add to each temporary course object a list of all classes.

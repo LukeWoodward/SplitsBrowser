@@ -1206,11 +1206,11 @@
             classToCompetitorsMap.keys().forEach(function (className) {
                 var numControls = course.controls.length - 1;
                 var oldCompetitors = classToCompetitorsMap.get(className);
-                var newCompetitors = oldCompetitors.map(function (competitor, index) {
-                    return competitor.toCompetitor(index + 1);
+                var newResults = oldCompetitors.map(function (competitor, index) {
+                    return competitor.toCompetitor(index + 1).result;
                 });
                 
-                var courseClass = new CourseClass(className, numControls, newCompetitors);
+                var courseClass = new CourseClass(className, numControls, newResults);
                 classesForThisCourse.push(courseClass);
                 classes.push(courseClass);
             }, this);

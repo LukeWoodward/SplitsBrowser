@@ -1,7 +1,7 @@
 ﻿/*
  *  Messages - PT Portuguese messages for SplitsBrowser
  *  
- *  Direitos Autorais (C) 2000-2014 Dave Ryder, Reinhard Balling,
+ *  Direitos Autorais (C) 2000-2020 Dave Ryder, Reinhard Balling,
  *                                  Andris Strazdins, Ed Nash, Luke Woodward,
  *                                  Robert Marique
  *
@@ -36,8 +36,8 @@ SplitsBrowser.Messages.pt_br = {
     FinishNameShort: "F",
     
     // Button labels.
-    SelectAllCompetitors: "Todos",
-    SelectNoCompetitors: "Nenhum",
+    SelectAllResults: "Todos",
+    SelectNoResults: "Nenhum",
     SelectCrossingRunners: "Crossing runners",
     
     LowerXAxisChartLabel: "Tempo (min)",
@@ -122,38 +122,38 @@ SplitsBrowser.Messages.pt_br = {
     FastestLegTimePopupHeader: "Tempo da pernada mais rápida $$START$$ até $$END$$",
 
     // Cabeçalho dos concorrentes próximas diálogo no gráfico de corrida.
-    NearbyCompetitorsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
+    NearbyResultsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
     
     // Espaço reservado mostrado nos próximos concorrentes de diálogo no gráfico de
     // corrida quando não há quaisquer concorrentes que visitam o controle dentro do
     // +/- janela de 2 minutos.
-    NoNearbyCompetitors: "Sem competidores",
+    NoNearbyResults: "Sem competidores",
     
     // Link that appears at the top and opens SplitsBrowser with the settings
-    // (selected classes, competitors, comparison, chart type, etc.) that are
+    // (selected classes, results, comparison, chart type, etc.) that are
     // currently shown.
     DirectLink: "Atalho",
     DirectLinkToolTip: "Atalho para o endereço que abre o SplitsBrowser com as configurações atuais",
     
-    // The placeholder text shown in the competitor-list filter box when no
+    // The placeholder text shown in the result-list filter box when no
     // text has been entered into this box.
-    CompetitorListFilter: "Filtro",
+    ResultListFilter: "Filtro",
     
-    // Labels that appear beside a competitor on the Results Table to indicate
+    // Labels that appear beside a result on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
     DidNotStartShort: "np",
     DidNotFinishShort: "dnf",
     DisqualifiedShort: "dsq",
     
-    // Placeholder message shown inside the competitor list if all competitors
+    // Placeholder message shown inside the result list if all results
     // in the class did not start.
-    NoCompetitorsStarted: "Nenhum atleta partiu",
+    NoResultsStarted: "Nenhum atleta partiu",
     
     // Label of the language-selector control.
     // TO BE TRANSLATED?
     LanguageSelectorLabel: "Language:",
     
-    // Label that appears beside a competitor on the Results Table to indicate
+    // Label that appears beside a result on the Results Table to indicate
     // that they were over the maximum time.
     // TO BE TRANSLATED
     OverMaxTimeShort: "over max time",

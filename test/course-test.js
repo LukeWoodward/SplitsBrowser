@@ -28,12 +28,12 @@
     
     QUnit.module("Course");
     
-    function getCompetitor1() {
-        return fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+    function getResult1() {
+        return fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]).result;
     }
     
-    function getCompetitor2() {
-        return fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
+    function getResult2() {
+        return fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [65, 221, 184, 100]).result;
     }
     
     QUnit.test("Getting other classes of a course with one class returns empty list when given that one class", function (assert) {
@@ -190,103 +190,103 @@
     });
     
     QUnit.test("Returns single-element array of fastest splits when course has one class with two competitors", function (assert) {
-        var competitor2 = getCompetitor2();
-        var courseClass = new CourseClass("Test class", 3, [getCompetitor1(), competitor2]);
+        var result2 = getResult2();
+        var courseClass = new CourseClass("Test class", 3, [getResult1(), result2]);
         var controls = ["235", "212", "189"];
         var course = new Course("Test course", [courseClass], 4.1, 115, controls);
-        assert.deepEqual(course.getFastestSplitsForLeg("212", "189"), [{name: competitor2.name, className:"Test class", split: 184}]);
+        assert.deepEqual(course.getFastestSplitsForLeg("212", "189"), [{name: result2.owner.name, className:"Test class", split: 184}]);
     });
     
     QUnit.test("Returns single-element array of fastest splits when course has one class with two competitors and one empty class", function (assert) {
-        var competitor2 = getCompetitor2();
-        var courseClass = new CourseClass("Test class", 3, [getCompetitor1(), competitor2]);
+        var result2 = getResult2();
+        var courseClass = new CourseClass("Test class", 3, [getResult1(), result2]);
         var emptyClass = new CourseClass("Empty class", 3, []);
         var controls = ["235", "212", "189"];
         var course = new Course("Test course", [courseClass, emptyClass], 4.1, 115, controls);
-        assert.deepEqual(course.getFastestSplitsForLeg("212", "189"), [{name: competitor2.name, className: courseClass.name, split: 184}]);
+        assert.deepEqual(course.getFastestSplitsForLeg("212", "189"), [{name: result2.owner.name, className: courseClass.name, split: 184}]);
     });
     
     QUnit.test("Returns two-element array of fastest splits when course has two classes with one competitor each", function (assert) {
-        var competitor1 = getCompetitor1();
-        var competitor2 = getCompetitor2();
-        var courseClass1 = new CourseClass("Test class 1", 3, [competitor1]);
-        var courseClass2 = new CourseClass("Test class 2", 3, [competitor2]);
+        var result1 = getResult1();
+        var result2 = getResult2();
+        var courseClass1 = new CourseClass("Test class 1", 3, [result1]);
+        var courseClass2 = new CourseClass("Test class 2", 3, [result2]);
         var controls = ["235", "212", "189"];
         var course = new Course("Test course", [courseClass1, courseClass2], 4.1, 115, controls);
-        assert.deepEqual(course.getFastestSplitsForLeg("212", "189"), [{name: competitor1.name, className: courseClass1.name, split: 212}, {name: competitor2.name, className: courseClass2.name, split: 184}]);
+        assert.deepEqual(course.getFastestSplitsForLeg("212", "189"), [{name: result1.owner.name, className: courseClass1.name, split: 212}, {name: result2.owner.name, className: courseClass2.name, split: 184}]);
     });
     
     QUnit.test("Returns empty list of competitors when attempting to fetch competitors visiting a control in an interval when there are no course-classes", function (assert) {
         var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
-        assert.deepEqual(course.getCompetitorsAtControlInTimeRange("212", 10 * 3600, 11 * 3600), []);
+        assert.deepEqual(course.getResultsAtControlInTimeRange("212", 10 * 3600, 11 * 3600), []);
     });
     
     QUnit.test("Returns empty list of competitors when attempting to fetch competitors visiting a control in an interval when course has no control information", function (assert) {
-        var courseClass = new CourseClass("Test class", 3, [getCompetitor1(), getCompetitor2()]);
+        var courseClass = new CourseClass("Test class", 3, [getResult1(), getResult2()]);
         var course = new Course("Test course", [courseClass], null, null, null);
-        assert.deepEqual(course.getCompetitorsAtControlInTimeRange("123", 10 * 3600, 11 * 3600), []);
+        assert.deepEqual(course.getResultsAtControlInTimeRange("123", 10 * 3600, 11 * 3600), []);
     });
     
     QUnit.test("Returns empty list of competitors when attempting to fetch competitors visiting a control in an interval whose code does not exist in the course", function (assert) {
-        var courseClass = new CourseClass("Test class", 3, [getCompetitor1(), getCompetitor2()]);
+        var courseClass = new CourseClass("Test class", 3, [getResult1(), getResult2()]);
         var controls = ["235", "212", "189"];
         var course = new Course("Test course", [courseClass], null, null, controls);
-        assert.deepEqual(course.getCompetitorsAtControlInTimeRange("456", 10 * 3600, 11 * 3600), []);
+        assert.deepEqual(course.getResultsAtControlInTimeRange("456", 10 * 3600, 11 * 3600), []);
     });
     
     QUnit.test("Returns singleton list of competitors when attempting to fetch competitors visiting a control in an interval when the control is on the course", function (assert) {
-        var competitor2 = getCompetitor2();
-        var courseClass = new CourseClass("Test class", 3, [getCompetitor1(), competitor2]);
+        var result2 = getResult2();
+        var courseClass = new CourseClass("Test class", 3, [getResult1(), result2]);
         var controls = ["235", "212", "189"];
         var course = new Course("Test course", [courseClass], null, null, controls);
         var expectedTime = 10 * 3600 + 65 + 221;
-        assert.deepEqual(course.getCompetitorsAtControlInTimeRange("212", expectedTime - 1, expectedTime + 1), [{name: competitor2.name, time: expectedTime, className: courseClass.name}]);
+        assert.deepEqual(course.getResultsAtControlInTimeRange("212", expectedTime - 1, expectedTime + 1), [{name: result2.owner.name, time: expectedTime, className: courseClass.name}]);
     });
     
     QUnit.test("Returns list of competitors from two different classes when attempting to fetch competitors visiting a control in an interval when the control is on the course", function (assert) {
-        var competitor1 = getCompetitor1();
-        var competitor2 = getCompetitor2();
-        var courseClass1 = new CourseClass("Test class 1", 3, [competitor1]);
-        var courseClass2 = new CourseClass("Test class 2", 3, [competitor2]);
+        var result1 = getResult1();
+        var result2 = getResult2();
+        var courseClass1 = new CourseClass("Test class 1", 3, [result1]);
+        var courseClass2 = new CourseClass("Test class 2", 3, [result2]);
         var course = new Course("Test course", [courseClass1, courseClass2], null, null, ["235", "212", "189"]);
-        var competitor1Time = 10 * 3600 + 30 * 60 + 81 + 197;
-        var competitor2Time = 10 * 3600 + 65 + 221;
-        assert.deepEqual(course.getCompetitorsAtControlInTimeRange("212", competitor2Time - 1, competitor1Time + 1),
-            [{name: competitor1.name, time: competitor1Time, className: courseClass1.name},
-             {name: competitor2.name, time: competitor2Time, className: courseClass2.name}]);
+        var result1Time = 10 * 3600 + 30 * 60 + 81 + 197;
+        var result2Time = 10 * 3600 + 65 + 221;
+        assert.deepEqual(course.getResultsAtControlInTimeRange("212", result2Time - 1, result1Time + 1),
+            [{name: result1.owner.name, time: result1Time, className: courseClass1.name},
+             {name: result2.owner.name, time: result2Time, className: courseClass2.name}]);
     });
     
     QUnit.test("Returns list of competitors punching both occurrences of a control when attempting to fetch competitors visiting a control in an interval", function (assert) {
-        var competitor1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 163]);
-        var competitor2 = fromSplitTimes(2, "Second Runner", "DEF", 10 * 3600 + 35 * 60, [99, 184, 230, 111, 158]);
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 163]).result;
+        var result2 = fromSplitTimes(2, "Second Runner", "DEF", 10 * 3600 + 35 * 60, [99, 184, 230, 111, 158]).result;
         
-        var courseClass1 = new CourseClass("Test class 1", 3, [competitor1]);
-        var courseClass2 = new CourseClass("Test class 2", 3, [competitor2]);
+        var courseClass1 = new CourseClass("Test class 1", 3, [result1]);
+        var courseClass2 = new CourseClass("Test class 2", 3, [result2]);
         var course = new Course("Test course", [courseClass1, courseClass2], null, null, ["235", "212", "235", "189"]);
-        var competitor1Time = 10 * 3600 + 30 * 60 + 81 + 197 + 212;
-        var competitor2Time = 10 * 3600 + 35 * 60 + 99;
-        assert.deepEqual(course.getCompetitorsAtControlInTimeRange("235", competitor2Time - 1, competitor1Time + 1),
-            [{name: competitor2.name, time: competitor2Time, className: courseClass2.name},
-             {name: competitor1.name, time: competitor1Time, className: courseClass1.name}]);
+        var result1Time = 10 * 3600 + 30 * 60 + 81 + 197 + 212;
+        var result2Time = 10 * 3600 + 35 * 60 + 99;
+        assert.deepEqual(course.getResultsAtControlInTimeRange("235", result2Time - 1, result1Time + 1),
+            [{name: result2.owner.name, time: result2Time, className: courseClass2.name},
+             {name: result1.owner.name, time: result1Time, className: courseClass1.name}]);
     });
     
     QUnit.test("Returns singleton list of competitors from two different classes when attempting to fetch competitor times at the start for an interval", function (assert) {
-        var competitor1 = getCompetitor1();
-        var courseClass1 = new CourseClass("Test class 1", 3, [competitor1]);
-        var courseClass2 = new CourseClass("Test class 2", 3, [getCompetitor2()]);
+        var result1 = getResult1();
+        var courseClass1 = new CourseClass("Test class 1", 3, [result1]);
+        var courseClass2 = new CourseClass("Test class 2", 3, [getResult2()]);
         var course = new Course("Test course", [courseClass1, courseClass2], null, null, ["235", "212", "189"]);
-        assert.deepEqual(course.getCompetitorsAtControlInTimeRange(Course.START, 10 * 3600 + 30 * 60 - 1, 10 * 3600 + 30 * 60 + 1),
-            [{name: competitor1.name, time: 10 * 3600 + 30 * 60, className: courseClass1.name}]);
+        assert.deepEqual(course.getResultsAtControlInTimeRange(Course.START, 10 * 3600 + 30 * 60 - 1, 10 * 3600 + 30 * 60 + 1),
+            [{name: result1.owner.name, time: 10 * 3600 + 30 * 60, className: courseClass1.name}]);
     });
     
     QUnit.test("Returns singleton list of competitors from two different classes when attempting to fetch competitor times at the start for an interval", function (assert) {
-        var competitor2 = getCompetitor2();
-        var courseClass1 = new CourseClass("Test class 1", 3, [getCompetitor1()]);
-        var courseClass2 = new CourseClass("Test class 2", 3, [competitor2]);
+        var result2 = getResult2();
+        var courseClass1 = new CourseClass("Test class 1", 3, [getResult1()]);
+        var courseClass2 = new CourseClass("Test class 2", 3, [result2]);
         var course = new Course("Test course", [courseClass1, courseClass2], null, null, ["235", "212", "189"]);
         var expectedTime = 10 * 3600 + 65 + 221 + 184 + 100;
-        assert.deepEqual(course.getCompetitorsAtControlInTimeRange(Course.FINISH, expectedTime - 1, expectedTime + 1),
-            [{name: competitor2.name, time: expectedTime, className: courseClass2.name}]);
+        assert.deepEqual(course.getResultsAtControlInTimeRange(Course.FINISH, expectedTime - 1, expectedTime + 1),
+            [{name: result2.owner.name, time: expectedTime, className: courseClass2.name}]);
     });
     
     QUnit.test("Course with no controls does not have a control", function (assert) {
