@@ -153,23 +153,23 @@
     };
     
     /**
-    * Adds the competitor to the course with the given name.
-    * @param {Competitor} competitor - The competitor object read from the row.
+    * Adds the result to the course with the given name.
+    * @param {Result} result - The result object read from the row.
     * @param {String} courseName - The name of the course.
     * @param {Array} row - Array of string parts making up the row of data read.
     */
-    Reader.prototype.addCompetitorToCourse = function (competitor, courseName, row) {
+    Reader.prototype.addResultToCourse = function (result, courseName, row) {
         if (this.classes.has(courseName)) {
             var cls = this.classes.get(courseName);
-            var cumTimes = competitor.result.getAllOriginalCumulativeTimes();
+            var cumTimes = result.getAllOriginalCumulativeTimes();
             // Subtract one from the list of cumulative times for the 
             // cumulative time at the start (always 0), and add one on to
             // the count of controls in the class to cater for the finish.
             if (cumTimes.length - 1 !== (cls.controls.length + 1)) {
-                this.warnings.push("Competitor '" + competitor.name + "' has the wrong number of splits for course '" + courseName + "': " +
+                this.warnings.push("Competitor '" + result.owner.name + "' has the wrong number of splits for course '" + courseName + "': " +
                                    "expected " + (cls.controls.length + 1) + ", actual " + (cumTimes.length - 1));
             } else {
-                cls.competitors.push(competitor);
+                cls.results.push(result);
             }
         } else {
             // New course/class.
@@ -183,7 +183,7 @@
             var courseLength = (this.format.length === null) ? null : parseCourseLength(row[this.format.length]);
             var courseClimb = (this.format.climb === null) ? null : parseCourseClimb(row[this.format.climb]);
         
-            this.classes.set(courseName, {length: courseLength, climb: courseClimb, controls: controls, competitors: [competitor]});
+            this.classes.set(courseName, {length: courseLength, climb: courseClimb, controls: controls, results: [result]});
         }
     };
     
@@ -232,7 +232,7 @@
             return;
         }
         
-        var order = (this.classes.has(courseName)) ? this.classes.get(courseName).competitors.length + 1 : 1;
+        var order = (this.classes.has(courseName)) ? this.classes.get(courseName).results.length + 1 : 1;
         
         var result = fromOriginalCumTimes(order, startTime, cumTimes);
         if (this.format.placing !== null && result.completed()) {
@@ -249,7 +249,7 @@
             result.setNonStarter();
         }
         
-        this.addCompetitorToCourse(new Competitor(competitorName, club, result), courseName, row);
+        this.addResultToCourse(new Competitor(competitorName, club, result).result, courseName, row);
     };
     
     /**
@@ -268,7 +268,7 @@
         this.classes.entries().forEach(function (keyValuePair) {
             var className = keyValuePair.key;
             var cls = keyValuePair.value;
-            var courseClass = new CourseClass(className, cls.controls.length, cls.competitors.map(function (comp) { return comp.result; }));
+            var courseClass = new CourseClass(className, cls.controls.length, cls.results);
             courseClasses.push(courseClass);
             
             var controlsList = cls.controls.join(",");

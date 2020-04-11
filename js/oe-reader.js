@@ -110,7 +110,7 @@
     function Reader(data) {
         this.data = normaliseLineEndings(data);
         
-        // Map that associates classes to all of the competitors running on
+        // Map that associates classes to all of the results running on
         // that class.
         this.classes = d3.map();
         
@@ -126,7 +126,7 @@
         // The indexes of the columns that we read data from.
         this.columnIndexes = null;
         
-        // Warnings about competitors that cannot be read in.
+        // Warnings about results that cannot be read in.
         this.warnings = [];
     }
 
@@ -292,7 +292,7 @@
     Reader.prototype.createClassIfNecessary = function (row, numControls) {
         var className = this.getClassName(row);
         if (!this.classes.has(className)) {
-            this.classes.set(className, { numControls: numControls, competitors: [] });
+            this.classes.set(className, { numControls: numControls, results: [] });
         }
     };
     
@@ -374,7 +374,7 @@
             name = name.substring(0, name.length - placing.length).trim();
         }
 
-        var order = this.classes.get(className).competitors.length + 1;
+        var order = this.classes.get(className).results.length + 1;
         var result = fromOriginalCumTimes(order, startTime, cumTimes);
         if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && result.completed()) {
             // Competitor either marked as non-competitive, or has completed
@@ -417,7 +417,7 @@
             }
         }
 
-        this.classes.get(className).competitors.push(competitor);
+        this.classes.get(className).results.push(competitor.result);
     };
     
     /**
@@ -495,7 +495,7 @@
         classNames.sort();
         return classNames.map(function (className) {
             var courseClass = this.classes.get(className);
-            return new CourseClass(className, courseClass.numControls, courseClass.competitors.map(function (comp) { return comp.result; }));
+            return new CourseClass(className, courseClass.numControls, courseClass.results);
         }, this);
     };
     

@@ -635,7 +635,7 @@
         }
 
         return {
-            competitor: competitor,
+            result: competitor.result,
             controls: controls
         };
     }
@@ -650,7 +650,7 @@
     */
     function parseClassData(element, reader, warnings) {
         var jqElement = $(element);
-        var cls = {name: null, competitors: [], controls: [], course: null};
+        var cls = {name: null, results: [], controls: [], course: null};
         
         cls.course = reader.readCourseFromClass(jqElement, warnings);
         
@@ -669,11 +669,11 @@
         }
         
         for (var index = 0; index < personResults.length; index += 1) {
-            var competitorAndControls = parseCompetitor(personResults[index], index + 1, reader, warnings);
-            if (competitorAndControls !== null) {
-                var competitor = competitorAndControls.competitor;
-                var controls = competitorAndControls.controls;
-                if (cls.competitors.length === 0 && !(competitor.isNonStarter && controls.length === 0)) {
+            var resultAndControls = parseCompetitor(personResults[index], index + 1, reader, warnings);
+            if (resultAndControls !== null) {
+                var result = resultAndControls.result;
+                var controls = resultAndControls.controls;
+                if (cls.results.length === 0 && !(result.isNonStarter && controls.length === 0)) {
                     // First competitor (not including non-starters with no controls).
                     // Record the list of controls.
                     cls.controls = controls;
@@ -687,16 +687,16 @@
                 }
 
                 // Subtract 2 for the start and finish cumulative times.
-                var actualControlCount = competitor.result.getAllOriginalCumulativeTimes().length - 2;
+                var actualControlCount = result.getAllOriginalCumulativeTimes().length - 2;
                 var warning = null;
-                if (competitor.result.isNonStarter && actualControlCount === 0) {
+                if (result.isNonStarter && actualControlCount === 0) {
                     // Don't generate warnings for non-starting competitors with no controls.
                 } else if (actualControlCount !== cls.course.numberOfControls) {
-                    warning = "Competitor '" + competitor.name + "' in class '" + className + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;
+                    warning = "Competitor '" + result.owner.name + "' in class '" + className + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;
                 } else {
                     for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
                         if (cls.controls[controlIndex] !== controls[controlIndex]) {
-                            warning = "Competitor '" + competitor.name + "' has an unexpected control code at control " + (controlIndex + 1) +
+                            warning = "Competitor '" + result.owner.name + "' has an unexpected control code at control " + (controlIndex + 1) +
                                 ": expected '" + cls.controls[controlIndex] + "', actual '" + controls[controlIndex] + "'";
                             break;
                         }
@@ -704,7 +704,7 @@
                 }
                 
                 if (warning === null) {
-                    cls.competitors.push(competitor);
+                    cls.results.push(result);
                 } else {
                     warnings.push(warning);
                 }
@@ -786,7 +786,7 @@
                 return;
             }
             
-            var courseClass = new CourseClass(parsedClass.name, parsedClass.controls.length, parsedClass.competitors.map(function (comp) { return comp.result; }));
+            var courseClass = new CourseClass(parsedClass.name, parsedClass.controls.length, parsedClass.results);
             classes.push(courseClass);
             
             // Add to each temporary course object a list of all classes.

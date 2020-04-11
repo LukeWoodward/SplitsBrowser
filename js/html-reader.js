@@ -275,12 +275,12 @@
     };
 
     /**
-    * Creates a Competitor object from this CompetitorParseRecord object.
-    * @param {Number} order - The number of this competitor within their class
+    * Creates a Result object from this CompetitorParseRecord object.
+    * @param {Number} order - The number of this result within their class
     *     (1=first, 2=second, ...).
-    * @return {Competitor} Converted competitor object.
+    * @return {Result} Converted result object.
     */
-    CompetitorParseRecord.prototype.toCompetitor = function (order) {
+    CompetitorParseRecord.prototype.toResult = function (order) {
         // Prepend a zero cumulative time.
         var cumTimes = [0].concat(this.cumTimes);
         
@@ -294,7 +294,7 @@
             result.setNonStarter();
         }
         
-        return new Competitor(this.name, this.club, result);
+        return new Competitor(this.name, this.club, result).result;
     };
 
     /*
@@ -1207,7 +1207,7 @@
                 var numControls = course.controls.length - 1;
                 var oldCompetitors = classToCompetitorsMap.get(className);
                 var newResults = oldCompetitors.map(function (competitor, index) {
-                    return competitor.toCompetitor(index + 1).result;
+                    return competitor.toResult(index + 1);
                 });
                 
                 var courseClass = new CourseClass(className, numControls, newResults);
