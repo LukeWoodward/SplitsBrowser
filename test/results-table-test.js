@@ -50,8 +50,8 @@
     });
     
     QUnit.test("Can create a results table with two results finishing", function (assert) {
-        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
-        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]).result;
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
+        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [result1, result2]);
         calculateRanks(courseClass);
         
@@ -88,8 +88,8 @@
     });
     
     QUnit.test("Can create a results table with two results finishing and with control codes", function (assert) {
-        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
-        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]).result;
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
+        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [result1, result2]);
         calculateRanks(courseClass);
         
@@ -108,8 +108,8 @@
     });
     
     QUnit.test("Can create a results table with one result not finishing sorted to the bottom", function (assert) {
-        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]).result;
-        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]).result;
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]);
+        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [result1, result2]);
         calculateRanks(courseClass);
 
@@ -127,7 +127,7 @@
     });
     
     QUnit.test("Can create a results table with one mispunching result", function (assert) {
-        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]).result;
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]);
         var courseClass = new CourseClass("Test", 3, [result]);
         calculateRanks(courseClass);
 
@@ -145,7 +145,7 @@
     });
     
     QUnit.test("Can create a results table with one non-starting result", function (assert) {
-        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [null, null, null, null]).result;
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [null, null, null, null]);
         result.setNonStarter();
         var courseClass = new CourseClass("Test", 3, [result]);
         calculateRanks(courseClass);
@@ -164,7 +164,7 @@
     });
 
     QUnit.test("Can create a results table with one non-finishing result", function (assert) {
-        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, null]).result;
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, null]);
         result.setNonFinisher();
         var courseClass = new CourseClass("Test", 3, [result]);
         calculateRanks(courseClass);
@@ -183,7 +183,7 @@
     });
 
     QUnit.test("Can create a results table with one disqualified result", function (assert) {
-        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         result.disqualify();
         var courseClass = new CourseClass("Test", 3, [result]);
         calculateRanks(courseClass);
@@ -202,7 +202,7 @@
     });
 
     QUnit.test("Can create a results table with one over-max-time result", function (assert) {
-        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         result.setOverMaxTime();
         var courseClass = new CourseClass("Test", 3, [result]);
         calculateRanks(courseClass);
@@ -221,9 +221,9 @@
     });
 
     QUnit.test("Can create a results table with one non-competitive result and the other result getting rank 1", function (assert) {
-        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         result1.setNonCompetitive();
-        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]).result;
+        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [result1, result2]);
         calculateRanks(courseClass);
 
@@ -238,9 +238,9 @@
     });
 
     QUnit.test("Can create a results table with one disqualified result and the other result getting rank 1", function (assert) {
-        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         result1.disqualify();
-        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]).result;
+        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [result1, result2]);
         calculateRanks(courseClass);
 
@@ -255,8 +255,8 @@
     });
     
     QUnit.test("Can create a results table with course with no length and climb", function (assert) {
-        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]).result;
-        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]).result;
+        var result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
+        var result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var courseClass = new CourseClass("Test", 3, [result1, result2]);
         calculateRanks(courseClass);
         
@@ -270,9 +270,9 @@
     });
     
     QUnit.test("Can create a results table with one result with dubious times appropriately classed", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 65, 65 + 0, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 65, 65 + 0, 65 + 221 + 184, 65 + 221 + 184 + 100], new Competitor("First Runner", "DEF"));
         result.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
-        var courseClass = new CourseClass("Test", 3, [new Competitor("First Runner", "DEF", result).result]);
+        var courseClass = new CourseClass("Test", 3, [result]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         calculateRanks(courseClass);
         
@@ -299,9 +299,9 @@
     });
     
     QUnit.test("Can create a results table with one result with missing times appropriately classed", function (assert) {
-        var result = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 65, null, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        var result = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 65, null, 65 + 221 + 184, 65 + 221 + 184 + 100], new Competitor("First Runner", "DEF"));
         result.setOKDespiteMissingTimes();
-        var courseClass = new CourseClass("Test", 3, [new Competitor("First Runner", "DEF", result).result]);
+        var courseClass = new CourseClass("Test", 3, [result]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         calculateRanks(courseClass);
         
@@ -328,7 +328,7 @@
     });
     
     QUnit.test("Can create a results table with one result with fractional times appropriately formatted", function (assert) {
-        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.5]).result;
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.5]);
         var courseClass = new CourseClass("Test", 3, [result]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         calculateRanks(courseClass);
@@ -355,7 +355,7 @@
     });
     
     QUnit.test("Can create a results table with one result with fractional split times and a finish time with a whole number of seconds appropriately formatted", function (assert) {
-        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.0]).result;
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.0]);
         var courseClass = new CourseClass("Test", 3, [result]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
         calculateRanks(courseClass);

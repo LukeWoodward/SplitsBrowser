@@ -234,7 +234,7 @@
         
         var order = (this.classes.has(courseName)) ? this.classes.get(courseName).results.length + 1 : 1;
         
-        var result = fromOriginalCumTimes(order, startTime, cumTimes);
+        var result = fromOriginalCumTimes(order, startTime, cumTimes, new Competitor(competitorName, club));
         if (this.format.placing !== null && result.completed()) {
             var placing = row[this.format.placing];
             if (!placing.match(/^\d*$/)) {
@@ -249,7 +249,7 @@
             result.setNonStarter();
         }
         
-        this.addResultToCourse(new Competitor(competitorName, club, result).result, courseName, row);
+        this.addResultToCourse(result, courseName, row);
     };
     
     /**

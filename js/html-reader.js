@@ -285,7 +285,7 @@
         var cumTimes = [0].concat(this.cumTimes);
         
         // The null is for the start time.
-        var result =  fromOriginalCumTimes(order, null, cumTimes);
+        var result =  fromOriginalCumTimes(order, null, cumTimes, new Competitor(this.name, this.club));
         if (result.completed() && !this.competitive) {
             result.setNonCompetitive();
         }
@@ -294,7 +294,7 @@
             result.setNonStarter();
         }
         
-        return new Competitor(this.name, this.club, result).result;
+        return result;
     };
 
     /*

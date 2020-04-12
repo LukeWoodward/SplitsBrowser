@@ -275,9 +275,9 @@
     */
     function getResultDetailsForCrossingRunners() {
         return [
-            {result: fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301]), visible: true},
-            {result: fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561]), visible: true},
-            {result: fromCumTimes(3, 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381]), visible: true}
+            {result: fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301], {}), visible: true},
+            {result: fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {}), visible: true},
+            {result: fromCumTimes(3, 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381], {}), visible: true}
         ];
     }
 
@@ -323,7 +323,7 @@
 
     QUnit.test("Cannot migrate from an old list of results that isn't an array", function (assert) {
         var selection = new ResultSelection(1);
-        var newResults = [fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301])];
+        var newResults = [fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301], {})];
         SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate("this is not an array", newResults);
         });
@@ -331,8 +331,8 @@
 
     QUnit.test("Cannot migrate from an old list of results that doesn't match the previous count", function (assert) {
         var selection = new ResultSelection(2);
-        var oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561])];
-        var newResults = [fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301])];
+        var oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {})];
+        var newResults = [fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301], {})];
         SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate(oldResults, newResults);
         });
@@ -340,7 +340,7 @@
 
     QUnit.test("Cannot migrate to a new list of results that isn't an array", function (assert) {
         var selection = new ResultSelection(1);
-        var oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561])];
+        var oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {})];
         SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate(oldResults, "this is not an array");
         });
@@ -349,7 +349,7 @@
     QUnit.test("Cannot migrate to an empty new list of results if a result is selected", function (assert) {
         var selection = new ResultSelection(1);
         selection.toggle(0);
-        var oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561])];
+        var oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {})];
         SplitsBrowserTest.assertInvalidData(assert, function () {
             selection.migrate(oldResults, []);
         });
@@ -358,17 +358,17 @@
     QUnit.test("Can migrate to an empty new list of results if no results are selected", function (assert) {
         var selection = new ResultSelection(1);
         selection.selectNone();
-        var oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561])];
+        var oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {})];
         selection.migrate(oldResults, []);
         assert.deepEqual(selection.getSelectedIndexes(), []);
     });
 
     QUnit.test("Can migrate to new list of results", function (assert) {
         reset();
-        var result1 = fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301]);
-        var result2 = fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561]);
-        var result3 = fromCumTimes(3, 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381]);
-        var result4 = fromCumTimes(4, 10 * 3600 + 2 * 60, [0, 78, 188, 252, 406]);
+        var result1 = fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301], {});
+        var result2 = fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {});
+        var result3 = fromCumTimes(3, 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381], {});
+        var result4 = fromCumTimes(4, 10 * 3600 + 2 * 60, [0, 78, 188, 252, 406], {});
         var oldResults = [result2, result1, result3];
         var newResults = [result1, result2, result4];
         var selection = new ResultSelection(oldResults.length);

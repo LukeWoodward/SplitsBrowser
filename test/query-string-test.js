@@ -52,7 +52,7 @@
             var courseClasses = [];
             course.classes.forEach(function (courseClass) {
                 var classResults = (courseClass.competitors || []).map(function (result, index) {
-                    return fromSplitTimes(index + 1, result.name, "club", null, (result.invalid) ? INVALID_SPLIT_TIMES : VALID_SPLIT_TIMES).result;
+                    return fromSplitTimes(index + 1, result.name, "club", null, (result.invalid) ? INVALID_SPLIT_TIMES : VALID_SPLIT_TIMES);
                 });
                 
                 var createdClass = new CourseClass(courseClass.name, 3, classResults);

@@ -606,7 +606,17 @@
         cumTimes.unshift(0); // Prepend a zero time for the start.
         cumTimes.push(totalTime);
 
-        var result = fromOriginalCumTimes(number, startTime, cumTimes);
+        var competitor = new Competitor(name, club, result);
+
+        if (yearOfBirth !== null) {
+            competitor.setYearOfBirth(yearOfBirth);
+        }
+
+        if (gender === "M" || gender === "F") {
+            competitor.setGender(gender);
+        }
+
+        var result = fromOriginalCumTimes(number, startTime, cumTimes, competitor);
 
         var status = reader.getStatus(resultElement);
         
@@ -624,18 +634,8 @@
             result.setOverMaxTime();
         }
 
-        var competitor = new Competitor(name, club, result);
-
-        if (yearOfBirth !== null) {
-            competitor.setYearOfBirth(yearOfBirth);
-        }
-
-        if (gender === "M" || gender === "F") {
-            competitor.setGender(gender);
-        }
-
         return {
-            result: competitor.result,
+            result: result,
             controls: controls
         };
     }

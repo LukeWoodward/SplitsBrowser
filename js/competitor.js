@@ -20,37 +20,18 @@
  */
 (function () {
     "use strict";
-    
-    var compareResults = SplitsBrowser.Model.compareResults;
-    
-    /**
-    * Comparison function to sort two competitors, by their results.
-    * @param {Competitor} a The first competitor to compare.
-    * @param {Competitor} b The second competitor to compare.
-    * @return The comparison result.
-    */ 
-    SplitsBrowser.Model.compareCompetitors = function (a, b) {
-        return compareResults(a.result, b.result);
-    };
 
     /**
     * Object that represents the data for a single competitor.
     *
     * @constructor
-    * @param {Number} order - The position of the competitor within the list of
-    *     results.
     * @param {String} name - The name of the competitor.
     * @param {String} club - The name of the competitor's club.
-    * @param {Result} result - The competitor's result data.
     */
-    function Competitor(name, club, result) {
-
+    function Competitor(name, club) {
         this.name = name;
         this.club = club;
         
-        this.result = result;
-        
-        this.result.owner = this;
         this.yearOfBirth = null;
         this.gender = null; // "M" or "F" for male or female.
     }

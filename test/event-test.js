@@ -23,7 +23,6 @@
     
     var isNotNull = SplitsBrowser.isNotNull;
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
-    var Competitor = SplitsBrowser.Model.Competitor;
     var Event = SplitsBrowser.Model.Event;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
@@ -33,15 +32,15 @@
     QUnit.module("Event");
     
     function getResult1() {
-        return fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]).result;
+        return fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
     function getResult2() {
-        return fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [65, 221, 184, 100]).result;
+        return fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
     function getResult2WithExtraSplit() {
-        return fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [65, 221, 184, 157, 100]).result;
+        return fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [65, 221, 184, 157, 100]);
     }
     
     QUnit.test("Returns empty list of fastest splits to a leg if the event has no competitors", function (assert) {
@@ -169,7 +168,7 @@
     });
     
     QUnit.test("Event that does need repairing reports that it does", function (assert) {
-        var result = new Competitor("First Runner", "DEF", fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 0, 81 + 197 + 212, 81 + 197 + 212 + 106])).result;
+        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 0, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
         var courseClass = new CourseClass("Test class", 3, [result]);
         var course = new Course("Test course", [courseClass], null, null, ["235", "212", "189"]);
     

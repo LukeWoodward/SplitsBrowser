@@ -42,107 +42,106 @@
     var Course = SplitsBrowser.Model.Course;
     var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
-    var Competitor = SplitsBrowser.Model.Competitor;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
 
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
     
     function getResult1() {
-        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, 209, 100]).result;
+        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, 209, 100]);
     }
     
     function getFasterResult1() {
-        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]).result;
+        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
     function getResult1WithNullSplitForControl2() {
-        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, null, 184, 100]).result;
+        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, null, 184, 100]);
     }
     
     function getResult1WithDubiousSplitForControl1() {
-        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 0, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 0, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {name: "First Runner"});
         result.setRepairedCumulativeTimes([0, NaN, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
-        return new Competitor("First Runner", "ABC", result).result;
+        return result;
     }
     
     function getResult1WithDubiousSplitForControl2() {
-        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100], {name: "First Runner"});
         result.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
-        return new Competitor("First Runner", "ABC", result).result;
+        return result;
     }
     
     function getResult1WithDubiousFinishTime() {
-        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184]);
+        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184], {});
         result.setRepairedCumulativeTimes([0, 65, 65 + 221, 65 + 221 + 184, NaN]);
-        return new Competitor("First Runner", "ABC", result).result;
+        return result;
     }
     
     function getResult1WithDubiousTimeToLastControlAndFinish() {
-        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221, 65 + 221]);
+        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221, 65 + 221], {});
         result.setRepairedCumulativeTimes([0, 65, 65 + 221, NaN, NaN]);
-        return new Competitor("First Runner", "ABC", result).result;
+        return result;
     }
     
     function getResult1WithNullSplitForControl3() {
-        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, null, 100]).result;
+        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, null, 100]);
     }
     
     function getResult1WithNullFinishSplit() {
-        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, 184, null]).result;
+        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, 184, null]);
     }
     
     function getResult1WithSameControl2SplitAsThatOfResult2() {
-        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 197, 209, 100]).result;
+        return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 197, 209, 100]);
     }
     
     function getNonStartingResult1() {
-        var competitor = fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [null, null, null, null]);
-        competitor.result.setNonStarter();
-        return competitor.result;
+        var result = fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [null, null, null, null]);
+        result.setNonStarter();
+        return result;
     }
     
     function getResult2() {
-        return fromSplitTimes(2, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]).result;
+        return fromSplitTimes(2, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
     function getResult2WithNullSplitForControl2() {
-        return fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, null, 212, 106]).result;
+        return fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, null, 212, 106]);
     }
     
     function getResult2FromCumulativeTimesWithNullSplitForControl2() {
-        return new Competitor("Second Runner", "DEF", fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 81 + 197 + 212 + 106])).result;
+        return fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
     }
     
     function getResult2WithNullFinishSplit() {
-        return fromSplitTimes(2, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, null]).result;
+        return fromSplitTimes(2, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, null]);
     }
     
     function getResult2WithFinishCumTimeNotTheLargest() {
-        return new Competitor("Second Runner", "DEF", fromCumTimes(2, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 - 73])).result;
+        return fromCumTimes(2, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 - 73], {name: "Second Runner"});
     }
     
     function getResult2WithFirstControlLargerThanAllOthers() {
-        return new Competitor("Second Runner", "DEF", fromCumTimes(2, 10 * 3600 + 30 * 60, [0, 4103, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106])).result;
+        return fromCumTimes(2, 10 * 3600 + 30 * 60, [0, 4103, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {name: "Second Runner"});
     }
     
     function getResult3() {
-        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, 199, 117]).result;    
+        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, 199, 117]);    
     }
     
     function getResult3WithSameTotalTimeAsResult1() {
-        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, 199, 109]).result;
+        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, 199, 109]);
     }
     
     function getResult3WithNullSplitForControl2() {
-        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, null, 199, 117]).result;
+        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, null, 199, 117]);
     }
     
     function getResult3WithNullSplitForControl3() {
-        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, null, 117]).result;
+        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, null, 117]);
     }
     
     function getResult3WithNullFinishSplit() {
-        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, 199, null]).result;
+        return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, 199, null]);
     }
     
     QUnit.test("Can create a CourseClassSet from an empty array of course-classes", function (assert) {
@@ -209,7 +208,7 @@
     });
     
     QUnit.test("Cannot create a CourseClassSet from two course-classes with different numbers of controls", function (assert) {
-        var result2 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 108]).result;
+        var result2 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 108]);
         var courseClass1 = new CourseClass("Test", 3, [getResult1()]);
         var courseClass2 = new CourseClass("Test", 4, [result2]);
         SplitsBrowserTest.assertInvalidData(assert, function () {
@@ -293,9 +292,9 @@
     });
 
     QUnit.test("Fastest cumulative times on course-class set when both results have dubious time at one control has backpopulated value for missing control", function (assert) {
-        var result1 = new Competitor("First Runner", "ABC", fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65, 65 + 221 + 209, 65 + 221 + 209 + 100])).result;
+        var result1 = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65, 65 + 221 + 209, 65 + 221 + 209 + 100], {});
         result1.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 209, 65 + 221 + 209 + 100]);
-        var result2 = new Competitor("Second Runner", "DEF", fromOriginalCumTimes(2, 10 * 3600 + 30, [0, 81, 81, 81 + 197 + 212, 81 + 197 + 212 + 106])).result;
+        var result2 = fromOriginalCumTimes(2, 10 * 3600 + 30, [0, 81, 81, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
         result2.setRepairedCumulativeTimes([0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
         
@@ -304,7 +303,7 @@
     });
 
     QUnit.test("Fastest cumulative times on course-class set when only result has missing time at last control has backpopulated values from that result", function (assert) {
-        var result = new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, null, 65 + 221 + 209 + 100])).result;
+        var result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, null, 65 + 221 + 209 + 100], {});
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result])]);
         assert.deepEqual(courseClassSet.getFastestCumTimes(), [0, 65, 65 + 221, 65 + 221 + (209 + 100) / 2, 65 + 221 + 209 + 100],
                     "Class with penultimate control mispunched by only result should have correct dummy value for missing control");
@@ -492,9 +491,9 @@
     });
     
     QUnit.test("Can compute ranks when there are three results specified by cumulative times with one missing split times", function (assert) {
-        var result1 = new Competitor("Second Runner", "DEF", fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106])).result;
-        var result2 = new Competitor("First Runner", "ABC", fromCumTimes(2, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100])).result;
-        var result3 = new Competitor("Third Runner", "GHI", fromCumTimes(2, 11 * 3600, [0, 78, null,     78 + 209 + 199, 78 + 209 + 199 + 117])).result;
+        var result1 = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+        var result2 = fromCumTimes(2, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100], {});
+        var result3 = fromCumTimes(2, 11 * 3600, [0, 78, null,     78 + 209 + 199, 78 + 209 + 199 + 117], {});
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
         
         assertSplitAndCumulativeRanks(assert, result1, [3, 1, 2, 2], [3, 1, 1, 2]);
@@ -507,9 +506,9 @@
     });
     
     QUnit.test("Can compute ranks when there are three results specified by cumulative times with one having a dubious split time", function (assert) {
-        var result1 = new Competitor("Second Runner", "DEF", fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106])).result;
-        var result2 = new Competitor("First Runner", "ABC", fromCumTimes(2, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100])).result;
-        var result3 = new Competitor("Third Runner", "GHI", fromOriginalCumTimes(2, 11 * 3600, [0, 78, 78 - 30, 78 + 209 + 199, 78 + 209 + 199 + 117])).result;
+        var result1 = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+        var result2 = fromCumTimes(2, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100], {});
+        var result3 = fromOriginalCumTimes(2, 11 * 3600, [0, 78, 78 - 30, 78 + 209 + 199, 78 + 209 + 199 + 117], {});
         result3.setRepairedCumulativeTimes([0, 78, NaN, 78 + 209 + 199, 78 + 209 + 199 + 117]);
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
         

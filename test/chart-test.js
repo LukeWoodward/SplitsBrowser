@@ -121,8 +121,8 @@
     */
     function getTestCourseClassSetAndEvent(results) {
         if (typeof results === "undefined") {
-            var result1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]).result;
-            var result2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]).result;
+            var result1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+            var result2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
             results = [result1, result2];
         }
         
@@ -179,12 +179,12 @@
     });
     
     QUnit.test("Can create a chart with dubious info", function (assert) {
-        var competitors = [
-            new Competitor("Second Runner", "DEF", fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106])),
-            new Competitor("First Runner", "ABC", fromOriginalCumTimes(2, 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100]))
+        var results = [
+            fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], new Competitor("Second Runner", "DEF")),
+            fromOriginalCumTimes(2, 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100], new Competitor("First Runner", "ABC"))
         ];
         
-        competitors[1].result.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
+        results[1].setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         
         runChartCreationTest(assert, DUMMY_CHART_TYPE_NO_SKIP);
     });

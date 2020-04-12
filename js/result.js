@@ -109,8 +109,9 @@
     *      with nulls for missed controls.
     * @param {Array} originalCumTimes - Array of cumulative times, as
     *     numbers, with nulls for missed controls.
+    & @param {Object} owner - The competitor or team that recorded this result.
     */
-    function Result(order, startTime, originalSplitTimes, originalCumTimes) {
+    function Result(order, startTime, originalSplitTimes, originalCumTimes, owner) {
 
         if (typeof order !== NUMBER_TYPE) {
             throwInvalidData("Result order must be a number, got " + typeof order + " '" + order + "' instead");
@@ -122,6 +123,8 @@
 
         this.order = order;
         this.startTime = startTime;
+        this.owner = owner;
+        
         this.isOKDespiteMissingTimes = false;
         this.isNonCompetitive = false;
         this.isNonStarter = false;
@@ -137,8 +140,6 @@
         this.cumRanks = null;
         this.timeLosses = null;
         this.className = null;
-        
-        this.owner = null;
 
         this.totalTime = (originalCumTimes === null || originalCumTimes.indexOf(null) > -1) ? null : originalCumTimes[originalCumTimes.length - 1];
     }
@@ -206,14 +207,16 @@
     * function should therefore be used to create a result if the data may later
     * need to be repaired.
     *
+    * @param {Number} order - The order of the result.
     * @param {Number} startTime - The start time, as seconds past midnight.
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with
     *     nulls for missed controls.
+    & @param {Object} owner - The competitor or team that recorded this result.
     * @return {Result} Created result.
     */
-    Result.fromOriginalCumTimes = function (order, startTime, cumTimes) {
+    Result.fromOriginalCumTimes = function (order, startTime, cumTimes, owner) {
         var splitTimes = splitTimesFromCumTimes(cumTimes);
-        return new Result(order, startTime, splitTimes, cumTimes);
+        return new Result(order, startTime, splitTimes, cumTimes, owner);
     };
     
     /**
@@ -227,10 +230,11 @@
     * @param {Number} startTime - The start time, as seconds past midnight.
     * @param {Array} cumTimes - Array of cumulative split times, as numbers, with
     *     nulls for missed controls.
+    & @param {Object} owner - The competitor or team that recorded this result.
     * @return {Result} Created result.
     */
-    Result.fromCumTimes = function (order, startTime, cumTimes) {
-        var result = Result.fromOriginalCumTimes(order, startTime, cumTimes);
+    Result.fromCumTimes = function (order, startTime, cumTimes, owner) {
+        var result = Result.fromOriginalCumTimes(order, startTime, cumTimes, owner);
         result.splitTimes = result.originalSplitTimes;
         result.cumTimes = result.originalCumTimes;
         return result;
@@ -745,9 +749,10 @@
     * of the given results.
     * @param {Number} order - The order of the team among the others.
     * @param {Array} results The individual team member results.
+    * @param {Object} owner - The team that owns this result.
     * @return {Result} A result object for the entire team.
     */ 
-    Result.createTeamResult = function (order, results) {
+    Result.createTeamResult = function (order, results, owner) {
         if (results.length < 2) {
             throwInvalidData("Team results can only be created from at least two other results");
         }
@@ -758,7 +763,7 @@
         var originalCumTimes = calculateCumulativeTimesFromResults(
             results, offsets, function (result) { return result.originalCumTimes; });
             
-        var teamResult = Result.fromOriginalCumTimes(order, results[0].startTime, originalCumTimes);
+        var teamResult = Result.fromOriginalCumTimes(order, results[0].startTime, originalCumTimes, owner);
         if (results.every(function (result) { return result.cumTimes !== null; })) {
             teamResult.cumTimes = calculateCumulativeTimesFromResults(
                 results, offsets, function (r) { return r.cumTimes; });

@@ -22,7 +22,6 @@
     "use strict";
 
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
-    var Competitor = SplitsBrowser.Model.Competitor;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
@@ -30,25 +29,25 @@
     QUnit.module("Course-class");
     
     function getResult1() {
-        return fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]).result;
+        return fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
     }
     
     function getResult1WithNullSplitForControl3() {
-        return fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]).result;
+        return fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, null, 106]);
     }
     
     function getResult1WithNaNSplitForControl3() {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 - 30, 81 + 197 + 212 + 106]);
+        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 - 30, 81 + 197 + 212 + 106], {});
         result.setRepairedCumulativeTimes([0, 81, 81 + 197, NaN, 81 + 197 + 212 + 106]);
-        return new Competitor("Second Runner", "DEF", result).result;
+        return result;
     }
     
     function getResult2() {
-        return fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]).result;
+        return fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
     
     function getResult2WithNullSplitForControl3() {
-        return fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, null, 100]).result;
+        return fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, null, 100]);
     }
     
     function getTestClass() {

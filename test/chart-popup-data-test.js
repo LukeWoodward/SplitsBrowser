@@ -38,7 +38,7 @@
     function getTestCourseClassSet() {
         var results = d3.range(0, 11).map(function (num) {
             var timeOffset = (num * 7) % 11;
-            return fromSplitTimes(1, "Name" + num, "Club" + num, 10 * 3600 + 127 * num, [65 + 10 * timeOffset, 221 + 20 * timeOffset, 209 + 15 * timeOffset, 100 + 5 * timeOffset]).result;
+            return fromSplitTimes(1, "Name" + num, "Club" + num, 10 * 3600 + 127 * num, [65 + 10 * timeOffset, 221 + 20 * timeOffset, 209 + 15 * timeOffset, 100 + 5 * timeOffset]);
         });
     
         return new CourseClassSet([new CourseClass("Test class", 3, results)]);
@@ -70,7 +70,7 @@
         var course1 = new Course("Test course", courseClassSet1.classes, null, null, ["235", "189", "212"]);
         courseClassSet1.classes.forEach(function (courseClass) { courseClass.setCourse(course1); });
 
-        var courseClassSet2 = new CourseClassSet([new CourseClass("Test class 2", 3, [fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [75, 242, 200, 157]).result])]);
+        var courseClassSet2 = new CourseClassSet([new CourseClass("Test class 2", 3, [fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [75, 242, 200, 157])])]);
         var course2 = new Course("Test course 2", courseClassSet2.classes, null, null, ["235", "189", "212"]);
         courseClassSet2.classes[0].setCourse(course2);
         

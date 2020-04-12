@@ -22,24 +22,14 @@
     "use strict";
 
     var Competitor = SplitsBrowser.Model.Competitor;
-    var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
-    var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
 
     QUnit.module("Competitor");
 
     QUnit.test("Can create a competitor with gender and year of birth and read them back", function (assert) {
-        var competitor = new Competitor("First Runner", "ABC", fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]));
+        var competitor = new Competitor("First Runner", "ABC");
         competitor.setYearOfBirth(1984);
         competitor.setGender("M");
         assert.strictEqual(competitor.yearOfBirth, 1984);
         assert.strictEqual(competitor.gender, "M");
     });    
-
-    QUnit.test("Competitor with lower total time comes before result with higher total time", function (assert) {
-        var result1 = fromCumTimes(1, 10 * 3600, [0, 154]);
-        var result2 = fromCumTimes(2, 12 * 3600, [0, 188]);
-        var competitor1 = new Competitor("First Runner", "ABC", result1);
-        var competitor2 = new Competitor("Second Runner", "DEF", result2);
-        assert.ok(compareCompetitors(competitor1, competitor2) < 0, "Comparison result was not as affected");
-    });  
 })();

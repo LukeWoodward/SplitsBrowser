@@ -83,11 +83,11 @@
                 }
             });
             
-            var result = fromCumTimes(index + 1, startTime, cumTimes);
+            var result = fromCumTimes(index + 1, startTime, cumTimes, new Competitor(name, club));
             if (lastCumTimeRecorded === 0) {
                 result.setNonStarter();
             }
-            return new Competitor(name, club, result).result;
+            return result;
         } else {
             var difference = originalPartCount - (controlCount + 5);
             var error = (difference < 0) ? (-difference) + " too few" : difference + " too many";

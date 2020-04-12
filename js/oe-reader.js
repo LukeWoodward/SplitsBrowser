@@ -375,7 +375,24 @@
         }
 
         var order = this.classes.get(className).results.length + 1;
-        var result = fromOriginalCumTimes(order, startTime, cumTimes);
+        var competitor = new Competitor(name, club);
+        
+        var yearOfBirthStr = row[this.columnIndexes.yearOfBirth];
+        if (yearOfBirthStr !== "") {
+            var yearOfBirth = parseInt(yearOfBirthStr, 10);
+            if (!isNaNStrict(yearOfBirth)) {
+                competitor.setYearOfBirth(yearOfBirth);
+            }
+        }
+        
+        if (this.columnIndexes.hasOwnProperty("gender")) {
+            var gender = row[this.columnIndexes.gender];
+            if (gender === "M" || gender === "F") {
+                competitor.setGender(gender);
+            }
+        }
+        
+        var result = fromOriginalCumTimes(order, startTime, cumTimes, competitor);
         if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && result.completed()) {
             // Competitor either marked as non-competitive, or has completed
             // the course but has a non-numeric placing.  In the latter case,
@@ -399,25 +416,8 @@
         } else if (!result.hasAnyTimes()) {
             result.setNonStarter();
         }
-        
-        var competitor = new Competitor(name, club, result);
-        
-        var yearOfBirthStr = row[this.columnIndexes.yearOfBirth];
-        if (yearOfBirthStr !== "") {
-            var yearOfBirth = parseInt(yearOfBirthStr, 10);
-            if (!isNaNStrict(yearOfBirth)) {
-                competitor.setYearOfBirth(yearOfBirth);
-            }
-        }
-        
-        if (this.columnIndexes.hasOwnProperty("gender")) {
-            var gender = row[this.columnIndexes.gender];
-            if (gender === "M" || gender === "F") {
-                competitor.setGender(gender);
-            }
-        }
 
-        this.classes.get(className).results.push(competitor.result);
+        this.classes.get(className).results.push(result);
     };
     
     /**

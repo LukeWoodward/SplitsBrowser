@@ -182,9 +182,9 @@
         var parent = d3.select("div#qunit-fixture").node();
         
         var resultList = [
-            fromSplitTimes(1, "First Runnerson", "CDO", 10 * 3600, [13, 96, 35]).result,
-            fromSplitTimes(2, "Second O'Runner", "GHO", 10 * 3600 + 6, [15, 79, 41]).result,
-            fromSplitTimes(3, "Third Runnerson", "KLO", 10 * 3600 + 33, [18, 81, 37]).result
+            fromSplitTimes(1, "First Runnerson", "CDO", 10 * 3600, [13, 96, 35]),
+            fromSplitTimes(2, "Second O'Runner", "GHO", 10 * 3600 + 6, [15, 79, 41]),
+            fromSplitTimes(3, "Third Runnerson", "KLO", 10 * 3600 + 33, [18, 81, 37])
         ];
         
         var selection = new ResultSelection(resultList.length);
@@ -325,7 +325,7 @@
         list.setSelection(new ResultSelection(0));
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.resultListPlaceholder").size(), 1);
         
-        var compList = [fromSplitTimes(1, "First Runner", "CDO", 10 * 3600, [13, 96, 35]).result];
+        var compList = [fromSplitTimes(1, "First Runner", "CDO", 10 * 3600, [13, 96, 35])];
         list.setResultList(compList);
         list.setSelection(new ResultSelection(1));
         assert.ok(!$("div#qunit-fixture button")[0].disabled);
@@ -1082,9 +1082,9 @@
         }
         
         var newResults = [
-            fromSplitTimes(1, "Fourth Runner", "CDO", 10 * 3600, [13, 96, 35]).result,
-            fromSplitTimes(2, "Fifth Runnerson", "GHO", 10 * 3600 + 6, [15, 79, 41]).result,
-            fromSplitTimes(3, "Sixth O'Runner", "KLO", 10 * 3600 + 33, [18, 81, 37]).result
+            fromSplitTimes(1, "Fourth Runner", "CDO", 10 * 3600, [13, 96, 35]),
+            fromSplitTimes(2, "Fifth Runnerson", "GHO", 10 * 3600 + 6, [15, 79, 41]),
+            fromSplitTimes(3, "Sixth O'Runner", "KLO", 10 * 3600 + 33, [18, 81, 37])
         ];
         
         listAndSelection.list.setResultList(newResults, false);

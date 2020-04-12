@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Utilities to assist with testing.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -99,10 +99,10 @@ var SplitsBrowserTest = {};
     }
     
     /**
-    * Convenience method to create a competitor from split times.
+    * Convenience method to create a result from split times.
     *
-    * This method has been moved out of Competitor because it is no longer used,
-    * by SplitsBrowser itself, but has been retained as it is used by plenty of
+    * This method has been moved out of Result because it is no longer used by
+    * SplitsBrowser itself, but has been retained as it is used by plenty of
     * tests.
     *
     * @param {Number} order - The position of the competitor within the list of results.
@@ -110,7 +110,7 @@ var SplitsBrowserTest = {};
     * @param {String} club - The name of the competitor's club.
     * @param {Number} startTime - The competitor's start time, as seconds past midnight.
     * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
-    * @return {Competitor} Created competitor.
+    * @return {Result} Created result.
     */
     SplitsBrowserTest.fromSplitTimes = function (order, name, club, startTime, splitTimes) {
         var cumTimes = [0];
@@ -118,10 +118,10 @@ var SplitsBrowserTest = {};
             cumTimes.push(addIfNotNull(cumTimes[i], splitTimes[i]));
         }
         
-        var result = new Result(order, startTime, splitTimes, cumTimes);
+        var result = new Result(order, startTime, splitTimes, cumTimes, new Competitor(name, club));
         result.splitTimes = splitTimes;
         result.cumTimes = cumTimes;
-        return new Competitor(name, club, result);
+        return result;
     };
     
     // Polyfill HTMLElement.prototype.click for the benefit of PhantomJS.
