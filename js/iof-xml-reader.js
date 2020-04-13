@@ -606,7 +606,7 @@
         cumTimes.unshift(0); // Prepend a zero time for the start.
         cumTimes.push(totalTime);
 
-        var competitor = new Competitor(name, club, result);
+        var competitor = new Competitor(name, club);
 
         if (yearOfBirth !== null) {
             competitor.setYearOfBirth(yearOfBirth);
