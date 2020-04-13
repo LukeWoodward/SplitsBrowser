@@ -37,6 +37,7 @@
         this.results = results;
         this.course = null;
         this.hasDubiousData = false;
+        this.isTeamClass = false;
         this.results.forEach(function (result) {
             result.setClassName(name);
         });
@@ -48,6 +49,14 @@
     */
     CourseClass.prototype.recordHasDubiousData = function () {
         this.hasDubiousData = true;
+    };
+    
+    /**
+    * Records that this course-class contains team results rather than
+    * individual results.
+    */
+    CourseClass.prototype.setIsTeamClass = function () {
+        this.isTeamClass = true;
     };
      
     /**

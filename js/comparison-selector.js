@@ -51,8 +51,19 @@
         });
     });
     
-    ALL_COMPARISON_OPTIONS.push({
+    var ALL_INDIVIDUAL_COMPARISON_OPTIONS = ALL_COMPARISON_OPTIONS.slice(0);
+    
+    ALL_INDIVIDUAL_COMPARISON_OPTIONS.push({
         nameKey: "CompareWithAnyRunner",
+        selector: null,
+        requiresWinner: true,
+        percentage: ""
+    });
+    
+    var ALL_TEAM_COMPARISON_OPTIONS = ALL_COMPARISON_OPTIONS.slice(0);
+    
+    ALL_TEAM_COMPARISON_OPTIONS.push({
+        nameKey: "CompareWithAnyTeam",
         selector: null,
         requiresWinner: true,
         percentage: ""
@@ -66,6 +77,10 @@
     
     // The id of the result selector
     var RESULT_SELECTOR_ID = "resultSelector";
+
+    // The id of the 'Runner' or 'Team' text before the selector for a specific
+    // runner or team.
+    var RESULT_SPAN_ID = "resultSpan";
 
     /**
     * A control that wraps a drop-down list used to choose what to compare
@@ -83,6 +98,8 @@
         this.alerter = alerter;
         this.hasWinner = false;
         this.previousSelectedIndex = -1;
+        this.courseClassSet = null;
+        this.comparisonOptions = ALL_INDIVIDUAL_COMPARISON_OPTIONS;
         
         var div = d3.select(parent).append("div")
                                    .classed("topRowStart", true);
@@ -99,11 +116,11 @@
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
 
         this.optionsList = d3.select(this.dropDown).selectAll("option")
-                                                   .data(ALL_COMPARISON_OPTIONS);
+                                                   .data(this.comparisonOptions);
         this.optionsList.enter().append("option");
         
         this.optionsList = d3.select(this.dropDown).selectAll("option")
-                                                   .data(ALL_COMPARISON_OPTIONS);
+                                                   .data(this.comparisonOptions);
         this.optionsList.attr("value", function (_opt, index) { return index.toString(); });
                    
         this.optionsList.exit().remove();
@@ -114,6 +131,7 @@
                                           .style("padding-left", "20px");
         
         this.resultSpan = this.resultDiv.append("span")
+                                        .attr("id", RESULT_SPAN_ID)
                                         .classed("comparisonSelectorLabel", true);
         
         this.resultDropDown = this.resultDiv.append("select")
@@ -134,8 +152,21 @@
     */ 
     ComparisonSelector.prototype.setMessages = function () {
         this.comparisonSelectorLabel.text(getMessage("ComparisonSelectorLabel"));    
-        this.resultSpan.text(getMessage("CompareWithAnyRunnerLabel"));
+        this.setCompareWithAnyLabel();
         this.optionsList.text(function (opt) { return getMessageWithFormatting(opt.nameKey, {"$$PERCENT$$": opt.percentage}); });
+    };
+
+    /**
+    * Updates the 'Compare with any' label, following a change of language or
+    * course-class set.
+    */
+    ComparisonSelector.prototype.setCompareWithAnyLabel = function () {
+        if (this.courseClassSet !== null && this.courseClassSet.hasTeamData()) {
+            this.resultSpan.text(getMessage("CompareWithAnyTeamLabel"));
+        }
+        else {
+            this.resultSpan.text(getMessage("CompareWithAnyRunnerLabel"));
+        }
     };
 
     /**
@@ -158,7 +189,7 @@
     *     if any other option is selected.
     */
     ComparisonSelector.prototype.isAnyResultSelected = function () {
-        return this.dropDown.selectedIndex === ALL_COMPARISON_OPTIONS.length - 1;
+        return this.dropDown.selectedIndex === this.comparisonOptions.length - 1;
     };
     
     /**
@@ -167,7 +198,12 @@
     */
     ComparisonSelector.prototype.setCourseClassSet = function (courseClassSet) {
         this.courseClassSet = courseClassSet;
+        this.comparisonOptions = (courseClassSet.hasTeamData()) ? ALL_TEAM_COMPARISON_OPTIONS : ALL_INDIVIDUAL_COMPARISON_OPTIONS;
+        this.optionsList = d3.select(this.dropDown).selectAll("option")
+                                                   .data(this.comparisonOptions);
+        this.optionsList.text(function (opt) { return getMessageWithFormatting(opt.nameKey, {"$$PERCENT$$": opt.percentage}); });
         this.setResults();
+        this.setCompareWithAnyLabel();
     };
 
     /**
@@ -196,7 +232,7 @@
             var oldSelectedResult = this.previousResultList[this.currentResultIndex];
             var newIndex = results.indexOf(oldSelectedResult);
             this.currentResultIndex = Math.max(newIndex, 0);
-        } else if (ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].requiresWinner) {
+        } else if (this.comparisonOptions[this.dropDown.selectedIndex].requiresWinner) {
             // We're currently viewing a comparison type that requires a
             // winner.  However, there is no longer a winner, presumably
             // because there was a winner but following the removal of a class
@@ -232,7 +268,7 @@
             var outerThis = this;
             return function (courseClassSet) { return courseClassSet.getCumulativeTimesForResult(outerThis.currentResultIndex); };
         } else {
-            return ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex].selector;
+            return this.comparisonOptions[this.dropDown.selectedIndex].selector;
         }
     };
     
@@ -241,9 +277,8 @@
     * @return {Object} Object containing the comparison type (type index and result).
     */
     ComparisonSelector.prototype.getComparisonType = function () {
-        var typeIndex = this.dropDown.selectedIndex;
         var result;
-        if (typeIndex === ALL_COMPARISON_OPTIONS.length - 1) {
+        if (this.isAnyResultSelected()) {
             if (this.resultDropDown.selectedIndex < 0) {
                 this.resultDropDown.selectedIndex = 0;
             }
@@ -253,7 +288,7 @@
             result = null;
         }
     
-        return {index: typeIndex, result: result };
+        return {index: this.dropDown.selectedIndex, result: result };
     };
     
     /**
@@ -263,8 +298,8 @@
     *     Any Result has not been selected.
     */
     ComparisonSelector.prototype.setComparisonType = function (typeIndex, result) {
-        if (0 <= typeIndex && typeIndex < ALL_COMPARISON_OPTIONS.length) {
-            if (typeIndex === ALL_COMPARISON_OPTIONS.length - 1) {
+        if (0 <= typeIndex && typeIndex < this.comparisonOptions.length) {
+            if (typeIndex === this.comparisonOptions.length - 1) {
                 var resultIndex = this.courseClassSet.allResults.indexOf(result);
                 if (resultIndex >= 0) {
                     this.dropDown.selectedIndex = typeIndex;
@@ -283,10 +318,12 @@
     */
     ComparisonSelector.prototype.onSelectionChanged = function() {
         var resultDropdownSelectedIndex = Math.max(this.resultDropDown.selectedIndex, 0);
-        var option = ALL_COMPARISON_OPTIONS[this.dropDown.selectedIndex];
+        var option = this.comparisonOptions[this.dropDown.selectedIndex];
         if (!this.hasWinner && option.requiresWinner) {
             // No winner on this course means you can't select this option.
-            this.alerter(getMessageWithFormatting("CannotCompareAsNoWinner", {"$$OPTION$$": getMessage(option.nameKey)}));
+            this.alerter(getMessageWithFormatting(
+                (this.courseClassSet !== null && this.courseClassSet.hasTeamData()) ? "CannotCompareAsNoWinnerTeam" : "CannotCompareAsNoWinner",
+                {"$$OPTION$$": getMessage(option.nameKey)}));
             this.dropDown.selectedIndex = this.previousSelectedIndex;
         } else {
             this.resultDiv.style("display", (this.isAnyResultSelected()) ? null : "none");

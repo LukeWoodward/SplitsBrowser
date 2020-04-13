@@ -22,6 +22,8 @@
     "use strict";
 
     var ComparisonSelector = SplitsBrowser.Controls.ComparisonSelector;
+    var getMessage = SplitsBrowser.getMessage;
+    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
 
     QUnit.module("Comparison Selector");
 
@@ -46,6 +48,9 @@
     // CSS selector for the result drop-down.
     var _RESULT_SELECTOR_SELECTOR = "#qunit-fixture select#resultSelector";
 
+    // CSS selector for the "Runner:" or "Team:" text.
+    var _RESULT_SPAN_SELECTOR = "#qunit-fixture span#resultSpan";
+
     function alerter(message) {
         alertsReceived.push(message);
     }
@@ -55,13 +60,14 @@
         callCount += 1;
     }
     
-    function getDummyCourseClassSet(results) {
+    function getDummyCourseClassSet(results, hasTeamData) {
         return {
             allResults: results,
             getWinnerCumTimes: function () { return _WINNER; },
             getFastestCumTimes: function () { return _FASTEST_TIME; },
             getFastestCumTimesPlusPercentage: function(percent) { return _FASTEST_TIME + ":" + percent; },
-            getCumulativeTimesForResult: function (index) { return results[index].getAllCumulativeTimes(); }
+            getCumulativeTimesForResult: function (index) { return results[index].getAllCumulativeTimes(); },
+            hasTeamData: function () { return hasTeamData; }
         };
     }
     
@@ -81,20 +87,20 @@
     
     var extraResult = {owner: { name: "four" }, getAllCumulativeTimes: function () { return [7, 8]; }, completed: returnTrue };
     
-    var DUMMY_CLASS_SET = getDummyCourseClassSet(results);
+    var DUMMY_CLASS_SET = getDummyCourseClassSet(results, false);
     
     function getDummyCourseClassSetWithMispuncher() {
         var resultsWithMispuncher = results.slice(0);
         resultsWithMispuncher[1] = { owner: results[1].owner, completed: function () { return false; } };
-        return getDummyCourseClassSet(resultsWithMispuncher);
+        return getDummyCourseClassSet(resultsWithMispuncher, false);
     }
     
-    function getDummyCourseClassSetWithNoWinner() {
+    function getDummyCourseClassSetWithNoWinner(hasTeamData) {
         var winnerlessResults = results.map(function (result) {
             return { owner: result.owner, getAllCumulativeTimes: result.getAllCumulativeTimes, completed: returnFalse };
         });
 
-        return getDummyCourseClassSet(winnerlessResults);
+        return getDummyCourseClassSet(winnerlessResults, hasTeamData);
     }
     
     function getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother() {
@@ -102,7 +108,11 @@
             return { owner: result.owner, getAllCumulativeTimes: result.getAllCumulativeTimes, completed: returnFalse };
         }));
         
-        return getDummyCourseClassSet(allResults);
+        return getDummyCourseClassSet(allResults, false);
+    }
+    
+    function getDummyTeamCourseClassSet() {
+        return getDummyCourseClassSet(results, true);
     }
     
     function createSelector() {
@@ -133,6 +143,8 @@
         assert.strictEqual(htmlSelect.selectedIndex, 0, "Result selector should be created with the first item selected");
         
         assert.strictEqual($(_RESULT_SELECTOR_SELECTOR).is(":visible"), false, "Result selector should not be shown");
+
+        assert.strictEqual($(_RESULT_SPAN_SELECTOR).text(), getMessage("CompareWithAnyRunnerLabel"), "Result span should contain 'Runner:' or suchlike");
         
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
@@ -323,10 +335,13 @@
         selector.setCourseClassSet(DUMMY_CLASS_SET);        
         assert.strictEqual(htmlSelect.options.length, DUMMY_CLASS_SET.allResults.length, "Expected "  + DUMMY_CLASS_SET.allResults.length + " options to be created");
 
-        selector.setCourseClassSet(getDummyCourseClassSet([{owner: { name: "four" }, completed: returnTrue}, {owner: { name: "five" }, completed: returnTrue}, {owner: { name: "six" }, completed: returnTrue}, {owner: { name: "seven" }, completed: returnTrue}]));
+        selector.setCourseClassSet(getDummyCourseClassSet(
+            [{owner: { name: "four" }, completed: returnTrue}, {owner: { name: "five" }, completed: returnTrue}, {owner: { name: "six" }, completed: returnTrue}, {owner: { name: "seven" }, completed: returnTrue}],
+            false
+        ));
         assert.strictEqual(htmlSelect.options.length, 4, "Wrong number of options created");
 
-        selector.setCourseClassSet(getDummyCourseClassSet([{owner: { name: "eight" }, completed: returnTrue}, {owner: { name: "nine" }, completed: returnTrue}]));
+        selector.setCourseClassSet(getDummyCourseClassSet([{owner: { name: "eight" }, completed: returnTrue}, {owner: { name: "nine" }, completed: returnTrue}], false));
         assert.strictEqual(htmlSelect.options.length, 2, "Wrong number of options created");
         
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
@@ -343,7 +358,7 @@
         
         $(htmlSelect).val(2).change();
 
-        selector.setCourseClassSet(getDummyCourseClassSet(results.slice(1)));
+        selector.setCourseClassSet(getDummyCourseClassSet(results.slice(1), false));
         assert.strictEqual($(htmlSelect).val(), "1");
         
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
@@ -360,7 +375,7 @@
         
         $(htmlSelect).val(2).change();
 
-        selector.setCourseClassSet(getDummyCourseClassSet(results.slice(0, 2)));
+        selector.setCourseClassSet(getDummyCourseClassSet(results.slice(0, 2), false));
         assert.strictEqual($(htmlSelect).val(), "0");
         
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
@@ -369,7 +384,7 @@
     QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has no winner and 'Winner' option chosen", function(assert) {
         resetLastSelector();
         var selector = createSelector();
-        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner());
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner(false));
         var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(2).change();
         
@@ -380,12 +395,13 @@
         assert.strictEqual(callCount, 0, "No calls to the change-handler should have been made");
         
         assert.strictEqual(alertsReceived.length, 1, "One alert should have been issued");
+        assert.strictEqual(alertsReceived[0], getMessageWithFormatting("CannotCompareAsNoWinner", {"$$OPTION$$": getMessage("CompareWithWinner")}));
     });
 
     QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has no winner and 'Any result...' option chosen", function(assert) {
         resetLastSelector();
         var selector = createSelector();
-        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner());
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner(false));
         var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(3).change();
         
@@ -505,7 +521,7 @@
         assert.strictEqual($(htmlSelect).val(), "0", "Initially the comparison should be set to 'Winner'");
         
         resetLastSelector();
-        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner());
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner(false));
         
         assert.strictEqual($(htmlSelect).val(), "1", "Later the comparison should be set to 'Fastest time'");               
         assert.strictEqual(callCount, 1, "One call to the change-handler should have been made");
@@ -526,7 +542,7 @@
         assert.strictEqual($(htmlSelect).val(), "2", "Initially the comparison should be set to 'Fastest Time + 5%'");
         
         resetLastSelector();
-        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner());
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner(false));
         
         assert.strictEqual($(htmlSelect).val(), "2", "The comparison should still be set to 'Fastest time + 5%'");
         assert.strictEqual(callCount, 0, "No calls to the change-handler should have been made");
@@ -548,7 +564,7 @@
         assert.strictEqual($(_RESULT_SELECTOR_SELECTOR).is(":visible"), true, "Result selector should be shown");
 
         resetLastSelector();
-        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner());
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner(false));
         
         assert.strictEqual($(htmlSelect).val(), "1", "Later the comparison should be set to 'Fastest time'");               
         assert.strictEqual(callCount, 1, "One call to the change-handler should have been made");
@@ -557,5 +573,53 @@
      
         assert.deepEqual(selector.getComparisonType(), {index: 1, result: null});
     });
-    
+
+    QUnit.test("Comparison type set to Any Team for a team class", function(assert) {
+        var selector = createSelector();
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        selector.setCourseClassSet(getDummyTeamCourseClassSet());
+        assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyTeam"));
+        assert.strictEqual($(_RESULT_SPAN_SELECTOR).text(), getMessage("CompareWithAnyTeamLabel"));
+    });
+
+    QUnit.test("Comparison type option changes from Any Runner to Any Team when changing from an individual to a team class", function(assert) {
+        var selector = createSelector();
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        var resultSpan = $(_RESULT_SPAN_SELECTOR);
+        selector.setCourseClassSet(DUMMY_CLASS_SET);
+        assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyRunner"));
+        assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyRunnerLabel"));
+        selector.setCourseClassSet(getDummyTeamCourseClassSet());
+        assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyTeam"));
+        assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyTeamLabel"));
+    });
+
+    QUnit.test("Comparison type option changes from Any Team back to Any Runner when changing from a team to an individual class", function(assert) {
+        var selector = createSelector();
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        var resultSpan = $(_RESULT_SPAN_SELECTOR);
+        selector.setCourseClassSet(getDummyTeamCourseClassSet());
+        assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyTeam"));
+        assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyTeamLabel"));
+        selector.setCourseClassSet(DUMMY_CLASS_SET);
+        assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyRunner"));
+        assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyRunnerLabel"));
+    });
+
+    QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has teams but no winner and 'Winner' option chosen", function(assert) {
+        resetLastSelector();
+        var selector = createSelector();
+        selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner(true));
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        $(htmlSelect).val(2).change();
+        
+        selector.registerChangeHandler(handleComparisonChanged);
+        $(htmlSelect).val(0).change();
+        
+        assert.strictEqual($(htmlSelect).val(), "2", "Selector should return to previous index: selector index is " + $(htmlSelect)[0].selectedIndex);
+        assert.strictEqual(callCount, 0, "No calls to the change-handler should have been made");
+        
+        assert.strictEqual(alertsReceived.length, 1, "One alert should have been issued");
+        assert.strictEqual(alertsReceived[0], getMessageWithFormatting("CannotCompareAsNoWinnerTeam", {"$$OPTION$$": getMessage("CompareWithWinner")}));
+    });    
 })();

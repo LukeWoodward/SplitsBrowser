@@ -248,6 +248,32 @@
         assert.ok(courseClassSet.hasDubiousData());
     });
 
+    QUnit.test("Course-class set made up of course-class without team data should not have team data", function (assert) {
+        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
+        assert.ok(!courseClassSet.hasTeamData());
+    });
+
+    QUnit.test("Course-class set made up of course-class with team data should have team data", function (assert) {
+        var courseClass = new CourseClass("Test", 3, []);
+        courseClass.setIsTeamClass();
+        var courseClassSet = new CourseClassSet([courseClass]);
+        assert.ok(courseClassSet.hasTeamData());
+    });
+
+    QUnit.test("Course-class set made up of two course-classes, one with team data and one without, should not have team data", function (assert) {
+        // This is a combination that in practice shouldn't happen.
+        var courseClass1 = new CourseClass("Test 1", 3, []);
+        courseClass1.setIsTeamClass();
+        var courseClass2 = new CourseClass("Test 2", 3, []);
+        var courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
+        assert.ok(!courseClassSet.hasTeamData());
+    });
+
+    QUnit.test("Course-class set with no course-classes should not have team data", function (assert) {
+        var courseClassSet = new CourseClassSet([]);
+        assert.ok(!courseClassSet.hasTeamData());
+    });
+
     QUnit.test("Cumulative times of the winner of a course-class set with only mispunchers is null", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [
             getResult1WithNullFinishSplit(),

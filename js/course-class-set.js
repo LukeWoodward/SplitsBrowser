@@ -142,6 +142,15 @@
     CourseClassSet.prototype.hasDubiousData = function () {
         return this.classes.some(function (courseClass) { return courseClass.hasDubiousData; });
     };
+    
+    /**
+    * Returns whether this course-class set has team data.
+    * @return {boolean} True if all of the classes within this course-class
+    *     set contain team data, false otherwise.
+    */
+    CourseClassSet.prototype.hasTeamData = function () {
+        return this.classes.length > 0 && this.classes.every(function (courseClass) { return courseClass.isTeamClass; });
+    };
 
     /**
     * Return a list of objects that describe when the given array of times has

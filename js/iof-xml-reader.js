@@ -954,16 +954,23 @@
             
             var numberOfControls;
             var courseKey;
+            var isTeamClass;
             if (parsedClass.teams !== null && parsedClass.course.numbersOfControls !== null && parsedClass.course.numbersOfControls.length > 0) {
                 numberOfControls = arraySum(parsedClass.course.numbersOfControls) + parsedClass.teamSize - 1;
                 parsedClass.controls = null;
                 courseKey = null;
+                isTeamClass = true;
             } else {
                 numberOfControls = parsedClass.controls.length;
                 courseKey = tempCourse.id + "," + parsedClass.controls.join(",");
+                isTeamClass = false;
             }
             
             var courseClass = new CourseClass(parsedClass.name, numberOfControls, parsedClass.results);
+            if (isTeamClass) {
+                courseClass.setIsTeamClass();
+            }
+            
             classes.push(courseClass);
             
             // Add to each temporary course object a list of all classes.           

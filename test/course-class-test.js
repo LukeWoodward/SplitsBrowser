@@ -66,13 +66,24 @@
     
     QUnit.test("Course-class initially created without any result data considered as dubious", function (assert) {
         var courseClass = getTestClass();
-        assert.ok(!courseClass.hasDubiousData, "Original-data option should not be availabl");
+        assert.ok(!courseClass.hasDubiousData, "Original-data option should not be available");
     });
     
     QUnit.test("Course-class that has recorded that it has dubious data reports itself as so", function (assert) {
         var courseClass = getTestClass();
         courseClass.recordHasDubiousData();
         assert.ok(courseClass.hasDubiousData, "Original-data option should be available");
+    });
+    
+    QUnit.test("Course-class initially created as not a team class", function (assert) {
+        var courseClass = getTestClass();
+        assert.ok(!courseClass.isTeamClass, "Course-class should not be a team class");
+    });
+    
+    QUnit.test("Course-class that has recorded that it is a team class reports itself as so.", function (assert) {
+        var courseClass = getTestClass();
+        courseClass.setIsTeamClass();
+        assert.ok(courseClass.isTeamClass, "Course-class should be a team class");
     });
     
     QUnit.test("Creating a class with results sets the class name in each result's result", function (assert) {

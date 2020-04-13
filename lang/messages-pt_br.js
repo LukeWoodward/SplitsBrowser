@@ -70,9 +70,12 @@ SplitsBrowser.Messages.pt_br = {
     CompareWithFastestTimePlusPercentage: "Melhor tempo + $$PERCENT$$%",
     CompareWithAnyRunner: "Qualquer corredor...",
     CompareWithAnyRunnerLabel: "Corredor: ",
+    CompareWithAnyTeam: "Any team...", // TO BE TRANSLATED
+    CompareWithAnyTeamLabel: "Team: ", // TO BE TRANSLATED
     // Mensagem de aviso mostrada ao usuário quando uma opção de comparação
     // não pode ser escolhida porque o percurso não tem vencedor.
     CannotCompareAsNoWinner: "Não posso comparar com '$$OPTION$$' porque nenhum concorrente deste percurso concluir a prova.",
+    CannotCompareAsNoWinnerTeam: "Cannot compare against '$$OPTION$$' because no teams in this class complete the course.", // TO BE TRANSLATED
     
     // Etiqueta da caixa de seleção que mostra os dados originais, em oposição aos
     // dados 'reparados'. Isso só aparece se os dados que precisão de reparos

@@ -69,9 +69,12 @@ SplitsBrowser.Messages.fr_be = {
     CompareWithFastestTimePlusPercentage: "Meilleur temps + $$PERCENT$$%",
     CompareWithAnyRunner: "N'importe quel coureur...",
     CompareWithAnyRunnerLabel: "Coureur: ",
+    CompareWithAnyTeam: "Any team...", // TO BE TRANSLATED
+    CompareWithAnyTeamLabel: "Team: ", // TO BE TRANSLATED
     // Warning message shown to the user when a comparison option cannot be
     // chosen because the course has no winner.
     CannotCompareAsNoWinner: "Impossible de comparer avec '$$OPTION$$' car aucun coureur de ce circuit n'a terminé le parcours.",
+    CannotCompareAsNoWinnerTeam: "Cannot compare against '$$OPTION$$' because no teams in this class complete the course.", // TO BE TRANSLATED
     
     // Label of checkbox that shows the original data as opposed to the
     // 'repaired' data.  This only appears if data that needs repair has been

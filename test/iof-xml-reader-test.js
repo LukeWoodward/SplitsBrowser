@@ -827,6 +827,7 @@
                     assert.strictEqual(courseClass.name, className);
                     assert.strictEqual(courseClass.results.length, 1, "One competitor should have been read - " + formatterName);
                     assert.strictEqual(courseClass.numControls, 3);
+                    assert.ok(!courseClass.isTeamClass, "Course-class should not be marked as a team class");
                     
                     if (courseClass.results.length === 1) {
                         var result = courseClass.results[0];
@@ -1532,6 +1533,7 @@
                     assert.strictEqual(courseClass.name, className);
                     assert.strictEqual(courseClass.results.length, 1, "One result should have been read - " + formatterName);
                     assert.strictEqual(courseClass.numControls, 7); // 3 numbered controls for each competitor plus 1 for the intermediate finish.
+                    assert.ok(courseClass.isTeamClass, "Course-class should be marked as a team class");
                     
                     if (courseClass.results.length === 1) {
                         var result = courseClass.results[0];
