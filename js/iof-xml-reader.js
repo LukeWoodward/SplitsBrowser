@@ -26,7 +26,9 @@
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
     var Competitor = SplitsBrowser.Model.Competitor;
+    var Team = SplitsBrowser.Model.Team;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -41,6 +43,15 @@
     */
     function isUndefined(value) {
         return typeof value === "undefined";
+    }
+
+    /**
+    * Returns the sum of all of the numbers in the given array
+    * @param {Array} array The array of numbers to find the sum of.
+    * @return The sum of the numbers in the given array.
+    */
+    function arraySum(array) {
+        return array.reduce(function (a, b) { return a + b; }, 0);
     }
     
     /**
@@ -148,7 +159,27 @@
     Version2Reader.readClassName = function (classResultElement) {
         return $("> ClassShortName", classResultElement).text();    
     };
-    
+
+    /**
+    * Reads the team name from a TeamResult element.
+    * @param {jQuery.selection} teamResultElement - TeamResult element
+    *     containing the team result details.
+    * @return {String} Team name.
+    */
+    Version2Reader.readTeamName = function (teamResultElement) {
+        return $("> TeamName", teamResultElement).text();
+    };
+
+    /**
+    * Returns a list of elements to be read to pull out team-member information.
+    * @param {jQuery.selection} teamResultElement - TeamResult element
+    *     containing the team result details.
+    * @return {Array} Elements to parse to read team member results.
+    */
+    Version2Reader.readTeamMemberResults = function (teamResultElement) {
+        return $("> PersonResult", teamResultElement);
+    };
+
     /**
     * Reads the course details from the given ClassResult element.
     * @param {jQuery.selection} classResultElement - ClassResult element
@@ -211,9 +242,9 @@
     };
     
     /**
-    * Returns the name of the competitor's club.
+    * Returns the name of the competitor or team's club.
     * @param {jQuery.selection} element - jQuery selection containing a
-    *     PersonResult element.
+    *     PersonResult or TeamResult element.
     * @return {String} Competitor's club name.
     */
     Version2Reader.readClubName = function (element) {
@@ -359,7 +390,27 @@
     Version3Reader.readClassName = function (classResultElement) {
         return $("> Class > Name", classResultElement).text();
     };
-    
+
+    /**
+    * Reads the team name from a TeamResult element.
+    * @param {jQuery.selection} teamResultElement - TeamResult element
+    *     containing the team result details.
+    * @return {String} Team name.
+    */
+    Version3Reader.readTeamName = function (teamResultElement) {
+        return $("> Name", teamResultElement).text();
+    };
+
+    /**
+    * Returns a list of elements to be read to pull out team-member information.
+    * @param {jQuery.selection} teamResultElement - TeamResult element
+    *     containing the team result details.
+    * @return {Array} Elements to parse to read team member results.
+    */
+    Version3Reader.readTeamMemberResults = function (teamResultElement) {
+        return $("> TeamMemberResult", teamResultElement);
+    };
+
     /**
     * Reads the course details from the given ClassResult element.
     * @param {jQuery.selection} classResultElement - ClassResult element
@@ -415,9 +466,9 @@
     };
     
     /**
-    * Returns the name of the competitor's club.
+    * Returns the name of the competitor or team's club.
     * @param {jQuery.selection} element - jQuery selection containing a
-    *     PersonResult element.
+    *     PersonResult or TeamResult element.
     * @return {String} Competitor's club name.
     */
     Version3Reader.readClubName = function (element) {
@@ -639,7 +690,149 @@
             controls: controls
         };
     }
-    
+
+    /**
+    * Parses a PersonResult element into a competitor and adds the resulting
+    * competitor to the class.
+    * @param {XMLElement} element XML PersonResult element.
+    * @param {Number} number The position number within the class.
+    * @param {Object} cls The class read so far.
+    * @param {Object} reader XML reader used to assist with format-specific parsing.
+    * @param {Array} warnings Array that accumulates warning messages.
+    */
+    function parsePersonResult(element, number, cls, reader, warnings) {
+        var resultAndControls = parseCompetitor(element, number, reader, warnings);
+        if (resultAndControls !== null) {
+            var result = resultAndControls.result;
+            var controls = resultAndControls.controls;
+            if (cls.results.length === 0 && !(result.isNonStarter && controls.length === 0)) {
+                // First result (not including non-starters with no controls).
+                // Record the list of controls.
+                cls.controls = controls;
+
+                // Set the number of controls on the course if we didn't read
+                // it from the XML.  Assume the first competitor's number of
+                // controls is correct.
+                if (cls.course.numberOfControls === null) {
+                    cls.course.numberOfControls = cls.controls.length;
+                }
+            }
+
+            // Subtract 2 for the start and finish cumulative times.
+            var actualControlCount = result.getAllOriginalCumulativeTimes().length - 2;
+            var warning = null;
+            if (result.isNonStarter && actualControlCount === 0) {
+                // Don't generate warnings for non-starting competitors with no controls.
+            } else if (actualControlCount !== cls.course.numberOfControls) {
+                warning = "Competitor '" + result.owner.name + "' in class '" + cls.name + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;
+            } else {
+                for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
+                    if (cls.controls[controlIndex] !== controls[controlIndex]) {
+                        warning = "Competitor '" + result.owner.name + "' has an unexpected control code at control " + (controlIndex + 1) +
+                            ": expected '" + cls.controls[controlIndex] + "', actual '" + controls[controlIndex] + "'";
+                        break;
+                    }
+                }
+            }
+
+            if (warning === null) {
+                cls.results.push(result);
+            } else {
+                warnings.push(warning);
+            }
+        }
+    }
+
+    /**
+    * Parses a TeamResult element into a team and adds the resulting
+    * team to the class.
+    * @param {XMLElement} teamResultElement XML TeamResult element.
+    * @param {Number} number The position number within the class.
+    * @param {Object} cls The class read so far.
+    * @param {Object} XML reader used to assist with format-specific parsing.
+    * @param {Array} warnings Array that accumulates warning messages.
+    */
+    function parseTeamResult(teamResultElement, number, cls, reader, warnings) {
+        var teamName = reader.readTeamName(teamResultElement);
+        var teamClubName = reader.readClubName(teamResultElement);
+        var members = reader.readTeamMemberResults(teamResultElement);
+        
+        if (members.length === 0) {
+            warnings.push("Ignoring team " + (teamName === "" ? "(unnamed team)" : teamName) + " with no members");
+            return;
+        } else if (cls.results.length === 0 && members.length === 1) {
+            // First team in the class has only a single member.
+            // (If this is a subsequent team in a class where there are teams
+            // with more than one member, the team-size check later on will
+            // catch this case.)
+            warnings.push("Ignoring team " + (teamName === "" ? "(unnamed team)" : teamName) + " with only a single member");
+            return;
+        }            
+        
+        var results = [];
+        var allControls = [];
+        for (var index = 0; index < members.length; index += 1) {
+            var resultAndControls = parseCompetitor(members[index], number, reader, warnings);
+            if (resultAndControls === null) {
+                // A warning for this competitor rules out the entire team.
+                return;
+            }
+            
+            results.push(resultAndControls.result);
+            allControls.push(resultAndControls.controls);
+        }
+        
+        for (index = 1; index < members.length; index += 1) {
+            var previousFinishTime = $("> Result > FinishTime", members[index - 1]).text();
+            var nextStartTime = $("> Result > StartTime", members[index]).text();
+            if (previousFinishTime !== nextStartTime) {
+                warnings.push("In team " + (teamName === "" ? "(unnamed team)" : teamName) + " in class '" + cls.name + "', " + results[index - 1].owner.name + " does not finish at the same time as " + results[index].owner.name + " starts" );
+                return;
+            }
+        }
+
+        var thisTeamControlCounts = allControls.map(function (controls) { return controls.length; });
+
+        if (cls.results.length === 0) {
+            // First team.  Record the team size.
+            cls.teamSize = results.length;
+
+            // Set the numbers of controls on the legs if we didn't read it
+            // from the XML.  Assume the first team's numbers of controls are
+            // correct.
+            if (cls.course.numbersOfControls === null) {
+                cls.course.numbersOfControls = thisTeamControlCounts;
+            }
+        }
+        
+        if (results.length !== cls.teamSize) {
+            warnings.push("Team " + (teamName === "" ? "(unnamed team)" : teamName) + " in class '" + cls.name + "' has an unexpected number of members: expected " + cls.teamSize + " but was actually " + results.length);
+        }
+        else {
+            var warning = null;
+            var teamResult = createTeamResult(number, results, new Team(teamName, teamClubName));
+            
+            for (var teamMemberIndex = 0; teamMemberIndex < results.length; teamMemberIndex += 1) {
+                var expectedControlCount = cls.course.numbersOfControls[teamMemberIndex];
+                var memberResult = results[teamMemberIndex];
+                
+                // Subtract 2 for the start and finish cumulative times.
+                var actualControlCount = memberResult.getAllOriginalCumulativeTimes().length - 2;
+                
+                if (actualControlCount !== expectedControlCount) {
+                    warning = "Competitor '" + memberResult.owner.name + "' in team '" + teamName + "' in class '" + cls.name + "' has an unexpected number of controls: expected " + expectedControlCount + ", actual " + actualControlCount;
+                    break;
+                }
+            }
+            
+            if (warning === null) {
+                cls.results.push(teamResult);
+            } else {
+                warnings.push(warning);
+            }
+        }
+    }
+
     /**
     * Parses data for a single class.
     * @param {XMLElement} element - XML ClassResult element
@@ -650,8 +843,8 @@
     */
     function parseClassData(element, reader, warnings) {
         var jqElement = $(element);
-        var cls = {name: null, results: [], controls: [], course: null};
-        
+        var cls = {name: null, results: [], teamSize: null, controls: [], course: null};
+
         cls.course = reader.readCourseFromClass(jqElement, warnings);
         
         var className = reader.readClassName(jqElement);
@@ -661,56 +854,27 @@
         }
         
         cls.name = className;
-        
+        cls.course.numbersOfControls = null;
+
         var personResults = $("> PersonResult", jqElement);
-        if (personResults.length === 0) {
+        var teamResults = $("> TeamResult", jqElement);
+
+        if (personResults.length > 0 && teamResults.length > 0) {
+            warnings.push("Class '" + className + "' has a combination of relay teams and individual results");
+            return null;
+        } else if (personResults.length > 0) {
+            for (var personIndex = 0; personIndex < personResults.length; personIndex += 1) {
+                parsePersonResult(personResults[personIndex], personIndex + 1, cls, reader, warnings);
+            }
+        } else if (teamResults.length > 0) {
+            for (var teamIndex = 0; teamIndex < teamResults.length; teamIndex += 1) {
+                parseTeamResult(teamResults[teamIndex], teamIndex + 1, cls, reader, warnings);
+            }
+        } else {
             warnings.push("Class '" + className + "' has no competitors");
             return null;
         }
-        
-        for (var index = 0; index < personResults.length; index += 1) {
-            var resultAndControls = parseCompetitor(personResults[index], index + 1, reader, warnings);
-            if (resultAndControls !== null) {
-                var result = resultAndControls.result;
-                var controls = resultAndControls.controls;
-                if (cls.results.length === 0 && !(result.isNonStarter && controls.length === 0)) {
-                    // First competitor (not including non-starters with no controls).
-                    // Record the list of controls.
-                    cls.controls = controls;
-                    
-                    // Set the number of controls on the course if we didn't read
-                    // it from the XML.  Assume the first competitor's number of
-                    // controls is correct.
-                    if (cls.course.numberOfControls === null) {
-                        cls.course.numberOfControls = cls.controls.length;
-                    }
-                }
 
-                // Subtract 2 for the start and finish cumulative times.
-                var actualControlCount = result.getAllOriginalCumulativeTimes().length - 2;
-                var warning = null;
-                if (result.isNonStarter && actualControlCount === 0) {
-                    // Don't generate warnings for non-starting competitors with no controls.
-                } else if (actualControlCount !== cls.course.numberOfControls) {
-                    warning = "Competitor '" + result.owner.name + "' in class '" + className + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;
-                } else {
-                    for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
-                        if (cls.controls[controlIndex] !== controls[controlIndex]) {
-                            warning = "Competitor '" + result.owner.name + "' has an unexpected control code at control " + (controlIndex + 1) +
-                                ": expected '" + cls.controls[controlIndex] + "', actual '" + controls[controlIndex] + "'";
-                            break;
-                        }
-                    }
-                }
-                
-                if (warning === null) {
-                    cls.results.push(result);
-                } else {
-                    warnings.push(warning);
-                }
-            }
-        }
-        
         if (cls.course.id === null && cls.controls.length > 0) {
             // No course ID given, so join the controls together with commas
             // and use that instead.  Course IDs are only used internally by
@@ -786,14 +950,24 @@
                 return;
             }
             
-            var courseClass = new CourseClass(parsedClass.name, parsedClass.controls.length, parsedClass.results);
+            var tempCourse = parsedClass.course;
+            
+            var numberOfControls;
+            var courseKey;
+            if (parsedClass.teams !== null && parsedClass.course.numbersOfControls !== null && parsedClass.course.numbersOfControls.length > 0) {
+                numberOfControls = arraySum(parsedClass.course.numbersOfControls) + parsedClass.teamSize - 1;
+                parsedClass.controls = null;
+                courseKey = null;
+            } else {
+                numberOfControls = parsedClass.controls.length;
+                courseKey = tempCourse.id + "," + parsedClass.controls.join(",");
+            }
+            
+            var courseClass = new CourseClass(parsedClass.name, numberOfControls, parsedClass.results);
             classes.push(courseClass);
             
-            // Add to each temporary course object a list of all classes.
-            var tempCourse = parsedClass.course;
-            var courseKey = tempCourse.id + "," + parsedClass.controls.join(",");
-            
-            if (tempCourse.id !== null && coursesMap.has(courseKey)) {
+            // Add to each temporary course object a list of all classes.           
+            if (tempCourse.id !== null && courseKey !== null && coursesMap.has(courseKey)) {
                 // We've come across this course before, so just add a class to
                 // it.
                 coursesMap.get(courseKey).classes.push(courseClass);
