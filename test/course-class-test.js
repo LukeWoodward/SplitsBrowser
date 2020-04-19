@@ -82,8 +82,9 @@
     
     QUnit.test("Course-class that has recorded that it is a team class reports itself as so.", function (assert) {
         var courseClass = getTestClass();
-        courseClass.setIsTeamClass();
+        courseClass.setIsTeamClass([3, 3]);
         assert.ok(courseClass.isTeamClass, "Course-class should be a team class");
+        assert.deepEqual(courseClass.numbersOfControls, [3, 3]);
     });
     
     QUnit.test("Creating a class with results sets the class name in each result's result", function (assert) {

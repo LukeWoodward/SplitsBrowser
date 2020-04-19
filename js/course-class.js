@@ -34,6 +34,7 @@
     function CourseClass(name, numControls, results) {
         this.name = name;
         this.numControls = numControls;
+        this.numbersOfControls = null;
         this.results = results;
         this.course = null;
         this.hasDubiousData = false;
@@ -54,9 +55,11 @@
     /**
     * Records that this course-class contains team results rather than
     * individual results.
+    * @param {Array} numbersOfControls The numbers of controls on the relay legs.
     */
-    CourseClass.prototype.setIsTeamClass = function () {
+    CourseClass.prototype.setIsTeamClass = function (numbersOfControls) {
         this.isTeamClass = true;
+        this.numbersOfControls = numbersOfControls;
     };
      
     /**

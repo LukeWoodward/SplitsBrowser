@@ -970,7 +970,7 @@
             
             var courseClass = new CourseClass(parsedClass.name, numberOfControls, parsedClass.results);
             if (isTeamClass) {
-                courseClass.setIsTeamClass();
+                courseClass.setIsTeamClass(parsedClass.course.numbersOfControls);
             }
             
             classes.push(courseClass);

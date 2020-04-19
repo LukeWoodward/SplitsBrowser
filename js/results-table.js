@@ -71,8 +71,8 @@
     * 
     * If there are some fractional times, then all times should be shown with
     * the same precision, even if not all of them need to.  For example, a
-    * a split time between controls punched after 62.7 and 108.7 seconds must
-    * be shown as 46.0 seconds, not 46.
+    * split time between controls punched after 62.7 and 108.7 seconds must be
+    * shown as 46.0 seconds, not 46.
     *
     * @param {Array} results - Array of Result objects.
     * @return {Number} Maximum precision to use.
@@ -175,16 +175,26 @@
             getMessage("ResultsTableHeaderTime")
         ];
         
-        var controls = this.courseClass.course.controls;
-        if (controls === null) {
-            headerCellData = headerCellData.concat(d3.range(1, this.courseClass.numControls + 1));
+        if (this.courseClass.isTeamClass) {
+            for (var legIndex = 0; legIndex < this.courseClass.numbersOfControls.length; legIndex += 1) {
+                var suffix = "-" + (legIndex + 1);
+                for (var controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[legIndex]; controlNumber += 1) {
+                    headerCellData.push(controlNumber + suffix);
+                }
+                headerCellData.push(getMessage("FinishName") + suffix);
+            }
         } else {
-            headerCellData = headerCellData.concat(controls.map(function (control, index) {
-                return (index + 1) + NON_BREAKING_SPACE_CHAR + "(" + control + ")";
-            }));
+            var controls = this.courseClass.course.controls;
+            if (controls === null) {
+                headerCellData = headerCellData.concat(d3.range(1, this.courseClass.numControls + 1));
+            } else {
+                headerCellData = headerCellData.concat(controls.map(function (control, index) {
+                    return (index + 1) + NON_BREAKING_SPACE_CHAR + "(" + control + ")";
+                }));
+            }
+                
+            headerCellData.push(getMessage("FinishName"));
         }
-            
-        headerCellData.push(getMessage("FinishName"));
         
         var headerCells = this.table.select("thead tr")
                                     .selectAll("th")

@@ -1534,6 +1534,7 @@
                     assert.strictEqual(courseClass.name, className);
                     assert.strictEqual(courseClass.results.length, 1, "One result should have been read - " + formatterName);
                     assert.strictEqual(courseClass.numControls, 7); // 3 numbered controls for each competitor plus 1 for the intermediate finish.
+                    assert.deepEqual(courseClass.numbersOfControls, [3, 3]);
                     assert.ok(courseClass.isTeamClass, "Course-class should be marked as a team class");
                     
                     if (courseClass.results.length === 1) {
@@ -1704,7 +1705,7 @@
                     assert.strictEqual(eventData.classes[0].results.length, 1, "One result should have been read in the individual class - " + formatterName);
                     assert.strictEqual(eventData.classes[0].name, classData[0].name, "Individual class should have correct name - " + formatterName);
                     assert.strictEqual(eventData.classes[1].results.length, 1, "One result should have been read in the relay class - " + formatterName);
-                    assert.strictEqual(eventData.classes[1].name, classData[1].name, "R class should have correct name - " + formatterName);
+                    assert.strictEqual(eventData.classes[1].name, classData[1].name, "Team class should have correct name - " + formatterName);
                 }
                 
                 assert.deepEqual(eventData.warnings, [], "No warnings should have been issued - " + formatterName);
