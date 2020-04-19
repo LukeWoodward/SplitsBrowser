@@ -396,13 +396,31 @@
         var table = d3.select("table.resultsTable");
         var tableHeaders = table.selectAll("thead tr th");
         assert.strictEqual(tableHeaders.size(), 11);
-        assert.strictEqual(tableHeaders.nodes()[3].innerHTML, "1-1");
-        assert.strictEqual(tableHeaders.nodes()[4].innerHTML, "2-1");
-        assert.strictEqual(tableHeaders.nodes()[5].innerHTML, "3-1");
-        assert.strictEqual(tableHeaders.nodes()[6].innerHTML, "Finish-1");
-        assert.strictEqual(tableHeaders.nodes()[7].innerHTML, "1-2");
-        assert.strictEqual(tableHeaders.nodes()[8].innerHTML, "2-2");
-        assert.strictEqual(tableHeaders.nodes()[9].innerHTML, "3-2");
-        assert.strictEqual(tableHeaders.nodes()[10].innerHTML, "Finish-2");
+        var controlHeaders = tableHeaders.nodes().slice(3).map(function (node) { return node.innerHTML; });
+        assert.deepEqual(controlHeaders, ["1-1", "2-1", "3-1", "Finish-1", "1-2", "2-2", "3-2", "Finish-2"]);
+    });
+    
+    QUnit.test("Can create a results table with two team results with different numbers of controls per leg and label the control headers", function (assert) {
+        var result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
+        var result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
+        var result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 103]);
+        var result2b = fromSplitTimes(2, "Fourth Runner", "ABC", 10 * 3600 + 596, [88, 192, 111]);
+        var team1 = new Team("Team 1", "DEF");
+        var team2 = new Team("Team 2", "ABC");
+        var courseClass = new CourseClass("Test", 3, [createTeamResult(1, [result1a, result1b], team1), createTeamResult(2, [result2a, result2b], team2)]);
+        courseClass.setIsTeamClass([3, 2]);
+        calculateRanks(courseClass);
+        
+        courseClass.setCourse(new Course("Test", [courseClass], 8.2, 270, null));
+        
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(courseClass);
+        
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
+        var table = d3.select("table.resultsTable");
+        var tableHeaders = table.selectAll("thead tr th");
+        assert.strictEqual(tableHeaders.size(), 10);
+        var controlHeaders = tableHeaders.nodes().slice(3).map(function (node) { return node.innerHTML; });
+        assert.deepEqual(controlHeaders, ["1-1", "2-1", "3-1", "Finish-1", "1-2", "2-2", "Finish-2"]);
     });
 })();
