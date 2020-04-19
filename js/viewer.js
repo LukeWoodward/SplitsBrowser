@@ -593,7 +593,7 @@
     Viewer.prototype.initClasses = function (classIndexes) {
         this.classSelector.selectClasses(classIndexes);
         this.setClasses(classIndexes);
-        this.resultList.setResultList(this.courseClassSet.allResults, (this.currentClasses.length > 1));
+        this.resultList.setResultList(this.courseClassSet.allResults, (this.currentClasses.length > 1), this.courseClassSet.hasTeamData());
         this.selection = new ResultSelection(this.courseClassSet.allResults.length);
         this.resultList.setSelection(this.selection);
         this.previousResultList = this.courseClassSet.allResults;
@@ -612,7 +612,7 @@
         }
         
         this.setClasses(classIndexes);
-        this.resultList.setResultList(this.courseClassSet.allResults, (this.currentClasses.length > 1));
+        this.resultList.setResultList(this.courseClassSet.allResults, (this.currentClasses.length > 1), this.courseClassSet.hasTeamData());
         this.selection.migrate(this.previousResultList, this.courseClassSet.allResults);
         this.resultList.selectionChanged();
         if (!this.chartTypeSelector.getChartType().isResultsTable) {

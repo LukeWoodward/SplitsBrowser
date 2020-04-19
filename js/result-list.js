@@ -57,6 +57,7 @@
         this.currentDragResultIndex = null;
         this.allResultDivs = [];
         this.inverted = false;
+        this.hasTeamData = false;
         this.placeholderDiv = null;
         
         this.changeHandlers = [];
@@ -131,9 +132,17 @@
     ResultList.prototype.retranslate = function () {
         this.setMessages();
         if (this.placeholderDiv !== null) {
-            this.placeholderDiv.text(getMessage("NoCompetitorsStarted"));
+            this.setPlaceholderDivText();
             this.fireChangeHandlers();
         }
+    };
+    
+    /**
+    * Sets the text in the placeholder div shown when the list of results
+    * contains only non-starters.
+    */
+    ResultList.prototype.setPlaceholderDivText = function () {
+        this.placeholderDiv.text(getMessage((this.hasTeamData) ? "NoTeamsStarted" : "NoCompetitorsStarted"));
     };
     
     /**
@@ -451,9 +460,12 @@
     * @param {Array} results - Array of result data.
     * @param {boolean} multipleClasses - Whether the list of results is
     *      made up from those in multiple classes.
+    * @param {boolean} hasTeamData - Whether the list of results shows
+    *      team data as opposed to individual data.
     */
-    ResultList.prototype.setResultList = function (results, multipleClasses) {
+    ResultList.prototype.setResultList = function (results, multipleClasses, hasTeamData) {
         this.allResults = results;
+        this.hasTeamData = hasTeamData;
         this.allResultDetails = this.allResults.map(function (result) {
             return { result: result, normedName: normaliseName(result.owner.name), visible: true };
         });
@@ -487,8 +499,8 @@
         
         if (this.allResults.length === 0) {
             this.placeholderDiv = this.listDiv.append("div")
-                                              .classed("resultListPlaceholder", true)
-                                              .text(getMessage("NoCompetitorsStarted"));
+                                              .classed("resultListPlaceholder", true);
+            this.setPlaceholderDivText();
         }
         
         this.allButton.property("disabled", this.allResults.length === 0);

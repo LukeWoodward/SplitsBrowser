@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+<ResultList xmlns="http://www.orienteering.org/datastandard/3.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" iofVersion="3.0">
+    <ClassResult>
+        <Class>
+            <Name>Team Class</Name>
+        </Class>
+        <TeamResult>
+            <Name>Non-Starting Team</Name>
+            <Organisation>
+                <ShortName>ABC</ShortName>
+            </Organisation>
+            <TeamMemberResult>
+                <Person>
+                    <Name>
+                        <Given>First</Given>
+                        <Family>Runner</Family>
+                    </Name>
+                </Person>
+                <Organisation>
+                    <ShortName>ABC</ShortName>
+                </Organisation>
+                <Result>
+                    <StartTime>2014-06-07T10:30:00</StartTime>
+                    <FinishTime>2014-06-07T10:44:12</FinishTime>
+                    <Time>0</Time>
+                    <Status>DidNotStart</Status>
+                    <SplitTime status="Missing">
+                        <ControlCode>212</ControlCode>
+                    </SplitTime>
+                    <SplitTime status="Missing">
+                        <ControlCode>229</ControlCode>
+                    </SplitTime>
+                    <SplitTime status="Missing">
+                        <ControlCode>208</ControlCode>
+                    </SplitTime>
+                </Result>
+            </TeamMemberResult>
+            <TeamMemberResult>
+                <Person>
+                    <Name>
+                        <Given>Second</Given>
+                        <Family>Runner</Family>
+                    </Name>
+                </Person>
+                <Organisation>
+                    <ShortName>ABC</ShortName>
+                </Organisation>
+                <Result>
+                    <StartTime>2014-06-07T10:44:12</StartTime>
+                    <FinishTime>2014-06-07T10:57:44</FinishTime>
+                    <Time>0</Time>
+                    <Status>DidNotStart</Status>
+                    <SplitTime>
+                        <ControlCode>212</ControlCode>
+                    </SplitTime>
+                    <SplitTime>
+                        <ControlCode>229</ControlCode>
+                    </SplitTime>
+                    <SplitTime>
+                        <ControlCode>208</ControlCode>
+                    </SplitTime>
+                </Result>
+            </TeamMemberResult>
+        </TeamResult>
+    </ClassResult>
+</ResultList>
