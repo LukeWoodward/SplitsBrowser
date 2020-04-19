@@ -1142,6 +1142,7 @@
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
             function (result) {
                 assert.strictEqual(result.isNonStarter, true);        
+                assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, null, null, null, null]);
             });
     });
     

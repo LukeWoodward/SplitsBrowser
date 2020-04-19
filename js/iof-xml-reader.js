@@ -646,6 +646,8 @@
         var startTime = reader.readStartTime(resultElement);
         
         var totalTime = reader.readTotalTime(resultElement);
+
+        var status = reader.getStatus(resultElement);
         
         var splitTimes = $("> SplitTime", resultElement).toArray();
         var splitData = splitTimes.filter(function (splitTime) { return !reader.isAdditional($(splitTime)); })
@@ -655,7 +657,9 @@
         var cumTimes = splitData.map(function (datum) { return datum.time; });
         
         cumTimes.unshift(0); // Prepend a zero time for the start.
-        cumTimes.push(totalTime);
+        
+        // Append the total time, ignoring any value given for a non-starter.
+        cumTimes.push((status === reader.StatusNonStarter) ? null : totalTime);
 
         var competitor = new Competitor(name, club);
 
@@ -668,8 +672,6 @@
         }
 
         var result = fromOriginalCumTimes(number, startTime, cumTimes, competitor);
-
-        var status = reader.getStatus(resultElement);
         
         if (status === "OK" && totalTime !== null && cumTimes.indexOf(null) >= 0) {
             result.setOKDespiteMissingTimes();
