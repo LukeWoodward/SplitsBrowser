@@ -35,8 +35,8 @@ SplitsBrowser.Messages.nl_nl = {
     FinishNameShort: "F", 
       
     // Button labels. 
-    SelectAllResults: "Allen", 
-    SelectNoResults: "Geen", 
+    SelectAllCompetitors: "Allen", 
+    SelectNoCompetitors: "Geen", 
     SelectCrossingRunners: "Kruisende lopers", 
       
     LowerXAxisChartLabel: "Tijd (min)", 
@@ -125,12 +125,14 @@ SplitsBrowser.Messages.nl_nl = {
     FastestLegTimePopupHeader: "Snelste tijd $$START$$ tot $$END$$", 
   
     // Header for the nearby-results dialog on the race graph. 
-    NearbyResultsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$", 
+    NearbyCompetitorsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$", 
       
-    // Placeholder text shown in the nearby-results dialog on the race 
-    // graph when there aren't any results visiting the control within the 
-    // +/- 2 minute window. 
-    NoNearbyResults: "Geen deelnemers",
+    // Placeholder text shown in the nearby-results dialog on the race
+    // graph when there aren't any competitors or teams visiting the control
+    // within the +/- 2 minute window.
+    NoNearbyCompetitors: "Geen deelnemers",
+    // TO BE TRANSLATED
+    NoNearbyTeams: "No nearby teams",
     
     // Link that appears at the top and opens SplitsBrowser with the settings
     // (selected classes, results, comparison, chart type, etc.) that are
@@ -141,7 +143,7 @@ SplitsBrowser.Messages.nl_nl = {
     // The placeholder text shown in the result-list filter box when no
     // text has been entered into this box.
     // TO BE TRANSLATED
-    ResultListFilter: "Filter",
+    CompetitorListFilter: "Filter",
     
     // Labels that appear beside a result on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
@@ -150,10 +152,12 @@ SplitsBrowser.Messages.nl_nl = {
     DidNotFinishShort: "dnf",
     DisqualifiedShort: "dsq",
     
-    // Placeholder message shown inside the result list if all results
+    // Placeholder message shown inside the result list if all competitors or teams
     // in the class did not start.
     // TO BE TRANSLATED
-    NoResultsStarted: "No competitors started",
+    NoCompetitorsStarted: "No competitors started",
+    // TO BE TRANSLATED
+    NoTeamsStarted: "No teams started",
     
     // Label of the language-selector control.
     // TO BE TRANSLATED

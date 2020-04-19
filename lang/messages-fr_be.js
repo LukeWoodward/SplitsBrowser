@@ -35,8 +35,8 @@ SplitsBrowser.Messages.fr_be = {
     FinishNameShort: "A",
     
     // Button labels.
-    SelectAllResults: "Tous",
-    SelectNoResults: "Aucun",
+    SelectAllCompetitors: "Tous",
+    SelectNoCompetitors: "Aucun",
     SelectCrossingRunners: "Coureurs rencontrés",
     
     LowerXAxisChartLabel: "Temps (min)",
@@ -125,12 +125,14 @@ SplitsBrowser.Messages.fr_be = {
     FastestLegTimePopupHeader: "Intermédiaire le plus rapide $$START$$ - $$END$$",
 
     // Header for the nearby-results dialog on the race graph.
-    NearbyResultsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
+    NearbyCompetitorsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
     
     // Placeholder text shown in the nearby-results dialog on the race
-    // graph when there aren't any results visiting the control within the
-    // +/- 2 minute window.
-    NoNearbyResults: "Aucun coureur",
+    // graph when there aren't any competitors or teams visiting the control
+    // within the +/- 2 minute window.
+    NoNearbyCompetitors: "Aucun coureur",
+    // TO BE TRANSLATED
+    NoNearbyTeams: "No nearby teams",
 
     // Link that appears at the top and opens SplitsBrowser with the settings
     // (selected classes, results, comparison, chart type, etc.) that are
@@ -140,7 +142,7 @@ SplitsBrowser.Messages.fr_be = {
     
     // The placeholder text shown in the result-list filter box when no
     // text has been entered into this box.
-    ResultListFilter: "Filtre",
+    CompetitorListFilter: "Filtre",
     
     // Labels that appear beside a result on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
@@ -148,9 +150,11 @@ SplitsBrowser.Messages.fr_be = {
     DidNotFinishShort: "ab",
     DisqualifiedShort: "dsq",
     
-    // Placeholder message shown inside the result list if all results
+    // Placeholder message shown inside the result list if all competitors or teams
     // in the class did not start.
-    NoResultsStarted: "Aucun coureur n'a encore pris le départ",
+    NoCompetitorsStarted: "Aucun coureur n'a encore pris le départ",
+    // TO BE TRANSLATED
+    NoTeamsStarted: "No teams started",
     
     // Label of the language-selector control.
     LanguageSelectorLabel: "Langue:",

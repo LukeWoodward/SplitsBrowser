@@ -36,8 +36,8 @@ SplitsBrowser.Messages.pt_br = {
     FinishNameShort: "F",
     
     // Button labels.
-    SelectAllResults: "Todos",
-    SelectNoResults: "Nenhum",
+    SelectAllCompetitors: "Todos",
+    SelectNoCompetitors: "Nenhum",
     SelectCrossingRunners: "Crossing runners",
     
     LowerXAxisChartLabel: "Tempo (min)",
@@ -125,12 +125,14 @@ SplitsBrowser.Messages.pt_br = {
     FastestLegTimePopupHeader: "Tempo da pernada mais rápida $$START$$ até $$END$$",
 
     // Cabeçalho dos concorrentes próximas diálogo no gráfico de corrida.
-    NearbyResultsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
+    NearbyCompetitorsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
     
     // Espaço reservado mostrado nos próximos concorrentes de diálogo no gráfico de
     // corrida quando não há quaisquer concorrentes que visitam o controle dentro do
     // +/- janela de 2 minutos.
-    NoNearbyResults: "Sem competidores",
+    NoNearbyCompetitors: "Sem competidores",
+    // TO BE TRANSLATED.
+    NoNearbyTeams: "No nearby teams",
     
     // Link that appears at the top and opens SplitsBrowser with the settings
     // (selected classes, results, comparison, chart type, etc.) that are
@@ -140,7 +142,7 @@ SplitsBrowser.Messages.pt_br = {
     
     // The placeholder text shown in the result-list filter box when no
     // text has been entered into this box.
-    ResultListFilter: "Filtro",
+    CompetitorListFilter: "Filtro",
     
     // Labels that appear beside a result on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
@@ -148,9 +150,11 @@ SplitsBrowser.Messages.pt_br = {
     DidNotFinishShort: "dnf",
     DisqualifiedShort: "dsq",
     
-    // Placeholder message shown inside the result list if all results
+    // Placeholder message shown inside the result list if all competitors or teams
     // in the class did not start.
-    NoResultsStarted: "Nenhum atleta partiu",
+    NoCompetitorsStarted: "Nenhum atleta partiu",
+    // TO BE TRANSLATED
+    NoTeamsStarted: "No teams started",
     
     // Label of the language-selector control.
     // TO BE TRANSLATED?

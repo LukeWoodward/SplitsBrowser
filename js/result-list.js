@@ -119,10 +119,10 @@
     * change of language.
     */
     ResultList.prototype.setMessages = function () {
-        this.allButton.text(getMessage("SelectAllResults"));
-        this.noneButton.text(getMessage("SelectNoResults"));
+        this.allButton.text(getMessage("SelectAllCompetitors"));
+        this.noneButton.text(getMessage("SelectNoCompetitors"));
         this.crossingRunnersButton.text(getMessage("SelectCrossingRunners"));
-        this.filter.attr("placeholder", getMessage("ResultListFilter"));
+        this.filter.attr("placeholder", getMessage("CompetitorListFilter"));
     };
     
     /**
@@ -131,7 +131,7 @@
     ResultList.prototype.retranslate = function () {
         this.setMessages();
         if (this.placeholderDiv !== null) {
-            this.placeholderDiv.text(getMessage("NoResultsStarted"));
+            this.placeholderDiv.text(getMessage("NoCompetitorsStarted"));
             this.fireChangeHandlers();
         }
     };
@@ -488,7 +488,7 @@
         if (this.allResults.length === 0) {
             this.placeholderDiv = this.listDiv.append("div")
                                               .classed("resultListPlaceholder", true)
-                                              .text(getMessage("NoResultsStarted"));
+                                              .text(getMessage("NoCompetitorsStarted"));
         }
         
         this.allButton.property("disabled", this.allResults.length === 0);

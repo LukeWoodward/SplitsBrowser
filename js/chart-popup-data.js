@@ -110,10 +110,10 @@
         }
         
         var title = getMessageWithFormatting(
-            "NearbyResultsPopupHeader",
+            "NearbyCompetitorsPopupHeader",
             {"$$START$$": formatTime(intervalStart), "$$END$$": formatTime(intervalEnd), "$$CONTROL$$": controlName});
         
-        return {title: title, data: resultData, placeholder: getMessage("NoNearbyResults")};
+        return {title: title, data: resultData, placeholder: getMessage("NoNearbyCompetitors")};
     };    
         
     /**

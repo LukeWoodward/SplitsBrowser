@@ -153,7 +153,7 @@
         var testTime = 10 * 3600 + 12 * 60;
         
         var expectedData = {
-            title: getMessageWithFormatting("NearbyResultsPopupHeader", {
+            title: getMessageWithFormatting("NearbyCompetitorsPopupHeader", {
                 "$$START$$": formatTime(testTime - 120),
                 "$$END$$": formatTime(testTime + 120),
                 "$$CONTROL$$": getMessageWithFormatting("ControlName", {"$$CODE$$": "189"})
@@ -162,7 +162,7 @@
                 { className: "Test class", highlight: true, name: "Name1", time: 36623 },
                 { className: "Test class", highlight: true, name: "Name2", time: 36630 }
             ],
-            placeholder: getMessage("NoNearbyResults")
+            placeholder: getMessage("NoNearbyCompetitors")
         };
         
         var actualData = ChartPopupData.getResultsVisitingCurrentControlPopupData(courseClassSet, eventData, 2, testTime);
@@ -180,7 +180,7 @@
         var testTime = 10 * 3600 + 12 * 60;
         
         var expectedData = {
-            title: getMessageWithFormatting("NearbyResultsPopupHeader", {
+            title: getMessageWithFormatting("NearbyCompetitorsPopupHeader", {
                 "$$START$$": formatTime(testTime - 120),
                 "$$END$$": formatTime(testTime + 120),
                 "$$CONTROL$$": getMessage("StartName")
@@ -189,7 +189,7 @@
                 { className: "Test class", highlight: true, name: "Name5", time: 36635 },
                 { className: "Test class", highlight: true, name: "Name6", time: 36762 }
             ],
-            placeholder: getMessage("NoNearbyResults")
+            placeholder: getMessage("NoNearbyCompetitors")
         };
         
         var actualData = ChartPopupData.getResultsVisitingCurrentControlPopupData(courseClassSet, eventData, 0, testTime);
@@ -207,7 +207,7 @@
         var testTime = 10 * 3600 + 28 * 60;
         
         var expectedData = {
-            title: getMessageWithFormatting("NearbyResultsPopupHeader", {
+            title: getMessageWithFormatting("NearbyCompetitorsPopupHeader", {
                 "$$START$$": formatTime(testTime - 120),
                 "$$END$$": formatTime(testTime + 120),
                 "$$CONTROL$$": getMessage("FinishName")
@@ -216,7 +216,7 @@
                 { className: "Test class", highlight: true, name: "Name8", time: 37661 },
                 { className: "Test class", highlight: true, name: "Name7", time: 37734 }
             ],
-            placeholder: getMessage("NoNearbyResults")
+            placeholder: getMessage("NoNearbyCompetitors")
         };
         
         var actualData = ChartPopupData.getResultsVisitingCurrentControlPopupData(courseClassSet, eventData, 4, testTime);
