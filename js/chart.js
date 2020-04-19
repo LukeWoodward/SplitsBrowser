@@ -583,9 +583,25 @@
     */
     Chart.prototype.getTickFormatter = function () {
         var outerThis = this;
-        return function (value, idx) {
-            return (idx === 0) ? getMessage("StartNameShort") : ((idx === outerThis.numControls + 1) ? getMessage("FinishNameShort") : idx.toString());
-        };
+        if (this.courseClassSet.hasTeamData()) {
+            var allControls = [getMessage("StartNameShort")];
+            var numbersOfControls = this.courseClassSet.classes[0].numbersOfControls;
+            for (var legIndex = 0; legIndex < numbersOfControls.length; legIndex += 1) {
+                for (var controlIndex = 1; controlIndex <= numbersOfControls[legIndex]; controlIndex += 1) {
+                    allControls.push(controlIndex.toString());
+                }
+                allControls.push(getMessage("FinishNameShort"));
+            }
+            
+            return function (value, idx) {
+                return allControls[idx];
+            };
+        }
+        else {
+            return function (value, idx) {
+                return (idx === 0) ? getMessage("StartNameShort") : ((idx === outerThis.numControls + 1) ? getMessage("FinishNameShort") : idx.toString());
+            };
+        }
     };
 
     /**

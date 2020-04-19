@@ -25,6 +25,8 @@
     var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
     var Competitor = SplitsBrowser.Model.Competitor;
+    var Team = SplitsBrowser.Model.Team;
+    var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var Course = SplitsBrowser.Model.Course;
@@ -70,12 +72,16 @@
         "03:41 (2)": 77,
         "09:56 (2)": 77,
         "00:00:00 Second Runner": 175,
-        "00:00:00 First Runner": 190
+        "00:00:00 First Runner": 190,
+        "Team 1": 70,
+        "Team 2": 70
     };
 
     var TEXT_HEIGHTS = {
         "Second Runner": 12,
-        "First Runner": 12
+        "First Runner": 12,
+        "Team 1": 12,
+        "Team 2": 12
     };
 
     // Dummy functions for returning the width/height of pieces of text.
@@ -119,19 +125,14 @@
     * @param {Array} competitors - Optional array of competitors.
     * @return {Object} Object containing a course-class set and event data.
     */
-    function getTestCourseClassSetAndEvent(results) {
+    function getTestCourseClass(results) {
         if (typeof results === "undefined") {
             var result1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
             var result2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
             results = [result1, result2];
         }
         
-        var courseClass = new CourseClass("Test", 3, results);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var course = new Course("Test course", [courseClass], null, null, null);
-        courseClass.setCourse(course);
-        var eventData = new Event([courseClass], [course]);
-        return {courseClassSet: courseClassSet, eventData: eventData};
+        return new CourseClass("Test", 3, results);
     }
     
     /**
@@ -142,13 +143,27 @@
     * @param {Array} results - Optional array of results.
     */
     function runChartCreationTest(assert, chartType, results) {
-        var courseClassSetAndEvent = getTestCourseClassSetAndEvent(results);
-        var fastestCumTimes = courseClassSetAndEvent.courseClassSet.getFastestCumTimes();
+        runChartCreationTestGivenCourseClass(assert, chartType, getTestCourseClass(results));
+    }
+    
+    /**
+    * Runs a test for creating a chart.  The test doesn't make any assertions;
+    * it just checks that the chart gets created successfully.
+	* @param {QUnit.assert} assert - QUnit assert object.
+    * @param {Object} chartType - The chart type.
+    * @param {CourseClass} courseClass - The course-class to run the tests on.
+    */
+    function runChartCreationTestGivenCourseClass(assert, chartType, courseClass) {
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var course = new Course("Test course", [courseClass], null, null, null);
+        courseClass.setCourse(course);
+        var eventData = new Event([courseClass], [course]);        
+        var fastestCumTimes = courseClassSet.getFastestCumTimes();
         var chart = createTestChart(chartType);
         var data = {
-            chartData: courseClassSetAndEvent.courseClassSet.getChartData(fastestCumTimes, [0, 1], chartType),
-            eventData: courseClassSetAndEvent.eventData,
-            courseClassSet: courseClassSetAndEvent.courseClassSet,
+            chartData: courseClassSet.getChartData(fastestCumTimes, [0, 1], chartType),
+            eventData: eventData,
+            courseClassSet: courseClassSet,
             referenceCumTimes: fastestCumTimes,
             fastestCumTimes: fastestCumTimes
         };
@@ -186,7 +201,21 @@
         
         results[1].setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         
-        runChartCreationTest(assert, DUMMY_CHART_TYPE_NO_SKIP);
+        runChartCreationTest(assert, DUMMY_CHART_TYPE_NO_SKIP, results);
     });
     
+    QUnit.test("Can create a chart for a team event", function (assert) {
+        var result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
+        var result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
+        var result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 199, 103]);
+        var result2b = fromSplitTimes(2, "Fourth Runner", "ABC", 10 * 3600 + 596, [88, 192, 220, 111]);
+        var team1 = new Team("Team 1", "DEF");
+        var team2 = new Team("Team 2", "ABC");
+        var results = [createTeamResult(1, [result1a, result1b], team1), createTeamResult(2, [result2a, result2b], team2)];
+
+        var courseClass = new CourseClass("Test", 7, results);
+        courseClass.setIsTeamClass([3, 3]);
+     
+        runChartCreationTestGivenCourseClass(assert, DUMMY_CHART_TYPE_NO_SKIP, courseClass);
+    });
 })();
