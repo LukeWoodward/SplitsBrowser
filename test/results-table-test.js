@@ -76,6 +76,8 @@
         assert.strictEqual(table.selectAll("tbody tr:first-child td").size(), 7);
         assert.strictEqual(table.selectAll("tbody tr:last-child td").size(), 7);    
         
+        assert.strictEqual(table.selectAll("tbody tr td[title]").size(), 0);
+        
         var topRowCells = $("tbody tr:first-child td", table.node());
         var cum1Cell = $("span:first-child", topRowCells[3]);
         assert.ok(cum1Cell.hasClass("fastest"));
@@ -381,8 +383,8 @@
         var result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 199, 103]);
         var result2b = fromSplitTimes(2, "Fourth Runner", "ABC", 10 * 3600 + 596, [88, 192, 220, 111]);
-        var team1 = new Team("Team 1", "DEF");
-        var team2 = new Team("Team 2", "ABC");
+        var team1 = new Team("Team 1", "DEF", [result1a.owner, result1b.owner]);
+        var team2 = new Team("Team 2", "ABC", [result2a.owner, result2b.owner]);
         var courseClass = new CourseClass("Test", 3, [createTeamResult(1, [result1a, result1b], team1), createTeamResult(2, [result2a, result2b], team2)]);
         courseClass.setIsTeamClass([3, 3]);
         calculateRanks(courseClass);
@@ -398,6 +400,9 @@
         assert.strictEqual(tableHeaders.size(), 11);
         var controlHeaders = tableHeaders.nodes().slice(3).map(function (node) { return node.innerHTML; });
         assert.deepEqual(controlHeaders, ["1-1", "2-1", "3-1", "Finish-1", "1-2", "2-2", "3-2", "Finish-2"]);
+        
+        assert.strictEqual(table.selectAll("tbody tr td[title]").size(), 2);
+        assert.strictEqual(table.selectAll("tbody tr td:nth-child(2)[title]").size(), 2);
     });
     
     QUnit.test("Can create a results table with two team results with different numbers of controls per leg and label the control headers", function (assert) {
@@ -405,8 +410,8 @@
         var result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         var result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 103]);
         var result2b = fromSplitTimes(2, "Fourth Runner", "ABC", 10 * 3600 + 596, [88, 192, 111]);
-        var team1 = new Team("Team 1", "DEF");
-        var team2 = new Team("Team 2", "ABC");
+        var team1 = new Team("Team 1", "DEF", [result1a.owner, result1b.owner]);
+        var team2 = new Team("Team 2", "ABC", [result2a.owner, result2b.owner]);
         var courseClass = new CourseClass("Test", 3, [createTeamResult(1, [result1a, result1b], team1), createTeamResult(2, [result2a, result2b], team2)]);
         courseClass.setIsTeamClass([3, 2]);
         calculateRanks(courseClass);

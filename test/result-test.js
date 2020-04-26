@@ -26,6 +26,8 @@
     var compareResults = SplitsBrowser.Model.compareResults;
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
     var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
+    var Competitor = SplitsBrowser.Model.Competitor;
+    var Team = SplitsBrowser.Model.Team;
 
     function signum(n) {
         return (n < 0) ? -1 : ((n > 0) ? 1 : 0);
@@ -853,14 +855,14 @@
     });   
 
     var teamResult1 = createTeamResult(1, [
-        fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {}),
-        fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533], {})
-    ], {});
+        fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], new Competitor("First Runner", "ABC")),
+        fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533], new Competitor("Second Runner", "ABC"))
+    ], new Team("Team 1", "ABC"));
 
     var teamResultWithMissingTime = createTeamResult(1, [
         fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {}),
         fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, null, 533], {})
-    ], {});
+    ], new Team("Team With Missing Time", "DEF"));
     
     var dubiousTeamResult = (function () {
         var cumTimes1 = [0, 65, 286, 470, 570];
@@ -871,18 +873,18 @@
         var result2 = fromOriginalCumTimes(1, 10 * 3600, cumTimes2, {});
         result2.setRepairedCumulativeTimes([0, 61, NaN, 430 ,533]);
     
-        return createTeamResult(1, [result1, result2], {});
+        return createTeamResult(1, [result1, result2], new Team("Team With Dubious Result", "GHI"));
     })();
     
     QUnit.test("Cannot create an empty team", function (assert) {
         SplitsBrowserTest.assertInvalidData(assert, function () {
-            createTeamResult(1, [], {});
+            createTeamResult(1, [], new Team("Team 1", "ABC"));
         });
     });
     
     QUnit.test("Cannot create a team with only one member", function (assert) {
         SplitsBrowserTest.assertInvalidData(assert, function () {
-            createTeamResult(1, [fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {})], {});
+            createTeamResult(1, [fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {})], new Team("Team 1", "ABC"));
         });
     });
 
@@ -921,7 +923,7 @@
         if (member2Action) {
             member2Action(result2);
         }
-        return createTeamResult(1, [result1, result2], {});
+        return createTeamResult(1, [result1, result2], new Team("Team 1", "ABC"));
     }
     
     QUnit.test("Ordinary team is not disqualified, non-starter, over-max-time nor non-competitive", function (assert) {
@@ -948,7 +950,7 @@
         var result2 = fromCumTimes(1, 10 * 3600 + 570, [0, null, null, null, null], {});
         result1.setNonStarter();
         result2.setNonStarter();
-        var teamResult = createTeamResult(1, [result1, result2], {});
+        var teamResult = createTeamResult(1, [result1, result2], new Team("Team 1", "ABC"));
         
         assert.ok(!teamResult.isDisqualified);
         assert.ok(teamResult.isNonStarter);
@@ -962,7 +964,7 @@
         var result1 = fromCumTimes(1, 10 * 3600, [0, null, null, null, null], {});
         var result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, 61, 254, 430, 533], {});
         result2.setNonStarter();
-        var teamResult = createTeamResult(1, [result1, result2], {});
+        var teamResult = createTeamResult(1, [result1, result2], new Team("Team 1", "ABC"));
         
         assert.ok(!teamResult.isDisqualified);
         assert.ok(!teamResult.isNonStarter);
@@ -977,7 +979,7 @@
         var result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, 61, 254, 430, 533], {});
         var result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, 71, 278, null, null], {});
         result3.setNonFinisher();
-        var teamResult = createTeamResult(1, [result1, result2, result3], {});
+        var teamResult = createTeamResult(1, [result1, result2, result3], new Team("Team 1", "ABC"));
         
         assert.ok(!teamResult.isDisqualified);
         assert.ok(!teamResult.isNonStarter);
@@ -992,7 +994,7 @@
         var result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, 61, 254, 430, 533], {});
         var result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, null, null, null, null], {});
         result3.setNonStarter();
-        var teamResult = createTeamResult(1, [result1, result2, result3], {});
+        var teamResult = createTeamResult(1, [result1, result2, result3], new Team("Team 1", "ABC"));
         
         assert.ok(!teamResult.isDisqualified);
         assert.ok(!teamResult.isNonStarter);
@@ -1008,7 +1010,7 @@
         var result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, null, null, null, null], {});
         result2.setNonFinisher();
         result3.setNonStarter();
-        var teamResult = createTeamResult(1, [result1, result2, result3], {});
+        var teamResult = createTeamResult(1, [result1, result2, result3], new Team("Team 1", "ABC"));
         
         assert.ok(!teamResult.isDisqualified);
         assert.ok(!teamResult.isNonStarter);
@@ -1024,7 +1026,7 @@
         var result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, null, null, null, null], {});
         result2.setNonStarter();
         result3.setNonStarter();
-        var teamResult = createTeamResult(1, [result1, result2, result3], {});
+        var teamResult = createTeamResult(1, [result1, result2, result3], new Team("Team 1", "ABC"));
         
         assert.ok(!teamResult.isDisqualified);
         assert.ok(!teamResult.isNonStarter);
@@ -1041,7 +1043,7 @@
         result1.setNonFinisher();
         result2.setNonStarter();
         result3.setNonStarter();
-        var teamResult = createTeamResult(1, [result1, result2, result3], {});
+        var teamResult = createTeamResult(1, [result1, result2, result3], new Team("Team 1", "ABC"));
         
         assert.ok(!teamResult.isDisqualified);
         assert.ok(!teamResult.isNonStarter);
@@ -1075,9 +1077,15 @@
         var teamResultOriginalTimesOnly = createTeamResult(1, [
             fromOriginalCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {}),
             fromOriginalCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533], {})
-        ], {});
+        ], new Team("Team 1", "ABC"));
         
         assert.deepEqual(teamResultOriginalTimesOnly.getAllOriginalCumulativeTimes(), [0, 65, 286, 470, 570, 631, 824, 1000, 1103]); 
         assert.strictEqual(teamResultOriginalTimesOnly.getAllCumulativeTimes(), null); 
+    });
+
+    QUnit.test("Team result has list of members", function (assert) {
+        assert.strictEqual(teamResult1.owner.members.length, 2);
+        assert.strictEqual("First Runner", teamResult1.owner.members[0].name);
+        assert.strictEqual("Second Runner", teamResult1.owner.members[1].name);        
     });
 })();

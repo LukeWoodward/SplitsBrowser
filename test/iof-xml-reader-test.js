@@ -1541,6 +1541,11 @@
                         var result = courseClass.results[0];
                         assert.strictEqual(result.owner.name, "TestTeam");
                         assert.strictEqual(result.owner.club, team.club);
+                        assert.strictEqual(result.owner.members.length, team.members.length);
+                        for (var index = 0; index < team.members.length; index += 1) {
+                            assert.strictEqual(result.owner.members[index].name, team.members[index].forename + " " + team.members[index].surname);
+                            assert.strictEqual(result.owner.members[index].club, team.members[index].club);
+                        }
                         assert.strictEqual(result.startTime, team.members[0].startTime);
                         assert.strictEqual(result.totalTime, team.members[0].totalTime + team.members[1].totalTime);
                         var expectedCumulativeTimes = [0].concat(team.members[0].cumTimes).concat([team.members[0].totalTime]).concat(team.members[1].cumTimes.map(function (time) { return team.members[0].totalTime + time; })).concat(result.totalTime);

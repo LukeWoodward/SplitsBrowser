@@ -25,6 +25,8 @@
     var ResultSelection = SplitsBrowser.Model.ResultSelection;
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
     var getMessage = SplitsBrowser.getMessage;
+    var Team = SplitsBrowser.Model.Team;
+    var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
 
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
 
@@ -198,6 +200,43 @@
     }
     
     /**
+    * Creates a list with three results in it, and return the list and the
+    * selection.
+    * @param {Array} selectedIndexes - Indexes of selected results in the selection.
+    * @param {boolean} multipleClasses - Whether the list of results is built from
+    *                                    multiple classes.
+    * @return 2-element object containing the selection and list.
+    */
+    function createSampleTeamList() {
+        var parent = d3.select("div#qunit-fixture").node();
+        
+        var resultList = [
+            createTeamResult(
+                1,
+                [fromSplitTimes(1, "First Runner", "CDO", 10 * 3600, [13, 96, 35]), fromSplitTimes(1, "Second Runner", "CDO", 10 * 3600 + 144, [19, 92, 37])],
+                new Team("First Team")
+            ),
+            createTeamResult(
+                2,
+                [fromSplitTimes(1, "Third Runner", "GHO", 10 * 3600, [15, 79, 41]), fromSplitTimes(1, "Fourth Runner", "GHO", 10 * 3600 + 135, [22, 100, 41])],
+                new Team("Second Team")
+            ),
+            createTeamResult(
+                3,
+                [fromSplitTimes(1, "Fifth Runner", "KLO", 10 * 3600, [18, 81, 37]), fromSplitTimes(1, "Sixth Runner", "KLO", 10 * 3600 + 136, [20, 99, 44])],
+                new Team("Third Team")
+            )
+        ];
+        
+        var selection = new ResultSelection(resultList.length);
+        
+        var list = new ResultList(parent, customAlert);
+        list.setResultList(resultList, false, true);
+        list.setSelection(selection);
+        return { selection: selection, list: list };
+    }
+    
+    /**
     * Creates a list with three options in it, set it up on the race graph
     * and return the list and the selection.
     * @param {Array} selectedIndexes - Indexes of selected results in the selection.
@@ -295,17 +334,35 @@
         assert.strictEqual(listAndSelection.list.getFilterText(), "test abc 123 DEF");
     });
 
-    QUnit.test("Can create a list for a single class with all results deselected and without class labels", function (assert) {
+    QUnit.test("Can create a list for a single individual class with all results deselected and without class labels", function (assert) {
         createSampleList([], false);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.result").size(), 3);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result[title]").size(), 0);
         assert.strictEqual(d3.selectAll("div#qunit-fixture span.resultClassLabel").size(), 0);
         assert.strictEqual(d3.selectAll("div#qunit-fixture button").size(), 3);
         assert.strictEqual(d3.selectAll("div#qunit-fixture input[type=text]").size(), 1);
         assert.ok(!$("div#qunit-fixture button")[0].disabled);
         assert.ok(!$("div#qunit-fixture button")[1].disabled);
         assert.ok(!d3.select("div#qunit-fixture input[type=text]").property("disabled"));
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.resultListPlaceholder").size(), 0);
+    });
+
+    QUnit.test("Can create a list for a single team class with all results deselected and with the correct tooltips", function (assert) {
+        createSampleTeamList([], false);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result[title]").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture span.resultClassLabel").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture button").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture input[type=text]").size(), 1);
+        assert.ok(!$("div#qunit-fixture button")[0].disabled);
+        assert.ok(!$("div#qunit-fixture button")[1].disabled);
+        assert.ok(!d3.select("div#qunit-fixture input[type=text]").property("disabled"));
+        
+        var titledNodes = d3.selectAll("div#qunit-fixture div.result[title]").nodes();
+        assert.strictEqual(titledNodes[0].getAttribute("title"), "First Runner\nSecond Runner");
+        assert.strictEqual(titledNodes[1].getAttribute("title"), "Third Runner\nFourth Runner");
+        assert.strictEqual(titledNodes[2].getAttribute("title"), "Fifth Runner\nSixth Runner");
     });
     
     QUnit.test("Can create a list for an empty class of individual results, with placeholder message", function (assert) {

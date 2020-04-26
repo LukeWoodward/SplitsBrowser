@@ -470,6 +470,13 @@
             return { result: result, normedName: normaliseName(result.owner.name), visible: true };
         });
         
+        var tooltipFunction;
+        if (hasTeamData) {
+            tooltipFunction = function (result) { return result.owner.members.map(function (competitor) { return competitor.name; }).join("\n"); };
+        } else {
+            tooltipFunction = function () { return null; };
+        }
+        
         if (this.placeholderDiv !== null) {
             this.placeholderDiv.remove();
             this.placeholderDiv = null;
@@ -480,7 +487,8 @@
         var outerThis = this;
         resultDivs.enter().append("div")
                           .classed("result", true)
-                          .classed("selected", function (result, index) { return outerThis.isSelected(index); });
+                          .classed("selected", function (result, index) { return outerThis.isSelected(index); })
+                          .attr("title", tooltipFunction);
 
         resultDivs.selectAll("span").remove();
         

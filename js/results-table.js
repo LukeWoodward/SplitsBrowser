@@ -229,10 +229,14 @@
         // Adds a two-line cell to the array of table-body HTML parts.
         // If truthy, cssClass is assumed to be HTML-safe and not require
         // escaping.
-        function addCell(topLine, bottomLine, cssClass, cumClasses, splitClasses) {
+        function addCell(topLine, bottomLine, cssClass, cumClasses, splitClasses, tooltip) {
             htmlBits.push("<td");
             if (cssClass) {
                 htmlBits.push(" class=\"" + cssClass + "\"");
+            }
+            
+            if (tooltip) {
+                htmlBits.push(" title=\"" + escapeHtml(tooltip) + "\"");
             }
             
             htmlBits.push("><span");
@@ -276,8 +280,15 @@
             
             htmlBits.push("</td>");
             
-            addCell(result.owner.name, result.owner.club, null, "", "");
-            addCell(getTimeOrStatus(result, precision), NON_BREAKING_SPACE_CHAR, "time", "", "");
+            var tooltipText;
+            if (this.courseClass.isTeamClass) {
+                tooltipText = result.owner.members.map(function (competitor) { return competitor.name; }).join("\n");
+            } else {
+                tooltipText = "";
+            }
+            
+            addCell(result.owner.name, result.owner.club, null, "", "", tooltipText);
+            addCell(getTimeOrStatus(result, precision), NON_BREAKING_SPACE_CHAR, "time", "", "", "");
             
             d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {
                 var cumTime = result.getOriginalCumulativeTimeTo(controlNum);
@@ -290,7 +301,7 @@
                 var isSplitDubious = result.isSplitTimeDubious(controlNum);
                 var isCumMissing = result.isOKDespiteMissingTimes && cumTime === null;
                 var isSplitMissing = result.isOKDespiteMissingTimes && splitTime === null;
-                addCell(formattedCumTime, formattedSplitTime, "time", timeClasses(isCumTimeFastest, isCumDubious, isCumMissing), timeClasses(isSplitTimeFastest, isSplitDubious, isSplitMissing));
+                addCell(formattedCumTime, formattedSplitTime, "time", timeClasses(isCumTimeFastest, isCumDubious, isCumMissing), timeClasses(isSplitTimeFastest, isSplitDubious, isSplitMissing), "");
             });
             
             htmlBits.push("</tr>\n");

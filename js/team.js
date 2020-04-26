@@ -33,5 +33,13 @@
         this.club = club;
     }
 
+    /**
+    * Sets the members of the team.
+    * @param {Array} members The members of the team.
+    */
+    Team.prototype.setMembers = function (members) {
+        this.members = members;
+    };
+
     SplitsBrowser.Model.Team = Team;
 })();

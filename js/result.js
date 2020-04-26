@@ -759,6 +759,7 @@
 
         // Firstly, compute offsets for each of the component results.
         var offsets = calculateOffsets(results);
+        owner.setMembers(results.map(function (result) { return result.owner; }));
         
         var originalCumTimes = calculateCumulativeTimesFromResults(
             results, offsets, function (result) { return result.originalCumTimes; });
