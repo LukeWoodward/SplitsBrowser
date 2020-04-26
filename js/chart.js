@@ -816,6 +816,15 @@
                                  .data(d3.range(refCumTimesSorted.length - 1));
         
         rects.enter().append("rect");
+        
+        var backgroundIndexes = [];
+        var numbersOfControls = (this.courseClassSet.hasTeamData()) ? this.courseClassSet.classes[0].numbersOfControls : [this.courseClassSet.numControls];
+        
+        for (var legIndex = 0; legIndex < numbersOfControls.length; legIndex += 1) {
+            for (var controlIndex = 0; controlIndex <= numbersOfControls[legIndex]; controlIndex += 1) {
+                backgroundIndexes.push(1 + controlIndex % 2 + (legIndex % 2) * 2);
+            }
+        }
 
         rects = this.svgGroup.selectAll("rect")
                                  .data(d3.range(refCumTimesSorted.length - 1));
@@ -823,7 +832,7 @@
              .attr("y", 0)
              .attr("width", function (index) { return outerThis.xScale(refCumTimesSorted[index + 1]) - outerThis.xScale(refCumTimesSorted[index]); })
              .attr("height", this.contentHeight)
-             .attr("class", function (index) { return (index % 2 === 0) ? "background1" : "background2"; });
+             .attr("class", function (index) { return "background" + backgroundIndexes[index]; });
 
         rects.exit().remove();
     };

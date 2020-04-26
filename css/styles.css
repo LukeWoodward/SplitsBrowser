@@ -132,6 +132,16 @@ svg rect.background2
     fill: #DDDDDD;
 }
 
+svg rect.background3
+{
+    fill: #E5E5DD;
+}
+
+svg rect.background4
+{
+    fill: #D4D4CC;
+}
+
 .axis path, .axis line
 {
     fill: none;
