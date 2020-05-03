@@ -169,5 +169,11 @@ SplitsBrowser.Messages.fr_be = {
     
     // Tooltip of the warning-triangle shown along the top if warnings were
     // issued reading in the file.
-    WarningsTooltip: "Impossible de lire toutes les données de cette compétition.  Un(e) ou plusieurs coureurs ou catégories peuvent avoir été omis.  Cliquer pour d'autres détails."
+    WarningsTooltip: "Impossible de lire toutes les données de cette compétition.  Un(e) ou plusieurs coureurs ou catégories peuvent avoir été omis.  Cliquer pour d'autres détails.",
+    
+    // Options in the leg-selector control when viewing results for a team.
+    // TO BE TRANSLATED
+    LegSelectorLabel: "Leg: ",
+    ShowAllLegs: "All",
+    ShowLeg: "Leg $$LEG_NUMBER$$"
 };

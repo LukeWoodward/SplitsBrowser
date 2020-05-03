@@ -169,5 +169,11 @@ SplitsBrowser.Messages.sl_si = {
 
     // Tooltip of the warning-triangle shown along the top if warnings were
     // issued reading in the file.
-    WarningsTooltip: "Vseh podatkov za to tekmovanje ni bilo mogoče prebrati. Enega ali več tekmovalcev ali kategorij smo izpustili.  Kliknite za več podrobnosti."
+    WarningsTooltip: "Vseh podatkov za to tekmovanje ni bilo mogoče prebrati. Enega ali več tekmovalcev ali kategorij smo izpustili.  Kliknite za več podrobnosti.",
+    
+    // Options in the leg-selector control when viewing results for a team.
+    // TO BE TRANSLATED
+    LegSelectorLabel: "Leg: ",
+    ShowAllLegs: "All",
+    ShowLeg: "Leg $$LEG_NUMBER$$"
 };

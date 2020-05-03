@@ -76,6 +76,7 @@ module.exports = function(grunt) {
                       'js/statistics-selector.js',
                       'js/chart-type-selector.js',
                       'js/original-data-selector.js',
+                      'js/leg-selector.js',
                       'js/chart-popup-data.js',
                       'js/chart-popup.js',
                       'js/chart.js',

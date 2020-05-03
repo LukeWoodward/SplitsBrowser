@@ -251,6 +251,7 @@
     QUnit.test("Course-class set made up of course-class without team data should not have team data", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
         assert.ok(!courseClassSet.hasTeamData());
+        assert.strictEqual(courseClassSet.getLegCount(), null);
     });
 
     QUnit.test("Course-class set made up of course-class with team data should have team data", function (assert) {
@@ -258,6 +259,7 @@
         courseClass.setIsTeamClass([3, 3]);
         var courseClassSet = new CourseClassSet([courseClass]);
         assert.ok(courseClassSet.hasTeamData());
+        assert.strictEqual(courseClassSet.getLegCount(), 2);
     });
 
     QUnit.test("Course-class set made up of two course-classes, one with team data and one without, should not have team data", function (assert) {
@@ -267,6 +269,18 @@
         var courseClass2 = new CourseClass("Test 2", 3, []);
         var courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
         assert.ok(!courseClassSet.hasTeamData());
+        assert.strictEqual(courseClassSet.getLegCount(), null);
+    });
+
+    QUnit.test("Course-class set made up of two team course-classes with different numbers of legs should not have a leg count", function (assert) {
+        // This is a combination that in practice shouldn't happen.
+        var courseClass1 = new CourseClass("Test 1", 3, []);
+        courseClass1.setIsTeamClass([3, 3]);
+        var courseClass2 = new CourseClass("Test 2", 3, []);
+        courseClass1.setIsTeamClass([3, 3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
+        assert.ok(!courseClassSet.hasTeamData());
+        assert.strictEqual(courseClassSet.getLegCount(), null);
     });
 
     QUnit.test("Course-class set with no course-classes should not have team data", function (assert) {
@@ -280,6 +294,7 @@
             getResult2WithNullSplitForControl2()
         ])]);
         assert.strictEqual(courseClassSet.getWinnerCumTimes(), null, "There should be no winner if there are no results that completed the course");
+        assert.strictEqual(courseClassSet.getLegCount(), null);
     });
 
     QUnit.test("Cumulative times of the winner of a single-class set are those with quickest time", function (assert) {

@@ -51,6 +51,7 @@
     var ChartTypeSelector = Controls.ChartTypeSelector;
     var ComparisonSelector = Controls.ComparisonSelector;
     var OriginalDataSelector = Controls.OriginalDataSelector;
+    var LegSelector = Controls.LegSelector;
     var StatisticsSelector = Controls.StatisticsSelector;
     var WarningViewer = Controls.WarningViewer;
     var ResultList = Controls.ResultList;
@@ -99,6 +100,7 @@
         this.classSelector = null;
         this.comparisonSelector = null;
         this.originalDataSelector = null;
+        this.legSelector = null;
         this.statisticsSelector = null;
         this.resultList = null;
         this.warningViewer = null;
@@ -255,6 +257,13 @@
     Viewer.prototype.addOriginalDataSelector = function () {
         this.originalDataSelector = new OriginalDataSelector(this.topPanel);
     };
+    
+    /**
+    * Adds the leg-selctor control to choose between legs on a relay class.
+    */
+    Viewer.prototype.addLegSelector = function () {
+        this.legSelector = new LegSelector(this.topPanel);
+    };
 
     /**
     * Adds a direct link which links directly to SplitsBrowser with the given
@@ -332,6 +341,7 @@
         this.addSpacer();
         this.addComparisonSelector();
         this.addOriginalDataSelector();
+        this.addLegSelector();
         this.addSpacer();
         this.addDirectLink();
         this.addWarningViewer();
@@ -562,6 +572,7 @@
         this.chartTypeSelector.setMessages();
         this.comparisonSelector.setMessages();
         this.originalDataSelector.setMessages();
+        this.legSelector.setMessages();
         this.setDirectLinkMessages();
         this.statisticsSelector.setMessages();
         this.warningViewer.setMessages();
@@ -584,6 +595,7 @@
         this.resultsTable.setClass(this.currentClasses.length > 0 ? this.currentClasses[0] : null);
         this.enableOrDisableRaceGraph();
         this.originalDataSelector.setVisible(this.courseClassSet.hasDubiousData());
+        this.legSelector.setCourseClassSet(this.courseClassSet);
     };
     
     /**

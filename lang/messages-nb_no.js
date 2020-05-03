@@ -169,5 +169,11 @@ SplitsBrowser.Messages.nb_no = {
     
     // Tooltip of the warning-triangle shown along the top if warnings were
     // issued reading in the file.
-    WarningsTooltip: "Det var ikke mulig å lese all data fra dette arrangementet. En eller flere utøvere eller klasser kan ha blitt utelatt. Klikk for mer informasjon."
+    WarningsTooltip: "Det var ikke mulig å lese all data fra dette arrangementet. En eller flere utøvere eller klasser kan ha blitt utelatt. Klikk for mer informasjon.",
+    
+    // Options in the leg-selector control when viewing results for a team.
+    // TO BE TRANSLATED
+    LegSelectorLabel: "Leg: ",
+    ShowAllLegs: "All",
+    ShowLeg: "Leg $$LEG_NUMBER$$"
 };

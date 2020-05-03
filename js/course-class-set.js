@@ -151,6 +151,32 @@
     CourseClassSet.prototype.hasTeamData = function () {
         return this.classes.length > 0 && this.classes.every(function (courseClass) { return courseClass.isTeamClass; });
     };
+    
+    /**
+    * Returns the number of legs in this course-class set, if this
+    * course-class set contains team data.  If not, or the number of
+    * legs among the classes is inconsistent, null is returned.
+    * @return {Number} The number of legs in the team class, or null
+    *     if this can't be determined.
+    */
+    CourseClassSet.prototype.getLegCount = function() {
+        var legCount = null;
+        for (var classIndex = 0; classIndex < this.classes.length; classIndex += 1) {
+            if (this.classes[classIndex].isTeamClass) {
+                var thisLegCount = this.classes[classIndex].numbersOfControls.length;
+                if (legCount === null) {
+                    legCount = thisLegCount;
+                } else if (legCount !== thisLegCount) {
+                    // Inconsistent leg counts?
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+        
+        return legCount;
+    };
 
     /**
     * Return a list of objects that describe when the given array of times has
