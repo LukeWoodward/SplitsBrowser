@@ -58,7 +58,7 @@
                             
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
 
-        this.options = [];
+        this.options = null;
         
         this.dropDown.selectedIndex = 0;
         
@@ -118,7 +118,7 @@
         this.courseClassSet = courseClassSet;
         this.legCount = this.courseClassSet.getLegCount();
         if (this.legCount === null) {
-            this.options = [];
+            this.options = null;
             d3.select(this.dropDown).selectAll("option").remove();
             this.containerDiv.style("display", "none");
         } else {
@@ -126,15 +126,49 @@
             this.containerDiv.style("display", null);
             this.dropDown.selectedIndex = 0;
         }
-   };
-
+    };
     
+    /**
+    * Returns the selected leg, i.e. the (0-based) leg index if a leg has been
+    * chosen, or null if all legs are visible or a team class is not being
+    * shown.
+    * @return {Number?} Leg index, or null.
+    */
+    LegSelector.prototype.getSelectedLeg = function () {
+        if (this.options === null) {
+            return null;
+        }
+            
+        var dropDownIndex = Math.max(this.dropDown.selectedIndex, 0);        
+        return (dropDownIndex === 0) ? null : dropDownIndex - 1;
+    };
+    
+    /**
+    * Returns the selected leg, i.e. the (0-based) leg index if a leg has been
+    * chosen, or null if all legs are visible or a team class is not being
+    * shown.
+    * @return {Number?} Leg index, or null.
+    */
+    LegSelector.prototype.setSelectedLeg = function (selectedLeg) {
+        if (this.options === null) {
+            // Not a relay class so do nothing.
+            return;
+        }
+        
+        var dropDownIndexToSet = (selectedLeg === null) ? 0 : selectedLeg + 1;
+        if (dropDownIndexToSet < 0 || dropDownIndexToSet >= this.options.size()) {
+            dropDownIndexToSet = 0;
+        }
+        
+        this.dropDown.selectedIndex = dropDownIndexToSet;
+        this.onSelectionChanged();
+    };
+
     /**
     * Handle a change of the selected option in the drop-down list.
     */
     LegSelector.prototype.onSelectionChanged = function() {
-        var dropDownIndex = Math.max(this.dropDown.selectedIndex, 0);        
-        var selectedLeg = (dropDownIndex === 0) ? null : dropDownIndex - 1;
+        var selectedLeg = this.getSelectedLeg();
         this.changeHandlers.forEach(function (handler) { handler(selectedLeg); });
     };
     

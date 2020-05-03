@@ -22,6 +22,7 @@
 (function () {
     "use strict";
     
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     
@@ -335,12 +336,41 @@
     * Formats the show-original-data flag into the given query-string.
     * @param {String} queryString - The original query-string.
     * @param {boolean} showOriginal - True to show original data, false not to.
-    * @return {String} queryString - The query-string with the show-original
-    *     data flag formatted in.
+    * @return {String} The query-string with the show-original-data flag
+    *     formatted in.
     */
     function formatShowOriginal(queryString, showOriginal) {
         queryString = removeAll(queryString, SHOW_ORIGINAL_REGEXP);
         return (showOriginal) ? queryString + "&showOriginal=1" : queryString;
+    }
+    
+    var SELECTED_LEG_REGEXP = /(?:^|&|\?)selectedLeg=([^&]*)/;
+    
+    /**
+    * Reads the selected leg from the given query-string
+    * @param {String} queryString - The query-string to read.
+    * @return {Number?} The selected leg, or null for none.
+    */
+    function readSelectedLeg(queryString) {
+        var selectedLegMatch = SELECTED_LEG_REGEXP.exec(queryString);
+        if (selectedLegMatch === null) {
+            return null;
+        } else {
+            var legIndex = parseInt(selectedLegMatch[1], 10);
+            return (isNaNStrict(legIndex)) ? null : legIndex;
+        }
+    }
+    
+    /**
+    * Formats the selected leg into the given query-string.
+    * @param {String} queryString  The original query-string.
+    * @param {Number?} selectedLeg - The selected leg, or null for none.
+    * @return {String} The query string with the selected-leg value formatted
+    *     in.
+    */
+    function formatSelectedLeg(queryString, selectedLeg) {
+       queryString = removeAll(queryString, SELECTED_LEG_REGEXP);
+       return (selectedLeg === null) ? queryString : queryString + "&selectedLeg=" + encodeURIComponent(selectedLeg);
     }
     
     var FILTER_TEXT_REGEXP = /(?:^|&|\?)filterText=([^&]*)/;
@@ -389,6 +419,7 @@
             selected: readSelectedResults(queryString, courseClassSet),
             stats: readSelectedStatistics(queryString),
             showOriginal: readShowOriginal(queryString),
+            selectedLeg: readSelectedLeg(queryString),
             filterText: readFilterText(queryString)
         };
     }
@@ -415,6 +446,7 @@
         queryString = formatSelectedResults(queryString, courseClassSet, data.selected);
         queryString = formatSelectedStatistics(queryString, data.stats);
         queryString = formatShowOriginal(queryString, data.showOriginal);
+        queryString = formatSelectedLeg(queryString, data.selectedLeg);
         queryString = formatFilterText(queryString, data.filterText);
         queryString = queryString.replace(/^\??&/, "");
         return queryString;

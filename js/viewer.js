@@ -304,6 +304,7 @@
             selected: this.selection.getSelectedIndexes(),
             stats: this.statisticsSelector.getVisibleStatistics(),
             showOriginal: this.courseClassSet.hasDubiousData() && this.originalDataSelector.isOriginalDataSelected(),
+            selectedLeg: this.legSelector.getSelectedLeg(),
             filterText: this.resultList.getFilterText()
         };
         
@@ -525,6 +526,13 @@
         };
         
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
+
+        this.legSelectorChangeHandler = function () {
+            // TODO finish this off
+            outerThis.updateDirectLink();
+        };
+        
+        this.legSelector.registerChangeHandler(this.legSelectorChangeHandler);
 
         this.updateControlEnabledness();
         if (this.classes.length > 0) {
@@ -762,6 +770,10 @@
         if (parsedQueryString.showOriginal && this.courseClassSet.hasDubiousData()) {
             this.originalDataSelector.selectOriginalData();
             this.selectOriginalOrRepairedData(true);
+        }
+        
+        if (parsedQueryString.selectedLeg !== null) {
+            this.legSelector.setSelectedLeg(parsedQueryString.selectedLeg);
         }
         
         if (parsedQueryString.filterText !== "") {
