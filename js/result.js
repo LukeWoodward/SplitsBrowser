@@ -140,6 +140,7 @@
         this.cumRanks = null;
         this.timeLosses = null;
         this.className = null;
+        this.constituents = null;
 
         this.totalTime = (originalCumTimes === null || originalCumTimes.indexOf(null) > -1) ? null : originalCumTimes[originalCumTimes.length - 1];
     }
@@ -771,6 +772,7 @@
             teamResult.splitTimes = splitTimesFromCumTimes(teamResult.cumTimes);
         }
         
+        teamResult.constituents = results;
         teamResult.determineAggregateStatus(results);
         return teamResult;
     };
