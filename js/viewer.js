@@ -391,6 +391,7 @@
         this.chartTypeSelector.registerChangeHandler(function (chartType) { outerThis.selectChartTypeAndRedraw(chartType); });
         this.comparisonSelector.registerChangeHandler(function (comparisonFunc) { outerThis.selectComparison(comparisonFunc); });
         this.originalDataSelector.registerChangeHandler(function (showOriginalData) { outerThis.showOriginalOrRepairedData(showOriginalData); });
+        this.legSelector.registerChangeHandler(function () { outerThis.handleLegSelectionChanged(); });
         this.resultList.registerChangeHandler(function () { outerThis.handleFilterTextChanged(); });
     };
 
@@ -526,13 +527,6 @@
         };
         
         this.statisticsSelector.registerChangeHandler(this.statisticsChangeHandler);
-
-        this.legSelectorChangeHandler = function () {
-            // TODO finish this off
-            outerThis.updateDirectLink();
-        };
-        
-        this.legSelector.registerChangeHandler(this.legSelectorChangeHandler);
 
         this.updateControlEnabledness();
         if (this.classes.length > 0) {
@@ -717,7 +711,15 @@
         this.drawChart();
         this.updateDirectLink();
     };
-    
+
+    /**
+    * Handles a change in the selected leg.
+    */
+    Viewer.prototype.handleLegSelectionChanged = function () {
+        // TODO finish this off
+        this.updateDirectLink();
+    };
+
     /**
     * Handles a change in the filter text in the result list.
     */
