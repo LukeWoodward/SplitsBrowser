@@ -437,23 +437,6 @@
     function normaliseName(name) {
         return name.toLowerCase().replace(/\W/g, "");
     }
-    
-    /**
-    * Returns the text to show for a result's name.
-    * @param {Result} The result.
-    * @return {String} The text to show for a result's name.
-    */
-    function resultText(result) {
-        if (result.completed()) {
-            // \u00a0 is a non-breaking space.  We substitute this in place of
-            // a blank name to prevent the height of the item being dropped to
-            // a few pixels.
-            return (result.owner.name === "") ? "\u00a0" : result.owner.name;
-        }
-        else {
-            return "* " + result.owner.name;
-        }
-    }
 
     /**
     * Sets the list of results.
@@ -462,8 +445,35 @@
     *      made up from those in multiple classes.
     * @param {boolean} hasTeamData - Whether the list of results shows
     *      team data as opposed to individual data.
+    * @param {Number?} selectedLegIndex  - The selected leg index, or
+    *      null to show the team.
     */
-    ResultList.prototype.setResultList = function (results, multipleClasses, hasTeamData) {
+    ResultList.prototype.setResultList = function (results, multipleClasses, hasTeamData, selectedLegIndex) {
+        /**
+        * Returns the text to show for a result's name.
+        * @param {Result} The result.
+        * @return {String} The text to show for a result's name.
+        */
+        function resultText(result) {
+            var name;
+            if (hasTeamData && selectedLegIndex !== null) {
+                name = result.owner.members[selectedLegIndex].name;
+            }
+            else {
+                name = result.owner.name;
+            }
+            
+            if (result.completed()) {
+                // \u00a0 is a non-breaking space.  We substitute this in place of
+                // a blank name to prevent the height of the item being dropped to
+                // a few pixels.
+                return (name === "") ? "\u00a0" : name;
+            }
+            else {
+                return "* " + name;
+            }
+        }
+        
         this.allResults = results;
         this.hasTeamData = hasTeamData;
         this.allResultDetails = this.allResults.map(function (result) {

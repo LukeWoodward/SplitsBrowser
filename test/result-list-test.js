@@ -194,7 +194,7 @@
         selectedIndexes.forEach(function (index) { selection.toggle(index); });
         
         var list = new ResultList(parent, customAlert);
-        list.setResultList(resultList, multipleClasses, false);
+        list.setResultList(resultList, multipleClasses, false, null);
         list.setSelection(selection);
         return { selection: selection, list: list };
     }
@@ -214,24 +214,24 @@
             createTeamResult(
                 1,
                 [fromSplitTimes(1, "First Runner", "CDO", 10 * 3600, [13, 96, 35]), fromSplitTimes(1, "Second Runner", "CDO", 10 * 3600 + 144, [19, 92, 37])],
-                new Team("First Team")
+                new Team("First Team", "CDO")
             ),
             createTeamResult(
                 2,
                 [fromSplitTimes(1, "Third Runner", "GHO", 10 * 3600, [15, 79, 41]), fromSplitTimes(1, "Fourth Runner", "GHO", 10 * 3600 + 135, [22, 100, 41])],
-                new Team("Second Team")
+                new Team("Second Team", "GHO")
             ),
             createTeamResult(
                 3,
                 [fromSplitTimes(1, "Fifth Runner", "KLO", 10 * 3600, [18, 81, 37]), fromSplitTimes(1, "Sixth Runner", "KLO", 10 * 3600 + 136, [20, 99, 44])],
-                new Team("Third Team")
+                new Team("Third Team", "KLO")
             )
         ];
         
         var selection = new ResultSelection(resultList.length);
         
         var list = new ResultList(parent, customAlert);
-        list.setResultList(resultList, false, true);
+        list.setResultList(resultList, false, true, null);
         list.setSelection(selection);
         return { selection: selection, list: list };
     }
@@ -360,15 +360,38 @@
         assert.ok(!d3.select("div#qunit-fixture input[type=text]").property("disabled"));
         
         var titledNodes = d3.selectAll("div#qunit-fixture div.result[title]").nodes();
+        assert.strictEqual(titledNodes.length, 3);
         assert.strictEqual(titledNodes[0].getAttribute("title"), "First Runner\nSecond Runner");
         assert.strictEqual(titledNodes[1].getAttribute("title"), "Third Runner\nFourth Runner");
         assert.strictEqual(titledNodes[2].getAttribute("title"), "Fifth Runner\nSixth Runner");
+    });
+
+    QUnit.test("Can create a list for the first leg of a team class", function (assert) {
+        var list = createSampleTeamList([], false).list;
+        list.setResultList(list.allResults, false, true, 0);
+        
+        var nodes = d3.selectAll("div#qunit-fixture div.result").nodes();
+        assert.strictEqual(nodes.length, 3);
+        assert.strictEqual(d3.select(nodes[0]).text(), "First Runner");
+        assert.strictEqual(d3.select(nodes[1]).text(), "Third Runner");
+        assert.strictEqual(d3.select(nodes[2]).text(), "Fifth Runner");
+    });
+
+    QUnit.test("Can create a list for the second leg of a team class", function (assert) {
+        var list = createSampleTeamList([], false).list;
+        list.setResultList(list.allResults, false, true, 1);
+        
+        var nodes = d3.selectAll("div#qunit-fixture div.result").nodes();
+        assert.strictEqual(nodes.length, 3);
+        assert.strictEqual(d3.select(nodes[0]).text(), "Second Runner");
+        assert.strictEqual(d3.select(nodes[1]).text(), "Fourth Runner");
+        assert.strictEqual(d3.select(nodes[2]).text(), "Sixth Runner");
     });
     
     QUnit.test("Can create a list for an empty class of individual results, with placeholder message", function (assert) {
         var parent = d3.select("div#qunit-fixture").node();
         var list = new ResultList(parent, customAlert);
-        list.setResultList([], false, false);
+        list.setResultList([], false, false, null);
         list.setSelection(new ResultSelection(0));
         assert.ok($("div#qunit-fixture button")[0].disabled);
         assert.ok($("div#qunit-fixture button")[1].disabled);
@@ -380,7 +403,7 @@
     QUnit.test("Can create a list for an empty class of team results, with placeholder message", function (assert) {
         var parent = d3.select("div#qunit-fixture").node();
         var list = new ResultList(parent, customAlert);
-        list.setResultList([], false, true);
+        list.setResultList([], false, true, null);
         list.setSelection(new ResultSelection(0));
         assert.ok($("div#qunit-fixture button")[0].disabled);
         assert.ok($("div#qunit-fixture button")[1].disabled);
@@ -392,12 +415,12 @@
     QUnit.test("Can create a list for an empty class of results and then a non-empty list, removing placeholder div", function (assert) {
         var parent = d3.select("div#qunit-fixture").node();
         var list = new ResultList(parent, customAlert);
-        list.setResultList([], false, false);
+        list.setResultList([], false, false, null);
         list.setSelection(new ResultSelection(0));
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.resultListPlaceholder").size(), 1);
         
         var compList = [fromSplitTimes(1, "First Runner", "CDO", 10 * 3600, [13, 96, 35])];
-        list.setResultList(compList, false, false);
+        list.setResultList(compList, false, false, null);
         list.setSelection(new ResultSelection(1));
         assert.ok(!$("div#qunit-fixture button")[0].disabled);
         assert.ok(!$("div#qunit-fixture button")[1].disabled);
@@ -1158,7 +1181,7 @@
             fromSplitTimes(3, "Sixth O'Runner", "KLO", 10 * 3600 + 33, [18, 81, 37])
         ];
         
-        listAndSelection.list.setResultList(newResults, false, false);
+        listAndSelection.list.setResultList(newResults, false, false, null);
         listAndSelection.list.setSelection(new ResultSelection(newResults.length));
         
         for (i = 0; i < 3; i += 1) {

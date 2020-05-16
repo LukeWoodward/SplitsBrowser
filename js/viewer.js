@@ -607,7 +607,7 @@
     Viewer.prototype.initClasses = function (classIndexes) {
         this.classSelector.selectClasses(classIndexes);
         this.setClasses(classIndexes);
-        this.resultList.setResultList(this.courseClassSet.allResults, (this.currentClasses.length > 1), this.courseClassSet.hasTeamData());
+        this.resultList.setResultList(this.courseClassSet.allResults, (this.currentClasses.length > 1), this.courseClassSet.hasTeamData(), null);
         this.selection = new ResultSelection(this.courseClassSet.allResults.length);
         this.resultList.setSelection(this.selection);
         this.previousResultList = this.courseClassSet.allResults;
@@ -626,7 +626,7 @@
         }
         
         this.setClasses(classIndexes);
-        this.resultList.setResultList(this.courseClassSet.allResults, (this.currentClasses.length > 1), this.courseClassSet.hasTeamData());
+        this.resultList.setResultList(this.courseClassSet.allResults, (this.currentClasses.length > 1), this.courseClassSet.hasTeamData(), null);
         this.selection.migrate(this.previousResultList, this.courseClassSet.allResults);
         this.resultList.selectionChanged();
         if (!this.chartTypeSelector.getChartType().isResultsTable) {
@@ -717,6 +717,7 @@
     */
     Viewer.prototype.handleLegSelectionChanged = function () {
         // TODO finish this off
+        this.resultList.setResultList(this.courseClassSet.allResults, (this.currentClasses.length > 1), this.courseClassSet.hasTeamData(), this.legSelector.getSelectedLeg());
         this.updateDirectLink();
     };
 
