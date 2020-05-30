@@ -72,8 +72,8 @@
         var result2 = fromCumTimes(2, 10 * 3600, [0, 65, 286, 495, 595], {});
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
 
-        assert.deepEqual(chartType.dataSelector(result1), [2, 1, 1, 2]);
-        assert.deepEqual(chartType.dataSelector(result2), [1, 2, 2, 1]);
+        assert.deepEqual(chartType.dataSelector(result1), [null, 2, 1, 1, 2]);
+        assert.deepEqual(chartType.dataSelector(result2), [null, 1, 2, 2, 1]);
     });
     
     QUnit.test("Split position returns split ranks", function (assert) {
@@ -82,8 +82,8 @@
         var result2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 209, 100]);
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
         
-        assert.deepEqual(chartType.dataSelector(result1), [2, 1, 2, 2]);
-        assert.deepEqual(chartType.dataSelector(result2), [1, 2, 1, 1]);
+        assert.deepEqual(chartType.dataSelector(result1), [null, 2, 1, 2, 2]);
+        assert.deepEqual(chartType.dataSelector(result2), [null, 1, 2, 1, 1]);
     });
     
     QUnit.test("Percent behind returns percents behind the reference time.", function (assert) {
@@ -102,10 +102,10 @@
         });
     });
     
-    QUnit.test("Only the position-after-leg and split-position chart types skip the start", function (assert) {
+    QUnit.test("No chart types skip the start", function (assert) {
         ALL_CHART_TYPES.forEach(function (chartType) {
             if (chartType !== ChartTypes.ResultsTable) {
-                assert.strictEqual(chartType.skipStart, chartType === ChartTypes.PositionAfterLeg || chartType === ChartTypes.SplitPosition);
+                assert.strictEqual(chartType.skipStart, false);
             }
         });
     });

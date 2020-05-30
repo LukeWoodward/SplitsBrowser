@@ -358,7 +358,7 @@
     * @return {Number} The split rank to the given control.
     */
     Result.prototype.getSplitRankTo = function (controlIndex) {
-        return (this.splitRanks === null || controlIndex === 0) ? null : this.splitRanks[controlIndex - 1];
+        return (this.splitRanks === null) ? null : this.splitRanks[controlIndex];
     };
     
     /**
@@ -370,7 +370,7 @@
     * @return {Number} The cumulative rank to the given control.
     */
     Result.prototype.getCumulativeRankTo = function (controlIndex) {
-        return (this.cumRanks === null || controlIndex === 0) ? null : this.cumRanks[controlIndex - 1];
+        return (this.cumRanks === null) ? null : this.cumRanks[controlIndex];
     };
     
     /**
@@ -425,11 +425,17 @@
     };
     
     /**
-    * Sets the split and cumulative-split ranks for this result.
+    * Sets the split and cumulative-split ranks for this result.  The first
+    * items in both arrays should be null, to indicate that the split and
+    * cumulative ranks don't make any sense at the start.
     * @param {Array} splitRanks - Array of split ranks for this result.
     * @param {Array} cumRanks - Array of cumulative-split ranks for this result.
     */
     Result.prototype.setSplitAndCumulativeRanks = function (splitRanks, cumRanks) {
+        if (splitRanks[0] !== null || cumRanks[0] !== null) {
+            throwInvalidData("Split and cumulative ranks arrays must both start with null");
+        }
+        
         this.splitRanks = splitRanks;
         this.cumRanks = cumRanks;
     };

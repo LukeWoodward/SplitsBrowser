@@ -74,7 +74,7 @@
         PositionAfterLeg: {
             nameKey:  "PositionAfterLegChartType",
             dataSelector: function (result) { return result.cumRanks; },
-            skipStart: true,
+            skipStart: false,
             yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
@@ -84,7 +84,7 @@
         SplitPosition: {
             nameKey: "SplitPositionChartType",
             dataSelector: function (result) { return result.splitRanks; },
-            skipStart: true,
+            skipStart: false,
             yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,

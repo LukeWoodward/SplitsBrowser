@@ -398,9 +398,10 @@
         var splitRanksByResult = [];
         var cumRanksByResult = [];
         
+        // Begin with null ranks for the start.
         this.allResults.forEach(function () {
-            splitRanksByResult.push([]);
-            cumRanksByResult.push([]);
+            splitRanksByResult.push([null]);
+            cumRanksByResult.push([null]);
         });
         
         d3.range(1, this.numControls + 2).forEach(function (control) {
@@ -413,9 +414,8 @@
             // We want to null out all subsequent cumulative ranks after a
             // result mispunches.
             var cumSplitsByResult = this.allResults.map(function (result, idx) {
-                // -1 for previous control, another -1 because the cumulative
-                // time to control N is cumRanksByResult[idx][N - 1].
-                if (control > 1 && cumRanksByResult[idx][control - 1 - 1] === null && !result.isOKDespiteMissingTimes) {
+                // -1 for previous control.
+                if (control > 1 && cumRanksByResult[idx][control - 1] === null && !result.isOKDespiteMissingTimes) {
                     // This result has no cumulative rank for the previous
                     // control, and is not recorded as OK despite missing times,
                     // so either they mispunched it or mispunched a previous one.

@@ -683,14 +683,13 @@
     
     QUnit.test("Returns non-null value for cumulative rank when ranks set", function (assert) {
         var result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
-        result.setSplitAndCumulativeRanks([1, 1, 1, 1], [2, 2, 2, 2]);
+        result.setSplitAndCumulativeRanks([null, 1, 1, 1, 1], [null, 2, 2, 2, 2]);
         assert.strictEqual(result.getCumulativeRankTo(2), 2, "A non-null cumulative rank should be returned");
     });
     
-    QUnit.test("Returns null value for cumulative rank at start control", function (assert) {
+    QUnit.test("Throws exception for cumulative ranks not starting with null", function (assert) {
         var result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
-        result.setSplitAndCumulativeRanks([1, 1, 1, 1], [2, 2, 2, 2]);
-        assert.strictEqual(result.getCumulativeRankTo(0), null, "A null cumulative rank should be returned for the start");
+        SplitsBrowserTest.assertInvalidData(assert, function() { result.setSplitAndCumulativeRanks([1, 1, 1, 1], [null, 2, 2, 2, 2]); });
     });
     
     QUnit.test("Returns null value for split rank when no ranks set", function (assert) {
@@ -700,14 +699,13 @@
     
     QUnit.test("Returns non-null value for split rank when ranks set", function (assert) {
         var result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
-        result.setSplitAndCumulativeRanks([1, 1, 1, 1], [2, 2, 2, 2]);
+        result.setSplitAndCumulativeRanks([null, 1, 1, 1, 1], [null, 2, 2, 2, 2]);
         assert.strictEqual(result.getSplitRankTo(2), 1, "A non-null split rank should be returned");
     });
     
-    QUnit.test("Returns null value for split rank at start control", function (assert) {
+    QUnit.test("Throws exception for split ranks not starting with null", function (assert) {
         var result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
-        result.setSplitAndCumulativeRanks([1, 1, 1, 1], [2, 2, 2, 2]);
-        assert.strictEqual(result.getSplitRankTo(0), null, "A null split rank should be returned for the start");
+        SplitsBrowserTest.assertInvalidData(assert, function() { result.setSplitAndCumulativeRanks([1, 1, 1, 1], [null, 2, 2, 2, 2]); });
     });
     
     QUnit.test("Result with no omitted times has no indexes around omitted cumulative times", function (assert) {
