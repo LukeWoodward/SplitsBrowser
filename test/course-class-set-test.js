@@ -26,15 +26,7 @@
     var _DUMMY_CHART_TYPE = {
         name: "dummy",
         dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes); },
-        skipStart: false,
         indexesAroundOmittedTimesFunc: function (result) { return result.getControlIndexesAroundOmittedCumulativeTimes(); }
-    };
-    
-    var DUMMY_CHART_TYPE_SKIP = {
-        name: "dummy",
-        dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes); },
-        skipStart: true,
-        indexesAroundOmittedTimesFunc: function (result) { return result.getControlIndexesAroundOmittedCumulativeTimes(); }    
     };
     
     var isNaNStrict = SplitsBrowser.isNaNStrict;
@@ -58,12 +50,6 @@
     
     function getResult1WithNullSplitForControl2() {
         return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, null, 184, 100]);
-    }
-    
-    function getResult1WithDubiousSplitForControl1() {
-        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 0, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {name: "First Runner"});
-        result.setRepairedCumulativeTimes([0, NaN, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100]);
-        return result;
     }
     
     function getResult1WithDubiousSplitForControl2() {
@@ -685,25 +671,17 @@
     QUnit.test("Can return a data for an individual course-class set", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
         var cumTimes = [0, 1, 2, 3, 4];
-        var slicedTimes = courseClassSet.sliceForLegIndex(cumTimes, null, false);
+        var slicedTimes = courseClassSet.sliceForLegIndex(cumTimes, null);
         assert.deepEqual(cumTimes, slicedTimes);
         assert.ok(cumTimes !== slicedTimes);
     });
     
-    QUnit.test("Can return a data for an individual course-class set, when the data skips the start", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
-        var cumTimes = [1, 2, 3, 4];
-        var slicedTimes = courseClassSet.sliceForLegIndex(cumTimes, null, true);
-        assert.deepEqual(cumTimes, slicedTimes);
-        assert.ok(cumTimes !== slicedTimes);
-    });
-
     QUnit.test("Can return a slice of data for all legs of a team course-class set", function (assert) {
         var courseClass = new CourseClass("Test 1", 3, []);
         courseClass.setIsTeamClass([3, 3]);
         var courseClassSet = new CourseClassSet([courseClass]);
         var data = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-        var slicedData = courseClassSet.sliceForLegIndex(data, null, false);
+        var slicedData = courseClassSet.sliceForLegIndex(data, null);
         assert.deepEqual(data, slicedData);
         assert.ok(data !== slicedData);
     });
@@ -713,7 +691,7 @@
         courseClass.setIsTeamClass([3, 3]);
         var courseClassSet = new CourseClassSet([courseClass]);
         var data = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-        var slicedData = courseClassSet.sliceForLegIndex(data, 0, false);
+        var slicedData = courseClassSet.sliceForLegIndex(data, 0);
         assert.deepEqual([0, 1, 2, 3, 4], slicedData);
     });
 
@@ -722,35 +700,7 @@
         courseClass.setIsTeamClass([3, 3]);
         var courseClassSet = new CourseClassSet([courseClass]);
         var data = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-        var slicedData = courseClassSet.sliceForLegIndex(data, 1, false);
-        assert.deepEqual([4, 5, 6, 7, 8], slicedData);
-    });
-
-    QUnit.test("Can return a slice of data for all legs of a team course-class set when the data skips the start", function (assert) {
-        var courseClass = new CourseClass("Test 1", 3, []);
-        courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var data = [1, 2, 3, 4, 5, 6, 7, 8];
-        var slicedData = courseClassSet.sliceForLegIndex(data, null, true);
-        assert.deepEqual(data, slicedData);
-        assert.ok(data !== slicedData);
-    });
-
-    QUnit.test("Can return a slice of data for the first leg of a team course-class set when the data skips the start", function (assert) {
-        var courseClass = new CourseClass("Test 1", 3, []);
-        courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var data = [1, 2, 3, 4, 5, 6, 7, 8];
-        var slicedData = courseClassSet.sliceForLegIndex(data, 0, true);
-        assert.deepEqual([1, 2, 3, 4], slicedData);
-    });
-
-    QUnit.test("Can return a slice of data for the second leg of a team course-class set when the data skips the start", function (assert) {
-        var courseClass = new CourseClass("Test 1", 3, []);
-        courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var data = [1, 2, 3, 4, 5, 6, 7, 8];
-        var slicedData = courseClassSet.sliceForLegIndex(data, 1, true);
+        var slicedData = courseClassSet.sliceForLegIndex(data, 1);
         assert.deepEqual([4, 5, 6, 7, 8], slicedData);
     });
 
@@ -797,53 +747,6 @@
             numControls: 3,
             resultNames: ["First Runner", "Second Runner"],
             dubiousTimesInfo: [[{start: 1, end: 3}], []]
-        };
-
-        assert.deepEqual(chartData, expectedChartData);
-    });
-
-    QUnit.test("Can return chart data for two results where one of them has a dubious split and chart type has skip-start", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithDubiousSplitForControl2(), getResult2()])]);
-        var fastestTime = courseClassSet.getFastestCumTimes();
-
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], DUMMY_CHART_TYPE_SKIP, null);
-
-        var expectedChartData = {
-            dataColumns: [
-                { x: 65, ys: [0, 0] },
-                { x: 65 + 197, ys: [0, 16] },
-                { x: 65 + 197 + 212, ys: [NaN, 16] },
-                { x: 65 + 197 + 212 + 100, ys: [-4, 16] }
-            ],
-            xExtent: [0, 65 + 197 + 212 + 100],
-            yExtent: [-4, 22],
-            numControls: 3,
-            resultNames: ["First Runner", "Second Runner"],
-            dubiousTimesInfo: [[{start: 0, end: 2}], []]
-        };
-
-        assert.deepEqual(chartData, expectedChartData);
-    });
-
-    // If the start is being skipped, then we must ignore dubious times to control 1.
-    QUnit.test("Can return chart data with no dubious time for two results where one of them has a dubious split to control 1 and chart type has skip-start", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithDubiousSplitForControl1(), getResult2()])]);
-        var fastestTime = courseClassSet.getFastestCumTimes();
-
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], DUMMY_CHART_TYPE_SKIP, null);
-
-        var expectedChartData = {
-            dataColumns: [
-                { x: 81, ys: [0, 0] },
-                { x: 81 + 197, ys: [NaN, 0] },
-                { x: 81 + 197 + 184, ys: [8, 0] },
-                { x: 81 + 197 + 184 + 100, ys: [8, 28] }
-            ],
-            xExtent: [0, 81 + 197 + 184 + 100],
-            yExtent: [0, 34],
-            numControls: 3,
-            resultNames: ["First Runner", "Second Runner"],
-            dubiousTimesInfo: [[/* none */], []]
         };
 
         assert.deepEqual(chartData, expectedChartData);
@@ -1086,86 +989,6 @@
         assert.deepEqual(chartData, expectedChartData);
     });
 
-
-    QUnit.test("Can return chart data for team result, skipping start", function (assert) {
-        var courseClass = new CourseClass("Test", 7, [getTeamResult()]);
-        courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
-
-        var chartData = courseClassSet.getChartData(fastestTime, [0], DUMMY_CHART_TYPE_SKIP, null);
-
-        var expectedChartData = {
-            dataColumns: [
-                { x: 61, ys: [0] },
-                { x: 282, ys: [4] },
-                { x: 472, ys: [4] },
-                { x: 570, ys: [-2] },
-                { x: 628, ys: [0] },
-                { x: 820, ys: [3] },
-                { x: 994, ys: [4] },
-                { x: 1104, ys: [6] }
-            ],
-            xExtent: [0, 1104],
-            yExtent: [-2, 6],
-            numControls: 7,
-            resultNames: ["Team 1"],
-            dubiousTimesInfo: [[]]
-        };
-
-        assert.deepEqual(chartData, expectedChartData);
-    });
-
-    QUnit.test("Can return chart data for first leg of team result, skipping start", function (assert) {
-        var courseClass = new CourseClass("Test", 7, [getTeamResult()]);
-        courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
-
-        var chartData = courseClassSet.getChartData(fastestTime, [0], DUMMY_CHART_TYPE_SKIP, 0);
-
-        var expectedChartData = {
-            dataColumns: [
-                { x: 61, ys: [0] },
-                { x: 282, ys: [4] },
-                { x: 472, ys: [4] },
-                { x: 570, ys: [-2] }
-            ],
-            xExtent: [0, 570],
-            yExtent: [-2, 4],
-            numControls: 3,
-            resultNames: ["First Runner"],
-            dubiousTimesInfo: [[]]
-        };
-
-        assert.deepEqual(chartData, expectedChartData);
-    });
-
-    QUnit.test("Can return chart data for second leg of team result, skipping start", function (assert) {
-        var courseClass = new CourseClass("Test", 7, [getTeamResult()]);
-        courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
-
-        var chartData = courseClassSet.getChartData(fastestTime, [0], DUMMY_CHART_TYPE_SKIP, 1);
-
-        var expectedChartData = {
-            dataColumns: [
-                { x: 570, ys: [-2] },
-                { x: 628, ys: [0] },
-                { x: 820, ys: [3] },
-                { x: 994, ys: [4] },
-                { x: 1104, ys: [6] }
-            ],
-            xExtent: [570, 1104],
-            yExtent: [-2, 6],
-            numControls: 3,
-            resultNames: ["Second Runner"],
-            dubiousTimesInfo: [[]]
-        };
-
-        assert.deepEqual(chartData, expectedChartData);
-    });
 
     QUnit.test("Cannot return chart data when no reference data given", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);

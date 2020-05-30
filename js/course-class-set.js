@@ -479,23 +479,12 @@
     * Returns the relevant data for a single leg if necessary.
     * @param {Array} data Array of data to slice.
     * @param {Number} legIndex The selected leg index, or null for all results.
-    * @param {Boolean} skipStart True if the data does not have a data point for
-    *     the start.
     * @return {Array} The relevant section of the given data array for the leg.
     */
-    CourseClassSet.prototype.sliceForLegIndex = function (data, legIndex, skipStart) {
+    CourseClassSet.prototype.sliceForLegIndex = function (data, legIndex) {
         if (this.hasTeamData() && legIndex !== null) {
             var numControls = this.classes[0].numbersOfControls[legIndex] + 2;
             var offset = this.classes[0].offsets[legIndex];
-            
-            if (skipStart) {
-                if (legIndex === 0) {
-                    numControls -= 1;
-                } else {
-                    offset -= 1;
-                }
-            }
-            
             return data.slice(offset, offset + numControls);
         } else {
             return data.slice(0);
@@ -528,9 +517,9 @@
         
         var numControls;
         if (this.hasTeamData() && legIndex !== null) {
-            selectedResultData = selectedResultData.map(function (data) { return this.sliceForLegIndex(data, legIndex, chartType.skipStart); }, this);
+            selectedResultData = selectedResultData.map(function (data) { return this.sliceForLegIndex(data, legIndex); }, this);
             numControls = this.classes[0].numbersOfControls[legIndex];
-            referenceCumTimes = this.sliceForLegIndex(referenceCumTimes, legIndex, false);
+            referenceCumTimes = this.sliceForLegIndex(referenceCumTimes, legIndex);
         } else {
             numControls = this.numControls;
         }
@@ -564,7 +553,7 @@
         }
         
         var offset = (this.hasTeamData() && legIndex !== null) ? this.classes[0].offsets[legIndex] : 0;
-        var controlIndexAdjust = offset + ((chartType.skipStart) ? 1 : 0);
+        var controlIndexAdjust = offset;
         var dubiousTimesInfo = currentIndexes.map(function (resultIndex) {
             var indexPairs = chartType.indexesAroundOmittedTimesFunc(this.allResults[resultIndex]);
             return indexPairs.filter(function (indexPair) { return indexPair.start >= controlIndexAdjust && indexPair.end <= controlIndexAdjust + numControls + 2; })
@@ -572,7 +561,7 @@
         }, this);
 
         var cumulativeTimesByControl = d3.transpose(selectedResultData);
-        var xData = (chartType.skipStart && (legIndex === 0 || legIndex === null)) ? referenceCumTimes.slice(1) : referenceCumTimes;
+        var xData = referenceCumTimes;
         var zippedData = d3.zip(xData, cumulativeTimesByControl);
         var resultNames = currentIndexes.map(function (index) { return this.allResults[index].getOwnerNameForLeg(legIndex); }, this);
         return {

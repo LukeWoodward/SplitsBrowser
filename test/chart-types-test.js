@@ -101,14 +101,6 @@
             assert.strictEqual(typeof chartType.nameKey, "string");
         });
     });
-    
-    QUnit.test("No chart types skip the start", function (assert) {
-        ALL_CHART_TYPES.forEach(function (chartType) {
-            if (chartType !== ChartTypes.ResultsTable) {
-                assert.strictEqual(chartType.skipStart, false);
-            }
-        });
-    });
    
     QUnit.test("All chart types except the results table have a y-axis label key", function (assert) {
         ALL_CHART_TYPES.forEach(function (chartType) {

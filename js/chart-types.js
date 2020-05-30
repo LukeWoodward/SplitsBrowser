@@ -54,7 +54,6 @@
         SplitsGraph: {
             nameKey: "SplitsGraphChartType",
             dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
-            skipStart: false,
             yAxisLabelKey: "SplitsGraphYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
@@ -64,7 +63,6 @@
         RaceGraph: {
             nameKey: "RaceGraphChartType",
             dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
-            skipStart: false,
             yAxisLabelKey: "RaceGraphYAxisLabel",
             isRaceGraph: true,
             isResultsTable: false,
@@ -74,7 +72,6 @@
         PositionAfterLeg: {
             nameKey:  "PositionAfterLegChartType",
             dataSelector: function (result) { return result.cumRanks; },
-            skipStart: false,
             yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
@@ -84,7 +81,6 @@
         SplitPosition: {
             nameKey: "SplitPositionChartType",
             dataSelector: function (result) { return result.splitRanks; },
-            skipStart: false,
             yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
@@ -94,7 +90,6 @@
         PercentBehind: {
             nameKey: "PercentBehindChartType",
             dataSelector: function (result, referenceCumTimes) { return result.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
-            skipStart: false,
             yAxisLabelKey: "PercentBehindYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
@@ -104,7 +99,6 @@
         ResultsTable: {
             nameKey: "ResultsTableChartType",
             dataSelector: null,
-            skipStart: false,
             yAxisLabelKey: null,
             isRaceGraph: false,
             isResultsTable: true,

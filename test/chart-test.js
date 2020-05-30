@@ -38,19 +38,9 @@
         return result.getControlIndexesAroundOmittedCumulativeTimes();
     }
 
-    var DUMMY_CHART_TYPE_NO_SKIP = {
+    var DUMMY_CHART_TYPE = {
         name: "dummy",
         dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes); },
-        skipStart: false,
-        yAxisLabelKey: "SplitsGraphYAxisLabel",
-        isRaceGraph: false,
-        indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumTimes
-    };
-    
-    var DUMMY_CHART_TYPE_SKIP = {
-        name: "dummy skip",
-        dataSelector: function (result) { return result.splitRanks; },
-        skipStart: true,
         yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: false,
         indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumTimes
@@ -59,7 +49,6 @@
     var DUMMY_CHART_TYPE_RACE_GRAPH = {
         name: "dummy race graph",
         dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes); },
-        skipStart: false,
         yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: true,
         indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumTimes
@@ -181,12 +170,8 @@
     // expected.  If we don't do this, it will complain that the test isn't
     // testing anything.
 
-    QUnit.test("Can create a chart without skipping the start", function (assert) {
-        runChartCreationTest(assert, DUMMY_CHART_TYPE_NO_SKIP);
-    });
-
-    QUnit.test("Can create a chart with a chart type skipping the start", function (assert) {
-        runChartCreationTest(assert, DUMMY_CHART_TYPE_SKIP);
+    QUnit.test("Can create a chart without start-time labels", function (assert) {
+        runChartCreationTest(assert, DUMMY_CHART_TYPE);
     });
 
     QUnit.test("Can create a chart with start-time labels", function (assert) {
@@ -201,7 +186,7 @@
         
         results[1].setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         
-        runChartCreationTest(assert, DUMMY_CHART_TYPE_NO_SKIP, results);
+        runChartCreationTest(assert, DUMMY_CHART_TYPE, results);
     });
     
     QUnit.test("Can create a chart for a team event", function (assert) {
@@ -216,6 +201,6 @@
         var courseClass = new CourseClass("Test", 7, results);
         courseClass.setIsTeamClass([3, 3]);
      
-        runChartCreationTestGivenCourseClass(assert, DUMMY_CHART_TYPE_NO_SKIP, courseClass);
+        runChartCreationTestGivenCourseClass(assert, DUMMY_CHART_TYPE, courseClass);
     });
 })();

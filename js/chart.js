@@ -802,7 +802,7 @@
         // We can't guarantee that the reference cumulative times are in
         // ascending order, but we need such a list of times in order to draw
         // the rectangles.  So, sort the reference cumulative times.
-        var refCumTimesSorted = this.courseClassSet.sliceForLegIndex(this.referenceCumTimes, this.selectedLegIndex, false);
+        var refCumTimesSorted = this.courseClassSet.sliceForLegIndex(this.referenceCumTimes, this.selectedLegIndex);
         refCumTimesSorted.sort(d3.ascending);
         
         // Now remove any duplicate times.
@@ -894,7 +894,7 @@
         var xAxis = d3.axisTop()
                       .scale(this.xScale)
                       .tickFormat(this.getTickFormatter())
-                      .tickValues(this.courseClassSet.sliceForLegIndex(this.referenceCumTimes, this.selectedLegIndex, false));
+                      .tickValues(this.courseClassSet.sliceForLegIndex(this.referenceCumTimes, this.selectedLegIndex));
 
         var yAxis = d3.axisLeft()
                       .scale(this.yScale)
