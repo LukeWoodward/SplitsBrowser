@@ -35,6 +35,7 @@
         this.name = name;
         this.numControls = numControls;
         this.numbersOfControls = null;
+        this.offsets = null;
         this.results = results;
         this.course = null;
         this.hasDubiousData = false;
@@ -60,6 +61,10 @@
     CourseClass.prototype.setIsTeamClass = function (numbersOfControls) {
         this.isTeamClass = true;
         this.numbersOfControls = numbersOfControls;
+        this.offsets = [0];
+        for (var index = 1; index < numbersOfControls.length; index += 1) {
+            this.offsets.push(this.offsets[index - 1] + numbersOfControls[index - 1] + 1);
+        }
     };
      
     /**

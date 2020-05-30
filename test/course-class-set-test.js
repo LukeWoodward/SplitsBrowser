@@ -41,7 +41,9 @@
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
+    var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var Team = SplitsBrowser.Model.Team;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
 
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
@@ -142,6 +144,12 @@
     
     function getResult3WithNullFinishSplit() {
         return fromSplitTimes(3, "Third Runner", "GHI", 11 * 3600, [78, 209, 199, null]);
+    }
+
+    function getTeamResult() {
+        var teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {name: "First Runner"});
+        var teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533], {name: "Second Runner"});
+        return createTeamResult(1, [teamMemberResult1, teamMemberResult2], new Team("Team 1", "ABC"));
     }
     
     QUnit.test("Can create a CourseClassSet from an empty array of course-classes", function (assert) {
@@ -673,12 +681,84 @@
     QUnit.test("Cannot return fastest splits to control that is not a number", function (assert) {
         assertCannotGetFastestSplits(assert, [getResult1()], 1, "this is not a number");
     });
+    
+    QUnit.test("Can return a data for an individual course-class set", function (assert) {
+        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
+        var cumTimes = [0, 1, 2, 3, 4];
+        var slicedTimes = courseClassSet.sliceForLegIndex(cumTimes, null, false);
+        assert.deepEqual(cumTimes, slicedTimes);
+        assert.ok(cumTimes !== slicedTimes);
+    });
+    
+    QUnit.test("Can return a data for an individual course-class set, when the data skips the start", function (assert) {
+        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
+        var cumTimes = [1, 2, 3, 4];
+        var slicedTimes = courseClassSet.sliceForLegIndex(cumTimes, null, true);
+        assert.deepEqual(cumTimes, slicedTimes);
+        assert.ok(cumTimes !== slicedTimes);
+    });
+
+    QUnit.test("Can return a slice of data for all legs of a team course-class set", function (assert) {
+        var courseClass = new CourseClass("Test 1", 3, []);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var data = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        var slicedData = courseClassSet.sliceForLegIndex(data, null, false);
+        assert.deepEqual(data, slicedData);
+        assert.ok(data !== slicedData);
+    });
+
+    QUnit.test("Can return a slice of data for the first leg of a team course-class set", function (assert) {
+        var courseClass = new CourseClass("Test 1", 3, []);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var data = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        var slicedData = courseClassSet.sliceForLegIndex(data, 0, false);
+        assert.deepEqual([0, 1, 2, 3, 4], slicedData);
+    });
+
+    QUnit.test("Can return a slice of data for the second leg of a team course-class set", function (assert) {
+        var courseClass = new CourseClass("Test 1", 3, []);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var data = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        var slicedData = courseClassSet.sliceForLegIndex(data, 1, false);
+        assert.deepEqual([4, 5, 6, 7, 8], slicedData);
+    });
+
+    QUnit.test("Can return a slice of data for all legs of a team course-class set when the data skips the start", function (assert) {
+        var courseClass = new CourseClass("Test 1", 3, []);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var data = [1, 2, 3, 4, 5, 6, 7, 8];
+        var slicedData = courseClassSet.sliceForLegIndex(data, null, true);
+        assert.deepEqual(data, slicedData);
+        assert.ok(data !== slicedData);
+    });
+
+    QUnit.test("Can return a slice of data for the first leg of a team course-class set when the data skips the start", function (assert) {
+        var courseClass = new CourseClass("Test 1", 3, []);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var data = [1, 2, 3, 4, 5, 6, 7, 8];
+        var slicedData = courseClassSet.sliceForLegIndex(data, 0, true);
+        assert.deepEqual([1, 2, 3, 4], slicedData);
+    });
+
+    QUnit.test("Can return a slice of data for the second leg of a team course-class set when the data skips the start", function (assert) {
+        var courseClass = new CourseClass("Test 1", 3, []);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var data = [1, 2, 3, 4, 5, 6, 7, 8];
+        var slicedData = courseClassSet.sliceForLegIndex(data, 1, true);
+        assert.deepEqual([4, 5, 6, 7, 8], slicedData);
+    });
 
     QUnit.test("Can return chart data for two results in same class", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
         var fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE);
+        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
 
         var expectedChartData = {
             dataColumns: [
@@ -702,7 +782,7 @@
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithDubiousSplitForControl2(), getResult2()])]);
         var fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE);
+        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
 
         var expectedChartData = {
             dataColumns: [
@@ -726,7 +806,7 @@
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithDubiousSplitForControl2(), getResult2()])]);
         var fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], DUMMY_CHART_TYPE_SKIP);
+        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], DUMMY_CHART_TYPE_SKIP, null);
 
         var expectedChartData = {
             dataColumns: [
@@ -750,7 +830,7 @@
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithDubiousSplitForControl1(), getResult2()])]);
         var fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], DUMMY_CHART_TYPE_SKIP);
+        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], DUMMY_CHART_TYPE_SKIP, null);
 
         var expectedChartData = {
             dataColumns: [
@@ -773,7 +853,7 @@
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2WithFinishCumTimeNotTheLargest()])]);
         var fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE);
+        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
 
         var expectedChartData = {
             dataColumns: [
@@ -798,7 +878,7 @@
 
         var fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE);
+        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
 
         var expectedChartData = {
             dataColumns: [
@@ -822,7 +902,7 @@
         var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getFasterResult1()]), new CourseClass("Test 2", 3, [getResult2()])]);
         var fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE);
+        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
 
         var expectedChartData = {
             dataColumns: [
@@ -846,7 +926,7 @@
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
         var fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE);
+        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, null);
 
         var expectedChartData = {
             dataColumns: [
@@ -870,7 +950,7 @@
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
         var fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [1], _DUMMY_CHART_TYPE);
+        var chartData = courseClassSet.getChartData(fastestTime, [1], _DUMMY_CHART_TYPE, null);
 
         var expectedChartData = {
             dataColumns: [
@@ -894,7 +974,7 @@
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
         var fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [], _DUMMY_CHART_TYPE);
+        var chartData = courseClassSet.getChartData(fastestTime, [], _DUMMY_CHART_TYPE, null);
 
         var expectedChartData = {
             dataColumns: [],
@@ -912,7 +992,7 @@
 
     QUnit.test("Can return empty chart data when no results", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
-        var data = courseClassSet.getChartData([0, 87, 87 + 147, 87 + 147 + 92], [], _DUMMY_CHART_TYPE);
+        var data = courseClassSet.getChartData([0, 87, 87 + 147, 87 + 147 + 92], [], _DUMMY_CHART_TYPE, null);
         var expectedChartData = {
             dataColumns: [],
             xExtent: data.xExtent,
@@ -922,6 +1002,169 @@
             dubiousTimesInfo: []
         };
         assert.deepEqual(data, expectedChartData);
+    });
+
+    QUnit.test("Can return chart data for team result", function (assert) {
+        var courseClass = new CourseClass("Test", 7, [getTeamResult()]);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+
+        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, null);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 0, ys: [0] },
+                { x: 61, ys: [4] },
+                { x: 282, ys: [4] },
+                { x: 472, ys: [-2] },
+                { x: 570, ys: [0] },
+                { x: 628, ys: [3] },
+                { x: 820, ys: [4] },
+                { x: 994, ys: [6] },
+                { x: 1104, ys: [-1] }
+            ],
+            xExtent: [0, 1104],
+            yExtent: [-2, 6],
+            numControls: 7,
+            resultNames: ["Team 1"],
+            dubiousTimesInfo: [[]]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+    QUnit.test("Can return chart data for first leg of team result", function (assert) {
+        var courseClass = new CourseClass("Test", 7, [getTeamResult()]);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+
+        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 0);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 0, ys: [0] },
+                { x: 61, ys: [4] },
+                { x: 282, ys: [4] },
+                { x: 472, ys: [-2] },
+                { x: 570, ys: [0] }
+            ],
+            xExtent: [0, 570],
+            yExtent: [-2, 4],
+            numControls: 3,
+            resultNames: ["First Runner"],
+            dubiousTimesInfo: [[]]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+    QUnit.test("Can return chart data for second leg of team result", function (assert) {
+        var courseClass = new CourseClass("Test", 7, [getTeamResult()]);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+
+        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 1);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 570, ys: [0] },
+                { x: 628, ys: [3] },
+                { x: 820, ys: [4] },
+                { x: 994, ys: [6] },
+                { x: 1104, ys: [-1] }
+            ],
+            xExtent: [570, 1104],
+            yExtent: [-1, 6],
+            numControls: 3,
+            resultNames: ["Second Runner"],
+            dubiousTimesInfo: [[]]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+
+    QUnit.test("Can return chart data for team result, skipping start", function (assert) {
+        var courseClass = new CourseClass("Test", 7, [getTeamResult()]);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+
+        var chartData = courseClassSet.getChartData(fastestTime, [0], DUMMY_CHART_TYPE_SKIP, null);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 61, ys: [0] },
+                { x: 282, ys: [4] },
+                { x: 472, ys: [4] },
+                { x: 570, ys: [-2] },
+                { x: 628, ys: [0] },
+                { x: 820, ys: [3] },
+                { x: 994, ys: [4] },
+                { x: 1104, ys: [6] }
+            ],
+            xExtent: [0, 1104],
+            yExtent: [-2, 6],
+            numControls: 7,
+            resultNames: ["Team 1"],
+            dubiousTimesInfo: [[]]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+    QUnit.test("Can return chart data for first leg of team result, skipping start", function (assert) {
+        var courseClass = new CourseClass("Test", 7, [getTeamResult()]);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+
+        var chartData = courseClassSet.getChartData(fastestTime, [0], DUMMY_CHART_TYPE_SKIP, 0);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 61, ys: [0] },
+                { x: 282, ys: [4] },
+                { x: 472, ys: [4] },
+                { x: 570, ys: [-2] }
+            ],
+            xExtent: [0, 570],
+            yExtent: [-2, 4],
+            numControls: 3,
+            resultNames: ["First Runner"],
+            dubiousTimesInfo: [[]]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+    QUnit.test("Can return chart data for second leg of team result, skipping start", function (assert) {
+        var courseClass = new CourseClass("Test", 7, [getTeamResult()]);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+
+        var chartData = courseClassSet.getChartData(fastestTime, [0], DUMMY_CHART_TYPE_SKIP, 1);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 570, ys: [-2] },
+                { x: 628, ys: [0] },
+                { x: 820, ys: [3] },
+                { x: 994, ys: [4] },
+                { x: 1104, ys: [6] }
+            ],
+            xExtent: [570, 1104],
+            yExtent: [-2, 6],
+            numControls: 3,
+            resultNames: ["Second Runner"],
+            dubiousTimesInfo: [[]]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
     });
 
     QUnit.test("Cannot return chart data when no reference data given", function (assert) {
@@ -934,7 +1177,7 @@
     QUnit.test("Cannot return chart data when no current indexes given", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
         SplitsBrowserTest.assertException(assert, "TypeError", function () {
-            courseClassSet.getChartData([0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100], _DUMMY_CHART_TYPE);
+            courseClassSet.getChartData([0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100], _DUMMY_CHART_TYPE, null);
         });
     });    
 })();

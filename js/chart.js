@@ -165,6 +165,7 @@
         this.referenceCumTimesSorted = [];
         this.referenceCumTimeIndexes = [];
         this.fastestCumTimes = [];
+        this.selectedLegIndex = null;
         
         this.isMouseIn = false;
         
@@ -533,7 +534,7 @@
     */
     Chart.prototype.updateResultStatistics = function() {
         var selectedResults = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.courseClassSet.allResults[index]; }, this);
-        var labelTexts = selectedResults.map(function (result) { return formatNameAndSuffix(result.owner.name, getSuffix(result)); });
+        var labelTexts = selectedResults.map(function (result) { return formatNameAndSuffix(result.getOwnerNameForLeg(this.selectedLegIndex), getSuffix(result)); }, this);
         
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
             var okDespites = selectedResults.map(function (result) { return result.isOKDespiteMissingTimes; });
@@ -586,6 +587,10 @@
         if (this.courseClassSet.hasTeamData()) {
             var allControls = [getMessage("StartNameShort")];
             var numbersOfControls = this.courseClassSet.classes[0].numbersOfControls;
+            if (this.selectedLegIndex !== null) {
+                numbersOfControls = [numbersOfControls[this.selectedLegIndex]];
+            }
+            
             for (var legIndex = 0; legIndex < numbersOfControls.length; legIndex += 1) {
                 for (var controlIndex = 1; controlIndex <= numbersOfControls[legIndex]; controlIndex += 1) {
                     allControls.push(controlIndex.toString());
@@ -638,7 +643,7 @@
         } else {
             var nameWidths = this.selectedIndexes.map(function (index) {
                 var result = this.courseClassSet.allResults[index];
-                return this.getTextWidth(formatNameAndSuffix(result.owner.name, getSuffix(result)));
+                return this.getTextWidth(formatNameAndSuffix(result.getOwnerNameForLeg(this.selectedLegIndex), getSuffix(result)));
             }, this);
             return d3.max(nameWidths) + this.determineMaxStatisticTextWidth();
         }
@@ -797,7 +802,7 @@
         // We can't guarantee that the reference cumulative times are in
         // ascending order, but we need such a list of times in order to draw
         // the rectangles.  So, sort the reference cumulative times.
-        var refCumTimesSorted = this.referenceCumTimes.slice(0);
+        var refCumTimesSorted = this.courseClassSet.sliceForLegIndex(this.referenceCumTimes, this.selectedLegIndex, false);
         refCumTimesSorted.sort(d3.ascending);
         
         // Now remove any duplicate times.
@@ -819,10 +824,13 @@
         
         var backgroundIndexes = [];
         var numbersOfControls = (this.courseClassSet.hasTeamData()) ? this.courseClassSet.classes[0].numbersOfControls : [this.courseClassSet.numControls];
+        if (this.courseClassSet.hasTeamData() && this.selectedLegIndex !== null) {
+            numbersOfControls = [numbersOfControls[this.selectedLegIndex]];
+        }
         
         for (var legIndex = 0; legIndex < numbersOfControls.length; legIndex += 1) {
             for (var controlIndex = 0; controlIndex <= numbersOfControls[legIndex]; controlIndex += 1) {
-                backgroundIndexes.push(1 + controlIndex % 2 + (legIndex % 2) * 2);
+                backgroundIndexes.push(1 + controlIndex % 2 + ((legIndex + (this.selectedLegIndex || 0)) % 2) * 2);
             }
         }
 
@@ -886,7 +894,7 @@
         var xAxis = d3.axisTop()
                       .scale(this.xScale)
                       .tickFormat(this.getTickFormatter())
-                      .tickValues(this.referenceCumTimes);
+                      .tickValues(this.courseClassSet.sliceForLegIndex(this.referenceCumTimes, this.selectedLegIndex, false));
 
         var yAxis = d3.axisLeft()
                       .scale(this.yScale)
@@ -1083,6 +1091,7 @@
     
     /**
     * Draw legend labels to the right of the chart.
+    * Draw legend labels to the right of the chart.
     * @param {object} chartData - The chart data that contains the final time offsets.
     */
     Chart.prototype.drawResultLegendLabels = function (chartData) {
@@ -1094,7 +1103,7 @@
             var finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
             this.currentResultData = d3.range(this.numLines).map(function (i) {
                 var resultIndex = this.selectedIndexes[i];
-                var name = this.courseClassSet.allResults[resultIndex].owner.name;
+                var name = this.courseClassSet.allResults[resultIndex].getOwnerNameForLeg(this.selectedLegIndex);
                 var textHeight = this.getTextHeight(name);
                 minLastY += textHeight;
                 return {
@@ -1245,8 +1254,10 @@
     * @param {Array} visibleStatistics - Array of boolean flags indicating whether
     *                                    certain statistics are visible.
     * @param {Object} chartType - The type of chart being drawn.
+    * @param {Number?} selectedLegIndex - The selected leg index, or null for all
+    *                                     legs.
     */
-    Chart.prototype.drawChart = function (data, selectedIndexes, visibleStatistics, chartType) {
+    Chart.prototype.drawChart = function (data, selectedIndexes, visibleStatistics, chartType, selectedLegIndex) {
         var chartData = data.chartData;
         this.numControls = chartData.numControls;
         this.numLines = chartData.resultNames.length;
@@ -1259,6 +1270,7 @@
         this.isRaceGraph = chartType.isRaceGraph;
         this.minViewableControl = chartType.minViewableControl;
         this.visibleStatistics = visibleStatistics;
+        this.selectedLegIndex = selectedLegIndex;
         this.hasData = true;
         
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();

@@ -161,14 +161,14 @@
         var fastestCumTimes = courseClassSet.getFastestCumTimes();
         var chart = createTestChart(chartType);
         var data = {
-            chartData: courseClassSet.getChartData(fastestCumTimes, [0, 1], chartType),
+            chartData: courseClassSet.getChartData(fastestCumTimes, [0, 1], chartType, null),
             eventData: eventData,
             courseClassSet: courseClassSet,
             referenceCumTimes: fastestCumTimes,
             fastestCumTimes: fastestCumTimes
         };
         
-        chart.drawChart(data, [0, 1], [true, true, true], chartType);
+        chart.drawChart(data, [0, 1], [true, true, true], chartType, null);
         assert.expect(0);
     }
 

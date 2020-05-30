@@ -1092,4 +1092,24 @@
         assert.strictEqual("First Runner", teamResult1.owner.members[0].name);
         assert.strictEqual("Second Runner", teamResult1.owner.members[1].name);        
     });
+    
+    QUnit.test("Owner name of a team result is team name for null leg index", function (assert) {
+        assert.strictEqual(teamResult1.getOwnerNameForLeg(null), "Team 1");
+    });
+    
+    QUnit.test("Owner name of a team result is the first runner name for leg index zero", function (assert) {
+        assert.strictEqual(teamResult1.getOwnerNameForLeg(0), "First Runner");
+    });
+    
+    QUnit.test("Owner name of a team result is the second runner name for leg index one", function (assert) {
+        assert.strictEqual(teamResult1.getOwnerNameForLeg(1), "Second Runner");
+    });
+    
+    QUnit.test("Owner name of an individual result is the runner name regardless of index", function (assert) {
+        var cumTimes = [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100];
+        var result = fromCumTimes(1, 10 * 3600, cumTimes, {name: "Test Runner", club: "ABC"});
+        assert.strictEqual(result.getOwnerNameForLeg(null), "Test Runner");
+        assert.strictEqual(result.getOwnerNameForLeg(0), "Test Runner");
+        assert.strictEqual(result.getOwnerNameForLeg(1), "Test Runner");
+    });
 })();

@@ -635,6 +635,22 @@
     };
     
     /**
+    * Returns the name of the owner for the leg with the given index.  If the
+    * leg index is not null and this is a team result, the name of the corresponding
+    * constituent result's owner is returned, otherwise the name of this result's
+    * owner is returned.
+    * @param {Number?} legIndex The index of the leg, or null for the team.
+    * @return The name of the owner for that leg.
+    */
+    Result.prototype.getOwnerNameForLeg = function (legIndex) {
+        if (this.constituents === null || legIndex === null) {
+            return this.owner.name;
+        } else {
+            return this.owner.members[legIndex].name;
+        }
+    };
+    
+    /**
     * Calculates and returns the offsets of the results.  The returned array
     * contains one offset for each result plus the overall total time in the
     * last element.

@@ -530,10 +530,11 @@
 
         this.updateControlEnabledness();
         if (this.classes.length > 0) {
+            var legIndex = this.legSelector.getSelectedLeg();
             var comparisonFunction = this.comparisonSelector.getComparisonFunction();
             this.referenceCumTimes = comparisonFunction(this.courseClassSet);
-            this.fastestCumTimes = this.courseClassSet.getFastestCumTimes();
-            this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType());
+            this.fastestCumTimes = this.courseClassSet.getFastestCumTimes(legIndex);
+            this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType(), legIndex);
             this.redrawChart();
         }
     };
@@ -550,7 +551,7 @@
             fastestCumTimes: this.fastestCumTimes
         };
             
-        this.chart.drawChart(data, this.selection.getSelectedIndexes(), this.currentVisibleStatistics, this.chartTypeSelector.getChartType());
+        this.chart.drawChart(data, this.selection.getSelectedIndexes(), this.currentVisibleStatistics, this.chartTypeSelector.getChartType(), this.legSelector.getSelectedLeg());
     };
     
     /**
@@ -559,7 +560,7 @@
     Viewer.prototype.redraw = function () {
         var chartType = this.chartTypeSelector.getChartType();
         if (!chartType.isResultsTable) {
-            this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), chartType);
+            this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), chartType, this.legSelector.getSelectedLeg());
             this.redrawChart();
         }
     };
@@ -716,8 +717,9 @@
     * Handles a change in the selected leg.
     */
     Viewer.prototype.handleLegSelectionChanged = function () {
-        // TODO finish this off
         this.resultList.setResultList(this.courseClassSet.allResults, (this.currentClasses.length > 1), this.courseClassSet.hasTeamData(), this.legSelector.getSelectedLeg());
+        this.setChartSize();
+        this.drawChart();
         this.updateDirectLink();
     };
 

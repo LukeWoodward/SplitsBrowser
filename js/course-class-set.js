@@ -473,7 +473,34 @@
             
             return fastestSplits;
         }
-    };    
+    };
+    
+    /**
+    * Returns the relevant data for a single leg if necessary.
+    * @param {Array} data Array of data to slice.
+    * @param {Number} legIndex The selected leg index, or null for all results.
+    * @param {Boolean} skipStart True if the data does not have a data point for
+    *     the start.
+    * @return {Array} The relevant section of the given data array for the leg.
+    */
+    CourseClassSet.prototype.sliceForLegIndex = function (data, legIndex, skipStart) {
+        if (this.hasTeamData() && legIndex !== null) {
+            var numControls = this.classes[0].numbersOfControls[legIndex] + 2;
+            var offset = this.classes[0].offsets[legIndex];
+            
+            if (skipStart) {
+                if (legIndex === 0) {
+                    numControls -= 1;
+                } else {
+                    offset -= 1;
+                }
+            }
+            
+            return data.slice(offset, offset + numControls);
+        } else {
+            return data.slice(0);
+        }
+    };
 
     /**
     * Return data from the current classes in a form suitable for plotting in a chart.
@@ -482,19 +509,31 @@
     * @param {Array} currentIndexes - Array of indexes that indicate which
     *           results from the overall list are plotted.
     * @param {Object} chartType - The type of chart to draw.
+    * @param {Number?} legIndex - The index of the selected leg, or null for all legs.
     * @returns {Object} Array of data.
     */
-    CourseClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType) {
+    CourseClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType, legIndex) {
         if (typeof referenceCumTimes === "undefined") {
             throw new TypeError("referenceCumTimes undefined or missing");
         } else if (typeof currentIndexes === "undefined") {
             throw new TypeError("currentIndexes undefined or missing");
         } else if (typeof chartType === "undefined") {
             throw new TypeError("chartType undefined or missing");
+        } else if (typeof legIndex === "undefined") {
+            throw new TypeError("legIndex undefined or missing");
         }
 
         var resultData = this.allResults.map(function (result) { return chartType.dataSelector(result, referenceCumTimes); });
         var selectedResultData = currentIndexes.map(function (index) { return resultData[index]; });
+        
+        var numControls;
+        if (this.hasTeamData() && legIndex !== null) {
+            selectedResultData = selectedResultData.map(function (data) { return this.sliceForLegIndex(data, legIndex, chartType.skipStart); }, this);
+            numControls = this.classes[0].numbersOfControls[legIndex];
+            referenceCumTimes = this.sliceForLegIndex(referenceCumTimes, legIndex, false);
+        } else {
+            numControls = this.numControls;
+        }
 
         var xMin = d3.min(referenceCumTimes);
         var xMax = d3.max(referenceCumTimes);
@@ -524,21 +563,22 @@
             yMax = yMin + 1;
         }
         
-        var controlIndexAdjust = (chartType.skipStart) ? 1 : 0;
+        var offset = (this.hasTeamData() && legIndex !== null) ? this.classes[0].offsets[legIndex] : 0;
+        var controlIndexAdjust = offset + ((chartType.skipStart) ? 1 : 0);
         var dubiousTimesInfo = currentIndexes.map(function (resultIndex) {
             var indexPairs = chartType.indexesAroundOmittedTimesFunc(this.allResults[resultIndex]);
-            return indexPairs.filter(function (indexPair) { return indexPair.start >= controlIndexAdjust; })
+            return indexPairs.filter(function (indexPair) { return indexPair.start >= controlIndexAdjust && indexPair.end <= controlIndexAdjust + numControls + 2; })
                              .map(function (indexPair) { return { start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust }; });
         }, this);
 
         var cumulativeTimesByControl = d3.transpose(selectedResultData);
-        var xData = (chartType.skipStart) ? referenceCumTimes.slice(1) : referenceCumTimes;
+        var xData = (chartType.skipStart && (legIndex === 0 || legIndex === null)) ? referenceCumTimes.slice(1) : referenceCumTimes;
         var zippedData = d3.zip(xData, cumulativeTimesByControl);
-        var resultNames = currentIndexes.map(function (index) { return this.allResults[index].owner.name; }, this);
+        var resultNames = currentIndexes.map(function (index) { return this.allResults[index].getOwnerNameForLeg(legIndex); }, this);
         return {
             dataColumns: zippedData.map(function (data) { return { x: data[0], ys: data[1] }; }),
             resultNames: resultNames,
-            numControls: this.numControls,
+            numControls: numControls,
             xExtent: [xMin, xMax],
             yExtent: [yMin, yMax],
             dubiousTimesInfo: dubiousTimesInfo
