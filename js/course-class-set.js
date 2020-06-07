@@ -553,11 +553,10 @@
         }
         
         var offset = (this.hasTeamData() && legIndex !== null) ? this.classes[0].offsets[legIndex] : 0;
-        var controlIndexAdjust = offset;
         var dubiousTimesInfo = currentIndexes.map(function (resultIndex) {
             var indexPairs = chartType.indexesAroundOmittedTimesFunc(this.allResults[resultIndex]);
-            return indexPairs.filter(function (indexPair) { return indexPair.start >= controlIndexAdjust && indexPair.end <= controlIndexAdjust + numControls + 2; })
-                             .map(function (indexPair) { return { start: indexPair.start - controlIndexAdjust, end: indexPair.end - controlIndexAdjust }; });
+            return indexPairs.filter(function (indexPair) { return indexPair.start >= offset && indexPair.end <= offset + numControls + 2; })
+                             .map(function (indexPair) { return { start: indexPair.start - offset, end: indexPair.end - offset }; });
         }, this);
 
         var cumulativeTimesByControl = d3.transpose(selectedResultData);
