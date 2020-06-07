@@ -989,6 +989,65 @@
         assert.deepEqual(chartData, expectedChartData);
     });
 
+    QUnit.test("Can return chart data for first leg of team result with omitted time", function (assert) {
+        var teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 65, 286, NaN, 570], {name: "First Runner"});
+        var teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533], {name: "Second Runner"});
+        var teamResult = createTeamResult(1, [teamMemberResult1, teamMemberResult2], new Team("Team 1", "ABC"));
+        
+        var courseClass = new CourseClass("Test", 7, [teamResult]);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+
+        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 0);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 0, ys: [0] },
+                { x: 61, ys: [4] },
+                { x: 282, ys: [4] },
+                { x: 472, ys: [NaN] },
+                { x: 570, ys: [0] }
+            ],
+            xExtent: [0, 570],
+            yExtent: [0, 4],
+            numControls: 3,
+            resultNames: ["First Runner"],
+            dubiousTimesInfo: [[{start: 2, end: 4}]]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+    QUnit.test("Can return chart data for second leg of team result with omitted time", function (assert) {
+        var teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {name: "First Runner"});
+        var teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 570, [0, NaN, 254, 430, 533], {name: "Second Runner"});
+        var teamResult = createTeamResult(1, [teamMemberResult1, teamMemberResult2], new Team("Team 1", "ABC"));
+
+        var courseClass = new CourseClass("Test", 7, [teamResult]);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+
+        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 1);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 570, ys: [0] },
+                { x: 628, ys: [NaN] },
+                { x: 820, ys: [4] },
+                { x: 994, ys: [6] },
+                { x: 1104, ys: [-1] }
+            ],
+            xExtent: [570, 1104],
+            yExtent: [-1, 6],
+            numControls: 3,
+            resultNames: ["Second Runner"],
+            dubiousTimesInfo: [[{start: 0, end: 2}]]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
 
     QUnit.test("Cannot return chart data when no reference data given", function (assert) {
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
