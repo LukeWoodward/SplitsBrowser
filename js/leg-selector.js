@@ -144,10 +144,10 @@
     };
     
     /**
-    * Returns the selected leg, i.e. the (0-based) leg index if a leg has been
+    * Sets the selected leg, i.e. the (0-based) leg index if a leg has been
     * chosen, or null if all legs are visible or a team class is not being
     * shown.
-    * @return {Number?} Leg index, or null.
+    * @param {Number?} selectedLeg - The leg index to set.
     */
     LegSelector.prototype.setSelectedLeg = function (selectedLeg) {
         if (this.options === null) {
