@@ -718,6 +718,7 @@
     */
     Viewer.prototype.handleLegSelectionChanged = function () {
         this.resultList.setResultList(this.courseClassSet.allResults, (this.currentClasses.length > 1), this.courseClassSet.hasTeamData(), this.legSelector.getSelectedLeg());
+        this.resultsTable.setSelectedLegIndex(this.legSelector.getSelectedLeg());
         this.setChartSize();
         this.drawChart();
         this.updateDirectLink();

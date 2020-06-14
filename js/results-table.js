@@ -25,6 +25,7 @@
     var compareResults = SplitsBrowser.Model.compareResults;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    var subtractIfNotNull = SplitsBrowser.subtractIfNotNull;
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     
     var NON_BREAKING_SPACE_CHAR = "\u00a0";
@@ -43,6 +44,7 @@
         this.div = null;
         this.headerSpan = null;
         this.table = null;
+        this.selectedLegIndex = null;
         this.buildTable();
     }
     
@@ -101,10 +103,11 @@
     * The status may be a string that indicates the result mispunched.
     *
     * @param {Result} result The result to get the status of.
+    * @param {Number?} time The time to format, if the result is OK.
     * @param {Number} precision The precision to use.
     * @return {String} Time or status for the given result.
     */
-    function getTimeOrStatus (result, precision) {
+    function getTimeOrStatus (result, time, precision) {
         if (result.isNonStarter) {
             return getMessage("DidNotStartShort");
         } else if (result.isNonFinisher) {
@@ -114,7 +117,7 @@
         } else if (result.isOverMaxTime) {
             return getMessage("OverMaxTimeShort");
         } else if (result.completed()) {
-            return formatTime(result.totalTime, precision);
+            return formatTime(time, precision);
         } else {
             return getMessage("MispunchedShort");
         }
@@ -153,10 +156,21 @@
     */
     ResultsTable.prototype.populateTable = function () {
         var headerText = this.courseClass.name + ", ";
-        if (this.courseClass.numControls === 1) {
+        
+        var numControls, controlOffset, timeOffset;
+        if (this.courseClass.isTeamClass && this.selectedLegIndex !== null) {
+            numControls = this.courseClass.numbersOfControls[this.selectedLegIndex];
+            controlOffset = this.courseClass.offsets[this.selectedLegIndex];
+        } else {
+            numControls = this.courseClass.numControls;
+            controlOffset = 0;
+            timeOffset = 0;
+        }
+        
+        if (numControls === 1) {
             headerText += getMessage("ResultsTableHeaderSingleControl");
         } else {
-            headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": this.courseClass.numControls});
+            headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": numControls});
         }
 
         var course = this.courseClass.course;
@@ -176,17 +190,25 @@
         ];
         
         if (this.courseClass.isTeamClass) {
-            for (var legIndex = 0; legIndex < this.courseClass.numbersOfControls.length; legIndex += 1) {
-                var suffix = "-" + (legIndex + 1);
-                for (var controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[legIndex]; controlNumber += 1) {
-                    headerCellData.push(controlNumber + suffix);
+            var controlNumber;
+            if (this.selectedLegIndex === null) {
+                for (var legIndex = 0; legIndex < this.courseClass.numbersOfControls.length; legIndex += 1) {
+                    var suffix = "-" + (legIndex + 1);
+                    for (controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[legIndex]; controlNumber += 1) {
+                        headerCellData.push(controlNumber + suffix);
+                    }
+                    headerCellData.push(getMessage("FinishName") + suffix);
                 }
-                headerCellData.push(getMessage("FinishName") + suffix);
+            } else {
+                for (controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[this.selectedLegIndex]; controlNumber += 1) {
+                    headerCellData.push(controlNumber);
+                }
+                headerCellData.push(getMessage("FinishName"));
             }
         } else {
             var controls = this.courseClass.course.controls;
             if (controls === null) {
-                headerCellData = headerCellData.concat(d3.range(1, this.courseClass.numControls + 1));
+                headerCellData = headerCellData.concat(d3.range(1, numControls + 1));
             } else {
                 headerCellData = headerCellData.concat(controls.map(function (control, index) {
                     return (index + 1) + NON_BREAKING_SPACE_CHAR + "(" + control + ")";
@@ -281,17 +303,19 @@
             htmlBits.push("</td>");
             
             var tooltipText;
-            if (this.courseClass.isTeamClass) {
+            if (this.courseClass.isTeamClass && this.selectedLegIndex === null) {
                 tooltipText = result.owner.members.map(function (competitor) { return competitor.name; }).join("\n");
             } else {
                 tooltipText = "";
             }
             
-            addCell(result.owner.name, result.owner.club, null, "", "", tooltipText);
-            addCell(getTimeOrStatus(result, precision), NON_BREAKING_SPACE_CHAR, "time", "", "", "");
+            var startTimeOffset = result.getOriginalCumulativeTimeTo(controlOffset);
+            addCell(result.getOwnerNameForLeg(this.selectedLegIndex), result.owner.club, null, "", "", tooltipText);
+            var time = (this.courseClass.isTeamClass && this.selectedLegIndex !== null) ? subtractIfNotNull(result.getOriginalCumulativeTimeTo(controlOffset + numControls + 1), startTimeOffset) : result.totalTime;
+            addCell(getTimeOrStatus(result, time, precision), NON_BREAKING_SPACE_CHAR, "time", "", "", "");
             
-            d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {
-                var cumTime = result.getOriginalCumulativeTimeTo(controlNum);
+            d3.range(controlOffset + 1, controlOffset + numControls + 2).forEach(function (controlNum) {
+                var cumTime = subtractIfNotNull(result.getOriginalCumulativeTimeTo(controlNum), startTimeOffset);
                 var splitTime = result.getOriginalSplitTimeTo(controlNum);
                 var formattedCumTime = formatPossiblyMissingTime(cumTime, precision, result.isOKDespiteMissingTimes);
                 var formattedSplitTime = formatPossiblyMissingTime(splitTime, precision, result.isOKDespiteMissingTimes);
@@ -317,6 +341,18 @@
     */
     ResultsTable.prototype.setClass = function (courseClass) {
         this.courseClass = courseClass;
+        this.selectedLegIndex = null;
+        if (this.courseClass !== null) {
+            this.populateTable();
+        }
+    };
+    
+    /**
+    * Sets the selected leg index.
+    * @param {Number?} selectedLegIndex - The selected leg index.
+    */
+    ResultsTable.prototype.setSelectedLegIndex = function (selectedLegIndex) {
+        this.selectedLegIndex = selectedLegIndex;
         if (this.courseClass !== null) {
             this.populateTable();
         }
