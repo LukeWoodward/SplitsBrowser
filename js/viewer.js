@@ -337,12 +337,12 @@
         this.addLanguageSelector();
         this.addSpacer();
         this.addClassSelector();
+        this.addLegSelector();
         this.addSpacer();
         this.addChartTypeSelector();
         this.addSpacer();
         this.addComparisonSelector();
         this.addOriginalDataSelector();
-        this.addLegSelector();
         this.addSpacer();
         this.addDirectLink();
         this.addWarningViewer();
