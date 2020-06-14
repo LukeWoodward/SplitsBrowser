@@ -140,7 +140,6 @@
         this.cumRanks = null;
         this.timeLosses = null;
         this.className = null;
-        this.constituents = null;
 
         this.totalTime = (originalCumTimes === null || originalCumTimes.indexOf(null) > -1) ? null : originalCumTimes[originalCumTimes.length - 1];
     }
@@ -643,16 +642,15 @@
     /**
     * Returns the name of the owner for the leg with the given index.  If the
     * leg index is not null and this is a team result, the name of the corresponding
-    * constituent result's owner is returned, otherwise the name of this result's
-    * owner is returned.
+    * member is returned, otherwise the name of this result's owner is returned.
     * @param {Number?} legIndex The index of the leg, or null for the team.
     * @return The name of the owner for that leg.
     */
     Result.prototype.getOwnerNameForLeg = function (legIndex) {
-        if (this.constituents === null || legIndex === null) {
-            return this.owner.name;
-        } else {
+        if (this.owner.hasOwnProperty("members") && legIndex !== null) {
             return this.owner.members[legIndex].name;
+        } else {
+            return this.owner.name;
         }
     };
     
@@ -794,7 +792,6 @@
             teamResult.splitTimes = splitTimesFromCumTimes(teamResult.cumTimes);
         }
         
-        teamResult.constituents = results;
         teamResult.determineAggregateStatus(results);
         return teamResult;
     };

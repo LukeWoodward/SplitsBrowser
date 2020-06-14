@@ -104,7 +104,6 @@
         assert.ok(!result.isNonFinisher, "Result should not be a non-finisher");
         assert.ok(!result.isDisqualified, "Result should not be disqualified");
         assert.ok(!result.isOverMaxTime, "Result should not be over max time");
-        assert.strictEqual(result.constituents, null, "Individual result should not have constituents");
     });
 
     QUnit.test("Can create a result from cumulative times and determine split times when result has missed a control", function (assert) {
@@ -213,7 +212,6 @@
         assert.strictEqual(result.cumTimes, null);
         assert.strictEqual(result.splitTimes, null);
         assert.deepEqual(result.getAllOriginalCumulativeTimes(), cumTimes);
-        assert.strictEqual(result.constituents, null, "Individual result should not have constituents");
     });
 
     QUnit.test("Can create a result from original cumulative times and set repaired times with NaNs replacing dubious splits", function (assert) {
@@ -894,10 +892,6 @@
 
     QUnit.test("Can get all split times of a team", function (assert) {
         assert.deepEqual(teamResult1.getAllSplitTimes(),  [65, 221, 184, 100, 61, 193, 176, 103]);
-    });
-
-    QUnit.test("Team result is created with its constituent results", function (assert) {
-        assert.deepEqual(teamResult1.constituents, [teamMemberResult1, teamMemberResult2]);
     });
 
     QUnit.test("Can get cumulative times of a team with missing times", function (assert) {
