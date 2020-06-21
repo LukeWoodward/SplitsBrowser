@@ -89,6 +89,8 @@
         var split2Cell = $("span:last-child", topRowCells[4]);
         assert.strictEqual(split2Cell.text(), "03:41");
         assert.ok(!split2Cell.hasClass("fastest"));
+        
+        assert.strictEqual($("span.resultsTableHeader").text(), "Test, 3 controls, 4.1km, 140m");
     });
     
     QUnit.test("Can create a results table with two results finishing and with control codes", function (assert) {
@@ -268,9 +270,8 @@
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(courseClass);
-            
-        // We don't expect any errors, but we also make no assertions here.
-        assert.expect(0);
+        
+        assert.strictEqual($("span.resultsTableHeader").text(), "Test, 3 controls");
     });
     
     QUnit.test("Can create a results table with one result with dubious times appropriately classed", function (assert) {
@@ -385,11 +386,11 @@
         var result2b = fromSplitTimes(2, "Fourth Runner", "ABC", 10 * 3600 + 596, [88, 192, 220, 111]);
         var team1 = new Team("Team 1", "DEF", [result1a.owner, result1b.owner]);
         var team2 = new Team("Team 2", "ABC", [result2a.owner, result2b.owner]);
-        var courseClass = new CourseClass("Test", 3, [createTeamResult(1, [result1a, result1b], team1), createTeamResult(2, [result2a, result2b], team2)]);
+        var courseClass = new CourseClass("Test", 7, [createTeamResult(1, [result1a, result1b], team1), createTeamResult(2, [result2a, result2b], team2)]);
         courseClass.setIsTeamClass([3, 3]);
         calculateRanks(courseClass);
         
-        courseClass.setCourse(new Course("Test", [courseClass], 8.2, 270, null));
+        courseClass.setCourse(new Course("Test", [courseClass], null, null, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(courseClass);
@@ -404,6 +405,8 @@
         
         assert.strictEqual(table.selectAll("tbody tr td[title]").size(), 2);
         assert.strictEqual(table.selectAll("tbody tr td:nth-child(2)[title]").size(), 2);
+        
+        assert.strictEqual($("span.resultsTableHeader").text(), "Test, 7 controls");
     });
     
     QUnit.test("Can create a results table with two team results with different numbers of controls per leg and label the control headers", function (assert) {
@@ -417,7 +420,7 @@
         courseClass.setIsTeamClass([3, 2]);
         calculateRanks(courseClass);
         
-        courseClass.setCourse(new Course("Test", [courseClass], 8.2, 270, null));
+        courseClass.setCourse(new Course("Test", [courseClass], null, null, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(courseClass);
@@ -441,7 +444,7 @@
         courseClass.setIsTeamClass([3, 3]);
         calculateRanks(courseClass);
         
-        courseClass.setCourse(new Course("Test", [courseClass], 8.2, 270, null));
+        courseClass.setCourse(new Course("Test", [courseClass], null, null, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(courseClass);
@@ -458,6 +461,8 @@
         assert.deepEqual(topOfFirstRow, ["First Runner", "09:30", "01:05", "04:46", "07:50", "09:30"]);
         var bottomOfFirstRow = table.selectAll("tbody tr:first-child td span:nth-child(3)").nodes().map(function (node) { return node.innerHTML; });
         assert.deepEqual(bottomOfFirstRow, ["DEF", "&nbsp;", "01:05", "03:41", "03:04", "01:40"]);
+        
+        assert.strictEqual($("span.resultsTableHeader").text(), "Test, Leg 1, 3 controls");
     });
 
     QUnit.test("Can create a results table with two team results finishing and switch to the second leg", function (assert) {
@@ -471,7 +476,7 @@
         courseClass.setIsTeamClass([3, 3]);
         calculateRanks(courseClass);
         
-        courseClass.setCourse(new Course("Test", [courseClass], 8.2, 270, null));
+        courseClass.setCourse(new Course("Test", [courseClass], null, null, null));
         
         var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(courseClass);
@@ -488,5 +493,7 @@
         assert.deepEqual(topOfFirstRow, ["Third Runner", "10:14", "01:18", "05:12", "08:31", "10:14"]);
         var bottomOfFirstRow = table.selectAll("tbody tr:first-child td span:nth-child(3)").nodes().map(function (node) { return node.innerHTML; });
         assert.deepEqual(bottomOfFirstRow, ["DEF", "&nbsp;", "01:18", "03:54", "03:19", "01:43"]);
+        
+        assert.strictEqual($("span.resultsTableHeader").text(), "Test, Leg 2, 3 controls");
     });
 })();

@@ -167,6 +167,10 @@
             timeOffset = 0;
         }
         
+        if (this.courseClass.isTeamClass && this.selectedLegIndex !== null) {
+            headerText += getMessageWithFormatting("ShowLeg", {"$$LEG_NUMBER$$": this.selectedLegIndex + 1 }) + ", ";
+        }
+        
         if (numControls === 1) {
             headerText += getMessage("ResultsTableHeaderSingleControl");
         } else {
