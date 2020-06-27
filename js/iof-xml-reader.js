@@ -808,7 +808,7 @@
         }
         
         if (results.length !== cls.teamSize) {
-            warnings.push("Team " + (teamName === "" ? "(unnamed team)" : teamName) + " in class '" + cls.name + "' has an unexpected number of members: expected " + cls.teamSize + " but was actually " + results.length);
+            warnings.push("Team " + (teamName === "" ? "(unnamed team)" : "'" + teamName + "'") + " in class '" + cls.name + "' has an unexpected number of members: expected " + cls.teamSize + " but was actually " + results.length);
         }
         else {
             var warning = null;
