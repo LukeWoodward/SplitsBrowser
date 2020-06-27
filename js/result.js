@@ -762,6 +762,10 @@
         if (results.some(function (result) { return result.isNonCompetitive; })) {
             this.isNonCompetitive = true;
         }
+        
+        if (results.some(function (result) { return result.isOKDespiteMissingTimes; })) {
+            this.setOKDespiteMissingTimes();
+        }
     };
 
     

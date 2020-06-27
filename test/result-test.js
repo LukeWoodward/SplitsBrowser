@@ -928,6 +928,7 @@
         assert.ok(!teamResult1.isNonFinisher);
         assert.ok(!teamResult1.isOverMaxTime);
         assert.ok(!teamResult1.isNonCompetitive);
+        assert.ok(!teamResult1.isOKDespiteMissingTimes);
         assert.ok(teamResult1.completed());
     });
     
@@ -938,6 +939,7 @@
         assert.ok(!teamResult.isNonFinisher);
         assert.ok(!teamResult.isOverMaxTime);
         assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.isOKDespiteMissingTimes);
         assert.ok(!teamResult.completed());
     });
     
@@ -953,6 +955,7 @@
         assert.ok(!teamResult.isNonFinisher);
         assert.ok(!teamResult.isOverMaxTime);
         assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.isOKDespiteMissingTimes);
         assert.ok(!teamResult.completed());        
     });
     
@@ -967,6 +970,7 @@
         assert.ok(!teamResult.isNonFinisher);
         assert.ok(!teamResult.isOverMaxTime);
         assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.isOKDespiteMissingTimes);
         assert.ok(!teamResult.completed());
     });
     
@@ -982,6 +986,7 @@
         assert.ok(teamResult.isNonFinisher);
         assert.ok(!teamResult.isOverMaxTime);
         assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.isOKDespiteMissingTimes);
         assert.ok(!teamResult.completed());
     });
     
@@ -997,6 +1002,7 @@
         assert.ok(teamResult.isNonFinisher);
         assert.ok(!teamResult.isOverMaxTime);
         assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.isOKDespiteMissingTimes);
         assert.ok(!teamResult.completed());
     });
     
@@ -1013,6 +1019,7 @@
         assert.ok(teamResult.isNonFinisher);
         assert.ok(!teamResult.isOverMaxTime);
         assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.isOKDespiteMissingTimes);
         assert.ok(!teamResult.completed());
     });
     
@@ -1029,6 +1036,7 @@
         assert.ok(teamResult.isNonFinisher);
         assert.ok(!teamResult.isOverMaxTime);
         assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.isOKDespiteMissingTimes);
         assert.ok(!teamResult.completed());
     });
     
@@ -1046,6 +1054,7 @@
         assert.ok(teamResult.isNonFinisher);
         assert.ok(!teamResult.isOverMaxTime);
         assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.isOKDespiteMissingTimes);
         assert.ok(!teamResult.completed());
     });
     
@@ -1056,6 +1065,7 @@
         assert.ok(!teamResult.isNonFinisher);
         assert.ok(teamResult.isOverMaxTime);
         assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(!teamResult.isOKDespiteMissingTimes);
         assert.ok(!teamResult.completed());
     });
     
@@ -1066,6 +1076,18 @@
         assert.ok(!teamResult.isNonFinisher);
         assert.ok(!teamResult.isOverMaxTime);
         assert.ok(teamResult.isNonCompetitive);
+        assert.ok(!teamResult.isOKDespiteMissingTimes);
+        assert.ok(teamResult.completed());
+    });
+    
+    QUnit.test("Team with an OK-despite-missing-times team member is OK despite missing times", function (assert) {
+        var teamResult = createModifiedTeamResult(function (result) { result.setOKDespiteMissingTimes(); }, null);
+        assert.ok(!teamResult.isDisqualified);
+        assert.ok(!teamResult.isNonStarter);
+        assert.ok(!teamResult.isNonFinisher);
+        assert.ok(!teamResult.isOverMaxTime);
+        assert.ok(!teamResult.isNonCompetitive);
+        assert.ok(teamResult.isOKDespiteMissingTimes);
         assert.ok(teamResult.completed());
     });
     
