@@ -1,0 +1,1462 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ResultList SYSTEM "IOFdata.dtd">
+<ResultList>
+   <IOFVersion version="2.0.3"/>
+   <ClassResult>
+      <ClassShortName>Team Statuses</ClassShortName>
+      <TeamResult>
+         <TeamName>Over-Max-Time Team</TeamName>
+         <Club>
+            <ShortName>OMT</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Over-Max-Time</Given>
+                  <Family>Finisher-One</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>10:24:06</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:52:13</Clock>
+               </FinishTime>
+               <Time>1:28:07</Time>
+               <CompetitorStatus value="OverTime"/>
+               <SplitTime sequence="1">
+                  <ControlCode>167</ControlCode>
+                  <Time>05:32</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>344</ControlCode>
+                  <Time>10:23</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>102</ControlCode>
+                  <Time>16:14</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>272</ControlCode>
+                  <Time>18:36</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>223</ControlCode>
+                  <Time>1:27:44</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Competitive</Given>
+                  <Family>Finisher-Two</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:52:13</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>12:16:24</Clock>
+               </FinishTime>
+               <Time>24:11</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>335</ControlCode>
+                  <Time>07:15</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>165</ControlCode>
+                  <Time>08:19</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>323</ControlCode>
+                  <Time>11:08</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>323</ControlCode>
+                  <Time>16:42</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>387</ControlCode>
+                  <Time>23:18</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Competitive</Given>
+                  <Family>Finisher-Three</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>12:16:24</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>12:40:37</Clock>
+               </FinishTime>
+               <Time>24:13</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>207</ControlCode>
+                  <Time>04:13</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>246</ControlCode>
+                  <Time>12:32</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>193</ControlCode>
+                  <Time>20:05</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>179</ControlCode>
+                  <Time>23:21</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+      <TeamResult>
+         <TeamName>Disqualified Team</TeamName>
+         <Club>
+            <ShortName>DSQ</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Competitive</Given>
+                  <Family>Finisher-One</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>10:18:18</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>10:48:33</Clock>
+               </FinishTime>
+               <Time>30:15</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>363</ControlCode>
+                  <Time>08:41</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>107</ControlCode>
+                  <Time>13:47</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>325</ControlCode>
+                  <Time>16:59</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>308</ControlCode>
+                  <Time>20:40</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>267</ControlCode>
+                  <Time>29:28</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Competitive</Given>
+                  <Family>Finisher-Two</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>10:48:33</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:19:10</Clock>
+               </FinishTime>
+               <Time>30:37</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>164</ControlCode>
+                  <Time>02:53</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>218</ControlCode>
+                  <Time>08:00</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>125</ControlCode>
+                  <Time>16:14</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>185</ControlCode>
+                  <Time>20:10</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>181</ControlCode>
+                  <Time>30:06</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Disqualified</Given>
+                  <Family>Finisher-Three</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:19:10</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:42:22</Clock>
+               </FinishTime>
+               <Time>23:12</Time>
+               <CompetitorStatus value="Disqualified"/>
+               <SplitTime sequence="1">
+                  <ControlCode>255</ControlCode>
+                  <Time>08:27</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>329</ControlCode>
+                  <Time>14:48</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>141</ControlCode>
+                  <Time>21:31</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>113</ControlCode>
+                  <Time>22:36</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+      <TeamResult>
+         <TeamName>OK Team</TeamName>
+         <Club>
+            <ShortName>OK</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Okay</Given>
+                  <Family>Finisher-One</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>10:56:54</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:19:25</Clock>
+               </FinishTime>
+               <Time>22:31</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>318</ControlCode>
+                  <Time>07:32</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>366</ControlCode>
+                  <Time>11:33</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>324</ControlCode>
+                  <Time>15:33</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>158</ControlCode>
+                  <Time>20:34</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>399</ControlCode>
+                  <Time>22:07</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Okay</Given>
+                  <Family>Finisher-Two</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:19:25</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:34:59</Clock>
+               </FinishTime>
+               <Time>15:34</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>192</ControlCode>
+                  <Time>05:13</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>335</ControlCode>
+                  <Time>06:48</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>205</ControlCode>
+                  <Time>08:18</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>231</ControlCode>
+                  <Time>11:35</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>352</ControlCode>
+                  <Time>15:09</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Okay</Given>
+                  <Family>Finisher-Three</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:34:59</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:54:08</Clock>
+               </FinishTime>
+               <Time>19:09</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>224</ControlCode>
+                  <Time>01:16</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>147</ControlCode>
+                  <Time>04:28</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>304</ControlCode>
+                  <Time>13:12</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>201</ControlCode>
+                  <Time>18:18</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+      <TeamResult>
+         <TeamName>OK-Despite-Missing-Times Team</TeamName>
+         <Club>
+            <ShortName>OKDMT</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Competitive</Given>
+                  <Family>Finisher-One</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>10:43:35</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:08:05</Clock>
+               </FinishTime>
+               <Time>24:30</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>123</ControlCode>
+                  <Time>03:37</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>116</ControlCode>
+                  <Time>06:17</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>206</ControlCode>
+                  <Time>12:02</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>176</ControlCode>
+                  <Time>18:40</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>202</ControlCode>
+                  <Time>23:55</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Competitive</Given>
+                  <Family>Finisher-Two</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:08:05</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:40:11</Clock>
+               </FinishTime>
+               <Time>32:06</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>180</ControlCode>
+                  <Time>06:45</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>388</ControlCode>
+                  <Time>14:35</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>220</ControlCode>
+                  <Time>19:46</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>118</ControlCode>
+                  <Time>25:22</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>261</ControlCode>
+                  <Time>31:18</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>OK-Despite-Missing-Time</Given>
+                  <Family>Finisher-Three</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:40:11</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:58:43</Clock>
+               </FinishTime>
+               <Time>18:32</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>164</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>193</ControlCode>
+                  <Time>14:14</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>102</ControlCode>
+                  <Time>16:34</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>195</ControlCode>
+                  <Time>17:36</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+      <TeamResult>
+         <TeamName>Non-Competitive Team</TeamName>
+         <Club>
+            <ShortName>NONCOMP</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Competitive</Given>
+                  <Family>Finisher-One</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:04:03</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:23:30</Clock>
+               </FinishTime>
+               <Time>19:27</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>323</ControlCode>
+                  <Time>03:17</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>139</ControlCode>
+                  <Time>05:57</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>366</ControlCode>
+                  <Time>08:56</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>395</ControlCode>
+                  <Time>15:01</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>166</ControlCode>
+                  <Time>18:44</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Non-Comp</Given>
+                  <Family>Finisher-Two</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:23:30</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:54:02</Clock>
+               </FinishTime>
+               <Time>30:32</Time>
+               <CompetitorStatus value="NotCompeting"/>
+               <SplitTime sequence="1">
+                  <ControlCode>123</ControlCode>
+                  <Time>07:53</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>335</ControlCode>
+                  <Time>15:53</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>283</ControlCode>
+                  <Time>21:21</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>185</ControlCode>
+                  <Time>25:53</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>121</ControlCode>
+                  <Time>30:01</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Competitive</Given>
+                  <Family>Finisher-Three</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:54:02</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>12:18:26</Clock>
+               </FinishTime>
+               <Time>24:24</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>197</ControlCode>
+                  <Time>06:29</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>344</ControlCode>
+                  <Time>14:00</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>276</ControlCode>
+                  <Time>19:04</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>143</ControlCode>
+                  <Time>23:30</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+      <TeamResult>
+         <TeamName>Mispunching Team</TeamName>
+         <Club>
+            <ShortName>MP</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Competitive</Given>
+                  <Family>Finisher-One</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:08:06</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:33:30</Clock>
+               </FinishTime>
+               <Time>25:24</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>202</ControlCode>
+                  <Time>09:56</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>291</ControlCode>
+                  <Time>17:25</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>292</ControlCode>
+                  <Time>19:15</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>351</ControlCode>
+                  <Time>22:41</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>210</ControlCode>
+                  <Time>24:46</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Mis</Given>
+                  <Family>Puncher</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:33:30</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:52:50</Clock>
+               </FinishTime>
+               <Time>19:20</Time>
+               <CompetitorStatus value="MisPunch"/>
+               <SplitTime sequence="1">
+                  <ControlCode>149</ControlCode>
+                  <Time>01:44</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>380</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>301</ControlCode>
+                  <Time>11:10</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>370</ControlCode>
+                  <Time>17:35</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>291</ControlCode>
+                  <Time>18:45</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Competitive</Given>
+                  <Family>Finisher-Three</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:52:50</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>12:24:13</Clock>
+               </FinishTime>
+               <Time>31:23</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>146</ControlCode>
+                  <Time>08:34</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>129</ControlCode>
+                  <Time>15:52</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>359</ControlCode>
+                  <Time>23:26</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>343</ControlCode>
+                  <Time>30:55</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+      <TeamResult>
+         <TeamName>Non-Comp and OK with Missing Times</TeamName>
+         <Club>
+            <ShortName>NCOKDMT</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Non-Competitive</Given>
+                  <Family>Finisher-One</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:15:09</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:45:10</Clock>
+               </FinishTime>
+               <Time>30:01</Time>
+               <CompetitorStatus value="NotCompeting"/>
+               <SplitTime sequence="1">
+                  <ControlCode>200</ControlCode>
+                  <Time>07:36</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>130</ControlCode>
+                  <Time>15:42</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>279</ControlCode>
+                  <Time>20:29</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>143</ControlCode>
+                  <Time>22:43</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>108</ControlCode>
+                  <Time>29:14</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>OK-Despite-Missing-Times</Given>
+                  <Family>Finisher-Two</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:45:10</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>12:10:35</Clock>
+               </FinishTime>
+               <Time>25:25</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>217</ControlCode>
+                  <Time>04:32</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>221</ControlCode>
+                  <Time>10:05</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>286</ControlCode>
+                  <Time>17:36</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>348</ControlCode>
+                  <Time>21:54</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>266</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Competitive</Given>
+                  <Family>Finisher-Three</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>12:10:35</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>12:25:18</Clock>
+               </FinishTime>
+               <Time>14:43</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>352</ControlCode>
+                  <Time>01:19</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>366</ControlCode>
+                  <Time>02:26</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>322</ControlCode>
+                  <Time>11:44</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>102</ControlCode>
+                  <Time>14:06</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+      <TeamResult>
+         <TeamName>DNF 1 (OK, OK, DNF)</TeamName>
+         <Club>
+            <ShortName>DNF1</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF1</Given>
+                  <Family>Finisher-One</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:05:40</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:45:29</Clock>
+               </FinishTime>
+               <Time>39:49</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>270</ControlCode>
+                  <Time>09:42</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>314</ControlCode>
+                  <Time>14:50</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>332</ControlCode>
+                  <Time>23:52</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>114</ControlCode>
+                  <Time>32:55</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>220</ControlCode>
+                  <Time>39:24</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF1</Given>
+                  <Family>Finisher-Two</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:45:29</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>12:14:37</Clock>
+               </FinishTime>
+               <Time>29:08</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>314</ControlCode>
+                  <Time>09:39</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>224</ControlCode>
+                  <Time>12:33</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>352</ControlCode>
+                  <Time>20:06</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>218</ControlCode>
+                  <Time>22:51</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>233</ControlCode>
+                  <Time>28:34</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF1</Given>
+                  <Family>Non-Finisher</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>12:14:37</Clock>
+               </StartTime>
+               <Time>-----</Time>
+               <CompetitorStatus value="DidNotFinish"/>
+               <SplitTime sequence="1">
+                  <ControlCode>106</ControlCode>
+                  <Time>04:27</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>266</ControlCode>
+                  <Time>06:01</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>205</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>292</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+      <TeamResult>
+         <TeamName>DNF 2 (OK, OK, DNS)</TeamName>
+         <Club>
+            <ShortName>DNF2</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF2</Given>
+                  <Family>Finisher-One</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:35:48</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>12:03:00</Clock>
+               </FinishTime>
+               <Time>27:12</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>164</ControlCode>
+                  <Time>05:27</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>106</ControlCode>
+                  <Time>07:19</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>163</ControlCode>
+                  <Time>17:04</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>169</ControlCode>
+                  <Time>19:20</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>233</ControlCode>
+                  <Time>26:47</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF2</Given>
+                  <Family>Finisher-Two</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>12:03:00</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>12:19:20</Clock>
+               </FinishTime>
+               <Time>16:20</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>323</ControlCode>
+                  <Time>01:36</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>349</ControlCode>
+                  <Time>04:38</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>291</ControlCode>
+                  <Time>09:11</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>149</ControlCode>
+                  <Time>10:51</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>300</ControlCode>
+                  <Time>15:59</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF2</Given>
+                  <Family>Non-Starter</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>12:19:20</Clock>
+               </StartTime>
+               <Time>-----</Time>
+               <CompetitorStatus value="DidNotStart"/>
+               <SplitTime sequence="1">
+                  <ControlCode>332</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>111</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>186</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>122</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+      <TeamResult>
+         <TeamName>DNF 3 (OK, DNF, DNS)</TeamName>
+         <Club>
+            <ShortName>DNF3</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF3</Given>
+                  <Family>Finisher</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:25:40</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:58:21</Clock>
+               </FinishTime>
+               <Time>32:41</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>209</ControlCode>
+                  <Time>05:42</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>133</ControlCode>
+                  <Time>14:24</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>194</ControlCode>
+                  <Time>20:30</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>299</ControlCode>
+                  <Time>27:23</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>205</ControlCode>
+                  <Time>32:12</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF3</Given>
+                  <Family>Non-Finisher</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:58:21</Clock>
+               </StartTime>
+               <Time>-----</Time>
+               <CompetitorStatus value="DidNotFinish"/>
+               <SplitTime sequence="1">
+                  <ControlCode>373</ControlCode>
+                  <Time>07:03</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>130</ControlCode>
+                  <Time>08:37</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>353</ControlCode>
+                  <Time>13:52</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>184</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>182</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF3</Given>
+                  <Family>Non-Starter</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <Time>-----</Time>
+               <CompetitorStatus value="DidNotStart"/>
+               <SplitTime sequence="1">
+                  <ControlCode>300</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>211</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>389</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>236</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+      <TeamResult>
+         <TeamName>DNF 4 (OK, DNS, DNS)</TeamName>
+         <Club>
+            <ShortName>DNF4</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF4</Given>
+                  <Family>Finisher</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:15:37</Clock>
+               </StartTime>
+               <FinishTime>
+                  <Clock>11:52:53</Clock>
+               </FinishTime>
+               <Time>37:16</Time>
+               <CompetitorStatus value="OK"/>
+               <SplitTime sequence="1">
+                  <ControlCode>129</ControlCode>
+                  <Time>08:03</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>384</ControlCode>
+                  <Time>11:22</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>329</ControlCode>
+                  <Time>20:39</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>151</ControlCode>
+                  <Time>26:53</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>202</ControlCode>
+                  <Time>36:18</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF4</Given>
+                  <Family>NonStarter-One</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:52:53</Clock>
+               </StartTime>
+               <Time>-----</Time>
+               <CompetitorStatus value="DidNotStart"/>
+               <SplitTime sequence="1">
+                  <ControlCode>290</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>317</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>333</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>350</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>339</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF4</Given>
+                  <Family>NonStarter-Two</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <Time>-----</Time>
+               <CompetitorStatus value="DidNotStart"/>
+               <SplitTime sequence="1">
+                  <ControlCode>138</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>116</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>205</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>307</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+      <TeamResult>
+         <TeamName>DNF 5 (DNF, DNS, DNS)</TeamName>
+         <Club>
+            <ShortName>DNF5</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF5</Given>
+                  <Family>Non-Finisher</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:48:22</Clock>
+               </StartTime>
+               <Time>-----</Time>
+               <CompetitorStatus value="DidNotFinish"/>
+               <SplitTime sequence="1">
+                  <ControlCode>279</ControlCode>
+                  <Time>07:41</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>220</ControlCode>
+                  <Time>09:40</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>152</ControlCode>
+                  <Time>14:37</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>252</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>244</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF5</Given>
+                  <Family>NonStarter-One</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <Time>-----</Time>
+               <CompetitorStatus value="DidNotStart"/>
+               <SplitTime sequence="1">
+                  <ControlCode>146</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>210</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>268</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>274</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>149</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>DNF5</Given>
+                  <Family>NonStarter-Two</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <Time>-----</Time>
+               <CompetitorStatus value="DidNotStart"/>
+               <SplitTime sequence="1">
+                  <ControlCode>314</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>316</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>267</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>342</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+      <TeamResult>
+         <TeamName>Non-Starters</TeamName>
+         <Club>
+            <ShortName>NON</ShortName>
+         </Club>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Non</Given>
+                  <Family>Starter-One</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <StartTime>
+                  <Clock>11:53:01</Clock>
+               </StartTime>
+               <Time>16:21</Time>
+               <CompetitorStatus value="DidNotStart"/>
+               <SplitTime sequence="1">
+                  <ControlCode>265</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>297</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>123</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>201</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>361</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Non</Given>
+                  <Family>Starter-Two</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <Time>-----</Time>
+               <CompetitorStatus value="DidNotStart"/>
+               <SplitTime sequence="1">
+                  <ControlCode>344</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>370</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>135</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>226</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="5">
+                  <ControlCode>196</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+         <PersonResult>
+            <Person>
+               <PersonName>
+                  <Given>Non</Given>
+                  <Family>Starter-Three</Family>
+               </PersonName>
+            </Person>
+            <Result>
+               <Time>-----</Time>
+               <CompetitorStatus value="DidNotStart"/>
+               <SplitTime sequence="1">
+                  <ControlCode>247</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="2">
+                  <ControlCode>274</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="3">
+                  <ControlCode>164</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+               <SplitTime sequence="4">
+                  <ControlCode>397</ControlCode>
+                  <Time>-----</Time>
+               </SplitTime>
+            </Result>
+         </PersonResult>
+      </TeamResult>
+   </ClassResult>
+</ResultList>
