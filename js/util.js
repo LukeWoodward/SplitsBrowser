@@ -108,7 +108,7 @@
     };
 
     /**
-    * Utility funciton to throw a 'WrongFileFormat' exception object.
+    * Utility function to throw a 'WrongFileFormat' exception object.
     * @param {string} message - The exception message.
     * @throws {WrongFileFormat} if invoked.
     */
