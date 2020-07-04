@@ -26,6 +26,7 @@
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var hasProperty = SplitsBrowser.hasProperty;
     var addIfNotNull = SplitsBrowser.addIfNotNull;
     var subtractIfNotNull = SplitsBrowser.subtractIfNotNull;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
@@ -98,6 +99,20 @@
             assert.strictEqual(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
             assert.strictEqual(e.message, "Test message", "Exception message should be the test message in the function call");
         }
+    });
+
+    QUnit.module("Utilities - hasProperty");
+
+    QUnit.test("hasProperty returns true for a property an object has", function (assert) {
+        assert.strictEqual(hasProperty({"propName": "value"}, "propName"), true);
+    });
+
+    QUnit.test("hasProperty returns false for a property an object does not have", function (assert) {
+        assert.strictEqual(hasProperty({"propName": "value"}, "someOtherPropertyName"), false);
+    });
+
+    QUnit.test("hasProperty returns false for a property an object inherits through the prototype chain", function (assert) {
+        assert.strictEqual(hasProperty({"propName": "value"}, "__proto__"), false);
     });
 
     QUnit.module("Utilities - addIfNotNull");

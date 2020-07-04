@@ -117,6 +117,17 @@
     };
 
     /**
+     * Checks whether the given object contains a property with the given name.
+     * This is a wrapper around the call to Object.prototype.hasOwnProperty.
+     * @param {Object} object The object to test.
+     * @param {string} property The name of the property.
+     * @return {Boolean} Whether the object has a property with the given name.
+     */
+    SplitsBrowser.hasProperty = function (object, property) {
+        return Object.prototype.hasOwnProperty.call(object, property);
+    };
+
+    /**
     * Returns the sum of two numbers, or null if either is null.
     * @param {?Number} a - One number, or null, to add.
     * @param {?Number} b - The other number, or null, to add.
@@ -185,5 +196,4 @@
     SplitsBrowser.normaliseLineEndings = function (stringValue) {
         return stringValue.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
     };
-
 })();

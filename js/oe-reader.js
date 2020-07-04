@@ -24,6 +24,7 @@
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
+    var hasProperty = SplitsBrowser.hasProperty;
     var parseCourseLength = SplitsBrowser.parseCourseLength;
     var parseCourseClimb = SplitsBrowser.parseCourseClimb;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
@@ -166,7 +167,7 @@
 
         var controlCodeRegexp = /^[A-Za-z0-9]+$/;
         for (var columnOffset in COLUMN_INDEXES) {
-            if (Object.prototype.hasOwnProperty.call(COLUMN_INDEXES, columnOffset)) {
+            if (hasProperty(COLUMN_INDEXES, columnOffset)) {
                 // Convert columnOffset to a number.  It will presently be a
                 // string because it is an object property.
                 columnOffset = parseInt(columnOffset, 10);
@@ -200,7 +201,7 @@
     */
     Reader.prototype.getClassName = function (row) {
         var className = row[this.columnIndexes.className];
-        if (className === "" && Object.prototype.hasOwnProperty.call(this.columnIndexes, "classNameFallback")) {
+        if (className === "" && hasProperty(this.columnIndexes, "classNameFallback")) {
             // 'Nameless' variation: no class names.
             className = row[this.columnIndexes.classNameFallback];
         }
@@ -336,13 +337,13 @@
     Reader.prototype.getName = function (row) {
         var name = "";
 
-        if (Object.prototype.hasOwnProperty.call(this.columnIndexes, "forename") && Object.prototype.hasOwnProperty.call(this.columnIndexes, "surname")) {
+        if (hasProperty(this.columnIndexes, "forename") && hasProperty(this.columnIndexes, "surname")) {
             var forename = row[this.columnIndexes.forename];
             var surname = row[this.columnIndexes.surname];
             name = (forename + " " + surname).trim();
         }
 
-        if (name === "" && Object.prototype.hasOwnProperty.call(this.columnIndexes, "combinedName")) {
+        if (name === "" && hasProperty(this.columnIndexes, "combinedName")) {
             // 'Nameless' or 44-column variation.
             name = row[this.columnIndexes.combinedName];
         }
@@ -361,7 +362,7 @@
         var className = this.getClassName(row);
         var placing = row[this.columnIndexes.placing];
         var club = row[this.columnIndexes.club];
-        if (club === "" && Object.prototype.hasOwnProperty.call(this.columnIndexes, "clubFallback")) {
+        if (club === "" && hasProperty(this.columnIndexes, "clubFallback")) {
             // Nameless variation: no club name, just number...
             club = row[this.columnIndexes.clubFallback];
         }
@@ -385,7 +386,7 @@
             }
         }
 
-        if (Object.prototype.hasOwnProperty.call(this.columnIndexes, "gender")) {
+        if (hasProperty(this.columnIndexes, "gender")) {
             var gender = row[this.columnIndexes.gender];
             if (gender === "M" || gender === "F") {
                 competitor.setGender(gender);

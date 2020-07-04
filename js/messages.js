@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser Messages - Fetches internationalised message strings.
  *
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -20,6 +20,8 @@
  */
 (function () {
     "use strict";
+
+    var hasProperty = SplitsBrowser.hasProperty;
 
     // Whether a warning about missing messages has been given.  We don't
     // really want to irritate the user with many alert boxes if there's a
@@ -71,7 +73,7 @@
     *     otherwise the default value.
     */
     SplitsBrowser.tryGetMessage = function (key, defaultValue) {
-        return (currentLanguage !== null && Object.prototype.hasOwnProperty.call(messages[currentLanguage], key)) ? SplitsBrowser.getMessage(key) : defaultValue;
+        return (currentLanguage !== null && hasProperty(messages[currentLanguage], key)) ? SplitsBrowser.getMessage(key) : defaultValue;
     };
 
     /**
@@ -86,7 +88,7 @@
         }
 
         if (currentLanguage !== null) {
-            if (Object.prototype.hasOwnProperty.call(messages[currentLanguage], key)) {
+            if (hasProperty(messages[currentLanguage], key)) {
                 return messages[currentLanguage][key];
             } else {
                 warn("Message not found for key '" + key + "' in language '" + currentLanguage + "'");
@@ -111,7 +113,7 @@
     SplitsBrowser.getMessageWithFormatting = function (key, params) {
         var message = SplitsBrowser.getMessage(key);
         for (var paramName in params) {
-            if (Object.prototype.hasOwnProperty.call(params, paramName)) {
+            if (hasProperty(params, paramName)) {
                 // Irritatingly there isn't a way of doing global replace
                 // without using regexps.  So we must escape any magic regex
                 // metacharacters first, so that we have a regexp that will
@@ -146,7 +148,7 @@
     * @return {String} The name of the language, e.g. "English".
     */
     SplitsBrowser.getLanguageName = function (language) {
-        if (Object.prototype.hasOwnProperty.call(messages, language) && Object.prototype.hasOwnProperty.call(messages[language], "Language")) {
+        if (hasProperty(messages, language) && hasProperty(messages[language], "Language")) {
             return messages[language].Language;
         } else {
             return "?????";
@@ -158,7 +160,7 @@
     * @param {String} language - The code of the new language to set.
     */
     SplitsBrowser.setLanguage = function (language) {
-        if (Object.prototype.hasOwnProperty.call(messages, language)) {
+        if (hasProperty(messages, language)) {
             currentLanguage = language;
         }
     };
@@ -178,14 +180,14 @@
         }
 
         for (var messageKey in messages) {
-            if (Object.prototype.hasOwnProperty.call(messages, messageKey)) {
+            if (hasProperty(messages, messageKey)) {
                 allLanguages.push(messageKey);
             }
         }
 
         if (allLanguages.length === 0) {
             warn("No messages files were found.");
-        } else if (defaultLanguage && Object.prototype.hasOwnProperty.call(messages, defaultLanguage)) {
+        } else if (defaultLanguage && hasProperty(messages, defaultLanguage)) {
             currentLanguage = defaultLanguage;
         } else {
             currentLanguage = allLanguages[0];

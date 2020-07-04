@@ -23,6 +23,7 @@
     "use strict";
 
     var isNaNStrict = SplitsBrowser.isNaNStrict;
+    var hasProperty = SplitsBrowser.hasProperty;
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
 
@@ -105,7 +106,7 @@
             return null;
         } else {
             var chartTypeName = chartTypeMatch[1];
-            if (Object.prototype.hasOwnProperty.call(ChartTypes, chartTypeName)) {
+            if (hasProperty(ChartTypes, chartTypeName)) {
                 return ChartTypes[chartTypeName];
             } else {
                 return null;
@@ -122,7 +123,7 @@
     function formatChartType(queryString, chartType) {
         queryString = removeAll(queryString, CHART_TYPE_REGEXP);
         for (var chartTypeName in ChartTypes) {
-            if (Object.prototype.hasOwnProperty.call(ChartTypes, chartTypeName) && ChartTypes[chartTypeName] === chartType) {
+            if (hasProperty(ChartTypes, chartTypeName) && ChartTypes[chartTypeName] === chartType) {
                 return queryString + "&chartType=" + encodeURIComponent(chartTypeName);
             }
         }
@@ -291,7 +292,7 @@
 
             for (var index = 0; index < statsNames.length; index += 1) {
                 var name = statsNames[index];
-                if (Object.prototype.hasOwnProperty.call(stats, name)) {
+                if (hasProperty(stats, name)) {
                     stats[name] = true;
                 } else if (name !== "") {
                     // Ignore unrecognised non-empty statistic name.
@@ -311,7 +312,7 @@
     */
     function formatSelectedStatistics(queryString, stats) {
         queryString = removeAll(queryString, SELECTED_STATISTICS_REGEXP);
-        var statsNames = ALL_STATS_NAMES.filter(function (name) { return Object.prototype.hasOwnProperty.call(stats, name) && stats[name]; });
+        var statsNames = ALL_STATS_NAMES.filter(function (name) { return hasProperty(stats, name) && stats[name]; });
         return queryString + "&stats=" + encodeURIComponent(statsNames.join(";"));
     }
 

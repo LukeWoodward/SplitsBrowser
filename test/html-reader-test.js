@@ -21,6 +21,7 @@
 (function () {
     "use strict";
 
+    var hasProperty = SplitsBrowser.hasProperty;
     var parseEventData = SplitsBrowser.Input.Html.parseEventData;
 
     QUnit.module("Input.Html");
@@ -60,10 +61,10 @@
         assert.strictEqual(actualCourse.name, expectedDetails.name);
         assert.strictEqual(actualCourse.length, expectedDetails.length);
         assert.strictEqual(actualCourse.climb, expectedDetails.climb);
-        if (expectedDetails.hasOwnProperty("controls")) {
+        if (hasProperty(expectedDetails, "controls")) {
             assert.deepEqual(actualCourse.controls, expectedDetails.controls);
         }
-        if (expectedDetails.hasOwnProperty("classCount")) {
+        if (hasProperty(expectedDetails, "classCount")) {
             assert.strictEqual(actualCourse.classes.length, expectedDetails.classCount);
         }
     }
@@ -98,7 +99,7 @@
     */
     function assertResult(assert, actualResult, expectedDetails) {
         ["name", "club"].forEach(function (propName) {
-            if (expectedDetails.hasOwnProperty(propName)) {
+            if (hasProperty(expectedDetails, propName)) {
                 var assertion = (propName === "originalCumTimes" || propName === "originalSplitTimes") ? assert.deepEqual.bind(assert) : assert.strictEqual.bind(assert);
                 assertion(actualResult.owner[propName], expectedDetails[propName], "Should have correct value for property '" + propName + "'");
             }
@@ -106,13 +107,13 @@
 
         var resultOptionalProps = ["totalTime", "originalCumTimes", "originalSplitTimes", "isNonCompetitive", "isNonStarter", "isNonFinisher", "isDisqualified"];
         resultOptionalProps.forEach(function (propName) {
-            if (expectedDetails.hasOwnProperty(propName)) {
+            if (hasProperty(expectedDetails, propName)) {
                 var assertion = (propName === "originalCumTimes" || propName === "originalSplitTimes") ? assert.deepEqual.bind(assert) : assert.strictEqual.bind(assert);
                 assertion(actualResult[propName], expectedDetails[propName], "Should have correct value for property '" + propName + "'");
             }
         });
 
-        if (expectedDetails.hasOwnProperty("completed")) {
+        if (hasProperty(expectedDetails, "completed")) {
             assert.strictEqual(actualResult.completed(), expectedDetails.completed);
         }
     }

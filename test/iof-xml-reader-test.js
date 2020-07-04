@@ -21,6 +21,7 @@
 (function (){
     "use strict";
 
+    var hasProperty = SplitsBrowser.hasProperty;
     var formatTime = SplitsBrowser.formatTime;
     var parseEventData = SplitsBrowser.Input.IOFXml.parseEventData;
 
@@ -108,9 +109,9 @@
     * @return {String} Generated XML string.
     */
     Version2Formatter.getClubXml = function (resultData) {
-        if (resultData.hasOwnProperty("club")) {
+        if (hasProperty(resultData, "club")) {
             return "<Club><ShortName>" + resultData.club + "</ShortName></Club>\n";
-        } else if (resultData.hasOwnProperty("clubFull")) {
+        } else if (hasProperty(resultData, "clubFull")) {
             return "<Club><Name>" + resultData.clubFull + "</Name></Club>\n";
         } else {
             return "";
@@ -150,7 +151,7 @@
     Version2Formatter.getPersonResultXml = function (personData, classData) {
 
         function exists(name) {
-            return personData.hasOwnProperty(name);
+            return hasProperty(personData, name);
         }
 
         if (!exists("controls") || !exists("cumTimes")) {
@@ -212,8 +213,8 @@
         var statusXml = '<CompetitorStatus value="' + status + '" />\n';
 
         var courseLengthXml = "";
-        if (classData.hasOwnProperty("length")) {
-            if (classData.hasOwnProperty("lengthUnit")) {
+        if (hasProperty(classData, "length")) {
+            if (hasProperty(classData, "lengthUnit")) {
                 courseLengthXml = '<CourseLength unit="' + classData.lengthUnit + '">' + classData.length + "</CourseLength>\n";
             } else {
                 courseLengthXml = "<CourseLength>" + classData.length + "</CourseLength>\n";
@@ -315,25 +316,25 @@
     */
     Version3Formatter.getCourseXml = function (clazz) {
         var xml = "<Course>\n";
-        if (clazz.hasOwnProperty("courseId")) {
+        if (hasProperty(clazz, "courseId")) {
             xml += "<Id>" + clazz.courseId + "</Id>\n";
         }
 
-        if (clazz.hasOwnProperty("courseName")) {
+        if (hasProperty(clazz, "courseName")) {
             xml += "<Name>" + clazz.courseName + "</Name>\n";
-        } else if (clazz.hasOwnProperty("name")) {
+        } else if (hasProperty(clazz, "name")) {
             xml += "<Name>" + clazz.name + "</Name>\n";
         }
 
-        if (clazz.hasOwnProperty("length")) {
+        if (hasProperty(clazz, "length")) {
             xml += "<Length>" + clazz.length + "</Length>\n";
         }
 
-        if (clazz.hasOwnProperty("climb")) {
+        if (hasProperty(clazz, "climb")) {
             xml += "<Climb>" + clazz.climb + "</Climb>\n";
         }
 
-        if (clazz.hasOwnProperty("numberOfControls")) {
+        if (hasProperty(clazz, "numberOfControls")) {
             xml += "<NumberOfControls>" + clazz.numberOfControls + "</NumberOfControls>\n";
         }
 
@@ -348,9 +349,9 @@
     * @return {String} Generated XML string.
     */
     Version3Formatter.getClubXml = function (resultData) {
-        if (resultData.hasOwnProperty("club")) {
+        if (hasProperty(resultData, "club")) {
             return "<Organisation><ShortName>" + resultData.club + "</ShortName></Organisation>\n";
-        } else if (resultData.hasOwnProperty("clubFull")) {
+        } else if (hasProperty(resultData, "clubFull")) {
             return "<Organisation><Name>" + resultData.clubFull + "</Name></Organisation>\n";
         } else {
             return "";
@@ -386,7 +387,7 @@
     Version3Formatter.getIndividualResultXml = function (personData, elementName) {
 
         function exists(name) {
-            return personData.hasOwnProperty(name);
+            return hasProperty(personData, name);
         }
 
         if (!exists("controls") || !exists("cumTimes")) {
@@ -545,21 +546,21 @@
         var xml = formatter.header;
         classes.forEach(function (clazz) {
             xml += "<ClassResult>\n";
-            if (clazz.hasOwnProperty("name")) {
+            if (hasProperty(clazz, "name")) {
                 xml += formatter.getClassXml(clazz.name);
             }
 
             xml += formatter.getCourseXml(clazz);
 
-            if (clazz.hasOwnProperty("competitors")) {
+            if (hasProperty(clazz, "competitors")) {
                 xml += clazz.competitors.map(function (comp) { return formatter.getPersonResultXml(comp, clazz); }).join("\n");
             }
 
-            if (clazz.hasOwnProperty("teams")) {
+            if (hasProperty(clazz, "teams")) {
                 xml += clazz.teams.map(function (team) { return formatRelayTeam(formatter, team, clazz); }).join("\n");
             }
 
-            if (!clazz.hasOwnProperty("competitors") && !clazz.hasOwnProperty("teams")) {
+            if (!hasProperty(clazz, "competitors") && !hasProperty(clazz, "teams")) {
                 throw new Error("Class has no competitor nor team results");
             }
 

@@ -21,6 +21,7 @@
 (function () {
     "use strict";
 
+    var hasProperty = SplitsBrowser.hasProperty;
     var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
     var CourseClass = SplitsBrowser.Model.CourseClass;
@@ -33,7 +34,7 @@
 
     var ALL_CHART_TYPES = [];
     for (var type in ChartTypes) {
-        if (ChartTypes.hasOwnProperty(type)) {
+        if (hasProperty(ChartTypes, type)) {
             ALL_CHART_TYPES.push(ChartTypes[type]);
         }
     }

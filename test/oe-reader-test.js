@@ -21,6 +21,7 @@
 (function () {
     "use strict";
 
+    var hasProperty = SplitsBrowser.hasProperty;
     var parseTime = SplitsBrowser.parseTime;
     var parseEventData = SplitsBrowser.Input.OE.parseEventData;
     var CourseClass = SplitsBrowser.Model.CourseClass;
@@ -72,7 +73,7 @@
 
         var row = template;
         for (var key in data) {
-            if (data.hasOwnProperty(key)) {
+            if (hasProperty(data, key)) {
                 row = row.replace(key, data[key]);
             }
         }

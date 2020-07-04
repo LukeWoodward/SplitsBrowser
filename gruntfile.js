@@ -50,8 +50,8 @@ module.exports = function(grunt) {
             },
             dist: {
                 src: ['js/core.js',
-                      'js/messages.js',
                       'js/util.js',
+                      'js/messages.js',
                       'js/time.js',
                       'js/result.js',
                       'js/competitor.js',

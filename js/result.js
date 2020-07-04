@@ -25,6 +25,7 @@
 
     var isNotNull = SplitsBrowser.isNotNull;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
+    var hasProperty = SplitsBrowser.hasProperty;
     var addIfNotNull = SplitsBrowser.addIfNotNull;
     var subtractIfNotNull = SplitsBrowser.subtractIfNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
@@ -647,7 +648,7 @@
     * @return The name of the owner for that leg.
     */
     Result.prototype.getOwnerNameForLeg = function (legIndex) {
-        if (Object.prototype.hasOwnProperty.call(this.owner, "members") && legIndex !== null) {
+        if (hasProperty(this.owner, "members") && legIndex !== null) {
             return this.owner.members[legIndex].name;
         } else {
             return this.owner.name;

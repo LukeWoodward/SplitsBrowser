@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Chart Popup - Shows data near the cursor in a popup window.
  *
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -22,6 +22,7 @@
     "use strict";
 
     var formatTime = SplitsBrowser.formatTime;
+    var hasProperty = SplitsBrowser.hasProperty;
 
     /**
     * Creates a ChartPopup control.
@@ -55,7 +56,7 @@
         // browsers support pointer-events: none, which means that this div
         // receives no mouse events at all.
         for (var eventName in handlers) {
-            if (Object.prototype.hasOwnProperty.call(handlers, eventName)) {
+            if (hasProperty(handlers, eventName)) {
                 $(this.popupDiv.node()).on(eventName, handlers[eventName]);
             }
         }
