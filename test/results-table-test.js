@@ -406,7 +406,7 @@
         assert.strictEqual(table.selectAll("tbody tr td[title]").size(), 2);
         assert.strictEqual(table.selectAll("tbody tr td:nth-child(2)[title]").size(), 2);
         
-        assert.strictEqual($("span.resultsTableHeader").text(), "Test, 7 controls");
+        assert.strictEqual($("span.resultsTableHeader").text(), "Test, 3 + 3 controls");
     });
     
     QUnit.test("Can create a results table with two team results with different numbers of controls per leg and label the control headers", function (assert) {

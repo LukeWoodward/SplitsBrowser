@@ -171,7 +171,10 @@
             headerText += getMessageWithFormatting("ShowLeg", {"$$LEG_NUMBER$$": this.selectedLegIndex + 1 }) + ", ";
         }
         
-        if (numControls === 1) {
+        if (this.courseClass.isTeamClass && this.selectedLegIndex === null) {
+            var numControlsString = this.courseClass.numbersOfControls.join(" + ");
+            headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": numControlsString});
+        } else if (numControls === 1) {
             headerText += getMessage("ResultsTableHeaderSingleControl");
         } else {
             headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": numControls});
