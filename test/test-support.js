@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser - Utilities to assist with testing.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -18,6 +18,8 @@
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+// Tell ESLint not to complain that this is redeclaring a constant.
+/* eslint no-redeclare: "off" */
 var SplitsBrowserTest = {};
 
 (function () {
@@ -62,8 +64,8 @@ var SplitsBrowserTest = {};
     SplitsBrowserTest.assertInvalidData = function (assert,  func, failureMessage) {
         SplitsBrowserTest.assertException(assert, "InvalidData", func, failureMessage);
     };
-    
-        
+
+
     /**
     * Asserts that two arrays of numbers have the same length and the
     * corresponding elements are strict-equal to one another.  This function
@@ -77,7 +79,7 @@ var SplitsBrowserTest = {};
         assert.ok($.isArray(expectedArray), "expectedArray is not an array");
         assert.strictEqual(actualArray.length, expectedArray.length,
             "Lengths should be the same: expected " + expectedArray.length + ", actual " + actualArray.length);
-        
+
         for (var index = 0; index < expectedArray.length; index += 1) {
             if (isNaNStrict(expectedArray[index])) {
                 assert.ok(isNaNStrict(actualArray[index]), "Expected array has NaN at index " + index + " so actual array should do too.  Actual value " + actualArray[index]);
@@ -86,7 +88,7 @@ var SplitsBrowserTest = {};
             }
         }
     };
-    
+
     /**
     * Returns the sum of two numbers, or null if either is null.
     * @param {?Number} a - One number, or null, to add.
@@ -97,7 +99,7 @@ var SplitsBrowserTest = {};
     function addIfNotNull(a, b) {
         return (a === null || b === null) ? null : (a + b);
     }
-    
+
     /**
     * Convenience method to create a result from split times.
     *
@@ -117,20 +119,20 @@ var SplitsBrowserTest = {};
         for (var i = 0; i < splitTimes.length; i += 1) {
             cumTimes.push(addIfNotNull(cumTimes[i], splitTimes[i]));
         }
-        
+
         var result = new Result(order, startTime, splitTimes, cumTimes, new Competitor(name, club));
         result.splitTimes = splitTimes;
         result.cumTimes = cumTimes;
         return result;
     };
-    
+
     // Polyfill HTMLElement.prototype.click for the benefit of PhantomJS.
     // See http://stackoverflow.com/a/17789929
     if (!HTMLElement.prototype.click) {
         HTMLElement.prototype.click = function() {
-            var ev = document.createEvent('MouseEvent');
+            var ev = document.createEvent("MouseEvent");
             ev.initMouseEvent(
-                'click',
+                "click",
                 /*bubble*/true, /*cancelable*/true,
                 window, null,
                 0, 0, 0, 0, /*coordinates*/

@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser - Competitor tests.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -31,5 +31,5 @@
         competitor.setGender("M");
         assert.strictEqual(competitor.yearOfBirth, 1984);
         assert.strictEqual(competitor.gender, "M");
-    });    
+    });
 })();

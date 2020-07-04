@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser - LanguageSelector tests.
- *  
+ *
  *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -24,7 +24,7 @@
     var LanguageSelector = SplitsBrowser.Controls.LanguageSelector;
 
     QUnit.module("Language Selector");
-    
+
     var callCount = 0;
 
     function reset() {
@@ -34,7 +34,7 @@
     function handleLanguageChanged() {
         callCount += 1;
     }
-    
+
     function createSelector() {
         return new LanguageSelector($("#qunit-fixture")[0]);
     }
@@ -79,7 +79,7 @@
         reset();
         var selector = createSelector();
         selector.registerChangeHandler(handleLanguageChanged);
-        
+
         var htmlSelect = $("#qunit-fixture select");
         assert.strictEqual(htmlSelect.length, 1, "One select element should have been created");
         try {
@@ -92,16 +92,16 @@
 
     QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", function(assert) {
         reset();
-        
+
         var callCount2 = null;
         var secondHandler = function () {
             callCount2 += 1;
         };
-        
+
         var selector = createSelector();
         selector.registerChangeHandler(handleLanguageChanged);
         selector.registerChangeHandler(secondHandler);
-        
+
         try {
             $("#qunit-fixture select").val("de").change();
             assert.strictEqual(callCount, 1, "One change should have been recorded");
@@ -129,7 +129,7 @@
         reset();
         var selector = createSelector();
         selector.registerChangeHandler(handleLanguageChanged);
-        
+
         try {
             selector.setLanguage("de");
             assert.strictEqual($("#qunit-fixture select")[0].selectedIndex, 1);
@@ -143,10 +143,10 @@
         reset();
         var selector = createSelector();
         selector.registerChangeHandler(handleLanguageChanged);
-        
+
         selector.setLanguage("This is not a recognised language code");
         assert.strictEqual($("#qunit-fixture select")[0].selectedIndex, 0);
-        
+
         assert.strictEqual(callCount, 0, "No changes should have been recorded");
     });
 })();

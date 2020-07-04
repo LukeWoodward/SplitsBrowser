@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser Language-file consistency tests.
- *  
+ *
  *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,9 +20,9 @@
  */
 (function () {
     "use strict";
-    
+
     var REFERENCE_LANGUAGE = "en_gb";
-    
+
     /**
     * Checks that an 'other' language has all of the message keys that a given
     * reference language has.
@@ -42,14 +42,14 @@
             }
         }
     }
-    
+
     QUnit.test("All languages are consistent", function (assert) {
         if (typeof SplitsBrowser.Messages === "undefined") {
             throw new Error("Languages not defined");
         } else if (!SplitsBrowser.Messages.hasOwnProperty(REFERENCE_LANGUAGE)) {
             throw new Error("Reference language not found");
         }
-        
+
         var consistencyErrors = [];
         var languageCount = 1;
         for (var language in SplitsBrowser.Messages) {
@@ -59,7 +59,7 @@
                 languageCount += 1;
             }
         }
-        
+
         assert.deepEqual(consistencyErrors, [], "The " + languageCount + " language files should be consistent");
     });
 })();
