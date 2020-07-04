@@ -1,5 +1,5 @@
 /*
- *  SplitsBrowser - CompetitorList tests.
+ *  SplitsBrowser - ResultList tests.
  *  
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
@@ -21,9 +21,12 @@
 (function () { 
     "use strict";
 
-    var CompetitorList = SplitsBrowser.Controls.CompetitorList;
-    var CompetitorSelection = SplitsBrowser.Model.CompetitorSelection;
+    var ResultList = SplitsBrowser.Controls.ResultList;
+    var ResultSelection = SplitsBrowser.Model.ResultSelection;
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
+    var getMessage = SplitsBrowser.getMessage;
+    var Team = SplitsBrowser.Model.Team;
+    var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
 
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
 
@@ -32,7 +35,7 @@
     
     var NUMBER_TYPE = typeof 0;
     
-    QUnit.module("Competitor List");
+    QUnit.module("Result List");
 
     var lastAlertMessage;
     var alertCount;
@@ -73,13 +76,13 @@
     /**
     * Sets up the d3 event before event handlers are called.
     * @param {Number|HTMLElement} target - The target element, or the index of
-    *     the competitor.
+    *     the result.
     * @param {Object} options - The options.
     */
     function setUpD3Event(target, options) {
         propagationStopped = false;
         if (typeof target === NUMBER_TYPE) {
-            target = $("div.competitor")[target];
+            target = $("div.result")[target];
         }
         options = options || {};
         var currentY = (target === document) ? 0 : target.getBoundingClientRect().top + target.clientTop;
@@ -95,11 +98,11 @@
     /**
     * Sets up the d3 event before event handlers are called and initiates a
     * start-drag.
-    * @param {Number} targetIndex - The index of the target competitor element.
+    * @param {Number} targetIndex - The index of the target result element.
     * @param {Object} options - The options.
     * @param {Boolean} holdShiftKey - Whether to hold down the Shift key.
-    * @param {Object} listAndSelection - Object containing the competitor list
-    *     and the competitor selection.
+    * @param {Object} listAndSelection - Object containing the result list and
+    *     the result selection.
     */    
     function setUpD3EventAndStartDrag(targetIndex, options, listAndSelection) {
         verifyNumeric(targetIndex);
@@ -109,27 +112,27 @@
     
     /**
     * Sets up the d3 event before event handlers are called and initiates a
-    * start-drag from off the bottom of the list of competitors.
-    * @param {Object} listAndSelection - Object containing the competitor list
-    *     and the competitor selection.
+    * start-drag from off the bottom of the list of results.
+    * @param {Object} listAndSelection - Object containing the result list and
+    *     the result selection.
     * @param {Object} options - The options.
     */    
     function setUpD3EventAndStartDragOffTheBottom(listAndSelection, options) {
         options.yOffset = 250;
-        setUpD3Event($("#competitorList")[0], options);
+        setUpD3Event($("#resultList")[0], options);
         listAndSelection.list.startDrag(-1);
     }
     
     /**
     * Sets up the d3 event before event handlers are called and initiates a
     * start-drag from within the scrollbar.
-    * @param {Object} listAndSelection - Object containing the competitor list
-    *     and the competitor selection.
+    * @param {Object} listAndSelection - Object containing the result list and
+    *     the result selection.
     * @param {Object} options - The options.
     */    
     function setUpD3EventAndStartDragInTheScrollbar(listAndSelection, options) {
         options.yOffset = -20;
-        setUpD3Event($("#competitorList")[0], options);
+        setUpD3Event($("#resultList")[0], options);
         listAndSelection.list.startDrag(-1);
     }
     
@@ -137,9 +140,9 @@
     * Sets up the d3 event and initiates a mouse-move event.
     * start-drag.
     * @param {Number|HTMLElement} target - The target element, or the index of
-    *     the competitor.
-    * @param {Object} listAndSelection - Object containing the competitor list
-    *     and the selected competitors.
+    *     the result.
+    * @param {Object} listAndSelection - Object containing the result list and
+    *     the selected results.
     */    
     function setUpD3EventAndMoveMouse(targetIndex, listAndSelection) {
         verifyNumeric(targetIndex);
@@ -149,49 +152,86 @@
     
     /**
     * Sets up the d3 event and initiates a mouse-move event off the bottom of
-    * the competitor list.
+    * the result list.
     * start-drag.
-    * @param {Object} listAndSelection - Object containing the competitor list
-    *     and the selected competitors.
+    * @param {Object} listAndSelection - Object containing the result list and
+    *     the selected results.
     */    
     function setUpD3EventAndMoveMouseOffTheBottom(listAndSelection) {
-        setUpD3Event($("#competitorList")[0], {yOffset: 200});
+        setUpD3Event($("#resultList")[0], {yOffset: 200});
         listAndSelection.list.mouseMove(-1);
     }
     
     /**
     * Sets up the d3 event and initiates a mouse-move event into the scrollbar.
     * start-drag.
-    * @param {Object} listAndSelection - Object containing the competitor list
-    *     and the selected competitors.
+    * @param {Object} listAndSelection - Object containing the result list and
+    *     the selected results.
     */    
     function setUpD3EventAndMoveMouseIntoTheScrollbar(listAndSelection) {
-        setUpD3Event($("#competitorList")[0], {yOffset: -20});
+        setUpD3Event($("#resultList")[0], {yOffset: -20});
         listAndSelection.list.mouseMove(-1);
     }
     
     /**
-    * Creates a list with three competitors in it, and return the list and the
+    * Creates a list with three results in it, and return the list and the
     * selection.
-    * @param {Array} selectedIndexes - Indexes of selected competitors in the selection.
-    * @param {boolean} multipleClasses - Whether the list of competitors is built from
+    * @param {Array} selectedIndexes - Indexes of selected results in the selection.
+    * @param {boolean} multipleClasses - Whether the list of results is built from
     *                                    multiple classes.
     * @return 2-element object containing the selection and list.
     */
     function createSampleList(selectedIndexes, multipleClasses) {
         var parent = d3.select("div#qunit-fixture").node();
         
-        var compList = [
+        var resultList = [
             fromSplitTimes(1, "First Runnerson", "CDO", 10 * 3600, [13, 96, 35]),
             fromSplitTimes(2, "Second O'Runner", "GHO", 10 * 3600 + 6, [15, 79, 41]),
             fromSplitTimes(3, "Third Runnerson", "KLO", 10 * 3600 + 33, [18, 81, 37])
         ];
         
-        var selection = new CompetitorSelection(compList.length);
+        var selection = new ResultSelection(resultList.length);
         selectedIndexes.forEach(function (index) { selection.toggle(index); });
         
-        var list = new CompetitorList(parent, customAlert);
-        list.setCompetitorList(compList, multipleClasses);
+        var list = new ResultList(parent, customAlert);
+        list.setResultList(resultList, multipleClasses, false, null);
+        list.setSelection(selection);
+        return { selection: selection, list: list };
+    }
+    
+    /**
+    * Creates a list with three results in it, and return the list and the
+    * selection.
+    * @param {Array} selectedIndexes - Indexes of selected results in the selection.
+    * @param {boolean} multipleClasses - Whether the list of results is built from
+    *                                    multiple classes.
+    * @return 2-element object containing the selection and list.
+    */
+    function createSampleTeamList() {
+        var parent = d3.select("div#qunit-fixture").node();
+        
+        var resultList = [
+            createTeamResult(
+                1,
+                [fromSplitTimes(1, "First Runner", "CDO", 10 * 3600, [13, 96, 35]), fromSplitTimes(1, "Second Runner", "CDO", 10 * 3600 + 144, [19, 92, 37])],
+                new Team("First Team", "CDO")
+            ),
+            createTeamResult(
+                2,
+                [fromSplitTimes(1, "Third Runner", "GHO", 10 * 3600, [15, 79, 41]), fromSplitTimes(1, "Fourth Runner", "GHO", 10 * 3600 + 135, [22, 100, 41])],
+                new Team("Second Team", "GHO")
+            ),
+            createTeamResult(
+                3,
+                [fromSplitTimes(1, "Fifth Runner", "KLO", 10 * 3600, [18, 81, 37]), fromSplitTimes(1, "Sixth Runner", "KLO", 10 * 3600 + 136, [20, 99, 44])],
+                new Team("Third Team", "KLO")
+            )
+        ];
+        
+        var selection = new ResultSelection(resultList.length);
+        
+        var list = new ResultList(parent, customAlert);
+        list.setResultList(resultList, false, true, null);
         list.setSelection(selection);
         return { selection: selection, list: list };
     }
@@ -199,8 +239,8 @@
     /**
     * Creates a list with three options in it, set it up on the race graph
     * and return the list and the selection.
-    * @param {Array} selectedIndexes - Indexes of selected competitors in the selection.
-    * @param {boolean} multipleClasses - Whether the list of competitors is built from
+    * @param {Array} selectedIndexes - Indexes of selected results in the selection.
+    * @param {boolean} multipleClasses - Whether the list of results is built from
     *                                    multiple classes.
     * @return 2-element object containing the selection and list.
     */
@@ -214,8 +254,8 @@
     /**
     * Creates a list with three options in it, wires up the test change handler
     * and returns the list and the selection.
-    * @param {Array} selectedIndexes - Indexes of selected competitors in the selection.
-    * @param {boolean} multipleClasses - Whether the list of competitors is built from
+    * @param {Array} selectedIndexes - Indexes of selected results in the selection.
+    * @param {boolean} multipleClasses - Whether the list of results is built from
     *                                    multiple classes.
     * @return 2-element object containing the selection and list.
     */
@@ -226,66 +266,66 @@
     }
     
     /**
-    * Asserts that the given expected list of competitors all have the given
-    * CSS class in their associated div, and other competitor divs do not.
+    * Asserts that the given expected list of results all have the given
+    * CSS class in their associated div, and other result divs do not.
     * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Number} count - Total number of competitors.
+    * @param {Number} count - Total number of results.
     * @param {String} className - The name of the CSS class to test for.
-    * @param {Array} expectedCompetitors - Array that contains the indexes of
-    *     all competitors that should have the given CSS class.
+    * @param {Array} expectedResults - Array that contains the indexes of
+    *     all results that should have the given CSS class.
     */
-    function assertCompetitorsClassed(assert, count, className, expectedCompetitors) {
-        var competitors = $("div.competitor");
+    function assertResultsClassed(assert, count, className, expectedResults) {
+        var results = $("div.result");
         for (var index = 0; index < count; index += 1) {
-            assert.strictEqual($(competitors[index]).hasClass(className), expectedCompetitors.indexOf(index) >= 0);
+            assert.strictEqual($(results[index]).hasClass(className), expectedResults.indexOf(index) >= 0);
         }
     }
     
     /**
-    * Asserts that the currently-drag-selected competitors are as expected.
+    * Asserts that the currently-drag-selected results are as expected.
     * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Number} count - Total number of competitors.
+    * @param {Number} count - Total number of results.
     * @param {Array} expectedDragSelected - Array that contains the indexes of
-    *     all competitors that should be drag-selected.
+    *     all results that should be drag-selected.
     */
     function assertDragSelected(assert, count, expectedDragSelected) {
-        assertCompetitorsClassed(assert, count, "dragSelected", expectedDragSelected);
+        assertResultsClassed(assert, count, "dragSelected", expectedDragSelected);
     }
     
     /**
-    * Asserts that the currently-drag-deselected competitors are as expected.
+    * Asserts that the currently-drag-deselected results are as expected.
     * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Number} count - Total number of competitors.
+    * @param {Number} count - Total number of results.
     * @param {Array} expectedDragDeselected - Array that contains the indexes of
-    *     all competitors that should be drag-deselected.
+    *     all results that should be drag-deselected.
     */
     function assertDragDeselected(assert, count, expectedDragDeselected) {
-        assertCompetitorsClassed(assert, count, "dragDeselected", expectedDragDeselected);
+        assertResultsClassed(assert, count, "dragDeselected", expectedDragDeselected);
     }
     
     /**
-    * Asserts that the currently-selected competitors are as expected,  both in
+    * Asserts that the currently-selected results are as expected,  both in
     * the the divs and the underlying selection.
     * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Number} count - Total number of competitors.
+    * @param {Number} count - Total number of results.
     * @param {Array} expectedSelected - Array that contains the indexes of
-    *     all competitors that should be selected.
+    *     all results that should be selected.
     */
     function assertSelected(assert, count, expectedSelected, listAndSelection) {
-        var competitors = $("div.competitor");
+        var results = $("div.result");
         for (var index = 0; index < count; index += 1) {
             var shouldBeSelected = expectedSelected.indexOf(index) >= 0;
-            assert.strictEqual($(competitors[index]).hasClass("selected"), shouldBeSelected);
+            assert.strictEqual($(results[index]).hasClass("selected"), shouldBeSelected);
             assert.strictEqual(listAndSelection.selection.isSelected(index), shouldBeSelected);
         }
     }
     
     /**
-    * Asserts that there are no drag-selected competitors.
+    * Asserts that there are no drag-selected results.
     * @param {QUnit.assert} assert - QUnit assert object.
     */
     function assertNoDragSelected(assert) {
-        assert.strictEqual($("div.competitor.dragSelected").length, 0);
+        assert.strictEqual($("div.result.dragSelected").length, 0);
     }
 
     QUnit.test("Can create a list, set the filter text and read the same value back", function (assert) {
@@ -294,88 +334,142 @@
         assert.strictEqual(listAndSelection.list.getFilterText(), "test abc 123 DEF");
     });
 
-    QUnit.test("Can create a list for a single class with all competitors deselected and without class labels", function (assert) {
+    QUnit.test("Can create a list for a single individual class with all results deselected and without class labels", function (assert) {
         createSampleList([], false);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor").size(), 3);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 0);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture span.competitorClassLabel").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result[title]").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture span.resultClassLabel").size(), 0);
         assert.strictEqual(d3.selectAll("div#qunit-fixture button").size(), 3);
         assert.strictEqual(d3.selectAll("div#qunit-fixture input[type=text]").size(), 1);
         assert.ok(!$("div#qunit-fixture button")[0].disabled);
         assert.ok(!$("div#qunit-fixture button")[1].disabled);
         assert.ok(!d3.select("div#qunit-fixture input[type=text]").property("disabled"));
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitorListPlaceholder").size(), 0);
     });
-    
-    QUnit.test("Can create a list for an empty class of competitors, with placeholder message", function (assert) {
-        var parent = d3.select("div#qunit-fixture").node();
-        var list = new CompetitorList(parent, customAlert);
-        list.setCompetitorList([], false);
-        list.setSelection(new CompetitorSelection(0));
-        assert.ok($("div#qunit-fixture button")[0].disabled);
-        assert.ok($("div#qunit-fixture button")[1].disabled);
-        assert.ok(d3.select("div#qunit-fixture input[type=text]").property("disabled"));
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitorListPlaceholder").size(), 1);
-    });
-    
-    QUnit.test("Can create a list for an empty class of competitors and then a non-empty list, removing placeholder div", function (assert) {
-        var parent = d3.select("div#qunit-fixture").node();
-        var list = new CompetitorList(parent, customAlert);
-        list.setCompetitorList([], false);
-        list.setSelection(new CompetitorSelection(0));
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitorListPlaceholder").size(), 1);
-        
-        var compList = [fromSplitTimes(1, "First Runner", "CDO", 10 * 3600, [13, 96, 35])];
-        list.setCompetitorList(compList);
-        list.setSelection(new CompetitorSelection(1));
+
+    QUnit.test("Can create a list for a single team class with all results deselected and with the correct tooltips", function (assert) {
+        createSampleTeamList([], false);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result[title]").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture span.resultClassLabel").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture button").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture input[type=text]").size(), 1);
         assert.ok(!$("div#qunit-fixture button")[0].disabled);
         assert.ok(!$("div#qunit-fixture button")[1].disabled);
         assert.ok(!d3.select("div#qunit-fixture input[type=text]").property("disabled"));
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitorListPlaceholder").size(), 0);
+        
+        var titledNodes = d3.selectAll("div#qunit-fixture div.result[title]").nodes();
+        assert.strictEqual(titledNodes.length, 3);
+        assert.strictEqual(titledNodes[0].getAttribute("title"), "First Runner\nSecond Runner");
+        assert.strictEqual(titledNodes[1].getAttribute("title"), "Third Runner\nFourth Runner");
+        assert.strictEqual(titledNodes[2].getAttribute("title"), "Fifth Runner\nSixth Runner");
     });
 
-    QUnit.test("Can create a list for multiple classes with all competitors deselected but with class labels shown", function (assert) {
+    QUnit.test("Can create a list for the first leg of a team class", function (assert) {
+        var list = createSampleTeamList([], false).list;
+        list.setResultList(list.allResults, false, true, 0);
+        
+        var nodes = d3.selectAll("div#qunit-fixture div.result").nodes();
+        assert.strictEqual(nodes.length, 3);
+        assert.strictEqual(d3.select(nodes[0]).text(), "First Runner");
+        assert.strictEqual(d3.select(nodes[1]).text(), "Third Runner");
+        assert.strictEqual(d3.select(nodes[2]).text(), "Fifth Runner");
+    });
+
+    QUnit.test("Can create a list for the second leg of a team class", function (assert) {
+        var list = createSampleTeamList([], false).list;
+        list.setResultList(list.allResults, false, true, 1);
+        
+        var nodes = d3.selectAll("div#qunit-fixture div.result").nodes();
+        assert.strictEqual(nodes.length, 3);
+        assert.strictEqual(d3.select(nodes[0]).text(), "Second Runner");
+        assert.strictEqual(d3.select(nodes[1]).text(), "Fourth Runner");
+        assert.strictEqual(d3.select(nodes[2]).text(), "Sixth Runner");
+    });
+    
+    QUnit.test("Can create a list for an empty class of individual results, with placeholder message", function (assert) {
+        var parent = d3.select("div#qunit-fixture").node();
+        var list = new ResultList(parent, customAlert);
+        list.setResultList([], false, false, null);
+        list.setSelection(new ResultSelection(0));
+        assert.ok($("div#qunit-fixture button")[0].disabled);
+        assert.ok($("div#qunit-fixture button")[1].disabled);
+        assert.ok(d3.select("div#qunit-fixture input[type=text]").property("disabled"));
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.resultListPlaceholder").size(), 1);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.resultListPlaceholder").text(), getMessage("NoCompetitorsStarted"));
+    });
+    
+    QUnit.test("Can create a list for an empty class of team results, with placeholder message", function (assert) {
+        var parent = d3.select("div#qunit-fixture").node();
+        var list = new ResultList(parent, customAlert);
+        list.setResultList([], false, true, null);
+        list.setSelection(new ResultSelection(0));
+        assert.ok($("div#qunit-fixture button")[0].disabled);
+        assert.ok($("div#qunit-fixture button")[1].disabled);
+        assert.ok(d3.select("div#qunit-fixture input[type=text]").property("disabled"));
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.resultListPlaceholder").size(), 1);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.resultListPlaceholder").text(), getMessage("NoTeamsStarted"));
+    });
+    
+    QUnit.test("Can create a list for an empty class of results and then a non-empty list, removing placeholder div", function (assert) {
+        var parent = d3.select("div#qunit-fixture").node();
+        var list = new ResultList(parent, customAlert);
+        list.setResultList([], false, false, null);
+        list.setSelection(new ResultSelection(0));
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.resultListPlaceholder").size(), 1);
+        
+        var compList = [fromSplitTimes(1, "First Runner", "CDO", 10 * 3600, [13, 96, 35])];
+        list.setResultList(compList, false, false, null);
+        list.setSelection(new ResultSelection(1));
+        assert.ok(!$("div#qunit-fixture button")[0].disabled);
+        assert.ok(!$("div#qunit-fixture button")[1].disabled);
+        assert.ok(!d3.select("div#qunit-fixture input[type=text]").property("disabled"));
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.resultListPlaceholder").size(), 0);
+    });
+
+    QUnit.test("Can create a list for multiple classes with all results deselected but with class labels shown", function (assert) {
         createSampleList([], true);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor").size(), 3);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 0);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture span.competitorClassLabel").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture span.resultClassLabel").size(), 3);
     });
 
-    QUnit.test("Can create a list with two of three competitors initially selected", function (assert) {
+    QUnit.test("Can create a list with two of three results initially selected", function (assert) {
         createSampleList([0, 2], false);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor").size(), 3);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 2);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 2);
     });
 
-    QUnit.test("Can create a list with all competitors deselected, and then select them all", function (assert) {
+    QUnit.test("Can create a list with all results deselected, and then select them all", function (assert) {
         var listAndSelection = createSampleList([], false);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor").size(), 3);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 0);
         listAndSelection.selection.selectAll();
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 3);
     });
 
-    QUnit.test("Can create a list with all competitors selected, and then deselect them all", function (assert) {
+    QUnit.test("Can create a list with all results selected, and then deselect them all", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor").size(), 3);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result").size(), 3);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 3);
         listAndSelection.selection.selectNone();
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 0);
     });
 
     QUnit.test("Can create a list, change the selection and ignore changes made to the old selection", function (assert) {
         var listAndSelection = createSampleList([], false);
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 0);
         
-        var newSelection = new CompetitorSelection(3);
+        var newSelection = new ResultSelection(3);
         listAndSelection.list.setSelection(newSelection);
         
         var oldSelection = listAndSelection.selection;
         oldSelection.selectAll();
-        assert.strictEqual(d3.selectAll("div#qunit-fixture div.competitor.selected").size(), 0);
+        assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 0);
     });
     
-    QUnit.test("Can create a list with all competitors deselected and click and hold to drag-select one of them", function (assert) {
+    QUnit.test("Can create a list with all results deselected and click and hold to drag-select one of them", function (assert) {
         var listAndSelection = createSampleList([], false);
 
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -384,7 +478,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and drag downwards to drag-select more than one of them", function (assert) {
+    QUnit.test("Can create a list with all results deselected and drag downwards to drag-select more than one of them", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -394,7 +488,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and drag upwards to drag-select more than one of them", function (assert) {
+    QUnit.test("Can create a list with all results deselected and drag upwards to drag-select more than one of them", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -404,7 +498,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and drag downwards and then upwards to drag-select more than one of them", function (assert) {
+    QUnit.test("Can create a list with all results deselected and drag downwards and then upwards to drag-select more than one of them", function (assert) {
         var listAndSelection = createSampleList([], false);
 
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -415,7 +509,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with one competitor selected and drag downwards to drag-select both competitors", function (assert) {
+    QUnit.test("Can create a list with one result selected and drag downwards to drag-select both results", function (assert) {
         var listAndSelection = createSampleList([1], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -425,7 +519,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and drag downwards off the bottom of the list to drag-select the last two competitors", function (assert) {
+    QUnit.test("Can create a list with all results deselected and drag downwards off the bottom of the list to drag-select the last two results", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -435,7 +529,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and drag off the list into the scrollbar to drag-select nothing", function (assert) {
+    QUnit.test("Can create a list with all results deselected and drag off the list into the scrollbar to drag-select nothing", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -445,7 +539,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected, and drag onto the list to drag-select the last two competitors", function (assert) {
+    QUnit.test("Can create a list with all results deselected, and drag onto the list to drag-select the last two results", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDragOffTheBottom(listAndSelection, {});
@@ -455,7 +549,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected, and drag from the scrollbar into the list to drag-select nothing", function (assert) {
+    QUnit.test("Can create a list with all results deselected, and drag from the scrollbar into the list to drag-select nothing", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDragInTheScrollbar(listAndSelection, {});
@@ -464,7 +558,7 @@
         assertDragSelected(assert, 3, []);
     });
 
-    QUnit.test("Can create a list with all competitors deselected, and drag around off the list to drag-select nothing", function (assert) {
+    QUnit.test("Can create a list with all results deselected, and drag around off the list to drag-select nothing", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDragOffTheBottom(listAndSelection, {});
@@ -474,7 +568,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected, and drag with the wrong mouse button to drag-select nothing", function (assert) {
+    QUnit.test("Can create a list with all results deselected, and drag with the wrong mouse button to drag-select nothing", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {which: 4}, listAndSelection);
@@ -483,28 +577,28 @@
         assertDragSelected(assert, 3, []);
     });
     
-    QUnit.test("Can create a list with all competitors deselected, filter the list and then select only all filtered competitors", function (assert) {
+    QUnit.test("Can create a list with all results deselected, filter the list and then select only all filtered results", function (assert) {
         var listAndSelection = createSampleList([], false);
         listAndSelection.list.setFilterText("son");
-        $("div#qunit-fixture button#selectAllCompetitors").click();
+        $("div#qunit-fixture button#selectAllResults").click();
         assertSelected(assert, 3, [0, 2], listAndSelection);
     });
     
-    QUnit.test("Can create a list with all competitors selected, filter the list and then deselect only all filtered competitors", function (assert) {
+    QUnit.test("Can create a list with all results selected, filter the list and then deselect only all filtered results", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         listAndSelection.list.setFilterText("son");
-        $("div#qunit-fixture button#selectNoCompetitors").click();
+        $("div#qunit-fixture button#selectNoResults").click();
         assertSelected(assert, 3, [1], listAndSelection);
     });
     
-    QUnit.test("Can create a list with all competitors selected, filter the list and then deselect all competitors with a double-click", function (assert) {
+    QUnit.test("Can create a list with all results selected, filter the list and then deselect all results with a double-click", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         listAndSelection.list.setFilterText("son");
-        $("div#qunit-fixture button#selectNoCompetitors").dblclick();
+        $("div#qunit-fixture button#selectNoResults").dblclick();
         assertSelected(assert, 3, [], listAndSelection);
     });
     
-    QUnit.test("Can create a list with all competitors deselected, filter the list and then drag-select those only in the filtered list", function (assert) {
+    QUnit.test("Can create a list with all results deselected, filter the list and then drag-select those only in the filtered list", function (assert) {
         var listAndSelection = createSampleList([], false);
         listAndSelection.list.setFilterText("son");
         
@@ -514,7 +608,7 @@
         assertDragSelected(assert, 3, [0, 2]);
     });
     
-    QUnit.test("Can create a list with all competitors selected and shift-click and hold to drag-deselect one of them", function (assert) {
+    QUnit.test("Can create a list with all results selected and shift-click and hold to drag-deselect one of them", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
 
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -523,7 +617,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected and shift-drag downwards to drag-deselect more than one of them", function (assert) {
+    QUnit.test("Can create a list with all results selected and shift-drag downwards to drag-deselect more than one of them", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -533,7 +627,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected and shift-drag upwards to drag-deselect more than one of them", function (assert) {
+    QUnit.test("Can create a list with all results selected and shift-drag upwards to drag-deselect more than one of them", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -543,7 +637,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and shift-drag downwards and then upwards to drag-deselect more than one of them", function (assert) {
+    QUnit.test("Can create a list with all results deselected and shift-drag downwards and then upwards to drag-deselect more than one of them", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
 
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -554,7 +648,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with one competitor deselected and shift-drag downwards to drag-deselect both competitors", function (assert) {
+    QUnit.test("Can create a list with one result deselected and shift-drag downwards to drag-deselect both results", function (assert) {
         var listAndSelection = createSampleList([0, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -564,7 +658,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected and shift-drag downwards off the bottom of the list to drag-deselect the last two competitors", function (assert) {
+    QUnit.test("Can create a list with all results selected and shift-drag downwards off the bottom of the list to drag-deselect the last two results", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -574,7 +668,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected and shift-drag off the list into the scrollbar to drag-deselect nothing", function (assert) {
+    QUnit.test("Can create a list with all results selected and shift-drag off the list into the scrollbar to drag-deselect nothing", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -584,7 +678,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected, and shift-drag onto the list to drag-deselect the last two competitors", function (assert) {
+    QUnit.test("Can create a list with all results selected, and shift-drag onto the list to drag-deselect the last two results", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDragOffTheBottom(listAndSelection, {shiftKey: true});
@@ -594,7 +688,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected, and shift-drag from the scrollbar into the list to drag-deselect nothing", function (assert) {
+    QUnit.test("Can create a list with all results selected, and shift-drag from the scrollbar into the list to drag-deselect nothing", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDragInTheScrollbar(listAndSelection, {shiftKey: true});
@@ -603,7 +697,7 @@
         assertDragDeselected(assert, 3, []);
     });
 
-    QUnit.test("Can create a list with all competitors selected, and shift-drag around off the list to drag-deselect nothing", function (assert) {
+    QUnit.test("Can create a list with all results selected, and shift-drag around off the list to drag-deselect nothing", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDragOffTheBottom(listAndSelection, {shiftKey: true});
@@ -613,7 +707,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected, and shift-drag with the wrong mouse button to drag-deselect nothing", function (assert) {
+    QUnit.test("Can create a list with all results selected, and shift-drag with the wrong mouse button to drag-deselect nothing", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true, which: 4}, listAndSelection);
@@ -622,7 +716,7 @@
         assertDragSelected(assert, 3, []);
     });
     
-    QUnit.test("Can create a list with all competitors selected, filter the list and then drag-deselect those only in the filtered list", function (assert) {
+    QUnit.test("Can create a list with all results selected, filter the list and then drag-deselect those only in the filtered list", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         listAndSelection.list.setFilterText("son");
         
@@ -632,7 +726,7 @@
         assertDragDeselected(assert, 3, [0, 2]);
     });
     
-    QUnit.test("Can create a list with all competitors deselected, and click to select one of them", function (assert) {
+    QUnit.test("Can create a list with all results deselected, and click to select one of them", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -643,7 +737,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected, and click to deselect one of them", function (assert) {
+    QUnit.test("Can create a list with all results selected, and click to deselect one of them", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -654,7 +748,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected, and drag downwards to select more than one of them", function (assert) {
+    QUnit.test("Can create a list with all results deselected, and drag downwards to select more than one of them", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -666,7 +760,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected, and drag upwards to select more than one of them", function (assert) {
+    QUnit.test("Can create a list with all results deselected, and drag upwards to select more than one of them", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -678,7 +772,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected, and drag downwards and then upwards to select more than one of them", function (assert) {
+    QUnit.test("Can create a list with all results deselected, and drag downwards and then upwards to select more than one of them", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -691,7 +785,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with one competitor selected and drag downwards to select that competitor and another", function (assert) {
+    QUnit.test("Can create a list with one result selected and drag downwards to select that result and another", function (assert) {
         var listAndSelection = createSampleList([1], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -703,7 +797,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and drag downwards off the bottom of the list to select the last two competitors", function (assert) {
+    QUnit.test("Can create a list with all results deselected and drag downwards off the bottom of the list to select the last two results", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -715,7 +809,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and drag off the list into the scrollbar to select nothing", function (assert) {
+    QUnit.test("Can create a list with all results deselected and drag off the list into the scrollbar to select nothing", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -727,7 +821,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and drag off the list altogether to select nothing", function (assert) {
+    QUnit.test("Can create a list with all results deselected and drag off the list altogether to select nothing", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {}, listAndSelection);
@@ -740,7 +834,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and drag onto the list to select the last two competitors", function (assert) {
+    QUnit.test("Can create a list with all results deselected and drag onto the list to select the last two results", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDragOffTheBottom(listAndSelection, {});
@@ -752,7 +846,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and drag from the scrollbar into the list to select nothing", function (assert) {
+    QUnit.test("Can create a list with all results deselected and drag from the scrollbar into the list to select nothing", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDragInTheScrollbar(listAndSelection, {});
@@ -763,7 +857,7 @@
         assertNoDragSelected(assert);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and drag around off the list to select nothing", function (assert) {
+    QUnit.test("Can create a list with all results deselected and drag around off the list to select nothing", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDragOffTheBottom(listAndSelection, {});
@@ -775,7 +869,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors deselected and drag with the wrong mouse button to select nothing", function (assert) {
+    QUnit.test("Can create a list with all results deselected and drag with the wrong mouse button to select nothing", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {which: 4}, listAndSelection);
@@ -786,7 +880,7 @@
         assertNoDragSelected(assert);
     });
 
-    QUnit.test("Can create a list with all competitors selected, and shift-drag downwards to deselect more than one of them", function (assert) {
+    QUnit.test("Can create a list with all results selected, and shift-drag downwards to deselect more than one of them", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -798,7 +892,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected, and shift-drag upwards to deselect more than one of them", function (assert) {
+    QUnit.test("Can create a list with all results selected, and shift-drag upwards to deselect more than one of them", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -810,7 +904,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected, and shift-drag downwards and then upwards to deselect more than one of them", function (assert) {
+    QUnit.test("Can create a list with all results selected, and shift-drag downwards and then upwards to deselect more than one of them", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -823,7 +917,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with one competitor deselected and shift-drag downwards to deselect that competitor and another", function (assert) {
+    QUnit.test("Can create a list with one result deselected and shift-drag downwards to deselect that result and another", function (assert) {
         var listAndSelection = createSampleList([0, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -835,7 +929,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected and shift-drag downwards off the bottom of the list to deselect the last two competitors", function (assert) {
+    QUnit.test("Can create a list with all results selected and shift-drag downwards off the bottom of the list to deselect the last two results", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -847,7 +941,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected and shift-drag off the list into the scrollbar to deselect nothing", function (assert) {
+    QUnit.test("Can create a list with all results selected and shift-drag off the list into the scrollbar to deselect nothing", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -859,7 +953,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected and shift-drag off the list altogether to deselect nothing", function (assert) {
+    QUnit.test("Can create a list with all results selected and shift-drag off the list altogether to deselect nothing", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true}, listAndSelection);
@@ -872,7 +966,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected and shift-drag onto the list to deselect the last two competitors", function (assert) {
+    QUnit.test("Can create a list with all results selected and shift-drag onto the list to deselect the last two results", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDragOffTheBottom(listAndSelection, {shiftKey: true});
@@ -884,7 +978,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected and shift-drag from the scrollbar into the list to deselect nothing", function (assert) {
+    QUnit.test("Can create a list with all results selected and shift-drag from the scrollbar into the list to deselect nothing", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDragInTheScrollbar(listAndSelection, {shiftKey: true});
@@ -895,7 +989,7 @@
         assertNoDragSelected(assert);
     });
 
-    QUnit.test("Can create a list with all competitors selected and drag around off the list to deselect nothing", function (assert) {
+    QUnit.test("Can create a list with all results selected and drag around off the list to deselect nothing", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         
         setUpD3EventAndStartDragOffTheBottom(listAndSelection, {shiftKey: true});
@@ -907,7 +1001,7 @@
         assert.ok(propagationStopped);
     });
 
-    QUnit.test("Can create a list with all competitors selected and shift-drag with the wrong mouse button to select nothing", function (assert) {
+    QUnit.test("Can create a list with all results selected and shift-drag with the wrong mouse button to select nothing", function (assert) {
         var listAndSelection = createSampleList([], false);
         
         setUpD3EventAndStartDrag(1, {shiftKey: true, which: 4}, listAndSelection);
@@ -918,7 +1012,7 @@
         assertNoDragSelected(assert);
     });
     
-    QUnit.test("Can create a list with all competitors deselected, filter the list and then select those only in the filtered list", function (assert) {
+    QUnit.test("Can create a list with all results deselected, filter the list and then select those only in the filtered list", function (assert) {
         var listAndSelection = createSampleList([], false);
         listAndSelection.list.setFilterText("son");
         
@@ -930,20 +1024,20 @@
         assertNoDragSelected(assert);
     });
     
-    QUnit.test("Can create a list with all competitors deselected, and click 'Select All' to select all of them", function (assert) {
+    QUnit.test("Can create a list with all results deselected, and click 'Select All' to select all of them", function (assert) {
         var listAndSelection = createSampleList([], false);
         assertSelected(assert, 3, [], listAndSelection);
         
-        $("div#qunit-fixture button#selectAllCompetitors").click();
+        $("div#qunit-fixture button#selectAllResults").click();
         
         assertSelected(assert, 3, [0, 1, 2], listAndSelection);
     });
     
-    QUnit.test("Can create a list with all competitors selected, and click 'Select None' to select none of them", function (assert) {
+    QUnit.test("Can create a list with all results selected, and click 'Select None' to select none of them", function (assert) {
         var listAndSelection = createSampleList([0, 1, 2], false);
         assertSelected(assert, 3, [0, 1, 2], listAndSelection);
         
-        $("div#qunit-fixture button#selectNoCompetitors").click();
+        $("div#qunit-fixture button#selectNoResults").click();
         
         assertSelected(assert, 3, [], listAndSelection);
     });
@@ -960,17 +1054,17 @@
         assert.ok($(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":visible"));
     });
     
-    QUnit.test("Crossing Runners button is not enabled if no competitors are selected", function (assert) {
+    QUnit.test("Crossing Runners button is not enabled if no results are selected", function (assert) {
         createSampleListForRaceGraph([], false);
         assert.ok($(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":disabled"));
     });
     
-    QUnit.test("Crossing Runners button is not enabled if two competitors are selected", function (assert) {
+    QUnit.test("Crossing Runners button is not enabled if two results are selected", function (assert) {
         createSampleListForRaceGraph([1, 2], false);
         assert.ok($(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":disabled"));
     });
     
-    QUnit.test("Crossing Runners button is enabled if one competitor is selected", function (assert) {
+    QUnit.test("Crossing Runners button is enabled if one result is selected", function (assert) {
         createSampleListForRaceGraph([1], false);
         assert.ok(!$(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":disabled"));
         resetAlert();
@@ -995,11 +1089,11 @@
         assert.strictEqual(alertCount, 1);
         assert.ok(typeof lastAlertMessage !== "undefined" && lastAlertMessage !== null);
         for (var i = 0; i < 3; i += 1) {
-            assert.strictEqual(listAndSelection.selection.isSelected(i), (i === 2), "Wrong selectedness for competitor " + i);
+            assert.strictEqual(listAndSelection.selection.isSelected(i), (i === 2), "Wrong selectedness for result " + i);
         }
     });
     
-    QUnit.test("Clicking the Crossing Runners button when a filter is active but there are no crossing runners among the filtered competitors pops up an alert messages", function (assert) {
+    QUnit.test("Clicking the Crossing Runners button when a filter is active but there are no crossing runners among the filtered results pops up an alert messages", function (assert) {
         resetAlert();
         var listAndSelection = createSampleListForRaceGraph([1], false);
         assert.ok(!$(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":disabled"));
@@ -1012,86 +1106,86 @@
         }
     });
 
-    QUnit.test("Filtering by a string contained in one competitor only matches only that competitor", function (assert) {
+    QUnit.test("Filtering by a string contained in one result only matches only that result", function (assert) {
         var listAndSelection = createSampleList([], false);
             
         listAndSelection.list.setFilterText("First");
         
         for (var i = 0; i < 3; i += 1) {
-            assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 0), "Only the first competitor should be visible");
+            assert.strictEqual($("div#qunit-fixture div.result:eq(" + i + ")").is(":visible"), (i === 0), "Only the first result should be visible");
         }
     });
 
-    QUnit.test("Filtering by a string contained in one competitor but not matching case only matches only that competitor", function (assert) {
+    QUnit.test("Filtering by a string contained in one result but not matching case only matches only that result", function (assert) {
         var listAndSelection = createSampleList([], false);
             
         listAndSelection.list.setFilterText("fiRst");
         
         for (var i = 0; i < 3; i += 1) {
-            assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 0), "Only the first competitor should be visible");
+            assert.strictEqual($("div#qunit-fixture div.result:eq(" + i + ")").is(":visible"), (i === 0), "Only the first result should be visible");
         }
     });
 
-    QUnit.test("Filtering by a string contained in one competitor with apostrophe in name but not in search string matches only that competitor", function (assert) {
+    QUnit.test("Filtering by a string contained in one result with apostrophe in name but not in search string matches only that result", function (assert) {
         var listAndSelection = createSampleList([], false);
             
         listAndSelection.list.setFilterText("ORunner");
         
         for (var i = 0; i < 3; i += 1) {
-            assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 1), "Only the second competitor should be visible");
+            assert.strictEqual($("div#qunit-fixture div.result:eq(" + i + ")").is(":visible"), (i === 1), "Only the second result should be visible");
         }
     });
 
-    QUnit.test("Filtering by a string contained in two competitors matches both of those competitors", function (assert) {
+    QUnit.test("Filtering by a string contained in two results matches both of those results", function (assert) {
         var listAndSelection = createSampleList([], false);
             
         listAndSelection.list.setFilterText("son");
         
         for (var i = 0; i < 3; i += 1) {
-            assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 0 || i === 2), "Only the first and third competitors should be visible: this is competitor " + i);
+            assert.strictEqual($("div#qunit-fixture div.result:eq(" + i + ")").is(":visible"), (i === 0 || i === 2), "Only the first and third results should be visible: this is result " + i);
         }
     });
 
-    QUnit.test("Filtering by a string contained in no competitors matches no competitors", function (assert) {
+    QUnit.test("Filtering by a string contained in no results matches no results", function (assert) {
         var listAndSelection = createSampleList([], false);
             
         listAndSelection.list.setFilterText("xxxxxx");
         
         for (var i = 0; i < 3; i += 1) {
-            assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), false, "No competitors should be visible");
+            assert.strictEqual($("div#qunit-fixture div.result:eq(" + i + ")").is(":visible"), false, "No results should be visible");
         }
     });
 
-    QUnit.test("Filtering by an empty string matches all competitors", function (assert) {
+    QUnit.test("Filtering by an empty string matches all results", function (assert) {
         var listAndSelection = createSampleList([], false);
             
         listAndSelection.list.setFilterText("");
         
         for (var i = 0; i < 3; i += 1) {
-            assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), true, "No competitors should be visible");
+            assert.strictEqual($("div#qunit-fixture div.result:eq(" + i + ")").is(":visible"), true, "No results should be visible");
         }
     });
 
-    QUnit.test("Filtering is updated when the list of competitors is changed", function (assert) {
+    QUnit.test("Filtering is updated when the list of results is changed", function (assert) {
         var listAndSelection = createSampleList([], false);
             
         listAndSelection.list.setFilterText("son");
         
         for (var i = 0; i < 3; i += 1) {
-            assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i !== 1), "The first and third competitors should be visible");
+            assert.strictEqual($("div#qunit-fixture div.result:eq(" + i + ")").is(":visible"), (i !== 1), "The first and third results should be visible");
         }
         
-        var newCompetitors = [
+        var newResults = [
             fromSplitTimes(1, "Fourth Runner", "CDO", 10 * 3600, [13, 96, 35]),
             fromSplitTimes(2, "Fifth Runnerson", "GHO", 10 * 3600 + 6, [15, 79, 41]),
             fromSplitTimes(3, "Sixth O'Runner", "KLO", 10 * 3600 + 33, [18, 81, 37])
         ];
         
-        listAndSelection.list.setCompetitorList(newCompetitors, false);
-        listAndSelection.list.setSelection(new CompetitorSelection(newCompetitors.length));
+        listAndSelection.list.setResultList(newResults, false, false, null);
+        listAndSelection.list.setSelection(new ResultSelection(newResults.length));
         
         for (i = 0; i < 3; i += 1) {
-            assert.strictEqual($("div#qunit-fixture div.competitor:eq(" + i + ")").is(":visible"), (i === 1), "Only the second competitor should be visible");
+            assert.strictEqual($("div#qunit-fixture div.result:eq(" + i + ")").is(":visible"), (i === 1), "Only the second result should be visible");
         }
     });
 
@@ -1110,7 +1204,7 @@
         assert.strictEqual(callCount, 2, "Handler should have been called twice");
     });
 
-    QUnit.test("Can register multiple handlers and have them all called when competitor selection toggled", function (assert) {
+    QUnit.test("Can register multiple handlers and have them all called when result selection toggled", function (assert) {
         reset();
         var listAndSelection = createSampleListWithChangeHandler([], false);
 

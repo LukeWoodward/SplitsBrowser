@@ -1,7 +1,7 @@
 ﻿/*
  *  Messages - PT Portuguese messages for SplitsBrowser
  *  
- *  Direitos Autorais (C) 2000-2014 Dave Ryder, Reinhard Balling,
+ *  Direitos Autorais (C) 2000-2020 Dave Ryder, Reinhard Balling,
  *                                  Andris Strazdins, Ed Nash, Luke Woodward,
  *                                  Robert Marique
  *
@@ -70,9 +70,12 @@ SplitsBrowser.Messages.pt_br = {
     CompareWithFastestTimePlusPercentage: "Melhor tempo + $$PERCENT$$%",
     CompareWithAnyRunner: "Qualquer corredor...",
     CompareWithAnyRunnerLabel: "Corredor: ",
+    CompareWithAnyTeam: "Any team...", // TO BE TRANSLATED
+    CompareWithAnyTeamLabel: "Team: ", // TO BE TRANSLATED
     // Mensagem de aviso mostrada ao usuário quando uma opção de comparação
     // não pode ser escolhida porque o percurso não tem vencedor.
     CannotCompareAsNoWinner: "Não posso comparar com '$$OPTION$$' porque nenhum concorrente deste percurso concluir a prova.",
+    CannotCompareAsNoWinnerTeam: "Cannot compare against '$$OPTION$$' because no teams in this class complete the course.", // TO BE TRANSLATED
     
     // Etiqueta da caixa de seleção que mostra os dados originais, em oposição aos
     // dados 'reparados'. Isso só aparece se os dados que precisão de reparos
@@ -128,32 +131,36 @@ SplitsBrowser.Messages.pt_br = {
     // corrida quando não há quaisquer concorrentes que visitam o controle dentro do
     // +/- janela de 2 minutos.
     NoNearbyCompetitors: "Sem competidores",
+    // TO BE TRANSLATED.
+    NoNearbyTeams: "No nearby teams",
     
     // Link that appears at the top and opens SplitsBrowser with the settings
-    // (selected classes, competitors, comparison, chart type, etc.) that are
+    // (selected classes, results, comparison, chart type, etc.) that are
     // currently shown.
     DirectLink: "Atalho",
     DirectLinkToolTip: "Atalho para o endereço que abre o SplitsBrowser com as configurações atuais",
     
-    // The placeholder text shown in the competitor-list filter box when no
+    // The placeholder text shown in the result-list filter box when no
     // text has been entered into this box.
     CompetitorListFilter: "Filtro",
     
-    // Labels that appear beside a competitor on the Results Table to indicate
+    // Labels that appear beside a result on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
     DidNotStartShort: "np",
     DidNotFinishShort: "dnf",
     DisqualifiedShort: "dsq",
     
-    // Placeholder message shown inside the competitor list if all competitors
+    // Placeholder message shown inside the result list if all competitors or teams
     // in the class did not start.
     NoCompetitorsStarted: "Nenhum atleta partiu",
+    // TO BE TRANSLATED
+    NoTeamsStarted: "No teams started",
     
     // Label of the language-selector control.
     // TO BE TRANSLATED?
     LanguageSelectorLabel: "Language:",
     
-    // Label that appears beside a competitor on the Results Table to indicate
+    // Label that appears beside a result on the Results Table to indicate
     // that they were over the maximum time.
     // TO BE TRANSLATED
     OverMaxTimeShort: "over max time",
@@ -166,5 +173,11 @@ SplitsBrowser.Messages.pt_br = {
     // Tooltip of the warning-triangle shown along the top if warnings were
     // issued reading in the file.
     // TO BE TRANSLATED
-    WarningsTooltip: "It was not possible to read all of the data for this event.  One or more competitors or classes may have been omitted.  Click for more details."
+    WarningsTooltip: "It was not possible to read all of the data for this event.  One or more competitors or classes may have been omitted.  Click for more details.",
+    
+    // Options in the leg-selector control when viewing results for a team.
+    // TO BE TRANSLATED
+    LegSelectorLabel: "Leg: ",
+    ShowAllLegs: "All",
+    ShowLeg: "Leg $$LEG_NUMBER$$"
 };

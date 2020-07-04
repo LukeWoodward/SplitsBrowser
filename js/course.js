@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Course - A single course at an event.
  *  
- *  Copyright (C) 2000-2018 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -212,7 +212,7 @@
     };
     
     /**
-    * Returns a list of all competitors on this course that visit the control
+    * Returns a list of all results on this course that visit the control
     * with the given code in the time interval given.
     *
     * Specify SplitsBrowser.Model.Course.START for the start and
@@ -225,30 +225,30 @@
     *     past midnight.
     * @param {Number} intervalEnd - The end of the interval, as seconds past
     *     midnight.
-    * @return  {Array} Array of all competitors visiting the given control
+    * @return  {Array} Array of all results visiting the given control
     *     within the given time interval.
     */
-    Course.prototype.getCompetitorsAtControlInTimeRange = function (controlCode, intervalStart, intervalEnd) {
+    Course.prototype.getResultsAtControlInTimeRange = function (controlCode, intervalStart, intervalEnd) {
         if (this.controls === null) {
-            // No controls means don't return any competitors.
+            // No controls means don't return any results.
             return [];
         } else if (controlCode === START) {
-            return this.getCompetitorsAtControlNumInTimeRange(0, intervalStart, intervalEnd);
+            return this.getResultsAtControlNumInTimeRange(0, intervalStart, intervalEnd);
         } else if (controlCode === FINISH) {
-            return this.getCompetitorsAtControlNumInTimeRange(this.controls.length + 1, intervalStart, intervalEnd);
+            return this.getResultsAtControlNumInTimeRange(this.controls.length + 1, intervalStart, intervalEnd);
         } else {
             // Be aware that the same control might be used more than once on a course.
             var lastControlIdx = -1;
-            var matchingCompetitors = [];
-            var appendMatchingCompetitor = function (comp) { matchingCompetitors.push(comp); };
+            var matchingResults = [];
+            var appendMatchingResult = function (result) { matchingResults.push(result); };
             while (true) {
                 var controlIdx = this.controls.indexOf(controlCode, lastControlIdx + 1);
                 if (controlIdx < 0) {
                     // No more occurrences of this control.
-                    return matchingCompetitors;
+                    return matchingResults;
                 } else {
-                    var competitors = this.getCompetitorsAtControlNumInTimeRange(controlIdx + 1, intervalStart, intervalEnd);
-                    competitors.forEach(appendMatchingCompetitor);
+                    var results = this.getResultsAtControlNumInTimeRange(controlIdx + 1, intervalStart, intervalEnd);
+                    results.forEach(appendMatchingResult);
                     lastControlIdx = controlIdx;
                 }
             }
@@ -256,7 +256,7 @@
     };
     
     /**
-    * Returns a list of all competitors on this course that visit the control
+    * Returns a list of all results on this course that visit the control
     * with the given number in the time interval given.
     *
     * @param {Number} controlNum - The number of the control (0 = start).
@@ -264,18 +264,18 @@
     *     past midnight.
     * @param {Number} intervalEnd - The end of the interval, as seconds past
     *     midnight.
-    * @return  {Array} Array of all competitors visiting the given control
+    * @return  {Array} Array of all results visiting the given control
     *     within the given time interval.
     */
-    Course.prototype.getCompetitorsAtControlNumInTimeRange = function (controlNum, intervalStart, intervalEnd) {
-        var matchingCompetitors = [];
+    Course.prototype.getResultsAtControlNumInTimeRange = function (controlNum, intervalStart, intervalEnd) {
+        var matchingResults = [];
         this.classes.forEach(function (courseClass) {
-            courseClass.getCompetitorsAtControlInTimeRange(controlNum, intervalStart, intervalEnd).forEach(function (comp) {
-                matchingCompetitors.push({name: comp.name, time: comp.time, className: courseClass.name});
+            courseClass.getResultsAtControlInTimeRange(controlNum, intervalStart, intervalEnd).forEach(function (result) {
+                matchingResults.push({name: result.name, time: result.time, className: courseClass.name});
             });
         });
         
-        return matchingCompetitors;
+        return matchingResults;
     };
     
     /**

@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser HTML - Reads in HTML-format results data files.
  *  
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,8 @@
     var parseCourseLength = SplitsBrowser.parseCourseLength;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var Competitor = SplitsBrowser.Model.Competitor;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -274,26 +275,26 @@
     };
 
     /**
-    * Creates a Competitor object from this CompetitorParseRecord object.
-    * @param {Number} order - The number of this competitor within their class
+    * Creates a Result object from this CompetitorParseRecord object.
+    * @param {Number} order - The number of this result within their class
     *     (1=first, 2=second, ...).
-    * @return {Competitor} Converted competitor object.
+    * @return {Result} Converted result object.
     */
-    CompetitorParseRecord.prototype.toCompetitor = function (order) {
+    CompetitorParseRecord.prototype.toResult = function (order) {
         // Prepend a zero cumulative time.
         var cumTimes = [0].concat(this.cumTimes);
         
         // The null is for the start time.
-        var competitor = fromOriginalCumTimes(order, this.name, this.club, null, cumTimes);
-        if (competitor.completed() && !this.competitive) {
-            competitor.setNonCompetitive();
+        var result =  fromOriginalCumTimes(order, null, cumTimes, new Competitor(this.name, this.club));
+        if (result.completed() && !this.competitive) {
+            result.setNonCompetitive();
         }
         
-        if (!competitor.hasAnyTimes()) {
-            competitor.setNonStarter();
+        if (!result.hasAnyTimes()) {
+            result.setNonStarter();
         }
         
-        return competitor;
+        return result;
     };
 
     /*
@@ -1205,11 +1206,11 @@
             classToCompetitorsMap.keys().forEach(function (className) {
                 var numControls = course.controls.length - 1;
                 var oldCompetitors = classToCompetitorsMap.get(className);
-                var newCompetitors = oldCompetitors.map(function (competitor, index) {
-                    return competitor.toCompetitor(index + 1);
+                var newResults = oldCompetitors.map(function (competitor, index) {
+                    return competitor.toResult(index + 1);
                 });
                 
-                var courseClass = new CourseClass(className, numControls, newCompetitors);
+                var courseClass = new CourseClass(className, numControls, newResults);
                 classesForThisCourse.push(courseClass);
                 classes.push(courseClass);
             }, this);

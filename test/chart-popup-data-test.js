@@ -36,12 +36,12 @@
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
 
     function getTestCourseClassSet() {
-        var competitors = d3.range(0, 11).map(function (num) {
+        var results = d3.range(0, 11).map(function (num) {
             var timeOffset = (num * 7) % 11;
             return fromSplitTimes(1, "Name" + num, "Club" + num, 10 * 3600 + 127 * num, [65 + 10 * timeOffset, 221 + 20 * timeOffset, 209 + 15 * timeOffset, 100 + 5 * timeOffset]);
         });
     
-        return new CourseClassSet([new CourseClass("Test class", 3, competitors)]);
+        return new CourseClassSet([new CourseClass("Test class", 3, results)]);
     }
     
     QUnit.test("Can get selected classes popup data", function (assert) {
@@ -143,7 +143,7 @@
         assert.deepEqual(actualData, expectedData);
     });
     
-    QUnit.test("Can get competitors near intermediate control", function (assert) {
+    QUnit.test("Can get results near intermediate control", function (assert) {
         var courseClassSet = getTestCourseClassSet();
         var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
@@ -165,12 +165,12 @@
             placeholder: getMessage("NoNearbyCompetitors")
         };
         
-        var actualData = ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(courseClassSet, eventData, 2, testTime);
+        var actualData = ChartPopupData.getResultsVisitingCurrentControlPopupData(courseClassSet, eventData, 2, testTime);
         
         assert.deepEqual(actualData, expectedData);
     });
     
-    QUnit.test("Can get competitors near start control", function (assert) {
+    QUnit.test("Can get results near start control", function (assert) {
         var courseClassSet = getTestCourseClassSet();
         var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
@@ -192,12 +192,12 @@
             placeholder: getMessage("NoNearbyCompetitors")
         };
         
-        var actualData = ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(courseClassSet, eventData, 0, testTime);
+        var actualData = ChartPopupData.getResultsVisitingCurrentControlPopupData(courseClassSet, eventData, 0, testTime);
         
         assert.deepEqual(actualData, expectedData);
     });
     
-    QUnit.test("Can get competitors near finish control", function (assert) {
+    QUnit.test("Can get results near finish control", function (assert) {
         var courseClassSet = getTestCourseClassSet();
         var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
@@ -219,7 +219,7 @@
             placeholder: getMessage("NoNearbyCompetitors")
         };
         
-        var actualData = ChartPopupData.getCompetitorsVisitingCurrentControlPopupData(courseClassSet, eventData, 4, testTime);
+        var actualData = ChartPopupData.getResultsVisitingCurrentControlPopupData(courseClassSet, eventData, 4, testTime);
         
         assert.deepEqual(actualData, expectedData);
     });

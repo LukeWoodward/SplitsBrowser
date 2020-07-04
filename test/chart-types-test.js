@@ -21,8 +21,8 @@
 (function () {
     "use strict";
     
-    var fromCumTimes = SplitsBrowser.Model.Competitor.fromCumTimes;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
@@ -38,75 +38,67 @@
         }
     }
     
-    QUnit.test("Splits graph selector returns competitor data adjusted to reference, in units of minutes", function (assert) {
+    QUnit.test("Splits graph selector returns result data adjusted to reference, in units of minutes", function (assert) {
         var chartType = ChartTypes.SplitsGraph;
-        var competitor = fromCumTimes(1, "First Runner", "ABC", 10 * 3600, [0, 65, 221, 409, 578]);
+        var result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 409, 578], {});
         var referenceCumTimes = [0, 58, 224, 381, 552];
-        assert.deepEqual(chartType.dataSelector(competitor, referenceCumTimes), [0, (65 - 58) / 60, (221 - 224) / 60, (409 - 381) / 60, (578 - 552) / 60]);
+        assert.deepEqual(chartType.dataSelector(result, referenceCumTimes), [0, (65 - 58) / 60, (221 - 224) / 60, (409 - 381) / 60, (578 - 552) / 60]);
     });
 
-    QUnit.test("Splits graph selector returns competitor data with a missed control adjusted to reference, in units of minutes", function (assert) {
+    QUnit.test("Splits graph selector returns result data with a missed control adjusted to reference, in units of minutes", function (assert) {
         var chartType = ChartTypes.SplitsGraph;
-        var competitor = fromCumTimes(1, "First Runner", "ABC", 10 * 3600, [0, 65, 221, null, 578]);
+        var result = fromCumTimes(1, 10 * 3600, [0, 65, 221, null, 578], {});
         var referenceCumTimes = [0, 58, 224, 381, 552];
-        assert.deepEqual(chartType.dataSelector(competitor, referenceCumTimes), [0, (65 - 58) / 60, (221 - 224) / 60, null, (578 - 552) / 60]);
+        assert.deepEqual(chartType.dataSelector(result, referenceCumTimes), [0, (65 - 58) / 60, (221 - 224) / 60, null, (578 - 552) / 60]);
     });
 
-    QUnit.test("Race graph selector returns competitor data adjusted to reference with start time added, in units of minutes", function (assert) {
+    QUnit.test("Race graph selector returns result data adjusted to reference with start time added, in units of minutes", function (assert) {
         var chartType = ChartTypes.RaceGraph;
-        var competitor = fromCumTimes(1, "First Runner", "ABC", 10 * 3600, [0, 65, 221, 409, 578]);
+        var result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 409, 578], {});
         var referenceCumTimes = [0, 58, 224, 381, 552];
-        assert.deepEqual(chartType.dataSelector(competitor, referenceCumTimes), [10 * 60, 10 * 60 + (65 - 58) / 60, 10 * 60 + (221 - 224) / 60, 10 * 60 + (409 - 381) / 60, 10 * 60 + (578 - 552) / 60]);
+        assert.deepEqual(chartType.dataSelector(result, referenceCumTimes), [10 * 60, 10 * 60 + (65 - 58) / 60, 10 * 60 + (221 - 224) / 60, 10 * 60 + (409 - 381) / 60, 10 * 60 + (578 - 552) / 60]);
     });
 
-    QUnit.test("Race graph selector returns competitor data with a missed control adjusted to reference with start time added, in units of minutes", function (assert) {
+    QUnit.test("Race graph selector returns result data with a missed control adjusted to reference with start time added, in units of minutes", function (assert) {
         var chartType = ChartTypes.RaceGraph;
-        var competitor = fromCumTimes(1, "First Runner", "ABC", 10 * 3600, [0, 65, null, 409, 578]);
+        var result = fromCumTimes(1, 10 * 3600, [0, 65, null, 409, 578], {});
         var referenceCumTimes = [0, 58, 224, 381, 552];
-        assert.deepEqual(chartType.dataSelector(competitor, referenceCumTimes), [10 * 60, 10 * 60 + (65 - 58) / 60, null, 10 * 60 + (409 - 381) / 60, 10 * 60 + (578 - 552) / 60]);
+        assert.deepEqual(chartType.dataSelector(result, referenceCumTimes), [10 * 60, 10 * 60 + (65 - 58) / 60, null, 10 * 60 + (409 - 381) / 60, 10 * 60 + (578 - 552) / 60]);
     });
     
     QUnit.test("Position after leg returns cumulative ranks", function (assert) {
         var chartType = ChartTypes.PositionAfterLeg;
-        var competitor1 = fromCumTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [0, 81, 278, 490, 596]);
-        var competitor2 = fromCumTimes(2, "First Runner", "ABC", 10 * 3600, [0, 65, 286, 495, 595]);
-        new CourseClassSet([new CourseClass("Test", 3, [competitor1, competitor2])]);
+        var result1 = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 278, 490, 596], {});
+        var result2 = fromCumTimes(2, 10 * 3600, [0, 65, 286, 495, 595], {});
+        new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
 
-        assert.deepEqual(chartType.dataSelector(competitor1), [2, 1, 1, 2]);
-        assert.deepEqual(chartType.dataSelector(competitor2), [1, 2, 2, 1]);
+        assert.deepEqual(chartType.dataSelector(result1), [null, 2, 1, 1, 2]);
+        assert.deepEqual(chartType.dataSelector(result2), [null, 1, 2, 2, 1]);
     });
     
     QUnit.test("Split position returns split ranks", function (assert) {
         var chartType = ChartTypes.SplitPosition;
-        var competitor1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-        var competitor2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 209, 100]);
-        new CourseClassSet([new CourseClass("Test", 3, [competitor1, competitor2])]);
+        var result1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var result2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 209, 100]);
+        new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
         
-        assert.deepEqual(chartType.dataSelector(competitor1), [2, 1, 2, 2]);
-        assert.deepEqual(chartType.dataSelector(competitor2), [1, 2, 1, 1]);
+        assert.deepEqual(chartType.dataSelector(result1), [null, 2, 1, 2, 2]);
+        assert.deepEqual(chartType.dataSelector(result2), [null, 1, 2, 1, 1]);
     });
     
     QUnit.test("Percent behind returns percents behind the reference time.", function (assert) {
         var chartType = ChartTypes.PercentBehind;
-        var competitor = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+        var result = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
         var referenceCumTimes = [0, 58, 224, 381, 552]; // Splits are 58, 166, 157, 171.
         
         var expectedData = [0, 100 * (81 - 58) / 58, 100 * (197 - 166) / 166, 100 * (212 - 157) / 157, 100 * (106 - 171) / 171];
         
-        assert.deepEqual(chartType.dataSelector(competitor, referenceCumTimes), expectedData);
+        assert.deepEqual(chartType.dataSelector(result, referenceCumTimes), expectedData);
     });
 
     QUnit.test("All chart types have a name key", function (assert) {
         ALL_CHART_TYPES.forEach(function (chartType) {
             assert.strictEqual(typeof chartType.nameKey, "string");
-        });
-    });
-    
-    QUnit.test("Only the position-after-leg and split-position chart types skip the start", function (assert) {
-        ALL_CHART_TYPES.forEach(function (chartType) {
-            if (chartType !== ChartTypes.ResultsTable) {
-                assert.strictEqual(chartType.skipStart, chartType === ChartTypes.PositionAfterLeg || chartType === ChartTypes.SplitPosition);
-            }
         });
     });
    
@@ -143,8 +135,8 @@
     });
    
     QUnit.test("All chart types except the results table have the correct dubious-indexes function", function (assert) {
-        var competitor = fromOriginalCumTimes(1, "First Runner", "ABC", 10 * 3600, [0, 96, 96, 96 + 221 + 184, 96 + 221 + 184 + 100]);
-        competitor.setRepairedCumulativeTimes([0, 96, NaN, 96 + 221 + 184, 96 + 221 + 184 + 100]);
+        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 96, 96, 96 + 221 + 184, 96 + 221 + 184 + 100], {});
+        result.setRepairedCumulativeTimes([0, 96, NaN, 96 + 221 + 184, 96 + 221 + 184 + 100]);
 
         ALL_CHART_TYPES.forEach(function (chartType) {
             if (chartType !== ChartTypes.ResultsTable) {
@@ -159,7 +151,7 @@
                     expectedDubiousTimeInfo = null;
                 }
                 
-                assert.deepEqual(chartType.indexesAroundOmittedTimesFunc(competitor), expectedDubiousTimeInfo, "Dubious-time info for " + chartType.nameKey + " should be correct");
+                assert.deepEqual(chartType.indexesAroundOmittedTimesFunc(result), expectedDubiousTimeInfo, "Dubious-time info for " + chartType.nameKey + " should be correct");
             }
         });
         

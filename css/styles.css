@@ -102,12 +102,12 @@ label.statisticsSelectorLabel.disabled, label.originalDataSelectorLabel.disabled
     color: #999999;
 }
 
-div.competitor span.nonfinisher
+div.result span.nonfinisher
 {
     font-style: italic;
 }
 
-span.competitorClassLabel
+span.resultClassLabel
 {
     padding-right: 10px;
 }
@@ -132,6 +132,16 @@ svg rect.background2
     fill: #DDDDDD;
 }
 
+svg rect.background3
+{
+    fill: #E5E5DD;
+}
+
+svg rect.background4
+{
+    fill: #D4D4CC;
+}
+
 .axis path, .axis line
 {
     fill: none;
@@ -146,7 +156,7 @@ line.controlLine
     shape-rendering: crispEdges;
 }
 
-path.graphLine, line.competitorLegendLine
+path.graphLine, line.resultLegendLine
 {
     fill: none;
     stroke-width: 2;
@@ -168,12 +178,12 @@ line.aroundOmittedTimes
     stroke-dasharray: 6, 3;
 }
 
-path.graphLine.selected, line.competitorLegendLine.selected, line.aroundOmittedTimes.selected
+path.graphLine.selected, line.resultLegendLine.selected, line.aroundOmittedTimes.selected
 {
     stroke-width: 6;
 }
 
-text.competitorLabel.selected
+text.resultLabel.selected
 {
     font-weight: bold;
 }
@@ -203,19 +213,19 @@ div.chartPopup tr.highlighted
     color: #0000ff;
 }
 
-#competitorList
+#resultList
 {
     overflow-y: scroll;
     height: 100%;
     min-width: 100px;
 }
 
-#competitorListContainer
+#resultListContainer
 {
     float: left;
 }
 
-div.competitorListPlaceholder
+div.resultListPlaceholder
 {
     color: #AAAAAA;
 }
@@ -225,19 +235,19 @@ div.competitorListPlaceholder
     float: left;
 }
 
-div.competitor
+div.result
 {
     font: 12px sans-serif;
     padding: 2px;
 }
 
-div.competitor.selected, div.competitor.dragSelected
+div.result.selected, div.result.dragSelected
 {
     background-color: #286880;
     color: white;
 }
 
-div.competitor.selected.dragDeselected
+div.result.selected.dragDeselected
 {
     background-color: transparent;
     color: black;

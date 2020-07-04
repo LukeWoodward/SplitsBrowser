@@ -22,9 +22,10 @@
     "use strict";
     
     var formatTime = SplitsBrowser.formatTime;
-    var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
+    var compareResults = SplitsBrowser.Model.compareResults;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    var subtractIfNotNull = SplitsBrowser.subtractIfNotNull;
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     
     var NON_BREAKING_SPACE_CHAR = "\u00a0";
@@ -43,6 +44,7 @@
         this.div = null;
         this.headerSpan = null;
         this.table = null;
+        this.selectedLegIndex = null;
         this.buildTable();
     }
     
@@ -71,17 +73,17 @@
     * 
     * If there are some fractional times, then all times should be shown with
     * the same precision, even if not all of them need to.  For example, a
-    * a split time between controls punched after 62.7 and 108.7 seconds must
-    * be shown as 46.0 seconds, not 46.
+    * split time between controls punched after 62.7 and 108.7 seconds must be
+    * shown as 46.0 seconds, not 46.
     *
-    * @param {Array} competitors - Array of Competitor objects.
+    * @param {Array} results - Array of Result objects.
     * @return {Number} Maximum precision to use.
     */
-    function determinePrecision(competitors) {
+    function determinePrecision(results) {
         var maxPrecision = 0;
         var maxPrecisionFactor = 1;        
-        competitors.forEach(function (competitor) {
-            competitor.getAllOriginalCumulativeTimes().forEach(function (cumTime) {
+        results.forEach(function (result) {
+            result.getAllOriginalCumulativeTimes().forEach(function (cumTime) {
                 if (isNotNullNorNaN(cumTime)) {
                     while (maxPrecision < MAX_PERMITTED_PRECISION && Math.abs(cumTime - Math.round(cumTime * maxPrecisionFactor) / maxPrecisionFactor) > 1e-7 * cumTime) {
                         maxPrecision += 1;
@@ -96,25 +98,26 @@
     
     /**
     * Returns the contents of the time or status column for the given
-    * competitor.
+    * result.
     * 
-    * The status may be a string that indicates the competitor mispunched.
+    * The status may be a string that indicates the result mispunched.
     *
-    * @param {Competitor} competitor The competitor to get the status of.
+    * @param {Result} result The result to get the status of.
+    * @param {Number?} time The time to format, if the result is OK.
     * @param {Number} precision The precision to use.
-    * @return {String} Time or status for the given competitor.
+    * @return {String} Time or status for the given result.
     */
-    function getTimeOrStatus (competitor, precision) {
-        if (competitor.isNonStarter) {
+    function getTimeOrStatus (result, time, precision) {
+        if (result.isNonStarter) {
             return getMessage("DidNotStartShort");
-        } else if (competitor.isNonFinisher) {
+        } else if (result.isNonFinisher) {
             return getMessage("DidNotFinishShort");
-        } else if (competitor.isDisqualified) {
+        } else if (result.isDisqualified) {
             return getMessage("DisqualifiedShort");
-        } else if (competitor.isOverMaxTime) {
+        } else if (result.isOverMaxTime) {
             return getMessage("OverMaxTimeShort");
-        } else if (competitor.completed()) {
-            return formatTime(competitor.totalTime, precision);
+        } else if (result.completed()) {
+            return formatTime(time, precision);
         } else {
             return getMessage("MispunchedShort");
         }
@@ -131,17 +134,17 @@
     }
     
     /**
-    * Formats a time (cumulative or split) for a competitor.  If the competitor is
+    * Formats a time (cumulative or split) for a result.  If the result is
     * deemed as completed despite having missing times, any such missing times are
     * replaced with "??:??".
     * @param {Number|null} time The time to format, in seconds.
     * @param {Number} precision The precision to format the time to.
-    * @param {Boolean} competitorOKDespiteMissingTimes True if the competitor is known to
+    * @param {Boolean} resultOKDespiteMissingTimes True if the result is known to
     *       have completed the course despite having missing times, false otherwise.
     * @return Formatted time
     */
-    function formatPossiblyMissingTime(time, precision, competitorOKDespiteMissingTimes) {
-        if (time === null && competitorOKDespiteMissingTimes) {
+    function formatPossiblyMissingTime(time, precision, resultOKDespiteMissingTimes) {
+        if (time === null && resultOKDespiteMissingTimes) {
             return "??:??";
         } else {
             return formatTime(time, precision);
@@ -153,10 +156,28 @@
     */
     ResultsTable.prototype.populateTable = function () {
         var headerText = this.courseClass.name + ", ";
-        if (this.courseClass.numControls === 1) {
+        
+        var numControls, controlOffset, timeOffset;
+        if (this.courseClass.isTeamClass && this.selectedLegIndex !== null) {
+            numControls = this.courseClass.numbersOfControls[this.selectedLegIndex];
+            controlOffset = this.courseClass.offsets[this.selectedLegIndex];
+        } else {
+            numControls = this.courseClass.numControls;
+            controlOffset = 0;
+            timeOffset = 0;
+        }
+        
+        if (this.courseClass.isTeamClass && this.selectedLegIndex !== null) {
+            headerText += getMessageWithFormatting("ShowLeg", {"$$LEG_NUMBER$$": this.selectedLegIndex + 1 }) + ", ";
+        }
+        
+        if (this.courseClass.isTeamClass && this.selectedLegIndex === null) {
+            var numControlsString = this.courseClass.numbersOfControls.join(" + ");
+            headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": numControlsString});
+        } else if (numControls === 1) {
             headerText += getMessage("ResultsTableHeaderSingleControl");
         } else {
-            headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": this.courseClass.numControls});
+            headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": numControls});
         }
 
         var course = this.courseClass.course;
@@ -175,16 +196,34 @@
             getMessage("ResultsTableHeaderTime")
         ];
         
-        var controls = this.courseClass.course.controls;
-        if (controls === null) {
-            headerCellData = headerCellData.concat(d3.range(1, this.courseClass.numControls + 1));
+        if (this.courseClass.isTeamClass) {
+            var controlNumber;
+            if (this.selectedLegIndex === null) {
+                for (var legIndex = 0; legIndex < this.courseClass.numbersOfControls.length; legIndex += 1) {
+                    var suffix = "-" + (legIndex + 1);
+                    for (controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[legIndex]; controlNumber += 1) {
+                        headerCellData.push(controlNumber + suffix);
+                    }
+                    headerCellData.push(getMessage("FinishName") + suffix);
+                }
+            } else {
+                for (controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[this.selectedLegIndex]; controlNumber += 1) {
+                    headerCellData.push(controlNumber);
+                }
+                headerCellData.push(getMessage("FinishName"));
+            }
         } else {
-            headerCellData = headerCellData.concat(controls.map(function (control, index) {
-                return (index + 1) + NON_BREAKING_SPACE_CHAR + "(" + control + ")";
-            }));
+            var controls = this.courseClass.course.controls;
+            if (controls === null) {
+                headerCellData = headerCellData.concat(d3.range(1, numControls + 1));
+            } else {
+                headerCellData = headerCellData.concat(controls.map(function (control, index) {
+                    return (index + 1) + NON_BREAKING_SPACE_CHAR + "(" + control + ")";
+                }));
+            }
+                
+            headerCellData.push(getMessage("FinishName"));
         }
-            
-        headerCellData.push(getMessage("FinishName"));
         
         var headerCells = this.table.select("thead tr")
                                     .selectAll("th")
@@ -219,10 +258,14 @@
         // Adds a two-line cell to the array of table-body HTML parts.
         // If truthy, cssClass is assumed to be HTML-safe and not require
         // escaping.
-        function addCell(topLine, bottomLine, cssClass, cumClasses, splitClasses) {
+        function addCell(topLine, bottomLine, cssClass, cumClasses, splitClasses, tooltip) {
             htmlBits.push("<td");
             if (cssClass) {
                 htmlBits.push(" class=\"" + cssClass + "\"");
+            }
+            
+            if (tooltip) {
+                htmlBits.push(" title=\"" + escapeHtml(tooltip) + "\"");
             }
             
             htmlBits.push("><span");
@@ -242,22 +285,22 @@
             htmlBits.push("</span></td>\n");
         }
         
-        var competitors = this.courseClass.competitors.slice(0);
-        competitors.sort(compareCompetitors);
+        var results = this.courseClass.results.slice(0);
+        results.sort(compareResults);
         
         var nonCompCount = 0;
         var rank = 0;
         
-        var precision = determinePrecision(competitors);
+        var precision = determinePrecision(results);
         
-        competitors.forEach(function (competitor, index) {
+        results.forEach(function (result, index) {
             htmlBits.push("<tr><td>");
-            
-            if (competitor.isNonCompetitive) {
+
+            if (result.isNonCompetitive) {
                 htmlBits.push(escapeHtml(getMessage("NonCompetitiveShort")));
                 nonCompCount += 1;
-            } else if (competitor.completed()) {
-                if (index === 0 || competitors[index - 1].totalTime !== competitor.totalTime) {
+            } else if (result.completed()) {
+                if (index === 0 || results[index - 1].totalTime !== result.totalTime) {
                     rank = index + 1 - nonCompCount;
                 }
                 
@@ -266,21 +309,30 @@
             
             htmlBits.push("</td>");
             
-            addCell(competitor.name, competitor.club, null, "", "");
-            addCell(getTimeOrStatus(competitor, precision), NON_BREAKING_SPACE_CHAR, "time", "", "");
+            var tooltipText;
+            if (this.courseClass.isTeamClass && this.selectedLegIndex === null) {
+                tooltipText = result.owner.members.map(function (competitor) { return competitor.name; }).join("\n");
+            } else {
+                tooltipText = "";
+            }
             
-            d3.range(1, this.courseClass.numControls + 2).forEach(function (controlNum) {
-                var cumTime = competitor.getOriginalCumulativeTimeTo(controlNum);
-                var splitTime = competitor.getOriginalSplitTimeTo(controlNum);
-                var formattedCumTime = formatPossiblyMissingTime(cumTime, precision, competitor.isOKDespiteMissingTimes);
-                var formattedSplitTime = formatPossiblyMissingTime(splitTime, precision, competitor.isOKDespiteMissingTimes);
-                var isCumTimeFastest = (competitor.getCumulativeRankTo(controlNum) === 1);
-                var isSplitTimeFastest = (competitor.getSplitRankTo(controlNum) === 1);
-                var isCumDubious = competitor.isCumulativeTimeDubious(controlNum);
-                var isSplitDubious = competitor.isSplitTimeDubious(controlNum);
-                var isCumMissing = competitor.isOKDespiteMissingTimes && cumTime === null;
-                var isSplitMissing = competitor.isOKDespiteMissingTimes && splitTime === null;
-                addCell(formattedCumTime, formattedSplitTime, "time", timeClasses(isCumTimeFastest, isCumDubious, isCumMissing), timeClasses(isSplitTimeFastest, isSplitDubious, isSplitMissing));
+            var startTimeOffset = result.getOriginalCumulativeTimeTo(controlOffset);
+            addCell(result.getOwnerNameForLeg(this.selectedLegIndex), result.owner.club, null, "", "", tooltipText);
+            var time = (this.courseClass.isTeamClass && this.selectedLegIndex !== null) ? subtractIfNotNull(result.getOriginalCumulativeTimeTo(controlOffset + numControls + 1), startTimeOffset) : result.totalTime;
+            addCell(getTimeOrStatus(result, time, precision), NON_BREAKING_SPACE_CHAR, "time", "", "", "");
+            
+            d3.range(controlOffset + 1, controlOffset + numControls + 2).forEach(function (controlNum) {
+                var cumTime = subtractIfNotNull(result.getOriginalCumulativeTimeTo(controlNum), startTimeOffset);
+                var splitTime = result.getOriginalSplitTimeTo(controlNum);
+                var formattedCumTime = formatPossiblyMissingTime(cumTime, precision, result.isOKDespiteMissingTimes);
+                var formattedSplitTime = formatPossiblyMissingTime(splitTime, precision, result.isOKDespiteMissingTimes);
+                var isCumTimeFastest = (result.getCumulativeRankTo(controlNum) === 1);
+                var isSplitTimeFastest = (result.getSplitRankTo(controlNum) === 1);
+                var isCumDubious = result.isCumulativeTimeDubious(controlNum);
+                var isSplitDubious = result.isSplitTimeDubious(controlNum);
+                var isCumMissing = result.isOKDespiteMissingTimes && cumTime === null;
+                var isSplitMissing = result.isOKDespiteMissingTimes && splitTime === null;
+                addCell(formattedCumTime, formattedSplitTime, "time", timeClasses(isCumTimeFastest, isCumDubious, isCumMissing), timeClasses(isSplitTimeFastest, isSplitDubious, isSplitMissing), "");
             });
             
             htmlBits.push("</tr>\n");
@@ -296,6 +348,18 @@
     */
     ResultsTable.prototype.setClass = function (courseClass) {
         this.courseClass = courseClass;
+        this.selectedLegIndex = null;
+        if (this.courseClass !== null) {
+            this.populateTable();
+        }
+    };
+    
+    /**
+    * Sets the selected leg index.
+    * @param {Number?} selectedLegIndex - The selected leg index.
+    */
+    ResultsTable.prototype.setSelectedLegIndex = function (selectedLegIndex) {
+        this.selectedLegIndex = selectedLegIndex;
         if (this.courseClass !== null) {
             this.populateTable();
         }

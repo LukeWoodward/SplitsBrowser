@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser ChartPopupData - Gets data for the chart popup window.
  *  
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -24,9 +24,9 @@
     // The maximum number of fastest splits to show when the popup is open.
     var MAX_FASTEST_SPLITS = 10;
 
-    // Width of the time interval, in seconds, when viewing nearby competitors
+    // Width of the time interval, in seconds, when viewing nearby results
     // at a control on the race graph.
-    var RACE_GRAPH_COMPETITOR_WINDOW = 240;
+    var RACE_GRAPH_RESULT_WINDOW = 240;
     
     var formatTime = SplitsBrowser.formatTime;
     var getMessage = SplitsBrowser.getMessage;
@@ -81,7 +81,7 @@
     };
     
     /**
-    * Returns an object containing an array of the competitors visiting a
+    * Returns an object containing an array of the results visiting a
     * control at a given time.
     * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet - The course-class set
     *     containing the splits data.
@@ -89,16 +89,16 @@
     *     event.
     * @param {Number} controlIndex - The index of the control.
     * @param {Number} time - The current time, in units of seconds past midnight.
-    * @return {Object} Object containing competitor data.
+    * @return {Object} Object containing result data.
     */
-    ChartPopupData.getCompetitorsVisitingCurrentControlPopupData = function (courseClassSet, eventData, controlIndex, time) {
+    ChartPopupData.getResultsVisitingCurrentControlPopupData = function (courseClassSet, eventData, controlIndex, time) {
         var controlCode = courseClassSet.getCourse().getControlCode(controlIndex);
-        var intervalStart = Math.round(time) - RACE_GRAPH_COMPETITOR_WINDOW / 2;
-        var intervalEnd = Math.round(time) + RACE_GRAPH_COMPETITOR_WINDOW / 2;
-        var competitors = eventData.getCompetitorsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
+        var intervalStart = Math.round(time) - RACE_GRAPH_RESULT_WINDOW / 2;
+        var intervalEnd = Math.round(time) + RACE_GRAPH_RESULT_WINDOW / 2;
+        var results = eventData.getResultsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
             
         var primaryClass = courseClassSet.getPrimaryClassName();
-        var competitorData = competitors.map(function (row) { return {name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}; });
+        var resultData = results.map(function (row) { return {name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}; });
         
         var controlName;
         if (controlCode === Course.START) {
@@ -113,7 +113,7 @@
             "NearbyCompetitorsPopupHeader",
             {"$$START$$": formatTime(intervalStart), "$$END$$": formatTime(intervalEnd), "$$CONTROL$$": controlName});
         
-        return {title: title, data: competitorData, placeholder: getMessage("NoNearbyCompetitors")};
+        return {title: title, data: resultData, placeholder: getMessage("NoNearbyCompetitors")};
     };    
         
     /**

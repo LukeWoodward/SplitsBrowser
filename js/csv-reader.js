@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser CSV - Reads in CSV result data files.
  *  
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -27,8 +27,9 @@
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
+    var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
     var Competitor = SplitsBrowser.Model.Competitor;
-    var compareCompetitors = SplitsBrowser.Model.compareCompetitors;
+    var compareResults = SplitsBrowser.Model.compareResults;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -42,7 +43,7 @@
     * @param {Array} warnings - Array of warnings to add any warnings found to.
     * @return {Object} Competitor object representing the competitor data read in.
     */
-    function parseCompetitors(index, line, controlCount, className, warnings) {
+    function parseResults(index, line, controlCount, className, warnings) {
         // Expect forename, surname, club, start time then (controlCount + 1) split times in the form MM:SS.
         var parts = line.split(",");
         
@@ -82,11 +83,11 @@
                 }
             });
             
-            var competitor = Competitor.fromCumTimes(index + 1, name, club, startTime, cumTimes);
+            var result = fromCumTimes(index + 1, startTime, cumTimes, new Competitor(name, club));
             if (lastCumTimeRecorded === 0) {
-                competitor.setNonStarter();
+                result.setNonStarter();
             }
-            return competitor;
+            return result;
         } else {
             var difference = originalPartCount - (controlCount + 5);
             var error = (difference < 0) ? (-difference) + " too few" : difference + " too many";
@@ -117,15 +118,15 @@
                 throwInvalidData("Could not read control count: '" + controlCountStr + "'");
             } else if (controlCount < 0 && lines.length > 0) {
                 // Only complain about a negative control count if there are
-                // any competitors.  Event 7632 ends with a line 'NOCLAS,-1' -
+                // any results.  Event 7632 ends with a line 'NOCLAS,-1' -
                 // we may as well ignore this.
                 throwInvalidData("Expected a non-negative control count, got " + controlCount + " instead");
             } else {              
-                var competitors = lines.map(function (line, index) { return parseCompetitors(index, line, controlCount, className, warnings); })
+                var results = lines.map(function (line, index) { return parseResults(index, line, controlCount, className, warnings); })
                                        .filter(isNotNull);
 
-                competitors.sort(compareCompetitors);
-                return new CourseClass(className, controlCount, competitors);
+                results.sort(compareResults);
+                return new CourseClass(className, controlCount, results);
             }
         } else {
             throwWrongFileFormat("Expected first line to have two parts (class name and number of controls), got " + firstLineParts.length + " part(s) instead");

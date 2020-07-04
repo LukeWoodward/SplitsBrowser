@@ -1,7 +1,7 @@
 ﻿/*
  *  Messages - Belgian French messages for SplitsBrowser
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward, Robert Marique
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -69,9 +69,12 @@ SplitsBrowser.Messages.fr_be = {
     CompareWithFastestTimePlusPercentage: "Meilleur temps + $$PERCENT$$%",
     CompareWithAnyRunner: "N'importe quel coureur...",
     CompareWithAnyRunnerLabel: "Coureur: ",
+    CompareWithAnyTeam: "Any team...", // TO BE TRANSLATED
+    CompareWithAnyTeamLabel: "Team: ", // TO BE TRANSLATED
     // Warning message shown to the user when a comparison option cannot be
     // chosen because the course has no winner.
     CannotCompareAsNoWinner: "Impossible de comparer avec '$$OPTION$$' car aucun coureur de ce circuit n'a terminé le parcours.",
+    CannotCompareAsNoWinnerTeam: "Cannot compare against '$$OPTION$$' because no teams in this class complete the course.", // TO BE TRANSLATED
     
     // Label of checkbox that shows the original data as opposed to the
     // 'repaired' data.  This only appears if data that needs repair has been
@@ -114,45 +117,49 @@ SplitsBrowser.Messages.fr_be = {
     SelectedClassesPopupHeader: "Circuits sélectionnés",
     
     // Placeholder text shown when the Selected classes dialog is empty,
-    // because no competitors registered a split for the control, or those
+    // because no results registered a split for the control, or those
     // that did only registered a dubious split.
     SelectedClassesPopupPlaceholder: "Aucun coureur n'a terminé ce circuit",
     
     // Header for the 'Fastest leg time' popup dialog.
     FastestLegTimePopupHeader: "Intermédiaire le plus rapide $$START$$ - $$END$$",
 
-    // Header for the nearby-competitors dialog on the race graph.
+    // Header for the nearby-results dialog on the race graph.
     NearbyCompetitorsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
     
-    // Placeholder text shown in the nearby-competitors dialog on the race
-    // graph when there aren't any competitors visiting the control within the
-    // +/- 2 minute window.
+    // Placeholder text shown in the nearby-results dialog on the race
+    // graph when there aren't any competitors or teams visiting the control
+    // within the +/- 2 minute window.
     NoNearbyCompetitors: "Aucun coureur",
+    // TO BE TRANSLATED
+    NoNearbyTeams: "No nearby teams",
 
     // Link that appears at the top and opens SplitsBrowser with the settings
-    // (selected classes, competitors, comparison, chart type, etc.) that are
+    // (selected classes, results, comparison, chart type, etc.) that are
     // currently shown.
     DirectLink: "Lien",
     DirectLinkToolTip: "Lien vers une URL qui lance SplitsBrowser avec les paramètres en cours",
     
-    // The placeholder text shown in the competitor-list filter box when no
+    // The placeholder text shown in the result-list filter box when no
     // text has been entered into this box.
     CompetitorListFilter: "Filtre",
     
-    // Labels that appear beside a competitor on the Results Table to indicate
+    // Labels that appear beside a result on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
     DidNotStartShort: "dns",
     DidNotFinishShort: "ab",
     DisqualifiedShort: "dsq",
     
-    // Placeholder message shown inside the competitor list if all competitors
+    // Placeholder message shown inside the result list if all competitors or teams
     // in the class did not start.
     NoCompetitorsStarted: "Aucun coureur n'a encore pris le départ",
+    // TO BE TRANSLATED
+    NoTeamsStarted: "No teams started",
     
     // Label of the language-selector control.
     LanguageSelectorLabel: "Langue:",
     
-    // Label that appears beside a competitor on the Results Table to indicate
+    // Label that appears beside a result on the Results Table to indicate
     // that they were over the maximum time.
     OverMaxTimeShort: "Au delà du temps maximum",
 
@@ -162,5 +169,11 @@ SplitsBrowser.Messages.fr_be = {
     
     // Tooltip of the warning-triangle shown along the top if warnings were
     // issued reading in the file.
-    WarningsTooltip: "Impossible de lire toutes les données de cette compétition.  Un(e) ou plusieurs coureurs ou catégories peuvent avoir été omis.  Cliquer pour d'autres détails."
+    WarningsTooltip: "Impossible de lire toutes les données de cette compétition.  Un(e) ou plusieurs coureurs ou catégories peuvent avoir été omis.  Cliquer pour d'autres détails.",
+    
+    // Options in the leg-selector control when viewing results for a team.
+    // TO BE TRANSLATED
+    LegSelectorLabel: "Leg: ",
+    ShowAllLegs: "All",
+    ShowLeg: "Leg $$LEG_NUMBER$$"
 };

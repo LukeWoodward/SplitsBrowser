@@ -1,0 +1,114 @@
+<?xml version="1.0" ?>
+<!DOCTYPE ResultList SYSTEM "IOFdata.dtd">
+<ResultList>
+    <IOFVersion version="2.0.3" />
+    <ClassResult>
+        <ClassShortName>Individual Class</ClassShortName>
+        <PersonResult>
+            <Person>
+                <PersonName>
+                    <Given>First</Given>
+                    <Family>Runner</Family>
+                </PersonName>
+            </Person>
+            <Club>
+                <ShortName>ABC</ShortName>
+            </Club>
+            <Result>
+                <StartTime>
+                    <Clock>10:00:00</Clock>
+                </StartTime>
+                <Time>12:14</Time>
+                <CompetitorStatus value="OK"/>
+                <CourseLength>4100</CourseLength>
+                <SplitTime sequence="1">
+                    <ControlCode>212</ControlCode>
+                    <Time>1:48</Time>
+                </SplitTime>
+                <SplitTime sequence="2">
+                    <ControlCode>229</ControlCode>
+                    <Time>6:14</Time>
+                </SplitTime>
+                <SplitTime sequence="3">
+                    <ControlCode>208</ControlCode>
+                    <Time>8:43</Time>
+                </SplitTime>
+            </Result>
+        </PersonResult>
+    </ClassResult>
+    <ClassResult>
+        <ClassShortName>Team Class</ClassShortName>
+        <TeamResult>
+            <TeamName>First Team</TeamName>
+            <Club>
+                <ShortName>DEF</ShortName>
+            </Club>
+            <PersonResult>
+                <Person>
+                    <PersonName>
+                        <Given>Second</Given>
+                        <Family>Runner</Family>
+                    </PersonName>
+                </Person>
+                <Club>
+                    <ShortName>DEF</ShortName>
+                </Club>
+                <Result>
+                    <StartTime>
+                        <Clock>10:30:00</Clock>
+                    </StartTime>
+                    <FinishTime>
+                        <Clock>10:44:12</Clock>
+                    </FinishTime>
+                    <Time>14:12</Time>
+                    <CompetitorStatus value="OK"/>
+                    <SplitTime sequence="1">
+                        <ControlCode>212</ControlCode>
+                        <Time>3:47</Time>
+                    </SplitTime>
+                    <SplitTime sequence="2">
+                        <ControlCode>229</ControlCode>
+                        <Time>7:56</Time>
+                    </SplitTime>
+                    <SplitTime sequence="3">
+                        <ControlCode>208</ControlCode>
+                        <Time>10:32</Time>
+                    </SplitTime>
+                </Result>
+            </PersonResult>
+            <PersonResult>
+                <Person>
+                    <PersonName>
+                        <Given>Third</Given>
+                        <Family>Runner</Family>
+                    </PersonName>
+                </Person>
+                <Club>
+                    <ShortName>DEF</ShortName>
+                </Club>
+                <Result>
+                    <StartTime>
+                        <Clock>10:44:12</Clock>
+                    </StartTime>
+                    <FinishTime>
+                        <Clock>10:57:44</Clock>
+                    </FinishTime>
+                    <Time>13:32</Time>
+                    <CompetitorStatus value="OK"/>
+                    <SplitTime sequence="1">
+                        <ControlCode>212</ControlCode>
+                        <Time>03:01</Time>
+                    </SplitTime>
+                    <SplitTime sequence="2">
+                        <ControlCode>229</ControlCode>
+                        <Time>07:05</Time>
+                    </SplitTime>
+                    <SplitTime sequence="3">
+                        <ControlCode>208</ControlCode>
+                        <Time>09:59</Time>
+                    </SplitTime>
+                </Result>
+            </PersonResult>
+        </TeamResult>
+    </ClassResult>
+</ResultList>

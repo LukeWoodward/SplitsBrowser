@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Grunt configuration.
  *  
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -32,7 +32,9 @@ module.exports = function(grunt) {
                 src: ['js/core.js',
                       'js/util.js',
                       'js/time.js',
+                      'js/result.js',
                       'js/competitor.js',
+                      'js/team.js',
                       'js/course-class.js',
                       'js/course.js',
                       'js/event.js',
@@ -51,13 +53,15 @@ module.exports = function(grunt) {
                       'js/messages.js',
                       'js/util.js',
                       'js/time.js',
+                      'js/result.js',
                       'js/competitor.js',
+                      'js/team.js',
                       'js/course-class.js',
                       'js/course-class-set.js',
                       'js/course.js',
                       'js/event.js',
                       'js/chart-types.js',
-                      'js/competitor-selection.js',
+                      'js/result-selection.js',
                       'js/data-repair.js',
                       'js/csv-reader.js',
                       'js/oe-reader.js',
@@ -65,13 +69,14 @@ module.exports = function(grunt) {
                       'js/alternative-csv-reader.js',
                       'js/iof-xml-reader.js',
                       'js/input.js',
-                      'js/competitor-list.js',
+                      'js/result-list.js',
                       'js/language-selector.js',
                       'js/class-selector.js',
                       'js/comparison-selector.js',
                       'js/statistics-selector.js',
                       'js/chart-type-selector.js',
                       'js/original-data-selector.js',
+                      'js/leg-selector.js',
                       'js/chart-popup-data.js',
                       'js/chart-popup.js',
                       'js/chart.js',

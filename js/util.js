@@ -117,6 +117,28 @@
     };
     
     /**
+    * Returns the sum of two numbers, or null if either is null.
+    * @param {?Number} a - One number, or null, to add.
+    * @param {?Number} b - The other number, or null, to add.
+    * @return {?Number} null if at least one of a or b is null,
+    *      otherwise a + b.
+    */
+    SplitsBrowser.addIfNotNull = function (a, b) {
+        return (a === null || b === null) ? null : (a + b);
+    };
+    
+    /**
+    * Returns the difference of two numbers, or null if either is null.
+    * @param {?Number} a - One number, or null, to add.
+    * @param {?Number} b - The other number, or null, to add.
+    * @return {?Number} null if at least one of a or b is null,
+    *      otherwise a - b.
+    */    
+    SplitsBrowser.subtractIfNotNull = function (a, b) {
+        return (a === null || b === null) ? null : (a - b);
+    };
+    
+    /**
     * Parses a course length.
     *
     * This can be specified as a decimal number of kilometres or metres, with

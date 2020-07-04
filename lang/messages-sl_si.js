@@ -1,7 +1,7 @@
 ﻿/*
  *  Messages - Slovenian messages for SplitsBrowser
  *
- *  Copyright (C) 2000-2016 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward, Klemen Kenda
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -69,9 +69,12 @@ SplitsBrowser.Messages.sl_si = {
     CompareWithFastestTimePlusPercentage: "najhitrejšim časom + $$PERCENT$$%",
     CompareWithAnyRunner: "izbranim tekmovalcem ...",
     CompareWithAnyRunnerLabel: "Tekmovalec: ",
+    CompareWithAnyTeam: "Any team...", // TO BE TRANSLATED
+    CompareWithAnyTeamLabel: "Team: ", // TO BE TRANSLATED
     // Warning message shown to the user when a comparison option cannot be
     // chosen because the course has no winner.
     CannotCompareAsNoWinner: "Nemorem primerjati z '$$OPTION$$', saj noben tekmovalec ni zaključil s to progo.",
+    CannotCompareAsNoWinnerTeam: "Cannot compare against '$$OPTION$$' because no teams in this class complete the course.", // TO BE TRANSLATED
 
     // Label of checkbox that shows the original data as opposed to the
     // 'repaired' data.  This only appears if data that needs repair has been
@@ -114,45 +117,49 @@ SplitsBrowser.Messages.sl_si = {
     SelectedClassesPopupHeader: "Izbrane kategorije",
 
     // Placeholder text shown when the Selected classes dialog is empty,
-    // because no competitors registered a split for the control, or those
+    // because no results registered a split for the control, or those
     // that did only registered a dubious split.
     SelectedClassesPopupPlaceholder: "Ni tekmovalcev",
 
     // Header for the 'Fastest leg time' popup dialog.
     FastestLegTimePopupHeader: "Najhitrejši čas etape $$START$$ do $$END$$",
 
-    // Header for the nearby-competitors dialog on the race graph.
+    // Header for the nearby-results dialog on the race graph.
     NearbyCompetitorsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
 
-    // Placeholder text shown in the nearby-competitors dialog on the race
-    // graph when there aren't any competitors visiting the control within the
-    // +/- 2 minute window.
+    // Placeholder text shown in the nearby-results dialog on the race
+    // graph when there aren't any competitors or teams visiting the control
+    // within the +/- 2 minute window.
     NoNearbyCompetitors: "Ni tekmovalcev",
+    // TO BE TRANSLATED
+    NoNearbyTeams: "No nearby teams",
 
     // Link that appears at the top and opens SplitsBrowser with the settings
-    // (selected classes, competitors, comparison, chart type, etc.) that are
+    // (selected classes, results, comparison, chart type, etc.) that are
     // currently shown.
     DirectLink: "Povezava",
     DirectLinkToolTip: "Povezava odpre SplitsBrowser s trenutnimi nastavitvami",
 
-    // The placeholder text shown in the competitor-list filter box when no
+    // The placeholder text shown in the result-list filter box when no
     // text has been entered into this box.
     CompetitorListFilter: "Filter",
 
-    // Labels that appear beside a competitor on the Results Table to indicate
+    // Labels that appear beside a result on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
     DidNotStartShort: "dns",
     DidNotFinishShort: "dnf",
     DisqualifiedShort: "dsq",
 
-    // Placeholder message shown inside the competitor list if all competitors
+    // Placeholder message shown inside the result list if all competitors or teams
     // in the class did not start.
     NoCompetitorsStarted: "Noben tekmovalec ni startal",
+    // TO BE TRANSLATED
+    NoTeamsStarted: "No teams started",
 
     // Label of the language-selector control.
     LanguageSelectorLabel: "Jezik:",
 
-    // Label that appears beside a competitor on the Results Table to indicate
+    // Label that appears beside a result on the Results Table to indicate
     // that they were over the maximum time.
     OverMaxTimeShort: "čez maksimalni dovoljeni čas",
 
@@ -162,5 +169,11 @@ SplitsBrowser.Messages.sl_si = {
 
     // Tooltip of the warning-triangle shown along the top if warnings were
     // issued reading in the file.
-    WarningsTooltip: "Vseh podatkov za to tekmovanje ni bilo mogoče prebrati. Enega ali več tekmovalcev ali kategorij smo izpustili.  Kliknite za več podrobnosti."
+    WarningsTooltip: "Vseh podatkov za to tekmovanje ni bilo mogoče prebrati. Enega ali več tekmovalcev ali kategorij smo izpustili.  Kliknite za več podrobnosti.",
+    
+    // Options in the leg-selector control when viewing results for a team.
+    // TO BE TRANSLATED
+    LegSelectorLabel: "Leg: ",
+    ShowAllLegs: "All",
+    ShowLeg: "Leg $$LEG_NUMBER$$"
 };

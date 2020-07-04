@@ -1,7 +1,7 @@
 ﻿/*
  *  Messages - Be Dutch messages for SplitsBrowser
  *
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward, Robert Marique,
  *                          Jan-Gerard van der Toorn
  *
@@ -70,9 +70,12 @@ SplitsBrowser.Messages.nl_be = {
     CompareWithFastestTimePlusPercentage: "Snelste tijd + $$PERCENT$$%",
     CompareWithAnyRunner: "Een deelnemer...",
     CompareWithAnyRunnerLabel: "Deelnemer: ",
+    CompareWithAnyTeam: "Any team...", // TO BE TRANSLATED
+    CompareWithAnyTeamLabel: "Team: ", // TO BE TRANSLATED
     // Warning message shown to the user when a comparison option cannot be
     // chosen because the course has no winner.
     CannotCompareAsNoWinner: "Kan niet vergelijken met '$$OPTION$$' omdat geen enkele deelnemer in deze omloop de wedstrijd beëindigde.",
+    CannotCompareAsNoWinnerTeam: "Cannot compare against '$$OPTION$$' because no teams in this class complete the course.", // TO BE TRANSLATED
     
     // Label of checkbox that shows the original data as opposed to the
     // 'repaired' data.  This only appears if data that needs repair has been
@@ -125,10 +128,12 @@ SplitsBrowser.Messages.nl_be = {
     // Header for the nearby-competitors dialog on the race graph.
     NearbyCompetitorsPopupHeader: "$$START$$ - $$END$$: $$CONTROL$$",
     
-    // Placeholder text shown in the nearby-competitors dialog on the race
-    // graph when there aren't any competitors visiting the control within the
-    // +/- 2 minute window.
+    // Placeholder text shown in the nearby-results dialog on the race
+    // graph when there aren't any competitors or teams visiting the control
+    // within the +/- 2 minute window.
     NoNearbyCompetitors: "Geen deelnemers",
+    // TO BE TRANSLATED
+    NoNearbyTeams: "No teams",
     
     // Link that appears at the top and opens SplitsBrowser with the settings
     // (selected classes, competitors, comparison, chart type, etc.) that are
@@ -136,28 +141,30 @@ SplitsBrowser.Messages.nl_be = {
     DirectLink: "Link",
     DirectLinkToolTip: "Linkt naar een URL die SplitsBrowser opent met de huidige weergave",
     
-    // The placeholder text shown in the competitor-list filter box when no
+    // The placeholder text shown in the result-list filter box when no
     // text has been entered into this box.
     // TO BE TRANSLATED
     CompetitorListFilter: "Filter",
     
-    // Labels that appear beside a competitor on the Results Table to indicate
+    // Labels that appear beside a result on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
     // TO BE TRANSLATED
     DidNotStartShort: "dns",
     DidNotFinishShort: "dnf",
     DisqualifiedShort: "dsq",
     
-    // Placeholder message shown inside the competitor list if all competitors
+    // Placeholder message shown inside the result list if all competitors or teams
     // in the class did not start.
     // TO BE TRANSLATED
     NoCompetitorsStarted: "No competitors started",
+    // TO BE TRANSLATED
+    NoTeamsStarted: "No teams started",
     
     // Label of the language-selector control.
     // TO BE TRANSLATED?
     LanguageSelectorLabel: "Language:",
     
-    // Label that appears beside a competitor on the Results Table to indicate
+    // Label that appears beside a result on the Results Table to indicate
     // that they were over the maximum time.
     // TO BE TRANSLATED
     OverMaxTimeShort: "over max time",
@@ -170,5 +177,11 @@ SplitsBrowser.Messages.nl_be = {
     // Tooltip of the warning-triangle shown along the top if warnings were
     // issued reading in the file.
     // TO BE TRANSLATED
-    WarningsTooltip: "It was not possible to read all of the data for this event.  One or more competitors or classes may have been omitted.  Click for more details."
+    WarningsTooltip: "It was not possible to read all of the data for this event.  One or more competitors or classes may have been omitted.  Click for more details.",
+    
+    // Options in the leg-selector control when viewing results for a team.
+    // TO BE TRANSLATED
+    LegSelectorLabel: "Leg: ",
+    ShowAllLegs: "All",
+    ShowLeg: "Leg $$LEG_NUMBER$$"
 };

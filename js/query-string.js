@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Query-string - Query-string parsing and merging
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -22,6 +22,7 @@
 (function () {
     "use strict";
     
+    var isNaNStrict = SplitsBrowser.isNaNStrict;
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     
@@ -151,31 +152,31 @@
             var comparisonName = decodeURIComponent(comparisonMatch[1]);
             var defaultIndex = BUILTIN_COMPARISON_TYPES.indexOf(comparisonName);
             if (defaultIndex >= 1) {
-                return {index: defaultIndex, runner: null};
+                return {index: defaultIndex, result: null};
             } else if (defaultIndex === 0 && courseClassSet !== null) {
-                var hasCompleters = courseClassSet.allCompetitors.some(function (competitor) {
-                    return competitor.completed();
+                var hasCompleters = courseClassSet.allResults.some(function (result) {
+                    return result.completed();
                 });
                 
                 if (hasCompleters) {
-                    return {index: 0, runner: null};
+                    return {index: 0, result: null};
                 } else {
                     // Cannot select 'Winner' as there was no winner.
                     return null;
                 }
             } else if (courseClassSet === null) {
                 // Not one of the recognised comparison types and we have no
-                // classes to look for competitor names within.
+                // classes to look for result names within.
                 return null;
             } else {
-                for (var competitorIndex = 0; competitorIndex < courseClassSet.allCompetitors.length; competitorIndex += 1) {
-                    var competitor = courseClassSet.allCompetitors[competitorIndex];
-                    if (competitor.name === comparisonName && competitor.completed()) {
-                        return {index: BUILTIN_COMPARISON_TYPES.length, runner: competitor};
+                for (var resultIndex = 0; resultIndex < courseClassSet.allResults.length; resultIndex += 1) {
+                    var result = courseClassSet.allResults[resultIndex];
+                    if (result.owner.name === comparisonName && result.completed()) {
+                        return {index: BUILTIN_COMPARISON_TYPES.length, result: result};
                     }
                 }
                 
-                // Didn't find the competitor.
+                // Didn't find the result.
                 return null;
             }
         }
@@ -185,15 +186,16 @@
     * Formats the given comparison into the given query-string.
     * @param {String} queryString - The original query-string.
     * @param {Number} index - Index of the comparison type.
-    * @param {String} The formatted query-string.
+    * @param {Result} result - The result to format.
+    * @return {String} The formatted query-string.
     */
-    function formatComparison(queryString, index, runner) {
+    function formatComparison(queryString, index, result) {
         queryString = removeAll(queryString, COMPARE_WITH_REGEXP);
         var comparison = null;
         if (typeof index === typeof 0 && 0 <= index && index < BUILTIN_COMPARISON_TYPES.length) {
             comparison = BUILTIN_COMPARISON_TYPES[index];
-        } else if (runner !== null) {
-            comparison = runner.name;
+        } else if (result !== null) {
+            comparison = result.owner.name;
         }
         
         if (comparison === null) {
@@ -203,7 +205,7 @@
         }
     }
     
-    var SELECTED_COMPETITORS_REGEXP = /(?:^|&|\?)selected=([^&]+)/;
+    var SELECTED_RESULTS_REGEXP = /(?:^|&|\?)selected=([^&]+)/;
     
     /**
     * Reads what to compare against.
@@ -211,60 +213,59 @@
     *     type from.
     * @param {CourseClassSet|null} courseClassSet - Course-class set containing
     *     selected course-classes, or null if none are selected.
-    * @return {Array|null} Array of selected competitor indexes, or null if
-    *     none found.
+    * @return {Array|null} Array of selected result indexes, or null if none
+    *     found.
     */
-    function readSelectedCompetitors(queryString, courseClassSet) {
+    function readSelectedResults(queryString, courseClassSet) {
         if (courseClassSet === null) {
             return null;
         } else {
-            var selectedCompetitorsMatch = SELECTED_COMPETITORS_REGEXP.exec(queryString);
-            if (selectedCompetitorsMatch === null) {
+            var selectedResultsMatch = SELECTED_RESULTS_REGEXP.exec(queryString);
+            if (selectedResultsMatch === null) {
                 return null;
             } else {
-                var competitorNames = decodeURIComponent(selectedCompetitorsMatch[1]).split(";");
-                if (competitorNames.indexOf("*") >= 0) {
-                    // All competitors selected.
-                    return d3.range(0, courseClassSet.allCompetitors.length);
+                var resultNames = decodeURIComponent(selectedResultsMatch[1]).split(";");
+                if (resultNames.indexOf("*") >= 0) {
+                    // All results selected.
+                    return d3.range(0, courseClassSet.allResults.length);
                 }
                 
-                competitorNames = d3.set(competitorNames).values();
-                var allCompetitorNames = courseClassSet.allCompetitors.map(function (competitor) { return competitor.name; });
-                var selectedCompetitorIndexes = [];
-                competitorNames.forEach(function (competitorName) {
-                    var index = allCompetitorNames.indexOf(competitorName);
+                resultNames = d3.set(resultNames).values();
+                var allResultNames = courseClassSet.allResults.map(function (result) { return result.owner.name; });
+                var selectedResultIndexes = [];
+                resultNames.forEach(function (resultName) {
+                    var index = allResultNames.indexOf(resultName);
                     if (index >= 0) {
-                        selectedCompetitorIndexes.push(index);
+                        selectedResultIndexes.push(index);
                     }
                 });
                 
-                selectedCompetitorIndexes.sort(d3.ascending);
-                return (selectedCompetitorIndexes.length === 0) ? null : selectedCompetitorIndexes;
+                selectedResultIndexes.sort(d3.ascending);
+                return (selectedResultIndexes.length === 0) ? null : selectedResultIndexes;
             }
         }
     }
     
     /**
-    * Formats the given selected competitors into the given query-string.
+    * Formats the given selected results into the given query-string.
     * @param {String} queryString - The original query-string.
     * @param {CourseClassSet} courseClassSet - The current course-class set.
     * @param {Array} selected - Array of indexes within the course-class set's
-    *     list of competitors of those that are selected.
-    * @return {String} Query-string with the selected competitors formatted
-    *     into it.
+    *     list of results of those that are selected.
+    * @return {String} Query-string with the selected result formatted into it.
     */
-    function formatSelectedCompetitors(queryString, courseClassSet, selected) {
-        queryString = removeAll(queryString, SELECTED_COMPETITORS_REGEXP);
-        var selectedCompetitors = selected.map(function (index) { return courseClassSet.allCompetitors[index]; });
-        if (selectedCompetitors.length === 0) {
+    function formatSelectedResults(queryString, courseClassSet, selected) {
+        queryString = removeAll(queryString, SELECTED_RESULTS_REGEXP);
+        var selectedResults = selected.map(function (index) { return courseClassSet.allResults[index]; });
+        if (selectedResults.length === 0) {
             return queryString;
-        } else if (selectedCompetitors.length === courseClassSet.allCompetitors.length) {
-            // Assume all selected competitors are different, so all must be
+        } else if (selectedResults.length === courseClassSet.allResults.length) {
+            // Assume all selected results are different, so all must be
             // selected.
             return queryString + "&selected=*";
         } else {
-            var competitorNames = selectedCompetitors.map(function (comp) { return comp.name; }).join(";");
-            return queryString + "&selected=" + encodeURIComponent(competitorNames);
+            var resultNames = selectedResults.map(function (result) { return result.owner.name; }).join(";");
+            return queryString + "&selected=" + encodeURIComponent(resultNames);
         }
     }
     
@@ -335,12 +336,41 @@
     * Formats the show-original-data flag into the given query-string.
     * @param {String} queryString - The original query-string.
     * @param {boolean} showOriginal - True to show original data, false not to.
-    * @return {String} queryString - The query-string with the show-original
-    *     data flag formatted in.
+    * @return {String} The query-string with the show-original-data flag
+    *     formatted in.
     */
     function formatShowOriginal(queryString, showOriginal) {
         queryString = removeAll(queryString, SHOW_ORIGINAL_REGEXP);
         return (showOriginal) ? queryString + "&showOriginal=1" : queryString;
+    }
+    
+    var SELECTED_LEG_REGEXP = /(?:^|&|\?)selectedLeg=([^&]*)/;
+    
+    /**
+    * Reads the selected leg from the given query-string
+    * @param {String} queryString - The query-string to read.
+    * @return {Number?} The selected leg, or null for none.
+    */
+    function readSelectedLeg(queryString) {
+        var selectedLegMatch = SELECTED_LEG_REGEXP.exec(queryString);
+        if (selectedLegMatch === null) {
+            return null;
+        } else {
+            var legIndex = parseInt(selectedLegMatch[1], 10);
+            return (isNaNStrict(legIndex)) ? null : legIndex;
+        }
+    }
+    
+    /**
+    * Formats the selected leg into the given query-string.
+    * @param {String} queryString  The original query-string.
+    * @param {Number?} selectedLeg - The selected leg, or null for none.
+    * @return {String} The query string with the selected-leg value formatted
+    *     in.
+    */
+    function formatSelectedLeg(queryString, selectedLeg) {
+       queryString = removeAll(queryString, SELECTED_LEG_REGEXP);
+       return (selectedLeg === null) ? queryString : queryString + "&selectedLeg=" + encodeURIComponent(selectedLeg);
     }
     
     var FILTER_TEXT_REGEXP = /(?:^|&|\?)filterText=([^&]*)/;
@@ -386,9 +416,10 @@
             classes: classIndexes,
             chartType: readChartType(queryString),
             compareWith: readComparison(queryString, courseClassSet),
-            selected: readSelectedCompetitors(queryString, courseClassSet),
+            selected: readSelectedResults(queryString, courseClassSet),
             stats: readSelectedStatistics(queryString),
             showOriginal: readShowOriginal(queryString),
+            selectedLeg: readSelectedLeg(queryString),
             filterText: readFilterText(queryString)
         };
     }
@@ -411,10 +442,11 @@
     function formatQueryString(queryString, eventData, courseClassSet, data) {
         queryString = formatSelectedClasses(queryString, eventData, data.classes);
         queryString = formatChartType(queryString, data.chartType);
-        queryString = formatComparison(queryString, data.compareWith.index, data.compareWith.runner);
-        queryString = formatSelectedCompetitors(queryString, courseClassSet, data.selected);
+        queryString = formatComparison(queryString, data.compareWith.index, data.compareWith.result);
+        queryString = formatSelectedResults(queryString, courseClassSet, data.selected);
         queryString = formatSelectedStatistics(queryString, data.stats);
         queryString = formatShowOriginal(queryString, data.showOriginal);
+        queryString = formatSelectedLeg(queryString, data.selectedLeg);
         queryString = formatFilterText(queryString, data.filterText);
         queryString = queryString.replace(/^\??&/, "");
         return queryString;

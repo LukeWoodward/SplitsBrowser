@@ -28,7 +28,8 @@
     var parseCourseClimb = SplitsBrowser.parseCourseClimb;
     var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
     var parseTime = SplitsBrowser.parseTime;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Competitor.fromOriginalCumTimes;
+    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    var Competitor = SplitsBrowser.Model.Competitor;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
@@ -109,7 +110,7 @@
     function Reader(data) {
         this.data = normaliseLineEndings(data);
         
-        // Map that associates classes to all of the competitors running on
+        // Map that associates classes to all of the results running on
         // that class.
         this.classes = d3.map();
         
@@ -125,7 +126,7 @@
         // The indexes of the columns that we read data from.
         this.columnIndexes = null;
         
-        // Warnings about competitors that cannot be read in.
+        // Warnings about results that cannot be read in.
         this.warnings = [];
     }
 
@@ -291,7 +292,7 @@
     Reader.prototype.createClassIfNecessary = function (row, numControls) {
         var className = this.getClassName(row);
         if (!this.classes.has(className)) {
-            this.classes.set(className, { numControls: numControls, competitors: [] });
+            this.classes.set(className, { numControls: numControls, results: [] });
         }
     };
     
@@ -373,31 +374,8 @@
             name = name.substring(0, name.length - placing.length).trim();
         }
 
-        var order = this.classes.get(className).competitors.length + 1;
-        var competitor = fromOriginalCumTimes(order, name, club, startTime, cumTimes);
-        if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && competitor.completed()) {
-            // Competitor either marked as non-competitive, or has completed
-            // the course but has a non-numeric placing.  In the latter case,
-            // assume that they are non-competitive.
-            competitor.setNonCompetitive();
-        }
-        
-        var classifier = row[this.columnIndexes.classifier];
-        if (classifier !== "") {
-            if (classifier === "0" && cumTimes.indexOf(null) >= 0 && cumTimes[cumTimes.length - 1] !== null) {
-                competitor.setOKDespiteMissingTimes();
-            } else if (classifier === "1") {
-                competitor.setNonStarter();
-            } else if (classifier === "2") {
-                competitor.setNonFinisher();
-            } else if (classifier === "4") {
-                competitor.disqualify();
-            } else if (classifier === "5") {
-                competitor.setOverMaxTime();
-            }
-        } else if (!competitor.hasAnyTimes()) {
-            competitor.setNonStarter();
-        }
+        var order = this.classes.get(className).results.length + 1;
+        var competitor = new Competitor(name, club);
         
         var yearOfBirthStr = row[this.columnIndexes.yearOfBirth];
         if (yearOfBirthStr !== "") {
@@ -413,8 +391,33 @@
                 competitor.setGender(gender);
             }
         }
+        
+        var result = fromOriginalCumTimes(order, startTime, cumTimes, competitor);
+        if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && result.completed()) {
+            // Competitor either marked as non-competitive, or has completed
+            // the course but has a non-numeric placing.  In the latter case,
+            // assume that they are non-competitive.
+            result.setNonCompetitive();
+        }
+        
+        var classifier = row[this.columnIndexes.classifier];
+        if (classifier !== "") {
+            if (classifier === "0" && cumTimes.indexOf(null) >= 0 && cumTimes[cumTimes.length - 1] !== null) {
+                result.setOKDespiteMissingTimes();
+            } else if (classifier === "1") {
+                result.setNonStarter();
+            } else if (classifier === "2") {
+                result.setNonFinisher();
+            } else if (classifier === "4") {
+                result.disqualify();
+            } else if (classifier === "5") {
+                result.setOverMaxTime();
+            }
+        } else if (!result.hasAnyTimes()) {
+            result.setNonStarter();
+        }
 
-        this.classes.get(className).competitors.push(competitor);
+        this.classes.get(className).results.push(result);
     };
     
     /**
@@ -492,7 +495,7 @@
         classNames.sort();
         return classNames.map(function (className) {
             var courseClass = this.classes.get(className);
-            return new CourseClass(className, courseClass.numControls, courseClass.competitors);
+            return new CourseClass(className, courseClass.numControls, courseClass.results);
         }, this);
     };
     

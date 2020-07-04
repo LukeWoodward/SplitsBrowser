@@ -46,11 +46,31 @@
             gender: "M",
             birthDate: "1976-04-11",
             startTime: 10 * 3600 + 11 * 60 + 37,
+            finishTime: 10 * 3600 + 21 * 60 + 7,
             totalTime: 65 + 221 + 184 + 100,
             controls: ["182", "148", "167"],
             cumTimes: [65, 65 + 221, 65 + 221 + 184],
             result: true
         };
+    }
+    
+    function getTeam() {
+        var teamMember1 = getPerson();
+        var teamMember2 = { 
+            forename: "Second",
+            surname: "Runner",
+            club: "TestClub",
+            gender: "M",
+            birthDate: "1978-08-18",
+            startTime: 10 * 3600 + 21 * 60 + 7,
+            finishTime: 10 * 3600 + 29 * 60 + 53,
+            totalTime: 61 + 193 + 176 + 103,
+            controls: ["183", "149", "167"],
+            cumTimes: [61, 61 + 193, 65 + 193 + 176],
+            result: true
+        };
+        
+        return {name: "TestTeam", club: "TeamClubName", members: [teamMember1, teamMember2]};
     }
     
     // In all of the following XML generation functions, it is assumed that the
@@ -81,6 +101,21 @@
     Version2Formatter.getCourseXml = function () {
         return "";
     };
+
+    /**
+    * Returns a chunk of XML that contains club details.
+    * @param {Object} resultData - The person or team data
+    * @return {String} Generated XML string.
+    */
+    Version2Formatter.getClubXml = function (resultData) {
+        if (resultData.hasOwnProperty("club")) {
+            return '<Club><ShortName>' + resultData.club + '</ShortName></Club>\n';
+        } else if (resultData.hasOwnProperty("clubFull")) {
+            return '<Club><Name>' + resultData.clubFull + '</Name></Club>\n';
+        } else {
+            return '';
+        }
+    };
     
     /**
     * Generates some XML for a person.
@@ -92,6 +127,8 @@
     * * surname (String) - The person's surname.
     * * club {String} The person's club.
     * * startTime (Number) - The person's start time, in seconds since
+    *       midnight.
+    * * finishTime (Number) - The person's finish time, in seconds since
     *       midnight.
     * * totalTime (Number) - The person's total time, in seconds.
     * * competitive (boolean) - True if competitive, false if non-competitive.  
@@ -147,8 +184,10 @@
             personNameXml += '</Person>\n';
         }
         
-        var clubXml = (exists("club")) ? '<Club><ShortName>' + personData.club + '</ShortName></Club>\n' : '';
+        var clubXml = Version2Formatter.getClubXml(personData);
+
         var startTimeXml = (exists("startTime")) ? '<StartTime><Clock>' + formatTime(personData.startTime) + '</Clock></StartTime>\n' : '';
+        var finishTimeXml = (exists("finishTime")) ? '<FinishTime><Clock>' + formatTime(personData.finishTime) + '</Clock></FinishTime>\n' : '';
         var totalTimeXml = (exists("totalTime")) ? '<Time>' + formatTime(personData.totalTime) + '</Time>\n' : '';
         
         var status;
@@ -186,9 +225,31 @@
             splitTimesXmls.push('<SplitTime><ControlCode>' + personData.controls[index] + '</ControlCode><Time>' + formatTime(personData.cumTimes[index]) + '</Time></SplitTime>\n');
         }
         
-        var resultXml = exists("result") ? '<Result>' + startTimeXml + totalTimeXml + statusXml + courseLengthXml + splitTimesXmls.join("") + '</Result>\n' : '';
+        var resultXml = exists("result") ? '<Result>' + startTimeXml + finishTimeXml + totalTimeXml + statusXml + courseLengthXml + splitTimesXmls.join("") + '</Result>\n' : '';
         
         return '<PersonResult>' + personNameXml + clubXml + resultXml + '</PersonResult>\n';
+    };
+
+    /**
+    * Generates some XML for a team name.
+    * @param {String} name The name of the team.
+    * @return {String} Generated XML string.
+    */
+    Version2Formatter.getTeamNameXml = function (name) {
+        return '<TeamName>' + name + '</TeamName>';
+    };
+
+    /**
+    * Generates some XML for a team member result.
+    *
+    * For IOF XML v2 the format is identical to that for a PersonResult.
+    *
+    * @param {Object} personData - The person data.
+    * @param {Object} classData - The class data.
+    * @return {String} Generated XML string.
+    */
+    Version2Formatter.getTeamMemberResultXml = function (personData, classData) {
+        return Version2Formatter.getPersonResultXml(personData, classData);
     };
     
     /**
@@ -205,31 +266,32 @@
     function seconds (value) { return zeroPadTwoDigits(value % 60); }
     
     /**
-    * Formats a start time as an ISO-8601 date.
-    * @param {Number} startTime - The start time to format.
+    * Formats a start or finish time as an ISO-8601 date.
+    * @param {Number} time - The time to format.
     * @return {String} The formatted date.
     */ 
-    function formatStartTime(startTime) {
-        return "2014-06-07T" + hours(startTime) + ":" + minutes(startTime) + ":" + seconds(startTime) + ".000+01:00";
+    function formatStartOrFinishTime(time) {
+        return "2014-06-07T" + hours(time) + ":" + minutes(time) + ":" + seconds(time) + ".000+01:00";
     }
     
     /**
-    * Formats a start time as an ISO-8601 date, but ending after the minutes.
-    * @param {Number} startTime - The start time to format.
+    * Formats a start or finish time as an ISO-8601 date, but ending after the
+    * minutes.
+    * @param {Number} time - The time to format.
     * @return {String} The formatted date.
     */ 
-    function formatStartTimeNoSeconds (startTime) {
-        return "2014-06-07T" + hours(startTime) + ":" + minutes(startTime);
+    function formatStartOrFinishTimeNoSeconds (time) {
+        return "2014-06-07T" + hours(time) + ":" + minutes(time);
     }
     
     /**
-    * Formats a start time as a 'baisc' ISO-8601 date, i.e. one without all of
-    * the separating characters.
-    * @param {Number} startTime - The start time to format.
+    * Formats a start or finish time as a 'basic' ISO-8601 date, i.e. one
+    * without all of the separating characters.
+    * @param {Number} time - The time to format.
     * @return {String} The formatted date.
     */ 
-    function formatStartTimeBasic (startTime) {
-        return "20140607" + hours(startTime) + minutes(startTime) + seconds(startTime);
+    function formatStartOrFinishTimeBasic (time) {
+        return "20140607" + hours(time) + minutes(time) + seconds(time);
     }
 
     var Version3Formatter = {
@@ -279,9 +341,25 @@
   
         return xml;
     };
+    
+    /**
+    * Returns a chunk of XML that contains club details.
+    * @param {Object} resultData - The person or team data
+    * @return {String} Generated XML string.
+    */
+    Version3Formatter.getClubXml = function (resultData) {
+        if (resultData.hasOwnProperty("club")) {
+            return '<Organisation><ShortName>' + resultData.club + '</ShortName></Organisation>\n';
+        } else if (resultData.hasOwnProperty("clubFull")) {
+            return '<Organisation><Name>' + resultData.clubFull + '</Name></Organisation>\n';
+        } else {
+            return '';
+        }
+    };
 
     /**
-    * Generates some XML for a person.
+    * Generates some XML for an individual result, either a competitor in an
+    * individual event or a team member in a relay.
     *
     * The properties supported are as follows.  Unless specified otherwise, the
     * XML generated for each property is omitted if the property is not
@@ -290,6 +368,8 @@
     * * surname (String) - The person's surname.
     * * club {String} The person's club.
     * * startTime (Number) - The person's start time, in seconds since
+    *       midnight.
+    * * finishTime (Number) - The person's start time, in seconds since
     *       midnight.
     * * totalTime (Number) - The person's total time, in seconds.
     * * competitive (boolean) - True if competitive, false if non-competitive.  
@@ -300,9 +380,10 @@
     *       skip it.
     *
     * @param {Object} personData - The person data.
+    * @param {String} elementName - The name of the root element.
     * @return {String} Generated XML string.
     */
-    Version3Formatter.getPersonResultXml = function (personData) {
+    Version3Formatter.getIndividualResultXml = function (personData, elementName) {
         
         function exists(name) {
             return personData.hasOwnProperty(name);
@@ -342,20 +423,32 @@
             personNameXml += '</Person>\n';
         }
         
-        var clubXml = (exists("club")) ? '<Organisation><ShortName>' + personData.club + '</ShortName></Organisation>\n' : '';
-        
         var startTimeStr;
         if (personData.startTime === null) {
             startTimeStr = '';
         } else if (exists("startTimeBasic")) {
-            startTimeStr = formatStartTimeBasic(personData.startTime);
+            startTimeStr = formatStartOrFinishTimeBasic(personData.startTime);
         } else if (exists("startTimeNoSeconds")) {
-            startTimeStr = formatStartTimeNoSeconds(personData.startTime);
+            startTimeStr = formatStartOrFinishTimeNoSeconds(personData.startTime);
         } else {
-            startTimeStr = formatStartTime(personData.startTime);
+            startTimeStr = formatStartOrFinishTime(personData.startTime);
         }
         
+        var finishTimeStr;
+        if (personData.finishTime === null) {
+            finishTimeStr = '';
+        } else if (exists("finishTimeBasic")) {
+            finishTimeStr = formatStartOrFinishTimeBasic(personData.finishTime);
+        } else if (exists("finishTimeNoSeconds")) {
+            finishTimeStr = formatStartOrFinishTimeNoSeconds(personData.finishTime);
+        } else {
+            finishTimeStr = formatStartOrFinishTime(personData.finishTime);
+        }
+        
+        var clubXml = Version3Formatter.getClubXml(personData);
+        
         var startTimeXml = (exists("startTime")) ? '<StartTime>' + startTimeStr + '</StartTime>\n' : '';
+        var finishTimeXml = (exists("finishTime")) ? '<FinishTime>' + finishTimeStr + '</FinishTime>\n' : '';
         var totalTimeXml = (exists("totalTime")) ? '<Time>' + personData.totalTime + '</Time>' : '';
         
         var status;
@@ -389,13 +482,58 @@
             }
         }
         
-        var resultXml = exists("result") ? '<Result>' + startTimeXml + totalTimeXml + statusXml + splitTimesXmls.join('') + '</Result>\n' : '';
+        var resultXml = exists("result") ? '<Result>' + startTimeXml + finishTimeXml + totalTimeXml + statusXml + splitTimesXmls.join('') + '</Result>\n' : '';
         
-        return '<PersonResult>' + personNameXml + clubXml + resultXml + '</PersonResult>\n';
+        return '<' + elementName + '>' + personNameXml + clubXml + resultXml + '</' + elementName + '>\n';
     };
 
+    /**
+    * Generates some XML for an individual competitor result.
+    *
+    * For IOF XML v3 this uses a PersonResult element.
+    *
+    * @param {Object} personData - The person data.
+    * @return {String} Generated XML string.
+    */
+    Version3Formatter.getPersonResultXml = function (personData) {
+        return Version3Formatter.getIndividualResultXml(personData, "PersonResult");
+    };
+
+    /**
+    * Generates some XML for a team name.
+    * @param {String} name The name of the team.
+    * @return {String} Generated XML string.
+    */
+    Version3Formatter.getTeamNameXml = function (name) {
+        return '<Name>' + name + '</Name>';
+    };
+
+    /**
+    * Generates some XML for an team member result.
+    *
+    * For IOF XML v3 this uses a TeamMemberResult element.
+    *
+    * @param {Object} personData - The person data.
+    * @return {String} Generated XML string.
+    */
+    Version3Formatter.getTeamMemberResultXml = function (personData) {
+        return Version3Formatter.getIndividualResultXml(personData, "TeamMemberResult");
+    };
     
     var ALL_FORMATTERS = [Version2Formatter, Version3Formatter];
+    
+    /**
+    * Formats a relay team to XML
+    * @param {Object} formatter The formatter to generate the XML with.
+    * @param {Object} team The team data.
+    * @param {Object} clazz The class data.
+    * @return {String} Generated XML string.
+    */
+    function formatRelayTeam(formatter, team, clazz) {
+        return '<TeamResult>\n' + formatter.getTeamNameXml(team.name) + formatter.getClubXml(team) +
+                    team.members.map(function (member) { return formatter.getTeamMemberResultXml(member, clazz); }).join("\n") +
+                    "\n</TeamResult>";
+    }
     
     /**
     * Uses the given formatter to format the given class data as XML.
@@ -413,7 +551,18 @@
             
             xml += formatter.getCourseXml(clazz);
             
-            xml += clazz.competitors.map(function (comp) { return formatter.getPersonResultXml(comp, clazz); }).join("\n");
+            if (clazz.hasOwnProperty("competitors")) {
+                xml += clazz.competitors.map(function (comp) { return formatter.getPersonResultXml(comp, clazz); }).join("\n");
+            }
+            
+            if (clazz.hasOwnProperty("teams")) {
+                xml += clazz.teams.map(function (team) { return formatRelayTeam(formatter, team, clazz); }).join("\n");
+            }
+            
+            if (!clazz.hasOwnProperty("competitors") && !clazz.hasOwnProperty("teams")) {
+                throw new Error("Class has no competitor nor team results");
+            }
+            
             xml += '</ClassResult>\n';
         });
         
@@ -422,24 +571,24 @@
     }
     
     /**
-    * Returns the single competitor in the given event.
+    * Returns the single result in the given event.
     *
     * This function also asserts that the event has exactly one course-class and
-    * exactly one competitor within that class.  This one competitor is what
+    * exactly one result within that class.  This one result is what
     * it returns.
     * @param {QUnit.assert} assert - QUnit assert object.
     * @param {Event} eventData - Event data parsed by the reader.
     * @param {String} formatterName - Name of the formatter used to generate
     *     the XML.
-    * @return {Competitor} The single competitor.
+    * @return {Result} The single result.
     */
-    function getSingleCompetitor(assert, eventData, formatterName) {
+    function getSingleResult(assert, eventData, formatterName) {
         assert.strictEqual(eventData.classes.length, 1, "Expected one class - " + formatterName);
         if (eventData.classes.length === 1) {
             var courseClass = eventData.classes[0];
-            assert.strictEqual(courseClass.competitors.length, 1, "Expected one competitor - " + formatterName);
-            if (courseClass.competitors.length === 1) {
-                return eventData.classes[0].competitors[0];
+            assert.strictEqual(courseClass.results.length, 1, "Expected one result - " + formatterName);
+            if (courseClass.results.length === 1) {
+                return eventData.classes[0].results[0];
             } else {
                 return null;
             }
@@ -513,24 +662,23 @@
     /**
     * Generates XML using each available formatter, parses the resulting XML,
     * and calls the given checking function on the result.  This function
-    * asserts that the resulting data contains only a single competitor, and
-    * then calls the check function with the parsed competitor.
+    * asserts that the resulting data contains only a single result, and
+    * then calls the check function with the parsed result.
     *
     * The options supported are the same as those for runXmlFormatParseTest.
     *
     * @param {QUnit.assert] assert - QUnit assert object.
     * @param {Object} clazz - Class object to generate the XML from.
     * @param {Function} checkFunc - Checking function called for the parsed
-    *     competitor, if a single competitor results.  It is passed the parsed
-    *     competitor.
+    *     result, if a single result results.  It is passed the parsed result.
     * @param {Object} options - Options object, the contents of which are
     *     described above.
     */
     function runSingleCompetitorXmlFormatParseTest(assert, clazz, checkFunc, options) {
         runXmlFormatParseTest([clazz], function (eventData, formatterName) {
-            var competitor = getSingleCompetitor(assert, eventData, formatterName);
-            if (competitor !== null) {
-                checkFunc(competitor);
+            var result = getSingleResult(assert, eventData, formatterName);
+            if (result !== null) {
+                checkFunc(result);
             }
         }, options);
     }
@@ -677,20 +825,21 @@
                 if (eventData.classes.length === 1) {
                     var courseClass = eventData.classes[0];
                     assert.strictEqual(courseClass.name, className);
-                    assert.strictEqual(courseClass.competitors.length, 1, "One competitor should have been read -  " + formatterName);
+                    assert.strictEqual(courseClass.results.length, 1, "One competitor should have been read - " + formatterName);
                     assert.strictEqual(courseClass.numControls, 3);
+                    assert.ok(!courseClass.isTeamClass, "Course-class should not be marked as a team class");
                     
-                    if (courseClass.competitors.length === 1) {
-                        var competitor = courseClass.competitors[0];
-                        assert.strictEqual(competitor.name, person.forename + " " + person.surname);
-                        assert.strictEqual(competitor.club, person.club);
-                        assert.strictEqual(competitor.startTime, person.startTime);
-                        assert.strictEqual(competitor.totalTime, person.totalTime);
-                        assert.strictEqual(competitor.gender, "M");
-                        assert.strictEqual(competitor.yearOfBirth, 1976);
-                        assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat(person.totalTime));
-                        assert.ok(competitor.completed());
-                        assert.ok(!competitor.isNonCompetitive);
+                    if (courseClass.results.length === 1) {
+                        var result = courseClass.results[0];
+                        assert.strictEqual(result.owner.name, person.forename + " " + person.surname);
+                        assert.strictEqual(result.owner.club, person.club);
+                        assert.strictEqual(result.owner.gender, "M");
+                        assert.strictEqual(result.owner.yearOfBirth, 1976);
+                        assert.strictEqual(result.startTime, person.startTime);
+                        assert.strictEqual(result.totalTime, person.totalTime);
+                        assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat(person.totalTime));
+                        assert.ok(result.completed());
+                        assert.ok(!result.isNonCompetitive);
                     }
                 
                     assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatterName);
@@ -735,8 +884,8 @@
         var person = getPerson();
         delete person.surname;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.name, person.forename);
+            function (result) {
+                assert.strictEqual(result.owner.name, person.forename);
             });
     });
     
@@ -744,8 +893,8 @@
         var person = getPerson();
         delete person.forename;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.name, person.surname);
+            function (result) {
+                assert.strictEqual(result.owner.name, person.surname);
             });
     });
     
@@ -757,8 +906,18 @@
             [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 0, "No competitors should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results.length, 0, "No competitors should have been read - " + formatterName);
                 assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued - " + formatterName);
+            });
+    });
+    
+    QUnit.test("Can parse a string that contains a competitor with a full club name", function (assert) {
+        var person = getPerson();
+        delete person.club;
+        person.clubFull = "Test Full Club Name";
+        runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
+            function (result) {
+                assert.strictEqual(result.owner.club, person.clubFull);
             });
     });
     
@@ -766,8 +925,8 @@
         var person = getPerson();
         delete person.club;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.club, "");
+            function (result) {
+                assert.strictEqual(result.owner.club, "");
             });
     });
     
@@ -777,8 +936,8 @@
         runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors[0].yearOfBirth, null);
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results[0].owner.yearOfBirth, null);
             });
     });
     
@@ -788,8 +947,8 @@
         runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors[0].yearOfBirth, null);
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results[0].owner.yearOfBirth, null);
             });
     });
     
@@ -799,8 +958,8 @@
         runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors[0].gender, "F");
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results[0].owner.gender, "F");
             });
     });
     
@@ -810,8 +969,8 @@
         runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors[0].gender, null);
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results[0].owner.gender, null);
             });
     });
     
@@ -821,8 +980,8 @@
         runXmlFormatParseTest([{name: "Test Class", length: 2300, competitors: [person]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read -  " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors[0].gender, null);
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results[0].owner.gender, null);
             });
     });
     
@@ -841,8 +1000,8 @@
         var person = getPerson();
         delete person.startTime;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.startTime, null);
+            function (result) {
+                assert.strictEqual(result.startTime, null);
             });
     });
     
@@ -850,8 +1009,8 @@
         var person = getPerson();
         person.startTime = null;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.startTime, null);
+            function (result) {
+                assert.strictEqual(result.startTime, null);
             });
     });
     
@@ -859,8 +1018,8 @@
         var person = getPerson();
         person.startTimeBasic = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.startTime, person.startTime);
+            function (result) {
+                assert.strictEqual(result.startTime, person.startTime);
             },
             {formatters: [Version3Formatter]});
     });
@@ -869,8 +1028,8 @@
         var person = getPerson();
         person.startTimeNoSeconds = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.startTime, person.startTime - (person.startTime % 60));
+            function (result) {
+                assert.strictEqual(result.startTime, person.startTime - (person.startTime % 60));
             },
             {formatters: [Version3Formatter]});
     });
@@ -879,9 +1038,9 @@
         var person = getPerson();
         delete person.totalTime;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.totalTime, null);
-                assert.ok(!competitor.completed());
+            function (result) {
+                assert.strictEqual(result.totalTime, null);
+                assert.ok(!result.completed());
             });
     });
     
@@ -889,9 +1048,9 @@
         var person = getPerson();
         person.totalTime = null;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.totalTime, null);
-                assert.ok(!competitor.completed());
+            function (result) {
+                assert.strictEqual(result.totalTime, null);
+                assert.ok(!result.completed());
             });
     });
     
@@ -899,8 +1058,8 @@
         var person = getPerson();
         person.cumTimes = [65.7, 65.7 + 221.4, 65.7 + 221.4 + 184.6];
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat(person.totalTime));
+            function (result) {
+                assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat(person.totalTime));
             },
             {formatters: [Version3Formatter]});
     });
@@ -971,8 +1130,8 @@
         var person = getPerson();
         person.competitive = false;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.isNonCompetitive, true);        
+            function (result) {
+                assert.strictEqual(result.isNonCompetitive, true);        
             });
     });
     
@@ -981,8 +1140,9 @@
         person.nonStarter = true;
         person.cumTimes = [null, null, null];
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.isNonStarter, true);        
+            function (result) {
+                assert.strictEqual(result.isNonStarter, true);        
+                assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, null, null, null, null]);
             });
     });
     
@@ -991,8 +1151,8 @@
         person.nonFinisher = true;
         person.cumTimes[2] = null;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.isNonFinisher, true);        
+            function (result) {
+                assert.strictEqual(result.isNonFinisher, true);        
             });
     });
     
@@ -1000,8 +1160,8 @@
         var person = getPerson();
         person.disqualified = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.isDisqualified, true);        
+            function (result) {
+                assert.strictEqual(result.isDisqualified, true);        
             });
     });
     
@@ -1009,8 +1169,8 @@
         var person = getPerson();
         person.overMaxTime = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.isOverMaxTime, true);        
+            function (result) {
+                assert.strictEqual(result.isOverMaxTime, true);        
             });
     });
     
@@ -1019,8 +1179,8 @@
         person.cumTimes[1] = null;
         person.okDespiteMissingTimes = true;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.strictEqual(competitor.isOKDespiteMissingTimes, true);        
+            function (result) {
+                assert.strictEqual(result.isOKDespiteMissingTimes, true);        
             });
     });
     
@@ -1085,8 +1245,8 @@
         runSingleCourseXmlFormatParseTest(assert, [{name: "Test Class", length: 2300, courseId: 1, competitors: [person]}],
             function (course) {
                 assert.strictEqual(course.classes.length, 1);
-                assert.strictEqual(course.classes[0].competitors.length, 1);
-                assert.strictEqual(course.classes[0].competitors[0].totalTime, person.totalTime, "Should read competitor's total time");
+                assert.strictEqual(course.classes[0].results.length, 1);
+                assert.strictEqual(course.classes[0].results[0].totalTime, person.totalTime, "Should read competitor's total time");
             },
             {preprocessor: function (xml) {
                 var timeRegex = /<Time>[^<]+<\/Time>/g;
@@ -1102,9 +1262,9 @@
         var person = getPerson();
         person.cumTimes[1] = null;
         runSingleCompetitorXmlFormatParseTest(assert, {name: "Test Class", length: 2300, courseId: 1, competitors: [person]},
-            function (competitor) {
-                assert.deepEqual(competitor.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat([person.totalTime]));
-                assert.ok(!competitor.completed());
+            function (result) {
+                assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0].concat(person.cumTimes).concat([person.totalTime]));
+                assert.ok(!result.completed());
             });
     });
     
@@ -1121,7 +1281,7 @@
             [{name: "Test Class", length: 2300, courseId: 1, competitors: [person1, person2]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read - " + formatterName);
                 assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued - " + formatterName);
                 assert.ok(eventData.warnings[0].match(/number of controls/));
             }
@@ -1148,7 +1308,7 @@
             [{name: "Test Class", length: 2300, courseId: 1, numberOfControls: person.controls.length + 2, competitors: [person]}],
             function (eventData) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
-                assert.strictEqual(eventData.classes[0].competitors.length, 0, "No competitors should have been read");
+                assert.strictEqual(eventData.classes[0].results.length, 0, "No competitors should have been read");
                 assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued");
             },
             {formatters: [Version3Formatter]}
@@ -1166,7 +1326,7 @@
             [{name: "Test Class 1", length: 2300, competitors: [person1, person2]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - "  + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 1, "One competitor should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read - " + formatterName);
                 assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued - " + formatterName);
             });
     });
@@ -1237,8 +1397,8 @@
                     for (var i = 0; i < 2; i += 1) {
                         assert.deepEqual(eventData.classes[i].course, eventData.courses[i]);
                         assert.deepEqual(eventData.courses[i].classes, [eventData.classes[i]]);
-                        assert.strictEqual(eventData.classes[i].competitors.length, 1);
-                        assert.deepEqual(eventData.classes[i].competitors[0].name, persons[i].forename + " " + persons[i].surname);
+                        assert.strictEqual(eventData.classes[i].results.length, 1);
+                        assert.deepEqual(eventData.classes[i].results[0].owner.name, persons[i].forename + " " + persons[i].surname);
                     }
                 }
             });
@@ -1264,8 +1424,8 @@
                 if (eventData.classes.length === 2 && eventData.courses.length === 1) {
                     for (var i = 0; i < 2; i += 1) {
                         assert.deepEqual(eventData.classes[i].course, eventData.courses[0]);
-                        assert.strictEqual(eventData.classes[i].competitors.length, 1);
-                        assert.deepEqual(eventData.classes[i].competitors[0].name, persons[i].forename + " " + persons[i].surname);
+                        assert.strictEqual(eventData.classes[i].results.length, 1);
+                        assert.deepEqual(eventData.classes[i].results[0].owner.name, persons[i].forename + " " + persons[i].surname);
                     }
                     assert.deepEqual(eventData.courses[0].classes, eventData.classes);
                 }
@@ -1330,7 +1490,7 @@
             [{name: "Test Class", length: 2300, courseId: 1, competitors: [person1, person2]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                assert.strictEqual(eventData.classes[0].competitors.length, 2, "Two competitors should have been read - " + formatterName);
+                assert.strictEqual(eventData.classes[0].results.length, 2, "Two competitors should have been read - " + formatterName);
                 assert.strictEqual(eventData.warnings.length, 0, "No warning should have been issued: " + eventData.warnings[0]);
             });
     });
@@ -1347,10 +1507,213 @@
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
                 if (eventData.classes.length === 1) {
                     var courseClass = eventData.classes[0];
-                    assert.strictEqual(courseClass.competitors.length, 1, "One competitor should have been read - " + formatterName);
+                    assert.strictEqual(courseClass.results.length, 1, "One competitor should have been read - " + formatterName);
                     assert.strictEqual(courseClass.numControls, 0);
                     assert.strictEqual(eventData.warnings.length, 0, "No warning should have been issued: " + eventData.warnings[0]);
                 }
             });
     });    
+    
+    QUnit.test("Can parse a string that has a single class with no teams", function (assert) {
+        runXmlFormatParseTest([{name: "Test Class", length: 2300, courseId: 1, teams: []}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 0, "No classes should have been read - " + formatterName);
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued - " + formatterName);
+            });
+    });
+    
+    QUnit.test("Can parse a string that has a single class with a single team", function (assert) {
+        var className = "Test Class";
+        var team = getTeam();
+
+        runXmlFormatParseTest([{name: className, teams: [team]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                if (eventData.classes.length === 1) {
+                    var courseClass = eventData.classes[0];
+                    assert.strictEqual(courseClass.name, className);
+                    assert.strictEqual(courseClass.results.length, 1, "One result should have been read - " + formatterName);
+                    assert.strictEqual(courseClass.numControls, 7); // 3 numbered controls for each competitor plus 1 for the intermediate finish.
+                    assert.deepEqual(courseClass.numbersOfControls, [3, 3]);
+                    assert.ok(courseClass.isTeamClass, "Course-class should be marked as a team class");
+                    
+                    if (courseClass.results.length === 1) {
+                        var result = courseClass.results[0];
+                        assert.strictEqual(result.owner.name, "TestTeam");
+                        assert.strictEqual(result.owner.club, team.club);
+                        assert.strictEqual(result.owner.members.length, team.members.length);
+                        for (var index = 0; index < team.members.length; index += 1) {
+                            assert.strictEqual(result.owner.members[index].name, team.members[index].forename + " " + team.members[index].surname);
+                            assert.strictEqual(result.owner.members[index].club, team.members[index].club);
+                        }
+                        assert.strictEqual(result.startTime, team.members[0].startTime);
+                        assert.strictEqual(result.totalTime, team.members[0].totalTime + team.members[1].totalTime);
+                        var expectedCumulativeTimes = [0].concat(team.members[0].cumTimes).concat([team.members[0].totalTime]).concat(team.members[1].cumTimes.map(function (time) { return team.members[0].totalTime + time; })).concat(result.totalTime);
+                        assert.deepEqual(result.getAllOriginalCumulativeTimes(), expectedCumulativeTimes);
+                        assert.ok(result.completed());
+                        assert.ok(!result.isNonCompetitive);
+                    }
+                
+                    assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatterName);
+                    if (eventData.courses.length > 0) {
+                        var course = eventData.courses[0];
+                        assert.strictEqual(course.name, className);
+                        assert.strictEqual(course.controls, null);
+                        
+                        assert.deepEqual(course.classes, [courseClass]);
+                        assert.strictEqual(courseClass.course, course);
+                    }
+                }
+                
+                assert.deepEqual(eventData.warnings, [], "No warnings should have been issued - " + formatterName);
+            });
+    });
+    
+    QUnit.test("Can parse a string that has a single class with a single empty team, generating a warning for the empty team", function (assert) {
+        var emptyTeam = {name: "EmptyTeam", club: "EmptyName", members: []};
+
+        runXmlFormatParseTest([{name: "Test Class", teams: [emptyTeam]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                if (eventData.classes.length === 1) {
+                    assert.strictEqual(eventData.classes[0].results.length, 0, "No results should have been read - " + formatterName);
+                }
+                
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued for the empty team - " + formatterName);
+            });
+    });
+    
+    QUnit.test("Can parse a string that has a single class with a single empty team, generating a warning for the empty team", function (assert) {
+        var singletonTeam = getTeam();
+        singletonTeam.members.pop();
+
+        runXmlFormatParseTest([{name: "Test Class", teams: [singletonTeam]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                if (eventData.classes.length === 1) {
+                    assert.strictEqual(eventData.classes[0].results.length, 0, "No results should have been read - " + formatterName);
+                }
+                
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued for the singleton team - " + formatterName);
+            });
+    });
+    
+    QUnit.test("Can parse a string that has a single class with a single team and an empty team, generating a warning for the empty team", function (assert) {
+        var team = getTeam();
+        var emptyTeam = {name: "EmptyTeam", club: "EmptyName", members: []};
+
+        runXmlFormatParseTest([{name: "Test Class", teams: [team, emptyTeam]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                if (eventData.classes.length === 1) {
+                    assert.strictEqual(eventData.classes[0].results.length, 1, "One result should have been read - " + formatterName);
+                }
+                
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued for the empty team - " + formatterName);
+            });
+    });
+    
+    QUnit.test("Can parse a string that has a single class with a single two-person team and a one-person team, generating a warning for the one-person team", function (assert) {
+        var team = getTeam();
+        var shortTeam = {name: "ShortTeam", club: "ShortName", members: [getPerson()]};
+
+        runXmlFormatParseTest([{name: "Test Class", teams: [team, shortTeam]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                if (eventData.classes.length === 1) {
+                    assert.strictEqual(eventData.classes[0].results.length, 1, "One result should have been read - " + formatterName);
+                }
+                
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued for the one-person team - " + formatterName);
+            });
+    });
+    
+    QUnit.test("Parsing a string that has a single class with a single team with the second team member not starting at the same time the first one finishes generates a warning only", function (assert) {
+        var team = getTeam();
+        team.members[1].startTime += 10;
+
+        runXmlFormatParseTest([{name: "Test Class", teams: [team]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                if (eventData.classes.length === 1) {
+                    assert.strictEqual(eventData.classes[0].results.length, 0, "One result should have been read - " + formatterName);
+                }
+                
+                assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued for the team with a starter not at the same time as the previous finisher - " + formatterName);
+            });
+    });
+    
+    QUnit.test("Can parse a string containing two results with different controls", function (assert) {
+        var team1 = getTeam();
+        
+        var team2 = getTeam();
+        team2.name += " 2";
+        for (var memberIndex = 0; memberIndex < 2; memberIndex += 1) {
+            team2.members[memberIndex].surname += " 2";
+            team2.members[memberIndex].startTime += 100;
+            team2.members[memberIndex].finishTime += 100;
+            team2.members[memberIndex].controls.reverse();
+        }
+
+        runXmlFormatParseTest([{name: "Test Class", teams: [team1, team2]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                if (eventData.classes.length === 1) {
+                    assert.strictEqual(eventData.classes[0].results.length, 2, "Two results should have been read - " + formatterName);
+                }
+                
+                assert.deepEqual(eventData.warnings, [], "No warnings should have been issued - " + formatterName);
+            });
+    });
+    
+    QUnit.test("Can parse a string containing two results with different numbers of controls, rejecting the second row", function (assert) {
+        var team1 = getTeam();
+        var team2 = getTeam();
+        team2.name += " 2";
+        for (var memberIndex = 0; memberIndex < 2; memberIndex += 1) {
+            team2.members[memberIndex].surname += " 2";
+            team2.members[memberIndex].startTime += 100;
+            team2.members[memberIndex].finishTime += 100;
+        }
+        
+        team2.members[1].controls.pop();
+        team2.members[1].cumTimes.pop();
+
+        runXmlFormatParseTest([{name: "Test Class", teams: [team1, team2]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                if (eventData.classes.length === 1) {
+                    assert.strictEqual(eventData.classes[0].results.length, 1, "One result should have been read - " + formatterName);
+                }
+                
+                assert.deepEqual(eventData.warnings.length, 1, "One warning should have been issued for the team with a missing control - " + formatterName);
+            });
+    });
+    
+    QUnit.test("Cannot parse a string containing a class with an individual result and a team result", function (assert) {
+        runXmlFormatParseTest([{name: "Test Class", competitors: [getPerson()], teams: [getTeam()]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 0, "No class should have been read - " + formatterName);
+                assert.deepEqual(eventData.warnings.length, 1, "One warning should have been issued for the class with inconsistent results - " + formatterName);
+            });
+    });
+    
+    QUnit.test("Can parse a string containing an individual class and a team class", function (assert) {
+        var classData = [
+            {name: "Individual Class", competitors: [getPerson()]},
+            {name: "Team Class", teams: [getTeam()]}
+        ];
+        runXmlFormatParseTest(classData,
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 2, "Two classes should have been read - " + formatterName);
+                if (eventData.classes.length === 2) {
+                    assert.strictEqual(eventData.classes[0].results.length, 1, "One result should have been read in the individual class - " + formatterName);
+                    assert.strictEqual(eventData.classes[0].name, classData[0].name, "Individual class should have correct name - " + formatterName);
+                    assert.strictEqual(eventData.classes[1].results.length, 1, "One result should have been read in the relay class - " + formatterName);
+                    assert.strictEqual(eventData.classes[1].name, classData[1].name, "Team class should have correct name - " + formatterName);
+                }
+                
+                assert.deepEqual(eventData.warnings, [], "No warnings should have been issued - " + formatterName);
+            });
+    });
 })();

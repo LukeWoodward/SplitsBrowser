@@ -1,0 +1,80 @@
+<?xml version="1.0" ?>
+<!DOCTYPE ResultList SYSTEM "IOFdata.dtd">
+<ResultList>
+    <IOFVersion version="2.0.3" />
+    <ClassResult>
+        <ClassShortName>Team Class</ClassShortName>
+        <TeamResult>
+            <TeamName>Non-Starting Team</TeamName>
+            <Club>
+                <ShortName>ABC</ShortName>
+            </Club>
+            <PersonResult>
+                <Person>
+                    <PersonName>
+                        <Given>First</Given>
+                        <Family>Runner</Family>
+                    </PersonName>
+                </Person>
+                <Club>
+                    <ShortName>ABC</ShortName>
+                </Club>
+                <Result>
+                    <StartTime>
+                        <Clock>10:30:00</Clock>
+                    </StartTime>
+                    <FinishTime>
+                        <Clock>10:30:00</Clock>
+                    </FinishTime>
+                    <Time>-----</Time>
+                    <CompetitorStatus value="DidNotStart"/>
+                    <SplitTime sequence="1">
+                        <ControlCode>212</ControlCode>
+                        <Time>-----</Time>
+                    </SplitTime>
+                    <SplitTime sequence="2">
+                        <ControlCode>229</ControlCode>
+                        <Time>-----</Time>
+                    </SplitTime>
+                    <SplitTime sequence="3">
+                        <ControlCode>208</ControlCode>
+                        <Time>-----</Time>
+                    </SplitTime>
+                </Result>
+            </PersonResult>
+            <PersonResult>
+                <Person>
+                    <PersonName>
+                        <Given>Second</Given>
+                        <Family>Runner</Family>
+                    </PersonName>
+                </Person>
+                <Club>
+                    <ShortName>ABC</ShortName>
+                </Club>
+                <Result>
+                    <StartTime>
+                        <Clock>10:30:00</Clock>
+                    </StartTime>
+                    <FinishTime>
+                        <Clock>10:30:00</Clock>
+                    </FinishTime>
+                    <Time>00:00</Time>
+                    <CompetitorStatus value="DidNotStart"/>
+                    <SplitTime sequence="1">
+                        <ControlCode>212</ControlCode>
+                        <Time>-----</Time>
+                    </SplitTime>
+                    <SplitTime sequence="2">
+                        <ControlCode>229</ControlCode>
+                        <Time>-----</Time>
+                    </SplitTime>
+                    <SplitTime sequence="3">
+                        <ControlCode>208</ControlCode>
+                        <Time>-----</Time>
+                    </SplitTime>
+                </Result>
+            </PersonResult>
+        </TeamResult>
+    </ClassResult>
+</ResultList>

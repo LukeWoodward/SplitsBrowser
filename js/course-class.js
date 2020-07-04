@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser CourseClass - A collection of runners competing against each other.
  *  
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -25,33 +25,50 @@
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     
     /**
-     * Object that represents a collection of competitor data for a class.
+     * Object that represents a collection of result data for a class.
      * @constructor.
      * @param {String} name - Name of the class.
      * @param {Number} numControls - Number of controls.
-     * @param {Array} competitors - Array of Competitor objects.
+     * @param {Array} results - Array of Result objects.
      */
-    function CourseClass(name, numControls, competitors) {
+    function CourseClass(name, numControls, results) {
         this.name = name;
         this.numControls = numControls;
-        this.competitors = competitors;
+        this.numbersOfControls = null;
+        this.offsets = null;
+        this.results = results;
         this.course = null;
         this.hasDubiousData = false;
-        this.competitors.forEach(function (comp) {
-            comp.setClassName(name);
+        this.isTeamClass = false;
+        this.results.forEach(function (result) {
+            result.setClassName(name);
         });
     }
     
     /**
-    * Records that this course-class has competitor data that SplitsBrowser has
+    * Records that this course-class has result data that SplitsBrowser has
     * deduced as dubious.
     */
     CourseClass.prototype.recordHasDubiousData = function () {
         this.hasDubiousData = true;
     };
+    
+    /**
+    * Records that this course-class contains team results rather than
+    * individual results.
+    * @param {Array} numbersOfControls The numbers of controls on the relay legs.
+    */
+    CourseClass.prototype.setIsTeamClass = function (numbersOfControls) {
+        this.isTeamClass = true;
+        this.numbersOfControls = numbersOfControls;
+        this.offsets = [0];
+        for (var index = 1; index < numbersOfControls.length; index += 1) {
+            this.offsets.push(this.offsets[index - 1] + numbersOfControls[index - 1] + 1);
+        }
+    };
      
     /**
-    * Determines the time losses for the competitors in this course-class.
+    * Determines the time losses for the results in this course-class.
     */
     CourseClass.prototype.determineTimeLosses = function () {
         var fastestSplitTimes = d3.range(1, this.numControls + 2).map(function (controlIdx) {
@@ -59,18 +76,18 @@
             return (splitRec === null) ? null : splitRec.split;
         }, this);
         
-        this.competitors.forEach(function (comp) {
-            comp.determineTimeLosses(fastestSplitTimes);
+        this.results.forEach(function (result) {
+            result.determineTimeLosses(fastestSplitTimes);
         });
     };
     
     /**
-    * Returns whether this course-class is empty, i.e. has no competitors.
-    * @return {boolean} True if this course-class has no competitors, false if it
-    *     has at least one competitor.
+    * Returns whether this course-class is empty, i.e. has no results.
+    * @return {boolean} True if this course-class has no results, false if it
+    *     has at least one result.
     */
     CourseClass.prototype.isEmpty = function () {
-        return (this.competitors.length === 0);
+        return (this.results.length === 0);
     };
     
     /**
@@ -82,8 +99,8 @@
     };
 
     /**
-    * Returns the fastest split time recorded by competitors in this class.  If
-    * no fastest split time is recorded (e.g. because all competitors
+    * Returns the fastest split time recorded by results in this class.  If
+    * no fastest split time is recorded (e.g. because all results
     * mispunched that control, or the class is empty), null is returned.
     * @param {Number} controlIdx - The index of the control to return the
     *      fastest split to.
@@ -96,22 +113,22 @@
         }
     
         var fastestSplit = null;
-        var fastestCompetitor = null;
-        this.competitors.forEach(function (comp) {
-            var compSplit = comp.getSplitTimeTo(controlIdx);
-            if (isNotNullNorNaN(compSplit)) {
-                if (fastestSplit === null || compSplit < fastestSplit) {
-                    fastestSplit = compSplit;
-                    fastestCompetitor = comp;
+        var fastestResult = null;
+        this.results.forEach(function (result) {
+            var resultSplit = result.getSplitTimeTo(controlIdx);
+            if (isNotNullNorNaN(resultSplit)) {
+                if (fastestSplit === null || resultSplit < fastestSplit) {
+                    fastestSplit = resultSplit;
+                    fastestResult = result;
                 }
             }
         });
         
-        return (fastestSplit === null) ? null : {split: fastestSplit, name: fastestCompetitor.name};
+        return (fastestSplit === null) ? null : {split: fastestSplit, name: fastestResult.owner.name};
     };
     
     /**
-    * Returns all competitors that visited the control in the given time
+    * Returns all results that visited the control in the given time
     * interval.
     * @param {Number} controlNum - The number of the control, with 0 being the
     *     start, and this.numControls + 1 being the finish.
@@ -120,25 +137,25 @@
     * @param {Number} intervalEnd - The end time of the interval, as seconds
     *     past midnight.
     * @return {Array} Array of objects listing the name and start time of each
-    *     competitor visiting the control within the given time interval.
+    *     result visiting the control within the given time interval.
     */
-    CourseClass.prototype.getCompetitorsAtControlInTimeRange = function (controlNum, intervalStart, intervalEnd) {
+    CourseClass.prototype.getResultsAtControlInTimeRange = function (controlNum, intervalStart, intervalEnd) {
         if (typeof controlNum !== "number" || isNaN(controlNum) || controlNum < 0 || controlNum > this.numControls + 1) {
             throwInvalidData("Control number must be a number between 0 and " + this.numControls + " inclusive");
         }
         
-        var matchingCompetitors = [];
-        this.competitors.forEach(function (comp) {
-            var cumTime = comp.getCumulativeTimeTo(controlNum);
-            if (cumTime !== null && comp.startTime !== null) {
-                var actualTimeAtControl = cumTime + comp.startTime;
+        var matchingResults = [];
+        this.results.forEach(function (result) {
+            var cumTime = result.getCumulativeTimeTo(controlNum);
+            if (cumTime !== null && result.startTime !== null) {
+                var actualTimeAtControl = cumTime + result.startTime;
                 if (intervalStart <= actualTimeAtControl && actualTimeAtControl <= intervalEnd) {
-                    matchingCompetitors.push({name: comp.name, time: actualTimeAtControl});
+                    matchingResults.push({name: result.owner.name, time: actualTimeAtControl});
                 }
             }
         });
         
-        return matchingCompetitors;
+        return matchingResults;
     };
     
     SplitsBrowser.Model.CourseClass = CourseClass;
