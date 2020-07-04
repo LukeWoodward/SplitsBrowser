@@ -35,6 +35,10 @@ module.exports = {
         "no-constant-condition": [
             "error",
             {"checkLoops": false}
-        ]
+        ],
+        "no-plusplus": "error",
+        "eqeqeq": "error",
+        "camelcase": "error",
+        "curly": "error"
     }
 };
