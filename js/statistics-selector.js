@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser StatisticsSelector - Provides a choice of the statistics to show.
- *  
+ *
  *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,7 +20,7 @@
  */
 (function () {
     "use strict";
-    
+
     var getMessage = SplitsBrowser.getMessage;
 
     // ID of the statistics selector control.
@@ -34,7 +34,7 @@
 
     // Message keys for the labels of the four checkboxes.
     var STATISTIC_NAME_KEYS = ["StatisticsTotalTime", "StatisticsSplitTime", "StatisticsBehindFastest", "StatisticsTimeLoss"];
-    
+
     // Names of statistics that are selected by default when the application
     // starts.
     var DEFAULT_SELECTED_STATISTICS = ["SplitTime", "TimeLoss"];
@@ -48,43 +48,43 @@
     function StatisticsSelector (parent) {
         this.div = d3.select(parent).append("div")
                                      .classed("topRowEnd", true)
-                                     .attr("id", STATISTIC_SELECTOR_ID);   
+                                     .attr("id", STATISTIC_SELECTOR_ID);
 
         var childDivs = this.div.selectAll("div")
                                 .data(STATISTIC_NAMES)
                                 .enter()
                                 .append("div")
                                 .style("display", "inline-block");
-         
+
         childDivs.append("input")
-                 .attr("id", function(name) { return LABEL_ID_PREFIX + name; }) 
+                 .attr("id", function(name) { return LABEL_ID_PREFIX + name; })
                  .attr("type", "checkbox")
                  .attr("checked", function (name) { return (DEFAULT_SELECTED_STATISTICS.indexOf(name) >= 0) ? "checked" : null; });
-                  
+
         this.statisticLabels  = childDivs.append("label")
                                          .attr("for", function(name) { return LABEL_ID_PREFIX + name; })
                                          .classed("statisticsSelectorLabel", true);
 
-        
+
         var outerThis = this;
         $("input", this.div.node()).bind("change", function () { return outerThis.onCheckboxChanged(); });
-                   
+
         this.handlers = [];
-        
+
         this.setMessages();
     }
-    
+
     /**
     * Sets the messages in this control, following either its creation or a
     * change of selected language.
     */
     StatisticsSelector.prototype.setMessages = function () {
-        this.statisticLabels.text(function (name, index) { return getMessage(STATISTIC_NAME_KEYS[index]); });    
+        this.statisticLabels.text(function (name, index) { return getMessage(STATISTIC_NAME_KEYS[index]); });
     };
-    
+
     /**
     * Deselects all checkboxes.
-    * 
+    *
     * This method is intended only for test purposes.
     */
     StatisticsSelector.prototype.clearAll = function () {
@@ -102,7 +102,7 @@
         this.div.selectAll("input")
                 .attr("disabled", (isEnabled) ? null : "disabled");
     };
-    
+
     /**
     * Register a change handler to be called whenever the choice of currently-
     * visible statistics is changed.
@@ -116,7 +116,7 @@
             this.handlers.push(handler);
         }
     };
-       
+
     /**
     * Deregister a change handler from being called whenever the choice of
     *  currently-visible statistics is changed.
@@ -142,10 +142,10 @@
         this.div.selectAll("input").nodes().forEach(function (checkbox, index) {
             visibleStats[STATISTIC_NAMES[index]] = checkbox.checked;
         });
-        
+
         return visibleStats;
     };
-    
+
     /**
     * Sets the visible statistics.
     * @param {Object} visibleStats - The statistics to make visible.
@@ -154,7 +154,7 @@
         this.div.selectAll("input").nodes().forEach(function (checkbox, index) {
             checkbox.checked = visibleStats[STATISTIC_NAMES[index]] || false;
         });
-        
+
         this.onCheckboxChanged();
     };
 
@@ -165,6 +165,6 @@
         var checkedFlags = this.getVisibleStatistics();
         this.handlers.forEach(function (handler) { handler(checkedFlags); });
     };
-    
+
     SplitsBrowser.Controls.StatisticsSelector = StatisticsSelector;
 })();

@@ -1,6 +1,6 @@
 ﻿/*
  *  SplitsBrowser CSV - Reads in CSV result data files.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,7 +20,7 @@
  */
 (function () {
     "use strict";
-    
+
     var isTrue = SplitsBrowser.isTrue;
     var isNotNull = SplitsBrowser.isNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
@@ -46,7 +46,7 @@
     function parseResults(index, line, controlCount, className, warnings) {
         // Expect forename, surname, club, start time then (controlCount + 1) split times in the form MM:SS.
         var parts = line.split(",");
-        
+
         while (parts.length > controlCount + 5 && parts[3].match(/[^0-9.,:-]/)) {
             // As this line is too long and the 'start time' cell has something
             // that appears not to be a start time, assume that the club name
@@ -54,7 +54,7 @@
             parts[2] += "," + parts[3];
             parts.splice(3, 1);
         }
-        
+
         var originalPartCount = parts.length;
         var forename = parts.shift() || "";
         var surname = parts.shift() || "";
@@ -70,7 +70,7 @@
                 // minutes and seconds.
                 startTime *= 60;
             }
-            
+
             var cumTimes = [0];
             var lastCumTimeRecorded = 0;
             parts.map(function (part) {
@@ -82,7 +82,7 @@
                     cumTimes.push(null);
                 }
             });
-            
+
             var result = fromCumTimes(index + 1, startTime, cumTimes, new Competitor(name, club));
             if (lastCumTimeRecorded === 0) {
                 result.setNonStarter();
@@ -91,7 +91,7 @@
         } else {
             var difference = originalPartCount - (controlCount + 5);
             var error = (difference < 0) ? (-difference) + " too few" : difference + " too many";
-            warnings.push("Competitor '" + name + "' appears to have the wrong number of split times - " + error + 
+            warnings.push("Competitor '" + name + "' appears to have the wrong number of split times - " + error +
                                   " (row " + (index + 1) + " of class '" + className + "')");
             return null;
         }
@@ -121,7 +121,7 @@
                 // any results.  Event 7632 ends with a line 'NOCLAS,-1' -
                 // we may as well ignore this.
                 throwInvalidData("Expected a non-negative control count, got " + controlCount + " instead");
-            } else {              
+            } else {
                 var results = lines.map(function (line, index) { return parseResults(index, line, controlCount, className, warnings); })
                                        .filter(isNotNull);
 
@@ -139,37 +139,37 @@
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */
     function parseEventData (eventData) {
-    
+
         if (/<html/i.test(eventData)) {
             throwWrongFileFormat("Cannot parse this file as CSV as it appears to be HTML");
         }
 
         eventData = normaliseLineEndings(eventData);
-        
+
         // Remove trailing commas.
         eventData = eventData.replace(/,+\n/g, "\n").replace(/,+$/, "");
 
         var classSections = eventData.split(/\n\n/).map(function (s) { return s.trim(); }).filter(isTrue);
         var warnings = [];
-       
+
         var classes = classSections.map(function (section) { return parseCourseClass(section, warnings); });
-        
+
         classes = classes.filter(function (courseClass) { return !courseClass.isEmpty(); });
-        
+
         if (classes.length === 0) {
             throwInvalidData("No competitor data was found");
         }
-        
+
         // Nulls are for the course length, climb and controls, which aren't in
         // the source data files, so we can't do anything about them.
         var courses = classes.map(function (cls) { return new Course(cls.name, [cls], null, null, null); });
-        
+
         for (var i = 0; i < classes.length; i += 1) {
             classes[i].setCourse(courses[i]);
         }
-        
+
         return new Event(classes, courses, warnings);
     }
-    
+
     SplitsBrowser.Input.CSV = { parseEventData: parseEventData };
 })();

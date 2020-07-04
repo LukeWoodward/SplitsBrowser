@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser Query-string - Query-string parsing and merging
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -21,11 +21,11 @@
 
 (function () {
     "use strict";
-    
+
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var ChartTypes = SplitsBrowser.Model.ChartTypes;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
-    
+
     /**
     * Remove all matches of the given regular expression from the given string.
     * The regexp is not assumed to contain the "g" flag.
@@ -36,14 +36,14 @@
     function removeAll(queryString, regexp) {
         return queryString.replace(new RegExp(regexp.source, "g"), "");
     }
-    
+
     var CLASS_NAME_REGEXP = /(?:^|&|\?)class=([^&]+)/;
-    
+
     /**
     * Reads the selected class names from a query string.
     * @param {String} queryString - The query string to read the class name
     *     from.
-    * @param {Event} eventData - The event data read in, used to validate the 
+    * @param {Event} eventData - The event data read in, used to validate the
     *     selected classes.
     * @return {CourseClassSet|null} - Array of selected CourseClass objects, or null
     *     if none were found.
@@ -58,12 +58,12 @@
             for (var index = 0; index < eventData.classes.length; index += 1) {
                 classesByName.set(eventData.classes[index].name, eventData.classes[index]);
             }
-            
+
             var classNames = decodeURIComponent(classNameMatch[1]).split(";");
             classNames = d3.set(classNames).values();
             var selectedClasses = classNames.filter(function (className) { return classesByName.has(className); })
                                             .map(function (className) { return classesByName.get(className); });
-            
+
             if (selectedClasses.length === 0) {
                 // No classes recognised, or none were specified.
                 return null;
@@ -76,7 +76,7 @@
             }
         }
     }
-    
+
     /**
     * Formats the selected classes into the given query-string, removing any
     * previous matches.
@@ -92,27 +92,27 @@
     }
 
     var CHART_TYPE_REGEXP = /(?:^|&|\?)chartType=([^&]+)/;
-    
+
     /**
     * Reads the selected chart type from a query string.
     * @param {String} queryString - The query string to read the chart type
     *     from.
     * @return {Object|null} Selected chart type, or null if not recognised.
-    */    
+    */
     function readChartType(queryString) {
         var chartTypeMatch = CHART_TYPE_REGEXP.exec(queryString);
         if (chartTypeMatch === null) {
             return null;
-        } else { 
+        } else {
             var chartTypeName = chartTypeMatch[1];
-            if (ChartTypes.hasOwnProperty(chartTypeName)) {
+            if (Object.prototype.hasOwnProperty.call(ChartTypes, chartTypeName)) {
                 return ChartTypes[chartTypeName];
             } else {
                 return null;
             }
         }
     }
-    
+
     /**
     * Formats the given chart type into the query-string
     * @param {String} queryString - The original query-string.
@@ -122,19 +122,19 @@
     function formatChartType(queryString, chartType) {
         queryString = removeAll(queryString, CHART_TYPE_REGEXP);
         for (var chartTypeName in ChartTypes) {
-            if (ChartTypes.hasOwnProperty(chartTypeName) && ChartTypes[chartTypeName] === chartType) {
+            if (Object.prototype.hasOwnProperty.call(ChartTypes, chartTypeName) && ChartTypes[chartTypeName] === chartType) {
                 return queryString + "&chartType=" + encodeURIComponent(chartTypeName);
             }
         }
-        
+
         // Unrecognised chart type?
         return queryString;
     }
-    
+
     var COMPARE_WITH_REGEXP = /(?:^|&|\?)compareWith=([^&]+)/;
-    
+
     var BUILTIN_COMPARISON_TYPES = ["Winner", "FastestTime", "FastestTimePlus5", "FastestTimePlus25", "FastestTimePlus50", "FastestTimePlus100"];
-    
+
     /**
     * Reads what to compare against.
     * @param {String} queryString - The query string to read the comparison
@@ -157,7 +157,7 @@
                 var hasCompleters = courseClassSet.allResults.some(function (result) {
                     return result.completed();
                 });
-                
+
                 if (hasCompleters) {
                     return {index: 0, result: null};
                 } else {
@@ -175,13 +175,13 @@
                         return {index: BUILTIN_COMPARISON_TYPES.length, result: result};
                     }
                 }
-                
+
                 // Didn't find the result.
                 return null;
             }
         }
     }
-    
+
     /**
     * Formats the given comparison into the given query-string.
     * @param {String} queryString - The original query-string.
@@ -197,16 +197,16 @@
         } else if (result !== null) {
             comparison = result.owner.name;
         }
-        
+
         if (comparison === null) {
             return queryString;
         } else {
             return queryString + "&compareWith=" + encodeURIComponent(comparison);
         }
     }
-    
+
     var SELECTED_RESULTS_REGEXP = /(?:^|&|\?)selected=([^&]+)/;
-    
+
     /**
     * Reads what to compare against.
     * @param {String} queryString - The query string to read the comparison
@@ -229,7 +229,7 @@
                     // All results selected.
                     return d3.range(0, courseClassSet.allResults.length);
                 }
-                
+
                 resultNames = d3.set(resultNames).values();
                 var allResultNames = courseClassSet.allResults.map(function (result) { return result.owner.name; });
                 var selectedResultIndexes = [];
@@ -239,13 +239,13 @@
                         selectedResultIndexes.push(index);
                     }
                 });
-                
+
                 selectedResultIndexes.sort(d3.ascending);
                 return (selectedResultIndexes.length === 0) ? null : selectedResultIndexes;
             }
         }
     }
-    
+
     /**
     * Formats the given selected results into the given query-string.
     * @param {String} queryString - The original query-string.
@@ -268,11 +268,11 @@
             return queryString + "&selected=" + encodeURIComponent(resultNames);
         }
     }
-    
+
     var SELECTED_STATISTICS_REGEXP = /(?:^|&|\?)stats=([^&]*)/;
-    
+
     var ALL_STATS_NAMES = ["TotalTime", "SplitTime", "BehindFastest", "TimeLoss"];
-    
+
     /**
     * Reads the selected statistics from the query string.
     * @param {String} queryString - The query string to read the selected
@@ -288,21 +288,21 @@
             var statsNames = decodeURIComponent(statsMatch[1]).split(";");
             var stats = {};
             ALL_STATS_NAMES.forEach(function (statsName) { stats[statsName] = false; });
-            
+
             for (var index = 0; index < statsNames.length; index += 1) {
                 var name = statsNames[index];
-                if (stats.hasOwnProperty(name)) {
+                if (Object.prototype.hasOwnProperty.call(stats, name)) {
                     stats[name] = true;
                 } else if (name !== "") {
                     // Ignore unrecognised non-empty statistic name.
                     return null;
                 }
             }
-            
+
             return stats;
         }
     }
-    
+
     /**
     * Formats the selected statistics into the given query string.
     * @param {String} queryString - The original query-string.
@@ -311,12 +311,12 @@
     */
     function formatSelectedStatistics(queryString, stats) {
         queryString = removeAll(queryString, SELECTED_STATISTICS_REGEXP);
-        var statsNames = ALL_STATS_NAMES.filter(function (name) { return stats.hasOwnProperty(name) && stats[name]; });
+        var statsNames = ALL_STATS_NAMES.filter(function (name) { return Object.prototype.hasOwnProperty.call(stats, name) && stats[name]; });
         return queryString + "&stats=" + encodeURIComponent(statsNames.join(";"));
     }
-    
+
     var SHOW_ORIGINAL_REGEXP = /(?:^|&|\?)showOriginal=([^&]*)/;
-    
+
     /**
     * Reads the show-original-data flag from the given query-string.
     *
@@ -331,7 +331,7 @@
         var showOriginalMatch = SHOW_ORIGINAL_REGEXP.exec(queryString);
         return (showOriginalMatch !== null && showOriginalMatch[1] === "1");
     }
-    
+
     /**
     * Formats the show-original-data flag into the given query-string.
     * @param {String} queryString - The original query-string.
@@ -343,9 +343,9 @@
         queryString = removeAll(queryString, SHOW_ORIGINAL_REGEXP);
         return (showOriginal) ? queryString + "&showOriginal=1" : queryString;
     }
-    
+
     var SELECTED_LEG_REGEXP = /(?:^|&|\?)selectedLeg=([^&]*)/;
-    
+
     /**
     * Reads the selected leg from the given query-string
     * @param {String} queryString - The query-string to read.
@@ -360,7 +360,7 @@
             return (isNaNStrict(legIndex)) ? null : legIndex;
         }
     }
-    
+
     /**
     * Formats the selected leg into the given query-string.
     * @param {String} queryString  The original query-string.
@@ -369,12 +369,12 @@
     *     in.
     */
     function formatSelectedLeg(queryString, selectedLeg) {
-       queryString = removeAll(queryString, SELECTED_LEG_REGEXP);
-       return (selectedLeg === null) ? queryString : queryString + "&selectedLeg=" + encodeURIComponent(selectedLeg);
+        queryString = removeAll(queryString, SELECTED_LEG_REGEXP);
+        return (selectedLeg === null) ? queryString : queryString + "&selectedLeg=" + encodeURIComponent(selectedLeg);
     }
-    
+
     var FILTER_TEXT_REGEXP = /(?:^|&|\?)filterText=([^&]*)/;
-    
+
     /**
     * Reads the filter text from the given query string.
     *
@@ -391,7 +391,7 @@
             return decodeURIComponent(filterTextMatch[1]);
         }
     }
-    
+
     /**
     * Formats filter text into the given query-string.
     * @param {String} queryString - The original query-string.
@@ -402,7 +402,7 @@
         queryString = removeAll(queryString, FILTER_TEXT_REGEXP);
         return (filterText === "") ? queryString : queryString + "&filterText=" + encodeURIComponent(filterText);
     }
-    
+
     /**
     * Attempts to parse the given query string.
     * @param {String} queryString - The query string to parse.
@@ -451,7 +451,7 @@
         queryString = queryString.replace(/^\??&/, "");
         return queryString;
     }
-    
+
     SplitsBrowser.parseQueryString = parseQueryString;
     SplitsBrowser.formatQueryString = formatQueryString;
 })();

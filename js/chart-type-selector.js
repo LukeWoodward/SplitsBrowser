@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser ChartTypeSelector - Provides a choice of chart types.
- *  
+ *
  *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,9 +20,9 @@
  */
 (function (){
     "use strict";
-    
+
     var getMessage = SplitsBrowser.getMessage;
-    
+
     /**
     * A control that wraps a drop-down list used to choose the types of chart to view.
     * @param {HTMLElement} parent - The parent element to add the control to.
@@ -33,36 +33,36 @@
         this.chartTypes = chartTypes;
         this.raceGraphDisabledNotifier = null;
         this.lastSelectedIndex = 0;
-        
+
         var div = d3.select(parent).append("div")
                                    .classed("topRowStart", true);
-                                   
+
         this.labelSpan = div.append("span");
-           
+
         var outerThis = this;
         this.dropDown = div.append("select").node();
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
-        
+
         this.optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);
         this.optionsList.enter().append("option");
-        
+
         this.optionsList = d3.select(this.dropDown).selectAll("option").data(chartTypes);
         this.optionsList.attr("value", function (_value, index) { return index.toString(); });
-                   
+
         this.optionsList.exit().remove();
-        
+
         this.setMessages();
     }
-    
+
     /**
     * Sets the messages displayed within this control, following either its
     * creation or a change of selected language.
     */
     ChartTypeSelector.prototype.setMessages = function () {
         this.labelSpan.text(getMessage("ChartTypeSelectorLabel"));
-        this.optionsList.text(function (value) { return getMessage(value.nameKey); });    
+        this.optionsList.text(function (value) { return getMessage(value.nameKey); });
     };
-    
+
     /**
     * Sets the function used to disable the selection of the race graph.
     *
@@ -83,7 +83,7 @@
             this.onSelectionChanged();
         }
     };
-    
+
     /**
     * Add a change handler to be called whenever the selected type of chart is changed.
     *
@@ -95,7 +95,7 @@
     ChartTypeSelector.prototype.registerChangeHandler = function (handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
             this.changeHandlers.push(handler);
-        }    
+        }
     };
 
     /**
@@ -105,7 +105,7 @@
     ChartTypeSelector.prototype.getChartType = function () {
         return this.chartTypes[Math.max(this.dropDown.selectedIndex, 0)];
     };
-    
+
     /**
     * Sets the chart type.  If the chart type given is not recognised, nothing
     * happens.
@@ -118,7 +118,7 @@
             this.onSelectionChanged();
         }
     };
-    
+
     /**
     * Handle a change of the selected option in the drop-down list.
     */
@@ -127,10 +127,10 @@
             this.raceGraphDisabledNotifier();
             this.dropDown.selectedIndex = Math.max(this.lastSelectedIndex, 0);
         }
-        
+
         this.changeHandlers.forEach(function(handler) { handler(this.chartTypes[this.dropDown.selectedIndex]); }, this);
         this.lastSelectedIndex = this.dropDown.selectedIndex;
     };
-    
+
     SplitsBrowser.Controls.ChartTypeSelector = ChartTypeSelector;
 })();

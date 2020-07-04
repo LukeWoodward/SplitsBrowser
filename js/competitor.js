@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser Competitor - An individual competitor who competed at an event.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -31,11 +31,11 @@
     function Competitor(name, club) {
         this.name = name;
         this.club = club;
-        
+
         this.yearOfBirth = null;
         this.gender = null; // "M" or "F" for male or female.
     }
-    
+
     /**
     * Sets the competitor's year of birth.
     * @param {Number} yearOfBirth - The competitor's year of birth.
@@ -43,7 +43,7 @@
     Competitor.prototype.setYearOfBirth = function (yearOfBirth) {
         this.yearOfBirth = yearOfBirth;
     };
-    
+
     /**
     * Sets the competitor's gender.  This should be "M" or "F".
     * @param {String} gender - The competitor's gender, "M" or "F".
@@ -51,6 +51,6 @@
     Competitor.prototype.setGender = function (gender) {
         this.gender = gender;
     };
-    
+
     SplitsBrowser.Model.Competitor = Competitor;
 })();

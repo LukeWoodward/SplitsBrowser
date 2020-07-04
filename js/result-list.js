@@ -1,6 +1,6 @@
 ﻿/*
  *  SplitsBrowser ResultList - Lists the results down the left side.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -24,17 +24,17 @@
     // ID of the result list div.
     // Must match that used in styles.css.
     var RESULT_LIST_ID = "resultList";
-    
+
     // The number that identifies the left mouse button.
     var LEFT_BUTTON = 1;
-    
+
     // Dummy index used to represent the mouse being let go off the bottom of
     // the list of results.
     var CONTAINER_RESULT_INDEX = -1;
-    
+
     // ID of the container that contains the list and the filter textbox.
     var RESULT_LIST_CONTAINER_ID = "resultListContainer";
-    
+
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
 
@@ -59,36 +59,36 @@
         this.inverted = false;
         this.hasTeamData = false;
         this.placeholderDiv = null;
-        
+
         this.changeHandlers = [];
-        
+
         this.containerDiv = d3.select(parent).append("div")
                                              .attr("id", RESULT_LIST_CONTAINER_ID);
-                                               
+
         this.buttonsPanel = this.containerDiv.append("div");
-                           
+
         var outerThis = this;
         this.allButton = this.buttonsPanel.append("button")
                                           .attr("id", "selectAllResults")
                                           .style("width", "50%")
                                           .on("click", function () { outerThis.selectAllFiltered(); });
-                        
+
         this.noneButton = this.buttonsPanel.append("button")
                                            .attr("id", "selectNoResults")
                                            .style("width", "50%")
                                            .on("click", function () { outerThis.selectNoneFiltered(); });
-                                           
-        // Wire up double-click event with jQuery for easier testing.                                           
+
+        // Wire up double-click event with jQuery for easier testing.
         $(this.noneButton.node()).dblclick(function () { outerThis.selectNone(); });
-                        
+
         this.buttonsPanel.append("br");
-                        
+
         this.crossingRunnersButton = this.buttonsPanel.append("button")
                                                       .attr("id", "selectCrossingRunners")
                                                       .style("width", "100%")
                                                       .on("click", function () { outerThis.selectCrossingRunners(); })
                                                       .style("display", "none");
-        
+
         this.filter = this.buttonsPanel.append("input")
                                        .attr("type", "text");
 
@@ -102,19 +102,19 @@
         this.filter.on("input", function () { outerThis.updateFilterIfChanged(); })
                    .on("keyup", function () { outerThis.updateFilterIfChangedDelayed(); })
                    .on("mouseup", function () { outerThis.updateFilterIfChangedDelayed(); });
-                                      
+
         this.listDiv = this.containerDiv.append("div")
                                         .attr("id", RESULT_LIST_ID);
-                                        
+
         this.listDiv.on("mousedown", function () { outerThis.startDrag(CONTAINER_RESULT_INDEX); })
                     .on("mousemove", function () { outerThis.mouseMove(CONTAINER_RESULT_INDEX); })
                     .on("mouseup", function () { outerThis.stopDrag(); });
-                              
+
         d3.select(document.body).on("mouseup", function () { outerThis.stopDrag(); });
-        
+
         this.setMessages();
     };
-    
+
     /**
     * Sets messages within this control, following either its creation or a
     * change of language.
@@ -125,7 +125,7 @@
         this.crossingRunnersButton.text(getMessage("SelectCrossingRunners"));
         this.filter.attr("placeholder", getMessage("CompetitorListFilter"));
     };
-    
+
     /**
     * Retranslates this control following a change of language.
     */
@@ -136,7 +136,7 @@
             this.fireChangeHandlers();
         }
     };
-    
+
     /**
     * Sets the text in the placeholder div shown when the list of results
     * contains only non-starters.
@@ -144,7 +144,7 @@
     ResultList.prototype.setPlaceholderDivText = function () {
         this.placeholderDiv.text(getMessage((this.hasTeamData) ? "NoTeamsStarted" : "NoCompetitorsStarted"));
     };
-    
+
     /**
     * Register a handler to be called whenever the filter text changes.
     *
@@ -173,14 +173,14 @@
             this.changeHandlers.splice(index, 1);
         }
     };
-    
+
     /**
     * Fires all of the change handlers currently registered.
     */
     ResultList.prototype.fireChangeHandlers = function () {
         this.changeHandlers.forEach(function (handler) { handler(); }, this);
     };
-    
+
     /**
     * Returns whether the current mouse event is off the bottom of the list of
     * result divs.
@@ -190,7 +190,7 @@
     ResultList.prototype.isMouseOffBottomOfResultList = function () {
         return this.lastVisibleDiv === null || d3.mouse(this.lastVisibleDiv)[1] >= $(this.lastVisibleDiv).height();
     };
-    
+
     /**
     * Returns the name of the CSS class to apply to result divs currently
     * part of the selection/deselection.
@@ -199,7 +199,7 @@
     ResultList.prototype.getDragClassName = function () {
         return (this.inverted) ? "dragDeselected" : "dragSelected";
     };
-    
+
     /**
     * Handles the start of a drag over the list of results.
     * @param {Number} index - Index of the result div that the drag started
@@ -222,12 +222,12 @@
             } else {
                 d3.select(this.allResultDivs[index]).classed(this.getDragClassName(), true);
             }
-            
+
             d3.event.stopPropagation();
             this.dragging = true;
         }
     };
-    
+
     /**
     * Handles a mouse-move event. by adjust the range of dragged results to
     * include the current index.
@@ -239,7 +239,7 @@
             if (dragIndex !== this.currentDragResultIndex) {
                 var dragClassName = this.getDragClassName();
                 d3.selectAll("div.result." + dragClassName).classed(dragClassName, false);
-                
+
                 if (this.dragStartResultIndex === CONTAINER_RESULT_INDEX && dragIndex === CONTAINER_RESULT_INDEX) {
                     // Drag is currently all off the list, so do nothing further.
                     return;
@@ -247,7 +247,7 @@
                     // Drag currently goes onto the div's scrollbar.
                     return;
                 }
-                
+
                 var leastIndex, greatestIndex;
                 if (this.dragStartResultIndex === CONTAINER_RESULT_INDEX || dragIndex === CONTAINER_RESULT_INDEX) {
                     // One of the ends is off the bottom.
@@ -257,14 +257,14 @@
                     leastIndex = Math.min(this.dragStartResultIndex, dragIndex);
                     greatestIndex  = Math.max(this.dragStartResultIndex, dragIndex);
                 }
-                
+
                 var selectedResults = [];
                 for (var index = leastIndex; index <= greatestIndex; index += 1) {
                     if (this.allResultDetails[index].visible) {
                         selectedResults.push(this.allResultDivs[index]);
                     }
                 }
-                
+
                 d3.selectAll(selectedResults).classed(dragClassName, true);
                 this.currentDragResultIndex = dragIndex;
             }
@@ -282,9 +282,9 @@
             // somewhere outside of this result list.  Ignore it.
             return;
         }
-        
+
         this.dragging = false;
-        
+
         var selectedResultIndexes = [];
         var dragClassName = this.getDragClassName();
         for (var index = 0; index < this.allResultDivs.length; index += 1) {
@@ -292,9 +292,9 @@
                 selectedResultIndexes.push(index);
             }
         }
-        
+
         d3.selectAll("div.result." + dragClassName).classed(dragClassName, false);
-        
+
         if (d3.event.currentTarget === document) {
             // Drag ended outside the list.
         } else if (this.currentDragResultIndex === CONTAINER_RESULT_INDEX && !this.isMouseOffBottomOfResultList()) {
@@ -307,10 +307,10 @@
         } else {
             this.resultSelection.bulkSelect(selectedResultIndexes);
         }
-        
+
         this.dragStartResultIndex = null;
         this.currentDragResultIndex = null;
-        
+
         d3.event.stopPropagation();
     };
 
@@ -321,7 +321,7 @@
     ResultList.prototype.width = function () {
         return $(this.containerDiv.node()).width();
     };
-    
+
     /**
     * Sets the overall height of the result list.
     * @param {Number} height - The height of the control, in pixels.
@@ -329,7 +329,7 @@
     ResultList.prototype.setHeight = function (height) {
         $(this.listDiv.node()).height(height - $(this.buttonsPanel.node()).height());
     };
-    
+
     /**
     * Returns all visible indexes.  This is the indexes of all results that
     * have not been excluded by the filters.
@@ -361,7 +361,7 @@
     ResultList.prototype.selectNone = function () {
         this.resultSelection.selectNone();
     };
-    
+
     /**
     * Returns whether the result with the given index is selected.
     * @param {Number} index - Index of the result within the list.
@@ -370,7 +370,7 @@
     ResultList.prototype.isSelected = function (index) {
         return this.resultSelection !== null && this.resultSelection.isSelected(index);
     };
-    
+
     /**
     * Select all of the results that cross the unique selected result.
     */
@@ -385,21 +385,21 @@
             this.alerter(getMessageWithFormatting(messageKey, {"$$NAME$$": resultName}));
         }
     };
-    
+
     /**
     * Enables or disables the crossing-runners button as appropriate.
     */
     ResultList.prototype.enableOrDisableCrossingRunnersButton = function () {
         this.crossingRunnersButton.node().disabled = !this.resultSelection.isSingleRunnerSelected();
     };
-    
+
     /**
     * Sets the chart type, so that the result list knows whether to show or
     * hide the Crossing Runners button.
     * @param {Object} chartType - The chart type selected.
     */
     ResultList.prototype.setChartType = function (chartType) {
-        this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "block" : "none");    
+        this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "block" : "none");
     };
 
     /**
@@ -462,7 +462,7 @@
             else {
                 name = result.owner.name;
             }
-            
+
             if (result.completed()) {
                 // \u00a0 is a non-breaking space.  We substitute this in place of
                 // a blank name to prevent the height of the item being dropped to
@@ -473,25 +473,25 @@
                 return "* " + name;
             }
         }
-        
+
         this.allResults = results;
         this.hasTeamData = hasTeamData;
         this.allResultDetails = this.allResults.map(function (result) {
             return { result: result, normedName: normaliseName(result.owner.name), visible: true };
         });
-        
+
         var tooltipFunction;
         if (hasTeamData) {
             tooltipFunction = function (result) { return result.owner.members.map(function (competitor) { return competitor.name; }).join("\n"); };
         } else {
             tooltipFunction = function () { return null; };
         }
-        
+
         if (this.placeholderDiv !== null) {
             this.placeholderDiv.remove();
             this.placeholderDiv = null;
         }
-        
+
         var resultDivs = this.listDiv.selectAll("div.result").data(this.allResults);
 
         var outerThis = this;
@@ -501,30 +501,30 @@
                           .attr("title", tooltipFunction);
 
         resultDivs.selectAll("span").remove();
-        
+
         resultDivs = this.listDiv.selectAll("div.result").data(this.allResults);
         if (multipleClasses) {
             resultDivs.append("span")
                       .classed("resultClassLabel", true)
                       .text(function (result) { return result.className; });
         }
-        
+
         resultDivs.append("span")
                   .classed("nonfinisher", function (result) { return !result.completed(); })
                   .text(resultText);
 
         resultDivs.exit().remove();
-        
+
         if (this.allResults.length === 0) {
             this.placeholderDiv = this.listDiv.append("div")
                                               .classed("resultListPlaceholder", true);
             this.setPlaceholderDivText();
         }
-        
+
         this.allButton.property("disabled", this.allResults.length === 0);
         this.noneButton.property("disabled", this.allResults.length === 0);
         this.filter.property("disabled", this.allResults.length === 0);
-        
+
         resultDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
                   .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })
                   .on("mouseup", function () { outerThis.stopDrag(); });
@@ -548,7 +548,7 @@
         this.resultSelection.registerChangeHandler(this.handler);
         this.selectionChanged();
     };
-    
+
     /**
     * Returns the filter text currently being used.
     * @return {String} Filter text.
@@ -556,7 +556,7 @@
     ResultList.prototype.getFilterText = function () {
         return this.filter.node().value;
     };
-    
+
     /**
     * Sets the filter text to use.
     * @param {String} filterText - The filter text to use.
@@ -565,7 +565,7 @@
         this.filter.node().value = filterText;
         this.updateFilterIfChanged();
     };
-    
+
     /**
     * Updates the filtering.
     */
@@ -575,12 +575,12 @@
         this.allResultDetails.forEach(function (result) {
             result.visible = (result.normedName.indexOf(normedFilter) >= 0);
         });
-        
+
         var outerThis = this;
         this.listDiv.selectAll("div.result")
                     .style("display", function (div, index) { return (outerThis.allResultDetails[index].visible) ? null : "none"; });
     };
-    
+
     /**
     * Updates the filtering following a change in the filter text input, if the
     * filter text has changed since last time.  If not, nothing happens.
@@ -593,7 +593,7 @@
             this.fireChangeHandlers();
         }
     };
-    
+
     /**
     * Updates the filtering following a change in the filter text input
     * in a short whiie.
@@ -602,6 +602,6 @@
         var outerThis = this;
         setTimeout(function () { outerThis.updateFilterIfChanged(); }, 1);
     };
-    
+
     SplitsBrowser.Controls.ResultList = ResultList;
 })();

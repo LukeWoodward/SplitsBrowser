@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser IOF XML - Read event data in IOF XML-format files.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,7 +20,7 @@
  */
 (function () {
     "use strict";
-    
+
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
@@ -32,10 +32,10 @@
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
-    
+
     // Number of feet in a kilometre.
     var FEET_PER_KILOMETRE = 3280;
-    
+
     /**
     * Returns whether the given value is undefined.
     * @param {any} value - The value to check.
@@ -53,7 +53,7 @@
     function arraySum(array) {
         return array.reduce(function (a, b) { return a + b; }, 0);
     }
-    
+
     /**
     * Parses the given XML string and returns the parsed XML.
     * @param {String} xmlString - The XML string to parse.
@@ -66,16 +66,16 @@
         } catch (e) {
             throwInvalidData("XML data not well-formed");
         }
-        
+
         if ($("> *", $(xml)).length === 0) {
             // PhantomJS doesn't always fail parsing invalid XML; we may be
             // left with 'xml' just containing the DOCTYPE and no root element.
             throwInvalidData("XML data not well-formed: " + xmlString);
         }
-        
+
         return xml;
     }
-    
+
     /**
     * Parses and returns a competitor name from the given XML element.
     *
@@ -88,10 +88,10 @@
     * @return {String} Name read from the element.
     */
     function readCompetitorName(nameElement) {
-        
+
         var forename = $("> Given", nameElement).text();
         var surname = $("> Family", nameElement).text();
-    
+
         if (forename === "") {
             return surname;
         } else if (surname === "") {
@@ -100,16 +100,16 @@
             return forename + " " + surname;
         }
     }
-    
+
     // Regexp that matches the year in an ISO-8601 date.
     // Both XML formats use ISO-8601 (YYYY-MM-DD) dates, so parsing is
     // fortunately straightforward.
     var yearRegexp = /^\d{4}/;
-    
+
     // Object that contains various functions for parsing bits of data from
     // IOF v2.0.3 XML event data.
     var Version2Reader = {};
-    
+
     /**
     * Returns whether the given event data is likely to be results data of the
     * version 2.0.3 format.
@@ -125,7 +125,7 @@
     Version2Reader.isOfThisVersion = function (data) {
         return data.indexOf("IOFdata.dtd") >= 0;
     };
-        
+
     /**
     * Makes a more thorough check that the parsed XML data is likely to be of
     * the v2.0.3 format.  If not, a WrongFileFormat exception is thrown.
@@ -143,7 +143,7 @@
                 throwWrongFileFormat("Found unrecognised IOF XML data format '" + version + "'");
             }
         }
-        
+
         var status = rootElement.attr("status");
         if (!isUndefined(status) && status.toLowerCase() !== "complete") {
             throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
@@ -157,7 +157,7 @@
     * @return {String} Class name.
     */
     Version2Reader.readClassName = function (classResultElement) {
-        return $("> ClassShortName", classResultElement).text();    
+        return $("> ClassShortName", classResultElement).text();
     };
 
     /**
@@ -193,14 +193,14 @@
         // So instead grab course details from the class and the first
         // competitor.
         var courseName = $("> ClassShortName", classResultElement).text();
-        
+
         var firstResult = $("> PersonResult > Result", classResultElement).first();
         var length = null;
-        
+
         if (firstResult.length > 0) {
             var lengthElement = $("> CourseLength", firstResult);
             var lengthStr = lengthElement.text();
-            
+
             // Course lengths in IOF v2 are a pain, as you have to handle three
             // units.
             if (lengthStr.length > 0) {
@@ -223,12 +223,12 @@
                 }
             }
         }
-        
+
         // Climb does not appear in the per-competitor results, and there is
         // no NumberOfControls.
         return {id: null, name: courseName, length: length, climb: null, numberOfControls: null};
     };
-    
+
     /**
     * Returns the XML element that contains a competitor's name.  This element
     * should contain child elements with names 'Given' and 'Family'.
@@ -240,7 +240,7 @@
     Version2Reader.getCompetitorNameElement = function (element) {
         return $("> Person > PersonName", element);
     };
-    
+
     /**
     * Returns the name of the competitor or team's club.
     * @param {jQuery.selection} element - jQuery selection containing a
@@ -251,7 +251,7 @@
         var clubName = $("> Club > ShortName", element).text();
         return (clubName === "") ?  $("> Club > Name", element).text() : clubName;
     };
-        
+
     /**
     * Returns the competitor's date of birth, as a string.
     * @param {jQuery.selection} element - jQuery selection containing a
@@ -271,10 +271,10 @@
     */
     Version2Reader.readStartTime = function (resultElement) {
         var startTimeStr = $("> StartTime > Clock", resultElement).text();
-        var startTime = (startTimeStr === "") ? null : parseTime(startTimeStr);       
+        var startTime = (startTimeStr === "") ? null : parseTime(startTimeStr);
         return startTime;
     };
-    
+
     /**
     * Reads a competitor's total time from the given Result element.
     * @param {jQuery.selection} resultElement - jQuery selection containing a
@@ -298,13 +298,13 @@
         var statusElement = $("> CompetitorStatus", resultElement);
         return (statusElement.length === 1) ? statusElement.attr("value") : "";
     };
-    
+
     Version2Reader.StatusNonCompetitive = "NotCompeting";
     Version2Reader.StatusNonStarter = "DidNotStart";
     Version2Reader.StatusNonFinisher = "DidNotFinish";
     Version2Reader.StatusDisqualified = "Disqualified";
     Version2Reader.StatusOverMaxTime = "OverTime";
-    
+
     /**
     * Unconditionally returns false - IOF XML version 2.0.3 appears not to
     * support additional controls.
@@ -313,7 +313,7 @@
     Version2Reader.isAdditional = function () {
         return false;
     };
-    
+
     /**
     * Reads a control code and split time from a SplitTime element.
     * @param {jQuery.selection} splitTimeElement - jQuery selection containing
@@ -326,7 +326,7 @@
         if (code === "") {
             code = $("> Control > ControlCode", splitTimeElement).text();
         }
-        
+
         if (code === "") {
             throwInvalidData("Control code missing for control");
         }
@@ -335,17 +335,17 @@
         var time = (timeStr === "") ? null : parseTime(timeStr);
         return {code: code, time: time};
     };
-    
+
     // Regexp to match ISO-8601 dates.
     // Ignores timezone info - always display times as local time.
     // We don't assume there are separator characters, and we also don't assume
     // that the seconds will be specified.
     var ISO_8601_RE = /^\d\d\d\d-?\d\d-?\d\dT?(\d\d):?(\d\d)(?::?(\d\d))?/;
-    
+
     // Object that contains various functions for parsing bits of data from
     // IOF v3.0 XML event data.
     var Version3Reader = {};
-    
+
     /**
     * Returns whether the given event data is likely to be results data of the
     * version 3.0 format.
@@ -361,12 +361,12 @@
     Version3Reader.isOfThisVersion = function (data) {
         return data.indexOf("http://www.orienteering.org/datastandard/3.0") >= 0;
     };
-    
+
     /**
     * Makes a more thorough check that the parsed XML data is likely to be of
     * the v2.0.3 format.  If not, a WrongFileFormat exception is thrown.
     * @param {jQuery.selection} rootElement - The root element.
-    */    
+    */
     Version3Reader.checkVersion = function (rootElement) {
         var iofVersion = rootElement.attr("iofVersion");
         if (isUndefined(iofVersion)) {
@@ -374,13 +374,13 @@
         } else if (iofVersion !== "3.0") {
             throwWrongFileFormat("Found unrecognised IOF XML data format '" + iofVersion + "'");
         }
-        
+
         var status = rootElement.attr("status");
         if (!isUndefined(status) && status.toLowerCase() !== "complete") {
             throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
         }
     };
-    
+
     /**
     * Reads the class name from a ClassResult element.
     * @param {jQuery.selection} classResultElement - ClassResult element
@@ -437,22 +437,22 @@
                 length /= 1000;
             }
         }
-        
+
         var numberOfControlsStr = $("> NumberOfControls", courseElement).text();
         var numberOfControls = parseInt(numberOfControlsStr, 10);
         if (isNaNStrict(numberOfControls)) {
             numberOfControls = null;
         }
-        
+
         var climbStr = $("> Climb", courseElement).text();
         var climb = parseInt(climbStr, 10);
         if (isNaNStrict(climb)) {
             climb = null;
         }
-        
+
         return {id: id, name: name, length: length, climb: climb, numberOfControls: numberOfControls};
     };
-    
+
     /**
     * Returns the XML element that contains a competitor's name.  This element
     * should contain child elements with names 'Given' and 'Family'.
@@ -464,7 +464,7 @@
     Version3Reader.getCompetitorNameElement = function (element) {
         return $("> Person > Name", element);
     };
-    
+
     /**
     * Returns the name of the competitor or team's club.
     * @param {jQuery.selection} element - jQuery selection containing a
@@ -475,7 +475,7 @@
         var clubName = $("> Organisation > ShortName", element).text();
         return (clubName === "") ? $("> Organisation > Name", element).text() : clubName;
     };
-    
+
     /**
     * Returns the competitor's date of birth, as a string.
     * @param {jQuery.selection} element - jQuery selection containing a
@@ -487,7 +487,7 @@
         var regexResult = yearRegexp.exec(birthDate);
         return (regexResult === null) ? null : parseInt(regexResult[0], 10);
     };
-    
+
     /**
     * Reads a competitor's start time from the given Result element.
     * @param {jQuery.selection} element - jQuery selection containing a
@@ -514,14 +514,14 @@
     * @param {String} timeStr - The time string to read.
     * @return {?Number} The parsed time, in seconds, or null if it could not
     *     be read.
-    */    
+    */
     Version3Reader.readTime = function (timeStr) {
         // IOF v3 allows fractional seconds, so we use parseFloat instead
         // of parseInt.
         var time = parseFloat(timeStr);
         return (isFinite(time)) ? time : null;
     };
-    
+
     /**
     * Read a competitor's total time from the given Time element.
     * @param {jQuery.selection} element - jQuery selection containing a
@@ -543,13 +543,13 @@
     Version3Reader.getStatus = function (resultElement) {
         return $("> Status", resultElement).text();
     };
-    
+
     Version3Reader.StatusNonCompetitive = "NotCompeting";
     Version3Reader.StatusNonStarter = "DidNotStart";
     Version3Reader.StatusNonFinisher = "DidNotFinish";
     Version3Reader.StatusDisqualified = "Disqualified";
     Version3Reader.StatusOverMaxTime = "OverTime";
-    
+
     /**
     * Returns whether the given split-time element is for an additional
     * control, and hence should be ignored.
@@ -572,7 +572,7 @@
         if (code === "") {
             throwInvalidData("Control code missing for control");
         }
-        
+
         var time;
         if (splitTimeElement.attr("status") === "Missing") {
             // Missed controls have their time omitted.
@@ -581,12 +581,12 @@
             var timeStr = $("> Time", splitTimeElement).text();
             time = (timeStr === "") ? null : Version3Reader.readTime(timeStr);
         }
-        
+
         return {code: code, time: time};
     };
-    
+
     var ALL_READERS = [Version2Reader, Version3Reader];
-    
+
     /**
     * Check that the XML document passed is in a suitable format for parsing.
     *
@@ -597,16 +597,16 @@
     *     XML reading.
     */
     function validateData(xml, reader) {
-        var rootElement = $("> *", xml);        
+        var rootElement = $("> *", xml);
         var rootElementNodeName = rootElement.prop("tagName");
-        
+
         if (rootElementNodeName !== "ResultList")  {
             throwWrongFileFormat("Root element of XML document does not have expected name 'ResultList', got '" + rootElementNodeName + "'");
         }
-        
+
         reader.checkVersion(rootElement);
     }
-    
+
     /**
     * Parses data for a single competitor.
     * @param {XMLElement} element - XML PersonResult element.
@@ -620,44 +620,44 @@
     */
     function parseCompetitor(element, number, reader, warnings) {
         var jqElement = $(element);
-        
+
         var nameElement = reader.getCompetitorNameElement(jqElement);
         var name = readCompetitorName(nameElement);
-        
+
         if (name === "") {
             warnings.push("Could not find a name for a competitor");
             return null;
         }
-        
+
         var club = reader.readClubName(jqElement);
-        
+
         var dateOfBirth =  reader.readDateOfBirth(jqElement);
         var regexResult = yearRegexp.exec(dateOfBirth);
         var yearOfBirth = (regexResult === null) ? null : parseInt(regexResult[0], 10);
-        
+
         var gender = $("> Person", jqElement).attr("sex");
-        
+
         var resultElement = $("Result", jqElement);
         if (resultElement.length === 0) {
             warnings.push("Could not find any result information for competitor '" + name + "'");
             return null;
         }
-        
+
         var startTime = reader.readStartTime(resultElement);
-        
+
         var totalTime = reader.readTotalTime(resultElement);
 
         var status = reader.getStatus(resultElement);
-        
+
         var splitTimes = $("> SplitTime", resultElement).toArray();
         var splitData = splitTimes.filter(function (splitTime) { return !reader.isAdditional($(splitTime)); })
                                   .map(function (splitTime) { return reader.readSplitTime($(splitTime)); });
-        
+
         var controls = splitData.map(function (datum) { return datum.code; });
         var cumTimes = splitData.map(function (datum) { return datum.time; });
-        
+
         cumTimes.unshift(0); // Prepend a zero time for the start.
-        
+
         // Append the total time, ignoring any value given for a non-starter.
         cumTimes.push((status === reader.StatusNonStarter) ? null : totalTime);
 
@@ -672,7 +672,7 @@
         }
 
         var result = fromOriginalCumTimes(number, startTime, cumTimes, competitor);
-        
+
         if (status === "OK" && totalTime !== null && cumTimes.indexOf(null) >= 0) {
             result.setOKDespiteMissingTimes();
         } else if (status === reader.StatusNonCompetitive) {
@@ -758,7 +758,7 @@
         var teamName = reader.readTeamName(teamResultElement);
         var teamClubName = reader.readClubName(teamResultElement);
         var members = reader.readTeamMemberResults(teamResultElement);
-        
+
         if (members.length === 0) {
             warnings.push("Ignoring team " + (teamName === "" ? "(unnamed team)" : teamName) + " with no members");
             return;
@@ -769,8 +769,8 @@
             // catch this case.)
             warnings.push("Ignoring team " + (teamName === "" ? "(unnamed team)" : teamName) + " with only a single member");
             return;
-        }            
-        
+        }
+
         var results = [];
         var allControls = [];
         for (var index = 0; index < members.length; index += 1) {
@@ -779,11 +779,11 @@
                 // A warning for this competitor rules out the entire team.
                 return;
             }
-            
+
             results.push(resultAndControls.result);
             allControls.push(resultAndControls.controls);
         }
-        
+
         for (index = 1; index < members.length; index += 1) {
             var previousFinishTime = $("> Result > FinishTime", members[index - 1]).text();
             var nextStartTime = $("> Result > StartTime", members[index]).text();
@@ -806,27 +806,27 @@
                 cls.course.numbersOfControls = thisTeamControlCounts;
             }
         }
-        
+
         if (results.length !== cls.teamSize) {
             warnings.push("Team " + (teamName === "" ? "(unnamed team)" : "'" + teamName + "'") + " in class '" + cls.name + "' has an unexpected number of members: expected " + cls.teamSize + " but was actually " + results.length);
         }
         else {
             var warning = null;
             var teamResult = createTeamResult(number, results, new Team(teamName, teamClubName));
-            
+
             for (var teamMemberIndex = 0; teamMemberIndex < results.length; teamMemberIndex += 1) {
                 var expectedControlCount = cls.course.numbersOfControls[teamMemberIndex];
                 var memberResult = results[teamMemberIndex];
-                
+
                 // Subtract 2 for the start and finish cumulative times.
                 var actualControlCount = memberResult.getAllOriginalCumulativeTimes().length - 2;
-                
+
                 if (actualControlCount !== expectedControlCount) {
                     warning = "Competitor '" + memberResult.owner.name + "' in team '" + teamName + "' in class '" + cls.name + "' has an unexpected number of controls: expected " + expectedControlCount + ", actual " + actualControlCount;
                     break;
                 }
             }
-            
+
             if (warning === null) {
                 cls.results.push(teamResult);
             } else {
@@ -848,13 +848,13 @@
         var cls = {name: null, results: [], teamSize: null, controls: [], course: null};
 
         cls.course = reader.readCourseFromClass(jqElement, warnings);
-        
+
         var className = reader.readClassName(jqElement);
-        
+
         if (className === "") {
             className = "<unnamed class>";
         }
-        
+
         cls.name = className;
         cls.course.numbersOfControls = null;
 
@@ -882,7 +882,7 @@
             // and use that instead.  Course IDs are only used internally by
             // this reader in order to merge classes, and the comma-separated
             // list of controls ought to work as a substitute identifier in
-            // lieu of an 'official' course ID. 
+            // lieu of an 'official' course ID.
             //
             // This is intended mainly for IOF XML v2.0.3 files in particular
             // as they tend not to have course IDs.  However, this can also be
@@ -891,10 +891,10 @@
             // Idea thanks to 'dfgeorge' (David George?)
             cls.course.id = cls.controls.join(",");
         }
-        
+
         return cls;
     }
-   
+
     /**
     * Determine which XML reader to use to parse the given event data.
     * @param {String} data - The event data.
@@ -907,10 +907,10 @@
                 return reader;
             }
         }
-        
+
         throwWrongFileFormat("Data apparently not of any recognised IOF XML format");
     }
-   
+
     /**
     * Parses IOF XML data in either the 2.0.3 format or the 3.0 format and
     * returns the data.
@@ -918,42 +918,42 @@
     * @return {Event} Parsed event object.
     */
     function parseEventData(data) {
-    
+
         var reader = determineReader(data);
-    
+
         var xml = parseXml(data);
-        
+
         validateData(xml, reader);
-        
+
         var classResultElements = $("> ResultList > ClassResult", $(xml)).toArray();
-        
+
         if (classResultElements.length === 0) {
             throwInvalidData("No class result elements found");
         }
-        
+
         var classes = [];
-        
+
         // Array of all 'temporary' courses, intermediate objects that contain
         // course data but not yet in a suitable form to return.
         var tempCourses = [];
-        
+
         // d3 map that maps course IDs plus comma-separated lists of controls
         // to the temporary course with that ID and controls.
         // (We expect that all classes with the same course ID have consistent
         // controls, but we don't assume that.)
         var coursesMap = d3.map();
-        
+
         var warnings = [];
-        
+
         classResultElements.forEach(function (classResultElement) {
             var parsedClass = parseClassData(classResultElement, reader, warnings);
             if (parsedClass === null) {
                 // Class could not be parsed.
                 return;
             }
-            
+
             var tempCourse = parsedClass.course;
-            
+
             var numberOfControls;
             var courseKey;
             var isTeamClass;
@@ -967,15 +967,15 @@
                 courseKey = tempCourse.id + "," + parsedClass.controls.join(",");
                 isTeamClass = false;
             }
-            
+
             var courseClass = new CourseClass(parsedClass.name, numberOfControls, parsedClass.results);
             if (isTeamClass) {
                 courseClass.setIsTeamClass(parsedClass.course.numbersOfControls);
             }
-            
+
             classes.push(courseClass);
-            
-            // Add to each temporary course object a list of all classes.           
+
+            // Add to each temporary course object a list of all classes.
             if (tempCourse.id !== null && courseKey !== null && coursesMap.has(courseKey)) {
                 // We've come across this course before, so just add a class to
                 // it.
@@ -990,16 +990,16 @@
                 }
             }
         });
-        
+
         // Now build up the array of courses.
         var courses = tempCourses.map(function (tempCourse) {
             var course = new Course(tempCourse.name, tempCourse.classes, tempCourse.length, tempCourse.climb, tempCourse.controls);
             tempCourse.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
             return course;
         });
-        
+
         return new Event(classes, courses, warnings);
     }
-    
+
     SplitsBrowser.Input.IOFXml = { parseEventData: parseEventData };
 })();

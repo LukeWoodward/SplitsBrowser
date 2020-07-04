@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser Event - Contains all of the courses for a single event.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,7 +20,7 @@
  */
 (function () {
     "use strict";
-    
+
     var Course = SplitsBrowser.Model.Course;
 
     /**
@@ -31,16 +31,16 @@
     *     courses of the event.
     * @param {Array} warnings - Array of strings containing warning messages
     *     encountered when reading in the event dara.
-    */ 
+    */
     function Event(classes, courses, warnings) {
         this.classes = classes;
         this.courses = courses;
         this.warnings = warnings;
     }
-    
+
     /**
     * Determines time losses for each result in each class.
-    * 
+    *
     * This method should be called after reading in the event data but before
     * attempting to plot it.
     */
@@ -49,7 +49,7 @@
             courseClass.determineTimeLosses();
         });
     };
-    
+
     /**
     * Returns whether the event data needs any repairing.
     *
@@ -66,7 +66,7 @@
             });
         });
     };
-    
+
     /**
     * Returns the fastest splits for each class on a given leg.
     *
@@ -86,12 +86,12 @@
                 fastestSplits = fastestSplits.concat(course.getFastestSplitsForLeg(startCode, endCode));
             }
         });
-        
+
         fastestSplits.sort(function (a, b) { return d3.ascending(a.split, b.split); });
-        
+
         return fastestSplits;
     };
-    
+
     /**
     * Returns a list of results that visit the control with the given code
     * within the given time interval.
@@ -113,12 +113,12 @@
                 results.push(result);
             });
         });
-        
+
         results.sort(function (a, b) { return d3.ascending(a.time, b.time); });
-        
+
         return results;
     };
-    
+
     /**
     * Returns the list of controls that follow after a given control.
     * @param {String} controlCode - The code for the control.
@@ -130,9 +130,9 @@
         if (controlCode !== Course.START) {
             courses = courses.filter(function (course) { return course.hasControl(controlCode); });
         }
-        
+
         return courses.map(function (course) { return {course: course, nextControls: course.getNextControls(controlCode)}; });
     };
-    
+
     SplitsBrowser.Model.Event = Event;
 })();

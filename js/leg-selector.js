@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser LegSelector - Provides a choice of leg to view within a relay
  *                              class.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -21,7 +21,7 @@
  */
 (function (){
     "use strict";
-    
+
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
 
@@ -39,15 +39,15 @@
         this.parent = parent;
         this.courseClassSet = null;
         this.legCount = null;
-        
+
         this.containerDiv = parent.append("div")
                                   .attr("id", LEG_SELECTOR_CONTAINER_ID)
                                   .classed("topRowStart", true)
                                   .style("display", "none");
-                                  
+
         this.containerDiv.append("div")
                          .classed("topRowStartSpacer", true);
-        
+
         this.legSelectorLabel = this.containerDiv.append("span")
                                                  .classed("legSelectorLabel", true);
 
@@ -55,22 +55,22 @@
         this.dropDown = this.containerDiv.append("select")
                                          .attr("id", LEG_SELECTOR_ID)
                                          .node();
-                            
+
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
 
         this.options = null;
-        
+
         this.dropDown.selectedIndex = 0;
-        
+
         this.setMessages();
     }
 
     /**
     * Sets the messages in this control, following its creation or a change of
     * selected language.
-    */ 
+    */
     LegSelector.prototype.setMessages = function () {
-        this.legSelectorLabel.text(getMessage("LegSelectorLabel"));    
+        this.legSelectorLabel.text(getMessage("LegSelectorLabel"));
         this.setLegNames();
     };
 
@@ -85,9 +85,9 @@
     LegSelector.prototype.registerChangeHandler = function(handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
             this.changeHandlers.push(handler);
-        }    
+        }
     };
-    
+
     /**
     * Sets the names of the legs within the control's drop-down list.
     */
@@ -96,19 +96,19 @@
         for (var legIndex = 0; legIndex < this.legCount; legIndex += 1) {
             legNames.push(getMessageWithFormatting("ShowLeg", {"$$LEG_NUMBER$$": legIndex + 1}));
         }
-    
+
         this.options = d3.select(this.dropDown).selectAll("option")
                                                .data(legNames);
         this.options.enter().append("option");
-        
+
         this.options = d3.select(this.dropDown).selectAll("option")
                                                .data(legNames);
         this.options.attr("value", function (_name, index) { return (index === 0) ? "" : index - 1; })
                     .text(function (name) { return name; });
-                        
+
         this.options.exit().remove();
     };
-    
+
     /**
     * Sets the course-class set to use.  This will also show or hide the control
     * as appropriate.
@@ -127,7 +127,7 @@
             this.dropDown.selectedIndex = 0;
         }
     };
-    
+
     /**
     * Returns the selected leg, i.e. the (0-based) leg index if a leg has been
     * chosen, or null if all legs are visible or a team class is not being
@@ -138,11 +138,11 @@
         if (this.options === null) {
             return null;
         }
-            
-        var dropDownIndex = Math.max(this.dropDown.selectedIndex, 0);        
+
+        var dropDownIndex = Math.max(this.dropDown.selectedIndex, 0);
         return (dropDownIndex === 0) ? null : dropDownIndex - 1;
     };
-    
+
     /**
     * Sets the selected leg, i.e. the (0-based) leg index if a leg has been
     * chosen, or null if all legs are visible or a team class is not being
@@ -154,12 +154,12 @@
             // Not a relay class so do nothing.
             return;
         }
-        
+
         var dropDownIndexToSet = (selectedLeg === null) ? 0 : selectedLeg + 1;
         if (dropDownIndexToSet < 0 || dropDownIndexToSet >= this.options.size()) {
             dropDownIndexToSet = 0;
         }
-        
+
         this.dropDown.selectedIndex = dropDownIndexToSet;
         this.onSelectionChanged();
     };
@@ -171,6 +171,6 @@
         var selectedLeg = this.getSelectedLeg();
         this.changeHandlers.forEach(function (handler) { handler(selectedLeg); });
     };
-    
+
     SplitsBrowser.Controls.LegSelector = LegSelector;
 })();

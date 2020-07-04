@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser Chart Types - Defines the types of charts that can be plotted.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -19,17 +19,17 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 (function () {
-    
+
     /**
     * Converts a number of seconds into the corresponding number of minutes.
     * This conversion is as simple as dividing by 60.
     * @param {Number} seconds - The number of seconds to convert.
     * @return {Number} The corresponding number of minutes.
     */
-    function secondsToMinutes(seconds) { 
+    function secondsToMinutes(seconds) {
         return (seconds === null) ? null : seconds / 60;
     }
-    
+
     /**
     * Returns indexes around the given competitor's omitted cumulative times.
     * @param {Result} result - The result to get the indexes for.
@@ -39,7 +39,7 @@
     function getIndexesAroundOmittedCumulativeTimes(result) {
         return result.getControlIndexesAroundOmittedCumulativeTimes();
     }
-    
+
     /**
     * Returns indexes around the given competitor's omitted split times.
     * @param {Result} result - The result to get the indexes for.

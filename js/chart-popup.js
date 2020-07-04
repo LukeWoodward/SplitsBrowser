@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser Chart Popup - Shows data near the cursor in a popup window.
- *  
+ *
  *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,9 +20,9 @@
  */
 (function () {
     "use strict";
-    
+
     var formatTime = SplitsBrowser.formatTime;
-    
+
     /**
     * Creates a ChartPopup control.
     * @constructor
@@ -37,17 +37,17 @@
         this.popupDiv.classed("chartPopup", true)
                      .style("display", "none")
                      .style("position", "absolute");
-                     
+
         this.dataHeader = this.popupDiv.append("div")
                                        .classed("chartPopupHeader", true)
                                        .append("span");
-                                           
+
         var tableContainer = this.popupDiv.append("div")
                                               .classed("chartPopupTableContainer", true);
-                                                  
-                                           
+
+
         this.dataTable = tableContainer.append("table");
-                                              
+
         this.popupDiv.selectAll(".nextControls").style("display", "none");
 
         // At this point we need to pass through mouse events to the parent.
@@ -55,11 +55,11 @@
         // browsers support pointer-events: none, which means that this div
         // receives no mouse events at all.
         for (var eventName in handlers) {
-            if (handlers.hasOwnProperty(eventName)) {
+            if (Object.prototype.hasOwnProperty.call(handlers, eventName)) {
                 $(this.popupDiv.node()).on(eventName, handlers[eventName]);
             }
         }
-        
+
         var outerThis = this;
         $(this.popupDiv.node()).mouseenter(function () { outerThis.mouseIn = true; });
         $(this.popupDiv.node()).mouseleave(function () { outerThis.mouseIn = false; });
@@ -72,7 +72,7 @@
     ChartPopup.prototype.isShown = function () {
         return this.shown;
     };
-    
+
     /**
     * Returns whether the mouse is currently over the popup.
     * @return {boolean} True if the mouse is over the popup, false otherwise.
@@ -80,7 +80,7 @@
     ChartPopup.prototype.isMouseIn = function () {
         return this.mouseIn;
     };
-    
+
     /**
     * Populates the chart popup with data.
     *
@@ -101,32 +101,32 @@
     */
     ChartPopup.prototype.setData = function (competitorData, includeClassNames) {
         this.dataHeader.text(competitorData.title);
-        
+
         var rows = this.dataTable.selectAll("tr")
                                  .data(competitorData.data);
-                                     
+
         rows.enter().append("tr");
-        
+
         rows = this.dataTable.selectAll("tr")
                              .data(competitorData.data);
         rows.classed("highlighted", function (row) { return row.highlight; });
-        
+
         rows.selectAll("td").remove();
         rows.append("td").text(function (row) { return formatTime(row.time); });
         if (includeClassNames) {
             rows.append("td").text(function (row) { return row.className; });
         }
         rows.append("td").text(function (row) { return row.name; });
-        
+
         rows.exit().remove();
-        
+
         if (competitorData.data.length === 0 && competitorData.placeholder !== null) {
             this.dataTable.append("tr")
                           .append("td")
                           .text(competitorData.placeholder);
         }
     };
-    
+
     /**
     * Sets the next-controls data.
     *
@@ -139,20 +139,20 @@
     */
     ChartPopup.prototype.setNextControlData = function (nextControlsData) {
         this.dataHeader.text(nextControlsData.thisControl);
-        
+
         var rows = this.dataTable.selectAll("tr")
                                  .data(nextControlsData.nextControls);
         rows.enter().append("tr");
-        
+
         rows.selectAll("td").remove();
         rows.classed("highlighted", false);
         rows.append("td").text(function (nextControlData) { return nextControlData.course.name; });
         rows.append("td").text("-->");
         rows.append("td").text(function (nextControlData) { return nextControlData.nextControls; });
-        
+
         rows.exit().remove();
     };
-    
+
     /**
     * Adjusts the location of the chart popup.
     *
@@ -165,7 +165,7 @@
         this.popupDiv.style("left", location.x + "px")
                      .style("top", location.y + "px");
     };
-    
+
     /**
     * Shows the chart popup.
     *
@@ -179,7 +179,7 @@
         this.shown = true;
         this.setLocation(location);
     };
-    
+
     /**
     * Hides the chart popup.
     */
@@ -187,7 +187,7 @@
         this.popupDiv.style("display", "none");
         this.shown = false;
     };
-    
+
     /**
     * Returns the height of the popup, in units of pixels.
     * @return {Number} Height of the popup, in pixels.
@@ -195,6 +195,6 @@
     ChartPopup.prototype.height = function () {
         return $(this.popupDiv.node()).height();
     };
-    
-    SplitsBrowser.Controls.ChartPopup = ChartPopup;    
+
+    SplitsBrowser.Controls.ChartPopup = ChartPopup;
 })();

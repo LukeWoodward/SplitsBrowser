@@ -1,6 +1,6 @@
 ﻿/*
  *  SplitsBrowser ResultSelection - The currently-selected results.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,9 +20,9 @@
  */
 (function (){
     "use strict";
-    
+
     var NUMBER_TYPE = typeof 0;
-    
+
     var throwInvalidData = SplitsBrowser.throwInvalidData;
 
     /**
@@ -51,7 +51,7 @@
     ResultSelection.prototype.isSelected = function (index) {
         return this.currentIndexes.indexOf(index) > -1;
     };
-    
+
     /**
     * Returns whether the selection consists of exactly one result.
     * @returns {boolean} True if precisely one result is selected, false if
@@ -60,7 +60,7 @@
     ResultSelection.prototype.isSingleRunnerSelected = function () {
         return this.currentIndexes.length === 1;
     };
-    
+
     /**
     * Returns the index of the single selected result.
     *
@@ -77,22 +77,22 @@
     * Given that a single runner is selected, select also all of the runners
     * that 'cross' this runner and are also marked as visible.
     * @param {Array} resultDetails - Array of result details to check within.
-    */    
+    */
     ResultSelection.prototype.selectCrossingRunners = function (resultDetails) {
         if (this.isSingleRunnerSelected()) {
             var refResult = resultDetails[this.currentIndexes[0]].result;
-            
+
             resultDetails.forEach(function (resultDetails, idx) {
                 if (resultDetails.visible && resultDetails.result.crosses(refResult)) {
                     this.currentIndexes.push(idx);
                 }
             }, this);
-            
+
             this.currentIndexes.sort(d3.ascending);
             this.fireChangeHandlers();
         }
     };
-    
+
     /**
     * Fires all of the change handlers currently registered.
     */
@@ -124,7 +124,7 @@
     ResultSelection.prototype.getSelectedIndexes = function () {
         return this.currentIndexes.slice(0);
     };
-    
+
     /**
     * Set the selected results to those in the given array.
     * @param {Array} selectedIndex - Array of indexes of selected results.
@@ -135,7 +135,7 @@
             this.fireChangeHandlers();
         }
     };
-    
+
     /**
     * Register a handler to be called whenever the list of indexes changes.
     *
@@ -191,7 +191,7 @@
             throwInvalidData("Index is not a number");
         }
     };
-    
+
     /**
     * Selects a number of results, firing the change handlers once at the
     * end if any indexes were added.
@@ -203,18 +203,18 @@
         }, this)) {
             throwInvalidData("Indexes not all numeric and in range");
         }
-        
+
         // Remove from the set of indexes given any that are already selected.
         var currentIndexSet = d3.set(this.currentIndexes);
         indexes = indexes.filter(function (index) { return !currentIndexSet.has(index); });
-        
+
         if (indexes.length > 0) {
             this.currentIndexes = this.currentIndexes.concat(indexes);
             this.currentIndexes.sort(d3.ascending);
             this.fireChangeHandlers();
         }
     };
-    
+
     /**
     * Deselects a number of results, firing the change handlers once at the
     * end if any indexes were removed.
@@ -226,7 +226,7 @@
         }, this)) {
             throwInvalidData("Indexes not all numeric and in range");
         }
-        
+
         // Remove from the set of indexes given any that are not already selected.
         var currentIndexSet = d3.set(this.currentIndexes);
         var anyRemoved = false;
@@ -236,14 +236,14 @@
                 anyRemoved = true;
             }
         }
-        
+
         if (anyRemoved) {
             this.currentIndexes = currentIndexSet.values().map(function (index) { return parseInt(index, 10); });
             this.currentIndexes.sort(d3.ascending);
             this.fireChangeHandlers();
         }
     };
-    
+
     /**
     * Migrates the selected results from one list to another.
     *
@@ -266,13 +266,13 @@
         } else if (!$.isArray(newResults)) {
             throwInvalidData("ResultSelection.migrate: newResults not an array");
         } else if (oldResults.length !== this.count) {
-            throwInvalidData("ResultSelection.migrate: oldResults list must have the same length as the current count"); 
+            throwInvalidData("ResultSelection.migrate: oldResults list must have the same length as the current count");
         } else if (newResults.length === 0 && this.currentIndexes.length > 0) {
             throwInvalidData("ResultSelection.migrate: newResults list must not be empty if current list has results selected");
         }
-    
+
         var selectedResults = this.currentIndexes.map(function (index) { return oldResults[index]; });
-        
+
         this.count = newResults.length;
         this.currentIndexes = [];
         newResults.forEach(function (result, idx) {

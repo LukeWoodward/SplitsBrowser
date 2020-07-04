@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser HTML - Reads in HTML-format results data files.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,7 +20,7 @@
  */
 (function () {
     "use strict";
-    
+
     var isNotNull = SplitsBrowser.isNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
@@ -37,7 +37,7 @@
     var HTML_TAG_STRIP_REGEXP = /<[^>]+>/g;
     var DISTANCE_FIND_REGEXP = /([0-9.,]+)\s*(?:Km|km)/;
     var CLIMB_FIND_REGEXP = /(\d+)\s*(?:Cm|Hm|hm|m)/;
-    
+
     /**
     * Returns whether the given string is nonempty.
     * @param {String} string - The string to check.
@@ -47,7 +47,7 @@
     function isNonEmpty(string) {
         return string !== null && string !== "";
     }
-    
+
     /**
     * Returns whether the given string contains a number.  The string is
     * considered to contain a number if, after stripping whitespace, the string
@@ -60,16 +60,16 @@
         // isFinite is not enough on its own: isFinite("") is true.
         return string !== "" && isFinite(string);
     }
-    
+
     /**
     * Splits a line by whitespace.
     * @param {String} line - The line to split.
     * @return {Array} Array of whitespace-separated strings.
-    */ 
+    */
     function splitByWhitespace (line) {
         return line.split(/\s+/g).filter(isNonEmpty);
     }
-    
+
     /**
     * Strips all HTML tags from a string and returns the remaining string.
     * @param {String} text - The HTML string to strip tags from.
@@ -78,7 +78,7 @@
     function stripHtml(text) {
         return text.replace(HTML_TAG_STRIP_REGEXP, "");
     }
-    
+
     /**
     * Returns all matches of the given regexp within the given text,
     * after being stripped of HTML.
@@ -102,7 +102,7 @@
                 matches.push(stripHtml(match[1]));
             }
         }
-        
+
         return matches;
     }
 
@@ -116,7 +116,7 @@
     function getFontBits(text) {
         return getHtmlStrippedRegexMatches(/<font[^>]*>(.*?)<\/font>/g, text);
     }
-    
+
     /**
     * Returns the contents of all <td> ... </td> elements within the given
     * text.  The contents of the <td> elements are stripped of all other HTML
@@ -127,7 +127,7 @@
     function getTableDataBits(text) {
         return getHtmlStrippedRegexMatches(/<td[^>]*>(.*?)<\/td>/g, text).map(function (s) { return s.trim(); });
     }
-    
+
     /**
     * Returns the contents of all <td> ... </td> elements within the given
     * text.  The contents of the <td> elements are stripped of all other HTML
@@ -138,7 +138,7 @@
     function getNonEmptyTableDataBits(text) {
         return getTableDataBits(text).filter(function (bit) { return bit !== ""; });
     }
-    
+
     /**
     * Returns the contents of all <th> ... </th> elements within the given
     * text.  The contents of the <th> elements are stripped of all other HTML
@@ -150,7 +150,7 @@
         var matches = getHtmlStrippedRegexMatches(/<th[^>]*>(.*?)<\/th>/g, text);
         return matches.filter(function (bit) { return bit !== ""; });
     }
-    
+
     /**
     * Attempts to read a course distance from the given string.
     * @param {String} text - The text string to read a course distance from.
@@ -165,7 +165,7 @@
             return parseCourseLength(distanceMatch[1]);
         }
     }
-    
+
     /**
     * Attempts to read a course climb from the given string.
     * @param {String} text - The text string to read a course climb from.
@@ -203,7 +203,7 @@
                 throwInvalidData("Unrecognised control header label: '" + label + "'");
             }
         }
-    
+
         return controlCodes;
     }
 
@@ -217,7 +217,7 @@
     *
     * This method does not return anything, instead it mutates the arrays
     * given.
-    * 
+    *
     * @param {Array} cumTimes - Array of cumulative times.
     * @param {Array} splitTimes - Array of split times.
     */
@@ -248,7 +248,7 @@
         this.cumTimes = cumTimes;
         this.competitive = competitive;
     }
-    
+
     /**
     * Returns whether this competitor record is a 'continuation' record.
     * A continuation record is one that has no name, club, class name or total
@@ -259,7 +259,7 @@
     CompetitorParseRecord.prototype.isContinuation = function () {
         return (this.name === "" && this.club === "" && this.className === null && this.totalTime === "" && !this.competitive);
     };
-    
+
     /**
     * Appends the cumulative split times in another CompetitorParseRecord to
     * this one.  The one given must be a 'continuation' record.
@@ -283,17 +283,17 @@
     CompetitorParseRecord.prototype.toResult = function (order) {
         // Prepend a zero cumulative time.
         var cumTimes = [0].concat(this.cumTimes);
-        
+
         // The null is for the start time.
         var result =  fromOriginalCumTimes(order, null, cumTimes, new Competitor(this.name, this.club));
         if (result.completed() && !this.competitive) {
             result.setNonCompetitive();
         }
-        
+
         if (!result.hasAnyTimes()) {
             result.setNonStarter();
         }
-        
+
         return result;
     };
 
@@ -305,19 +305,19 @@
     *
     * A 'Recognizer' is used to handle the finer details of the format parsing.
     * A recognizer should contain methods 'isTextOfThisFormat',
-    * 'preprocess', 'canIgnoreThisLine', 'isCourseHeaderLine', 
+    * 'preprocess', 'canIgnoreThisLine', 'isCourseHeaderLine',
     * 'parseCourseHeaderLine', 'parseControlsLine' and 'parseCompetitor'.
     * See the documentation on the objects below for more information about
     * what these methods do.
     */
-    
+
     /**
     * A Recognizer that handles the 'older' HTML format based on preformatted
     * text.
     * @constructor
     */
     var OldHtmlFormatRecognizer = function () {
-        // There exists variations of the format depending on what the second 
+        // There exists variations of the format depending on what the second
         // <font> ... </font> element on each row contains.  It can be blank,
         // contain a number (start number, perhaps?) or something else.
         // If blank or containing a number, the competitor's name is in column
@@ -325,7 +325,7 @@
         // name is in column 1 and there are three preceding columns.
         this.precedingColumnCount = null;
     };
-    
+
     /**
     * Returns whether this recognizer is likely to recognize the given HTML
     * text and possibly be able to parse it.  If this method returns true, the
@@ -340,18 +340,18 @@
     * @param {String} text - The entire input text read in.
     * @return {boolean} True if the text contains any pre-formatted HTML, false
     *     otherwise
-    */ 
+    */
     OldHtmlFormatRecognizer.prototype.isTextOfThisFormat = function (text) {
         return (text.indexOf("<pre>") >= 0 && text.indexOf("<font") >= 0);
     };
-    
+
     /**
     * Performs some pre-processing on the text before it is read in.
     *
     * This object strips everything up to and including the opening
     * &lt;pre&gt; tag, and everything from the closing &lt;/pre&gt; tag
     * to the end of the text.
-    * 
+    *
     * @param {String} text - The HTML text to preprocess.
     * @return {String} The preprocessed text.
     */
@@ -360,29 +360,29 @@
         if (prePos === -1) {
             throw new Error("Cannot find opening pre tag");
         }
-            
+
         var lineEndPos = text.indexOf("\n", prePos);
         text = text.substring(lineEndPos + 1);
-            
+
         // Replace blank lines.
         text = text.replace(/\n{2,}/g, "\n");
-        
+
         var closePrePos = text.lastIndexOf("</pre>");
         if (closePrePos === -1) {
             throwInvalidData("Found opening <pre> but no closing </pre>");
         }
-            
+
         lineEndPos = text.lastIndexOf("\n", closePrePos);
         text = text.substring(0, lineEndPos);
         return text.trim();
     };
-    
+
     /**
     * Returns whether the HTML parser can ignore the given line altogether.
     *
     * The parser will call this method with every line read in, apart from
     * the second line of each pair of competitor data rows.  These are always
-    * assumed to be in pairs.  
+    * assumed to be in pairs.
     *
     * This recognizer ignores only blank lines.
     *
@@ -392,7 +392,7 @@
     OldHtmlFormatRecognizer.prototype.canIgnoreThisLine = function (line) {
         return line === "";
     };
-    
+
     /**
     * Returns whether the given line is the first line of a course.
     *
@@ -410,7 +410,7 @@
     OldHtmlFormatRecognizer.prototype.isCourseHeaderLine = function (line) {
         return (getFontBits(line).length === 2);
     };
-    
+
     /**
     * Parse a course header line and return the course name, distance and
     * climb.
@@ -425,23 +425,23 @@
         if (bits.length !== 2) {
             throw new Error("Course header line should have two parts");
         }
-        
+
         var nameAndControls = bits[0];
         var distanceAndClimb = bits[1];
-        
+
         var openParenPos = nameAndControls.indexOf("(");
         var courseName = (openParenPos > -1) ? nameAndControls.substring(0, openParenPos) : nameAndControls;
-        
+
         var distance = tryReadDistance(distanceAndClimb);
         var climb = tryReadClimb(distanceAndClimb);
-        
+
         return {
             name: courseName.trim(),
             distance: distance,
             climb: climb
         };
     };
-    
+
     /**
     * Parse control codes from the given line and return a list of them.
     *
@@ -459,7 +459,7 @@
         var controlLabels = splitByWhitespace(controlsText.trim());
         return readControlCodes(controlLabels);
     };
-    
+
     /**
     * Read either cumulative or split times from the given line of competitor
     * data.
@@ -472,11 +472,11 @@
             var closeFontPos = line.indexOf("</font>");
             line = line.substring(closeFontPos + "</font>".length);
         }
-        
+
         var times = splitByWhitespace(stripHtml(line));
         return times;
     };
-    
+
     /**
     * Parse two lines of competitor data into a CompetitorParseRecord object
     * containing the data.
@@ -487,7 +487,7 @@
     OldHtmlFormatRecognizer.prototype.parseCompetitor = function (firstLine, secondLine) {
         var firstLineBits = getFontBits(firstLine);
         var secondLineBits = getFontBits(secondLine);
-        
+
         if (this.precedingColumnCount === null) {
             // If column 1 is blank or a number, we have four preceding
             // columns.  Otherwise we have three.
@@ -499,20 +499,20 @@
         var name = firstLineBits[this.precedingColumnCount - 2].trim();
         var totalTime = firstLineBits[this.precedingColumnCount - 1].trim();
         var club = secondLineBits[this.precedingColumnCount - 2].trim();
-        
+
         var cumulativeTimes = this.readCompetitorSplitDataLine(firstLine);
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
         cumulativeTimes = cumulativeTimes.map(parseTime);
 
         removeExtraControls(cumulativeTimes, splitTimes);
-        
+
         var className = null;
         if (name !== null && name !== "") {
             var lastCloseFontPos = -1;
             for (var i = 0; i < this.precedingColumnCount; i += 1) {
                 lastCloseFontPos = firstLine.indexOf("</font>", lastCloseFontPos + 1);
             }
-            
+
             var firstLineUpToLastPreceding = firstLine.substring(0, lastCloseFontPos + "</font>".length);
             var firstLineMinusFonts = firstLineUpToLastPreceding.replace(/<font[^>]*>(.*?)<\/font>/g, "");
             var lineParts = splitByWhitespace(firstLineMinusFonts);
@@ -520,10 +520,10 @@
                 className = lineParts[0];
             }
         }
-        
+
         return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
     };
-    
+
     /**
     * Constructs a recognizer for formatting the 'newer' format of HTML
     * event results data.
@@ -551,7 +551,7 @@
     * @param {String} text - The entire input text read in.
     * @return {boolean} True if the text contains at least five HTML table
     *     tags.
-    */ 
+    */
     NewHtmlFormatRecognizer.prototype.isTextOfThisFormat = function (text) {
         var tablePos = -1;
         for (var i = 0; i < 5; i += 1) {
@@ -561,17 +561,17 @@
                 return false;
             }
         }
-        
+
         return true;
     };
-    
+
     /**
     * Performs some pre-processing on the text before it is read in.
     *
     * This recognizer performs a fair amount of pre-processing, to remove
     * parts of the file we don't care about, and to reshape what there is left
     * so that it is in a more suitable form to be parsed.
-    * 
+    *
     * @param {String} text - The HTML text to preprocess.
     * @return {String} The preprocessed text.
     */
@@ -595,10 +595,10 @@
         // and closing table and table-row tags at the end of lines.
         text = text.replace(/>\n+</g, "><").replace(/><tr>/g, ">\n<tr>").replace(/<\/tr></g, "</tr>\n<")
                    .replace(/><table/g, ">\n<table").replace(/<\/table></g, "</table>\n<");
-        
+
         // Remove all <col> elements.
         text = text.replace(/<\/col[^>]*>/g, "");
-        
+
         // Remove all rows that contain only a single non-breaking space.
         // In the file I have, the &nbsp; entities are missing their
         // semicolons.  However, this could well be fixed in the future.
@@ -606,17 +606,17 @@
 
         // Remove any anchor elements used for navigation...
         text = text.replace(/<a id="[^"]*"><\/a>/g, "");
-        
+
         // ... and the navigation div.  Use [\s\S] to match everything
         // including newlines - JavaScript regexps have no /s modifier.
         text = text.replace(/<div id="navigation">[\s\S]*?<\/div>/g, "");
-        
+
         // Finally, remove the trailing </body> and </html> elements.
         text = text.replace("</body></html>", "");
-        
+
         return text.trim();
     };
-    
+
     /**
     * Returns whether the HTML parser can ignore the given line altogether.
     *
@@ -642,7 +642,7 @@
         }
     };
 
-    
+
     /**
     * Returns whether the given line is the first line of a course.
     *
@@ -659,7 +659,7 @@
     NewHtmlFormatRecognizer.prototype.isCourseHeaderLine = function (line) {
         return line.indexOf('<td id="header"') > -1;
     };
-    
+
     /**
     * Parse a course header line and return the course name, distance and
     * climb.
@@ -674,28 +674,28 @@
         if (dataBits.length === 0) {
             throwInvalidData("No parts found in course header line");
         }
-            
+
         var name = dataBits[0];
         var openParenPos = name.indexOf("(");
         if (openParenPos > -1) {
             name = name.substring(0, openParenPos);
         }
-            
+
         name = name.trim();
-        
+
         var distance = null;
         var climb = null;
-        
+
         for (var bitIndex = 1; bitIndex < dataBits.length; bitIndex += 1) {
             if (distance === null) {
                 distance = tryReadDistance(dataBits[bitIndex]);
             }
-                    
+
             if (climb === null) {
                 climb = tryReadClimb(dataBits[bitIndex]);
             }
         }
-                    
+
         return {name: name, distance: distance, climb: climb };
     };
 
@@ -713,7 +713,7 @@
         var bits = getNonEmptyTableDataBits(line);
         return readControlCodes(bits);
     };
-    
+
     /**
     * Read either cumulative or split times from the given line of competitor
     * data.
@@ -723,18 +723,18 @@
     */
     NewHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (line) {
         var bits = getTableDataBits(line);
-        
+
         var startPos = this.timesOffset;
-        
+
         // Discard the empty bits at the end.
         var endPos = bits.length;
         while (endPos > 0 && bits[endPos - 1] === "") {
             endPos -= 1;
         }
-        
+
         return bits.slice(startPos, endPos).filter(isNonEmpty);
     };
-    
+
     /**
     * Parse two lines of competitor data into a CompetitorParseRecord object
     * containing the data.
@@ -745,30 +745,30 @@
     NewHtmlFormatRecognizer.prototype.parseCompetitor = function (firstLine, secondLine) {
         var firstLineBits = getTableDataBits(firstLine);
         var secondLineBits = getTableDataBits(secondLine);
-        
+
         var competitive = hasNumber(firstLineBits[0]);
         var nameOffset = (this.timesOffset === 3) ? 1 : 2;
         var name = firstLineBits[nameOffset];
         var totalTime = firstLineBits[this.timesOffset - 1];
         var club = secondLineBits[nameOffset];
-        
+
         var className = (this.timesOffset === 5 && name !== "") ? firstLineBits[3] : null;
-        
+
         var cumulativeTimes = this.readCompetitorSplitDataLine(firstLine);
         var splitTimes = this.readCompetitorSplitDataLine(secondLine);
         cumulativeTimes = cumulativeTimes.map(parseTime);
-        
+
         removeExtraControls(cumulativeTimes, splitTimes);
-        
+
         var nonZeroCumTimeCount = cumulativeTimes.filter(isNotNull).length;
-        
+
         if (nonZeroCumTimeCount !== splitTimes.length) {
             throwInvalidData("Cumulative and split times do not have the same length: " + nonZeroCumTimeCount + " cumulative times, " + splitTimes.length + " split times");
         }
-        
+
         return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
     };
-    
+
     /**
     * Constructs a recognizer for formatting an HTML format supposedly from
     * 'OEvent'.
@@ -796,7 +796,7 @@
     * @param {String} text - The entire input text read in.
     * @return {boolean} True if the text contains precisely two HTML table
     *     tags.
-    */ 
+    */
     OEventTabularHtmlFormatRecognizer.prototype.isTextOfThisFormat = function (text) {
         var table1Pos = text.indexOf("<table");
         if (table1Pos >= 0) {
@@ -809,17 +809,17 @@
                 }
             }
         }
-        
+
         return false;
     };
-    
+
     /**
     * Performs some pre-processing on the text before it is read in.
     *
     * This recognizer performs a fair amount of pre-processing, to remove
     * parts of the file we don't care about, and to reshape what there is left
     * so that it is in a more suitable form to be parsed.
-    * 
+    *
     * @param {String} text - The HTML text to preprocess.
     * @return {String} The preprocessed text.
     */
@@ -829,26 +829,26 @@
         if (tableEndPos === -1) {
             throwInvalidData("Could not find any closing </table> tags");
         }
-        
+
         if (text.indexOf('<td colspan="25">') >= 0) {
             // The table has 25 columns with classes and 24 without.
             this.usesClasses = true;
         }
 
         text = text.substring(tableEndPos + "</table>".length);
-        
+
         // Remove all rows that contain only a single non-breaking space.
         text = text.replace(/<tr[^>]*><td colspan=[^>]*>&nbsp;<\/td><\/tr>/g, "");
-        
+
         // Replace blank lines.
         text = text.replace(/\n{2,}/g, "\n");
-        
+
         // Finally, remove the trailing </body> and </html> elements.
         text = text.replace("</body>", "").replace("</html>", "");
-        
+
         return text.trim();
     };
-    
+
     /**
     * Returns whether the HTML parser can ignore the given line altogether.
     *
@@ -865,7 +865,7 @@
     OEventTabularHtmlFormatRecognizer.prototype.canIgnoreThisLine = function (line) {
         return (line === "" || line.indexOf("<table") > -1 || line.indexOf("</table>") > -1 || line.indexOf("<hr>") > -1);
     };
-    
+
     /**
     * Returns whether the given line is the first line of a course.
     *
@@ -882,7 +882,7 @@
     OEventTabularHtmlFormatRecognizer.prototype.isCourseHeaderLine = function (line) {
         return line.indexOf('<tr class="clubName"') > -1;
     };
-    
+
     /**
     * Parse a course header line and return the course name, distance and
     * climb.
@@ -897,9 +897,9 @@
         if (dataBits.length === 0) {
             throwInvalidData("No parts found in course header line");
         }
-            
+
         var part = dataBits[0];
-        
+
         var name, distance, climb;
         var match = /^(.*?)\s+\((\d+)m,\s*(\d+)m\)$/.exec(part);
         if (match === null) {
@@ -912,7 +912,7 @@
             distance = parseInt(match[2], 10) / 1000;
             climb = parseInt(match[3], 10);
         }
-                    
+
         return {name: name.trim(), distance: distance, climb: climb };
     };
 
@@ -933,7 +933,7 @@
             return (dashPos === -1) ? null : bit.substring(dashPos + 1);
         });
     };
-    
+
     /**
     * Read either cumulative or split times from the given line of competitor
     * data.
@@ -942,15 +942,15 @@
     * @return {Array} Array of times.
     */
     OEventTabularHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (bits) {
-        
+
         var startPos = (this.usesClasses) ? 5 : 4;
-        
+
         // Discard the empty bits at the end.
         var endPos = bits.length;
         while (endPos > 0 && bits[endPos - 1] === "") {
             endPos -= 1;
         }
-        
+
         // Alternate cells contain ranks, which we're not interested in.
         var timeBits = [];
         for (var index = startPos; index < endPos; index += 2) {
@@ -959,10 +959,10 @@
                 timeBits.push(bit);
             }
         }
-        
+
         return timeBits;
     };
-    
+
     /**
     * Parse two lines of competitor data into a CompetitorParseRecord object
     * containing the data.
@@ -973,13 +973,13 @@
     OEventTabularHtmlFormatRecognizer.prototype.parseCompetitor = function (firstLine, secondLine) {
         var firstLineBits = getTableDataBits(firstLine);
         var secondLineBits = getTableDataBits(secondLine);
-        
+
         var competitive = hasNumber(firstLineBits[0]);
         var name = firstLineBits[2];
         var totalTime = firstLineBits[(this.usesClasses) ? 4 : 3];
         var className = (this.usesClasses && name !== "") ? firstLineBits[3] : null;
         var club = secondLineBits[2];
-        
+
         // If there is any cumulative time with a blank corresponding split
         // time, use a placeholder value for the split time.  Typically this
         // happens when a competitor has punched one control but not the
@@ -989,17 +989,17 @@
                 secondLineBits[index] = "----";
             }
         }
-        
+
         var cumulativeTimes = this.readCompetitorSplitDataLine(firstLineBits);
         var splitTimes = this.readCompetitorSplitDataLine(secondLineBits);
         cumulativeTimes = cumulativeTimes.map(parseTime);
-        
+
         removeExtraControls(cumulativeTimes, splitTimes);
-        
+
         if (cumulativeTimes.length !== splitTimes.length) {
             throwInvalidData("Cumulative and split times do not have the same length: " + cumulativeTimes.length + " cumulative times, " + splitTimes.length + " split times");
         }
-        
+
         return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
     };
 
@@ -1011,7 +1011,7 @@
     *     if known, else null.
     * @param {?Number} climb - The climb of the course in metres, if known,
     *     else null.
-    */ 
+    */
     function CourseParseRecord(name, distance, climb) {
         this.name = name;
         this.distance = distance;
@@ -1019,15 +1019,15 @@
         this.controls = [];
         this.competitors = [];
     }
-    
+
     /**
     * Adds the given list of control codes to those built up so far.
     * @param {Array} controls - Array of control codes read.
-    */ 
+    */
     CourseParseRecord.prototype.addControls = function (controls) {
         this.controls = this.controls.concat(controls);
     };
-    
+
     /**
     * Returns whether the course has all of the controls it needs.
     * The course has all its controls if its last control is the finish, which
@@ -1077,7 +1077,7 @@
         this.linePos = -1;
         this.currentCompetitor = null;
     }
-    
+
     /**
     * Attempts to read the next unread line from the data given.  If the end of
     * the data has been read, null will be returned.
@@ -1092,11 +1092,11 @@
             return null;
         }
     };
-    
+
     /**
     * Adds the current competitor being constructed to the current course, and
     * clear the current competitor.
-    * 
+    *
     * If there is no current competitor, nothing happens.
     */
     HtmlFormatParser.prototype.addCurrentCompetitorIfNecessary = function () {
@@ -1105,11 +1105,11 @@
             this.currentCompetitor = null;
         }
     };
-    
+
     /**
     * Adds the current competitor being constructed to the current course, and
     * the current course being constructed to the list of all courses.
-    * 
+    *
     * If there is no current competitor nor no current course, nothing happens.
     */
     HtmlFormatParser.prototype.addCurrentCompetitorAndCourseIfNecessary = function () {
@@ -1118,7 +1118,7 @@
             this.courses.push(this.currentCourse);
         }
     };
-    
+
     /**
     * Reads in data for one competitor from two lines of the input data.
     *
@@ -1131,7 +1131,7 @@
         if (secondLine === null) {
             throwInvalidData("Hit end of input data unexpectedly while parsing competitor: first line was '" + firstLine + "'");
         }
-            
+
         var competitorRecord = this.recognizer.parseCompetitor(firstLine, secondLine);
         if (competitorRecord.isContinuation()) {
             if (this.currentCompetitor === null) {
@@ -1144,14 +1144,14 @@
             this.currentCompetitor = competitorRecord;
         }
     };
-    
+
     /**
     * Returns whether the classes are unique within courses.  If so, they can
     * be used to subdivide courses.  If not, CourseClasses and Courses must be
     * the same.
     * @return {boolean} True if no two competitors in the same class are on
     *     different classes, false otherwise.
-    */ 
+    */
     HtmlFormatParser.prototype.areClassesUniqueWithinCourses = function () {
         var classesToCoursesMap = d3.map();
         for (var courseIndex = 0; courseIndex < this.courses.length; courseIndex += 1) {
@@ -1167,10 +1167,10 @@
                 }
             }
         }
-        
+
         return true;
     };
-    
+
     /**
     * Reads through all of the intermediate parse-record data and creates an
     * Event object with all of the courses and classes.
@@ -1181,14 +1181,14 @@
         // are repeated within multiple courses.  In this case, ignore the
         // classes given and create a CourseClass for each set.
         var classesUniqueWithinCourses = this.areClassesUniqueWithinCourses();
-        
+
         var newCourses = [];
         var classes = [];
-        
+
         var competitorsHaveClasses = this.courses.every(function (course) {
             return course.competitors.every(function (competitor) { return isNotNull(competitor.className); });
         });
-        
+
         this.courses.forEach(function (course) {
             // Firstly, sort competitors by class.
             var classToCompetitorsMap = d3.map();
@@ -1200,33 +1200,33 @@
                     classToCompetitorsMap.set(className, [competitor]);
                 }
             });
-            
+
             var classesForThisCourse = [];
-            
+
             classToCompetitorsMap.keys().forEach(function (className) {
                 var numControls = course.controls.length - 1;
                 var oldCompetitors = classToCompetitorsMap.get(className);
                 var newResults = oldCompetitors.map(function (competitor, index) {
                     return competitor.toResult(index + 1);
                 });
-                
+
                 var courseClass = new CourseClass(className, numControls, newResults);
                 classesForThisCourse.push(courseClass);
                 classes.push(courseClass);
             }, this);
-            
+
             var newCourse = new Course(course.name, classesForThisCourse, course.distance, course.climb, course.controls.slice(0, course.controls.length - 1));
             newCourses.push(newCourse);
             classesForThisCourse.forEach(function (courseClass) {
                 courseClass.setCourse(newCourse);
             });
         }, this);
-        
+
         // Empty array is for warnings, which aren't supported by the HTML
         // format parsers.
         return new Event(classes, newCourses, []);
     };
-    
+
     /**
     * Parses the given HTML text containing results data into an Event object.
     * @param {String} text - The HTML text to parse.
@@ -1254,21 +1254,21 @@
                 this.currentCourse.addControls(controls);
             }
         }
-        
+
         this.addCurrentCompetitorAndCourseIfNecessary();
-        
+
         if (this.courses.length === 0) {
             throwInvalidData("No competitor data was found");
         }
-        
+
         var eventData = this.createOverallEventObject();
         return eventData;
     };
-    
+
     var RECOGNIZER_CLASSES = [OldHtmlFormatRecognizer, NewHtmlFormatRecognizer, OEventTabularHtmlFormatRecognizer];
-    
+
     SplitsBrowser.Input.Html = {};
-    
+
     /**
     * Attempts to parse data as one of the supported HTML formats.
     *
@@ -1291,8 +1291,8 @@
                 return parsedEvent;
             }
         }
-        
+
         // If we get here, the format wasn't recognized.
         throwWrongFileFormat("No HTML recognizers recognised this as HTML they could parse");
     };
-})();    
+})();

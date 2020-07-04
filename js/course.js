@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser Course - A single course at an event.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,9 +20,9 @@
  */
 (function () {
     "use strict";
-    
+
     var throwInvalidData = SplitsBrowser.throwInvalidData;
-    
+
     /**
     * A collection of 'classes', all runners within which ran the same physical
     * course.
@@ -43,16 +43,16 @@
         this.climb = climb;
         this.controls = controls;
     }
-    
+
     /** 'Magic' control code that represents the start. */
     Course.START = "__START__";
-    
+
     /** 'Magic' control code that represents the finish. */
     Course.FINISH = "__FINISH__";
-    
+
     var START = Course.START;
     var FINISH = Course.FINISH;
-    
+
     /**
     * Returns an array of the 'other' classes on this course.
     * @param {SplitsBrowser.Model.CourseClass} courseClass - A course-class
@@ -68,7 +68,7 @@
             return otherClasses;
         }
     };
-    
+
     /**
     * Returns the number of course-classes that use this course.
     * @return {Number} Number of course-classes that use this course.
@@ -76,7 +76,7 @@
     Course.prototype.getNumClasses = function () {
         return this.classes.length;
     };
-    
+
     /**
     * Returns whether this course has control code data.
     * @return {boolean} true if this course has control codes, false if it does
@@ -85,7 +85,7 @@
     Course.prototype.hasControls = function () {
         return (this.controls !== null);
     };
-    
+
     /**
     * Returns the code of the control at the given number.
     *
@@ -113,7 +113,7 @@
             throwInvalidData("Cannot get control code of control " + controlNum + " because it is out of range");
         }
     };
-    
+
     /**
     * Returns whether this course uses the given leg.
     *
@@ -129,7 +129,7 @@
     Course.prototype.usesLeg = function (startCode, endCode) {
         return this.getLegNumber(startCode, endCode) >= 0;
     };
-    
+
     /**
     * Returns the number of a leg in this course, given the start and end
     * control codes.
@@ -152,7 +152,7 @@
             // No controls, so no, it doesn't contain the leg specified.
             return -1;
         }
-        
+
         if (startCode === START && endCode === FINISH) {
             // No controls - straight from the start to the finish.
             // This leg is only present, and is leg 1, if there are no
@@ -169,12 +169,12 @@
                     return controlIdx + 1;
                 }
             }
-            
+
             // If we get here, the given leg is not part of this course.
             return -1;
         }
     };
-    
+
     /**
     * Returns the fastest splits recorded for a given leg of the course.
     *
@@ -192,13 +192,13 @@
         if (this.legs === null) {
             throwInvalidData("Cannot determine fastest splits for a leg because leg information is not available");
         }
-        
+
         var legNumber = this.getLegNumber(startCode, endCode);
         if (legNumber < 0) {
             var legStr = ((startCode === START) ? "start" : startCode) + " to " + ((endCode === FINISH) ? "end" : endCode);
             throwInvalidData("Leg from " +  legStr + " not found in course " + this.name);
         }
-        
+
         var controlNum = legNumber;
         var fastestSplits = [];
         this.classes.forEach(function (courseClass) {
@@ -207,10 +207,10 @@
                 fastestSplits.push({name: classFastest.name, className: courseClass.name, split: classFastest.split});
             }
         });
-        
+
         return fastestSplits;
     };
-    
+
     /**
     * Returns a list of all results on this course that visit the control
     * with the given code in the time interval given.
@@ -254,7 +254,7 @@
             }
         }
     };
-    
+
     /**
     * Returns a list of all results on this course that visit the control
     * with the given number in the time interval given.
@@ -274,10 +274,10 @@
                 matchingResults.push({name: result.name, time: result.time, className: courseClass.name});
             });
         });
-        
+
         return matchingResults;
     };
-    
+
     /**
     * Returns whether the course has the given control.
     * @param {String} controlCode - The code of the control.
@@ -287,7 +287,7 @@
     Course.prototype.hasControl = function (controlCode) {
         return this.controls !== null && this.controls.indexOf(controlCode) > -1;
     };
-    
+
     /**
     * Returns the control code(s) of the control(s) after the one with the
     * given code.
@@ -316,17 +316,17 @@
                 } else {
                     nextControls.push(this.controls[controlIdx + 1]);
                 }
-                
+
                 lastControlIdx = controlIdx;
             } while (true); // Loop exits when broken.
-            
+
             if (nextControls.length === 0) {
                 throwInvalidData("Control '" + controlCode + "' not found on course " + this.name);
             } else {
                 return nextControls;
             }
         }
-    };  
-    
+    };
+
     SplitsBrowser.Model.Course = Course;
 })();

@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser OE Reader - Reads in OE CSV results data files.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,7 +20,7 @@
  */
 (function () {
     "use strict";
-    
+
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
@@ -33,13 +33,13 @@
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var Course = SplitsBrowser.Model.Course;
     var Event = SplitsBrowser.Model.Event;
-    
+
     var DELIMITERS = [";", ",", "\t", "\\"];
-    
+
     // Indexes of the various columns relative to the column for control-1.
-    
+
     var COLUMN_INDEXES = {};
-    
+
     [44, 46, 60].forEach(function (columnOffset) {
         COLUMN_INDEXES[columnOffset] = {
             course: columnOffset - 7,
@@ -52,7 +52,7 @@
             control1: columnOffset
         };
     });
-    
+
     [44, 46].forEach(function (columnOffset) {
         COLUMN_INDEXES[columnOffset].nonCompetitive = columnOffset - 38;
         COLUMN_INDEXES[columnOffset].startTime = columnOffset - 37;
@@ -61,15 +61,15 @@
         COLUMN_INDEXES[columnOffset].club =  columnOffset - 31;
         COLUMN_INDEXES[columnOffset].className = columnOffset - 28;
     });
-    
+
     COLUMN_INDEXES[44].combinedName = 3;
     COLUMN_INDEXES[44].yearOfBirth = 4;
-    
+
     COLUMN_INDEXES[46].forename = 4;
     COLUMN_INDEXES[46].surname = 3;
     COLUMN_INDEXES[46].yearOfBirth = 5;
     COLUMN_INDEXES[46].gender = 6;
-    
+
     COLUMN_INDEXES[60].forename = 6;
     COLUMN_INDEXES[60].surname = 5;
     COLUMN_INDEXES[60].yearOfBirth = 7;
@@ -83,10 +83,10 @@
     COLUMN_INDEXES[60].className = 26;
     COLUMN_INDEXES[60].classNameFallback = COLUMN_INDEXES[60].course;
     COLUMN_INDEXES[60].clubFallback = 18;
-    
+
     // Minimum control offset.
     var MIN_CONTROLS_OFFSET = 37;
-    
+
     /**
     * Remove any leading and trailing double-quotes from the given string.
     * @param {String} value - The value to trim quotes from.
@@ -96,10 +96,10 @@
         if (value[0] === '"' && value[value.length - 1] === '"') {
             value = value.substring(1, value.length - 1).replace(/""/g, '"').trim();
         }
-        
+
         return value;
     }
-    
+
     /**
     * Constructs an OE-format data reader.
     *
@@ -109,23 +109,23 @@
     */
     function Reader(data) {
         this.data = normaliseLineEndings(data);
-        
+
         // Map that associates classes to all of the results running on
         // that class.
         this.classes = d3.map();
-        
+
         // Map that associates course names to length and climb values.
         this.courseDetails = d3.map();
-        
+
         // Set of all pairs of classes and courses.
         // (While it is common that one course may have multiple classes, it
         // seems also that one class can be made up of multiple courses, e.g.
         // M21E at BOC 2013.)
         this.classCoursePairs = [];
-        
+
         // The indexes of the columns that we read data from.
         this.columnIndexes = null;
-        
+
         // Warnings about results that cannot be read in.
         this.warnings = [];
     }
@@ -138,7 +138,7 @@
         if (this.lines.length <= 1) {
             throwWrongFileFormat("No data found to read");
         }
-        
+
         var firstDataLine = this.lines[1];
         for (var i = 0; i < DELIMITERS.length; i += 1) {
             var delimiter = DELIMITERS[i];
@@ -146,10 +146,10 @@
                 return delimiter;
             }
         }
-        
+
         throwWrongFileFormat("Data appears not to be in the OE CSV format");
     };
-    
+
     /**
     * Identifies which variation on the OE CSV format we are parsing.
     *
@@ -161,16 +161,16 @@
     *     data.
     */
     Reader.prototype.identifyFormatVariation = function (delimiter) {
-        
+
         var firstLine = this.lines[1].split(delimiter);
-        
+
         var controlCodeRegexp = /^[A-Za-z0-9]+$/;
         for (var columnOffset in COLUMN_INDEXES) {
-            if (COLUMN_INDEXES.hasOwnProperty(columnOffset)) {
+            if (Object.prototype.hasOwnProperty.call(COLUMN_INDEXES, columnOffset)) {
                 // Convert columnOffset to a number.  It will presently be a
                 // string because it is an object property.
                 columnOffset = parseInt(columnOffset, 10);
-                
+
                 // We want there to be a control code at columnOffset, with
                 // both preceding columns either blank or containing a valid
                 // time.
@@ -178,7 +178,7 @@
                         controlCodeRegexp.test(firstLine[columnOffset]) &&
                         (firstLine[columnOffset - 2].trim() === "" || parseTime(firstLine[columnOffset - 2]) !== null) &&
                         (firstLine[columnOffset - 1].trim() === "" || parseTime(firstLine[columnOffset - 1]) !== null)) {
-                           
+
                     // Now check the control count exists.  If not, we've
                     // probably got a triple-column CSV file instead.
                     var controlCountColumnIndex = COLUMN_INDEXES[columnOffset].controlCount;
@@ -189,10 +189,10 @@
                 }
             }
         }
-        
+
         throwWrongFileFormat("Did not find control 1 at any of the supported indexes");
     };
-    
+
     /**
     * Returns the name of the class in the given row.
     * @param {Array} row - Array of row data.
@@ -200,7 +200,7 @@
     */
     Reader.prototype.getClassName = function (row) {
         var className = row[this.columnIndexes.className];
-        if (className === "" && this.columnIndexes.hasOwnProperty("classNameFallback")) {
+        if (className === "" && Object.prototype.hasOwnProperty.call(this.columnIndexes, "classNameFallback")) {
             // 'Nameless' variation: no class names.
             className = row[this.columnIndexes.classNameFallback];
         }
@@ -218,10 +218,10 @@
         if (startTimeStr === "") {
             startTimeStr = row[this.columnIndexes.startTime];
         }
-        
+
         return parseTime(startTimeStr);
     };
-    
+
     /**
     * Returns the number of controls to expect on the given line.
     * @param {Array} row - Array of row data items.
@@ -246,9 +246,9 @@
                 this.warnings.push("Could not read the control count '" + row[this.columnIndexes.controlCount] + "' for competitor '" + name + "' from line " + lineNumber);
                 return null;
             }
-        }    
+        }
     };
-    
+
     /**
     * Reads the cumulative times out of a row of competitor data.
     * @param {Array} row - Array of row data items.
@@ -257,16 +257,16 @@
     * @return {Array} Array of cumulative times.
     */
     Reader.prototype.readCumulativeTimes = function (row, lineNumber, numControls) {
-        
+
         var cumTimes = [0];
-        
+
         for (var controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
             var cellIndex = this.columnIndexes.control1 + 1 + 2 * controlIdx;
             var cumTimeStr = (cellIndex < row.length) ? row[cellIndex] : null;
             var cumTime = (cumTimeStr === null) ? null : parseTime(cumTimeStr);
             cumTimes.push(cumTime);
         }
-        
+
         var totalTime = parseTime(row[this.columnIndexes.time]);
         if (totalTime === null) {
             // 'Nameless' variation: total time missing, so calculate from
@@ -277,12 +277,12 @@
                 totalTime = finishTime - startTime;
             }
         }
-        
+
         cumTimes.push(totalTime);
-    
+
         return cumTimes;
     };
-    
+
     /**
     * Checks to see whether the given row contains a new class, and if so,
     * creates it.
@@ -295,7 +295,7 @@
             this.classes.set(className, { numControls: numControls, results: [] });
         }
     };
-    
+
     /**
     * Checks to see whether the given row contains a new course, and if so,
     * creates it.
@@ -307,7 +307,7 @@
         if (!this.courseDetails.has(courseName)) {
             var controlNums = d3.range(0, numControls).map(function (controlIdx) { return row[this.columnIndexes.control1 + 2 * controlIdx]; }, this);
             this.courseDetails.set(courseName, {
-                length: parseCourseLength(row[this.columnIndexes.distance]), 
+                length: parseCourseLength(row[this.columnIndexes.distance]),
                 climb: parseCourseClimb(row[this.columnIndexes.climb]),
                 controls: controlNums
             });
@@ -322,7 +322,7 @@
     Reader.prototype.createClassCoursePairIfNecessary = function (row) {
         var className = this.getClassName(row);
         var courseName = row[this.columnIndexes.course];
-        
+
         if (!this.classCoursePairs.some(function (pair) { return pair[0] === className && pair[1] === courseName; })) {
             this.classCoursePairs.push([className, courseName]);
         }
@@ -336,20 +336,20 @@
     Reader.prototype.getName = function (row) {
         var name = "";
 
-        if (this.columnIndexes.hasOwnProperty("forename") && this.columnIndexes.hasOwnProperty("surname")) {
+        if (Object.prototype.hasOwnProperty.call(this.columnIndexes, "forename") && Object.prototype.hasOwnProperty.call(this.columnIndexes, "surname")) {
             var forename = row[this.columnIndexes.forename];
             var surname = row[this.columnIndexes.surname];
             name = (forename + " " + surname).trim();
         }
-        
-        if (name === "" && this.columnIndexes.hasOwnProperty("combinedName")) {
+
+        if (name === "" && Object.prototype.hasOwnProperty.call(this.columnIndexes, "combinedName")) {
             // 'Nameless' or 44-column variation.
             name = row[this.columnIndexes.combinedName];
         }
-        
+
         return name;
     };
-    
+
     /**
     * Reads in the competitor-specific data from the given row and adds it to
     * the event data read so far.
@@ -357,15 +357,15 @@
     * @param {Array} cumTimes - Array of cumulative times for the competitor.
     */
     Reader.prototype.addCompetitor = function (row, cumTimes) {
-    
+
         var className = this.getClassName(row);
         var placing = row[this.columnIndexes.placing];
         var club = row[this.columnIndexes.club];
-        if (club === "" && this.columnIndexes.hasOwnProperty("clubFallback")) {
+        if (club === "" && Object.prototype.hasOwnProperty.call(this.columnIndexes, "clubFallback")) {
             // Nameless variation: no club name, just number...
             club = row[this.columnIndexes.clubFallback];
         }
-        
+
         var startTime = this.getStartTime(row);
 
         var name = this.getName(row);
@@ -376,7 +376,7 @@
 
         var order = this.classes.get(className).results.length + 1;
         var competitor = new Competitor(name, club);
-        
+
         var yearOfBirthStr = row[this.columnIndexes.yearOfBirth];
         if (yearOfBirthStr !== "") {
             var yearOfBirth = parseInt(yearOfBirthStr, 10);
@@ -384,14 +384,14 @@
                 competitor.setYearOfBirth(yearOfBirth);
             }
         }
-        
-        if (this.columnIndexes.hasOwnProperty("gender")) {
+
+        if (Object.prototype.hasOwnProperty.call(this.columnIndexes, "gender")) {
             var gender = row[this.columnIndexes.gender];
             if (gender === "M" || gender === "F") {
                 competitor.setGender(gender);
             }
         }
-        
+
         var result = fromOriginalCumTimes(order, startTime, cumTimes, competitor);
         if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && result.completed()) {
             // Competitor either marked as non-competitive, or has completed
@@ -399,7 +399,7 @@
             // assume that they are non-competitive.
             result.setNonCompetitive();
         }
-        
+
         var classifier = row[this.columnIndexes.classifier];
         if (classifier !== "") {
             if (classifier === "0" && cumTimes.indexOf(null) >= 0 && cumTimes[cumTimes.length - 1] !== null) {
@@ -419,7 +419,7 @@
 
         this.classes.get(className).results.push(result);
     };
-    
+
     /**
     * Parses the given line and adds it to the event data accumulated so far.
     * @param {String} line - The line to parse.
@@ -429,63 +429,63 @@
     *     data.
     */
     Reader.prototype.readLine = function (line, lineNumber, delimiter) {
-    
+
         if (line.trim() === "") {
             // Skip this blank line.
             return;
         }
-    
+
         var row = line.split(delimiter).map(function (s) { return s.trim(); }).map(dequote);
-        
+
         // Check the row is long enough to have all the data besides the
         // controls data.
         if (row.length < MIN_CONTROLS_OFFSET) {
             throwInvalidData("Too few items on line " + lineNumber + " of the input file: expected at least " + MIN_CONTROLS_OFFSET + ", got " + row.length);
         }
-        
+
         var numControls = this.getNumControls(row, lineNumber);
         if (numControls !== null) {
             var cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
-            
+
             this.createClassIfNecessary(row, numControls);
             this.createCourseIfNecessary(row, numControls);
             this.createClassCoursePairIfNecessary(row);
-            
+
             this.addCompetitor(row, cumTimes);
         }
     };
-    
+
     /**
     * Creates maps that describe the many-to-many join between the class names
-    * and course names. 
+    * and course names.
     * @return {Object} Object that contains two maps describing the
     *     many-to-many join.
-    */    
+    */
     Reader.prototype.getMapsBetweenClassesAndCourses = function () {
-        
+
         var classesToCourses = d3.map();
         var coursesToClasses = d3.map();
-        
+
         this.classCoursePairs.forEach(function (pair) {
             var className = pair[0];
             var courseName = pair[1];
-            
+
             if (classesToCourses.has(className)) {
                 classesToCourses.get(className).push(courseName);
             } else {
                 classesToCourses.set(className, [courseName]);
             }
-            
+
             if (coursesToClasses.has(courseName)) {
                 coursesToClasses.get(courseName).push(className);
             } else {
                 coursesToClasses.set(courseName, [className]);
             }
         });
-        
+
         return {classesToCourses: classesToCourses, coursesToClasses: coursesToClasses};
     };
-    
+
     /**
     * Creates and return a list of CourseClass objects from all of the data read.
     * @return {Array} Array of CourseClass objects.
@@ -498,7 +498,7 @@
             return new CourseClass(className, courseClass.numControls, courseClass.results);
         }, this);
     };
-    
+
     /**
     * Find all of the courses and classes that are related to the given course.
     *
@@ -508,7 +508,7 @@
     * Essentially, we have a many-to-many join, and we want to pull out of that
     * all of the classes and courses linked to the one course with the given
     * name.
-    * 
+    *
     * (For the graph theorists among you, imagine the bipartite graph with
     * classes on one side and courses on the other.  We want to find the
     * connected subgraph that this course belongs to.)
@@ -529,10 +529,10 @@
         var classNamesToDo = [];
         var relatedCourseNames = [];
         var relatedClassNames = [];
-        
+
         var courseName;
         var className;
-        
+
         while (courseNamesToDo.length > 0 || classNamesToDo.length > 0) {
             while (courseNamesToDo.length > 0) {
                 courseName = courseNamesToDo.shift();
@@ -543,10 +543,10 @@
                         classNamesToDo.push(className);
                     }
                 }
-                
+
                 relatedCourseNames.push(courseName);
             }
-            
+
             while (classNamesToDo.length > 0) {
                 className = classNamesToDo.shift();
                 var courseNames = manyToManyMaps.classesToCourses.get(className);
@@ -556,27 +556,27 @@
                         courseNamesToDo.push(courseName);
                     }
                 }
-                
+
                 relatedClassNames.push(className);
             }
         }
-        
+
         // Mark all of the courses that we handled here as done.
         relatedCourseNames.forEach(function (courseName) {
             doneCourseNames.add(courseName);
         });
-        
+
         var classesForThisCourse = relatedClassNames.map(function (className) { return classesMap.get(className); });
         var details = this.courseDetails.get(initCourseName);
         var course = new Course(initCourseName, classesForThisCourse, details.length, details.climb, details.controls);
-        
+
         classesForThisCourse.forEach(function (courseClass) {
             courseClass.setCourse(course);
         });
-        
+
         return course;
     };
-    
+
     /**
     * Sort through the data read in and create Course objects representing each
     * course in the event.
@@ -584,21 +584,21 @@
     * @return {Array} Array of course objects.
     */
     Reader.prototype.determineCourses = function (classes) {
-        
+
         var manyToManyMaps = this.getMapsBetweenClassesAndCourses();
-        
+
         // As we work our way through the courses and classes, we may find one
         // class made up from multiple courses (e.g. in BOC2013, class M21E
         // uses course 1A and 1B).  In this set we collect up all of the
         // courses that we have now processed, so that if we later come across
         // one we've already dealt with, we can ignore it.
         var doneCourseNames = d3.set();
-        
+
         var classesMap = d3.map();
         classes.forEach(function (courseClass) {
             classesMap.set(courseClass.name, courseClass);
         });
-        
+
         // List of all Course objects created so far.
         var courses = [];
         manyToManyMaps.coursesToClasses.keys().forEach(function (courseName) {
@@ -607,44 +607,44 @@
                 courses.push(course);
             }
         }, this);
-        
+
         return courses;
     };
-    
+
     /**
     * Parses the read-in data and returns it.
     * @return {SplitsBrowser.Model.Event} Event-data read.
     */
     Reader.prototype.parseEventData = function () {
-        
+
         this.warnings = [];
-        
+
         this.lines = this.data.split(/\n/);
-        
+
         var delimiter = this.identifyDelimiter();
-        
+
         this.identifyFormatVariation(delimiter);
-        
+
         // Discard the header row.
         this.lines.shift();
-        
+
         this.lines.forEach(function (line, lineIndex) {
             this.readLine(line, lineIndex + 1, delimiter);
         }, this);
-        
+
         var classes = this.createClasses();
         if (classes.length === 0 && this.warnings.length > 0) {
             // A warning was generated for every single competitor in the file.
             // This file is quite probably not an OE-CSV file.
             throwWrongFileFormat("This file may have looked vaguely like an OE CSV file but no data could be read out of it");
         }
-        
+
         var courses = this.determineCourses(classes);
         return new Event(classes, courses, this.warnings);
     };
-    
+
     SplitsBrowser.Input.OE = {};
-    
+
     /**
     * Parse OE data read from a semicolon-separated data string.
     * @param {String} data - The input data string read.

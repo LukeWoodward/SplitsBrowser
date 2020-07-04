@@ -1,6 +1,6 @@
 ﻿/*
  *  SplitsBrowser ChartPopupData - Gets data for the chart popup window.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
@@ -20,22 +20,22 @@
  */
 (function () {
     "use strict";
-    
+
     // The maximum number of fastest splits to show when the popup is open.
     var MAX_FASTEST_SPLITS = 10;
 
     // Width of the time interval, in seconds, when viewing nearby results
     // at a control on the race graph.
     var RACE_GRAPH_RESULT_WINDOW = 240;
-    
+
     var formatTime = SplitsBrowser.formatTime;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
-    
+
     var Course = SplitsBrowser.Model.Course;
-    
+
     var ChartPopupData = {};
-    
+
     /**
     * Returns the fastest splits to a control.
     * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet - The
@@ -48,10 +48,10 @@
         data = data.map(function (comp) {
             return {time: comp.split, name: comp.name, highlight: false};
         });
-        
+
         return {title: getMessage("SelectedClassesPopupHeader"), data: data, placeholder: getMessage("SelectedClassesPopupPlaceholder")};
     };
-    
+
     /**
     * Returns the fastest splits for the currently-shown leg.  The list
     * returned contains the fastest splits for the current leg for each class.
@@ -67,19 +67,19 @@
         var course = courseClassSet.getCourse();
         var startCode = course.getControlCode(controlIndex - 1);
         var endCode = course.getControlCode(controlIndex);
-        
+
         var startControl = (startCode === Course.START) ? getMessage("StartName") : startCode;
         var endControl = (endCode === Course.FINISH) ? getMessage("FinishName") : endCode;
-        
+
         var title = getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": startControl, "$$END$$": endControl});
-        
+
         var primaryClass = courseClassSet.getPrimaryClassName();
         var data = eventData.getFastestSplitsForLeg(startCode, endCode)
                             .map(function (row) { return { name: row.name, className: row.className, time: row.split, highlight: (row.className === primaryClass)}; });
-        
+
         return {title: title, data: data, placeholder: null};
     };
-    
+
     /**
     * Returns an object containing an array of the results visiting a
     * control at a given time.
@@ -96,10 +96,10 @@
         var intervalStart = Math.round(time) - RACE_GRAPH_RESULT_WINDOW / 2;
         var intervalEnd = Math.round(time) + RACE_GRAPH_RESULT_WINDOW / 2;
         var results = eventData.getResultsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
-            
+
         var primaryClass = courseClassSet.getPrimaryClassName();
         var resultData = results.map(function (row) { return {name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}; });
-        
+
         var controlName;
         if (controlCode === Course.START) {
             controlName = getMessage("StartName");
@@ -108,14 +108,14 @@
         } else {
             controlName = getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
         }
-        
+
         var title = getMessageWithFormatting(
             "NearbyCompetitorsPopupHeader",
             {"$$START$$": formatTime(intervalStart), "$$END$$": formatTime(intervalEnd), "$$CONTROL$$": controlName});
-        
+
         return {title: title, data: resultData, placeholder: getMessage("NoNearbyCompetitors")};
-    };    
-        
+    };
+
     /**
     * Compares two course names.
     * @param {String} name1 - One course name to compare.
@@ -142,11 +142,11 @@
                     }
                 }
             }
-            
+
             return (name1 < name2) ? -1 : 1;
         }
     }
-    
+
     /**
     * Tidy next-control data, by joining up multiple controls into one string,
     * and substituting the display-name of the finish if necessary.
@@ -159,11 +159,11 @@
             if (codes[codes.length - 1] === Course.FINISH) {
                 codes[codes.length - 1] = getMessage("FinishName");
             }
-            
+
             return {course: nextControlRec.course, nextControls: codes.join(", ")};
         });
     }
-    
+
     /**
     * Returns next-control data to show on the chart popup.
     * @param {SplitsBrowser.Model.Course} course - The course containing the
@@ -181,6 +181,6 @@
         var thisControlName = (controlCode === Course.START) ? getMessage("StartName") : getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
         return {thisControl: thisControlName, nextControls: tidyNextControlsList(nextControls) };
     };
-    
+
     SplitsBrowser.Model.ChartPopupData = ChartPopupData;
 })();
