@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser Core - Namespaces the rest of the program depends on.
  *
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -19,8 +19,6 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// Tell JSHint not to complain that this isn't used anywhere.
-/* exported SplitsBrowser */
 // Tell ESLint not to complain that this is redeclaring a constant.
 /* eslint no-redeclare: "off", no-unused-vars: "off" */
 var SplitsBrowser = { Version: "3.4.4", Model: {}, Input: {}, Controls: {}, Messages: {} };
