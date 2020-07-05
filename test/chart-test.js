@@ -1,6 +1,6 @@
 ﻿/*
  *  SplitsBrowser - Chart tests.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -33,7 +33,7 @@
     var Event = SplitsBrowser.Model.Event;
 
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
-    
+
     function getIndexesAroundOmittedCumTimes(result) {
         return result.getControlIndexesAroundOmittedCumulativeTimes();
     }
@@ -78,7 +78,7 @@
         while (text.substring(0, 1) === "\xa0") {
             text = text.substring(1);
         }
-        
+
         if (text in TEXT_WIDTHS) {
             return TEXT_WIDTHS[text];
         } else {
@@ -106,7 +106,7 @@
     }
 
     QUnit.module("Chart");
-    
+
     /**
     * Creates and returns a CourseClassSet object and event object populated with
     * test data.  If no value is provided for the optional competitors parameter,
@@ -120,10 +120,10 @@
             var result2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
             results = [result1, result2];
         }
-        
+
         return new CourseClass("Test", 3, results);
     }
-    
+
     /**
     * Runs a test for creating a chart.  The test doesn't make any assertions;
     * it just checks that the chart gets created successfully.
@@ -134,7 +134,7 @@
     function runChartCreationTest(assert, chartType, results) {
         runChartCreationTestGivenCourseClass(assert, chartType, getTestCourseClass(results));
     }
-    
+
     /**
     * Runs a test for creating a chart.  The test doesn't make any assertions;
     * it just checks that the chart gets created successfully.
@@ -146,7 +146,7 @@
         var courseClassSet = new CourseClassSet([courseClass]);
         var course = new Course("Test course", [courseClass], null, null, null);
         courseClass.setCourse(course);
-        var eventData = new Event([courseClass], [course]);        
+        var eventData = new Event([courseClass], [course]);
         var fastestCumTimes = courseClassSet.getFastestCumTimes();
         var chart = createTestChart(chartType);
         var data = {
@@ -156,7 +156,7 @@
             referenceCumTimes: fastestCumTimes,
             fastestCumTimes: fastestCumTimes
         };
-        
+
         chart.drawChart(data, [0, 1], [true, true, true], chartType, null);
         assert.expect(0);
     }
@@ -177,18 +177,18 @@
     QUnit.test("Can create a chart with start-time labels", function (assert) {
         runChartCreationTest(assert, DUMMY_CHART_TYPE_RACE_GRAPH);
     });
-    
+
     QUnit.test("Can create a chart with dubious info", function (assert) {
         var results = [
             fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], new Competitor("Second Runner", "DEF")),
             fromOriginalCumTimes(2, 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100], new Competitor("First Runner", "ABC"))
         ];
-        
+
         results[1].setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
-        
+
         runChartCreationTest(assert, DUMMY_CHART_TYPE, results);
     });
-    
+
     QUnit.test("Can create a chart for a team event", function (assert) {
         var result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         var result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
@@ -200,7 +200,7 @@
 
         var courseClass = new CourseClass("Test", 7, results);
         courseClass.setIsTeamClass([3, 3]);
-     
+
         runChartCreationTestGivenCourseClass(assert, DUMMY_CHART_TYPE, courseClass);
     });
 })();

@@ -1,6 +1,6 @@
 ﻿/*
  *  SplitsBrowser - ResultSelection tests.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -26,8 +26,8 @@
     var ResultSelection = SplitsBrowser.Model.ResultSelection;
 
     var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
-    
-    // Test code for handling notifications 
+
+    // Test code for handling notifications
     var lastIndexes = null;
     var callCount = 0;
 
@@ -89,7 +89,7 @@
         assert.deepEqual(selection.getSelectedIndexes(), [], "No results should be selected");
 
         selection.toggle(1);
-        
+
         assert.deepEqual(selection.getSelectedIndexes(), [1], "Only result 1 should be selected");
 
         selection.toggle(1);
@@ -106,7 +106,7 @@
         assert.deepEqual(selection.getSelectedIndexes(), [0, 1, 2], "All results should be selected");
 
         selection.selectNone();
-        
+
         assert.deepEqual(selection.getSelectedIndexes(), [], "No results should be selected");
     });
 
@@ -288,7 +288,7 @@
         selection.selectCrossingRunners(getResultDetailsForCrossingRunners());
         assert.strictEqual(callCount, 0, "No call to the change-handler should be registered");
     });
-    
+
     QUnit.test("If a single runner is selected, when crossing results are selected, then one other result is selected", function (assert) {
         reset();
         var selection = new ResultSelection(3);
@@ -374,82 +374,82 @@
         var selection = new ResultSelection(oldResults.length);
         selection.toggle(1);
         selection.toggle(2);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.migrate(oldResults, newResults);
         assert.strictEqual(selection.count, newResults.length);
         assert.strictEqual(callCount, 0);
     });
-    
+
     QUnit.test("Can set array of selected results to an empty array", function (assert) {
         reset();
         var selection = new ResultSelection(3);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.setSelectedIndexes([]);
         assert.deepEqual(lastIndexes, []);
         assert.deepEqual(callCount, 1);
     });
-    
+
     QUnit.test("Can set array of selected results to an non-empty array", function (assert) {
         reset();
         var selection = new ResultSelection(3);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.setSelectedIndexes([0, 2]);
         assert.deepEqual(lastIndexes, [0, 2]);
         assert.deepEqual(callCount, 1);
     });
-    
+
     QUnit.test("Cannot set array of selected results to an array containing a negative index", function (assert) {
         reset();
         var selection = new ResultSelection(3);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.setSelectedIndexes([0, -1]);
         assert.deepEqual(callCount, 0);
     });
-    
+
     QUnit.test("Can bulk-select an empty list of results without firing change handlers", function (assert) {
         reset();
         var selection = new ResultSelection(5);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.bulkSelect([]);
         assert.strictEqual(callCount, 0);
     });
-    
+
     QUnit.test("Can bulk-select three results when none originally selected, firing change handlers once", function (assert) {
         reset();
         var selection = new ResultSelection(5);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.bulkSelect([1, 3, 4]);
         assert.deepEqual(lastIndexes, [1, 3, 4]);
         assert.strictEqual(callCount, 1);
     });
-    
+
     QUnit.test("Can bulk-select three results in the wrong order when none originally selected, firing change handlers once", function (assert) {
         reset();
         var selection = new ResultSelection(5);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.bulkSelect([4, 3, 1]);
         assert.deepEqual(lastIndexes, [1, 3, 4]);
         assert.strictEqual(callCount, 1);
     });
-    
+
     QUnit.test("Can bulk-select three results when two originally selected, with correct list of last indexes and firing change handlers once", function (assert) {
         reset();
         var selection = new ResultSelection(5);
         selection.toggle(1);
         selection.toggle(4);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.bulkSelect([1, 3, 4]);
         assert.deepEqual(lastIndexes, [1, 3, 4]);
         assert.strictEqual(callCount, 1);
     });
-    
+
     QUnit.test("Bulk-selecting three results when all three originally selected does not fire change handlers", function (assert) {
         reset();
         var selection = new ResultSelection(5);
         selection.toggle(1);
         selection.toggle(3);
         selection.toggle(4);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.bulkSelect([1, 3, 4]);
         assert.strictEqual(callCount, 0);
     });
@@ -474,7 +474,7 @@
             selection.bulkSelect([1, 5, 4]);
         });
     });
-    
+
     /**
     * Creates and returns a ResultSelection object with all results
     * selected
@@ -489,7 +489,7 @@
         }
         return selection;
     }
-    
+
     QUnit.test("Can bulk-deselect an empty list of results without firing change handlers", function (assert) {
         reset();
         var selection = createSelectionWithAllSelected(5);
@@ -497,7 +497,7 @@
         selection.bulkDeselect([]);
         assert.strictEqual(callCount, 0);
     });
-    
+
     QUnit.test("Can bulk-deselect three results when all were originally selected, firing change handlers once", function (assert) {
         reset();
         var selection = createSelectionWithAllSelected(5);
@@ -506,34 +506,34 @@
         assert.deepEqual(lastIndexes, [0, 2]);
         assert.strictEqual(callCount, 1);
     });
-    
+
     QUnit.test("Can bulk-deselect three results in the wrong order when all were originally selected, firing change handlers once", function (assert) {
         reset();
         var selection = createSelectionWithAllSelected(5);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.bulkDeselect([4, 3, 1]);
         assert.deepEqual(lastIndexes, [0, 2]);
         assert.strictEqual(callCount, 1);
     });
-    
+
     QUnit.test("Can bulk-deselect three results when two originally deselected, with correct list of last indexes and firing change handlers once", function (assert) {
         reset();
         var selection = createSelectionWithAllSelected(5);
         selection.toggle(1);
         selection.toggle(4);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.bulkDeselect([1, 3, 4]);
         assert.deepEqual(lastIndexes, [0, 2]);
         assert.strictEqual(callCount, 1);
     });
-    
+
     QUnit.test("Bulk-deselecting three results when all three originally deselected does not fire change handlers", function (assert) {
         reset();
         var selection = createSelectionWithAllSelected(5);
         selection.toggle(1);
         selection.toggle(3);
         selection.toggle(4);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.bulkDeselect([1, 3, 4]);
         assert.strictEqual(callCount, 0);
     });
@@ -562,7 +562,7 @@
     QUnit.test("Cannot set array of selected results to an array containing an index too large", function (assert) {
         reset();
         var selection = new ResultSelection(3);
-        selection.registerChangeHandler(testHandler);        
+        selection.registerChangeHandler(testHandler);
         selection.setSelectedIndexes([0, 3]);
         assert.deepEqual(callCount, 0);
     });

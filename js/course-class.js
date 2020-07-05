@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser CourseClass - A collection of runners competing against each other.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -23,7 +23,7 @@
 
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
-    
+
     /**
      * Object that represents a collection of result data for a class.
      * @constructor.
@@ -44,7 +44,7 @@
             result.setClassName(name);
         });
     }
-    
+
     /**
     * Records that this course-class has result data that SplitsBrowser has
     * deduced as dubious.
@@ -52,7 +52,7 @@
     CourseClass.prototype.recordHasDubiousData = function () {
         this.hasDubiousData = true;
     };
-    
+
     /**
     * Records that this course-class contains team results rather than
     * individual results.
@@ -66,7 +66,7 @@
             this.offsets.push(this.offsets[index - 1] + numbersOfControls[index - 1] + 1);
         }
     };
-     
+
     /**
     * Determines the time losses for the results in this course-class.
     */
@@ -75,12 +75,12 @@
             var splitRec = this.getFastestSplitTo(controlIdx);
             return (splitRec === null) ? null : splitRec.split;
         }, this);
-        
+
         this.results.forEach(function (result) {
             result.determineTimeLosses(fastestSplitTimes);
         });
     };
-    
+
     /**
     * Returns whether this course-class is empty, i.e. has no results.
     * @return {boolean} True if this course-class has no results, false if it
@@ -89,7 +89,7 @@
     CourseClass.prototype.isEmpty = function () {
         return (this.results.length === 0);
     };
-    
+
     /**
     * Sets the course that this course-class belongs to.
     * @param {SplitsBrowser.Model.Course} course - The course this class belongs to.
@@ -111,7 +111,7 @@
         if (typeof controlIdx !== "number" || controlIdx < 1 || controlIdx > this.numControls + 1) {
             throwInvalidData("Cannot return splits to leg '" + controlIdx + "' in a course with " + this.numControls + " control(s)");
         }
-    
+
         var fastestSplit = null;
         var fastestResult = null;
         this.results.forEach(function (result) {
@@ -123,10 +123,10 @@
                 }
             }
         });
-        
+
         return (fastestSplit === null) ? null : {split: fastestSplit, name: fastestResult.owner.name};
     };
-    
+
     /**
     * Returns all results that visited the control in the given time
     * interval.
@@ -143,7 +143,7 @@
         if (typeof controlNum !== "number" || isNaN(controlNum) || controlNum < 0 || controlNum > this.numControls + 1) {
             throwInvalidData("Control number must be a number between 0 and " + this.numControls + " inclusive");
         }
-        
+
         var matchingResults = [];
         this.results.forEach(function (result) {
             var cumTime = result.getCumulativeTimeTo(controlNum);
@@ -154,9 +154,9 @@
                 }
             }
         });
-        
+
         return matchingResults;
     };
-    
+
     SplitsBrowser.Model.CourseClass = CourseClass;
 })();

@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser Result - The results for a competitor or a team.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,26 +20,27 @@
  */
 (function () {
     "use strict";
-    
+
     var NUMBER_TYPE = typeof 0;
-    
+
     var isNotNull = SplitsBrowser.isNotNull;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
+    var hasProperty = SplitsBrowser.hasProperty;
     var addIfNotNull = SplitsBrowser.addIfNotNull;
     var subtractIfNotNull = SplitsBrowser.subtractIfNotNull;
     var throwInvalidData = SplitsBrowser.throwInvalidData;
 
     /**
     * Function used with the JavaScript sort method to sort results in order.
-    * 
+    *
     * Results that are mispunched are sorted to the end of the list.
-    * 
+    *
     * The return value of this method will be:
     * (1) a negative number if result a comes before result b,
     * (2) a positive number if result a comes after result a,
     * (3) zero if the order of a and b makes no difference (i.e. they have the
     *     same total time, or both mispunched.)
-    * 
+    *
     * @param {SplitsBrowser.Model.Result} a - One result to compare.
     * @param {SplitsBrowser.Model.Result} b - The other result to compare.
     * @returns {Number} Result of comparing two results.
@@ -76,12 +77,12 @@
         } else if (cumTimes.length === 1) {
             throwInvalidData("Array of cumulative times must contain more than just a single zero");
         }
-        
+
         var splitTimes = [];
         for (var i = 0; i + 1 < cumTimes.length; i += 1) {
             splitTimes.push(subtractIfNotNull(cumTimes[i + 1], cumTimes[i]));
         }
-        
+
         return splitTimes;
     }
 
@@ -124,14 +125,14 @@
         this.order = order;
         this.startTime = startTime;
         this.owner = owner;
-        
+
         this.isOKDespiteMissingTimes = false;
         this.isNonCompetitive = false;
         this.isNonStarter = false;
         this.isNonFinisher = false;
         this.isDisqualified = false;
         this.isOverMaxTime = false;
-        
+
         this.originalSplitTimes = originalSplitTimes;
         this.originalCumTimes = originalCumTimes;
         this.splitTimes = null;
@@ -143,7 +144,7 @@
 
         this.totalTime = (originalCumTimes === null || originalCumTimes.indexOf(null) > -1) ? null : originalCumTimes[originalCumTimes.length - 1];
     }
-    
+
     /**
     * Marks this result as having completed the course despite having missing times.
     */
@@ -153,28 +154,28 @@
             this.totalTime = this.originalCumTimes[this.originalCumTimes.length - 1];
         }
     };
-    
+
     /**
     * Marks this result as non-competitive.
     */
     Result.prototype.setNonCompetitive = function () {
         this.isNonCompetitive = true;
     };
-    
+
     /**
     * Marks this result as not starting.
     */
     Result.prototype.setNonStarter = function () {
         this.isNonStarter = true;
     };
-    
+
     /**
     * Marks this result as not finishing.
     */
     Result.prototype.setNonFinisher = function () {
         this.isNonFinisher = true;
     };
-    
+
     /**
     * Marks this result as disqualified, for reasons other than a missing
     * punch.
@@ -182,14 +183,14 @@
     Result.prototype.disqualify = function () {
         this.isDisqualified = true;
     };
-    
+
     /**
     * Marks this result as over maximum time.
     */
     Result.prototype.setOverMaxTime = function () {
         this.isOverMaxTime = true;
     };
-    
+
     /**
     * Sets the name of the class that the result belongs to.
     * This is the course-class, not the result's age class.
@@ -198,7 +199,7 @@
     Result.prototype.setClassName = function (className) {
         this.className = className;
     };
-    
+
     /**
     * Create and return a Result object where the times are given as a list of
     * cumulative times.
@@ -218,7 +219,7 @@
         var splitTimes = splitTimesFromCumTimes(cumTimes);
         return new Result(order, startTime, splitTimes, cumTimes, owner);
     };
-    
+
     /**
     * Create and return a Result object where the times are given as a list of
     * cumulative times.
@@ -239,7 +240,7 @@
         result.cumTimes = result.originalCumTimes;
         return result;
     };
-    
+
     /**
     * Sets the 'repaired' cumulative times.  This also calculates the repaired
     * split times.
@@ -249,7 +250,7 @@
         this.cumTimes = cumTimes;
         this.splitTimes = splitTimesFromCumTimes(cumTimes);
     };
-    
+
     /**
     * Returns whether this result indicated the competitor or team completed the
     * course and did not get
@@ -271,25 +272,25 @@
         // Trim the leading zero
         return this.originalCumTimes.slice(1).some(isNotNull);
     };
-    
+
     /**
     * Returns the split to the given control.  If the control index given is zero
     * (i.e. the start), zero is returned.  If the competitor or team has no time
     * recorded for that control, null is returned.  If the value is missing,
     * because the value read from the file was invalid, NaN is returned.
-    * 
+    *
     * @param {Number} controlIndex - Index of the control (0 = start).
     * @return {?Number} The split time in seconds to the given control.
     */
     Result.prototype.getSplitTimeTo = function (controlIndex) {
         return (controlIndex === 0) ? 0 : this.splitTimes[controlIndex - 1];
     };
-    
+
     /**
     * Returns the 'original' split to the given control.  This is always the
     * value read from the source data file, or derived directly from this data,
     * before any attempt was made to repair the data.
-    * 
+    *
     * If the control index given is zero (i.e. the start), zero is returned.
     * If no time is recorded for that control, null is returned.
     * @param {Number} controlIndex - Index of the control (0 = start).
@@ -302,7 +303,7 @@
             return (controlIndex === 0) ? 0 : this.originalSplitTimes[controlIndex - 1];
         }
     };
-    
+
     /**
     * Returns whether the control with the given index is deemed to have a
     * dubious split time.
@@ -313,7 +314,7 @@
     Result.prototype.isSplitTimeDubious = function (controlIndex) {
         return (controlIndex > 0 && this.originalSplitTimes[controlIndex - 1] !== this.splitTimes[controlIndex - 1]);
     };
-    
+
     /**
     * Returns the cumulative split to the given control.  If the control index
     * given is zero (i.e. the start), zero is returned.   If there is no
@@ -325,7 +326,7 @@
     Result.prototype.getCumulativeTimeTo = function (controlIndex) {
         return this.cumTimes[controlIndex];
     };
-    
+
     /**
     * Returns the 'original' cumulative time the competitor or team took to the
     * given control.  This is always the value read from the source data file,
@@ -336,7 +337,7 @@
     Result.prototype.getOriginalCumulativeTimeTo = function (controlIndex) {
         return (this.isNonStarter) ? null : this.originalCumTimes[controlIndex];
     };
-    
+
     /**
     * Returns whether the control with the given index is deemed to have a
     * dubious cumulative time.
@@ -347,7 +348,7 @@
     Result.prototype.isCumulativeTimeDubious = function (controlIndex) {
         return this.originalCumTimes[controlIndex] !== this.cumTimes[controlIndex];
     };
-    
+
     /**
     * Returns the rank of the split to the given control.  If the control index
     * given is zero (i.e. the start), or if there is no time recorded for that
@@ -359,19 +360,19 @@
     Result.prototype.getSplitRankTo = function (controlIndex) {
         return (this.splitRanks === null) ? null : this.splitRanks[controlIndex];
     };
-    
+
     /**
     * Returns the rank of the cumulative split to the given control.  If the
     * control index given is zero (i.e. the start), or if there is no time
     * recorded for that control, or if the ranks have not been set on this
-    * result, null is returned.  
+    * result, null is returned.
     * @param {Number} controlIndex - Index of the control (0 = start).
     * @return {Number} The cumulative rank to the given control.
     */
     Result.prototype.getCumulativeRankTo = function (controlIndex) {
         return (this.cumRanks === null) ? null : this.cumRanks[controlIndex];
     };
-    
+
     /**
     * Returns the time loss at the given control, or null if time losses cannot
     * be calculated or have not yet been calculated.
@@ -381,7 +382,7 @@
     Result.prototype.getTimeLossAt = function (controlIndex) {
         return (controlIndex === 0 || this.timeLosses === null) ? null : this.timeLosses[controlIndex - 1];
     };
-    
+
     /**
     * Returns all of the cumulative time splits.
     * @return {Array} The cumulative split times in seconds for the competitor
@@ -390,7 +391,7 @@
     Result.prototype.getAllCumulativeTimes = function () {
         return this.cumTimes;
     };
-    
+
     /**
     * Returns all of the original cumulative time splits.
     * @return {Array} The original cumulative split times in seconds for the
@@ -399,7 +400,7 @@
     Result.prototype.getAllOriginalCumulativeTimes = function () {
         return this.originalCumTimes;
     };
-    
+
     /**
     * Returns all of the split times.
     * @return {Array} The split times in seconds for the competitor or team.
@@ -407,10 +408,10 @@
     Result.prototype.getAllSplitTimes = function () {
         return this.splitTimes;
     };
-    
+
     /**
     * Returns whether this result is missing a start time.
-    * 
+    *
     * The result is missing its start time if it doesn't have a start time and
     * it also has at least one split.  This second condition allows the Race
     * Graph to be shown even if there are results with no times and no start
@@ -422,7 +423,7 @@
     Result.prototype.lacksStartTime = function () {
         return this.startTime === null && this.splitTimes.some(isNotNull);
     };
-    
+
     /**
     * Sets the split and cumulative-split ranks for this result.  The first
     * items in both arrays should be null, to indicate that the split and
@@ -434,7 +435,7 @@
         if (splitRanks[0] !== null || cumRanks[0] !== null) {
             throwInvalidData("Split and cumulative ranks arrays must both start with null");
         }
-        
+
         this.splitRanks = splitRanks;
         this.cumRanks = cumRanks;
     };
@@ -456,7 +457,7 @@
         var adjustedTimes = this.cumTimes.map(function (time, idx) { return subtractIfNotNull(time, referenceCumTimes[idx]); });
         return adjustedTimes;
     };
-    
+
     /**
     * Returns the cumulative times of this result with the start time added on.
     * @param {Array} referenceCumTimes - The reference cumulative-split-time data to adjust by.
@@ -467,7 +468,7 @@
         var startTime = this.startTime;
         return adjustedTimes.map(function (adjTime) { return addIfNotNull(adjTime, startTime); });
     };
-    
+
     /**
     * Returns an array of percentages that this splits are behind when compared
     * to those of a reference result.
@@ -480,7 +481,7 @@
         } else if (referenceCumTimes.indexOf(null) > -1) {
             throwInvalidData("Cannot determine percentages-behind because a null value is in the reference data");
         }
-        
+
         var percentsBehind = [0];
         this.splitTimes.forEach(function (splitTime, index) {
             if (splitTime === null) {
@@ -494,7 +495,7 @@
                 }
             }
         });
-        
+
         return percentsBehind;
     };
 
@@ -546,7 +547,7 @@
             }
         }
     };
-    
+
     /**
     * Returns whether this result 'crosses' another.  Two results are considered
     * to have crossed if their chart lines on the Race Graph cross.
@@ -557,13 +558,13 @@
         if (other.cumTimes.length !== this.cumTimes.length) {
             throwInvalidData("Two results with different numbers of controls cannot cross");
         }
-        
+
         // We determine whether two results cross by keeping track of whether
         // this result is ahead of other at any point, and whether this result
         // is behind the other one.  If both, the results cross.
         var beforeOther = false;
         var afterOther = false;
-        
+
         for (var controlIdx = 0; controlIdx < this.cumTimes.length; controlIdx += 1) {
             if (this.cumTimes[controlIdx] !== null && other.cumTimes[controlIdx] !== null) {
                 var thisTotalTime = this.startTime + this.cumTimes[controlIdx];
@@ -575,10 +576,10 @@
                 }
             }
         }
-         
+
         return beforeOther && afterOther;
     };
-    
+
     /**
     * Returns whether the given time has been omitted: i.e. it is dubious, or
     * it is missing but the result has been marked as OK despite that.
@@ -588,7 +589,7 @@
     Result.prototype.isTimeOmitted = function (time) {
         return isNaNStrict(time) || (this.isOKDespiteMissingTimes && time === null);
     };
-    
+
     /**
     * Returns an array of objects that record the indexes around which times in
     * the given array are omitted, due to the times being dubious or missing.
@@ -604,21 +605,21 @@
                 while (endIndex + 1 < times.length && this.isTimeOmitted(times[endIndex + 1])) {
                     endIndex += 1;
                 }
-                
+
                 if (endIndex + 1 < times.length && times[startIndex - 1] !== null && times[endIndex + 1] !== null) {
                     omittedTimeInfo.push({start: startIndex - 1, end: endIndex + 1});
                 }
-                
+
                 startIndex = endIndex + 1;
-                
+
             } else {
                 startIndex += 1;
             }
         }
-        
+
         return omittedTimeInfo;
     };
-    
+
     /**
     * Returns an array of objects that list the controls around those that have
     * omitted cumulative times.
@@ -628,7 +629,7 @@
     Result.prototype.getControlIndexesAroundOmittedCumulativeTimes = function () {
         return this.getIndexesAroundOmittedTimes(this.cumTimes);
     };
-    
+
     /**
     * Returns an array of objects that list the controls around those that have
     * omitted split times.
@@ -638,7 +639,7 @@
     Result.prototype.getControlIndexesAroundOmittedSplitTimes = function () {
         return this.getIndexesAroundOmittedTimes([0].concat(this.splitTimes));
     };
-    
+
     /**
     * Returns the name of the owner for the leg with the given index.  If the
     * leg index is not null and this is a team result, the name of the corresponding
@@ -647,13 +648,13 @@
     * @return The name of the owner for that leg.
     */
     Result.prototype.getOwnerNameForLeg = function (legIndex) {
-        if (this.owner.hasOwnProperty("members") && legIndex !== null) {
+        if (hasProperty(this.owner, "members") && legIndex !== null) {
             return this.owner.members[legIndex].name;
         } else {
             return this.owner.name;
         }
     };
-    
+
     /**
     * Calculates and returns the offsets of the results.  The returned array
     * contains one offset for each result plus the overall total time in the
@@ -664,7 +665,7 @@
     function calculateOffsets(results) {
         var offsets = [0];
         results.forEach(function (comp, resultIndex) {
-            
+
             // Calculate the offset for result resultIndex + 1.
             var lastOffset = offsets[offsets.length - 1];
             var nextResult = (resultIndex + 1 < results.length) ? results[resultIndex + 1] : null;
@@ -678,15 +679,15 @@
             } else {
                 nextFinishTime = null;
             }
-            
+
             offsets.push(nextFinishTime);
         });
-        
+
         // The above loop will add an item to the end of 'offsets' for the
         // finish time of the last competitor, but we don't need that.
-        return offsets.slice(0, offsets.length - 1);         
+        return offsets.slice(0, offsets.length - 1);
     }
-    
+
     /**
     * Calculate the full list of cumulative times for a collection of results.
     * @param {Array} results The list of results.
@@ -701,12 +702,12 @@
             var resultTimes = cumulativeTimesGetter(results[resultIndex]);
             for (var controlIndex = 1; controlIndex < resultTimes.length; controlIndex += 1) {
                 times.push(addIfNotNull(offsets[resultIndex], resultTimes[controlIndex]));
-            }                
+            }
         }
-        
+
         return times;
     }
-    
+
     /**
     * Determines the status of a relay result from the status of the component
     * results.
@@ -762,13 +763,13 @@
         if (results.some(function (result) { return result.isNonCompetitive; })) {
             this.isNonCompetitive = true;
         }
-        
+
         if (results.some(function (result) { return result.isOKDespiteMissingTimes; })) {
             this.setOKDespiteMissingTimes();
         }
     };
 
-    
+
     /**
     * Creates and returns a result object representing the combined result of all
     * of the given results.
@@ -776,7 +777,7 @@
     * @param {Array} results The individual team member results.
     * @param {Object} owner - The team that owns this result.
     * @return {Result} A result object for the entire team.
-    */ 
+    */
     Result.createTeamResult = function (order, results, owner) {
         if (results.length < 2) {
             throwInvalidData("Team results can only be created from at least two other results");
@@ -785,20 +786,20 @@
         // Firstly, compute offsets for each of the component results.
         var offsets = calculateOffsets(results);
         owner.setMembers(results.map(function (result) { return result.owner; }));
-        
+
         var originalCumTimes = calculateCumulativeTimesFromResults(
             results, offsets, function (result) { return result.originalCumTimes; });
-            
+
         var teamResult = Result.fromOriginalCumTimes(order, results[0].startTime, originalCumTimes, owner);
         if (results.every(function (result) { return result.cumTimes !== null; })) {
             teamResult.cumTimes = calculateCumulativeTimesFromResults(
                 results, offsets, function (r) { return r.cumTimes; });
             teamResult.splitTimes = splitTimesFromCumTimes(teamResult.cumTimes);
         }
-        
+
         teamResult.determineAggregateStatus(results);
         return teamResult;
     };
-    
+
     SplitsBrowser.Model.Result = Result;
 })();

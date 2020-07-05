@@ -1,6 +1,6 @@
 ﻿/*
  *  SplitsBrowser Chart - Draws a chart of data on an SVG element.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
@@ -24,14 +24,14 @@
     // ID of the hidden text-size element.
     // Must match that used in styles.css.
     var TEXT_SIZE_ELEMENT_ID = "sb-text-size-element";
-    
+
     // ID of the chart.
     // Must match that used in styles.css
     var CHART_SVG_ID = "chart";
-    
+
     // X-offset in pixels between the mouse and the popup that opens.
     var CHART_POPUP_X_OFFSET = 10;
-    
+
     // Margins on the four sides of the chart.
     var MARGIN = {
         top: 18, // Needs to be high enough not to obscure the upper X-axis.
@@ -41,14 +41,14 @@
     };
 
     var LEGEND_LINE_WIDTH = 10;
-    
+
     // Minimum distance between a Y-axis tick label and a result's start
     // time, in pixels.
     var MIN_RESULT_TICK_MARK_DISTANCE = 10;
-    
+
     // The number that identifies the left mouse button in a jQuery event.
     var JQUERY_EVENT_LEFT_BUTTON = 1;
-    
+
     // The number that identifies the right mouse button in a jQuery event.
     var JQUERY_EVENT_RIGHT_BUTTON = 3;
 
@@ -66,10 +66,10 @@
     var getMessage = SplitsBrowser.getMessage;
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
-    
+
     var ChartPopupData = SplitsBrowser.Model.ChartPopupData;
     var ChartPopup = SplitsBrowser.Controls.ChartPopup;
-    
+
     /**
     * Format a time and a rank as a string, with the split time in mm:ss or h:mm:ss
     * as appropriate.
@@ -84,7 +84,7 @@
             time = NaN;
             rank = NaN;
         }
-        
+
         var rankStr;
         if (rank === null) {
             rankStr = "-";
@@ -93,10 +93,10 @@
         } else {
             rankStr = rank.toString();
         }
-        
+
         return SPACER + formatTime(time) + " (" + rankStr + ")";
     }
-    
+
     /**
     * Formats and returns a result's name and optional suffix.
     * @param {String} name - The name associated with the result.
@@ -110,7 +110,7 @@
 
     /**
     * Returns the 'suffix' to use with the given result.
-    * The suffix indicates whether they are non-competitive or a mispuncher, 
+    * The suffix indicates whether they are non-competitive or a mispuncher,
     * were disqualified or did not finish.  If none of the above apply, an
     * empty string is returned.
     * @param {Result} result The result to get the suffix for.
@@ -122,7 +122,7 @@
         if (result.completed() && result.isNonCompetitive) {
             return getMessage("NonCompetitiveShort");
         } else if (result.isNonFinisher) {
-            return getMessage("DidNotFinishShort"); 
+            return getMessage("DidNotFinishShort");
         } else if (result.isDisqualified) {
             return getMessage("DisqualifiedShort");
         } else if (result.isOverMaxTime) {
@@ -155,9 +155,9 @@
         this.isPopupOpen = false;
         this.popupUpdateFunc = null;
         this.maxStartTimeLabelWidth = 0;
-        
+
         this.mouseOutTimeout = null;
-        
+
         // Indexes of the currently-selected results, in the order that
         // they appear in the list of labels.
         this.selectedIndexesOrderedByLastYValue = [];
@@ -166,19 +166,19 @@
         this.referenceCumTimeIndexes = [];
         this.fastestCumTimes = [];
         this.selectedLegIndex = null;
-        
+
         this.isMouseIn = false;
-        
+
         // The position the mouse cursor is currently over, or null for not over
         // the charts.  This index is constrained by the minimum control that a
         // chart type specifies.
         this.currentControlIndex = null;
-        
+
         // The position the mouse cursor is currently over, or null for not over
         // the charts.  Unlike this.currentControlIndex, this index is not
         // constrained by the minimum control that a chart type specifies.
         this.actualControlIndex = null;
-        
+
         this.controlLine = null;
 
         this.svg = d3.select(this.parent).append("svg")
@@ -196,7 +196,7 @@
                           .mouseleave(function (event) { outerThis.onMouseLeave(event); })
                           .mousedown(mousedownHandler)
                           .mouseup(mouseupHandler);
-                          
+
         // Disable the context menu on the chart, so that it doesn't open when
         // showing the right-click popup.
         $(this.svg.node()).contextmenu(function(e) { e.preventDefault(); });
@@ -204,13 +204,13 @@
         // Add an invisible text element used for determining text size.
         this.textSizeElement = this.svg.append("text").attr("fill", "transparent")
                                                       .attr("id", TEXT_SIZE_ELEMENT_ID);
-        
+
         var handlers = {"mousemove": mousemoveHandler, "mousedown": mousedownHandler, "mouseup": mouseupHandler};
         this.popup = new ChartPopup(parent, handlers);
-        
+
         $(document).mouseup(function () { outerThis.popup.hide(); });
     }
-    
+
     /**
     * Sets the left margin of the chart.
     * @param {Number} leftMargin - The left margin of the chart.
@@ -232,7 +232,7 @@
             y: Math.max(event.pageY - this.popup.height() / 2, 0)
         };
     };
-    
+
     /**
     * Returns the fastest splits to the current control.
     * @return {Array} Array of fastest-split data.
@@ -240,7 +240,7 @@
     Chart.prototype.getFastestSplitsPopupData = function () {
         return ChartPopupData.getFastestSplitsPopupData(this.courseClassSet, this.currentControlIndex);
     };
-    
+
     /**
     * Returns the fastest splits for the currently-shown leg.  The list
     * returned contains the fastest splits for the current leg for each class.
@@ -250,7 +250,7 @@
     Chart.prototype.getFastestSplitsForCurrentLegPopupData = function () {
         return ChartPopupData.getFastestSplitsForLegPopupData(this.courseClassSet, this.eventData, this.currentControlIndex);
     };
-    
+
     /**
     * Stores the current time the mouse is at, on the race graph.
     * @param {jQuery.event} event - The mouse-down or mouse-move event.
@@ -259,7 +259,7 @@
         var yOffset = event.pageY - $(this.svg.node()).offset().top - MARGIN.top;
         this.currentChartTime = Math.round(this.yScale.invert(yOffset) * 60) + this.referenceCumTimes[this.currentControlIndex];
     };
-    
+
     /**
     * Returns an array of the results visiting the current control at the
     * current time.
@@ -268,7 +268,7 @@
     Chart.prototype.getResultsVisitingCurrentControlPopupData = function () {
         return ChartPopupData.getResultsVisitingCurrentControlPopupData(this.courseClassSet, this.eventData, this.currentControlIndex, this.currentChartTime);
     };
-    
+
     /**
     * Returns next-control data to show on the chart popup.
     * @return {Array} Array of next-control data.
@@ -286,10 +286,10 @@
             clearTimeout(this.mouseOutTimeout);
             this.mouseOutTimeout = null;
         }
-        
+
         this.isMouseIn = true;
         if (this.hasData) {
-            this.updateControlLineLocation(event);            
+            this.updateControlLineLocation(event);
         }
     };
 
@@ -302,7 +302,7 @@
             this.updateControlLineLocation(event);
         }
     };
-     
+
     /**
     * Handle the mouse leaving the chart.
     */
@@ -315,7 +315,7 @@
         // This is only necessary for IE9 and IE10; other browsers support
         // "pointer-events: none" in CSS so the popup never gets any mouse
         // events.
-        
+
         // Note that we keep a reference to the 'timeout', so that we can
         // clear it if the mouse subsequently re-enters.  This happens a lot
         // more often than might be expected for a function with a timeout of
@@ -327,7 +327,7 @@
             }
         }, 1);
     };
-    
+
     /**
     * Handles a mouse button being pressed over the chart.
     * @param {jQuery.Event} event - jQuery event object.
@@ -339,7 +339,7 @@
         // order of these events is not consistent between browsers.
         setTimeout(function () { outerThis.showPopupDialog(event); }, 1);
     };
-    
+
     /**
     * Handles a mouse button being pressed over the chart.
     * @param {jQuery.event} event - The jQuery onMouseUp event.
@@ -348,12 +348,12 @@
         this.popup.hide();
         event.preventDefault();
     };
-    
+
     /**
     * Shows the popup window, populating it with data as necessary
     * @param {jQuery.event} event - The jQuery onMouseDown event that triggered
     *     the popup.
-    */ 
+    */
     Chart.prototype.showPopupDialog = function (event) {
         if (this.isMouseIn && this.currentControlIndex !== null) {
             var showPopup = false;
@@ -373,14 +373,14 @@
                     showPopup = true;
                 }
             }
-            
+
             if (showPopup) {
                 this.updatePopupContents(event);
                 this.popup.show(this.getPopupLocation(event));
             }
         }
     };
-    
+
     /**
     * Updates the chart popup with the contents it should contain.
     *
@@ -399,7 +399,7 @@
             this.popupUpdateFunc();
         }
     };
-    
+
     /**
     * Updates the next-control information.
     */
@@ -417,7 +417,7 @@
     */
     Chart.prototype.drawControlLine = function(controlIndex) {
         this.currentControlIndex = controlIndex;
-        this.updateResultStatistics();    
+        this.updateResultStatistics();
         var xPosn = this.xScale(this.referenceCumTimes[controlIndex]);
         this.controlLine = this.svgGroup.append("line")
                                         .attr("x1", xPosn)
@@ -427,7 +427,7 @@
                                         .attr("class", "controlLine")
                                         .node();
     };
-    
+
     /**
     * Updates the location of the control line from the given mouse event.
     * @param {jQuery.event} event - jQuery mousedown or mousemove event.
@@ -438,14 +438,14 @@
         var offset = svgNodeAsJQuery.offset();
         var xOffset = event.pageX - offset.left;
         var yOffset = event.pageY - offset.top;
-        
-        if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - MARGIN.right && 
+
+        if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - MARGIN.right &&
             yOffset < svgNodeAsJQuery.height() - MARGIN.bottom) {
             // In the chart.
             // Get the time offset that the mouse is currently over.
             var chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
             var bisectIndex = d3.bisect(this.referenceCumTimesSorted, chartX);
-            
+
             // bisectIndex is the index at which to insert chartX into
             // referenceCumTimes in order to keep the array sorted.  So if
             // this index is N, the mouse is between N - 1 and N.  Find
@@ -460,25 +460,25 @@
                 var diffToPrev = Math.abs(chartX - this.referenceCumTimesSorted[bisectIndex - 1]);
                 sortedControlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
             }
-            
+
             var controlIndex = this.referenceCumTimeIndexes[sortedControlIndex];
-            
+
             if (this.actualControlIndex === null || this.actualControlIndex !== controlIndex) {
                 // The control line has appeared for the first time or has moved, so redraw it.
                 this.removeControlLine();
                 this.actualControlIndex = controlIndex;
                 this.drawControlLine(Math.max(this.minViewableControl, controlIndex));
             }
-            
+
             if (this.popup.isShown() && this.currentControlIndex !== null) {
                 if (this.isRaceGraph) {
                     this.setCurrentChartTime(event);
                 }
-                
+
                 this.updatePopupContents(event);
                 this.popup.setLocation(this.getPopupLocation(event));
             }
-            
+
         } else {
             // In the SVG element but outside the chart area.
             this.removeControlLine();
@@ -528,14 +528,14 @@
         var timeLosses = selectedResults.map(function (result) { return result.getTimeLossAt(controlIndex); });
         return timeLosses;
     };
-    
+
     /**
     * Updates the statistics text shown after the results.
     */
     Chart.prototype.updateResultStatistics = function() {
         var selectedResults = this.selectedIndexesOrderedByLastYValue.map(function (index) { return this.courseClassSet.allResults[index]; }, this);
         var labelTexts = selectedResults.map(function (result) { return formatNameAndSuffix(result.getOwnerNameForLeg(this.selectedLegIndex), getSuffix(result)); }, this);
-        
+
         if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
             var okDespites = selectedResults.map(function (result) { return result.isOKDespiteMissingTimes; });
             if (this.visibleStatistics.TotalTime) {
@@ -544,32 +544,32 @@
                 labelTexts = d3.zip(labelTexts, cumTimes, cumRanks, okDespites)
                                .map(function(quad) { return quad[0] + formatTimeAndRank(quad[1], quad[2], quad[3]); });
             }
-                           
+
             if (this.visibleStatistics.SplitTime) {
                 var splitTimes = selectedResults.map(function (result) { return result.getSplitTimeTo(this.currentControlIndex); }, this);
                 var splitRanks = selectedResults.map(function (result) { return result.getSplitRankTo(this.currentControlIndex); }, this);
                 labelTexts = d3.zip(labelTexts, splitTimes, splitRanks, okDespites)
                                .map(function(quad) { return quad[0] + formatTimeAndRank(quad[1], quad[2], quad[3]); });
             }
-             
+
             if (this.visibleStatistics.BehindFastest) {
                 var timesBehind = this.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                 labelTexts = d3.zip(labelTexts, timesBehind, okDespites)
                                .map(function(triple) { return triple[0] + SPACER + formatTime((triple[2] && triple[1] === null) ? NaN : triple[1]); });
             }
-             
+
             if (this.visibleStatistics.TimeLoss) {
                 var timeLosses = this.getTimeLosses(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                 labelTexts = d3.zip(labelTexts, timeLosses)
                                .map(function(pair) { return pair[0] + SPACER + formatTime(pair[1]); });
             }
         }
-        
+
         // Update the current result data.
         if (this.hasData) {
             this.currentResultData.forEach(function (data, index) { data.label = labelTexts[index]; });
         }
-        
+
         // This data is already joined to the labels; just update the text.
         d3.selectAll("text.resultLabel").text(function (data) { return data.label; });
     };
@@ -590,14 +590,14 @@
             if (this.selectedLegIndex !== null) {
                 numbersOfControls = [numbersOfControls[this.selectedLegIndex]];
             }
-            
+
             for (var legIndex = 0; legIndex < numbersOfControls.length; legIndex += 1) {
                 for (var controlIndex = 1; controlIndex <= numbersOfControls[legIndex]; controlIndex += 1) {
                     allControls.push(controlIndex.toString());
                 }
                 allControls.push(getMessage("FinishNameShort"));
             }
-            
+
             return function (value, idx) {
                 return allControls[idx];
             };
@@ -612,7 +612,7 @@
     /**
     * Get the width of a piece of text.
     * @param {string} text - The piece of text to measure the width of.
-    * @returns {Number} The width of the piece of text, in pixels. 
+    * @returns {Number} The width of the piece of text, in pixels.
     */
     Chart.prototype.getTextWidth = function (text) {
         return this.textSizeElement.text(text).node().getBBox().width;
@@ -655,7 +655,7 @@
     * returned.
     * @param {Array} values - Array of values.
     * @return {Number} Maximum non-null or NaN value.
-    */    
+    */
     function maxNonNullNorNaNValue(values) {
         var nonNullNorNaNValues = values.filter(isNotNullNorNaN);
         return (nonNullNorNaNValues.length > 0) ? d3.max(nonNullNorNaNValues) : 0;
@@ -663,7 +663,7 @@
 
     /**
     * Return the maximum width of a piece of time and rank text shown to the right
-    * of each result. 
+    * of each result.
     * @param {string} timeFuncName - Name of the function to call to get the time
                                      data.
     * @param {string} rankFuncName - Name of the function to call to get the rank
@@ -673,24 +673,24 @@
     Chart.prototype.getMaxTimeAndRankTextWidth = function(timeFuncName, rankFuncName) {
         var maxTime = 0;
         var maxRank = 0;
-        
+
         var selectedResults = this.selectedIndexes.map(function (index) { return this.courseClassSet.allResults[index]; }, this);
-        
+
         d3.range(1, this.numControls + 2).forEach(function (controlIndex) {
             var times = selectedResults.map(function (result) { return result[timeFuncName](controlIndex); });
             maxTime = Math.max(maxTime, maxNonNullNorNaNValue(times));
-            
+
             var ranks = selectedResults.map(function (result) { return result[rankFuncName](controlIndex); });
             maxRank = Math.max(maxRank, maxNonNullNorNaNValue(ranks));
         });
-        
+
         var text = formatTimeAndRank(maxTime, maxRank);
         return this.getTextWidth(text);
     };
 
     /**
     * Return the maximum width of the split-time and rank text shown to the right
-    * of each result. 
+    * of each result.
     * @returns {Number} Maximum width of split-time and rank text, in pixels.
     */
     Chart.prototype.getMaxSplitTimeAndRankTextWidth = function() {
@@ -714,12 +714,12 @@
     */
     Chart.prototype.getMaxTimeBehindFastestWidth = function() {
         var maxTime = 0;
-        
+
         for (var controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
             var times = this.getTimesBehindFastest(controlIndex, this.selectedIndexes);
             maxTime = Math.max(maxTime, maxNonNullNorNaNValue(times));
         }
-        
+
         return this.getTextWidth(SPACER + formatTime(maxTime));
     };
 
@@ -739,9 +739,11 @@
                 minTimeLoss = Math.min(minTimeLoss, d3.min(nonNullTimeLosses));
             }
         }
-        
-        return Math.max(this.getTextWidth(SPACER + formatTime(maxTimeLoss)),
-                        this.getTextWidth(SPACER + formatTime(minTimeLoss)));
+
+        return Math.max(
+            this.getTextWidth(SPACER + formatTime(maxTimeLoss)),
+            this.getTextWidth(SPACER + formatTime(minTimeLoss))
+        );
     };
 
     /**
@@ -762,10 +764,10 @@
         if (this.visibleStatistics.TimeLoss) {
             maxWidth += this.getMaxTimeLossWidth();
         }
-        
+
         return maxWidth;
     };
-    
+
     /**
     * Determines the maximum width of all of the visible start time labels.
     * If none are presently visible, zero is returned.
@@ -779,7 +781,7 @@
         } else {
             maxWidth = 0;
         }
-        
+
         return maxWidth;
     };
 
@@ -798,13 +800,13 @@
     * between controls.
     */
     Chart.prototype.drawBackgroundRectangles = function () {
-        
+
         // We can't guarantee that the reference cumulative times are in
         // ascending order, but we need such a list of times in order to draw
         // the rectangles.  So, sort the reference cumulative times.
         var refCumTimesSorted = this.courseClassSet.sliceForLegIndex(this.referenceCumTimes, this.selectedLegIndex);
         refCumTimesSorted.sort(d3.ascending);
-        
+
         // Now remove any duplicate times.
         var index = 1;
         while (index < refCumTimesSorted.length) {
@@ -816,18 +818,18 @@
         }
 
         var outerThis = this;
-        
+
         var rects = this.svgGroup.selectAll("rect")
                                  .data(d3.range(refCumTimesSorted.length - 1));
-        
+
         rects.enter().append("rect");
-        
+
         var backgroundIndexes = [];
         var numbersOfControls = (this.courseClassSet.hasTeamData()) ? this.courseClassSet.classes[0].numbersOfControls : [this.courseClassSet.numControls];
         if (this.courseClassSet.hasTeamData() && this.selectedLegIndex !== null) {
             numbersOfControls = [numbersOfControls[this.selectedLegIndex]];
         }
-        
+
         for (var legIndex = 0; legIndex < numbersOfControls.length; legIndex += 1) {
             for (var controlIndex = 0; controlIndex <= numbersOfControls[legIndex]; controlIndex += 1) {
                 backgroundIndexes.push(1 + controlIndex % 2 + ((legIndex + (this.selectedLegIndex || 0)) % 2) * 2);
@@ -844,7 +846,7 @@
 
         rects.exit().remove();
     };
-    
+
     /**
     * Returns a function used to format tick labels on the Y-axis.
     *
@@ -854,7 +856,7 @@
     *
     * For other graph types, this method returns null, which tells d3 to use
     * its default tick formatter.
-    * 
+    *
     * @param {object} chartData - The chart data to read start times from.
     * @return {?Function} Tick formatter function, or null to use the default
     *     d3 formatter.
@@ -888,9 +890,9 @@
     * @param {object} chartData - The chart data to use.
     */
     Chart.prototype.drawAxes = function (yAxisLabel, chartData) {
-    
+
         var tickFormatter = this.determineYAxisTickFormatter(chartData);
-        
+
         var xAxis = d3.axisTop()
                       .scale(this.xScale)
                       .tickFormat(this.getTickFormatter())
@@ -899,7 +901,7 @@
         var yAxis = d3.axisLeft()
                       .scale(this.yScale)
                       .tickFormat(tickFormatter);
-                     
+
         var lowerXAxis = d3.axisBottom()
                            .scale(this.xScaleMinutes);
 
@@ -923,7 +925,7 @@
 
         this.svgGroup.append("g")
                      .attr("class", "x axis")
-                     .attr("transform", "translate(0," + this.contentHeight + ")")                     
+                     .attr("transform", "translate(0," + this.contentHeight + ")")
                      .call(lowerXAxis)
                      .append("text")
                      .attr("x", 60)
@@ -932,7 +934,7 @@
                      .style("fill", "black")
                      .text(getMessage("LowerXAxisChartLabel"));
     };
-    
+
     /**
     * Draw the lines on the chart.
     * @param {Array} chartData - Array of chart data.
@@ -957,16 +959,16 @@
                            .defined(function (d) { return isNotNullNorNaN(d.ys[selResultIdx]); });
             }
         };
-        
+
         this.svgGroup.selectAll("path.graphLine").remove();
-        
+
         this.svgGroup.selectAll("line.aroundOmittedTimes").remove();
-        
+
         d3.range(this.numLines).forEach(function (selResultIdx) {
             var strokeColour = colours[this.selectedIndexes[selResultIdx] % colours.length];
             var highlighter = function () { outerThis.highlight(outerThis.selectedIndexes[selResultIdx]); };
             var unhighlighter = function () { outerThis.unhighlight(); };
-            
+
             this.svgGroup.append("path")
                          .attr("d", lineFunctionGenerator(selResultIdx)(chartData.dataColumns))
                          .attr("stroke", strokeColour)
@@ -975,7 +977,7 @@
                          .on("mouseleave", unhighlighter)
                          .append("title")
                          .text(chartData.resultNames[selResultIdx]);
-                         
+
             chartData.dubiousTimesInfo[selResultIdx].forEach(function (dubiousTimeInfo) {
                 this.svgGroup.append("line")
                              .attr("x1", this.xScale(chartData.dataColumns[dubiousTimeInfo.start].x))
@@ -1018,16 +1020,16 @@
     /**
     * Draws the start-time labels for the currently-selected results.
     * @param {object} chartData - The chart data that contains the start offsets.
-    */ 
+    */
     Chart.prototype.drawResultStartTimeLabels = function (chartData) {
         var startColumn = chartData.dataColumns[0];
         var outerThis = this;
-        
+
         var startLabels = this.svgGroup.selectAll("text.startLabel").data(this.selectedIndexes);
-        
+
         startLabels.enter().append("text")
                            .classed("startLabel", true);
-        
+
         startLabels = this.svgGroup.selectAll("text.startLabel").data(this.selectedIndexes);
         startLabels.attr("x", -7)
                    .attr("y", function (_resultIndex, selResultIndex) { return outerThis.yScale(startColumn.ys[selResultIndex]) + outerThis.getTextHeight(chartData.resultNames[selResultIndex]) / 4; })
@@ -1035,13 +1037,13 @@
                    .on("mouseenter", function (resultIndex) { outerThis.highlight(resultIndex); })
                    .on("mouseleave", function () { outerThis.unhighlight(); })
                    .text(function (_resultIndex, selResultIndex) { return formatTime(Math.round(startColumn.ys[selResultIndex] * 60)) + " " + chartData.resultNames[selResultIndex]; });
-        
+
         startLabels.exit().remove();
     };
-    
+
     /**
     * Removes all of the result start-time labels from the chart.
-    */ 
+    */
     Chart.prototype.removeResultStartTimeLabels = function () {
         this.svgGroup.selectAll("text.startLabel").remove();
     };
@@ -1086,16 +1088,16 @@
                     break;
                 }
             }
-        }    
+        }
     };
-    
+
     /**
     * Draw legend labels to the right of the chart.
     * Draw legend labels to the right of the chart.
     * @param {object} chartData - The chart data that contains the final time offsets.
     */
     Chart.prototype.drawResultLegendLabels = function (chartData) {
-        
+
         var minLastY = 0;
         if (chartData.dataColumns.length === 0) {
             this.currentResultData = [];
@@ -1114,9 +1116,9 @@
                     index: resultIndex
                 };
             }, this);
-            
+
             minLastY -= this.currentResultData[this.numLines - 1].textHeight;
-            
+
             // Draw the mispunchers at the bottom of the chart, with the last
             // one of them at the bottom.
             var lastMispuncherY = null;
@@ -1127,15 +1129,15 @@
                 }
             }
         }
-        
+
         // Sort by the y-offset values, which doesn't always agree with the end
         // positions of the results.
         this.currentResultData.sort(function (a, b) { return a.y - b.y; });
-        
+
         this.selectedIndexesOrderedByLastYValue = this.currentResultData.map(function (result) { return result.index; });
 
         this.adjustResultLegendLabelsDownwardsIfNecessary();
-        
+
         this.adjustResultLegendLabelsUpwardsIfNecessary(minLastY);
 
         var legendLines = this.svgGroup.selectAll("line.resultLegendLine").data(this.currentResultData);
@@ -1206,7 +1208,7 @@
     Chart.prototype.clearGraph = function () {
         this.svgGroup.selectAll("*").remove();
     };
-    
+
     /**
     * Sorts the reference cumulative times, and creates a list of the sorted
     * reference cumulative times and their indexes into the actual list of
@@ -1224,7 +1226,7 @@
                 cumTimesToControlIndex.set(cumTime, index);
             }
         });
-        
+
         // Sort and deduplicate the reference cumulative times.
         this.referenceCumTimesSorted = this.referenceCumTimes.slice(0);
         this.referenceCumTimesSorted.sort(d3.ascending);
@@ -1236,7 +1238,7 @@
 
         this.referenceCumTimeIndexes = this.referenceCumTimesSorted.map(function (cumTime) { return cumTimesToControlIndex.get(cumTime); });
     };
-    
+
     /**
     * Draws the chart.
     * @param {object} data - Object that contains various chart data.  This
@@ -1272,7 +1274,7 @@
         this.visibleStatistics = visibleStatistics;
         this.selectedLegIndex = selectedLegIndex;
         this.hasData = true;
-        
+
         this.maxStatisticTextWidth = this.determineMaxStatisticTextWidth();
         this.maxStartTimeLabelWidth = (this.isRaceGraph) ? this.determineMaxStartTimeLabelWidth(chartData) : 0;
         this.sortReferenceCumTimes();
@@ -1289,6 +1291,6 @@
             this.removeResultStartTimeLabels();
         }
     };
-    
+
     SplitsBrowser.Controls.Chart = Chart;
 })();

@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser ResultsTable - Shows class results in a table.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,19 +20,19 @@
  */
 (function () {
     "use strict";
-    
+
     var formatTime = SplitsBrowser.formatTime;
     var compareResults = SplitsBrowser.Model.compareResults;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
     var subtractIfNotNull = SplitsBrowser.subtractIfNotNull;
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
-    
+
     var NON_BREAKING_SPACE_CHAR = "\u00a0";
 
     // Maximum precision to show a results-table entry using.
     var MAX_PERMITTED_PRECISION = 2;
-    
+
     /**
     * A control that shows an entire table of results.
     * @constructor
@@ -47,30 +47,30 @@
         this.selectedLegIndex = null;
         this.buildTable();
     }
-    
+
     /**
     * Build the results table.
     */
     ResultsTable.prototype.buildTable = function () {
         this.div = d3.select(this.parent).append("div")
                                          .attr("id", "resultsTableContainer");
-                                         
+
         this.headerSpan = this.div.append("div")
                                   .append("span")
                                   .classed("resultsTableHeader", true);
-                                  
+
         this.table = this.div.append("table")
                              .classed("resultsTable", true);
-                             
+
         this.table.append("thead")
                   .append("tr");
-                  
+
         this.table.append("tbody");
     };
-    
+
     /**
     * Determines the precision with which to show the results.
-    * 
+    *
     * If there are some fractional times, then all times should be shown with
     * the same precision, even if not all of them need to.  For example, a
     * split time between controls punched after 62.7 and 108.7 seconds must be
@@ -81,7 +81,7 @@
     */
     function determinePrecision(results) {
         var maxPrecision = 0;
-        var maxPrecisionFactor = 1;        
+        var maxPrecisionFactor = 1;
         results.forEach(function (result) {
             result.getAllOriginalCumulativeTimes().forEach(function (cumTime) {
                 if (isNotNullNorNaN(cumTime)) {
@@ -92,14 +92,14 @@
                 }
             });
         });
-        
+
         return maxPrecision;
     }
-    
+
     /**
     * Returns the contents of the time or status column for the given
     * result.
-    * 
+    *
     * The status may be a string that indicates the result mispunched.
     *
     * @param {Result} result The result to get the status of.
@@ -128,11 +128,11 @@
     * HTML string without the risk of any injection.
     * @param {String} value The HTML value to escape.
     * @return {String} The HTML value escaped.
-    */ 
+    */
     function escapeHtml(value) {
         return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
-    
+
     /**
     * Formats a time (cumulative or split) for a result.  If the result is
     * deemed as completed despite having missing times, any such missing times are
@@ -150,27 +150,26 @@
             return formatTime(time, precision);
         }
     }
-    
+
     /**
     * Populates the contents of the table with the course-class data.
     */
     ResultsTable.prototype.populateTable = function () {
         var headerText = this.courseClass.name + ", ";
-        
-        var numControls, controlOffset, timeOffset;
+
+        var numControls, controlOffset;
         if (this.courseClass.isTeamClass && this.selectedLegIndex !== null) {
             numControls = this.courseClass.numbersOfControls[this.selectedLegIndex];
             controlOffset = this.courseClass.offsets[this.selectedLegIndex];
         } else {
             numControls = this.courseClass.numControls;
             controlOffset = 0;
-            timeOffset = 0;
         }
-        
+
         if (this.courseClass.isTeamClass && this.selectedLegIndex !== null) {
             headerText += getMessageWithFormatting("ShowLeg", {"$$LEG_NUMBER$$": this.selectedLegIndex + 1 }) + ", ";
         }
-        
+
         if (this.courseClass.isTeamClass && this.selectedLegIndex === null) {
             var numControlsString = this.courseClass.numbersOfControls.join(" + ");
             headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", {"$$NUM$$": numControlsString});
@@ -187,15 +186,15 @@
         if (course.climb !== null) {
             headerText += ", " + getMessageWithFormatting("ResultsTableHeaderClimb", {"$$CLIMB$$": course.climb});
         }
-        
+
         this.headerSpan.text(headerText);
-        
+
         var headerCellData = [
             getMessage("ResultsTableHeaderControlNumber"),
             getMessage("ResultsTableHeaderName"),
             getMessage("ResultsTableHeaderTime")
         ];
-        
+
         if (this.courseClass.isTeamClass) {
             var controlNumber;
             if (this.selectedLegIndex === null) {
@@ -221,25 +220,25 @@
                     return (index + 1) + NON_BREAKING_SPACE_CHAR + "(" + control + ")";
                 }));
             }
-                
+
             headerCellData.push(getMessage("FinishName"));
         }
-        
+
         var headerCells = this.table.select("thead tr")
                                     .selectAll("th")
                                     .data(headerCellData);
-                                                       
+
         headerCells.enter().append("th");
         headerCells.exit().remove();
         headerCells = this.table.select("thead tr")
                                 .selectAll("th")
                                 .data(headerCellData);
-                                
+
         headerCells.text(function (header) { return header; });
-        
+
         // Array that accumulates bits of HTML for the table body.
         var htmlBits = [];
-        
+
         function timeClasses(isFastest, isDubious, isMissing) {
             var classes = [];
             if (isFastest) {
@@ -251,10 +250,10 @@
             if (isMissing) {
                 classes.push("missing");
             }
-            
+
             return classes.join(" ");
         }
-        
+
         // Adds a two-line cell to the array of table-body HTML parts.
         // If truthy, cssClass is assumed to be HTML-safe and not require
         // escaping.
@@ -263,36 +262,36 @@
             if (cssClass) {
                 htmlBits.push(" class=\"" + cssClass + "\"");
             }
-            
+
             if (tooltip) {
                 htmlBits.push(" title=\"" + escapeHtml(tooltip) + "\"");
             }
-            
+
             htmlBits.push("><span");
             if (cumClasses !== "") {
                 htmlBits.push(" class=\"" + cumClasses + "\"");
             }
-            
+
             htmlBits.push(">");
             htmlBits.push(escapeHtml(topLine));
             htmlBits.push("</span><br><span");
             if (splitClasses !== "") {
                 htmlBits.push(" class=\"" + splitClasses + "\"");
             }
-            
+
             htmlBits.push(">");
             htmlBits.push(escapeHtml(bottomLine));
             htmlBits.push("</span></td>\n");
         }
-        
+
         var results = this.courseClass.results.slice(0);
         results.sort(compareResults);
-        
+
         var nonCompCount = 0;
         var rank = 0;
-        
+
         var precision = determinePrecision(results);
-        
+
         results.forEach(function (result, index) {
             htmlBits.push("<tr><td>");
 
@@ -303,24 +302,24 @@
                 if (index === 0 || results[index - 1].totalTime !== result.totalTime) {
                     rank = index + 1 - nonCompCount;
                 }
-                
+
                 htmlBits.push("" + rank);
             }
-            
+
             htmlBits.push("</td>");
-            
+
             var tooltipText;
             if (this.courseClass.isTeamClass && this.selectedLegIndex === null) {
                 tooltipText = result.owner.members.map(function (competitor) { return competitor.name; }).join("\n");
             } else {
                 tooltipText = "";
             }
-            
+
             var startTimeOffset = result.getOriginalCumulativeTimeTo(controlOffset);
             addCell(result.getOwnerNameForLeg(this.selectedLegIndex), result.owner.club, null, "", "", tooltipText);
             var time = (this.courseClass.isTeamClass && this.selectedLegIndex !== null) ? subtractIfNotNull(result.getOriginalCumulativeTimeTo(controlOffset + numControls + 1), startTimeOffset) : result.totalTime;
             addCell(getTimeOrStatus(result, time, precision), NON_BREAKING_SPACE_CHAR, "time", "", "", "");
-            
+
             d3.range(controlOffset + 1, controlOffset + numControls + 2).forEach(function (controlNum) {
                 var cumTime = subtractIfNotNull(result.getOriginalCumulativeTimeTo(controlNum), startTimeOffset);
                 var splitTime = result.getOriginalSplitTimeTo(controlNum);
@@ -334,14 +333,14 @@
                 var isSplitMissing = result.isOKDespiteMissingTimes && splitTime === null;
                 addCell(formattedCumTime, formattedSplitTime, "time", timeClasses(isCumTimeFastest, isCumDubious, isCumMissing), timeClasses(isSplitTimeFastest, isSplitDubious, isSplitMissing), "");
             });
-            
+
             htmlBits.push("</tr>\n");
-            
+
         }, this);
-        
+
         this.table.select("tbody").node().innerHTML = htmlBits.join("");
     };
-    
+
     /**
     * Sets the class whose data is displayed.
     * @param {SplitsBrowser.Model.CourseClass} courseClass - The class displayed.
@@ -353,7 +352,7 @@
             this.populateTable();
         }
     };
-    
+
     /**
     * Sets the selected leg index.
     * @param {Number?} selectedLegIndex - The selected leg index.
@@ -364,27 +363,27 @@
             this.populateTable();
         }
     };
-    
+
     /**
     * Shows the table of results.
     */
     ResultsTable.prototype.show = function () {
         this.div.style("display", null);
     };
-    
+
     /**
     * Hides the table of results.
     */
     ResultsTable.prototype.hide = function () {
         this.div.style("display", "none");
     };
-    
+
     /**
     * Retranslates the results table following a change of selected language.
     */
     ResultsTable.prototype.retranslate = function () {
         this.populateTable();
     };
-    
+
     SplitsBrowser.Controls.ResultsTable = ResultsTable;
 })();

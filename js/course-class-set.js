@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser Course-Class Set - A collection of selected course classes.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,13 +20,13 @@
  */
 (function () {
     "use strict";
-    
+
     var isNotNull = SplitsBrowser.isNotNull;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
-    var throwInvalidData = SplitsBrowser.throwInvalidData; 
+    var throwInvalidData = SplitsBrowser.throwInvalidData;
     var compareResults = SplitsBrowser.Model.compareResults;
-    
+
     /**
     * Utility function to merge the lists of all results in a number of
     * classes.  All classes must contain the same number of controls.
@@ -37,16 +37,16 @@
         if (classes.length === 0) {
             return [];
         }
-        
+
         var allResults = [];
         var expectedControlCount = classes[0].numControls;
         classes.forEach(function (courseClass) {
             if (courseClass.numControls !== expectedControlCount) {
                 throwInvalidData("Cannot merge classes with " + expectedControlCount + " and " + courseClass.numControls + " controls");
             }
-            
+
             courseClass.results.forEach(function (result) {
-                if (!result.isNonStarter) { 
+                if (!result.isNonStarter) {
                     allResults.push(result);
                 }
             });
@@ -66,7 +66,7 @@
         // First, sort the source data, removing nulls.
         var sortedData = sourceData.filter(isNotNullNorNaN);
         sortedData.sort(d3.ascending);
-        
+
         // Now construct a map that maps from source value to rank.
         var rankMap = new d3.map();
         sortedData.forEach(function(value, index) {
@@ -74,15 +74,15 @@
                 rankMap.set(value, index + 1);
             }
         });
-        
+
         // Finally, build and return the list of ranks.
         var ranks = sourceData.map(function(value) {
             return isNotNullNorNaN(value) ? rankMap.get(value) : value;
         });
-        
+
         return ranks;
     }
-    
+
     /**
     * An object that represents the currently-selected classes.
     * @constructor
@@ -94,17 +94,17 @@
         this.numControls = (classes.length > 0) ? classes[0].numControls : null;
         this.computeRanks();
     }
-    
+
     /**
     * Returns whether this course-class set is empty, i.e. whether it has no
     * results at all.
     * @return {boolean} True if the course-class set is empty, false if it is not
     *     empty.
-    */    
+    */
     CourseClassSet.prototype.isEmpty = function () {
         return this.allResults.length === 0;
     };
-    
+
     /**
     * Returns the course used by all of the classes that make up this set.  If
     * there are no classes, null is returned instead.
@@ -113,7 +113,7 @@
     CourseClassSet.prototype.getCourse = function () {
         return (this.classes.length > 0) ? this.classes[0].course : null;
     };
-    
+
     /**
     * Returns the name of the 'primary' class, i.e. that that has been
     * chosen in the drop-down list.  If there are no classes, null is returned
@@ -123,7 +123,7 @@
     CourseClassSet.prototype.getPrimaryClassName = function () {
         return (this.classes.length > 0) ? this.classes[0].name : null;
     };
-    
+
     /**
     * Returns the number of classes that this course-class set is made up of.
     * @return {Number} The number of classes that this course-class set is
@@ -132,7 +132,7 @@
     CourseClassSet.prototype.getNumClasses = function () {
         return this.classes.length;
     };
-    
+
     /**
     * Returns whether any of the classes within this set have data that
     * SplitsBrowser can identify as dubious.
@@ -142,7 +142,7 @@
     CourseClassSet.prototype.hasDubiousData = function () {
         return this.classes.some(function (courseClass) { return courseClass.hasDubiousData; });
     };
-    
+
     /**
     * Returns whether this course-class set has team data.
     * @return {boolean} True if all of the classes within this course-class
@@ -151,7 +151,7 @@
     CourseClassSet.prototype.hasTeamData = function () {
         return this.classes.length > 0 && this.classes.every(function (courseClass) { return courseClass.isTeamClass; });
     };
-    
+
     /**
     * Returns the number of legs in this course-class set, if this
     * course-class set contains team data.  If not, or the number of
@@ -174,7 +174,7 @@
                 return null;
             }
         }
-        
+
         return legCount;
     };
 
@@ -198,15 +198,15 @@
                 while (endIndex + 1 < times.length && !isNotNullNorNaN(times[endIndex + 1])) {
                     endIndex += 1;
                 }
-                
+
                 if (endIndex + 1 < times.length || includeEnd) {
                     blankRangeInfo.push({start: startIndex - 1, end: endIndex + 1});
                 }
-                
+
                 startIndex = endIndex + 1;
             }
         }
-        
+
         return blankRangeInfo;
     }
 
@@ -228,21 +228,21 @@
                 cumTimes[index] = timeBefore + (index - range.start) * avgTimePerControl;
             }
         }
-        
+
         var lastNaNTimeIndex = cumTimes.length;
         while (lastNaNTimeIndex >= 0 && isNaNStrict(cumTimes[lastNaNTimeIndex - 1])) {
             lastNaNTimeIndex -= 1;
         }
-        
+
         if (lastNaNTimeIndex > 0) {
             for (var timeIndex = lastNaNTimeIndex; timeIndex < cumTimes.length; timeIndex += 1) {
                 cumTimes[timeIndex] = cumTimes[timeIndex - 1] + ((timeIndex === cumTimes.length - 1) ? 60 : 180);
             }
         }
-        
+
         return cumTimes;
     }
-    
+
     /**
     * Returns an array of the cumulative times of the winner of the set of
     * classes.
@@ -252,7 +252,7 @@
         if (this.allResults.length === 0) {
             return null;
         }
-        
+
         var firstResult = this.allResults[0];
         return (firstResult.completed()) ? fillBlankRangesInCumulativeTimes(firstResult.cumTimes) : null;
     };
@@ -268,7 +268,7 @@
     CourseClassSet.prototype.getFastestCumTimes = function () {
         return this.getFastestCumTimesPlusPercentage(0);
     };
-    
+
     /**
     * Return the imaginary result who recorded the fastest time on each leg of
     * the given classes, with a given percentage of their time added.
@@ -282,12 +282,12 @@
         if (this.numControls === null) {
             return null;
         }
-    
+
         var ratio = 1 + percent / 100;
-        
+
         var fastestSplits = new Array(this.numControls + 1);
         fastestSplits[0] = 0;
-        
+
         for (var controlIdx = 1; controlIdx <= this.numControls + 1; controlIdx += 1) {
             var fastestForThisControl = null;
             for (var resultIdx = 0; resultIdx < this.allResults.length; resultIdx += 1) {
@@ -296,20 +296,20 @@
                     fastestForThisControl = thisTime;
                 }
             }
-            
+
             fastestSplits[controlIdx] = fastestForThisControl;
         }
-     
+
         if (!fastestSplits.every(isNotNull)) {
             // We don't have fastest splits for every control, so there was one
             // control that either nobody punched or everybody had a dubious
             // split for.
-            
+
             // Find the blank-ranges of the fastest times.  Include the end
             // of the range in case there are no cumulative times at the last
             // control but there is to the finish.
             var fastestBlankRanges = getBlankRanges(fastestSplits, true);
-            
+
             // Find all blank-ranges of results.
             var allResultBlankRanges = [];
             this.allResults.forEach(function (result) {
@@ -323,7 +323,7 @@
                     });
                 });
             });
-            
+
             // Now, for each blank range of the fastest times, find the
             // size of the smallest result blank range that covers it,
             // and then the fastest split among those results.
@@ -331,7 +331,7 @@
                 var coveringResultRanges = allResultBlankRanges.filter(function (compRange) {
                     return compRange.start <= fastestRange.start && fastestRange.end <= compRange.end + 1;
                 });
-                
+
                 var minSize = null;
                 var minOverallSplit = null;
                 coveringResultRanges.forEach(function (coveringRange) {
@@ -339,12 +339,12 @@
                         minSize = coveringRange.size;
                         minOverallSplit = null;
                     }
-                    
+
                     if (minOverallSplit === null || coveringRange.overallSplit < minOverallSplit) {
                         minOverallSplit = coveringRange.overallSplit;
                     }
                 });
-                
+
                 // Assume that the fastest result across the range had equal
                 // splits for all controls on the range.  This won't always
                 // make sense but it's the best we can do.
@@ -355,7 +355,7 @@
                 }
             });
         }
-                
+
         if (!fastestSplits.every(isNotNull)) {
             // Could happen if the results are created from split times and the
             // splits are not complete, and also if nobody punches the final
@@ -367,7 +367,7 @@
                 }
             }
         }
-        
+
         var fastestCumTimes = new Array(this.numControls + 1);
         fastestSplits.forEach(function (fastestSplit, index) {
             fastestCumTimes[index] = (index === 0) ? 0 : fastestCumTimes[index - 1] + fastestSplit * ratio;
@@ -394,22 +394,22 @@
             // Nothing to compute.
             return;
         }
-        
+
         var splitRanksByResult = [];
         var cumRanksByResult = [];
-        
+
         // Begin with null ranks for the start.
         this.allResults.forEach(function () {
             splitRanksByResult.push([null]);
             cumRanksByResult.push([null]);
         });
-        
+
         d3.range(1, this.numControls + 2).forEach(function (control) {
             var splitsByResult = this.allResults.map(function(result) { return result.getSplitTimeTo(control); });
             var splitRanksForThisControl = getRanks(splitsByResult);
             this.allResults.forEach(function (_result, idx) { splitRanksByResult[idx].push(splitRanksForThisControl[idx]); });
         }, this);
-        
+
         d3.range(1, this.numControls + 2).forEach(function (control) {
             // We want to null out all subsequent cumulative ranks after a
             // result mispunches.
@@ -429,12 +429,12 @@
             var cumRanksForThisControl = getRanks(cumSplitsByResult);
             this.allResults.forEach(function (_res, idx) { cumRanksByResult[idx].push(cumRanksForThisControl[idx]); });
         }, this);
-        
+
         this.allResults.forEach(function (result, idx) {
             result.setSplitAndCumulativeRanks(splitRanksByResult[idx], cumRanksByResult[idx]);
         });
     };
-    
+
     /**
     * Returns the best few splits to a given control.
     *
@@ -463,18 +463,18 @@
                 var resultBSplit = resultB.getSplitTimeTo(controlIdx);
                 return (resultASplit === resultBSplit) ? d3.ascending(resultA.totalTime, resultB.totalTime) : d3.ascending(resultASplit, resultBSplit);
             };
-            
+
             var results = this.allResults.filter(function (result) { return result.completed() && !isNaNStrict(result.getSplitTimeTo(controlIdx)); });
             results.sort(comparator);
             var fastestSplits = [];
             for (var i = 0; i < results.length && i < numSplits; i += 1) {
                 fastestSplits.push({name: results[i].owner.name, split: results[i].getSplitTimeTo(controlIdx)});
             }
-            
+
             return fastestSplits;
         }
     };
-    
+
     /**
     * Returns the relevant data for a single leg if necessary.
     * @param {Array} data Array of data to slice.
@@ -514,7 +514,7 @@
 
         var resultData = this.allResults.map(function (result) { return chartType.dataSelector(result, referenceCumTimes); });
         var selectedResultData = currentIndexes.map(function (index) { return resultData[index]; });
-        
+
         var numControls;
         if (this.hasTeamData() && legIndex !== null) {
             selectedResultData = selectedResultData.map(function (data) { return this.sliceForLegIndex(data, legIndex); }, this);
@@ -529,7 +529,7 @@
         var yMin;
         var yMax;
         if (currentIndexes.length === 0) {
-            // No results selected.  
+            // No results selected.
             if (this.isEmpty()) {
                 // No results at all.  Make up some values.
                 yMin = 0;
@@ -551,7 +551,7 @@
             // floating-point noise.
             yMax = yMin + 1;
         }
-        
+
         var offset = (this.hasTeamData() && legIndex !== null) ? this.classes[0].offsets[legIndex] : 0;
         var dubiousTimesInfo = currentIndexes.map(function (resultIndex) {
             var indexPairs = chartType.indexesAroundOmittedTimesFunc(this.allResults[resultIndex]);
@@ -572,6 +572,6 @@
             dubiousTimesInfo: dubiousTimesInfo
         };
     };
-    
+
     SplitsBrowser.Model.CourseClassSet = CourseClassSet;
 })();

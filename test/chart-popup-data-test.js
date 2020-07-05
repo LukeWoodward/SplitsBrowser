@@ -1,6 +1,6 @@
 ﻿/*
  *  SplitsBrowser - ChartPopupData tests.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
@@ -20,9 +20,9 @@
  */
 (function () {
     "use strict";
-    
+
     QUnit.module("Chart popup data");
-    
+
     var formatTime = SplitsBrowser.formatTime;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
@@ -40,15 +40,15 @@
             var timeOffset = (num * 7) % 11;
             return fromSplitTimes(1, "Name" + num, "Club" + num, 10 * 3600 + 127 * num, [65 + 10 * timeOffset, 221 + 20 * timeOffset, 209 + 15 * timeOffset, 100 + 5 * timeOffset]);
         });
-    
+
         return new CourseClassSet([new CourseClass("Test class", 3, results)]);
     }
-    
+
     QUnit.test("Can get selected classes popup data", function (assert) {
-    
+
         var courseClassSet = getTestCourseClassSet();
         var actualData = ChartPopupData.getFastestSplitsPopupData(courseClassSet, 2);
-    
+
         var expectedData = {
             title: getMessage("SelectedClassesPopupHeader"),
             data: d3.range(0, 10).map(function (num) {
@@ -60,12 +60,12 @@
             }),
             placeholder: getMessage("SelectedClassesPopupPlaceholder")
         };
-        
+
         assert.deepEqual(actualData, expectedData);
     });
 
     QUnit.test("Can get fastest splits to intermediate control", function (assert) {
-    
+
         var courseClassSet1 = getTestCourseClassSet();
         var course1 = new Course("Test course", courseClassSet1.classes, null, null, ["235", "189", "212"]);
         courseClassSet1.classes.forEach(function (courseClass) { courseClass.setCourse(course1); });
@@ -73,10 +73,10 @@
         var courseClassSet2 = new CourseClassSet([new CourseClass("Test class 2", 3, [fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [75, 242, 200, 157])])]);
         var course2 = new Course("Test course 2", courseClassSet2.classes, null, null, ["235", "189", "212"]);
         courseClassSet2.classes[0].setCourse(course2);
-        
+
         var eventData = new Event(courseClassSet1.classes.concat(courseClassSet2.classes), [course1, course2]);
         var actualData = ChartPopupData.getFastestSplitsForLegPopupData(courseClassSet1, eventData, 2);
-        
+
         var expectedData = {
             title: getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": "235", "$$END$$": "189"}),
             data: [{
@@ -93,19 +93,19 @@
             }],
             placeholder: null
         };
-        
+
         assert.deepEqual(actualData, expectedData);
     });
 
     QUnit.test("Can get fastest splits from start to first control", function (assert) {
-    
+
         var courseClassSet = getTestCourseClassSet();
         var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
-        
+
         var eventData = new Event(courseClassSet.classes, [course]);
         var actualData = ChartPopupData.getFastestSplitsForLegPopupData(courseClassSet, eventData, 1);
-        
+
         var expectedData = {
             title: getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": getMessage("StartName"), "$$END$$": "235"}),
             data: [{
@@ -116,19 +116,19 @@
             }],
             placeholder: null
         };
-        
+
         assert.deepEqual(actualData, expectedData);
     });
 
     QUnit.test("Can get fastest splits from last control to finish", function (assert) {
-    
+
         var courseClassSet = getTestCourseClassSet();
         var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
-        
+
         var eventData = new Event(courseClassSet.classes, [course]);
         var actualData = ChartPopupData.getFastestSplitsForLegPopupData(courseClassSet, eventData, 4);
-        
+
         var expectedData = {
             title: getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": "212", "$$END$$": getMessage("FinishName")}),
             data: [{
@@ -139,19 +139,19 @@
             }],
             placeholder: null
         };
-        
+
         assert.deepEqual(actualData, expectedData);
     });
-    
+
     QUnit.test("Can get results near intermediate control", function (assert) {
         var courseClassSet = getTestCourseClassSet();
         var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
-        
+
         var eventData = new Event(courseClassSet.classes, [course]);
-        
+
         var testTime = 10 * 3600 + 12 * 60;
-        
+
         var expectedData = {
             title: getMessageWithFormatting("NearbyCompetitorsPopupHeader", {
                 "$$START$$": formatTime(testTime - 120),
@@ -164,21 +164,21 @@
             ],
             placeholder: getMessage("NoNearbyCompetitors")
         };
-        
+
         var actualData = ChartPopupData.getResultsVisitingCurrentControlPopupData(courseClassSet, eventData, 2, testTime);
-        
+
         assert.deepEqual(actualData, expectedData);
     });
-    
+
     QUnit.test("Can get results near start control", function (assert) {
         var courseClassSet = getTestCourseClassSet();
         var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
-        
+
         var eventData = new Event(courseClassSet.classes, [course]);
-        
+
         var testTime = 10 * 3600 + 12 * 60;
-        
+
         var expectedData = {
             title: getMessageWithFormatting("NearbyCompetitorsPopupHeader", {
                 "$$START$$": formatTime(testTime - 120),
@@ -191,21 +191,21 @@
             ],
             placeholder: getMessage("NoNearbyCompetitors")
         };
-        
+
         var actualData = ChartPopupData.getResultsVisitingCurrentControlPopupData(courseClassSet, eventData, 0, testTime);
-        
+
         assert.deepEqual(actualData, expectedData);
     });
-    
+
     QUnit.test("Can get results near finish control", function (assert) {
         var courseClassSet = getTestCourseClassSet();
         var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
-        
+
         var eventData = new Event(courseClassSet.classes, [course]);
-        
+
         var testTime = 10 * 3600 + 28 * 60;
-        
+
         var expectedData = {
             title: getMessageWithFormatting("NearbyCompetitorsPopupHeader", {
                 "$$START$$": formatTime(testTime - 120),
@@ -218,12 +218,12 @@
             ],
             placeholder: getMessage("NoNearbyCompetitors")
         };
-        
+
         var actualData = ChartPopupData.getResultsVisitingCurrentControlPopupData(courseClassSet, eventData, 4, testTime);
-        
+
         assert.deepEqual(actualData, expectedData);
     });
-    
+
     QUnit.test("Can get courses and next controls using numeric sorting of course names where appropriate", function (assert) {
         var course5 = new Course("Test course 5", [], null, null, ["235", "189", "212"]);
         var course8 = new Course("Test course 8", [], null, null, ["235", "189", "212"]);
@@ -231,9 +231,9 @@
         var course23 = new Course("Test course 23", [], null, null, ["235", "189", "212"]);
         var courseBefore = new Course("AAAAA", [], null, null, ["235", "189", "212"]);
         var courseAfter = new Course("ZZZZZ", [], null, null, ["235", "189", "212"]);
-        
+
         var eventData = new Event([], [course10, courseAfter, course5, course23, courseBefore, course8]);
-        
+
         var expectedData = {
             nextControls: [
                 { course: courseBefore, nextControls: "212" },
@@ -245,46 +245,46 @@
             ],
             thisControl: getMessageWithFormatting("ControlName", {"$$CODE$$": "189"})
         };
-        
+
         var actualData = ChartPopupData.getNextControlData(course5, eventData, 2);
         assert.deepEqual(actualData, expectedData);
     });
-    
+
     QUnit.test("Can get next controls of course after intermediate control when control repeated", function (assert) {
         var course = new Course("Test course", [], null, null, ["235", "189", "241", "189", "212"]);
         var eventData = new Event([], [course]);
-        
+
         var expectedData = {
             nextControls: [{ course: course, nextControls: "241, 212" }],
             thisControl: getMessageWithFormatting("ControlName", {"$$CODE$$": "189"})
         };
-        
+
         var actualData = ChartPopupData.getNextControlData(course, eventData, 2);
         assert.deepEqual(actualData, expectedData);
     });
-    
+
     QUnit.test("Can get next controls of course after start control", function (assert) {
         var course = new Course("Test course", [], null, null, ["235", "189", "212"]);
         var eventData = new Event([], [course]);
-        
+
         var expectedData = {
             nextControls: [{ course: course, nextControls: "235" }],
             thisControl: getMessage("StartName")
         };
-        
+
         var actualData = ChartPopupData.getNextControlData(course, eventData, 0);
         assert.deepEqual(actualData, expectedData);
     });
-    
+
     QUnit.test("Can get next controls of course after last control", function (assert) {
         var course = new Course("Test course", [], null, null, ["235", "189", "212"]);
         var eventData = new Event([], [course]);
-        
+
         var expectedData = {
             nextControls: [{ course: course, nextControls: getMessage("FinishName") }],
             thisControl: getMessageWithFormatting("ControlName", {"$$CODE$$": "212"})
         };
-        
+
         var actualData = ChartPopupData.getNextControlData(course, eventData, 3);
         assert.deepEqual(actualData, expectedData);
     });

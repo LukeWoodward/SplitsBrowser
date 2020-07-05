@@ -1,6 +1,6 @@
 ﻿/*
  *  SplitsBrowser - Assorted utility functions.
- *  
+ *
  *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,7 +20,7 @@
  */
 (function () {
     "use strict";
-    
+
     // Minimum length of a course that is considered to be given in metres as
     // opposed to kilometres.
     var MIN_COURSE_LENGTH_METRES = 500;
@@ -38,7 +38,7 @@
     * @returns True if the value is not null, false otherwise.
     */
     SplitsBrowser.isNotNull = function (x) { return x !== null; };
-    
+
     /**
     * Returns whether the value given is the numeric value NaN.
     *
@@ -52,7 +52,7 @@
     * @return True if x is NaN, false if x is any other value.
     */
     SplitsBrowser.isNaNStrict = function (x) { return x !== x; };
-    
+
     /**
     * Returns whether the value given is neither null nor NaN.
     * @param {?Number} x - A value to test.
@@ -87,7 +87,7 @@
     SplitsBrowser.throwInvalidData = function (message) {
         throw new InvalidData(message);
     };
-    
+
     /**
     * Exception object raised if a data parser for a format deems that the data
     * given is not of that format.
@@ -98,7 +98,7 @@
         this.name = "WrongFileFormat";
         this.message = message;
     }
-    
+
     /**
     * Returns a string representation of this exception.
     * @returns {String} String representation.
@@ -106,16 +106,27 @@
     WrongFileFormat.prototype.toString = function () {
         return this.name + ": " + this.message;
     };
-    
+
     /**
-    * Utility funciton to throw a 'WrongFileFormat' exception object.
+    * Utility function to throw a 'WrongFileFormat' exception object.
     * @param {string} message - The exception message.
     * @throws {WrongFileFormat} if invoked.
     */
     SplitsBrowser.throwWrongFileFormat = function (message) {
         throw new WrongFileFormat(message);
     };
-    
+
+    /**
+     * Checks whether the given object contains a property with the given name.
+     * This is a wrapper around the call to Object.prototype.hasOwnProperty.
+     * @param {Object} object The object to test.
+     * @param {string} property The name of the property.
+     * @return {Boolean} Whether the object has a property with the given name.
+     */
+    SplitsBrowser.hasProperty = function (object, property) {
+        return Object.prototype.hasOwnProperty.call(object, property);
+    };
+
     /**
     * Returns the sum of two numbers, or null if either is null.
     * @param {?Number} a - One number, or null, to add.
@@ -126,18 +137,18 @@
     SplitsBrowser.addIfNotNull = function (a, b) {
         return (a === null || b === null) ? null : (a + b);
     };
-    
+
     /**
     * Returns the difference of two numbers, or null if either is null.
     * @param {?Number} a - One number, or null, to add.
     * @param {?Number} b - The other number, or null, to add.
     * @return {?Number} null if at least one of a or b is null,
     *      otherwise a - b.
-    */    
+    */
     SplitsBrowser.subtractIfNotNull = function (a, b) {
         return (a === null || b === null) ? null : (a - b);
     };
-    
+
     /**
     * Parses a course length.
     *
@@ -152,14 +163,14 @@
         if (!isFinite(courseLength)) {
             return null;
         }
-        
+
         if (courseLength >= MIN_COURSE_LENGTH_METRES) {
             courseLength /= 1000;
         }
-        
+
         return courseLength;
     };
-    
+
     /**
     * Parses a course climb, specified as a whole number of metres.
     *
@@ -174,7 +185,7 @@
             return courseClimb;
         }
     };
-    
+
     /**
     * Normalise line endings so that all lines end with LF, instead of
     * CRLF or CR.
@@ -185,5 +196,4 @@
     SplitsBrowser.normaliseLineEndings = function (stringValue) {
         return stringValue.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
     };
-    
 })();

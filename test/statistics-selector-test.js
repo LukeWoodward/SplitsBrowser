@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser - StatisticsSelector tests.
- *  
+ *
  *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -48,9 +48,9 @@
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
-        
+
         selector.registerChangeHandler(testChangeHandler);
-        
+
         var checkboxes = $("#qunit-fixture input");
         $(checkboxes[0]).prop("checked", true).change();
         assert.deepEqual(lastVisibleStats, {TotalTime: true, SplitTime: false, BehindFastest: false, TimeLoss: false});
@@ -61,13 +61,13 @@
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
-        
+
         selector.registerChangeHandler(testChangeHandler);
         selector.registerChangeHandler(testChangeHandler);
-        
+
         var checkboxes = $("#qunit-fixture input");
         $(checkboxes[1]).prop("checked", true).change();
-        
+
         assert.deepEqual(lastVisibleStats, {TotalTime: false, SplitTime: true, BehindFastest: false, TimeLoss: false});
         assert.strictEqual(1, callCount);
     });
@@ -76,41 +76,41 @@
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
-        
+
         var lastVisibleStats2 = null;
         var callCount2 = 0;
         var secondHandler = function (visibleStats) {
             lastVisibleStats2 = visibleStats;
             callCount2 += 1;
         };
-        
+
         selector.registerChangeHandler(testChangeHandler);
         selector.registerChangeHandler(secondHandler);
-        
-        
+
+
         var checkboxes = $("#qunit-fixture input");
         $(checkboxes[2]).prop("checked", true).change();
-        
+
         var expectedStats = {TotalTime: false, SplitTime: false, BehindFastest: true, TimeLoss: false};
         assert.deepEqual(lastVisibleStats, expectedStats);
         assert.strictEqual(1, callCount);
         assert.deepEqual(lastVisibleStats2, expectedStats);
-        assert.strictEqual(1, callCount2); 
+        assert.strictEqual(1, callCount2);
     });
 
     QUnit.test("Can deregister change handler and have it no longer called", function (assert) {
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
-        
+
         selector.registerChangeHandler(testChangeHandler);
-        
+
         var checkboxes = $("#qunit-fixture input");
         $(checkboxes[3]).prop("checked", true).change();
         var expectedResult = {TotalTime: false, SplitTime: false, BehindFastest: false, TimeLoss: true};
         assert.deepEqual(lastVisibleStats, expectedResult);
         assert.strictEqual(1, callCount);
-        
+
         selector.deregisterChangeHandler(testChangeHandler);
         $(checkboxes[2]).prop("checked", true).change();
         assert.deepEqual(lastVisibleStats, expectedResult);
@@ -121,9 +121,9 @@
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
-        
+
         selector.deregisterChangeHandler(testChangeHandler);
-        
+
         assert.expect(0); // Tell QUnit to expect no assertions.
     });
 
@@ -131,9 +131,9 @@
         reset();
         var selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
-        
+
         selector.registerChangeHandler(testChangeHandler);
-        
+
         selector.setVisibleStatistics({TotalTime: false, SplitTime: true, BehindFastest: false, TimeLoss: true});
         assert.deepEqual(lastVisibleStats, {TotalTime: false, SplitTime: true, BehindFastest: false, TimeLoss: true});
         assert.strictEqual(1, callCount);

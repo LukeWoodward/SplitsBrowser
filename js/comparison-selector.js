@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser ComparisonSelector - Provides a choice of 'reference' results.
- *  
+ *
  *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,10 +20,10 @@
  */
 (function (){
     "use strict";
-    
+
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
-    
+
     var ALL_COMPARISON_OPTIONS = [
         {
             nameKey: "CompareWithWinner",
@@ -38,43 +38,43 @@
             percentage: ""
         }
     ];
-    
+
     // All 'Fastest time + N %' values (not including zero).
     var FASTEST_PLUS_PERCENTAGES = [5, 25, 50, 100];
-    
+
     FASTEST_PLUS_PERCENTAGES.forEach(function (percent) {
         ALL_COMPARISON_OPTIONS.push({
             nameKey: "CompareWithFastestTimePlusPercentage",
             selector: function (courseClassSet) { return courseClassSet.getFastestCumTimesPlusPercentage(percent); },
-            requiresWinner: false, 
+            requiresWinner: false,
             percentage: percent
         });
     });
-    
+
     var ALL_INDIVIDUAL_COMPARISON_OPTIONS = ALL_COMPARISON_OPTIONS.slice(0);
-    
+
     ALL_INDIVIDUAL_COMPARISON_OPTIONS.push({
         nameKey: "CompareWithAnyRunner",
         selector: null,
         requiresWinner: true,
         percentage: ""
     });
-    
+
     var ALL_TEAM_COMPARISON_OPTIONS = ALL_COMPARISON_OPTIONS.slice(0);
-    
+
     ALL_TEAM_COMPARISON_OPTIONS.push({
         nameKey: "CompareWithAnyTeam",
         selector: null,
         requiresWinner: true,
         percentage: ""
     });
-    
+
     // Default selected index of the comparison function.
     var DEFAULT_COMPARISON_INDEX = 1; // 1 = fastest time.
-    
+
     // The id of the comparison selector.
     var COMPARISON_SELECTOR_ID = "comparisonSelector";
-    
+
     // The id of the result selector
     var RESULT_SELECTOR_ID = "resultSelector";
 
@@ -100,58 +100,58 @@
         this.previousSelectedIndex = -1;
         this.courseClassSet = null;
         this.comparisonOptions = ALL_INDIVIDUAL_COMPARISON_OPTIONS;
-        
+
         var div = d3.select(parent).append("div")
                                    .classed("topRowStart", true);
-        
+
         this.comparisonSelectorLabel = div.append("span")
                                           .classed("comparisonSelectorLabel", true);
-        
+
 
         var outerThis = this;
         this.dropDown = div.append("select")
                            .attr("id", COMPARISON_SELECTOR_ID)
                            .node();
-                            
+
         $(this.dropDown).bind("change", function() { outerThis.onSelectionChanged(); });
 
         this.optionsList = d3.select(this.dropDown).selectAll("option")
                                                    .data(this.comparisonOptions);
         this.optionsList.enter().append("option");
-        
+
         this.optionsList = d3.select(this.dropDown).selectAll("option")
                                                    .data(this.comparisonOptions);
         this.optionsList.attr("value", function (_opt, index) { return index.toString(); });
-                   
+
         this.optionsList.exit().remove();
-        
+
         this.resultDiv = d3.select(parent).append("div")
                                           .classed("topRowStart", true)
                                           .style("display", "none")
                                           .style("padding-left", "20px");
-        
+
         this.resultSpan = this.resultDiv.append("span")
                                         .attr("id", RESULT_SPAN_ID)
                                         .classed("comparisonSelectorLabel", true);
-        
+
         this.resultDropDown = this.resultDiv.append("select")
                                             .attr("id", RESULT_SELECTOR_ID)
                                             .node();
-                                            
+
         $(this.resultDropDown).bind("change", function () { outerThis.onSelectionChanged(); });
-        
+
         this.dropDown.selectedIndex = DEFAULT_COMPARISON_INDEX;
         this.previousSelectedIndex = DEFAULT_COMPARISON_INDEX;
-        
+
         this.setMessages();
     }
 
     /**
     * Sets the messages in this control, following its creation or a change of
     * selected language.
-    */ 
+    */
     ComparisonSelector.prototype.setMessages = function () {
-        this.comparisonSelectorLabel.text(getMessage("ComparisonSelectorLabel"));    
+        this.comparisonSelectorLabel.text(getMessage("ComparisonSelectorLabel"));
         this.setCompareWithAnyLabel();
         this.optionsList.text(function (opt) { return getMessageWithFormatting(opt.nameKey, {"$$PERCENT$$": opt.percentage}); });
     };
@@ -180,7 +180,7 @@
     ComparisonSelector.prototype.registerChangeHandler = function(handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
             this.changeHandlers.push(handler);
-        }    
+        }
     };
 
     /**
@@ -191,7 +191,7 @@
     ComparisonSelector.prototype.isAnyResultSelected = function () {
         return this.dropDown.selectedIndex === this.comparisonOptions.length - 1;
     };
-    
+
     /**
     * Sets the course-class set to use.
     * @param {CourseClassSet} courseClassSet - The course-class set to set.
@@ -213,12 +213,12 @@
         var results = this.courseClassSet.allResults;
         var completingResultIndexes = d3.range(results.length).filter(function (idx) { return results[idx].completed(); });
         var completingResults = results.filter(function (result) { return result.completed(); });
-        
+
         this.hasWinner = (completingResults.length > 0);
-        
+
         var optionsList = d3.select(this.resultDropDown).selectAll("option")
                                                         .data(completingResults);
-        
+
         optionsList.enter().append("option");
         optionsList = d3.select(this.resultDropDown).selectAll("option")
                                                     .data(completingResults);
@@ -239,12 +239,12 @@
             // there isn't any more.  Switch back to the fastest time.
             this.setComparisonType(1, null);
         }
-        
+
         this.resultDropDown.selectedIndex = this.currentResultIndex;
-       
+
         this.previousResultList = results;
     };
-    
+
     /**
     * Sets whether the control is enabled.
     * @param {boolean} isEnabled - True if the control is enabled, false if
@@ -253,11 +253,11 @@
     ComparisonSelector.prototype.setEnabled = function (isEnabled) {
         d3.select(this.parent).selectAll("span.comparisonSelectorLabel")
                               .classed("disabled", !isEnabled);
-                              
+
         this.dropDown.disabled = !isEnabled;
         this.resultDropDown.disabled = !isEnabled;
     };
-    
+
     /**
     * Returns the function that compares a result's splits against some
     * reference data.
@@ -271,7 +271,7 @@
             return this.comparisonOptions[this.dropDown.selectedIndex].selector;
         }
     };
-    
+
     /**
     * Returns the comparison type.
     * @return {Object} Object containing the comparison type (type index and result).
@@ -282,15 +282,15 @@
             if (this.resultDropDown.selectedIndex < 0) {
                 this.resultDropDown.selectedIndex = 0;
             }
-            
+
             result = this.courseClassSet.allResults[this.resultDropDown.selectedIndex];
         } else {
             result = null;
         }
-    
+
         return {index: this.dropDown.selectedIndex, result: result };
     };
-    
+
     /**
     * Sets the comparison type.
     * @param {Number} typeIndex - The index of the comparison type.
@@ -312,7 +312,7 @@
             }
         }
     };
-    
+
     /**
     * Handle a change of the selected option in either drop-down list.
     */
@@ -332,6 +332,6 @@
             this.changeHandlers.forEach(function (handler) { handler(this.getComparisonFunction()); }, this);
         }
     };
-    
+
     SplitsBrowser.Controls.ComparisonSelector = ComparisonSelector;
 })();

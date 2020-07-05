@@ -1,6 +1,6 @@
 /*
  *  SplitsBrowser Language-file consistency tests.
- *  
+ *
  *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
@@ -20,9 +20,11 @@
  */
 (function () {
     "use strict";
-    
+
+    var hasProperty = SplitsBrowser.hasProperty;
+
     var REFERENCE_LANGUAGE = "en_gb";
-    
+
     /**
     * Checks that an 'other' language has all of the message keys that a given
     * reference language has.
@@ -35,31 +37,31 @@
         var referenceLanguage = SplitsBrowser.Messages[referenceLanguageKey];
         var otherLanguage = SplitsBrowser.Messages[otherLanguageKey];
         for (var refKey in referenceLanguage) {
-            if (referenceLanguage.hasOwnProperty(refKey)) {
-                if (!otherLanguage.hasOwnProperty(refKey)) {
+            if (hasProperty(referenceLanguage, refKey)) {
+                if (!hasProperty(otherLanguage, refKey)) {
                     consistencyErrors.push("Language '" + referenceLanguageKey + "' has message with key '" + refKey + "', but language '" + otherLanguageKey + "' does not");
                 }
             }
         }
     }
-    
+
     QUnit.test("All languages are consistent", function (assert) {
         if (typeof SplitsBrowser.Messages === "undefined") {
             throw new Error("Languages not defined");
-        } else if (!SplitsBrowser.Messages.hasOwnProperty(REFERENCE_LANGUAGE)) {
+        } else if (!hasProperty(SplitsBrowser.Messages, REFERENCE_LANGUAGE)) {
             throw new Error("Reference language not found");
         }
-        
+
         var consistencyErrors = [];
         var languageCount = 1;
         for (var language in SplitsBrowser.Messages) {
-            if (SplitsBrowser.Messages.hasOwnProperty(language) && language !== REFERENCE_LANGUAGE) {
+            if (hasProperty(SplitsBrowser.Messages, language) && language !== REFERENCE_LANGUAGE) {
                 verifyConsistency(REFERENCE_LANGUAGE, language, consistencyErrors);
                 verifyConsistency(language, REFERENCE_LANGUAGE, consistencyErrors);
                 languageCount += 1;
             }
         }
-        
+
         assert.deepEqual(consistencyErrors, [], "The " + languageCount + " language files should be consistent");
     });
 })();
