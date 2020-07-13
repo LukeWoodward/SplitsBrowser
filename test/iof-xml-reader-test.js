@@ -1641,10 +1641,27 @@
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
                 if (eventData.classes.length === 1) {
-                    assert.strictEqual(eventData.classes[0].results.length, 0, "One result should have been read - " + formatterName);
+                    assert.strictEqual(eventData.classes[0].results.length, 0, "No results should have been read - " + formatterName);
                 }
 
                 assert.strictEqual(eventData.warnings.length, 1, "One warning should have been issued for the team with a starter not at the same time as the previous finisher - " + formatterName);
+            });
+    });
+
+    QUnit.test("Parsing a string that has a single class with a single team with the second team member a non-starter and with no start time generates no warning", function (assert) {
+        var team = getTeam();
+        team.members[1].startTime = null;
+        team.members[1].nonStarter = true;
+        team.members[1].cumTimes = [null, null, null];
+
+        runXmlFormatParseTest([{name: "Test Class", teams: [team]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                if (eventData.classes.length === 1) {
+                    assert.strictEqual(eventData.classes[0].results.length, 1, "One result should have been read - " + formatterName);
+                }
+
+                assert.strictEqual(eventData.warnings.length, 0, "No warning should have been issued for the team with a non-starter whose start time was not at the same time as the previous finisher - " + formatterName + ": first warning is " + eventData.warnings[0]);
             });
     });
 

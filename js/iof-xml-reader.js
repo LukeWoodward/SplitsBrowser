@@ -787,7 +787,7 @@
         for (index = 1; index < members.length; index += 1) {
             var previousFinishTime = $("> Result > FinishTime", members[index - 1]).text();
             var nextStartTime = $("> Result > StartTime", members[index]).text();
-            if (previousFinishTime !== nextStartTime) {
+            if (!results[index].isNonStarter && previousFinishTime !== nextStartTime) {
                 warnings.push("In team " + (teamName === "" ? "(unnamed team)" : teamName) + " in class '" + cls.name + "', " + results[index - 1].owner.name + " does not finish at the same time as " + results[index].owner.name + " starts" );
                 return;
             }

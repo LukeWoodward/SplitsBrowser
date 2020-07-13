@@ -1018,9 +1018,6 @@
                </PersonName>
             </Person>
             <Result>
-               <StartTime>
-                  <Clock>12:19:20</Clock>
-               </StartTime>
                <Time>-----</Time>
                <CompetitorStatus value="DidNotStart"/>
                <SplitTime sequence="1">
@@ -1200,9 +1197,6 @@
                </PersonName>
             </Person>
             <Result>
-               <StartTime>
-                  <Clock>11:52:53</Clock>
-               </StartTime>
                <Time>-----</Time>
                <CompetitorStatus value="DidNotStart"/>
                <SplitTime sequence="1">
@@ -1370,10 +1364,7 @@
                </PersonName>
             </Person>
             <Result>
-               <StartTime>
-                  <Clock>11:53:01</Clock>
-               </StartTime>
-               <Time>16:21</Time>
+               <Time>-----</Time>
                <CompetitorStatus value="DidNotStart"/>
                <SplitTime sequence="1">
                   <ControlCode>265</ControlCode>

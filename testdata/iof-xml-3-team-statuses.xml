@@ -910,7 +910,6 @@
 					</Name>
 				</Person>
 				<Result>
-					<StartTime>2020-04-19T12:19:20</StartTime>
 					<Status>DidNotStart</Status>
 					<SplitTime>
 						<ControlCode status="Missing">332</ControlCode>
@@ -1067,7 +1066,6 @@
 					</Name>
 				</Person>
 				<Result>
-                    <StartTime>2020-04-19T11:52:53</StartTime>
 					<Status>DidNotStart</Status>
 					<SplitTime>
 						<ControlCode status="Missing">290</ControlCode>
@@ -1208,8 +1206,6 @@
 					</Name>
 				</Person>
 				<Result>
-					<StartTime>2020-04-19T11:53:01</StartTime>
-					<Time>981</Time>
 					<Status>DidNotStart</Status>
 					<SplitTime>
 						<ControlCode status="Missing">265</ControlCode>
