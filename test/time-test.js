@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Time-handling functions tests.
  *
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 (function () {
 
     var formatTime = SplitsBrowser.formatTime;
+    var formatTimeOfDay = SplitsBrowser.formatTimeOfDay;
     var parseTime = SplitsBrowser.parseTime;
 
     QUnit.module("Time");
@@ -123,6 +124,22 @@
 
     QUnit.test("Can format minus three hours, fifty-two minutes and seventeen seconds as a string", function(assert) {
         assert.strictEqual(formatTime(-3 * 60 * 60 - 52 * 60 - 17), "-3:52:17");
+    });
+
+    QUnit.test("Can format midnight as a time of day", function(assert) {
+        assert.strictEqual(formatTimeOfDay(0), "00:00:00");
+    });
+
+    QUnit.test("Can format midnight tomorrow as a time of day", function(assert) {
+        assert.strictEqual(formatTimeOfDay(24 * 60 * 60), "00:00:00");
+    });
+
+    QUnit.test("Can format a time during the day", function(assert) {
+        assert.strictEqual(formatTimeOfDay(11 * 60 * 60 + 54 * 60 + 37), "11:54:37");
+    });
+
+    QUnit.test("Can format a time during the next day", function(assert) {
+        assert.strictEqual(formatTimeOfDay(24 * 60 * 60 + 19 * 60 * 60 + 24 * 60 + 8), "19:24:08");
     });
 
     QUnit.test("Can parse a zero minute zero second string to zero", function (assert) {

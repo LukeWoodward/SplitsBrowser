@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Time - Functions for time handling and conversion.
  *
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,16 @@
     SplitsBrowser.NULL_TIME_PLACEHOLDER = "-----";
 
     var isNaNStrict = SplitsBrowser.isNaNStrict;
+
+    /**
+     * Formats a number to two digits, preceding it with a zero if necessary,
+     * e.g. 47 -> "47", 8 -> "08".
+     * @param {Number} value The value to format.
+     * @return {string} Number formatted with a leading zero if necessary.
+     */
+    function formatToTwoDigits(value) {
+        return (value < 10) ? "0" + value : value.toString();
+    }
 
     /**
     * Formats a time period given as a number of seconds as a string in the form
@@ -54,11 +64,7 @@
             result += hours.toString() + ":";
         }
 
-        if (mins < 10) {
-            result += "0";
-        }
-
-        result += mins + ":";
+        result += formatToTwoDigits(mins) + ":";
 
         if (secs < 10) {
             result += "0";
@@ -71,6 +77,19 @@
         }
 
         return result;
+    };
+
+    /**
+    * Formats a number of seconds as a time of day.  This returns a string
+    * of the form HH:MM:SS, with HH no more than 24.
+    * @param {Number} seconds The number of seconds
+    * @return {string} The time of day formatted as a string.
+    */
+    SplitsBrowser.formatTimeOfDay = function (seconds) {
+        var hours = Math.floor((seconds / (60 * 60)) % 24);
+        var mins = Math.floor(seconds / 60) % 60;
+        var secs = Math.floor(seconds % 60);
+        return formatToTwoDigits(hours) + ":" + formatToTwoDigits(mins) + ":" + formatToTwoDigits(secs);
     };
 
     /**

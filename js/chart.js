@@ -63,6 +63,7 @@
 
     // 'Imports'.
     var formatTime = SplitsBrowser.formatTime;
+    var formatTimeOfDay = SplitsBrowser.formatTimeOfDay;
     var getMessage = SplitsBrowser.getMessage;
     var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
@@ -868,14 +869,14 @@
             var startTimes = (chartData.dataColumns.length === 0) ? [] : chartData.dataColumns[0].ys;
             if (startTimes.length === 0) {
                 // No start times - draw all tick marks.
-                return function (time) { return formatTime(time * 60); };
+                return function (time) { return formatTimeOfDay(time * 60); };
             } else {
                 // Some start times are to be drawn - only draw tick marks if
                 // they are far enough away from results.
                 var yScale = this.yScale;
                 return function (time) {
                     var nearestOffset = d3.min(startTimes.map(function (startTime) { return Math.abs(yScale(startTime) - yScale(time)); }));
-                    return (nearestOffset >= MIN_RESULT_TICK_MARK_DISTANCE) ? formatTime(Math.round(time * 60)) : "";
+                    return (nearestOffset >= MIN_RESULT_TICK_MARK_DISTANCE) ? formatTimeOfDay(Math.round(time * 60)) : "";
                 };
             }
         } else {
@@ -1036,7 +1037,7 @@
                    .attr("class", function (resultIndex) { return "startLabel result" + resultIndex; })
                    .on("mouseenter", function (resultIndex) { outerThis.highlight(resultIndex); })
                    .on("mouseleave", function () { outerThis.unhighlight(); })
-                   .text(function (_resultIndex, selResultIndex) { return formatTime(Math.round(startColumn.ys[selResultIndex] * 60)) + " " + chartData.resultNames[selResultIndex]; });
+                   .text(function (_resultIndex, selResultIndex) { return formatTimeOfDay(Math.round(startColumn.ys[selResultIndex] * 60)) + " " + chartData.resultNames[selResultIndex]; });
 
         startLabels.exit().remove();
     };
