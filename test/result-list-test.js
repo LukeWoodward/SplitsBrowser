@@ -361,12 +361,12 @@
 
         var titledNodes = d3.selectAll("div#qunit-fixture div.result[title]").nodes();
         assert.strictEqual(titledNodes.length, 3);
-        assert.strictEqual(titledNodes[0].getAttribute("title"), "First Runner\nSecond Runner");
-        assert.strictEqual(titledNodes[1].getAttribute("title"), "Third Runner\nFourth Runner");
-        assert.strictEqual(titledNodes[2].getAttribute("title"), "Fifth Runner\nSixth Runner");
+        assert.strictEqual(titledNodes[0].getAttribute("title"), "> First Team\nFirst Runner\nSecond Runner");
+        assert.strictEqual(titledNodes[1].getAttribute("title"), "> Second Team\nThird Runner\nFourth Runner");
+        assert.strictEqual(titledNodes[2].getAttribute("title"), "> Third Team\nFifth Runner\nSixth Runner");
     });
 
-    QUnit.test("Can create a list for the first leg of a team class", function (assert) {
+    QUnit.test("Can create a list for the first leg of a team class with the correct tooltips", function (assert) {
         var list = createSampleTeamList([], false).list;
         list.setResultList(list.allResults, false, true, 0);
 
@@ -375,9 +375,15 @@
         assert.strictEqual(d3.select(nodes[0]).text(), "First Runner");
         assert.strictEqual(d3.select(nodes[1]).text(), "Third Runner");
         assert.strictEqual(d3.select(nodes[2]).text(), "Fifth Runner");
+
+        var titledNodes = d3.selectAll("div#qunit-fixture div.result[title]").nodes();
+        assert.strictEqual(titledNodes.length, 3);
+        assert.strictEqual(titledNodes[0].getAttribute("title"), "First Team\n> First Runner\nSecond Runner");
+        assert.strictEqual(titledNodes[1].getAttribute("title"), "Second Team\n> Third Runner\nFourth Runner");
+        assert.strictEqual(titledNodes[2].getAttribute("title"), "Third Team\n> Fifth Runner\nSixth Runner");
     });
 
-    QUnit.test("Can create a list for the second leg of a team class", function (assert) {
+    QUnit.test("Can create a list for the second leg of a team class with the correct tooltips", function (assert) {
         var list = createSampleTeamList([], false).list;
         list.setResultList(list.allResults, false, true, 1);
 
@@ -386,6 +392,12 @@
         assert.strictEqual(d3.select(nodes[0]).text(), "Second Runner");
         assert.strictEqual(d3.select(nodes[1]).text(), "Fourth Runner");
         assert.strictEqual(d3.select(nodes[2]).text(), "Sixth Runner");
+
+        var titledNodes = d3.selectAll("div#qunit-fixture div.result[title]").nodes();
+        assert.strictEqual(titledNodes.length, 3);
+        assert.strictEqual(titledNodes[0].getAttribute("title"), "First Team\nFirst Runner\n> Second Runner");
+        assert.strictEqual(titledNodes[1].getAttribute("title"), "Second Team\nThird Runner\n> Fourth Runner");
+        assert.strictEqual(titledNodes[2].getAttribute("title"), "Third Team\nFifth Runner\n> Sixth Runner");
     });
 
     QUnit.test("Can create a list for an empty class of individual results, with placeholder message", function (assert) {

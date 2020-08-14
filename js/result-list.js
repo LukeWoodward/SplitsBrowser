@@ -35,6 +35,9 @@
     // ID of the container that contains the list and the filter textbox.
     var RESULT_LIST_CONTAINER_ID = "resultListContainer";
 
+    // Prefix showing which runner in a tooltip is currently shown.
+    var SELECTED_RUNNER_TOOLTIP_PREFIX = "> ";
+
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
 
@@ -58,6 +61,7 @@
         this.allResultDivs = [];
         this.inverted = false;
         this.hasTeamData = false;
+        this.selectedLegIndex = null;
         this.placeholderDiv = null;
 
         this.changeHandlers = [];
@@ -439,6 +443,20 @@
     }
 
     /**
+    * Formats a tooltip for a team.
+    * @param {Result} result The result to format the tooltip for
+    * @return {String} The formatted tooltip contents.
+    */
+    ResultList.prototype.formatTooltip = function(result) {
+        var names = [result.owner.name];
+        result.owner.members.forEach(function (competitor) { names.push(competitor.name); });
+
+        var nameIndex = (this.selectedLegIndex === null) ? 0 : this.selectedLegIndex + 1;
+        names[nameIndex] = SELECTED_RUNNER_TOOLTIP_PREFIX + names[nameIndex];
+        return names.join("\n");
+    };
+
+    /**
     * Sets the list of results.
     * @param {Array} results - Array of result data.
     * @param {boolean} multipleClasses - Whether the list of results is
@@ -476,13 +494,14 @@
 
         this.allResults = results;
         this.hasTeamData = hasTeamData;
+        this.selectedLegIndex = selectedLegIndex;
         this.allResultDetails = this.allResults.map(function (result) {
             return { result: result, normedName: normaliseName(result.owner.name), visible: true };
         });
 
         var tooltipFunction;
         if (hasTeamData) {
-            tooltipFunction = function (result) { return result.owner.members.map(function (competitor) { return competitor.name; }).join("\n"); };
+            tooltipFunction = this.formatTooltip.bind(this);
         } else {
             tooltipFunction = function () { return null; };
         }
@@ -497,12 +516,14 @@
         var outerThis = this;
         resultDivs.enter().append("div")
                           .classed("result", true)
-                          .classed("selected", function (result, index) { return outerThis.isSelected(index); })
-                          .attr("title", tooltipFunction);
+                          .classed("selected", function (result, index) { return outerThis.isSelected(index); });
 
         resultDivs.selectAll("span").remove();
 
-        resultDivs = this.listDiv.selectAll("div.result").data(this.allResults);
+        resultDivs = this.listDiv.selectAll("div.result")
+                                 .data(this.allResults)
+                                 .attr("title", tooltipFunction);
+
         if (multipleClasses) {
             resultDivs.append("span")
                       .classed("resultClassLabel", true)
