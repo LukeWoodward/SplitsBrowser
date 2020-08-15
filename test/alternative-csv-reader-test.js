@@ -31,12 +31,12 @@
 
     /**
     * Fabricates and returns a data row of the triple-column CSV file.
-    * @param {String} name - The competitor name.
-    * @param {String} club - The competitor's club.
-    * @param {String} courseName - The name of the course.
-    * @param {Array} controls - Array of string control codes.
-    * @param {String} startTime - The competitor's start time, or null if none.
-    * @param {Array} cumTimes - Array of cumulative times, either numbers or
+    * @param {String} name The competitor name.
+    * @param {String} club The competitor's club.
+    * @param {String} courseName The name of the course.
+    * @param {Array} controls Array of string control codes.
+    * @param {Number|null} startTime The competitor's start time, or null if none.
+    * @param {Array} cumTimes Array of cumulative times, either numbers or
     *     null.
     * @return {String} Fabricated data row.
     */

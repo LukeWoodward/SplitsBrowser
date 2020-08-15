@@ -43,7 +43,7 @@
     * Control that contains a number of checkboxes for enabling and/or disabling
     * the display of various statistics.
     * @constructor
-    * @param {HTMLElement} parent - The parent element.
+    * @param {HTMLElement} parent The parent element.
     */
     function StatisticsSelector (parent) {
         this.div = d3.select(parent).append("div")
@@ -93,7 +93,7 @@
 
     /**
     * Sets whether the statistics selector controls are enabled.
-    * @param {boolean} isEnabled - True if the controls are to be enabled,
+    * @param {Boolean} isEnabled True if the controls are to be enabled,
     *      false if the controls are to be disabled.
     */
     StatisticsSelector.prototype.setEnabled = function (isEnabled) {
@@ -108,8 +108,8 @@
     * visible statistics is changed.
     *
     * If the handler was already registered, nothing happens.
-    * @param {Function} handler - Function to be called whenever the choice
-    *                             changes.
+    * @param {Function} handler Function to be called whenever the choice
+    *                           changes.
     */
     StatisticsSelector.prototype.registerChangeHandler = function (handler) {
         if (this.handlers.indexOf(handler) === -1) {
@@ -122,8 +122,8 @@
     *  currently-visible statistics is changed.
     *
     * If the handler given was never registered, nothing happens.
-    * @param {Function} handler - Function to be called whenever the choice
-    *                             changes.
+    * @param {Function} handler Function to be called whenever the choice
+    *                           changes.
     */
     StatisticsSelector.prototype.deregisterChangeHandler = function (handler) {
         var index = this.handlers.indexOf(handler);
@@ -134,7 +134,7 @@
 
     /**
     * Return the statistics that are currently enabled.
-    * @returns {Object} Object that lists all the statistics and whether they
+    * @return {Object} Object that lists all the statistics and whether they
     *     are enabled.
     */
     StatisticsSelector.prototype.getVisibleStatistics = function () {
@@ -148,7 +148,7 @@
 
     /**
     * Sets the visible statistics.
-    * @param {Object} visibleStats - The statistics to make visible.
+    * @param {Object} visibleStats The statistics to make visible.
     */
     StatisticsSelector.prototype.setVisibleStatistics = function (visibleStats) {
         this.div.selectAll("input").nodes().forEach(function (checkbox, index) {

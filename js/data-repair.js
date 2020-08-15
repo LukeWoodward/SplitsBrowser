@@ -43,8 +43,8 @@
     * If the entire array of cumulative times is strictly ascending, this
     * returns null.
     *
-    * @param {Array} cumTimes - Array of cumulative times.
-    * @return {?Object} Object containing indexes of non-ascending entries, or
+    * @param {Array} cumTimes Array of cumulative times.
+    * @return {Object|null} Object containing indexes of non-ascending entries, or
     *     null if none found.
     */
     function getFirstNonAscendingIndexes(cumTimes) {
@@ -74,7 +74,7 @@
     /**
     * Remove, by setting to NaN, any cumulative time that is equal to the
     * previous cumulative time.
-    * @param {Array} cumTimes - Array of cumulative times.
+    * @param {Array} cumTimes Array of cumulative times.
     */
     Repairer.prototype.removeCumulativeTimesEqualToPrevious = function (cumTimes) {
         var lastCumTime = cumTimes[0];
@@ -98,7 +98,7 @@
     * This method does not compare the last two cumulative times, so if the
     * finish time is not after the last control time, no changes will be made.
     *
-    * @param {Array} cumTimes - Array of cumulative times.
+    * @param {Array} cumTimes Array of cumulative times.
     * @return {Array} Array of cumulaive times with perhaps some cumulative
     *     times taken out.
     */
@@ -170,7 +170,7 @@
     * It is absurd if it is less than the time at the previous control by at
     * least the maximum amount of time that can be added to finish splits.
     *
-    * @param {Array} cumTimes - The cumulative times to perhaps remove the
+    * @param {Array} cumTimes The cumulative times to perhaps remove the
     *     finish split from.
     */
     Repairer.prototype.removeFinishTimeIfAbsurd = function (cumTimes) {
@@ -204,7 +204,7 @@
 
     /**
     * Attempt to repair all of the data within a course-class.
-    * @param {CourseClass} courseClass - The class whose data we wish to
+    * @param {CourseClass} courseClass The class whose data we wish to
     *     repair.
     */
     Repairer.prototype.repairCourseClass = function (courseClass) {
@@ -220,7 +220,7 @@
 
     /**
     * Attempt to carry out repairs to the data in an event.
-    * @param {Event} eventData - The event data to repair.
+    * @param {Event} eventData The event data to repair.
     */
     Repairer.prototype.repairEventData = function (eventData) {
         eventData.classes.forEach(function (courseClass) {
@@ -230,7 +230,7 @@
 
     /**
     * Attempt to carry out repairs to the data in an event.
-    * @param {Event} eventData - The event data to repair.
+    * @param {Event} eventData The event data to repair.
     */
     function repairEventData(eventData) {
         var repairer = new Repairer();
@@ -243,7 +243,7 @@
     * This is used if the input data has been read in a format that requires
     * the data to be checked, but the user has opted not to perform any such
     * reparations and wishes to view the
-    * @param {Event} eventData - The event data to repair.
+    * @param {Event} eventData The event data to repair.
     */
     function transferResultData(eventData) {
         eventData.classes.forEach(function (courseClass) {

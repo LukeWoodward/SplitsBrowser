@@ -34,10 +34,10 @@ var SplitsBrowserTest = {};
     *
     * The function given is called with no arguments.
     *
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {String} exceptionName - The name of the exception to expect.
-    * @param {Function} func - The function to call.
-    * @param {String} failureMessage - Optional message to show in assertion
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {String} exceptionName The name of the exception to expect.
+    * @param {Function} func The function to call.
+    * @param {String|undefined} failureMessage Optional message to show in assertion
     *     failure message if no exception is thrown.  A default message is used
     *     instead if this is not specified.
     */
@@ -55,9 +55,9 @@ var SplitsBrowserTest = {};
     *
     * The function given is called with no arguments.
     *
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Function} func - The function to call.
-    * @param {String} failureMessage - Optional message to show in assertion
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {Function} func The function to call.
+    * @param {String|undefined} failureMessage Optional message to show in assertion
     *     failure message if no exception is thrown.  A default message is used
     *     instead if this is not specified.
     */
@@ -70,9 +70,9 @@ var SplitsBrowserTest = {};
     * Asserts that two arrays of numbers have the same length and the
     * corresponding elements are strict-equal to one another.  This function
     * assumes NaN to be equal to itself.
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Array} actualArray - The 'actual' array of numbers.
-    * @param {Array} expectedArray - The 'expected' array of numbers.
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {Array} actualArray The 'actual' array of numbers.
+    * @param {Array} expectedArray The 'expected' array of numbers.
     */
     SplitsBrowserTest.assertStrictEqualArrays = function (assert, actualArray, expectedArray) {
         assert.ok($.isArray(actualArray), "actualArray is not an array");
@@ -91,9 +91,9 @@ var SplitsBrowserTest = {};
 
     /**
     * Returns the sum of two numbers, or null if either is null.
-    * @param {?Number} a - One number, or null, to add.
-    * @param {?Number} b - The other number, or null, to add.
-    * @return {?Number} null if at least one of a or b is null,
+    * @param {Number|null} a One number, or null, to add.
+    * @param {Number|null} b The other number, or null, to add.
+    * @return {Number|null} null if at least one of a or b is null,
     *      otherwise a + b.
     */
     function addIfNotNull(a, b) {
@@ -107,11 +107,11 @@ var SplitsBrowserTest = {};
     * SplitsBrowser itself, but has been retained as it is used by plenty of
     * tests.
     *
-    * @param {Number} order - The position of the competitor within the list of results.
-    * @param {String} name - The name of the competitor.
-    * @param {String} club - The name of the competitor's club.
-    * @param {Number} startTime - The competitor's start time, as seconds past midnight.
-    * @param {Array} splitTimes - Array of split times, as numbers, with nulls for missed controls.
+    * @param {Number} order The position of the competitor within the list of results.
+    * @param {String} name The name of the competitor.
+    * @param {String} club The name of the competitor's club.
+    * @param {Number} startTime The competitor's start time, as seconds past midnight.
+    * @param {Array} splitTimes Array of split times, as numbers, with nulls for missed controls.
     * @return {Result} Created result.
     */
     SplitsBrowserTest.fromSplitTimes = function (order, name, club, startTime, splitTimes) {

@@ -85,8 +85,8 @@
     /**
     * A control that wraps a drop-down list used to choose what to compare
     * times against.
-    * @param {HTMLElement} parent - The parent element to add the control to.
-    * @param {Function} alerter - Function to call with any messages to show to
+    * @param {HTMLElement} parent The parent element to add the control to.
+    * @param {Function} alerter Function to call with any messages to show to
     *     the user.
     */
     function ComparisonSelector(parent, alerter) {
@@ -174,7 +174,7 @@
     *
     * The function used to return the comparison result is returned.
     *
-    * @param {Function} handler - Handler function to be called whenever the class
+    * @param {Function} handler Handler function to be called whenever the class
     *                   changes.
     */
     ComparisonSelector.prototype.registerChangeHandler = function(handler) {
@@ -185,7 +185,7 @@
 
     /**
     * Returns whether the 'Any Result...' option is selected.
-    * @return {boolean} True if the 'Any Result...' option is selected, false
+    * @return {Boolean} True if the 'Any Result...' option is selected, false
     *     if any other option is selected.
     */
     ComparisonSelector.prototype.isAnyResultSelected = function () {
@@ -194,7 +194,7 @@
 
     /**
     * Sets the course-class set to use.
-    * @param {CourseClassSet} courseClassSet - The course-class set to set.
+    * @param {CourseClassSet} courseClassSet The course-class set to set.
     */
     ComparisonSelector.prototype.setCourseClassSet = function (courseClassSet) {
         this.courseClassSet = courseClassSet;
@@ -247,7 +247,7 @@
 
     /**
     * Sets whether the control is enabled.
-    * @param {boolean} isEnabled - True if the control is enabled, false if
+    * @param {Boolean} isEnabled True if the control is enabled, false if
     *      disabled.
     */
     ComparisonSelector.prototype.setEnabled = function (isEnabled) {
@@ -293,9 +293,9 @@
 
     /**
     * Sets the comparison type.
-    * @param {Number} typeIndex - The index of the comparison type.
-    * @param {Result|null} result - The selected 'Any result', or null if
-    *     Any Result has not been selected.
+    * @param {Number} typeIndex The index of the comparison type.
+    * @param {Result|null} result The selected 'Any result', or null if
+    *     'Any Result' has not been selected.
     */
     ComparisonSelector.prototype.setComparisonType = function (typeIndex, result) {
         if (0 <= typeIndex && typeIndex < this.comparisonOptions.length) {

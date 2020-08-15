@@ -29,7 +29,7 @@
     * Represents the currently-selected results, and offers a callback
     * mechanism for when the selection changes.
     * @constructor
-    * @param {Number} count - The number of results that can be chosen.
+    * @param {Number} count The number of results that can be chosen.
     */
     function ResultSelection(count) {
         if (typeof count !== NUMBER_TYPE) {
@@ -45,8 +45,8 @@
 
     /**
     * Returns whether the R at the given index is selected.
-    * @param {Number} index - The index of the result.
-    * @returns {boolean} True if the result is selected, false if not.
+    * @param {Number} index The index of the result.
+    * @return {Boolean} True if the result is selected, false if not.
     */
     ResultSelection.prototype.isSelected = function (index) {
         return this.currentIndexes.indexOf(index) > -1;
@@ -54,7 +54,7 @@
 
     /**
     * Returns whether the selection consists of exactly one result.
-    * @returns {boolean} True if precisely one result is selected, false if
+    * @return {Boolean} True if precisely one result is selected, false if
     *     either no results, or two or more results, are selected.
     */
     ResultSelection.prototype.isSingleRunnerSelected = function () {
@@ -76,7 +76,7 @@
     /**
     * Given that a single runner is selected, select also all of the runners
     * that 'cross' this runner and are also marked as visible.
-    * @param {Array} resultDetails - Array of result details to check within.
+    * @param {Array} resultDetails Array of result details to check within.
     */
     ResultSelection.prototype.selectCrossingRunners = function (resultDetails) {
         if (this.isSingleRunnerSelected()) {
@@ -127,7 +127,7 @@
 
     /**
     * Set the selected results to those in the given array.
-    * @param {Array} selectedIndex - Array of indexes of selected results.
+    * @param {Array} selectedIndex Array of indexes of selected results.
     */
     ResultSelection.prototype.setSelectedIndexes = function (selectedIndexes) {
         if (selectedIndexes.every(function (index) { return 0 <= index && index < this.count; }, this)) {
@@ -146,7 +146,7 @@
     *
     * If the handler has already been registered, nothing happens.
     *
-    * @param {Function} handler - The handler to register.
+    * @param {Function} handler The handler to register.
     */
     ResultSelection.prototype.registerChangeHandler = function (handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
@@ -159,7 +159,7 @@
     *
     * If the handler given was never registered, nothing happens.
     *
-    * @param {Function} handler - The handler to register.
+    * @param {Function} handler The handler to register.
     */
     ResultSelection.prototype.deregisterChangeHandler = function (handler) {
         var index = this.changeHandlers.indexOf(handler);
@@ -170,7 +170,7 @@
 
     /**
     * Toggles whether the result at the given index is selected.
-    * @param {Number} index - The index of the result.
+    * @param {Number} index The index of the result.
     */
     ResultSelection.prototype.toggle = function (index) {
         if (typeof index === NUMBER_TYPE) {
@@ -195,7 +195,7 @@
     /**
     * Selects a number of results, firing the change handlers once at the
     * end if any indexes were added.
-    * @param {Array} indexes - Array of indexes of results to select.
+    * @param {Array} indexes Array of indexes of results to select.
     */
     ResultSelection.prototype.bulkSelect = function (indexes) {
         if (indexes.some(function (index) {
@@ -218,7 +218,7 @@
     /**
     * Deselects a number of results, firing the change handlers once at the
     * end if any indexes were removed.
-    * @param {Array} indexes - Array of indexes of results to deselect.
+    * @param {Array} indexes Array of indexes of results to deselect.
     */
     ResultSelection.prototype.bulkDeselect = function (indexes) {
         if (indexes.some(function (index) {
@@ -254,10 +254,10 @@
     * is typically used during a change of class, when the application may be
     * making other changes.
     *
-    * @param {Array} oldResults - Array of Result objects for the old
+    * @param {Array} oldResults Array of Result objects for the old
     *      selection.  The length of this must match the current count of
     *      results.
-    * @param {Array} newResults - Array of Result objects for the new
+    * @param {Array} newResults Array of Result objects for the new
     *      selection.  This array must not be empty.
     */
     ResultSelection.prototype.migrate = function (oldResults, newResults) {

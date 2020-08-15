@@ -27,9 +27,9 @@
     /**
      * Object that represents a collection of result data for a class.
      * @constructor.
-     * @param {String} name - Name of the class.
-     * @param {Number} numControls - Number of controls.
-     * @param {Array} results - Array of Result objects.
+     * @param {String} name Name of the class.
+     * @param {Number} numControls Number of controls.
+     * @param {Array} results Array of Result objects.
      */
     function CourseClass(name, numControls, results) {
         this.name = name;
@@ -83,7 +83,7 @@
 
     /**
     * Returns whether this course-class is empty, i.e. has no results.
-    * @return {boolean} True if this course-class has no results, false if it
+    * @return {Boolean} True if this course-class has no results, false if it
     *     has at least one result.
     */
     CourseClass.prototype.isEmpty = function () {
@@ -92,7 +92,7 @@
 
     /**
     * Sets the course that this course-class belongs to.
-    * @param {SplitsBrowser.Model.Course} course - The course this class belongs to.
+    * @param {SplitsBrowser.Model.Course} course The course this class belongs to.
     */
     CourseClass.prototype.setCourse = function (course) {
         this.course = course;
@@ -102,9 +102,9 @@
     * Returns the fastest split time recorded by results in this class.  If
     * no fastest split time is recorded (e.g. because all results
     * mispunched that control, or the class is empty), null is returned.
-    * @param {Number} controlIdx - The index of the control to return the
+    * @param {Number} controlIdx The index of the control to return the
     *      fastest split to.
-    * @return {?Object} Object containing the name and fastest split, or
+    * @return {Object|null} Object containing the name and fastest split, or
     *      null if no split times for that control were recorded.
     */
     CourseClass.prototype.getFastestSplitTo = function (controlIdx) {
@@ -130,11 +130,11 @@
     /**
     * Returns all results that visited the control in the given time
     * interval.
-    * @param {Number} controlNum - The number of the control, with 0 being the
+    * @param {Number} controlNum The number of the control, with 0 being the
     *     start, and this.numControls + 1 being the finish.
-    * @param {Number} intervalStart - The start time of the interval, as
+    * @param {Number} intervalStart The start time of the interval, as
     *     seconds past midnight.
-    * @param {Number} intervalEnd - The end time of the interval, as seconds
+    * @param {Number} intervalEnd The end time of the interval, as seconds
     *     past midnight.
     * @return {Array} Array of objects listing the name and start time of each
     *     result visiting the control within the given time interval.

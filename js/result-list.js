@@ -44,8 +44,8 @@
     /**
     * Object that controls a list of results from which the user can select.
     * @constructor
-    * @param {HTMLElement} parent - Parent element to add this list to.
-    * @param {Function} alerter - Function to call to issue an alert message.
+    * @param {HTMLElement} parent Parent element to add this list to.
+    * @param {Function} alerter Function to call to issue an alert message.
     */
     var ResultList = function (parent, alerter) {
         this.parent = parent;
@@ -156,7 +156,7 @@
     *
     * If the handler has already been registered, nothing happens.
     *
-    * @param {Function} handler - The handler to register.
+    * @param {Function} handler The handler to register.
     */
     ResultList.prototype.registerChangeHandler = function (handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
@@ -169,7 +169,7 @@
     *
     * If the handler given was never registered, nothing happens.
     *
-    * @param {Function} handler - The handler to register.
+    * @param {Function} handler The handler to register.
     */
     ResultList.prototype.deregisterChangeHandler = function (handler) {
         var index = this.changeHandlers.indexOf(handler);
@@ -188,7 +188,7 @@
     /**
     * Returns whether the current mouse event is off the bottom of the list of
     * result divs.
-    * @return {boolean} True if the mouse is below the last visible div, false
+    * @return {Boolean} True if the mouse is below the last visible div, false
     *     if not.
     */
     ResultList.prototype.isMouseOffBottomOfResultList = function () {
@@ -206,7 +206,7 @@
 
     /**
     * Handles the start of a drag over the list of results.
-    * @param {Number} index - Index of the result div that the drag started
+    * @param {Number} index Index of the result div that the drag started
     *     over, or RESULT_CONTAINER_INDEX if below the list of results.
     */
     ResultList.prototype.startDrag = function (index) {
@@ -235,7 +235,7 @@
     /**
     * Handles a mouse-move event. by adjust the range of dragged results to
     * include the current index.
-    * @param {Number} dragIndex - The index to which the drag has now moved.
+    * @param {Number} dragIndex The index to which the drag has now moved.
     */
     ResultList.prototype.mouseMove = function (dragIndex) {
         if (this.dragging) {
@@ -320,7 +320,7 @@
 
     /**
     * Returns the width of the list, in pixels.
-    * @returns {Number} Width of the list.
+    * @return {Number} Width of the list.
     */
     ResultList.prototype.width = function () {
         return $(this.containerDiv.node()).width();
@@ -328,7 +328,7 @@
 
     /**
     * Sets the overall height of the result list.
-    * @param {Number} height - The height of the control, in pixels.
+    * @param {Number} height The height of the control, in pixels.
     */
     ResultList.prototype.setHeight = function (height) {
         $(this.listDiv.node()).height(height - $(this.buttonsPanel.node()).height());
@@ -337,7 +337,7 @@
     /**
     * Returns all visible indexes.  This is the indexes of all results that
     * have not been excluded by the filters.
-    * @returns {Array} Array of indexes of visible results.
+    * @return {Array} Array of indexes of visible results.
     */
     ResultList.prototype.getAllVisibleIndexes = function () {
         return d3.range(this.allResultDetails.length).filter(function (index) {
@@ -368,8 +368,8 @@
 
     /**
     * Returns whether the result with the given index is selected.
-    * @param {Number} index - Index of the result within the list.
-    * @return True if the result is selected, false if not.
+    * @param {Number} index Index of the result within the list.
+    * @return {Boolean} True if the result is selected, false if not.
     */
     ResultList.prototype.isSelected = function (index) {
         return this.resultSelection !== null && this.resultSelection.isSelected(index);
@@ -400,7 +400,7 @@
     /**
     * Sets the chart type, so that the result list knows whether to show or
     * hide the Crossing Runners button.
-    * @param {Object} chartType - The chart type selected.
+    * @param {Object} chartType The chart type selected.
     */
     ResultList.prototype.setChartType = function (chartType) {
         this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "block" : "none");
@@ -419,7 +419,7 @@
 
     /**
     * Toggle the selectedness of a result.
-    * @param {Number} index - The index of the result to toggle.
+    * @param {Number} index The index of the result to toggle.
     */
     ResultList.prototype.toggleResult = function (index) {
         this.resultSelection.toggle(index);
@@ -435,7 +435,7 @@
     * * Conversion to lower case
     * * Removing all non-alphanumeric characters.
     *
-    * @param {String} name - The name to normalise.
+    * @param {String} name The name to normalise.
     * @return {String} The normalised names.
     */
     function normaliseName(name) {
@@ -458,18 +458,18 @@
 
     /**
     * Sets the list of results.
-    * @param {Array} results - Array of result data.
-    * @param {boolean} multipleClasses - Whether the list of results is
+    * @param {Array} results Array of result data.
+    * @param {Boolean} multipleClasses Whether the list of results is
     *      made up from those in multiple classes.
-    * @param {boolean} hasTeamData - Whether the list of results shows
+    * @param {Boolean} hasTeamData Whether the list of results shows
     *      team data as opposed to individual data.
-    * @param {Number?} selectedLegIndex  - The selected leg index, or
+    * @param {Number|null} selectedLegIndex The selected leg index, or
     *      null to show the team.
     */
     ResultList.prototype.setResultList = function (results, multipleClasses, hasTeamData, selectedLegIndex) {
         /**
         * Returns the text to show for a result's name.
-        * @param {Result} The result.
+        * @param {Result} result The result.
         * @return {String} The text to show for a result's name.
         */
         function resultText(result) {
@@ -556,7 +556,7 @@
 
     /**
     * Sets the result selection object.
-    * @param {SplitsBrowser.Controls.ResultSelection} selection - Result selection.
+    * @param {SplitsBrowser.Controls.ResultSelection} selection Result selection.
     */
     ResultList.prototype.setSelection = function (selection) {
         if (this.resultSelection !== null) {
@@ -580,7 +580,7 @@
 
     /**
     * Sets the filter text to use.
-    * @param {String} filterText - The filter text to use.
+    * @param {String} filterText The filter text to use.
     */
     ResultList.prototype.setFilterText = function (filterText) {
         this.filter.node().value = filterText;

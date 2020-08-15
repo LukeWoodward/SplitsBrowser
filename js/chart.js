@@ -74,11 +74,11 @@
     /**
     * Format a time and a rank as a string, with the split time in mm:ss or h:mm:ss
     * as appropriate.
-    * @param {?Number} time - The time, in seconds, or null.
-    * @param {?Number} rank - The rank, or null.
-    * @param {Boolean} isOKDespiteMissingTimes - True if the result is marked as
+    * @param {Number|null} time The time, in seconds, or null.
+    * @param {Number|null} rank The rank, or null.
+    * @param {Boolean} isOKDespiteMissingTimes True if the result is marked as
     *     OK despite having missing controls.
-    * @returns Time and rank formatted as a string.
+    * @return {String} Time and rank formatted as a string.
     */
     function formatTimeAndRank(time, rank, isOKDespiteMissingTimes) {
         if (isOKDespiteMissingTimes && time === null) {
@@ -100,10 +100,10 @@
 
     /**
     * Formats and returns a result's name and optional suffix.
-    * @param {String} name - The name associated with the result.
-    * @param {String} suffix - The optional suffix of the result (may be an
+    * @param {String} name The name associated with the result.
+    * @param {String} suffix The optional suffix of the result (may be an
     *      empty string to indicate no suffix).
-    * @return Result's associated name and suffix, formatted.
+    * @return {String} Result's associated name and suffix, formatted.
     */
     function formatNameAndSuffix(name, suffix) {
         return (suffix === "") ? name : name + " (" + suffix + ")";
@@ -138,7 +138,7 @@
     /**
     * A chart object in a window.
     * @constructor
-    * @param {HTMLElement} parent - The parent object to create the element within.
+    * @param {HTMLElement} parent The parent object to create the element within.
     */
     function Chart(parent) {
         this.parent = parent;
@@ -214,7 +214,7 @@
 
     /**
     * Sets the left margin of the chart.
-    * @param {Number} leftMargin - The left margin of the chart.
+    * @param {Number} leftMargin The left margin of the chart.
     */
     Chart.prototype.setLeftMargin = function (leftMargin) {
         this.currentLeftMargin = leftMargin;
@@ -224,7 +224,7 @@
     /**
     * Gets the location the chart popup should be at following a mouse-button
     * press or a mouse movement.
-    * @param {jQuery.event} event - jQuery mouse-down or mouse-move event.
+    * @param {jQuery.event} event jQuery mouse-down or mouse-move event.
     * @return {Object} Location of the popup.
     */
     Chart.prototype.getPopupLocation = function (event) {
@@ -254,7 +254,7 @@
 
     /**
     * Stores the current time the mouse is at, on the race graph.
-    * @param {jQuery.event} event - The mouse-down or mouse-move event.
+    * @param {jQuery.event} event The mouse-down or mouse-move event.
     */
     Chart.prototype.setCurrentChartTime = function (event) {
         var yOffset = event.pageY - $(this.svg.node()).offset().top - MARGIN.top;
@@ -280,7 +280,7 @@
 
     /**
     * Handle the mouse entering the chart.
-    * @param {jQuery.event} event - jQuery event object.
+    * @param {jQuery.event} event jQuery event object.
     */
     Chart.prototype.onMouseEnter = function (event) {
         if (this.mouseOutTimeout !== null) {
@@ -296,7 +296,7 @@
 
     /**
     * Handle a mouse movement.
-    * @param {jQuery.event} event - jQuery event object.
+    * @param {jQuery.event} event jQuery event object.
     */
     Chart.prototype.onMouseMove = function (event) {
         if (this.hasData&& this.isMouseIn && this.xScale !== null) {
@@ -331,7 +331,7 @@
 
     /**
     * Handles a mouse button being pressed over the chart.
-    * @param {jQuery.Event} event - jQuery event object.
+    * @param {jQuery.Event} event jQuery event object.
     */
     Chart.prototype.onMouseDown = function (event) {
         var outerThis = this;
@@ -343,7 +343,7 @@
 
     /**
     * Handles a mouse button being pressed over the chart.
-    * @param {jQuery.event} event - The jQuery onMouseUp event.
+    * @param {jQuery.event} event The jQuery onMouseUp event.
     */
     Chart.prototype.onMouseUp = function (event) {
         this.popup.hide();
@@ -352,7 +352,7 @@
 
     /**
     * Shows the popup window, populating it with data as necessary
-    * @param {jQuery.event} event - The jQuery onMouseDown event that triggered
+    * @param {jQuery.event} event The jQuery onMouseDown event that triggered
     *     the popup.
     */
     Chart.prototype.showPopupDialog = function (event) {
@@ -389,7 +389,7 @@
     * X-axis, control information is shown instead of whatever other data would
     * be being shown.
     *
-    * @param {jQuery.event} event - jQuery mouse-move event.
+    * @param {jQuery.event} event jQuery mouse-move event.
     */
     Chart.prototype.updatePopupContents = function (event) {
         var yOffset = event.pageY - $(this.svg.node()).offset().top;
@@ -413,8 +413,8 @@
     /**
     * Draw a 'control line'.  This is a vertical line running the entire height of
     * the chart, at one of the controls.
-    * @param {Number} controlIndex - The index of the control at which to draw the
-    *                                control line.
+    * @param {Number} controlIndex The index of the control at which to draw the
+    *                              control line.
     */
     Chart.prototype.drawControlLine = function(controlIndex) {
         this.currentControlIndex = controlIndex;
@@ -431,7 +431,7 @@
 
     /**
     * Updates the location of the control line from the given mouse event.
-    * @param {jQuery.event} event - jQuery mousedown or mousemove event.
+    * @param {jQuery.event} event jQuery mousedown or mousemove event.
     */
     Chart.prototype.updateControlLineLocation = function (event) {
 
@@ -504,8 +504,8 @@
     /**
     * Returns an array of the the times that the selected results are behind
     * the fastest time at the given control.
-    * @param {Number} controlIndex - Index of the given control.
-    * @param {Array} indexes - Array of indexes of selected results.
+    * @param {Number} controlIndex Index of the given control.
+    * @param {Array} indexes Array of indexes of selected results.
     * @return {Array} Array of times in seconds that the given results are
     *     behind the fastest time.
     */
@@ -519,8 +519,8 @@
     /**
     * Returns an array of the the time losses of the selected results at the
     * given control.
-    * @param {Number} controlIndex - Index of the given control.
-    * @param {Array} indexes - Array of indexes of selected results.
+    * @param {Number} controlIndex Index of the given control.
+    * @param {Array} indexes Array of indexes of selected results.
     * @return {Array} Array of times in seconds that the given results are
     *     deemed to have lost at the given control.
     */
@@ -581,7 +581,7 @@
     *
     * The function returned is suitable for use with the D3 axis.tickFormat method.
     *
-    * @returns {function} Tick-formatting function.
+    * @return {Function} Tick-formatting function.
     */
     Chart.prototype.getTickFormatter = function () {
         var outerThis = this;
@@ -612,8 +612,8 @@
 
     /**
     * Get the width of a piece of text.
-    * @param {string} text - The piece of text to measure the width of.
-    * @returns {Number} The width of the piece of text, in pixels.
+    * @param {String} text The piece of text to measure the width of.
+    * @return {Number} The width of the piece of text, in pixels.
     */
     Chart.prototype.getTextWidth = function (text) {
         return this.textSizeElement.text(text).node().getBBox().width;
@@ -622,8 +622,8 @@
     /**
     * Gets the height of a piece of text.
     *
-    * @param {string} text - The piece of text to measure the height of.
-    * @returns {Number} The height of the piece of text, in pixels.
+    * @param {String} text The piece of text to measure the height of.
+    * @return {Number} The height of the piece of text, in pixels.
     */
     Chart.prototype.getTextHeight = function (text) {
         return this.textSizeElement.text(text).node().getBBox().height;
@@ -634,7 +634,7 @@
     *
     * This function considers only the results whose indexes are in the list
     * given.  This method returns zero if the list is empty.
-    * @returns {Number} Maximum width of text, in pixels.
+    * @return {Number} Maximum width of text, in pixels.
     */
     Chart.prototype.getMaxGraphEndTextWidth = function () {
         if (this.selectedIndexes.length === 0) {
@@ -654,7 +654,7 @@
     * Returns the maximum value from the given array, not including any null or
     * NaN values.  If the array contains no non-null, non-NaN values, zero is
     * returned.
-    * @param {Array} values - Array of values.
+    * @param {Array} values Array of values.
     * @return {Number} Maximum non-null or NaN value.
     */
     function maxNonNullNorNaNValue(values) {
@@ -665,11 +665,11 @@
     /**
     * Return the maximum width of a piece of time and rank text shown to the right
     * of each result.
-    * @param {string} timeFuncName - Name of the function to call to get the time
-                                     data.
-    * @param {string} rankFuncName - Name of the function to call to get the rank
-                                     data.
-    * @returns {Number} Maximum width of split-time and rank text, in pixels.
+    * @param {String} timeFuncName Name of the function to call to get the time
+                                   data.
+    * @param {String} rankFuncName Name of the function to call to get the rank
+                                   data.
+    * @return {Number} Maximum width of split-time and rank text, in pixels.
     */
     Chart.prototype.getMaxTimeAndRankTextWidth = function(timeFuncName, rankFuncName) {
         var maxTime = 0;
@@ -692,7 +692,7 @@
     /**
     * Return the maximum width of the split-time and rank text shown to the right
     * of each result.
-    * @returns {Number} Maximum width of split-time and rank text, in pixels.
+    * @return {Number} Maximum width of split-time and rank text, in pixels.
     */
     Chart.prototype.getMaxSplitTimeAndRankTextWidth = function() {
         return this.getMaxTimeAndRankTextWidth("getSplitTimeTo", "getSplitRankTo");
@@ -701,8 +701,8 @@
     /**
     * Return the maximum width of the cumulative time and cumulative-time rank text
     * shown to the right of each result.
-    * @returns {Number} Maximum width of cumulative time and cumulative-time rank text, in
-    *                   pixels.
+    * @return {Number} Maximum width of cumulative time and cumulative-time rank text, in
+    *                  pixels.
     */
     Chart.prototype.getMaxCumulativeTimeAndRankTextWidth = function() {
         return this.getMaxTimeAndRankTextWidth("getCumulativeTimeTo", "getCumulativeRankTo");
@@ -711,7 +711,7 @@
     /**
     * Return the maximum width of the behind-fastest time shown to the right of
     * each result.
-    * @returns {Number} Maximum width of behind-fastest time rank text, in pixels.
+    * @return {Number} Maximum width of behind-fastest time rank text, in pixels.
     */
     Chart.prototype.getMaxTimeBehindFastestWidth = function() {
         var maxTime = 0;
@@ -727,7 +727,7 @@
     /**
     * Return the maximum width of the behind-fastest time shown to the right of
     * each result.
-    * @returns {Number} Maximum width of behind-fastest time rank text, in pixels.
+    * @return {Number} Maximum width of behind-fastest time rank text, in pixels.
     */
     Chart.prototype.getMaxTimeLossWidth = function() {
         var maxTimeLoss = 0;
@@ -749,7 +749,7 @@
 
     /**
     * Determines the maximum width of the statistics text at the end of the result.
-    * @returns {Number} Maximum width of the statistics text, in pixels.
+    * @return {Number} Maximum width of the statistics text, in pixels.
     */
     Chart.prototype.determineMaxStatisticTextWidth = function() {
         var maxWidth = 0;
@@ -772,7 +772,7 @@
     /**
     * Determines the maximum width of all of the visible start time labels.
     * If none are presently visible, zero is returned.
-    * @param {object} chartData - Object containing the chart data.
+    * @param {Object} chartData Object containing the chart data.
     * @return {Number} Maximum width of a start time label.
     */
     Chart.prototype.determineMaxStartTimeLabelWidth = function (chartData) {
@@ -788,7 +788,7 @@
 
     /**
     * Creates the X and Y scales necessary for the chart and its axes.
-    * @param {object} chartData - Chart data object.
+    * @param {Object} chartData Chart data object.
     */
     Chart.prototype.createScales = function (chartData) {
         this.xScale = d3.scaleLinear().domain(chartData.xExtent).range([0, this.contentWidth]);
@@ -858,8 +858,8 @@
     * For other graph types, this method returns null, which tells d3 to use
     * its default tick formatter.
     *
-    * @param {object} chartData - The chart data to read start times from.
-    * @return {?Function} Tick formatter function, or null to use the default
+    * @param {Object} chartData The chart data to read start times from.
+    * @return {Function|null} Tick formatter function, or null to use the default
     *     d3 formatter.
     */
     Chart.prototype.determineYAxisTickFormatter = function (chartData) {
@@ -887,8 +887,8 @@
 
     /**
     * Draw the chart axes.
-    * @param {String} yAxisLabel - The label to use for the Y-axis.
-    * @param {object} chartData - The chart data to use.
+    * @param {String} yAxisLabel The label to use for the Y-axis.
+    * @param {Object} chartData The chart data to use.
     */
     Chart.prototype.drawAxes = function (yAxisLabel, chartData) {
 
@@ -938,7 +938,7 @@
 
     /**
     * Draw the lines on the chart.
-    * @param {Array} chartData - Array of chart data.
+    * @param {Array} chartData Array of chart data.
     */
     Chart.prototype.drawChartLines = function (chartData) {
         var outerThis = this;
@@ -997,7 +997,7 @@
 
     /**
     * Highlights the result with the given index.
-    * @param {Number} resultIdx - The index of the result to highlight.
+    * @param {Number} resultIdx The index of the result to highlight.
     */
     Chart.prototype.highlight = function (resultIdx) {
         this.svg.selectAll("path.graphLine.result" + resultIdx).classed("selected", true);
@@ -1020,7 +1020,7 @@
 
     /**
     * Draws the start-time labels for the currently-selected results.
-    * @param {object} chartData - The chart data that contains the start offsets.
+    * @param {Object} chartData The chart data that contains the start offsets.
     */
     Chart.prototype.drawResultStartTimeLabels = function (chartData) {
         var startColumn = chartData.dataColumns[0];
@@ -1071,7 +1071,7 @@
     * This method does not move off the chart any label that is currently on
     * the chart.
     *
-    * @param {Number} minLastY - The minimum Y-coordinate of the lowest label.
+    * @param {Number} minLastY The minimum Y-coordinate of the lowest label.
     */
     Chart.prototype.adjustResultLegendLabelsUpwardsIfNecessary = function (minLastY) {
         if (this.numLines > 0 && this.currentResultData[this.numLines - 1].y > this.contentHeight) {
@@ -1095,7 +1095,7 @@
     /**
     * Draw legend labels to the right of the chart.
     * Draw legend labels to the right of the chart.
-    * @param {object} chartData - The chart data that contains the final time offsets.
+    * @param {Object} chartData The chart data that contains the final time offsets.
     */
     Chart.prototype.drawResultLegendLabels = function (chartData) {
 
@@ -1193,8 +1193,8 @@
 
     /**
     * Sets the overall size of the chart control, including margin, axes and legend labels.
-    * @param {Number} overallWidth - Overall width
-    * @param {Number} overallHeight - Overall height
+    * @param {Number} overallWidth Overall width
+    * @param {Number} overallHeight Overall height
     */
     Chart.prototype.setSize = function (overallWidth, overallHeight) {
         this.overallWidth = overallWidth;
@@ -1242,7 +1242,7 @@
 
     /**
     * Draws the chart.
-    * @param {object} data - Object that contains various chart data.  This
+    * @param {Object} data Object that contains various chart data.  This
     *     must contain the following properties:
     *     * chartData {Object} - the data to plot on the chart
     *     * eventData {SplitsBrowser.Model.Event} - the overall Event object.
@@ -1251,14 +1251,14 @@
     *       'reference'.
     *     * fastestCumTimes {Array} - Array of cumulative times of the
     *       imaginary 'fastest' result.
-    * @param {Array} selectedIndexes - Array of indexes of selected results
+    * @param {Array} selectedIndexes Array of indexes of selected results
     *                (0 in this array means the first result is selected, 1
     *                means the second is selected, and so on.)
-    * @param {Array} visibleStatistics - Array of boolean flags indicating whether
-    *                                    certain statistics are visible.
-    * @param {Object} chartType - The type of chart being drawn.
-    * @param {Number?} selectedLegIndex - The selected leg index, or null for all
-    *                                     legs.
+    * @param {Array} visibleStatistics Array of boolean flags indicating whether
+    *                                  certain statistics are visible.
+    * @param {Object} chartType The type of chart being drawn.
+    * @param {Number|null} selectedLegIndex The selected leg index, or null for all
+    *                                       legs.
     */
     Chart.prototype.drawChart = function (data, selectedIndexes, visibleStatistics, chartType, selectedLegIndex) {
         var chartData = data.chartData;

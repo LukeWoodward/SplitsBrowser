@@ -64,11 +64,11 @@
     /**
     * Returns the fastest splits for the currently-shown leg.  The list
     * returned contains the fastest splits for the current leg for each class.
-    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet - The course-class set
+    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet The course-class set
     *     containing the splits data.
-    * @param {SplitsBrowser.Model.EventData} eventData - Data for the entire
+    * @param {SplitsBrowser.Model.EventData} eventData Data for the entire
     *     event.
-    * @param {Number} controlIndex - The index of the control.
+    * @param {Number} controlIndex The index of the control.
     * @return {Object} Object that contains the title for the popup and the
     *     array of data to show within it.
     */
@@ -92,12 +92,12 @@
     /**
     * Returns an object containing an array of the results visiting a
     * control at a given time.
-    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet - The course-class set
+    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet The course-class set
     *     containing the splits data.
-    * @param {SplitsBrowser.Model.EventData} eventData - Data for the entire
+    * @param {SplitsBrowser.Model.EventData} eventData Data for the entire
     *     event.
-    * @param {Number} controlIndex - The index of the control.
-    * @param {Number} time - The current time, in units of seconds past midnight.
+    * @param {Number} controlIndex The index of the control.
+    * @param {Number} time The current time, in units of seconds past midnight.
     * @return {Object} Object containing result data.
     */
     ChartPopupData.getResultsVisitingCurrentControlPopupData = function (courseClassSet, eventData, controlIndex, time) {
@@ -127,10 +127,10 @@
 
     /**
     * Compares two course names.
-    * @param {String} name1 - One course name to compare.
-    * @param {String} name2 - The other course name to compare.
-    * @return {Number} Comparison result: -1 if name1 < name2, 1 if
-    *     name1 > name2 and 0 if name1 === name2.
+    * @param {String} name1 One course name to compare.
+    * @param {String} name2 The other course name to compare.
+    * @return {Number} Comparison result: negative if name1 < name2,
+    *     positive if name1 > name2 and zero if name1 === name2.
     */
     function compareCourseNames(name1, name2) {
         if (name1 === name2) {
@@ -159,7 +159,7 @@
     /**
     * Tidy next-control data, by joining up multiple controls into one string,
     * and substituting the display-name of the finish if necessary.
-    * @param {Array} nextControls - Array of next-control information objects.
+    * @param {Array} nextControls Array of next-control information objects.
     * @return {String} Next-control information containing joined-up control names.
     */
     function tidyNextControlsList(nextControls) {
@@ -175,11 +175,11 @@
 
     /**
     * Returns next-control data to show on the chart popup.
-    * @param {SplitsBrowser.Model.Course} course - The course containing the
+    * @param {SplitsBrowser.Model.Course} course The course containing the
     *     controls data.
-    * @param {SplitsBrowser.Model.EventData} eventData - Data for the entire
+    * @param {SplitsBrowser.Model.EventData} eventData Data for the entire
     *     event.
-    * @param {Number} controlIndex - The index of the control.
+    * @param {Number} controlIndex The index of the control.
     * @return {Object} Next-control data.
     */
     ChartPopupData.getNextControlData = function (course, eventData, controlIndex) {

@@ -31,7 +31,7 @@
     /**
     * A control that wraps a drop-down list used to choose which leg of a relay
     * team to show, or whether to show all legs.
-    * @param {d3.selection} parent - D3 selection containing the parent element
+    * @param {d3.selection} parent D3 selection containing the parent element
     *     to add the control to.
     */
     function LegSelector(parent) {
@@ -79,7 +79,7 @@
     *
     * The function used to return the comparison result is returned.
     *
-    * @param {Function} handler - Handler function to be called whenever the class
+    * @param {Function} handler Handler function to be called whenever the class
     *                   changes.
     */
     LegSelector.prototype.registerChangeHandler = function(handler) {
@@ -112,7 +112,7 @@
     /**
     * Sets the course-class set to use.  This will also show or hide the control
     * as appropriate.
-    * @param {CourseClassSet} courseClassSet - The course-class set to set.
+    * @param {CourseClassSet} courseClassSet The course-class set to set.
     */
     LegSelector.prototype.setCourseClassSet = function (courseClassSet) {
         this.courseClassSet = courseClassSet;
@@ -132,7 +132,7 @@
     * Returns the selected leg, i.e. the (0-based) leg index if a leg has been
     * chosen, or null if all legs are visible or a team class is not being
     * shown.
-    * @return {Number?} Leg index, or null.
+    * @return {Number|null} Leg index, or null.
     */
     LegSelector.prototype.getSelectedLeg = function () {
         if (this.options === null) {
@@ -147,7 +147,7 @@
     * Sets the selected leg, i.e. the (0-based) leg index if a leg has been
     * chosen, or null if all legs are visible or a team class is not being
     * shown.
-    * @param {Number?} selectedLeg - The leg index to set.
+    * @param {Number|null} selectedLeg The leg index to set, or null.
     */
     LegSelector.prototype.setSelectedLeg = function (selectedLeg) {
         if (this.options === null) {

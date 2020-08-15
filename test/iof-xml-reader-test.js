@@ -86,7 +86,7 @@
 
     /**
     * Returns a chunk of XML that contains a class name.
-    * @param {String} className - The name of the class.
+    * @param {String} className The name of the class.
     * @return {String} XML string containing the class name.
     */
     Version2Formatter.getClassXml = function (className) {
@@ -97,7 +97,7 @@
     * Returns a chunk of XML that contains course details.
     * This formatter does not support course details, so this function returns
     * an empty string.
-    * @returns {String} An empty string.
+    * @return {String} An empty string.
     */
     Version2Formatter.getCourseXml = function () {
         return "";
@@ -105,7 +105,7 @@
 
     /**
     * Returns a chunk of XML that contains club details.
-    * @param {Object} resultData - The person or team data
+    * @param {Object} resultData The person or team data
     * @return {String} Generated XML string.
     */
     Version2Formatter.getClubXml = function (resultData) {
@@ -144,8 +144,8 @@
     * * courseLengthUnit (String) - The unit that the length of the course is
     *       measured in.
     *
-    * @param {Object} personData - The person data.
-    * @param {Object} classData - The class data.
+    * @param {Object} personData The person data.
+    * @param {Object} classData The class data.
     * @return {String} Generated XML string.
     */
     Version2Formatter.getPersonResultXml = function (personData, classData) {
@@ -245,8 +245,8 @@
     *
     * For IOF XML v2 the format is identical to that for a PersonResult.
     *
-    * @param {Object} personData - The person data.
-    * @param {Object} classData - The class data.
+    * @param {Object} personData The person data.
+    * @param {Object} classData The class data.
     * @return {String} Generated XML string.
     */
     Version2Formatter.getTeamMemberResultXml = function (personData, classData) {
@@ -255,7 +255,7 @@
 
     /**
     * Zero-pads the given value to two digits.
-    * @param {Number} value - The value to pad.
+    * @param {Number} value The value to pad.
     * @return {String} Zero-padded number as a string.
     */
     function zeroPadTwoDigits (value) {
@@ -268,7 +268,7 @@
 
     /**
     * Formats a start or finish time as an ISO-8601 date.
-    * @param {Number} time - The time to format.
+    * @param {Number} time The time to format.
     * @return {String} The formatted date.
     */
     function formatStartOrFinishTime(time) {
@@ -278,7 +278,7 @@
     /**
     * Formats a start or finish time as an ISO-8601 date, but ending after the
     * minutes.
-    * @param {Number} time - The time to format.
+    * @param {Number} time The time to format.
     * @return {String} The formatted date.
     */
     function formatStartOrFinishTimeNoSeconds (time) {
@@ -288,7 +288,7 @@
     /**
     * Formats a start or finish time as a 'basic' ISO-8601 date, i.e. one
     * without all of the separating characters.
-    * @param {Number} time - The time to format.
+    * @param {Number} time The time to format.
     * @return {String} The formatted date.
     */
     function formatStartOrFinishTimeBasic (time) {
@@ -302,7 +302,7 @@
 
     /**
     * Returns a chunk of XML that contains a class name.
-    * @param {String} className - The name of the class.
+    * @param {String} className The name of the class.
     * @return {String} XML string containing the class name.
     */
     Version3Formatter.getClassXml = function (className) {
@@ -311,8 +311,8 @@
 
     /**
     * Returns a chunk of XML that contains course details.
-    * @param {Object} clazz - Object containing class data.
-    * @returns {String} XML string.
+    * @param {Object} clazz Object containing class data.
+    * @return {String} XML string.
     */
     Version3Formatter.getCourseXml = function (clazz) {
         var xml = "<Course>\n";
@@ -345,7 +345,7 @@
 
     /**
     * Returns a chunk of XML that contains club details.
-    * @param {Object} resultData - The person or team data
+    * @param {Object} resultData The person or team data
     * @return {String} Generated XML string.
     */
     Version3Formatter.getClubXml = function (resultData) {
@@ -380,8 +380,8 @@
     * * result {Any} - Specified to include the <Result> element, omit to
     *       skip it.
     *
-    * @param {Object} personData - The person data.
-    * @param {String} elementName - The name of the root element.
+    * @param {Object} personData The person data.
+    * @param {String} elementName The name of the root element.
     * @return {String} Generated XML string.
     */
     Version3Formatter.getIndividualResultXml = function (personData, elementName) {
@@ -493,7 +493,7 @@
     *
     * For IOF XML v3 this uses a PersonResult element.
     *
-    * @param {Object} personData - The person data.
+    * @param {Object} personData The person data.
     * @return {String} Generated XML string.
     */
     Version3Formatter.getPersonResultXml = function (personData) {
@@ -514,7 +514,7 @@
     *
     * For IOF XML v3 this uses a TeamMemberResult element.
     *
-    * @param {Object} personData - The person data.
+    * @param {Object} personData The person data.
     * @return {String} Generated XML string.
     */
     Version3Formatter.getTeamMemberResultXml = function (personData) {
@@ -538,8 +538,8 @@
 
     /**
     * Uses the given formatter to format the given class data as XML.
-    * @param {Object} formatter - Formatter object.
-    * @param {Array} classes - Array of objects containing data to format.
+    * @param {Object} formatter Formatter object.
+    * @param {Array} classes Array of objects containing data to format.
     * @return {String} Formatted XML string.
     */
     function getXmlFromFormatter(formatter, classes) {
@@ -577,9 +577,9 @@
     * This function also asserts that the event has exactly one course-class and
     * exactly one result within that class.  This one result is what
     * it returns.
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Event} eventData - Event data parsed by the reader.
-    * @param {String} formatterName - Name of the formatter used to generate
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {Event} eventData Event data parsed by the reader.
+    * @param {String} formatterName Name of the formatter used to generate
     *     the XML.
     * @return {Result} The single result.
     */
@@ -601,9 +601,9 @@
     /**
     * Asserts that attempting to parse the given XML string will fail with an
     * InvalidData exception being thrown.
-    * @param {QUnit.assert] assert - QUnit assert object.
-    * @param {String} xml - The XML string to attempt to parse.
-    * @param {String} failureMessage - Optional message to show in assertion
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {String} xml The XML string to attempt to parse.
+    * @param {String|undefined} failureMessage Optional message to show in assertion
     *     failure message if no exception is thrown.  A default message is used
     *     instead if this is not specified.
     */
@@ -616,9 +616,9 @@
     /**
     * Asserts that attempting to parse the given string will fail with a
     * WrongFileFormat exception being thrown.
-    * @param {QUnit.assert] assert - QUnit assert object.
-    * @param {String} data - The string to attempt to parse.
-    * @param {String} failureMessage - Optional message to show in assertion
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {String} data The string to attempt to parse.
+    * @param {String|undefined} failureMessage Optional message to show in assertion
     *     failure message if no exception is thrown.  A default message is used
     *     instead if this is not specified.
     */
@@ -640,12 +640,12 @@
     * If none of the above options are required, the options object itself can
     * be omitted.
     *
-    * @param {QUnit.assert] assert - QUnit assert object.
-    * @param {Array} classes - Array of class objects to generate the XML from.
-    * @param {Function} checkFunc - Checking function called for each parsed
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {Array} classes Array of class objects to generate the XML from.
+    * @param {Function} checkFunc Checking function called for each parsed
     *     event data object.  It is passed the data, and also the name of the
     *     formatter used.
-    * @param {Object} options - Options object, the contents of which are
+    * @param {Object} options Options object, the contents of which are
     *     described above.
     */
     function runXmlFormatParseTest(classes, checkFunc, options) {
@@ -668,11 +668,11 @@
     *
     * The options supported are the same as those for runXmlFormatParseTest.
     *
-    * @param {QUnit.assert] assert - QUnit assert object.
-    * @param {Object} clazz - Class object to generate the XML from.
-    * @param {Function} checkFunc - Checking function called for the parsed
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {Object} clazz Class object to generate the XML from.
+    * @param {Function} checkFunc Checking function called for the parsed
     *     result, if a single result results.  It is passed the parsed result.
-    * @param {Object} options - Options object, the contents of which are
+    * @param {Object} options Options object, the contents of which are
     *     described above.
     */
     function runSingleCompetitorXmlFormatParseTest(assert, clazz, checkFunc, options) {
@@ -692,10 +692,10 @@
     *
     * The options supported are the same as those for runXmlFormatParseTest.
     *
-    * @param {Array} classes - Array of class objects to generate the XML from.
-    * @param {Function} checkFunc - Checking function called for the parsed
+    * @param {Array} classes Array of class objects to generate the XML from.
+    * @param {Function} checkFunc Checking function called for the parsed
     *     course, if a single course results.  It is passed the parsed course.
-    * @param {Object} options - Options object, the contents of which are
+    * @param {Object} options Options object, the contents of which are
     *     described above.
     */
     function runSingleCourseXmlFormatParseTest(assert, classes, checkFunc, options) {
@@ -719,10 +719,10 @@
     * If none of the above options are required, the options object itself can
     * be omitted.
     *
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Array} classes - Array of class objects to generate the XML
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {Array} classes Array of class objects to generate the XML
     *     using.
-    * @param {Object} options - Options object, the contents of which are
+    * @param {Object} options Options object, the contents of which are
     *     described above.
     */
     function runFailingXmlFormatParseTest(assert, classes, options) {

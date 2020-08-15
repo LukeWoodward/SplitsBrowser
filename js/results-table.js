@@ -36,7 +36,7 @@
     /**
     * A control that shows an entire table of results.
     * @constructor
-    * @param {HTMLElement} parent - The parent element to add this control to.
+    * @param {HTMLElement} parent The parent element to add this control to.
     */
     function ResultsTable(parent) {
         this.parent = parent;
@@ -76,7 +76,7 @@
     * split time between controls punched after 62.7 and 108.7 seconds must be
     * shown as 46.0 seconds, not 46.
     *
-    * @param {Array} results - Array of Result objects.
+    * @param {Array} results Array of Result objects.
     * @return {Number} Maximum precision to use.
     */
     function determinePrecision(results) {
@@ -103,7 +103,7 @@
     * The status may be a string that indicates the result mispunched.
     *
     * @param {Result} result The result to get the status of.
-    * @param {Number?} time The time to format, if the result is OK.
+    * @param {Number|null} time The time to format, if the result is OK.
     * @param {Number} precision The precision to use.
     * @return {String} Time or status for the given result.
     */
@@ -141,7 +141,7 @@
     * @param {Number} precision The precision to format the time to.
     * @param {Boolean} resultOKDespiteMissingTimes True if the result is known to
     *       have completed the course despite having missing times, false otherwise.
-    * @return Formatted time
+    * @return {String} Formatted time
     */
     function formatPossiblyMissingTime(time, precision, resultOKDespiteMissingTimes) {
         if (time === null && resultOKDespiteMissingTimes) {
@@ -343,7 +343,7 @@
 
     /**
     * Sets the class whose data is displayed.
-    * @param {SplitsBrowser.Model.CourseClass} courseClass - The class displayed.
+    * @param {SplitsBrowser.Model.CourseClass} courseClass The class displayed.
     */
     ResultsTable.prototype.setClass = function (courseClass) {
         this.courseClass = courseClass;
@@ -355,7 +355,7 @@
 
     /**
     * Sets the selected leg index.
-    * @param {Number?} selectedLegIndex - The selected leg index.
+    * @param {Number|null} selectedLegIndex The selected leg index.
     */
     ResultsTable.prototype.setSelectedLegIndex = function (selectedLegIndex) {
         this.selectedLegIndex = selectedLegIndex;

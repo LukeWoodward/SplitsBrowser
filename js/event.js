@@ -25,11 +25,11 @@
 
     /**
     * Contains all of the data for an event.
-    * @param {Array} classes - Array of CourseClass objects representing all of
+    * @param {Array} classes Array of CourseClass objects representing all of
     *     the classes of competitors.
-    * @param {Array} courses - Array of Course objects representing all of the
+    * @param {Array} courses Array of Course objects representing all of the
     *     courses of the event.
-    * @param {Array} warnings - Array of strings containing warning messages
+    * @param {Array} warnings Array of strings containing warning messages
     *     encountered when reading in the event dara.
     */
     function Event(classes, courses, warnings) {
@@ -56,7 +56,7 @@
     * The event data needs repairing if any results are missing their
     * 'repaired' cumulative times.
     *
-    * @return {boolean} True if the event data needs repairing, false
+    * @return {Boolean} True if the event data needs repairing, false
     *     otherwise.
     */
     Event.prototype.needsRepair = function () {
@@ -73,9 +73,9 @@
     * The fastest splits are returned as an array of objects, where each object
     * lists the results name, the class, and the split time in seconds.
     *
-    * @param {String} startCode - Code for the control at the start of the leg,
+    * @param {String} startCode Code for the control at the start of the leg,
     *     or null for the start.
-    * @param {String} endCode - Code for the control at the end of the leg, or
+    * @param {String} endCode Code for the control at the end of the leg, or
     *     null for the finish.
     * @return {Array} Array of objects containing fastest splits for that leg.
     */
@@ -99,10 +99,10 @@
     * The fastest splits are returned as an array of objects, where each object
     * lists the results name, the class, and the split time in seconds.
     *
-    * @param {String} controlCode - Code for the control.
-    * @param {Number} intervalStart - Start of the time interval, in seconds
+    * @param {String} controlCode Code for the control.
+    * @param {Number} intervalStart Start of the time interval, in seconds
     *     since midnight.
-    * @param {?Number} intervalEnd - End of the time interval, in seconds, or
+    * @param {Number|null} intervalEnd End of the time interval, in seconds, or
     *     null for the finish.
     * @return {Array} Array of objects containing fastest splits for that leg.
     */
@@ -121,7 +121,7 @@
 
     /**
     * Returns the list of controls that follow after a given control.
-    * @param {String} controlCode - The code for the control.
+    * @param {String} controlCode The code for the control.
     * @return {Array} Array of objects for each course using that control,
     *    with each object listing course name and next control.
     */

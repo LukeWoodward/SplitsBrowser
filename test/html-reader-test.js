@@ -28,10 +28,10 @@
 
     /**
     * Runs a test for parsing invalid data that should fail.
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {String} invalidData - The invalid string to parse.
-    * @param {String} what - Description of the invalid data.
-    * @param {String} exceptionName - Optional name of the exception (defaults
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {String} invalidData The invalid string to parse.
+    * @param {String} what Description of the invalid data.
+    * @param {String|undefined} exceptionName Optional name of the exception (defaults
     *     to InvalidData.
     */
     function runInvalidDataTest(assert, invalidData, what, exceptionName) {
@@ -49,9 +49,9 @@
     * The parameter expectedDetails is an object that contains the properties
     * name, length, climb, controls and classCount, with the last two being
     * optional.
-    * @param {QUnit.assert} assert - The QUnit assert object.
-    * @param {Course} actualCourse - The parsed course.
-    * @param {Object} expectedDetails - The expected details.
+    * @param {QUnit.assert} assert The QUnit assert object.
+    * @param {Course} actualCourse The parsed course.
+    * @param {Object} expectedDetails The expected details.
     */
     function assertCourse(assert, actualCourse, expectedDetails) {
         if (typeof expectedDetails === "undefined") {
@@ -75,9 +75,9 @@
     * The parameter expectedDetails is an object that contains the properties
     * name, numControls, course and competitorCount.
     *
-    * @param {QUnit.assert} assert - The QUnit assert object.
-    * @param {CourseClass} actualClass - The parsed class.
-    * @param {Object} expectedDetails - The expected details.
+    * @param {QUnit.assert} assert The QUnit assert object.
+    * @param {CourseClass} actualClass The parsed class.
+    * @param {Object} expectedDetails The expected details.
     */
     function assertCourseClass(assert, actualClass, expectedDetails) {
         assert.strictEqual(actualClass.name, expectedDetails.name);
@@ -93,9 +93,9 @@
     * name, club, totalTime, cumTimes, splitTimes, isNonCompetitive, completed.
     * All seven are optional.
     *
-    * @param {QUnit.assert} assert - The QUnit assert object.
-    * @param {CourseClass} actualResult - The parsed result.
-    * @param {Object} expectedDetails - The expected details.
+    * @param {QUnit.assert} assert The QUnit assert object.
+    * @param {CourseClass} actualResult The parsed result.
+    * @param {Object} expectedDetails The expected details.
     */
     function assertResult(assert, actualResult, expectedDetails) {
         ["name", "club"].forEach(function (propName) {
@@ -135,7 +135,7 @@
 
     /**
     * Wrap some text in some HTML for an old-format file
-    * @param {String} contents - The contents to wrap.
+    * @param {String} contents The contents to wrap.
     * @return {String} The contents wrapped up in HTML.
     */
     function cellOld(contents) {
@@ -145,9 +145,9 @@
     /**
     * Returns an old-format course header line for a course with the given
     * name, length and climb.
-    * @param {String} name - The name of the course.
-    * @param {Number} length - The length of the course, in kilometres.
-    * @param {Number} climb - The climb of the course, in metres.
+    * @param {String} name The name of the course.
+    * @param {Number|null} length The length of the course, in kilometres.
+    * @param {Number|null} climb The climb of the course, in metres.
     * @return {String} The created header line.
     */
     function getCourseHeaderLineOld(name, length, climb) {
@@ -171,9 +171,9 @@
 
     /**
     * Returns a controls-line for an old-format course.
-    * @param {Array} codes - Array of control codes.
-    * @param {Number} offset - Control number offset.
-    * @param {boolean} includeFinish - Whether to add the finish control.
+    * @param {Array} codes Array of control codes.
+    * @param {Number} offset Control number offset.
+    * @param {Boolean} includeFinish Whether to add the finish control.
     *     (The finish will always be specified as "F"; don't add a code to the
     *     codes array for this.)
     * @return {String} The created controls-line.
@@ -207,20 +207,20 @@
     * containing the properties cumTime and controlNum.  The parameter is
     * optional and can be omitted.
     *
-    * @param {String|Number} posn - The position of the competitor.
-    * @param {?String} startNum - The start number of the competitor, or
+    * @param {String|Number} posn The position of the competitor.
+    * @param {String|null} startNum The start number of the competitor, or
     *     null to skip the first column.
-    * @param {String} name - The name of the competitor.
-    * @param {String} club - The name of the competitor's club.
-    * @param {boolean} useClasses - This parameter is not used.  It is
+    * @param {String} name The name of the competitor.
+    * @param {String} club The name of the competitor's club.
+    * @param {Boolean} useClasses This parameter is not used.  It is
     *     specified only for compatibility with the other getCompetitorLines
     *     functions.
-    * @param {String} className - The name of the competitor's class, or "" to
+    * @param {String} className The name of the competitor's class, or "" to
     *     default to course name.
-    * @param {Number} time - The total time of the competitor.
-    * @param {Array} cumTimes - Array of cumulative times, as strings.
-    * @param {Array} splits - Array of split times, as strings.
-    * @param {Array} extras - Optional array of extra splits times.
+    * @param {Number} time The total time of the competitor.
+    * @param {Array} cumTimes Array of cumulative times, as strings.
+    * @param {Array} splits Array of split times, as strings.
+    * @param {Array} extras Optional array of extra splits times.
     * @return {String} Both lines concatenated together.
     */
     function getCompetitorLinesOld(posn, startNum, name, club, useClasses, className, time, cumTimes, splits, extras) {
@@ -257,7 +257,7 @@
 
     /**
     * Wrap some text in some HTML for a new-format file
-    * @param {String} contents - The contents to wrap.
+    * @param {String} contents The contents to wrap.
     * @return {String} The contents wrapped up in HTML.
     */
     function cellNew(contents) {
@@ -267,9 +267,9 @@
     /**
     * Returns an new-format course header for a course with the given name,
     * length and climb.
-    * @param {String} name - The name of the course.
-    * @param {Number} length - The length of the course, in kilometres.
-    * @param {Number} climb - The climb of the course, in metres.
+    * @param {String} name The name of the course.
+    * @param {Number|null} length The length of the course, in kilometres.
+    * @param {Number|null} climb The climb of the course, in metres.
     * @return {String} The created header line.
     */
     function getCourseHeaderNew(name, length, climb) {
@@ -283,9 +283,9 @@
 
     /**
     * Returns a controls-line for a new-format course.
-    * @param {Array} codes - Array of control codes.
-    * @param {Number} offset - Control number offset.
-    * @param {boolean} includeFinish - Whether to add the finish control.
+    * @param {Array} codes Array of control codes.
+    * @param {Number} offset Control number offset.
+    * @param {Boolean} includeFinish Whether to add the finish control.
     *     (The finish will always be specified as "F"; don't add a code to the
     *     codes array for this.)
     * @return {String} The created controls-line.
@@ -319,18 +319,18 @@
     * containing the properties cumTime and controlNum.  The parameter is
     * optional and can be omitted.
     *
-    * @param {String|Number} posn - The position of the competitor.
-    * @param {String} startNum - The start number of the competitor.
-    * @param {String} name - The name of the competitor.
-    * @param {String} club - The name of the competitor's club.
-    * @param {boolean} useClasses - True to include a cell for the competitor's
+    * @param {String|Number} posn The position of the competitor.
+    * @param {String} startNum The start number of the competitor.
+    * @param {String} name The name of the competitor.
+    * @param {String} club The name of the competitor's club.
+    * @param {Boolean} useClasses True to include a cell for the competitor's
     *     class name, false to default class name to course name.
-    * @param {String} className - The name of the competitor's class, or "" to
+    * @param {String} className The name of the competitor's class, or "" to
     *     default to course name.
-    * @param {Number} time - The total time of the competitor.
-    * @param {Array} cumTimes - Array of cumulative times, as strings.
-    * @param {Array} splits - Array of split times, as strings.
-    * @param {Array} extras - Optional array of extra splits times.
+    * @param {Number} time The total time of the competitor.
+    * @param {Array} cumTimes Array of cumulative times, as strings.
+    * @param {Array} splits Array of split times, as strings.
+    * @param {Array|undefined} extras Optional array of extra splits times.
     * @return {String} Both lines concatenated together.
     */
     function getCompetitorLinesNew(posn, startNum, name, club, useClasses, className, time, cumTimes, splits, extras) {
@@ -391,7 +391,7 @@
 
     /**
     * Returns a table cell in the OEvent tabular format.
-    * @param {String} contents - The contents of the cell.
+    * @param {String} contents The contents of the cell.
     * @return {String} The contents wrapped up in a table-data element.
     */
     function getCellOEventTabular(contents) {
@@ -400,9 +400,9 @@
 
     /**
     * Returns a course header line for the OEvent tabular format.
-    * @param {String} name - The name of the course.
-    * @param {Number} length - The length of the course, in km.
-    * @param {Number} climb - The climb of the course, in km.
+    * @param {String} name The name of the course.
+    * @param {Number|null} length The length of the course, in km.
+    * @param {Number|null} climb The climb of the course, in km.
     * @return {String} Course header line.
     */
     function getCourseHeaderOEventTabular(name, length, climb) {
@@ -418,9 +418,9 @@
 
     /**
     * Returns a line of the table that contains the controls.
-    * @param {Array} codes - Array of control code strings.
-    * @param {Number} offset - The offset to add to the control numbers.
-    * @param {boolean} includeFinish - True to include the finish, false to
+    * @param {Array} codes Array of control code strings.
+    * @param {Number} offset The offset to add to the control numbers.
+    * @param {Boolean} includeFinish True to include the finish, false to
     *     not include it.
     * @return {String} Line of the table.
     */
@@ -451,18 +451,18 @@
     * containing the properties cumTime and controlNum.  The parameter is
     * optional and can be omitted.
     *
-    * @param {String|Number} posn - The position of the competitor.
-    * @param {String} startNum - The start number of the competitor.
-    * @param {String} name - The name of the competitor.
-    * @param {String} club - The name of the competitor's club.
-    * @param {boolean} useClasses - True to include a table cell containing the
+    * @param {String|Number} posn The position of the competitor.
+    * @param {String} startNum The start number of the competitor.
+    * @param {String} name The name of the competitor.
+    * @param {String} club The name of the competitor's club.
+    * @param {Boolean} useClasses True to include a table cell containing the
     *     class, false to not include the class name cell.
-    * @param {String} className - The name of the competitor's class, or "" to
+    * @param {String} className The name of the competitor's class, or "" to
     *     default to course name.
-    * @param {Number} time - The total time of the competitor.
-    * @param {Array} cumTimes - Array of cumulative times, as strings.
-    * @param {Array} splits - Array of split times, as strings.
-    * @param {Array} extras - Optional array of extra splits times.
+    * @param {Number} time The total time of the competitor.
+    * @param {Array} cumTimes Array of cumulative times, as strings.
+    * @param {Array} splits Array of split times, as strings.
+    * @param {Array|undefined} extras Optional array of extra splits times.
     * @return {String} Both lines concatenated together.
     */
     function getCompetitorLinesOEventTabular(posn, startNum, name, club, useClasses, className, time, cumTimes, splits, extras) {
@@ -554,10 +554,10 @@
     * * headerDetails: Array of arguments for header generation function.
     * * controlLines: Array of arrays of control codes, one sub-array per row.
     * * competitors: Array of arrays of data for each competitor.
-    * @param {Object} template - The template object that details how to
+    * @param {Object} template The template object that details how to
     *                            construct an HTML file of a given format.
-    * @param {Array} courses - Array of course data objects.
-    * @param {boolean} useClasses - True to use classes, false not to.
+    * @param {Array} courses Array of course data objects.
+    * @param {Boolean} useClasses True to use classes, false not to.
     * @return {String} Created HTML.
     */
     function getHtmlFromTemplate(template, courses, useClasses) {
@@ -598,12 +598,12 @@
     * If none of the above three options are required, the options object
     * itself can be omitted.
     *
-    * @param {Array} courses - Array of course objects to generate the HTML
-    *                          using.
-    * @param {Function} checkFunc - Checking function called for each parsed
-    *                               event data object.  It is passed the data,
-    *                               and also the name of the template used.
-    * @param {Object} options - Options object, the contents of which are
+    * @param {Array} courses Array of course objects to generate the HTML
+    *                        using.
+    * @param {Function} checkFunc Checking function called for each parsed
+    *                             event data object.  It is passed the data,
+    *                             and also the name of the template used.
+    * @param {Object} options Options object, the contents of which are
     *     described above.
     */
     function runHtmlFormatParseTest(courses, checkFunc, options) {
@@ -622,10 +622,10 @@
     /**
     * Generates HTML using each available template, attempts to parse each
     * generated HTML string and asserts that each attempt fails.
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Array} courses - Array of course objects to generate the HTML
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {Array} courses Array of course objects to generate the HTML
     *                          using.
-    * @param {boolean} useClasses - True to use classes, false not to.
+    * @param {Boolean} useClasses True to use classes, false not to.
     */
     function runFailingHtmlFormatParseTest(assert, courses, useClasses) {
         ALL_TEMPLATES.forEach(function (template) {

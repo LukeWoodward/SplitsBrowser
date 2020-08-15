@@ -28,9 +28,9 @@
     /**
     * Checks that an 'other' language has all of the message keys that a given
     * reference language has.
-    * @param {String} referenceLanguageKey - Key of the reference language.
-    * @param {String} otherLanguageKey - Key of the other language.
-    * @param {Array} consistencyErrors - Array to append any consistency errors
+    * @param {String} referenceLanguageKey Key of the reference language.
+    * @param {String} otherLanguageKey Key of the other language.
+    * @param {Array} consistencyErrors Array to append any consistency errors
     *     found.
     */
     function verifyConsistency(referenceLanguageKey, otherLanguageKey, consistencyErrors) {

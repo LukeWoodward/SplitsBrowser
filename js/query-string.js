@@ -30,8 +30,8 @@
     /**
     * Remove all matches of the given regular expression from the given string.
     * The regexp is not assumed to contain the "g" flag.
-    * @param {String} queryString - The query-string to process.
-    * @param {RegExp} regexp - The regular expression to use to remove text.
+    * @param {String} queryString The query-string to process.
+    * @param {RegExp} regexp The regular expression to use to remove text.
     * @return {String} The given query-string with all regexp matches removed.
     */
     function removeAll(queryString, regexp) {
@@ -42,11 +42,11 @@
 
     /**
     * Reads the selected class names from a query string.
-    * @param {String} queryString - The query string to read the class name
+    * @param {String} queryString The query string to read the class name
     *     from.
-    * @param {Event} eventData - The event data read in, used to validate the
+    * @param {Event} eventData The event data read in, used to validate the
     *     selected classes.
-    * @return {CourseClassSet|null} - Array of selected CourseClass objects, or null
+    * @return {CourseClassSet|null} Array of selected CourseClass objects, or null
     *     if none were found.
     */
     function readSelectedClasses(queryString, eventData) {
@@ -81,9 +81,9 @@
     /**
     * Formats the selected classes into the given query-string, removing any
     * previous matches.
-    * @param {String} queryString - The original query-string.
-    * @param {Event} eventData - The event data.
-    * @param {Array} classIndexes - Array of indexes of selected classes.
+    * @param {String} queryString The original query-string.
+    * @param {Event} eventData The event data.
+    * @param {Array} classIndexes Array of indexes of selected classes.
     * @return {String} The query-string with the selected classes formatted in.
     */
     function formatSelectedClasses(queryString, eventData, classIndexes) {
@@ -96,7 +96,7 @@
 
     /**
     * Reads the selected chart type from a query string.
-    * @param {String} queryString - The query string to read the chart type
+    * @param {String} queryString The query string to read the chart type
     *     from.
     * @return {Object|null} Selected chart type, or null if not recognised.
     */
@@ -116,8 +116,8 @@
 
     /**
     * Formats the given chart type into the query-string
-    * @param {String} queryString - The original query-string.
-    * @param {Object} chartType - The chart type
+    * @param {String} queryString The original query-string.
+    * @param {Object} chartType The chart type
     * @return {String} The query-string with the chart-type formatted in.
     */
     function formatChartType(queryString, chartType) {
@@ -138,9 +138,9 @@
 
     /**
     * Reads what to compare against.
-    * @param {String} queryString - The query string to read the comparison
+    * @param {String} queryString The query string to read the comparison
     *     type from.
-    * @param {CourseClassSet|null} courseClassSet - Course-class set containing
+    * @param {CourseClassSet|null} courseClassSet Course-class set containing
     *     selected course-classes, or null if none are selected.
     * @return {Object|null} Selected comparison type, or null if not
     *     recognised.
@@ -185,9 +185,9 @@
 
     /**
     * Formats the given comparison into the given query-string.
-    * @param {String} queryString - The original query-string.
-    * @param {Number} index - Index of the comparison type.
-    * @param {Result} result - The result to format.
+    * @param {String} queryString The original query-string.
+    * @param {Number} index Index of the comparison type.
+    * @param {Result} result The result to format.
     * @return {String} The formatted query-string.
     */
     function formatComparison(queryString, index, result) {
@@ -210,9 +210,9 @@
 
     /**
     * Reads what to compare against.
-    * @param {String} queryString - The query string to read the comparison
+    * @param {String} queryString The query string to read the comparison
     *     type from.
-    * @param {CourseClassSet|null} courseClassSet - Course-class set containing
+    * @param {CourseClassSet|null} courseClassSet Course-class set containing
     *     selected course-classes, or null if none are selected.
     * @return {Array|null} Array of selected result indexes, or null if none
     *     found.
@@ -249,9 +249,9 @@
 
     /**
     * Formats the given selected results into the given query-string.
-    * @param {String} queryString - The original query-string.
-    * @param {CourseClassSet} courseClassSet - The current course-class set.
-    * @param {Array} selected - Array of indexes within the course-class set's
+    * @param {String} queryString The original query-string.
+    * @param {CourseClassSet} courseClassSet The current course-class set.
+    * @param {Array} selected Array of indexes within the course-class set's
     *     list of results of those that are selected.
     * @return {String} Query-string with the selected result formatted into it.
     */
@@ -276,9 +276,9 @@
 
     /**
     * Reads the selected statistics from the query string.
-    * @param {String} queryString - The query string to read the selected
+    * @param {String} queryString The query string to read the selected
     *     statistics from.
-    * @return {Object|null} - Object containing the statistics read, or null
+    * @return {Object|null} Object containing the statistics read, or null
     *     if no statistics parameter was found.
     */
     function readSelectedStatistics(queryString) {
@@ -306,9 +306,9 @@
 
     /**
     * Formats the selected statistics into the given query string.
-    * @param {String} queryString - The original query-string.
-    * @param {Object} stats - The statistics to format.
-    * @return Query-string with the selected statistics formatted in.
+    * @param {String} queryString The original query-string.
+    * @param {Object} stats The statistics to format.
+    * @return {String} Query-string with the selected statistics formatted in.
     */
     function formatSelectedStatistics(queryString, stats) {
         queryString = removeAll(queryString, SELECTED_STATISTICS_REGEXP);
@@ -325,8 +325,8 @@
     * URL.  If this parameter does not exist or has some other value, original
     * data will not be shown.  If the selected classes do not contain any
     * dubious splits, this option will have no effect.
-    * @param {String} queryString - The query-string to read.
-    * @return {boolean} True to show original data, false not to.
+    * @param {String} queryString The query-string to read.
+    * @return {Boolean} True to show original data, false not to.
     */
     function readShowOriginal(queryString) {
         var showOriginalMatch = SHOW_ORIGINAL_REGEXP.exec(queryString);
@@ -335,8 +335,8 @@
 
     /**
     * Formats the show-original-data flag into the given query-string.
-    * @param {String} queryString - The original query-string.
-    * @param {boolean} showOriginal - True to show original data, false not to.
+    * @param {String} queryString The original query-string.
+    * @param {Boolean} showOriginal True to show original data, false not to.
     * @return {String} The query-string with the show-original-data flag
     *     formatted in.
     */
@@ -349,8 +349,8 @@
 
     /**
     * Reads the selected leg from the given query-string
-    * @param {String} queryString - The query-string to read.
-    * @return {Number?} The selected leg, or null for none.
+    * @param {String} queryString The query-string to read.
+    * @return {Number|null} The selected leg, or null for none.
     */
     function readSelectedLeg(queryString) {
         var selectedLegMatch = SELECTED_LEG_REGEXP.exec(queryString);
@@ -364,8 +364,8 @@
 
     /**
     * Formats the selected leg into the given query-string.
-    * @param {String} queryString  The original query-string.
-    * @param {Number?} selectedLeg - The selected leg, or null for none.
+    * @param {String} queryString The original query-string.
+    * @param {Number|null} selectedLeg The selected leg, or null for none.
     * @return {String} The query string with the selected-leg value formatted
     *     in.
     */
@@ -381,7 +381,7 @@
     *
     * If no filter text is found, an empty string is returned.
     *
-    * @param {String} queryString - The query-string to read.
+    * @param {String} queryString The query-string to read.
     * @return {String} The filter text read.
     */
     function readFilterText(queryString) {
@@ -395,8 +395,8 @@
 
     /**
     * Formats filter text into the given query-string.
-    * @param {String} queryString - The original query-string.
-    * @param {String} filterText - The filter text.
+    * @param {String} queryString The original query-string.
+    * @param {String} filterText The filter text.
     * @return {String} The query-string with the filter text formatted in.
     */
     function formatFilterText(queryString, filterText) {
@@ -406,8 +406,8 @@
 
     /**
     * Attempts to parse the given query string.
-    * @param {String} queryString - The query string to parse.
-    * @param {Event} eventData - The parsed event data.
+    * @param {String} queryString The query string to parse.
+    * @param {Event} eventData The parsed event data.
     * @return {Object} The data parsed from the given query string.
     */
     function parseQueryString(queryString, eventData) {
@@ -433,12 +433,12 @@
     * string parameters are preserved; they could be used server-side by
     * whatever web application is hosting SplitsBrowser.
     *
-    * @param {String} queryString - The original query-string.
-    * @param {Event} eventData - The event data.
-    * @param {CourseClassSet} courseClassSet - The current course-class set.
-    * @param {Object} data - Object containing the data to format into the
+    * @param {String} queryString The original query-string.
+    * @param {Event} eventData The event data.
+    * @param {CourseClassSet} courseClassSet The current course-class set.
+    * @param {Object} data Object containing the data to format into the
     *     query-string.
-    * @return The formatted query-string.
+    * @return {String} The formatted query-string.
     */
     function formatQueryString(queryString, eventData, courseClassSet, data) {
         queryString = formatSelectedClasses(queryString, eventData, data.classes);

@@ -29,7 +29,7 @@
 
     /**
     * A control that wraps a drop-down list used to choose the language to view.
-    * @param {HTMLElement} parent - The parent element to add the control to.
+    * @param {HTMLElement} parent The parent element to add the control to.
     */
     function LanguageSelector(parent) {
         this.changeHandlers = [];
@@ -82,8 +82,8 @@
     *
     * The handler function is called with no arguments.
     *
-    * @param {Function} handler - Handler function to be called whenever the
-    *                             language changes.
+    * @param {Function} handler Handler function to be called whenever the
+    *                           language changes.
     */
     LanguageSelector.prototype.registerChangeHandler = function (handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
@@ -94,7 +94,7 @@
     /**
     * Sets the language.  If the language given is not recognised, nothing
     * happens.
-    * @param {String} language - The language code.
+    * @param {String} language The language code.
     */
     LanguageSelector.prototype.setLanguage = function (language) {
         var index = this.allLanguages.indexOf(language);

@@ -38,8 +38,8 @@
 
     /**
     * Returns whether the given value is undefined.
-    * @param {any} value - The value to check.
-    * @return {boolean} True if the value is undefined, false otherwise.
+    * @param {any} value The value to check.
+    * @return {Boolean} True if the value is undefined, false otherwise.
     */
     function isUndefined(value) {
         return typeof value === "undefined";
@@ -48,7 +48,7 @@
     /**
     * Returns the sum of all of the numbers in the given array
     * @param {Array} array The array of numbers to find the sum of.
-    * @return The sum of the numbers in the given array.
+    * @return {Number} The sum of the numbers in the given array.
     */
     function arraySum(array) {
         return array.reduce(function (a, b) { return a + b; }, 0);
@@ -56,7 +56,7 @@
 
     /**
     * Parses the given XML string and returns the parsed XML.
-    * @param {String} xmlString - The XML string to parse.
+    * @param {String} xmlString The XML string to parse.
     * @return {XMLDocument} The parsed XML document.
     */
     function parseXml(xmlString) {
@@ -79,11 +79,11 @@
     /**
     * Parses and returns a competitor name from the given XML element.
     *
-    * The XML element should have name 'PersonName' for v2.0.3 or 'Name' for
-    * v3.0.  It should contain 'Given' and 'Family' child elements from which
+    * The XML element should have name PersonName for v2.0.3 or Name for
+    * v3.0.  It should contain Given and Family child elements from which
     * the name will be formed.
     *
-    * @param {jQuery.selection} nameElement - jQuery selection containing the
+    * @param {jQuery.selection} nameElement jQuery selection containing the
     *     PersonName or Name element.
     * @return {String} Name read from the element.
     */
@@ -118,8 +118,8 @@
     * quick way to discount files that are not of the v2.0.3 format.  Further
     * functions of this reader are only called if this method returns true.
     *
-    * @param {String} data - The event data.
-    * @return {boolean} True if the data is likely to be v2.0.3-format data,
+    * @param {String} data The event data.
+    * @return {Boolean} True if the data is likely to be v2.0.3-format data,
     *     false if not.
     */
     Version2Reader.isOfThisVersion = function (data) {
@@ -129,7 +129,7 @@
     /**
     * Makes a more thorough check that the parsed XML data is likely to be of
     * the v2.0.3 format.  If not, a WrongFileFormat exception is thrown.
-    * @param {jQuery.selection} rootElement - The root element.
+    * @param {jQuery.selection} rootElement The root element.
     */
     Version2Reader.checkVersion = function (rootElement) {
         var iofVersionElement = $("> IOFVersion", rootElement);
@@ -152,7 +152,7 @@
 
     /**
     * Reads the class name from a ClassResult element.
-    * @param {jQuery.selection} classResultElement - ClassResult element
+    * @param {jQuery.selection} classResultElement ClassResult element
     *     containing the course details.
     * @return {String} Class name.
     */
@@ -162,7 +162,7 @@
 
     /**
     * Reads the team name from a TeamResult element.
-    * @param {jQuery.selection} teamResultElement - TeamResult element
+    * @param {jQuery.selection} teamResultElement TeamResult element
     *     containing the team result details.
     * @return {String} Team name.
     */
@@ -172,7 +172,7 @@
 
     /**
     * Returns a list of elements to be read to pull out team-member information.
-    * @param {jQuery.selection} teamResultElement - TeamResult element
+    * @param {jQuery.selection} teamResultElement TeamResult element
     *     containing the team result details.
     * @return {Array} Elements to parse to read team member results.
     */
@@ -182,9 +182,9 @@
 
     /**
     * Reads the course details from the given ClassResult element.
-    * @param {jQuery.selection} classResultElement - ClassResult element
+    * @param {jQuery.selection} classResultElement ClassResult element
     *     containing the course details.
-    * @param {Array} warnings - Array that accumulates warning messages.
+    * @param {Array} warnings Array that accumulates warning messages.
     * @return {Object} Course details: id, name, length, climb and numberOfControls
     */
     Version2Reader.readCourseFromClass = function (classResultElement, warnings) {
@@ -231,11 +231,11 @@
 
     /**
     * Returns the XML element that contains a competitor's name.  This element
-    * should contain child elements with names 'Given' and 'Family'.
-    * @param {jQuery.selection} element - jQuery selection containing a
+    * should contain child elements with names Given and Family.
+    * @param {jQuery.selection} element jQuery selection containing a
     *     PersonResult element.
     * @return {jQuery.selection} jQuery selection containing any child
-    *     'PersonName' element.
+    *     PersonName element.
     */
     Version2Reader.getCompetitorNameElement = function (element) {
         return $("> Person > PersonName", element);
@@ -243,9 +243,9 @@
 
     /**
     * Returns the name of the competitor or team's club.
-    * @param {jQuery.selection} element - jQuery selection containing a
+    * @param {jQuery.selection} element jQuery selection containing a
     *     PersonResult or TeamResult element.
-    * @return {String} Competitor's club name.
+    * @return {String} Competitor or team's club name.
     */
     Version2Reader.readClubName = function (element) {
         var clubName = $("> Club > ShortName", element).text();
@@ -254,20 +254,20 @@
 
     /**
     * Returns the competitor's date of birth, as a string.
-    * @param {jQuery.selection} element - jQuery selection containing a
+    * @param {jQuery.selection} element jQuery selection containing a
     *     PersonResult element.
-    * @return {String} The competitors date of birth, as a string.
+    * @return {String} The competitor's date of birth, as a string.
     */
     Version2Reader.readDateOfBirth = function (element) {
         return $("> Person > BirthDate > Date", element).text();
     };
 
     /**
-    * Reads a competitor's start time from the given Result element.
-    * @param {jQuery.selection} resultElement - jQuery selection containing a
+    * Reads a start time from the given Result element.
+    * @param {jQuery.selection} resultElement jQuery selection containing a
     *     Result element.
-    * @return {?Number} Competitor's start time in seconds since midnight, or
-    *     null if not found.
+    * @return {Number|null} Start time in seconds since midnight, or null if
+    *     not found.
     */
     Version2Reader.readStartTime = function (resultElement) {
         var startTimeStr = $("> StartTime > Clock", resultElement).text();
@@ -277,10 +277,10 @@
 
     /**
     * Reads a competitor's total time from the given Result element.
-    * @param {jQuery.selection} resultElement - jQuery selection containing a
+    * @param {jQuery.selection} resultElement jQuery selection containing a
     *     Result element.
-    * @return {?Number} - The competitor's total time in seconds, or
-    *     null if a valid time was not found.
+    * @return {Number|null} The competitor's total time in seconds, or null if
+    *     a valid time was not found.
     */
     Version2Reader.readTotalTime = function (resultElement) {
         var totalTimeStr = $("> Time", resultElement).text();
@@ -290,7 +290,7 @@
 
     /**
     * Returns the status of the competitor with the given result.
-    * @param {jQuery.selection} resultElement - jQuery selection containing a
+    * @param {jQuery.selection} resultElement jQuery selection containing a
     *     Result element.
     * @return {String} Status of the competitor.
     */
@@ -308,7 +308,7 @@
     /**
     * Unconditionally returns false - IOF XML version 2.0.3 appears not to
     * support additional controls.
-    * @return {boolean} false.
+    * @return {Boolean} false.
     */
     Version2Reader.isAdditional = function () {
         return false;
@@ -316,7 +316,7 @@
 
     /**
     * Reads a control code and split time from a SplitTime element.
-    * @param {jQuery.selection} splitTimeElement - jQuery selection containing
+    * @param {jQuery.selection} splitTimeElement jQuery selection containing
     *     a SplitTime element.
     * @return {Object} Object containing code and time.
     */
@@ -354,8 +354,8 @@
     * quick way to discount files that are not of the v3.0 format.  Further
     * functions of this reader are only called if this method returns true.
     *
-    * @param {String} data - The event data.
-    * @return {boolean} True if the data is likely to be v3.0-format data,
+    * @param {String} data The event data.
+    * @return {Boolean} True if the data is likely to be v3.0-format data,
     *     false if not.
     */
     Version3Reader.isOfThisVersion = function (data) {
@@ -365,7 +365,7 @@
     /**
     * Makes a more thorough check that the parsed XML data is likely to be of
     * the v2.0.3 format.  If not, a WrongFileFormat exception is thrown.
-    * @param {jQuery.selection} rootElement - The root element.
+    * @param {jQuery.selection} rootElement The root element.
     */
     Version3Reader.checkVersion = function (rootElement) {
         var iofVersion = rootElement.attr("iofVersion");
@@ -383,7 +383,7 @@
 
     /**
     * Reads the class name from a ClassResult element.
-    * @param {jQuery.selection} classResultElement - ClassResult element
+    * @param {jQuery.selection} classResultElement ClassResult element
     *     containing the course details.
     * @return {String} Class name.
     */
@@ -393,7 +393,7 @@
 
     /**
     * Reads the team name from a TeamResult element.
-    * @param {jQuery.selection} teamResultElement - TeamResult element
+    * @param {jQuery.selection} teamResultElement TeamResult element
     *     containing the team result details.
     * @return {String} Team name.
     */
@@ -403,7 +403,7 @@
 
     /**
     * Returns a list of elements to be read to pull out team-member information.
-    * @param {jQuery.selection} teamResultElement - TeamResult element
+    * @param {jQuery.selection} teamResultElement TeamResult element
     *     containing the team result details.
     * @return {Array} Elements to parse to read team member results.
     */
@@ -413,9 +413,9 @@
 
     /**
     * Reads the course details from the given ClassResult element.
-    * @param {jQuery.selection} classResultElement - ClassResult element
+    * @param {jQuery.selection} classResultElement ClassResult element
     *     containing the course details.
-    * @param {Array} warnings - Array that accumulates warning messages.
+    * @param {Array} warnings Array that accumulates warning messages.
     * @return {Object} Course details: id, name, length, climb and number of
     *     controls.
     */
@@ -455,10 +455,10 @@
 
     /**
     * Returns the XML element that contains a competitor's name.  This element
-    * should contain child elements with names 'Given' and 'Family'.
-    * @param {jQuery.selection} element - jQuery selection containing a
+    * should contain child elements with names Given and Family.
+    * @param {jQuery.selection} element jQuery selection containing a
     *     PersonResult element.
-    * @return {jQuery.selection} jQuery selection containing any child 'Name'
+    * @return {jQuery.selection} jQuery selection containing any child Name
     *     element.
     */
     Version3Reader.getCompetitorNameElement = function (element) {
@@ -467,9 +467,9 @@
 
     /**
     * Returns the name of the competitor or team's club.
-    * @param {jQuery.selection} element - jQuery selection containing a
+    * @param {jQuery.selection} element jQuery selection containing a
     *     PersonResult or TeamResult element.
-    * @return {String} Competitor's club name.
+    * @return {String} Competitor or team's club name.
     */
     Version3Reader.readClubName = function (element) {
         var clubName = $("> Organisation > ShortName", element).text();
@@ -478,7 +478,7 @@
 
     /**
     * Returns the competitor's date of birth, as a string.
-    * @param {jQuery.selection} element - jQuery selection containing a
+    * @param {jQuery.selection} element jQuery selection containing a
     *     PersonResult element.
     * @return {String} The competitor's date of birth, as a string.
     */
@@ -490,9 +490,9 @@
 
     /**
     * Reads a competitor's start time from the given Result element.
-    * @param {jQuery.selection} element - jQuery selection containing a
+    * @param {jQuery.selection} element jQuery selection containing a
     *     Result element.
-    * @return {?Number} Competitor's start time, in seconds since midnight,
+    * @return {Number|null} Competitor's start time, in seconds since midnight,
     *     or null if not known.
     */
     Version3Reader.readStartTime = function (resultElement) {
@@ -511,8 +511,8 @@
     /**
     * Reads a time, in seconds, from a string.  If the time was not valid,
     * null is returned.
-    * @param {String} timeStr - The time string to read.
-    * @return {?Number} The parsed time, in seconds, or null if it could not
+    * @param {String} timeStr The time string to read.
+    * @return {Number|null} The parsed time, in seconds, or null if it could not
     *     be read.
     */
     Version3Reader.readTime = function (timeStr) {
@@ -524,9 +524,9 @@
 
     /**
     * Read a competitor's total time from the given Time element.
-    * @param {jQuery.selection} element - jQuery selection containing a
+    * @param {jQuery.selection} element jQuery selection containing a
     *     Result element.
-    * @return {?Number} Competitor's total time, in seconds, or null if a time
+    * @return {Number|null} Competitor's total time, in seconds, or null if a time
     *     was not found or was invalid.
     */
     Version3Reader.readTotalTime = function (resultElement) {
@@ -536,7 +536,7 @@
 
     /**
     * Returns the status of the competitor with the given result.
-    * @param {jQuery.selection} resultElement - jQuery selection containing a
+    * @param {jQuery.selection} resultElement jQuery selection containing a
     *     Result element.
     * @return {String} Status of the competitor.
     */
@@ -553,9 +553,9 @@
     /**
     * Returns whether the given split-time element is for an additional
     * control, and hence should be ignored.
-    * @param {jQuery.selection} splitTimeElement - jQuery selection containing
+    * @param {jQuery.selection} splitTimeElement jQuery selection containing
     *     a SplitTime element.
-    * @return {boolean} True if the control is additional, false if not.
+    * @return {Boolean} True if the control is additional, false if not.
     */
     Version3Reader.isAdditional = function (splitTimeElement) {
         return (splitTimeElement.attr("status") === "Additional");
@@ -563,7 +563,7 @@
 
     /**
     * Reads a control code and split time from a SplitTime element.
-    * @param {jQuery.selection} splitTimeElement - jQuery selection containing
+    * @param {jQuery.selection} splitTimeElement jQuery selection containing
     *     a SplitTime element.
     * @return {Object} Object containing code and time.
     */
@@ -592,8 +592,8 @@
     *
     * If any problems arise, this function will throw an exception.  If the
     * data is valid, the function will return normally.
-    * @param {XMLDocument} xml - The parsed XML document.
-    * @param {Object} reader - XML reader used to assist with format-specific
+    * @param {XMLDocument} xml The parsed XML document.
+    * @param {Object} reader XML reader used to assist with format-specific
     *     XML reading.
     */
     function validateData(xml, reader) {
@@ -609,13 +609,13 @@
 
     /**
     * Parses data for a single competitor.
-    * @param {XMLElement} element - XML PersonResult element.
-    * @param {Number} number - The competitor number (1 for first in the array
+    * @param {XMLElement} element XML PersonResult element.
+    * @param {Number} number The competitor number (1 for first in the array
     *     of those read so far, 2 for the second, ...)
-    * @param {Object} reader - XML reader used to assist with format-specific
+    * @param {Object} reader XML reader used to assist with format-specific
     *     XML reading.
-    * @param {Array} warnings - Array that accumulates warning messages.
-    * @return {Object?} Object containing the competitor data, or null if no
+    * @param {Array} warnings Array that accumulates warning messages.
+    * @return {Object|null} Object containing the competitor data, or null if no
     *     competitor could be read.
     */
     function parseCompetitor(element, number, reader, warnings) {
@@ -837,10 +837,10 @@
 
     /**
     * Parses data for a single class.
-    * @param {XMLElement} element - XML ClassResult element
-    * @param {Object} reader - XML reader used to assist with format-specific
+    * @param {XMLElement} element XML ClassResult element
+    * @param {Object} reader XML reader used to assist with format-specific
     *     XML reading.
-    * @param {Array} warnings - Array to accumulate any warning messages within.
+    * @param {Array} warnings Array to accumulate any warning messages within.
     * @return {Object} Object containing parsed data.
     */
     function parseClassData(element, reader, warnings) {
@@ -897,7 +897,7 @@
 
     /**
     * Determine which XML reader to use to parse the given event data.
-    * @param {String} data - The event data.
+    * @param {String} data The event data.
     * @return {Object} XML reader used to read version-specific information.
     */
     function determineReader(data) {
@@ -914,7 +914,7 @@
     /**
     * Parses IOF XML data in either the 2.0.3 format or the 3.0 format and
     * returns the data.
-    * @param {String} data - String to parse as XML.
+    * @param {String} data String to parse as XML.
     * @return {Event} Parsed event object.
     */
     function parseEventData(data) {

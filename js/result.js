@@ -41,9 +41,9 @@
     * (3) zero if the order of a and b makes no difference (i.e. they have the
     *     same total time, or both mispunched.)
     *
-    * @param {SplitsBrowser.Model.Result} a - One result to compare.
-    * @param {SplitsBrowser.Model.Result} b - The other result to compare.
-    * @returns {Number} Result of comparing two results.
+    * @param {SplitsBrowser.Model.Result} a One result to compare.
+    * @param {SplitsBrowser.Model.Result} b The other result to compare.
+    * @return {Number} Result of comparing two results.
     */
     SplitsBrowser.Model.compareResults = function (a, b) {
         if (a.isDisqualified !== b.isDisqualified) {
@@ -64,7 +64,7 @@
     *
     * The input array should begin with a zero, for the cumulative time to the
     * start.
-    * @param {Array} cumTimes - Array of cumulative split times.
+    * @param {Array} cumTimes Array of cumulative split times.
     * @return {Array} Corresponding array of split times.
     */
     function splitTimesFromCumTimes(cumTimes) {
@@ -104,13 +104,14 @@
     * either the split or cumulative times and have the other calculated.
     *
     * @constructor
-    * @param {Number} order - The order of the result.
-    * @param {String} startTime - The start time of the competitors or teams.
-    * @param {Array} originalSplitTimes - Array of split times, as numbers,
+    * @param {Number} order The order of the result.
+    * @param {Number|null} startTime The start time of the competitor or team, in
+    *      seconds past midnight
+    * @param {Array} originalSplitTimes Array of split times, as numbers,
     *      with nulls for missed controls.
-    * @param {Array} originalCumTimes - Array of cumulative times, as
-    *     numbers, with nulls for missed controls.
-    & @param {Object} owner - The competitor or team that recorded this result.
+    * @param {Array} originalCumTimes Array of cumulative times, as
+    *      numbers, with nulls for missed controls.
+    & @param {Object} owner The competitor or team that recorded this result.
     */
     function Result(order, startTime, originalSplitTimes, originalCumTimes, owner) {
 
@@ -194,7 +195,7 @@
     /**
     * Sets the name of the class that the result belongs to.
     * This is the course-class, not the result's age class.
-    * @param {String} className - The name of the class.
+    * @param {String} className The name of the class.
     */
     Result.prototype.setClassName = function (className) {
         this.className = className;
@@ -208,11 +209,11 @@
     * function should therefore be used to create a result if the data may later
     * need to be repaired.
     *
-    * @param {Number} order - The order of the result.
-    * @param {Number} startTime - The start time, as seconds past midnight.
-    * @param {Array} cumTimes - Array of cumulative split times, as numbers, with
+    * @param {Number} order The order of the result.
+    * @param {Number|null} startTime The start time, as seconds past midnight.
+    * @param {Array} cumTimes Array of cumulative split times, as numbers, with
     *     nulls for missed controls.
-    & @param {Object} owner - The competitor or team that recorded this result.
+    & @param {Object} owner The competitor or team that recorded this result.
     * @return {Result} Created result.
     */
     Result.fromOriginalCumTimes = function (order, startTime, cumTimes, owner) {
@@ -227,11 +228,11 @@
     * This method assumes that the data given has been repaired, so it is ready
     * to be viewed.
     *
-    * @param {Number} order - The order of the result.
-    * @param {Number} startTime - The start time, as seconds past midnight.
-    * @param {Array} cumTimes - Array of cumulative split times, as numbers, with
+    * @param {Number} order The order of the result.
+    * @param {Number|null} startTime The start time, as seconds past midnight.
+    * @param {Array} cumTimes Array of cumulative split times, as numbers, with
     *     nulls for missed controls.
-    & @param {Object} owner - The competitor or team that recorded this result.
+    & @param {Object} owner The competitor or team that recorded this result.
     * @return {Result} Created result.
     */
     Result.fromCumTimes = function (order, startTime, cumTimes, owner) {
@@ -244,7 +245,7 @@
     /**
     * Sets the 'repaired' cumulative times.  This also calculates the repaired
     * split times.
-    * @param {Array} cumTimes - The 'repaired' cumulative times.
+    * @param {Array} cumTimes The 'repaired' cumulative times.
     */
     Result.prototype.setRepairedCumulativeTimes = function (cumTimes) {
         this.cumTimes = cumTimes;
@@ -255,7 +256,7 @@
     * Returns whether this result indicated the competitor or team completed the
     * course and did not get
     * disqualified.
-    * @return {boolean} True if the competitor or team completed the course and
+    * @return {Boolean} True if the competitor or team completed the course and
     *     did not get disqualified, false if they did not complete the course or
     *     got disqualified.
     */
@@ -265,7 +266,7 @@
 
     /**
     * Returns whether the result has any times at all.
-    * @return {boolean} True if the result includes at least one time,
+    * @return {Boolean} True if the result includes at least one time,
     *     false if the result has no times.
     */
     Result.prototype.hasAnyTimes = function () {
@@ -279,8 +280,8 @@
     * recorded for that control, null is returned.  If the value is missing,
     * because the value read from the file was invalid, NaN is returned.
     *
-    * @param {Number} controlIndex - Index of the control (0 = start).
-    * @return {?Number} The split time in seconds to the given control.
+    * @param {Number} controlIndex Index of the control (0 = start).
+    * @return {Number|null} The split time in seconds to the given control.
     */
     Result.prototype.getSplitTimeTo = function (controlIndex) {
         return (controlIndex === 0) ? 0 : this.splitTimes[controlIndex - 1];
@@ -293,8 +294,8 @@
     *
     * If the control index given is zero (i.e. the start), zero is returned.
     * If no time is recorded for that control, null is returned.
-    * @param {Number} controlIndex - Index of the control (0 = start).
-    * @return {?Number} The split time in seconds to the given control.
+    * @param {Number} controlIndex Index of the control (0 = start).
+    * @return {Number|null} The split time in seconds to the given control.
     */
     Result.prototype.getOriginalSplitTimeTo = function (controlIndex) {
         if (this.isNonStarter) {
@@ -307,8 +308,8 @@
     /**
     * Returns whether the control with the given index is deemed to have a
     * dubious split time.
-    * @param {Number} controlIndex - The index of the control.
-    * @return {boolean} True if the split time to the given control is dubious,
+    * @param {Number} controlIndex The index of the control.
+    * @return {Boolean} True if the split time to the given control is dubious,
     *     false if not.
     */
     Result.prototype.isSplitTimeDubious = function (controlIndex) {
@@ -320,8 +321,8 @@
     * given is zero (i.e. the start), zero is returned.   If there is no
     * cumulative time recorded for that control, null is returned.  If no time
     * is recorded, but the time was deemed to be invalid, NaN will be returned.
-    * @param {Number} controlIndex - Index of the control (0 = start).
-    * @return {Number} The cumulative split time in seconds to the given control.
+    * @param {Number} controlIndex Index of the control (0 = start).
+    * @return {Number|null} The cumulative split time in seconds to the given control.
     */
     Result.prototype.getCumulativeTimeTo = function (controlIndex) {
         return this.cumTimes[controlIndex];
@@ -331,8 +332,8 @@
     * Returns the 'original' cumulative time the competitor or team took to the
     * given control.  This is always the value read from the source data file,
     * before any attempt was made to repair the data.
-    * @param {Number} controlIndex - Index of the control (0 = start).
-    * @return {Number} The cumulative split time in seconds to the given control.
+    * @param {Number} controlIndex Index of the control (0 = start).
+    * @return {Number|null} The cumulative split time in seconds to the given control.
     */
     Result.prototype.getOriginalCumulativeTimeTo = function (controlIndex) {
         return (this.isNonStarter) ? null : this.originalCumTimes[controlIndex];
@@ -341,8 +342,8 @@
     /**
     * Returns whether the control with the given index is deemed to have a
     * dubious cumulative time.
-    * @param {Number} controlIndex - The index of the control.
-    * @return {boolean} True if the cumulative time to the given control is
+    * @param {Number} controlIndex The index of the control.
+    * @return {Boolean} True if the cumulative time to the given control is
     *     dubious, false if not.
     */
     Result.prototype.isCumulativeTimeDubious = function (controlIndex) {
@@ -354,8 +355,8 @@
     * given is zero (i.e. the start), or if there is no time recorded for that
     * control, or the ranks have not been set on this result, null is
     * returned.
-    * @param {Number} controlIndex - Index of the control (0 = start).
-    * @return {Number} The split rank to the given control.
+    * @param {Number} controlIndex Index of the control (0 = start).
+    * @return {Number|null} The split rank to the given control.
     */
     Result.prototype.getSplitRankTo = function (controlIndex) {
         return (this.splitRanks === null) ? null : this.splitRanks[controlIndex];
@@ -366,8 +367,8 @@
     * control index given is zero (i.e. the start), or if there is no time
     * recorded for that control, or if the ranks have not been set on this
     * result, null is returned.
-    * @param {Number} controlIndex - Index of the control (0 = start).
-    * @return {Number} The cumulative rank to the given control.
+    * @param {Number} controlIndex Index of the control (0 = start).
+    * @return {Number|null} The cumulative rank to the given control.
     */
     Result.prototype.getCumulativeRankTo = function (controlIndex) {
         return (this.cumRanks === null) ? null : this.cumRanks[controlIndex];
@@ -376,8 +377,8 @@
     /**
     * Returns the time loss at the given control, or null if time losses cannot
     * be calculated or have not yet been calculated.
-    * @param {Number} controlIndex - Index of the control.
-    * @return {?Number} Time loss in seconds, or null.
+    * @param {Number} controlIndex Index of the control.
+    * @return {Number|null} Time loss in seconds, or null.
     */
     Result.prototype.getTimeLossAt = function (controlIndex) {
         return (controlIndex === 0 || this.timeLosses === null) ? null : this.timeLosses[controlIndex - 1];
@@ -417,7 +418,7 @@
     * Graph to be shown even if there are results with no times and no start
     * time.
     *
-    * @return {boolean} True if there is no a start time, false if there is, or
+    * @return {Boolean} True if there is no a start time, false if there is, or
     *     if they have no other splits.
     */
     Result.prototype.lacksStartTime = function () {
@@ -428,8 +429,8 @@
     * Sets the split and cumulative-split ranks for this result.  The first
     * items in both arrays should be null, to indicate that the split and
     * cumulative ranks don't make any sense at the start.
-    * @param {Array} splitRanks - Array of split ranks for this result.
-    * @param {Array} cumRanks - Array of cumulative-split ranks for this result.
+    * @param {Array} splitRanks Array of split ranks for this result.
+    * @param {Array} cumRanks Array of cumulative-split ranks for this result.
     */
     Result.prototype.setSplitAndCumulativeRanks = function (splitRanks, cumRanks) {
         if (splitRanks[0] !== null || cumRanks[0] !== null) {
@@ -443,7 +444,7 @@
     /**
     * Return this result's cumulative times after being adjusted by a 'reference'
     * result.
-    * @param {Array} referenceCumTimes - The reference cumulative-split-time data
+    * @param {Array} referenceCumTimes The reference cumulative-split-time data
     *     to adjust by.
     * @return {Array} The array of adjusted data.
     */
@@ -460,7 +461,7 @@
 
     /**
     * Returns the cumulative times of this result with the start time added on.
-    * @param {Array} referenceCumTimes - The reference cumulative-split-time data to adjust by.
+    * @param {Array} referenceCumTimes The reference cumulative-split-time data to adjust by.
     * @return {Array} The array of adjusted data.
     */
     Result.prototype.getCumTimesAdjustedToReferenceWithStartAdded = function (referenceCumTimes) {
@@ -472,7 +473,7 @@
     /**
     * Returns an array of percentages that this splits are behind when compared
     * to those of a reference result.
-    * @param {Array} referenceCumTimes - The reference cumulative split times
+    * @param {Array} referenceCumTimes The reference cumulative split times
     * @return {Array} The array of percentages.
     */
     Result.prototype.getSplitPercentsBehindReferenceCumTimes = function (referenceCumTimes) {
@@ -501,7 +502,7 @@
 
     /**
     * Determines the time losses for this result.
-    * @param {Array} fastestSplitTimes - Array of fastest split times.
+    * @param {Array} fastestSplitTimes Array of fastest split times.
     */
     Result.prototype.determineTimeLosses = function (fastestSplitTimes) {
         if (this.completed()) {
@@ -551,8 +552,8 @@
     /**
     * Returns whether this result 'crosses' another.  Two results are considered
     * to have crossed if their chart lines on the Race Graph cross.
-    * @param {Result} other - The result to compare against.
-    * @return {Boolean} true if the results cross, false if they don't.
+    * @param {Result} other The result to compare against.
+    * @return {Boolean} True if the results cross, false if they don't.
     */
     Result.prototype.crosses = function (other) {
         if (other.cumTimes.length !== this.cumTimes.length) {
@@ -583,8 +584,8 @@
     /**
     * Returns whether the given time has been omitted: i.e. it is dubious, or
     * it is missing but the result has been marked as OK despite that.
-    * @param {?Number} time The time to test.
-    * @return {Boolean} true if the time is dubious or missing, false if not.
+    * @param {Number|null} time The time to test.
+    * @return {Boolean} True if the time is dubious or missing, false if not.
     */
     Result.prototype.isTimeOmitted = function (time) {
         return isNaNStrict(time) || (this.isOKDespiteMissingTimes && time === null);
@@ -593,7 +594,7 @@
     /**
     * Returns an array of objects that record the indexes around which times in
     * the given array are omitted, due to the times being dubious or missing.
-    * @param {Array} times - Array of time values.
+    * @param {Array} times Array of time values.
     * @return {Array} Array of objects that record indexes around omitted times.
     */
     Result.prototype.getIndexesAroundOmittedTimes = function (times) {
@@ -644,8 +645,8 @@
     * Returns the name of the owner for the leg with the given index.  If the
     * leg index is not null and this is a team result, the name of the corresponding
     * member is returned, otherwise the name of this result's owner is returned.
-    * @param {Number?} legIndex The index of the leg, or null for the team.
-    * @return The name of the owner for that leg.
+    * @param {Number|null} legIndex The index of the leg, or null for the team.
+    * @return {String} The name of the owner for that leg.
     */
     Result.prototype.getOwnerNameForLeg = function (legIndex) {
         if (hasProperty(this.owner, "members") && legIndex !== null) {
@@ -660,7 +661,7 @@
     * contains one offset for each result plus the overall total time in the
     * last element.
     * @param {Array} results The array of results.
-    * @return Array of offsets.
+    * @return {Array} Array of offsets.
     */
     function calculateOffsets(results) {
         var offsets = [0];
@@ -694,7 +695,7 @@
     * @param {Array} offsets The offsets of the results.
     * @param {Function} cumulativeTimesGetter Function that returns a list of
     *     cumulative times from a result.
-    * @return The full list of cumulative times.
+    * @return {Array} The full list of cumulative times.
     */
     function calculateCumulativeTimesFromResults(results, offsets, cumulativeTimesGetter) {
         var times = [0];
@@ -710,9 +711,8 @@
 
     /**
     * Determines the status of a relay result from the status of the component
-    * results.
+    * results and records it within this result.
     * @param {Array} results The array of component results.
-    * @return The overall status.
     */
     Result.prototype.determineAggregateStatus = function (results) {
         if (results.some(function (result) { return result.isDisqualified; })) {
@@ -773,9 +773,9 @@
     /**
     * Creates and returns a result object representing the combined result of all
     * of the given results.
-    * @param {Number} order - The order of the team among the others.
+    * @param {Number} order The order of the team among the others.
     * @param {Array} results The individual team member results.
-    * @param {Object} owner - The team that owns this result.
+    * @param {Object} owner The team that owns this result.
     * @return {Result} A result object for the entire team.
     */
     Result.createTeamResult = function (order, results, owner) {

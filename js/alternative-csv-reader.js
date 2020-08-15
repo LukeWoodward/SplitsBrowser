@@ -69,7 +69,7 @@
     /**
     * Trim trailing empty-string entries from the given array.
     * The given array is mutated.
-    * @param {Array} array - The array of string values.
+    * @param {Array} array The array of string values.
     */
     function trimTrailingEmptyCells (array) {
         var index = array.length - 1;
@@ -83,7 +83,7 @@
     /**
     * Object used to read data from an alternative CSV file.
     * @constructor
-    * @param {Object} format - Object that describes the data format to read.
+    * @param {Object} format Object that describes the data format to read.
     */
     function Reader (format) {
         this.format = format;
@@ -102,8 +102,8 @@
 
     /**
     * Determine the delimiter used to delimit data.
-    * @param {String} firstDataLine - The first data line of the file.
-    * @return {?String} The delimiter separating the data, or null if no
+    * @param {String} firstDataLine The first data line of the file.
+    * @return {String|null} The delimiter separating the data, or null if no
     *    suitable delimiter was found.
     */
     Reader.prototype.determineDelimiter = function (firstDataLine) {
@@ -123,7 +123,7 @@
     * Some lines of some formats can have multiple delimited competitors, which
     * will move the following columns out of their normal place.  Identify any
     * such situations and merge them together.
-    * @param {Array} row - The row of data read from the file.
+    * @param {Array} row The row of data read from the file.
     */
     Reader.prototype.adjustLinePartsForMultipleCompetitors = function (row) {
         if (this.format.allowMultipleCompetitorNames) {
@@ -137,7 +137,7 @@
     /**
     * Check the first line of data read in to verify that all of the control
     * codes specified are alphanumeric.
-    * @param {String} firstLine - The first line of data from the file (not
+    * @param {String} firstLine The first line of data from the file (not
     *     the header line).
     */
     Reader.prototype.checkControlCodesAlphaNumeric = function (firstLine) {
@@ -154,9 +154,9 @@
 
     /**
     * Adds the result to the course with the given name.
-    * @param {Result} result - The result object read from the row.
-    * @param {String} courseName - The name of the course.
-    * @param {Array} row - Array of string parts making up the row of data read.
+    * @param {Result} result The result object read from the row.
+    * @param {String} courseName The name of the course.
+    * @param {Array} row Array of string parts making up the row of data read.
     */
     Reader.prototype.addResultToCourse = function (result, courseName, row) {
         if (this.classes.has(courseName)) {
@@ -189,7 +189,7 @@
 
     /**
     * Read a row of data from a line of the file.
-    * @param {String} line - The line of data read from the file.
+    * @param {String} line The line of data read from the file.
     */
     Reader.prototype.readDataRow = function (line) {
         var row = line.split(this.delimiter);
@@ -292,7 +292,7 @@
 
     /**
     * Parse alternative CSV data for an entire event.
-    * @param {String} eventData - String containing the entire event data.
+    * @param {String} eventData String containing the entire event data.
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */
     Reader.prototype.parseEventData = function (eventData) {

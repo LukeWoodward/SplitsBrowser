@@ -111,7 +111,7 @@
     * Creates and returns a CourseClassSet object and event object populated with
     * test data.  If no value is provided for the optional competitors parameter,
     * a list of two competitors is used as a default.
-    * @param {Array} competitors - Optional array of competitors.
+    * @param {Array} competitors Optional array of competitors.
     * @return {Object} Object containing a course-class set and event data.
     */
     function getTestCourseClass(results) {
@@ -127,9 +127,9 @@
     /**
     * Runs a test for creating a chart.  The test doesn't make any assertions;
     * it just checks that the chart gets created successfully.
-	* @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Object} chartType - The chart type.
-    * @param {Array} results - Optional array of results.
+	* @param {QUnit.assert} assert QUnit assert object.
+    * @param {Object} chartType The chart type.
+    * @param {Array} results Optional array of results.
     */
     function runChartCreationTest(assert, chartType, results) {
         runChartCreationTestGivenCourseClass(assert, chartType, getTestCourseClass(results));
@@ -138,9 +138,9 @@
     /**
     * Runs a test for creating a chart.  The test doesn't make any assertions;
     * it just checks that the chart gets created successfully.
-	* @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Object} chartType - The chart type.
-    * @param {CourseClass} courseClass - The course-class to run the tests on.
+	* @param {QUnit.assert} assert QUnit assert object.
+    * @param {Object} chartType The chart type.
+    * @param {CourseClass} courseClass The course-class to run the tests on.
     */
     function runChartCreationTestGivenCourseClass(assert, chartType, courseClass) {
         var courseClassSet = new CourseClassSet([courseClass]);

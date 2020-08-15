@@ -36,11 +36,11 @@
 
     /**
     * Parse a row of competitor data.
-    * @param {Number} index - Index of the competitor line.
-    * @param {string} line - The line of competitor data read from a CSV file.
-    * @param {Number} controlCount - The number of controls (not including the finish).
-    * @param {string} className - The name of the class.
-    * @param {Array} warnings - Array of warnings to add any warnings found to.
+    * @param {Number} index Index of the competitor line.
+    * @param {String} line The line of competitor data read from a CSV file.
+    * @param {Number} controlCount The number of controls (not including the finish).
+    * @param {String} className The name of the class.
+    * @param {Array} warnings Array of warnings to add any warnings found to.
     * @return {Object} Competitor object representing the competitor data read in.
     */
     function parseResults(index, line, controlCount, className, warnings) {
@@ -99,8 +99,8 @@
 
     /**
     * Parse CSV data for a class.
-    * @param {string} courseClass - The string containing data for that class.
-    * @param {Array} warnings - Array of warnings to add any warnings found to.
+    * @param {String} courseClass The string containing data for that class.
+    * @param {Array} warnings Array of warnings to add any warnings found to.
     * @return {SplitsBrowser.Model.CourseClass} Parsed class data.
     */
     function parseCourseClass (courseClass, warnings) {
@@ -135,7 +135,7 @@
 
     /**
     * Parse CSV data for an entire event.
-    * @param {string} eventData - String containing the entire event data.
+    * @param {String} eventData String containing the entire event data.
     * @return {SplitsBrowser.Model.Event} All event data read in.
     */
     function parseEventData (eventData) {

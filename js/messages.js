@@ -43,7 +43,7 @@
     /**
     * Issue a warning about the messages, if a warning hasn't already been
     * issued.
-    * @param {String} warning - The warning message to issue.
+    * @param {String} warning The warning message to issue.
     */
     function warn(warning) {
         if (!warnedAboutMessages) {
@@ -57,7 +57,7 @@
     *
     * This function is intended only for testing purposes.
 
-    * @param {Function} alerter - The function to be called when a warning is
+    * @param {Function} alerter The function to be called when a warning is
     *     to be shown.
     */
     SplitsBrowser.setMessageAlerter = function (alerter) {
@@ -67,8 +67,8 @@
     /**
     * Attempts to get a message, returning a default string if it does not
     * exist.
-    * @param {String} key - The key of the message.
-    * @param {String} defaultValue - Value to be used
+    * @param {String} key The key of the message.
+    * @param {String} defaultValue Value to be used
     * @return {String} The message with the given key, if the key exists,
     *     otherwise the default value.
     */
@@ -78,7 +78,7 @@
 
     /**
     * Returns the message with the given key.
-    * @param {String} key - The key of the message.
+    * @param {String} key The key of the message.
     * @return {String} The message with the given key, or a placeholder string
     *     if the message could not be looked up.
     */
@@ -106,8 +106,8 @@
     *
     * The object 'params' should map search strings to their replacements.
     *
-    * @param {String} key - The key of the message.
-    * @param {Object} params - Object mapping parameter names to values.
+    * @param {String} key The key of the message.
+    * @param {Object} params Object mapping parameter names to values.
     * @return {String} The resulting message.
     */
     SplitsBrowser.getMessageWithFormatting = function (key, params) {
@@ -144,7 +144,7 @@
 
     /**
     * Returns the name of the language with the given code.
-    * @param {String} language - The code of the language, e.g. "en_gb".
+    * @param {String} language The code of the language, e.g. "en_gb".
     * @return {String} The name of the language, e.g. "English".
     */
     SplitsBrowser.getLanguageName = function (language) {
@@ -157,7 +157,7 @@
 
     /**
     * Sets the current language.
-    * @param {String} language - The code of the new language to set.
+    * @param {String} language The code of the new language to set.
     */
     SplitsBrowser.setLanguage = function (language) {
         if (hasProperty(messages, language)) {
@@ -168,7 +168,7 @@
     /**
     * Initialises the messages from those read in.
     *
-    * @param {String} defaultLanguage - (Optional) The default language to choose.
+    * @param {String} defaultLanguage (Optional) The default language to choose.
     */
     SplitsBrowser.initialiseMessages = function (defaultLanguage) {
         allLanguages = [];

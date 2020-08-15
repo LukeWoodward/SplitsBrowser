@@ -65,7 +65,7 @@
 
     /**
     * Verifies that the given value is a Number.
-    * @param {any} value - Value to verify.
+    * @param {any} value Value to verify.
     */
     function verifyNumeric(value) {
         if (typeof value !== NUMBER_TYPE) {
@@ -75,9 +75,9 @@
 
     /**
     * Sets up the d3 event before event handlers are called.
-    * @param {Number|HTMLElement} target - The target element, or the index of
+    * @param {Number|HTMLElement} target The target element, or the index of
     *     the result.
-    * @param {Object} options - The options.
+    * @param {Object} options The options.
     */
     function setUpD3Event(target, options) {
         propagationStopped = false;
@@ -98,10 +98,10 @@
     /**
     * Sets up the d3 event before event handlers are called and initiates a
     * start-drag.
-    * @param {Number} targetIndex - The index of the target result element.
-    * @param {Object} options - The options.
-    * @param {Boolean} holdShiftKey - Whether to hold down the Shift key.
-    * @param {Object} listAndSelection - Object containing the result list and
+    * @param {Number} targetIndex The index of the target result element.
+    * @param {Object} options The options.
+    * @param {Boolean} holdShiftKey Whether to hold down the Shift key.
+    * @param {Object} listAndSelection Object containing the result list and
     *     the result selection.
     */
     function setUpD3EventAndStartDrag(targetIndex, options, listAndSelection) {
@@ -113,9 +113,9 @@
     /**
     * Sets up the d3 event before event handlers are called and initiates a
     * start-drag from off the bottom of the list of results.
-    * @param {Object} listAndSelection - Object containing the result list and
+    * @param {Object} listAndSelection Object containing the result list and
     *     the result selection.
-    * @param {Object} options - The options.
+    * @param {Object} options The options.
     */
     function setUpD3EventAndStartDragOffTheBottom(listAndSelection, options) {
         options.yOffset = 250;
@@ -126,9 +126,9 @@
     /**
     * Sets up the d3 event before event handlers are called and initiates a
     * start-drag from within the scrollbar.
-    * @param {Object} listAndSelection - Object containing the result list and
+    * @param {Object} listAndSelection Object containing the result list and
     *     the result selection.
-    * @param {Object} options - The options.
+    * @param {Object} options The options.
     */
     function setUpD3EventAndStartDragInTheScrollbar(listAndSelection, options) {
         options.yOffset = -20;
@@ -139,9 +139,9 @@
     /**
     * Sets up the d3 event and initiates a mouse-move event.
     * start-drag.
-    * @param {Number|HTMLElement} target - The target element, or the index of
+    * @param {Number|HTMLElement} target The target element, or the index of
     *     the result.
-    * @param {Object} listAndSelection - Object containing the result list and
+    * @param {Object} listAndSelection Object containing the result list and
     *     the selected results.
     */
     function setUpD3EventAndMoveMouse(targetIndex, listAndSelection) {
@@ -154,7 +154,7 @@
     * Sets up the d3 event and initiates a mouse-move event off the bottom of
     * the result list.
     * start-drag.
-    * @param {Object} listAndSelection - Object containing the result list and
+    * @param {Object} listAndSelection Object containing the result list and
     *     the selected results.
     */
     function setUpD3EventAndMoveMouseOffTheBottom(listAndSelection) {
@@ -165,7 +165,7 @@
     /**
     * Sets up the d3 event and initiates a mouse-move event into the scrollbar.
     * start-drag.
-    * @param {Object} listAndSelection - Object containing the result list and
+    * @param {Object} listAndSelection Object containing the result list and
     *     the selected results.
     */
     function setUpD3EventAndMoveMouseIntoTheScrollbar(listAndSelection) {
@@ -176,10 +176,10 @@
     /**
     * Creates a list with three results in it, and return the list and the
     * selection.
-    * @param {Array} selectedIndexes - Indexes of selected results in the selection.
-    * @param {boolean} multipleClasses - Whether the list of results is built from
-    *                                    multiple classes.
-    * @return 2-element object containing the selection and list.
+    * @param {Array} selectedIndexes Indexes of selected results in the selection.
+    * @param {Boolean} multipleClasses Whether the list of results is built from
+    *                                  multiple classes.
+    * @return {Object} 2-element object containing the selection and list.
     */
     function createSampleList(selectedIndexes, multipleClasses) {
         var parent = d3.select("div#qunit-fixture").node();
@@ -202,10 +202,10 @@
     /**
     * Creates a list with three results in it, and return the list and the
     * selection.
-    * @param {Array} selectedIndexes - Indexes of selected results in the selection.
-    * @param {boolean} multipleClasses - Whether the list of results is built from
-    *                                    multiple classes.
-    * @return 2-element object containing the selection and list.
+    * @param {Array} selectedIndexes Indexes of selected results in the selection.
+    * @param {Boolean} multipleClasses Whether the list of results is built from
+    *                                  multiple classes.
+    * @return {Object} 2-element object containing the selection and list.
     */
     function createSampleTeamList() {
         var parent = d3.select("div#qunit-fixture").node();
@@ -239,10 +239,10 @@
     /**
     * Creates a list with three options in it, set it up on the race graph
     * and return the list and the selection.
-    * @param {Array} selectedIndexes - Indexes of selected results in the selection.
-    * @param {boolean} multipleClasses - Whether the list of results is built from
+    * @param {Array} selectedIndexes Indexes of selected results in the selection.
+    * @param {Boolean} multipleClasses Whether the list of results is built from
     *                                    multiple classes.
-    * @return 2-element object containing the selection and list.
+    * @return {Object} 2-element object containing the selection and list.
     */
     function createSampleListForRaceGraph(selectedIndexes, multipleClasses) {
         var listAndSelection = createSampleList(selectedIndexes, multipleClasses);
@@ -254,10 +254,10 @@
     /**
     * Creates a list with three options in it, wires up the test change handler
     * and returns the list and the selection.
-    * @param {Array} selectedIndexes - Indexes of selected results in the selection.
-    * @param {boolean} multipleClasses - Whether the list of results is built from
+    * @param {Array} selectedIndexes Indexes of selected results in the selection.
+    * @param {Boolean} multipleClasses Whether the list of results is built from
     *                                    multiple classes.
-    * @return 2-element object containing the selection and list.
+    * @return {Object} 2-element object containing the selection and list.
     */
     function createSampleListWithChangeHandler(selectedIndexes, multipleClasses) {
         var listAndSelection = createSampleList(selectedIndexes, multipleClasses);
@@ -268,10 +268,10 @@
     /**
     * Asserts that the given expected list of results all have the given
     * CSS class in their associated div, and other result divs do not.
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Number} count - Total number of results.
-    * @param {String} className - The name of the CSS class to test for.
-    * @param {Array} expectedResults - Array that contains the indexes of
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {Number} count Total number of results.
+    * @param {String} className The name of the CSS class to test for.
+    * @param {Array} expectedResults Array that contains the indexes of
     *     all results that should have the given CSS class.
     */
     function assertResultsClassed(assert, count, className, expectedResults) {
@@ -283,9 +283,9 @@
 
     /**
     * Asserts that the currently-drag-selected results are as expected.
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Number} count - Total number of results.
-    * @param {Array} expectedDragSelected - Array that contains the indexes of
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {Number} count Total number of results.
+    * @param {Array} expectedDragSelected Array that contains the indexes of
     *     all results that should be drag-selected.
     */
     function assertDragSelected(assert, count, expectedDragSelected) {
@@ -294,9 +294,9 @@
 
     /**
     * Asserts that the currently-drag-deselected results are as expected.
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Number} count - Total number of results.
-    * @param {Array} expectedDragDeselected - Array that contains the indexes of
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {Number} count Total number of results.
+    * @param {Array} expectedDragDeselected Array that contains the indexes of
     *     all results that should be drag-deselected.
     */
     function assertDragDeselected(assert, count, expectedDragDeselected) {
@@ -306,9 +306,9 @@
     /**
     * Asserts that the currently-selected results are as expected,  both in
     * the the divs and the underlying selection.
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {Number} count - Total number of results.
-    * @param {Array} expectedSelected - Array that contains the indexes of
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {Number} count Total number of results.
+    * @param {Array} expectedSelected Array that contains the indexes of
     *     all results that should be selected.
     */
     function assertSelected(assert, count, expectedSelected, listAndSelection) {
@@ -322,7 +322,7 @@
 
     /**
     * Asserts that there are no drag-selected results.
-    * @param {QUnit.assert} assert - QUnit assert object.
+    * @param {QUnit.assert} assert QUnit assert object.
     */
     function assertNoDragSelected(assert) {
         assert.strictEqual($("div.result.dragSelected").length, 0);

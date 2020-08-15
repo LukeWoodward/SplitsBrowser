@@ -40,8 +40,8 @@
 
     /**
     * Returns whether the given string is nonempty.
-    * @param {String} string - The string to check.
-    * @return True if the string is neither null nor empty, false if it is null
+    * @param {String} string The string to check.
+    * @return {Boolean} True if the string is neither null nor empty, false if it is null
     *     or empty.
     */
     function isNonEmpty(string) {
@@ -52,8 +52,8 @@
     * Returns whether the given string contains a number.  The string is
     * considered to contain a number if, after stripping whitespace, the string
     * is not empty and calling isFinite on it returns true.
-    * @param {String} string - The string to test.
-    * @return True if the string contains a number, false if not.
+    * @param {String} string The string to test.
+    * @return {Boolean} True if the string contains a number, false if not.
     */
     function hasNumber(string) {
         string = string.trim();
@@ -63,7 +63,7 @@
 
     /**
     * Splits a line by whitespace.
-    * @param {String} line - The line to split.
+    * @param {String} line The line to split.
     * @return {Array} Array of whitespace-separated strings.
     */
     function splitByWhitespace (line) {
@@ -72,7 +72,7 @@
 
     /**
     * Strips all HTML tags from a string and returns the remaining string.
-    * @param {String} text - The HTML string to strip tags from.
+    * @param {String} text The HTML string to strip tags from.
     * @return {String} The input string with HTML tags removed.
     */
     function stripHtml(text) {
@@ -86,8 +86,8 @@
     * Note that it is recommended to pass this function a new regular
     * expression each time, rather than using a precompiled regexp.
     *
-    * @param {RegExp} regexp - The regular expression to find all matches of.
-    * @param {String} text - The text to search for matches within.
+    * @param {RegExp} regexp The regular expression to find all matches of.
+    * @param {String} text The text to search for matches within.
     * @return {Array} Array of strings representing the HTML-stripped regexp
     *     matches.
     */
@@ -110,7 +110,7 @@
     * Returns the contents of all <font> ... </font> elements within the given
     * text.  The contents of the <font> elements are stripped of all other HTML
     * tags.
-    * @param {String} text - The HTML string containing the <font> elements.
+    * @param {String} text The HTML string containing the <font> elements.
     * @return {Array} Array of strings of text inside <font> elements.
     */
     function getFontBits(text) {
@@ -121,7 +121,7 @@
     * Returns the contents of all <td> ... </td> elements within the given
     * text.  The contents of the <td> elements are stripped of all other HTML
     * tags.
-    * @param {String} text - The HTML string containing the <td> elements.
+    * @param {String} text The HTML string containing the <td> elements.
     * @return {Array} Array of strings of text inside <td> elements.
     */
     function getTableDataBits(text) {
@@ -132,7 +132,7 @@
     * Returns the contents of all <td> ... </td> elements within the given
     * text.  The contents of the <td> elements are stripped of all other HTML
     * tags.  Empty matches are removed.
-    * @param {String} text - The HTML string containing the <td> elements.
+    * @param {String} text The HTML string containing the <td> elements.
     * @return {Array} Array of strings of text inside <td> elements.
     */
     function getNonEmptyTableDataBits(text) {
@@ -143,7 +143,7 @@
     * Returns the contents of all <th> ... </th> elements within the given
     * text.  The contents of the <th> elements are stripped of all other HTML
     * tags.  Empty matches are removed.
-    * @param {String} text - The HTML string containing the <td> elements.
+    * @param {String} text The HTML string containing the <td> elements.
     * @return {Array} Array of strings of text inside <td> elements.
     */
     function getNonEmptyTableHeaderBits(text) {
@@ -153,8 +153,8 @@
 
     /**
     * Attempts to read a course distance from the given string.
-    * @param {String} text - The text string to read a course distance from.
-    * @return {?Number} - The parsed course distance, or null if no
+    * @param {String} text The text string to read a course distance from.
+    * @return {Number|null} The parsed course distance, or null if no
     *     distance could be parsed.
     */
     function tryReadDistance(text) {
@@ -168,8 +168,8 @@
 
     /**
     * Attempts to read a course climb from the given string.
-    * @param {String} text - The text string to read a course climb from.
-    * @return {?Number} - The parsed course climb, or null if no climb
+    * @param {String} text The text string to read a course climb from.
+    * @return {Number|null} The parsed course climb, or null if no climb
     *     could be parsed.
     */
     function tryReadClimb(text) {
@@ -186,7 +186,7 @@
     * form num(code), with the exception of the finish, which, if it appears,
     * should contain no parentheses and must be the last.  The finish is
     * returned as null.
-    * @param {Array} labels - Array of string labels.
+    * @param {Array} labels Array of string labels.
     * @return {Array} Array of control codes, with null indicating the finish.
     */
     function readControlCodes(labels) {
@@ -218,8 +218,8 @@
     * This method does not return anything, instead it mutates the arrays
     * given.
     *
-    * @param {Array} cumTimes - Array of cumulative times.
-    * @param {Array} splitTimes - Array of split times.
+    * @param {Array} cumTimes Array of cumulative times.
+    * @param {Array} splitTimes Array of split times.
     */
     function removeExtraControls(cumTimes, splitTimes) {
         while (splitTimes.length > 0 && splitTimes[splitTimes.length - 1][0] === "*") {
@@ -232,13 +232,13 @@
     * Represents the result of parsing lines of competitor data.  This can
     * represent intermediate data as well as complete data.
     * @constructor
-    * @param {String} name - The name of the competitor.
-    * @param {String} club - The name of the competitor's club.
-    * @param {String} className - The class of the competitor.
-    * @param {?Number} totalTime - The total time taken by the competitor, or
+    * @param {String} name The name of the competitor.
+    * @param {String} club The name of the competitor's club.
+    * @param {String} className The class of the competitor.
+    * @param {Number|null} totalTime The total time taken by the competitor, or
     *     null for no total time.
-    * @param {Array} cumTimes - Array of cumulative split times.
-    * @param {boolean} competitive - Whether the competitor's run is competitive.
+    * @param {Array} cumTimes Array of cumulative split times.
+    * @param {Boolean} competitive Whether the competitor's run is competitive.
     */
     function CompetitorParseRecord(name, club, className, totalTime, cumTimes, competitive) {
         this.name = name;
@@ -254,7 +254,7 @@
     * A continuation record is one that has no name, club, class name or total
     * time.  Instead it represents the data read from lines of data other than
     * the first two.
-    * @return {boolean} True if the record is a continuation record, false if not.
+    * @return {Boolean} True if the record is a continuation record, false if not.
     */
     CompetitorParseRecord.prototype.isContinuation = function () {
         return (this.name === "" && this.club === "" && this.className === null && this.totalTime === "" && !this.competitive);
@@ -263,7 +263,7 @@
     /**
     * Appends the cumulative split times in another CompetitorParseRecord to
     * this one.  The one given must be a 'continuation' record.
-    * @param {CompetitorParseRecord} other - The record whose cumulative times
+    * @param {CompetitorParseRecord} other The record whose cumulative times
     *     we wish to append.
     */
     CompetitorParseRecord.prototype.append = function (other) {
@@ -276,7 +276,7 @@
 
     /**
     * Creates a Result object from this CompetitorParseRecord object.
-    * @param {Number} order - The number of this result within their class
+    * @param {Number} order The number of this result within their class
     *     (1=first, 2=second, ...).
     * @return {Result} Converted result object.
     */
@@ -337,9 +337,9 @@
     * lot of &lt;font&gt; elements, it simply checks for the presence of
     * HTML &lt;pre&gt; and &lt;font&gt; elements.
     *
-    * @param {String} text - The entire input text read in.
-    * @return {boolean} True if the text contains any pre-formatted HTML, false
-    *     otherwise
+    * @param {String} text The entire input text read in.
+    * @return {Boolean} True if the text contains any pre-formatted HTML, false
+    *     otherwise.
     */
     OldHtmlFormatRecognizer.prototype.isTextOfThisFormat = function (text) {
         return (text.indexOf("<pre>") >= 0 && text.indexOf("<font") >= 0);
@@ -352,7 +352,7 @@
     * &lt;pre&gt; tag, and everything from the closing &lt;/pre&gt; tag
     * to the end of the text.
     *
-    * @param {String} text - The HTML text to preprocess.
+    * @param {String} text The HTML text to preprocess.
     * @return {String} The preprocessed text.
     */
     OldHtmlFormatRecognizer.prototype.preprocess = function (text) {
@@ -386,8 +386,8 @@
     *
     * This recognizer ignores only blank lines.
     *
-    * @param {String} line - The line to check.
-    * @return {boolean} True if the line should be ignored, false if not.
+    * @param {String} line The line to check.
+    * @return {Boolean} True if the line should be ignored, false if not.
     */
     OldHtmlFormatRecognizer.prototype.canIgnoreThisLine = function (line) {
         return line === "";
@@ -403,8 +403,8 @@
     * &lt;font&gt;...&lt;/font&gt; elements as a course header line, and
     * anything else not.
     *
-    * @param {String} line - The line to check.
-    * @return {boolean} True if this is the first line of a course, false
+    * @param {String} line The line to check.
+    * @return {Boolean} True if this is the first line of a course, false
     *     otherwise.
     */
     OldHtmlFormatRecognizer.prototype.isCourseHeaderLine = function (line) {
@@ -417,7 +417,7 @@
     *
     * This method can assume that the line given is a course header line.
     *
-    * @param {String} line - The line to parse course details from.
+    * @param {String} line The line to parse course details from.
     * @return {Object} Object containing the parsed course details.
     */
     OldHtmlFormatRecognizer.prototype.parseCourseHeaderLine = function (line) {
@@ -449,7 +449,7 @@
     * previous control line.  It should also return null for the finish, which
     * should have no code.  The finish is assumed to he the last.
     *
-    * @param {String} line - The line to parse control codes from.
+    * @param {String} line The line to parse control codes from.
     * @return {Array} Array of control codes.
     */
     OldHtmlFormatRecognizer.prototype.parseControlsLine = function (line) {
@@ -464,7 +464,7 @@
     * Read either cumulative or split times from the given line of competitor
     * data.
     * (This method is not used by the parser, only elsewhere in the recognizer.)
-    * @param {String} line - The line to read the times from.
+    * @param {String} line The line to read the times from.
     * @return {Array} Array of times.
     */
     OldHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (line) {
@@ -480,8 +480,8 @@
     /**
     * Parse two lines of competitor data into a CompetitorParseRecord object
     * containing the data.
-    * @param {String} firstLine - The first line of competitor data.
-    * @param {String} secondLine - The second line of competitor data.
+    * @param {String} firstLine The first line of competitor data.
+    * @param {String} secondLine The second line of competitor data.
     * @return {CompetitorParseRecord} The parsed competitor.
     */
     OldHtmlFormatRecognizer.prototype.parseCompetitor = function (firstLine, secondLine) {
@@ -548,8 +548,8 @@
     * Each course uses three tables, and there are two HTML tables before the
     * courses.
     *
-    * @param {String} text - The entire input text read in.
-    * @return {boolean} True if the text contains at least five HTML table
+    * @param {String} text The entire input text read in.
+    * @return {Boolean} True if the text contains at least five HTML table
     *     tags.
     */
     NewHtmlFormatRecognizer.prototype.isTextOfThisFormat = function (text) {
@@ -572,7 +572,7 @@
     * parts of the file we don't care about, and to reshape what there is left
     * so that it is in a more suitable form to be parsed.
     *
-    * @param {String} text - The HTML text to preprocess.
+    * @param {String} text The HTML text to preprocess.
     * @return {String} The preprocessed text.
     */
     NewHtmlFormatRecognizer.prototype.preprocess = function (text) {
@@ -629,8 +629,8 @@
     * opening or closing HTML table tags.  This is not a problem because the
     * preprocessing has ensured that the table data is not in the same line.
     *
-    * @param {String} line - The line to check.
-    * @return {boolean} True if the line should be ignored, false if not.
+    * @param {String} line The line to check.
+    * @return {Boolean} True if the line should be ignored, false if not.
     */
     NewHtmlFormatRecognizer.prototype.canIgnoreThisLine = function (line) {
         if (line.indexOf("<th>") > -1) {
@@ -652,8 +652,8 @@
     * This recognizer treats a line that contains a table-data cell with ID
     * "header" as the first line of a course.
     *
-    * @param {String} line - The line to check.
-    * @return {boolean} True if this is the first line of a course, false
+    * @param {String} line The line to check.
+    * @return {Boolean} True if this is the first line of a course, false
     *     otherwise.
     */
     NewHtmlFormatRecognizer.prototype.isCourseHeaderLine = function (line) {
@@ -666,7 +666,7 @@
     *
     * This method can assume that the line given is a course header line.
     *
-    * @param {String} line - The line to parse course details from.
+    * @param {String} line The line to parse course details from.
     * @return {Object} Object containing the parsed course details.
     */
     NewHtmlFormatRecognizer.prototype.parseCourseHeaderLine = function (line) {
@@ -706,7 +706,7 @@
     * previous control line.  It should also return null for the finish, which
     * should have no code.  The finish is assumed to he the last.
     *
-    * @param {String} line - The line to parse control codes from.
+    * @param {String} line The line to parse control codes from.
     * @return {Array} Array of control codes.
     */
     NewHtmlFormatRecognizer.prototype.parseControlsLine = function (line) {
@@ -718,7 +718,7 @@
     * Read either cumulative or split times from the given line of competitor
     * data.
     * (This method is not used by the parser, only elsewhere in the recognizer.)
-    * @param {String} line - The line to read the times from.
+    * @param {String} line The line to read the times from.
     * @return {Array} Array of times.
     */
     NewHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (line) {
@@ -738,8 +738,8 @@
     /**
     * Parse two lines of competitor data into a CompetitorParseRecord object
     * containing the data.
-    * @param {String} firstLine - The first line of competitor data.
-    * @param {String} secondLine - The second line of competitor data.
+    * @param {String} firstLine The first line of competitor data.
+    * @param {String} secondLine The second line of competitor data.
     * @return {CompetitorParseRecord} The parsed competitor.
     */
     NewHtmlFormatRecognizer.prototype.parseCompetitor = function (firstLine, secondLine) {
@@ -793,8 +793,8 @@
     * two.  If fewer than two tables are found, or more than two, this method
     * returns false.
     *
-    * @param {String} text - The entire input text read in.
-    * @return {boolean} True if the text contains precisely two HTML table
+    * @param {String} text The entire input text read in.
+    * @return {Boolean} True if the text contains precisely two HTML table
     *     tags.
     */
     OEventTabularHtmlFormatRecognizer.prototype.isTextOfThisFormat = function (text) {
@@ -820,7 +820,7 @@
     * parts of the file we don't care about, and to reshape what there is left
     * so that it is in a more suitable form to be parsed.
     *
-    * @param {String} text - The HTML text to preprocess.
+    * @param {String} text The HTML text to preprocess.
     * @return {String} The preprocessed text.
     */
     OEventTabularHtmlFormatRecognizer.prototype.preprocess = function (text) {
@@ -859,8 +859,8 @@
     * This recognizer ignores blank lines. It also ignores any that contain
     * opening or closing HTML table tags or horizontal-rule tags.
     *
-    * @param {String} line - The line to check.
-    * @return {boolean} True if the line should be ignored, false if not.
+    * @param {String} line The line to check.
+    * @return {Boolean} True if the line should be ignored, false if not.
     */
     OEventTabularHtmlFormatRecognizer.prototype.canIgnoreThisLine = function (line) {
         return (line === "" || line.indexOf("<table") > -1 || line.indexOf("</table>") > -1 || line.indexOf("<hr>") > -1);
@@ -875,8 +875,8 @@
     * This recognizer treats a line that contains a table-row cell with class
     * "clubName" as the first line of a course.
     *
-    * @param {String} line - The line to check.
-    * @return {boolean} True if this is the first line of a course, false
+    * @param {String} line The line to check.
+    * @return {Boolean} True if this is the first line of a course, false
     *     otherwise.
     */
     OEventTabularHtmlFormatRecognizer.prototype.isCourseHeaderLine = function (line) {
@@ -889,7 +889,7 @@
     *
     * This method can assume that the line given is a course header line.
     *
-    * @param {String} line - The line to parse course details from.
+    * @param {String} line The line to parse course details from.
     * @return {Object} Object containing the parsed course details.
     */
     OEventTabularHtmlFormatRecognizer.prototype.parseCourseHeaderLine = function (line) {
@@ -923,7 +923,7 @@
     * previous control line.  It should also return null for the finish, which
     * should have no code.  The finish is assumed to he the last.
     *
-    * @param {String} line - The line to parse control codes from.
+    * @param {String} line The line to parse control codes from.
     * @return {Array} Array of control codes.
     */
     OEventTabularHtmlFormatRecognizer.prototype.parseControlsLine = function (line) {
@@ -938,7 +938,7 @@
     * Read either cumulative or split times from the given line of competitor
     * data.
     * (This method is not used by the parser, only elsewhere in the recognizer.)
-    * @param {Array} bits - Array of all contents of table elements.
+    * @param {Array} bits Array of all contents of table elements.
     * @return {Array} Array of times.
     */
     OEventTabularHtmlFormatRecognizer.prototype.readCompetitorSplitDataLine = function (bits) {
@@ -966,8 +966,8 @@
     /**
     * Parse two lines of competitor data into a CompetitorParseRecord object
     * containing the data.
-    * @param {String} firstLine - The first line of competitor data.
-    * @param {String} secondLine - The second line of competitor data.
+    * @param {String} firstLine The first line of competitor data.
+    * @param {String} secondLine The second line of competitor data.
     * @return {CompetitorParseRecord} The parsed competitor.
     */
     OEventTabularHtmlFormatRecognizer.prototype.parseCompetitor = function (firstLine, secondLine) {
@@ -1006,10 +1006,10 @@
     /**
     * Represents the partial result of parsing a course.
     * @constructor
-    * @param {String} name - The name of the course.
-    * @param {?Number} distance - The distance of the course in kilometres,
+    * @param {String} name The name of the course.
+    * @param {Number|null} distance The distance of the course in kilometres,
     *     if known, else null.
-    * @param {?Number} climb - The climb of the course in metres, if known,
+    * @param {Number|null} climb The climb of the course in metres, if known,
     *     else null.
     */
     function CourseParseRecord(name, distance, climb) {
@@ -1022,7 +1022,7 @@
 
     /**
     * Adds the given list of control codes to those built up so far.
-    * @param {Array} controls - Array of control codes read.
+    * @param {Array} controls Array of control codes read.
     */
     CourseParseRecord.prototype.addControls = function (controls) {
         this.controls = this.controls.concat(controls);
@@ -1032,7 +1032,7 @@
     * Returns whether the course has all of the controls it needs.
     * The course has all its controls if its last control is the finish, which
     * is indicated by a null control code.
-    * @return {boolean} True if the course has all of its controls, including
+    * @return {Boolean} True if the course has all of its controls, including
     *     the finish, false otherwise.
     */
     CourseParseRecord.prototype.hasAllControls = function () {
@@ -1041,7 +1041,7 @@
 
     /**
     * Adds a competitor record to the collection held by this course.
-    * @param {CompetitorParseRecord} competitor - The competitor to add.
+    * @param {CompetitorParseRecord} competitor The competitor to add.
     */
     CourseParseRecord.prototype.addCompetitor = function (competitor) {
         if (!competitor.competitive && competitor.cumTimes.length === this.controls.length - 1) {
@@ -1067,7 +1067,7 @@
     /**
     * A parser that is capable of parsing event data in a given HTML format.
     * @constructor
-    * @param {Object} recognizer - The recognizer to use to parse the HTML.
+    * @param {Object} recognizer The recognizer to use to parse the HTML.
     */
     function HtmlFormatParser(recognizer) {
         this.recognizer = recognizer;
@@ -1081,7 +1081,7 @@
     /**
     * Attempts to read the next unread line from the data given.  If the end of
     * the data has been read, null will be returned.
-    * @return {?String} The line read, or null if the end of the data has
+    * @return {String|null} The line read, or null if the end of the data has
     *     been reached.
     */
     HtmlFormatParser.prototype.tryGetLine = function () {
@@ -1123,7 +1123,7 @@
     * Reads in data for one competitor from two lines of the input data.
     *
     * The first of the two lines will be given; the second will be read.
-    * @param {String} firstLine - The first of the two lines to read the
+    * @param {String} firstLine The first of the two lines to read the
     *     competitor data from.
     */
     HtmlFormatParser.prototype.readCompetitorLines = function (firstLine) {
@@ -1149,7 +1149,7 @@
     * Returns whether the classes are unique within courses.  If so, they can
     * be used to subdivide courses.  If not, CourseClasses and Courses must be
     * the same.
-    * @return {boolean} True if no two competitors in the same class are on
+    * @return {Boolean} True if no two competitors in the same class are on
     *     different classes, false otherwise.
     */
     HtmlFormatParser.prototype.areClassesUniqueWithinCourses = function () {
@@ -1229,7 +1229,7 @@
 
     /**
     * Parses the given HTML text containing results data into an Event object.
-    * @param {String} text - The HTML text to parse.
+    * @param {String} text The HTML text to parse.
     * @return {Event} Event object containing all the parsed data.
     */
     HtmlFormatParser.prototype.parse = function (text) {
@@ -1276,7 +1276,7 @@
     * is thrown.  If the data appears to be HTML data but is invalid in some
     * way, an InvalidData exception is thrown.
     *
-    * @param {String} data - The string containing event data.
+    * @param {String} data The string containing event data.
     * @return {Event} The parsed event.
     */
     SplitsBrowser.Input.Html.parseEventData = function (data) {

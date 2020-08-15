@@ -63,8 +63,8 @@
 
     /**
     * Asserts whether the other-class selector should be visible.
-    * @param {Qunit.assert} assert - QUnit assert object.
-    * @param {boolean} isVisible - Whether the other-class selector should be
+    * @param {Qunit.assert} assert QUnit assert object.
+    * @param {Boolean} isVisible Whether the other-class selector should be
     *     visible.
     */
     function assertOtherClassSelectorVisibility(assert, isVisible) {
@@ -81,10 +81,10 @@
     /**
     * Assert whether the div that contains the list of other classes is
     * visible, and, optionally, how many other classes are in this list.
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {boolean} isVisible - Whether the list of other classes should be
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {Boolean} isVisible Whether the list of other classes should be
     *      visible.
-    * @param {Number|undefined} itemCount - Optional number of items to check
+    * @param {Number|undefined} itemCount Optional number of items to check
     *      for in the list of other classes.  If omitted, no check is made.
     */
     function assertOtherClassListVisibility(assert, isVisible, itemCount) {

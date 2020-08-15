@@ -42,8 +42,8 @@
 
     /**
     * Fabricates an Event object from the data given.
-    * @param {Object} courseData - The data to create an Event using.
-    * @return The fabricated Event.
+    * @param {Object} courseData The data to create an Event using.
+    * @return {Event} The fabricated Event.
     */
     function makeEvent(courseData) {
         var courses = [];
@@ -75,7 +75,7 @@
     /**
     * Creates and returns an expected-data object that contains default values
     * for all parameters not specified.
-    * @param {Object} data - Object with some data values set.
+    * @param {Object} data Object with some data values set.
     * @return {Object} Object with the same data values set, and with all
     *     others set to their defaults.
     */

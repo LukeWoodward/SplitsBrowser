@@ -90,7 +90,7 @@
 
     /**
     * Remove any leading and trailing double-quotes from the given string.
-    * @param {String} value - The value to trim quotes from.
+    * @param {String} value The value to trim quotes from.
     * @return {String} The string with any leading and trailing quotes removed.
     */
     function dequote(value) {
@@ -106,7 +106,7 @@
     *
     * NOTE: The reader constructed can only be used to read data in once.
     * @constructor
-    * @param {String} data - The OE data to read in.
+    * @param {String} data The OE data to read in.
     */
     function Reader(data) {
         this.data = normaliseLineEndings(data);
@@ -158,7 +158,7 @@
     * 60-column.  In all cases, the numbers count the columns before the
     * controls data.
     *
-    * @param {String} delimiter - The character used to delimit the columns of
+    * @param {String} delimiter The character used to delimit the columns of
     *     data.
     */
     Reader.prototype.identifyFormatVariation = function (delimiter) {
@@ -196,7 +196,7 @@
 
     /**
     * Returns the name of the class in the given row.
-    * @param {Array} row - Array of row data.
+    * @param {Array} row Array of row data.
     * @return {String} Class name.
     */
     Reader.prototype.getClassName = function (row) {
@@ -211,8 +211,8 @@
     /**
     * Reads the start-time in the given row.  The start punch time will
     * be used if it is available, otherwise the start time.
-    * @param {Array} row - Array of row data.
-    * @return {?Number} Parsed start time, or null for none.
+    * @param {Array} row Array of row data.
+    * @return {Number|null} Parsed start time, or null for none.
     */
     Reader.prototype.getStartTime = function (row) {
         var startTimeStr = row[this.columnIndexes.startPunch];
@@ -225,9 +225,9 @@
 
     /**
     * Returns the number of controls to expect on the given line.
-    * @param {Array} row - Array of row data items.
-    * @param {Number} lineNumber - The line number of the line.
-    * @return {Number?} The number of controls, or null if the count could not be read.
+    * @param {Array} row Array of row data items.
+    * @param {Number} lineNumber The line number of the line.
+    * @return {Number|null} The number of controls, or null if the count could not be read.
     */
     Reader.prototype.getNumControls = function (row, lineNumber) {
         var className = this.getClassName(row);
@@ -252,9 +252,9 @@
 
     /**
     * Reads the cumulative times out of a row of competitor data.
-    * @param {Array} row - Array of row data items.
-    * @param {Number} lineNumber - Line number of the row within the source data.
-    * @param {Number} numControls - The number of controls to read.
+    * @param {Array} row Array of row data items.
+    * @param {Number} lineNumber Line number of the row within the source data.
+    * @param {Number} numControls The number of controls to read.
     * @return {Array} Array of cumulative times.
     */
     Reader.prototype.readCumulativeTimes = function (row, lineNumber, numControls) {
@@ -287,8 +287,8 @@
     /**
     * Checks to see whether the given row contains a new class, and if so,
     * creates it.
-    * @param {Array} row - Array of row data items.
-    * @param {Number} numControls - The number of controls to read.
+    * @param {Array} row Array of row data items.
+    * @param {Number} numControls The number of controls to read.
     */
     Reader.prototype.createClassIfNecessary = function (row, numControls) {
         var className = this.getClassName(row);
@@ -300,8 +300,8 @@
     /**
     * Checks to see whether the given row contains a new course, and if so,
     * creates it.
-    * @param {Array} row - Array of row data items.
-    * @param {Number} numControls - The number of controls to read.
+    * @param {Array} row Array of row data items.
+    * @param {Number} numControls The number of controls to read.
     */
     Reader.prototype.createCourseIfNecessary = function (row, numControls) {
         var courseName = row[this.columnIndexes.course];
@@ -318,7 +318,7 @@
     /**
     * Checks to see whether the given row contains a class-course pairing that
     * we haven't seen so far, and adds one if not.
-    * @param {Array} row - Array of row data items.
+    * @param {Array} row Array of row data items.
     */
     Reader.prototype.createClassCoursePairIfNecessary = function (row) {
         var className = this.getClassName(row);
@@ -331,7 +331,7 @@
 
     /**
     * Reads the name of the competitor from the row.
-    * @param {Array} row - Array of row data items.
+    * @param {Array} row Array of row data items.
     * @return {String} The name of the competitor.
     */
     Reader.prototype.getName = function (row) {
@@ -354,8 +354,8 @@
     /**
     * Reads in the competitor-specific data from the given row and adds it to
     * the event data read so far.
-    * @param {Array} row - Row of items read from a line of the input data.
-    * @param {Array} cumTimes - Array of cumulative times for the competitor.
+    * @param {Array} row Row of items read from a line of the input data.
+    * @param {Array} cumTimes Array of cumulative times for the competitor.
     */
     Reader.prototype.addCompetitor = function (row, cumTimes) {
 
@@ -423,10 +423,10 @@
 
     /**
     * Parses the given line and adds it to the event data accumulated so far.
-    * @param {String} line - The line to parse.
-    * @param {Number} lineNumber - The number of the line (used in error
+    * @param {String} line The line to parse.
+    * @param {Number} lineNumber The number of the line (used in error
     *     messages).
-    * @param {String} delimiter - The character used to delimit the columns of
+    * @param {String} delimiter The character used to delimit the columns of
     *     data.
     */
     Reader.prototype.readLine = function (line, lineNumber, delimiter) {
@@ -514,13 +514,13 @@
     * classes on one side and courses on the other.  We want to find the
     * connected subgraph that this course belongs to.)
     *
-    * @param {String} initCourseName - The name of the initial course.
-    * @param {Object} manyToManyMaps - Object that contains the two maps that
+    * @param {String} initCourseName The name of the initial course.
+    * @param {Object} manyToManyMaps Object that contains the two maps that
     *     map between class names and course names.
-    * @param {d3.set} doneCourseNames - Set of all course names that have been
+    * @param {d3.set} doneCourseNames Set of all course names that have been
     *     'done', i.e. included in a Course object that has been returned from
     *     a call to this method.
-    * @param {d3.map} classesMap - Map that maps class names to CourseClass
+    * @param {d3.map} classesMap Map that maps class names to CourseClass
     *     objects.
     * @return {SplitsBrowser.Model.Course} - The created Course object.
     */
@@ -581,7 +581,7 @@
     /**
     * Sort through the data read in and create Course objects representing each
     * course in the event.
-    * @param {Array} classes - Array of CourseClass objects read.
+    * @param {Array} classes Array of CourseClass objects read.
     * @return {Array} Array of course objects.
     */
     Reader.prototype.determineCourses = function (classes) {
@@ -648,7 +648,7 @@
 
     /**
     * Parse OE data read from a semicolon-separated data string.
-    * @param {String} data - The input data string read.
+    * @param {String} data The input data string read.
     * @return {SplitsBrowser.Model.Event} All event data read.
     */
     SplitsBrowser.Input.OE.parseEventData = function (data) {

@@ -27,15 +27,15 @@
 
     /**
      * Utility function used with filters that simply returns the object given.
-     * @param x - Any input value
-     * @returns The input value.
+     * @param {any} x Any input value
+     * @return {any} The input value.
      */
     SplitsBrowser.isTrue = function (x) { return x; };
 
     /**
     * Utility function that returns whether a value is not null.
-    * @param x - Any input value.
-    * @returns True if the value is not null, false otherwise.
+    * @param {any} x Any input value.
+    * @return {Boolean} True if the value is not null, false otherwise.
     */
     SplitsBrowser.isNotNull = function (x) { return x !== null; };
 
@@ -48,15 +48,15 @@
     * isn't NaN.  This function only returns true if you actually pass it NaN,
     * rather than any value that fails to convert to a number.
     *
-    * @param {Any} x - Any input value.
-    * @return True if x is NaN, false if x is any other value.
+    * @param {any} x Any input value.
+    * @return {Boolean} True if x is NaN, false if x is any other value.
     */
     SplitsBrowser.isNaNStrict = function (x) { return x !== x; };
 
     /**
     * Returns whether the value given is neither null nor NaN.
-    * @param {?Number} x - A value to test.
-    * @return {boolean} false if the value given is null or NaN, true
+    * @param {Number|null} x A value to test.
+    * @return {Boolean} False if the value given is null or NaN, true
     *     otherwise.
     */
     SplitsBrowser.isNotNullNorNaN = function (x) { return x !== null && x === x; };
@@ -64,7 +64,7 @@
     /**
     * Exception object raised if invalid data is passed.
     * @constructor
-    * @param {String} message - The exception detail message.
+    * @param {String} message The exception detail message.
     */
     function InvalidData(message) {
         this.name = "InvalidData";
@@ -73,7 +73,7 @@
 
     /**
     * Returns a string representation of this exception.
-    * @returns {String} String representation.
+    * @return {String} String representation.
     */
     InvalidData.prototype.toString = function () {
         return this.name + ": " + this.message;
@@ -81,7 +81,7 @@
 
     /**
     * Utility function to throw an 'InvalidData' exception object.
-    * @param {string} message - The exception message.
+    * @param {String} message The exception message.
     * @throws {InvalidData} if invoked.
     */
     SplitsBrowser.throwInvalidData = function (message) {
@@ -92,7 +92,7 @@
     * Exception object raised if a data parser for a format deems that the data
     * given is not of that format.
     * @constructor
-    * @param {String} message - The exception message.
+    * @param {String} message The exception message.
     */
     function WrongFileFormat(message) {
         this.name = "WrongFileFormat";
@@ -101,7 +101,7 @@
 
     /**
     * Returns a string representation of this exception.
-    * @returns {String} String representation.
+    * @return {String} String representation.
     */
     WrongFileFormat.prototype.toString = function () {
         return this.name + ": " + this.message;
@@ -109,7 +109,7 @@
 
     /**
     * Utility function to throw a 'WrongFileFormat' exception object.
-    * @param {string} message - The exception message.
+    * @param {String} message The exception message.
     * @throws {WrongFileFormat} if invoked.
     */
     SplitsBrowser.throwWrongFileFormat = function (message) {
@@ -120,7 +120,7 @@
      * Checks whether the given object contains a property with the given name.
      * This is a wrapper around the call to Object.prototype.hasOwnProperty.
      * @param {Object} object The object to test.
-     * @param {string} property The name of the property.
+     * @param {String} property The name of the property.
      * @return {Boolean} Whether the object has a property with the given name.
      */
     SplitsBrowser.hasProperty = function (object, property) {
@@ -129,9 +129,9 @@
 
     /**
     * Returns the sum of two numbers, or null if either is null.
-    * @param {?Number} a - One number, or null, to add.
-    * @param {?Number} b - The other number, or null, to add.
-    * @return {?Number} null if at least one of a or b is null,
+    * @param {Number|null} a One number, or null, to add.
+    * @param {Number|null} b The other number, or null, to add.
+    * @return {Number|null} null if at least one of a or b is null,
     *      otherwise a + b.
     */
     SplitsBrowser.addIfNotNull = function (a, b) {
@@ -140,9 +140,9 @@
 
     /**
     * Returns the difference of two numbers, or null if either is null.
-    * @param {?Number} a - One number, or null, to add.
-    * @param {?Number} b - The other number, or null, to add.
-    * @return {?Number} null if at least one of a or b is null,
+    * @param {Number|null} a One number, or null, to add.
+    * @param {Number|null} b The other number, or null, to add.
+    * @return {Number|null} null if at least one of a or b is null,
     *      otherwise a - b.
     */
     SplitsBrowser.subtractIfNotNull = function (a, b) {
@@ -155,8 +155,8 @@
     * This can be specified as a decimal number of kilometres or metres, with
     * either a full stop or a comma as the decimal separator.
     *
-    * @param {String} stringValue - The course length to parse, as a string.
-    * @return {?Number} The parsed course length, or null if not valid.
+    * @param {String} stringValue The course length to parse, as a string.
+    * @return {Number|null} The parsed course length, or null if not valid.
     */
     SplitsBrowser.parseCourseLength = function (stringValue) {
         var courseLength = parseFloat(stringValue.replace(",", "."));
@@ -174,8 +174,8 @@
     /**
     * Parses a course climb, specified as a whole number of metres.
     *
-    * @param {String} stringValue - The course climb to parse, as a string.
-    * @return {?Number} The parsed course climb, or null if not valid.
+    * @param {String} stringValue The course climb to parse, as a string.
+    * @return {Number|null} The parsed course climb, or null if not valid.
     */
     SplitsBrowser.parseCourseClimb = function (stringValue) {
         var courseClimb = parseInt(stringValue, 10);
@@ -189,8 +189,8 @@
     /**
     * Normalise line endings so that all lines end with LF, instead of
     * CRLF or CR.
-    * @param {String} stringValue - The string value to normalise line endings
-    *     within
+    * @param {String} stringValue The string value to normalise line endings
+    *     within.
     * @return {String} String value with the line-endings normalised.
     */
     SplitsBrowser.normaliseLineEndings = function (stringValue) {

@@ -27,8 +27,8 @@
     /**
     * Creates a ChartPopup control.
     * @constructor
-    * @param {HTMLElement} parent - Parent HTML element.
-    * @param {Object} handlers - Object that maps mouse event names to handlers.
+    * @param {HTMLElement} parent Parent HTML element.
+    * @param {Object} handlers Object that maps mouse event names to handlers.
     */
     function ChartPopup(parent, handlers) {
 
@@ -68,7 +68,7 @@
 
     /**
     * Returns whether the popup is currently shown.
-    * @return {boolean} True if the popup is shown, false otherwise.
+    * @return {Boolean} True if the popup is shown, false otherwise.
     */
     ChartPopup.prototype.isShown = function () {
         return this.shown;
@@ -76,7 +76,7 @@
 
     /**
     * Returns whether the mouse is currently over the popup.
-    * @return {boolean} True if the mouse is over the popup, false otherwise.
+    * @return {Boolean} True if the mouse is over the popup, false otherwise.
     */
     ChartPopup.prototype.isMouseIn = function () {
         return this.mouseIn;
@@ -97,8 +97,8 @@
     *   competitor.
     * The 'placeholder' property is a placeholder string to show if there is no
     * 'data' array is empty.  It can be null to show no such message.
-    * @param {Object} competitorData - Array of data to show.
-    * @param {boolean} includeClassNames - Whether to include class names.
+    * @param {Object} competitorData Array of data to show.
+    * @param {Boolean} includeClassNames Whether to include class names.
     */
     ChartPopup.prototype.setData = function (competitorData, includeClassNames) {
         this.dataHeader.text(competitorData.title);
@@ -136,7 +136,7 @@
     * * nextControls - Array of objects, each with 'course' and 'nextControl'
     *   properties.
     *
-    * @param {Object} nextControlsData - The next-controls data.
+    * @param {Object} nextControlsData The next-controls data.
     */
     ChartPopup.prototype.setNextControlData = function (nextControlsData) {
         this.dataHeader.text(nextControlsData.thisControl);
@@ -160,7 +160,7 @@
     * The location object should contain "x" and "y" properties.  The two
     * coordinates are in units of pixels from top-left corner of the viewport.
     *
-    * @param {Object} location - The location of the chart popup.
+    * @param {Object} location The location of the chart popup.
     */
     ChartPopup.prototype.setLocation = function (location) {
         this.popupDiv.style("left", location.x + "px")
@@ -173,7 +173,7 @@
     * The location object should contain "x" and "y" properties.  The two
     * coordinates are in units of pixels from top-left corner of the viewport.
     *
-    * @param {Object} location - The location of the chart popup.
+    * @param {Object} location The location of the chart popup.
     */
     ChartPopup.prototype.show = function (location) {
         this.popupDiv.style("display", null);

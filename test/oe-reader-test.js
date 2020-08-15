@@ -58,11 +58,11 @@
 
     /**
     * Generates a row of data for an OE-format file.
-    * @param {Object} data - Object that maps key names to the data for those
+    * @param {Object} data Object that maps key names to the data for those
     *     keys.
-    * @param {Array} controls - Array of objects, each of which contains a code
+    * @param {Array} controls Array of objects, each of which contains a code
     *     and a time.
-    * @param {String} template - String template that describes how to generate
+    * @param {String} template String template that describes how to generate
     *     the row.
     * @return {String} Row of data.
     */
@@ -261,10 +261,10 @@
 
     /**
     * Runs a test for parsing invalid data that should fail.
-    * @param {QUnit.assert} assert - QUnit assert object.
-    * @param {String} invalidData - The invalid string to parse.
-    * @param {String} what - Description of the invalid data.
-    * @param {String} exceptionName - Optional name of the exception (defaults
+    * @param {QUnit.assert} assert QUnit assert object.
+    * @param {String} invalidData The invalid string to parse.
+    * @param {String} what Description of the invalid data.
+    * @param {String|undefined} exceptionName Optional name of the exception (defaults
     *     to InvalidData.
     */
     function runInvalidDataTest(assert, invalidData, what, exceptionName) {
@@ -298,10 +298,10 @@
 
     /**
     * Formats some competitor data into a string that can be read by the reader.
-    * @param {Object} format - The format used to generate the data string.
-    * @param {Array} competitors - Array of 2-element arrays containing
+    * @param {Object} format The format used to generate the data string.
+    * @param {Array} competitors Array of 2-element arrays containing
     *     competitor and control data.
-    * @param {Function} preprocessor - Function called on the event data string
+    * @param {Function} preprocessor Function called on the event data string
     *     immediately before it is passed to the parser.  If not specified,
     *     no preprocessing is done.
     */
@@ -326,11 +326,11 @@
     /**
     * Calls a test function for the result of formatting the given competitor
     * data using all formats.  The data is expected to be parsed successfully.
-    * @param {Array} competitors - Array of 2-element arrays containing
+    * @param {Array} competitors Array of 2-element arrays containing
     *     competitor and control data.
-    * @param {Function} testFunc - Function called with the parsed event data
+    * @param {Function} testFunc Function called with the parsed event data
     *     and the format used to generate it.
-    * @param {Function} preprocessor - Function called on the event data string
+    * @param {Function} preprocessor Function called on the event data string
     *     immediately before it is passed to the parser.  If not specified,
     *     no preprocessing is done.
     */

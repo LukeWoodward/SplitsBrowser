@@ -29,7 +29,7 @@
      * Formats a number to two digits, preceding it with a zero if necessary,
      * e.g. 47 -> "47", 8 -> "08".
      * @param {Number} value The value to format.
-     * @return {string} Number formatted with a leading zero if necessary.
+     * @return {String} Number formatted with a leading zero if necessary.
      */
     function formatToTwoDigits(value) {
         return (value < 10) ? "0" + value : value.toString();
@@ -38,10 +38,10 @@
     /**
     * Formats a time period given as a number of seconds as a string in the form
     * [-][h:]mm:ss.ss .
-    * @param {Number} seconds - The number of seconds.
-    * @param {?Number} precision - Optional number of decimal places to format
+    * @param {Number} seconds The number of seconds.
+    * @param {Number|null} precision Optional number of decimal places to format
     *     using, or the default if not specified.
-    * @returns {string} The string formatting of the time.
+    * @return {String} The string formatting of the time.
     */
     SplitsBrowser.formatTime = function (seconds, precision) {
 
@@ -83,7 +83,7 @@
     * Formats a number of seconds as a time of day.  This returns a string
     * of the form HH:MM:SS, with HH no more than 24.
     * @param {Number} seconds The number of seconds
-    * @return {string} The time of day formatted as a string.
+    * @return {String} The time of day formatted as a string.
     */
     SplitsBrowser.formatTimeOfDay = function (seconds) {
         var hours = Math.floor((seconds / (60 * 60)) % 24);
@@ -94,8 +94,8 @@
 
     /**
     * Parse a time of the form MM:SS or H:MM:SS into a number of seconds.
-    * @param {string} time - The time of the form MM:SS.
-    * @return {?Number} The number of seconds.
+    * @param {String} time The time of the form MM:SS.
+    * @return {Number|null} The number of seconds.
     */
     SplitsBrowser.parseTime = function (time) {
         time = time.trim();

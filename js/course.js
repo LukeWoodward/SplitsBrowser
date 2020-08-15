@@ -29,11 +29,11 @@
     *
     * Course length and climb are both optional and can both be null.
     * @constructor
-    * @param {String} name - The name of the course.
-    * @param {Array} classes - Array of CourseClass objects comprising the course.
-    * @param {?Number} length - Length of the course, in kilometres.
-    * @param {?Number} climb - The course climb, in metres.
-    * @param {?Array} controls - Array of codes of the controls that make
+    * @param {String} name The name of the course.
+    * @param {Array} classes Array of CourseClass objects comprising the course.
+    * @param {Number|null} length Length of the course, in kilometres.
+    * @param {Number|null} climb The course climb, in metres.
+    * @param {Array|null} controls Array of codes of the controls that make
     *     up this course.  This may be null if no such information is provided.
     */
     function Course(name, classes, length, climb, controls) {
@@ -55,7 +55,7 @@
 
     /**
     * Returns an array of the 'other' classes on this course.
-    * @param {SplitsBrowser.Model.CourseClass} courseClass - A course-class
+    * @param {SplitsBrowser.Model.CourseClass} courseClass A course-class
     *    that should be on this course.
     * @return {Array} Array of other course-classes.
     */
@@ -79,7 +79,7 @@
 
     /**
     * Returns whether this course has control code data.
-    * @return {boolean} true if this course has control codes, false if it does
+    * @return {Boolean} true if this course has control codes, false if it does
     *     not.
     */
     Course.prototype.hasControls = function () {
@@ -96,8 +96,8 @@
     * The codes for the start and finish are given by the constants
     * SplitsBrowser.Model.Course.START and SplitsBrowser.Model.Course.FINISH.
     *
-    * @param {Number} controlNum - The number of the control.
-    * @return {?String} The code of the control, or one of the aforementioned
+    * @param {Number} controlNum The number of the control.
+    * @return {String} The code of the control, or one of the aforementioned
     *     constants for the start or finish.
     */
     Course.prototype.getControlCode = function (controlNum) {
@@ -120,11 +120,11 @@
     * If this course lacks leg information, it is assumed not to contain any
     * legs and so will return false for every leg.
     *
-    * @param {String} startCode - Code for the control at the start of the leg,
+    * @param {String} startCode Code for the control at the start of the leg,
     *     or null for the start.
-    * @param {String} endCode - Code for the control at the end of the leg, or
+    * @param {String} endCode Code for the control at the end of the leg, or
     *     null for the finish.
-    * @return {boolean} Whether this course uses the given leg.
+    * @return {Boolean} Whether this course uses the given leg.
     */
     Course.prototype.usesLeg = function (startCode, endCode) {
         return this.getLegNumber(startCode, endCode) >= 0;
@@ -140,9 +140,9 @@
     *
     * A negative number is returned if this course does not contain this leg.
     *
-    * @param {String} startCode - Code for the control at the start of the leg,
+    * @param {String} startCode Code for the control at the start of the leg,
     *     or null for the start.
-    * @param {String} endCode - Code for the control at the end of the leg, or
+    * @param {String} endCode Code for the control at the end of the leg, or
     *     null for the finish.
     * @return {Number} The control number of the leg in this course, or a
     *     negative number if the leg is not part of this course.
@@ -181,9 +181,9 @@
     * Note that this method should only be called if the course is known to use
     * the given leg.
     *
-    * @param {String} startCode - Code for the control at the start of the leg,
+    * @param {String} startCode Code for the control at the start of the leg,
     *     or SplitsBrowser.Model.Course.START for the start.
-    * @param {String} endCode - Code for the control at the end of the leg, or
+    * @param {String} endCode Code for the control at the end of the leg, or
     *     SplitsBrowser.Model.Course.FINISH for the finish.
     * @return {Array} Array of fastest splits for each course-class using this
     *      course.
@@ -220,12 +220,12 @@
     *
     * If the given control is not on this course, an empty list is returned.
     *
-    * @param {String} controlCode - Control code of the required control.
-    * @param {Number} intervalStart - The start of the interval, as seconds
+    * @param {String} controlCode Control code of the required control.
+    * @param {Number} intervalStart The start of the interval, as seconds
     *     past midnight.
-    * @param {Number} intervalEnd - The end of the interval, as seconds past
+    * @param {Number} intervalEnd The end of the interval, as seconds past
     *     midnight.
-    * @return  {Array} Array of all results visiting the given control
+    * @return {Array} Array of all results visiting the given control
     *     within the given time interval.
     */
     Course.prototype.getResultsAtControlInTimeRange = function (controlCode, intervalStart, intervalEnd) {
@@ -259,12 +259,12 @@
     * Returns a list of all results on this course that visit the control
     * with the given number in the time interval given.
     *
-    * @param {Number} controlNum - The number of the control (0 = start).
-    * @param {Number} intervalStart - The start of the interval, as seconds
+    * @param {Number} controlNum The number of the control (0 = start).
+    * @param {Number} intervalStart The start of the interval, as seconds
     *     past midnight.
-    * @param {Number} intervalEnd - The end of the interval, as seconds past
+    * @param {Number} intervalEnd The end of the interval, as seconds past
     *     midnight.
-    * @return  {Array} Array of all results visiting the given control
+    * @return {Array} Array of all results visiting the given control
     *     within the given time interval.
     */
     Course.prototype.getResultsAtControlNumInTimeRange = function (controlNum, intervalStart, intervalEnd) {
@@ -280,8 +280,8 @@
 
     /**
     * Returns whether the course has the given control.
-    * @param {String} controlCode - The code of the control.
-    * @return {boolean} True if the course has the control, false if the
+    * @param {String} controlCode The code of the control.
+    * @return {Boolean} True if the course has the control, false if the
     *     course doesn't, or doesn't have any controls at all.
     */
     Course.prototype.hasControl = function (controlCode) {
@@ -293,9 +293,9 @@
     * given code.
     *
     * Controls can appear multiple times in a course.  If a control appears
-    * multiple times, there will be multiple next controls.  As a result
-    * @param {String} controlCode - The code of the control.
-    * @return {Array} The code of the next control
+    * multiple times, there will be multiple next controls.
+    * @param {String} controlCode The code of the control.
+    * @return {Array} The codes of the next controls.
     */
     Course.prototype.getNextControls = function (controlCode) {
         if (this.controls === null) {

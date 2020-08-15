@@ -478,7 +478,7 @@
     /**
     * Creates and returns a ResultSelection object with all results
     * selected
-    * @param {Number} count - The number of results to create.
+    * @param {Number} count The number of results to create.
     * @return {ResultSelection} ResultSelection object with the given
     *     number of results, all selected.
     */

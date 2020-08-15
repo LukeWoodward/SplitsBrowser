@@ -40,8 +40,8 @@
     /**
     * Wraps the given array of results in a course-class, course and event,
     * repair the event and return whether the course-class has dubious data.
-    * @param {Array} results - Array of Result objects.
-    * @return {boolean} True if the course-class has dubious data, false
+    * @param {Array} results Array of Result objects.
+    * @return {Boolean} True if the course-class has dubious data, false
     *     otherwise.
     */
     function wrapInEventAndRepair(results) {

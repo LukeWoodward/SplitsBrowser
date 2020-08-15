@@ -30,7 +30,7 @@
     /**
     * Utility function to merge the lists of all results in a number of
     * classes.  All classes must contain the same number of controls.
-    * @param {Array} classes - Array of CourseClass objects.
+    * @param {Array} classes Array of CourseClass objects.
     * @return {Array} Merged array of results.
     */
     function mergeResults(classes) {
@@ -59,8 +59,8 @@
     /**
     * Given an array of numbers, return a list of the corresponding ranks of those
     * numbers.
-    * @param {Array} sourceData - Array of number values.
-    * @returns Array of corresponding ranks.
+    * @param {Array} sourceData Array of number values.
+    * @return {Array} Array of corresponding ranks.
     */
     function getRanks(sourceData) {
         // First, sort the source data, removing nulls.
@@ -86,7 +86,7 @@
     /**
     * An object that represents the currently-selected classes.
     * @constructor
-    * @param {Array} classes - Array of currently-selected classes.
+    * @param {Array} classes Array of currently-selected classes.
     */
     function CourseClassSet(classes) {
         this.allResults = mergeResults(classes);
@@ -98,7 +98,7 @@
     /**
     * Returns whether this course-class set is empty, i.e. whether it has no
     * results at all.
-    * @return {boolean} True if the course-class set is empty, false if it is not
+    * @return {Boolean} True if the course-class set is empty, false if it is not
     *     empty.
     */
     CourseClassSet.prototype.isEmpty = function () {
@@ -108,7 +108,7 @@
     /**
     * Returns the course used by all of the classes that make up this set.  If
     * there are no classes, null is returned instead.
-    * @return {?SplitsBrowser.Model.Course} The course used by all classes.
+    * @return {SplitsBrowser.Model.Course|null} The course used by all classes.
     */
     CourseClassSet.prototype.getCourse = function () {
         return (this.classes.length > 0) ? this.classes[0].course : null;
@@ -118,7 +118,7 @@
     * Returns the name of the 'primary' class, i.e. that that has been
     * chosen in the drop-down list.  If there are no classes, null is returned
     * instead.
-    * @return {?String} Name of the primary class.
+    * @return {String|null} Name of the primary class.
     */
     CourseClassSet.prototype.getPrimaryClassName = function () {
         return (this.classes.length > 0) ? this.classes[0].name : null;
@@ -136,7 +136,7 @@
     /**
     * Returns whether any of the classes within this set have data that
     * SplitsBrowser can identify as dubious.
-    * @return {boolean} True if any of the classes within this set contain
+    * @return {Boolean} True if any of the classes within this set contain
     *     dubious data, false if none of them do.
     */
     CourseClassSet.prototype.hasDubiousData = function () {
@@ -145,7 +145,7 @@
 
     /**
     * Returns whether this course-class set has team data.
-    * @return {boolean} True if all of the classes within this course-class
+    * @return {Boolean} True if all of the classes within this course-class
     *     set contain team data, false otherwise.
     */
     CourseClassSet.prototype.hasTeamData = function () {
@@ -156,7 +156,7 @@
     * Returns the number of legs in this course-class set, if this
     * course-class set contains team data.  If not, or the number of
     * legs among the classes is inconsistent, null is returned.
-    * @return {Number} The number of legs in the team class, or null
+    * @return {Number|null} The number of legs in the team class, or null
     *     if this can't be determined.
     */
     CourseClassSet.prototype.getLegCount = function() {
@@ -181,8 +181,8 @@
     /**
     * Return a list of objects that describe when the given array of times has
     * null or NaN values.  This does not include trailing null or NaN values.
-    * @param {Array} times - Array of times, which may include NaNs and nulls.
-    * @param {boolean} includeEnd - Whether to include a blank range that ends
+    * @param {Array} times Array of times, which may include NaNs and nulls.
+    * @param {Boolean} includeEnd Whether to include a blank range that ends
     *    at the end of the array.
     * @return {Array} Array of objects that describes when the given array has
     *    ranges of null and/or NaN values.
@@ -213,7 +213,7 @@
     /**
     * Fill in any NaN values in the given list of cumulative times by doing
     * a linear interpolation on the missing values.
-    * @param {Array} cumTimes - Array of cumulative times.
+    * @param {Array} cumTimes Array of cumulative times.
     * @return {Array} Array of cumulative times with NaNs replaced.
     */
     function fillBlankRangesInCumulativeTimes(cumTimes) {
@@ -262,7 +262,7 @@
     * the class.
     * If at least one control has no results recording a time for it, null is
     * returned.  If there are no classes at all, null is returned.
-    * @returns {?Array} Cumulative splits of the imaginary result with fastest
+    * @return {Array|null} Cumulative splits of the imaginary result with fastest
     *           time, if any.
     */
     CourseClassSet.prototype.getFastestCumTimes = function () {
@@ -274,8 +274,8 @@
     * the given classes, with a given percentage of their time added.
     * If at least one control has no results recording a time for it, null is
     * is returned.  If there are no classes at all, null is returned.
-    * @param {Number} percent - The percentage of time to add.
-    * @returns {?Array} Cumulative splits of the imaginary result with fastest
+    * @param {Number} percent The percentage of time to add.
+    * @return {Array|null} Cumulative splits of the imaginary result with fastest
     *           time, if any, after adding a percentage.
     */
     CourseClassSet.prototype.getFastestCumTimesPlusPercentage = function (percent) {
@@ -379,7 +379,7 @@
     /**
     * Returns the cumulative times for the result with the given index, with
     * any runs of blanks filled in.
-    * @param {Number} resultIndex - The index of the result.
+    * @param {Number} resultIndex The index of the result.
     * @return {Array} Array of cumulative times.
     */
     CourseClassSet.prototype.getCumulativeTimesForResult = function (resultIndex) {
@@ -495,13 +495,13 @@
 
     /**
     * Return data from the current classes in a form suitable for plotting in a chart.
-    * @param {Array} referenceCumTimes - 'Reference' cumulative time data, such
+    * @param {Array} referenceCumTimes 'Reference' cumulative time data, such
     *            as that of the winner, or the fastest time.
-    * @param {Array} currentIndexes - Array of indexes that indicate which
+    * @param {Array} currentIndexes Array of indexes that indicate which
     *           results from the overall list are plotted.
-    * @param {Object} chartType - The type of chart to draw.
-    * @param {Number?} legIndex - The index of the selected leg, or null for all legs.
-    * @returns {Object} Array of data.
+    * @param {Object} chartType The type of chart to draw.
+    * @param {Number|null} legIndex The index of the selected leg, or null for all legs.
+    * @return {Object} Array of data.
     */
     CourseClassSet.prototype.getChartData = function (referenceCumTimes, currentIndexes, chartType, legIndex) {
         if (typeof referenceCumTimes === "undefined") {

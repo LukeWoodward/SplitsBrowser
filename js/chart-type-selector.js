@@ -25,8 +25,8 @@
 
     /**
     * A control that wraps a drop-down list used to choose the types of chart to view.
-    * @param {HTMLElement} parent - The parent element to add the control to.
-    * @param {Array} chartTypes - Array of types of chart to list.
+    * @param {HTMLElement} parent The parent element to add the control to.
+    * @param {Array} chartTypes Array of types of chart to list.
     */
     function ChartTypeSelector(parent, chartTypes) {
         this.changeHandlers = [];
@@ -70,7 +70,7 @@
     * graph is made, and the selection will revert to what it was before.  If
     * it is null, the race graph can be selected.
     *
-    * @param {?Function} raceGraphDisabledNotifier - Function to call when the
+    * @param {Function|null} raceGraphDisabledNotifier Function to call when the
     *     race graph is selected
     */
     ChartTypeSelector.prototype.setRaceGraphDisabledNotifier = function (raceGraphDisabledNotifier) {
@@ -89,8 +89,8 @@
     *
     * The selected type of chart is passed to the handler function.
     *
-    * @param {Function} handler - Handler function to be called whenever the
-    *                             chart type changes.
+    * @param {Function} handler Handler function to be called whenever the
+    *                           chart type changes.
     */
     ChartTypeSelector.prototype.registerChangeHandler = function (handler) {
         if (this.changeHandlers.indexOf(handler) === -1) {
@@ -109,7 +109,7 @@
     /**
     * Sets the chart type.  If the chart type given is not recognised, nothing
     * happens.
-    * @param {Object} chartType - The chart type selected.
+    * @param {Object} chartType The chart type selected.
     */
     ChartTypeSelector.prototype.setChartType = function (chartType) {
         var index = this.chartTypes.indexOf(chartType);

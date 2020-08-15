@@ -26,7 +26,7 @@
 
     /**
     * A control that wraps a drop-down list used to choose between classes.
-    * @param {HTMLElement} parent - The parent element to add the control to.
+    * @param {HTMLElement} parent The parent element to add the control to.
     */
     function ClassSelector(parent) {
         this.changeHandlers = [];
@@ -99,7 +99,7 @@
     /**
     * Sets whether the other-classes selector is enabled, if it is shown at
     * all.
-    * @param {boolean} otherClassesEnabled - true to enable the selector, false
+    * @param {Boolean} otherClassesEnabled True to enable the selector, false
     *      to disable it.
     */
     ClassSelector.prototype.setOtherClassesEnabled = function (otherClassesEnabled) {
@@ -112,7 +112,7 @@
     * Sets the list of classes that this selector can choose between.
     *
     * If there are no classes, a 'dummy' entry is added
-    * @param {Array} classes - Array of CourseClass objects containing class
+    * @param {Array} classes Array of CourseClass objects containing class
     *     data.
     */
     ClassSelector.prototype.setClasses = function(classes) {
@@ -150,7 +150,7 @@
     * each handler function.  This array is guaranteed to be non-empty.  The
     * first index in the array is the 'primary' class.
     *
-    * @param {Function} handler - Handler function to be called whenever the class
+    * @param {Function} handler Handler function to be called whenever the class
     *                   changes.
     */
     ClassSelector.prototype.registerChangeHandler = function(handler) {
@@ -161,7 +161,7 @@
 
     /**
     * Sets the selected classes.
-    * @param {Array} selectedIndexes - Array of indexes of classes.
+    * @param {Array} selectedIndexes Array of indexes of classes.
     */
     ClassSelector.prototype.selectClasses = function (selectedIndexes) {
         if (selectedIndexes.length > 0 && selectedIndexes.every(function (index) { return 0 <= index && index < this.dropDown.options.length; }, this)) {
@@ -173,7 +173,7 @@
 
     /**
     * Returns the indexes of the selected classes.
-    * @param {Array} Indexes of selected classes.
+    * @return {Array} Indexes of selected classes.
     */
     ClassSelector.prototype.getSelectedClasses = function () {
         if (this.dropDown.disabled) {
@@ -216,7 +216,7 @@
     /**
     * Updates the other-classes selector div following a change of selected
     * 'main' class.
-    * @param {d3.set} selectedOtherClassIndexes - Array of selected other-class indexes.
+    * @param {d3.set} selectedOtherClassIndexes Array of selected other-class indexes.
     */
     ClassSelector.prototype.updateOtherClasses = function (selectedOtherClassIndexes) {
         this.otherClassesList.style("display", "none");
@@ -278,7 +278,7 @@
 
     /**
     * Toggles the selection of an other class.
-    * @param {Number} classIdx - Index of the class among the list of all classes.
+    * @param {Number} classIdx Index of the class among the list of all classes.
     */
     ClassSelector.prototype.toggleOtherClass = function (classIdx) {
         if (this.selectedOtherClassIndexes.has(classIdx)) {

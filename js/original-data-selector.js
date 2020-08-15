@@ -30,7 +30,7 @@
     /**
     * Constructs a new OriginalDataSelector object.
     * @constructor
-    * @param {d3.selection} parent - d3 selection containing the parent to
+    * @param {d3.selection} parent d3 selection containing the parent to
     *     insert the selector into.
     */
     function OriginalDataSelector(parent) {
@@ -74,8 +74,8 @@
     * repaired data is changed.
     *
     * If the handler was already registered, nothing happens.
-    * @param {Function} handler - Function to be called whenever the choice
-    *                             changes.
+    * @param {Function} handler Function to be called whenever the choice
+    *                           changes.
     */
     OriginalDataSelector.prototype.registerChangeHandler = function (handler) {
         if (this.handlers.indexOf(handler) === -1) {
@@ -88,8 +88,8 @@
     * original or repaired data is changed.
     *
     * If the handler given was never registered, nothing happens.
-    * @param {Function} handler - Function to be called whenever the choice
-    *                             changes.
+    * @param {Function} handler Function to be called whenever the choice
+    *                           changes.
     */
     OriginalDataSelector.prototype.deregisterChangeHandler = function (handler) {
         var index = this.handlers.indexOf(handler);
@@ -107,7 +107,7 @@
 
     /**
     * Returns whether original data is selected.
-    * @return {boolean} True if original data is selected, false if not.
+    * @return {Boolean} True if original data is selected, false if not.
     */
     OriginalDataSelector.prototype.isOriginalDataSelected = function () {
         return this.checkbox.checked;
@@ -123,7 +123,7 @@
 
     /**
     * Sets whether this original-data selector should be visible.
-    * @param {boolean} isVisible - True if the original-data selector should be
+    * @param {Boolean} isVisible True if the original-data selector should be
     *     visible, false if it should be hidden.
     */
     OriginalDataSelector.prototype.setVisible = function (isVisible) {
@@ -132,7 +132,7 @@
 
     /**
     * Sets whether the control is enabled.
-    * @param {boolean} isEnabled - True if the control is enabled, false if
+    * @param {Boolean} isEnabled True if the control is enabled, false if
     *      disabled.
     */
     OriginalDataSelector.prototype.setEnabled = function (isEnabled) {
@@ -143,5 +143,4 @@
     };
 
     SplitsBrowser.Controls.OriginalDataSelector = OriginalDataSelector;
-
 })();

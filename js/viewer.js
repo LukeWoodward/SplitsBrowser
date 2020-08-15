@@ -60,7 +60,7 @@
 
     /**
     * Checks that D3 version 4 or later is present.
-    * @return {Boolean} true if D3 version 4 is present, false if no D3 was found
+    * @return {Boolean} True if D3 version 4 is present, false if no D3 was found
     *     or a version of D3 older version 4 was found.
     */
     function checkD3Version4() {
@@ -78,8 +78,8 @@
     /**
     * The 'overall' viewer object responsible for viewing the splits graph.
     * @constructor
-    * @param {?Object} options - Optional object containing various options
-    *     to SplitsBrowser.
+    * @param {Object|String|HTMLElement|undefined} options Optional object
+    *     containing various options to SplitsBrowser.
     */
     function Viewer(options) {
         this.options = options;
@@ -121,7 +121,7 @@
     * up an alert box in normal use and call some other function during
     * testing.
     *
-    * @param {String} message - The message to show.
+    * @param {String} message The message to show.
     */
     function alerter(message) {
         alert(message);
@@ -146,7 +146,7 @@
 
     /**
     * Sets the classes that the viewer can view.
-    * @param {SplitsBrowser.Model.Event} eventData - All event data loaded.
+    * @param {SplitsBrowser.Model.Event} eventData All event data loaded.
     */
     Viewer.prototype.setEvent = function (eventData) {
         this.eventData = eventData;
@@ -591,7 +591,7 @@
     /**
     * Sets the currently-selected classes in various objects that need it:
     * current course-class set, comparison selector and results table.
-    * @param {Array} classIndexes - Array of selected class indexes.
+    * @param {Array} classIndexes Array of selected class indexes.
     */
     Viewer.prototype.setClasses = function (classIndexes) {
         this.currentClasses = classIndexes.map(function (index) { return this.classes[index]; }, this);
@@ -605,7 +605,7 @@
 
     /**
     * Initialises the viewer with the given initial classes.
-    * @param {Array} classIndexes - Array of selected class indexes.
+    * @param {Array} classIndexes Array of selected class indexes.
     */
     Viewer.prototype.initClasses = function (classIndexes) {
         this.classSelector.selectClasses(classIndexes);
@@ -618,7 +618,7 @@
 
     /**
     * Change the graph to show the classes with the given indexes.
-    * @param {Number} classIndexes - The (zero-based) indexes of the classes.
+    * @param {Number} classIndexes The (zero-based) indexes of the classes.
     */
     Viewer.prototype.selectClasses = function (classIndexes) {
         if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
@@ -650,7 +650,7 @@
 
     /**
     * Change the type of chart shown.
-    * @param {Object} chartType - The type of chart to draw.
+    * @param {Object} chartType The type of chart to draw.
     */
     Viewer.prototype.selectChartType = function (chartType) {
         if (chartType.isResultsTable) {
@@ -677,7 +677,7 @@
 
     /**
     * Change the type of chart shown.
-    * @param {Object} chartType - The type of chart to draw.
+    * @param {Object} chartType The type of chart to draw.
     */
     Viewer.prototype.selectChartTypeAndRedraw = function (chartType) {
         this.selectChartType(chartType);
@@ -691,7 +691,7 @@
 
     /**
     * Selects original or repaired data, doing any recalculation necessary.
-    * @param {boolean} showOriginalData - True to show original data, false to
+    * @param {Boolean} showOriginalData True to show original data, false to
     *     show repaired data.
     */
     Viewer.prototype.selectOriginalOrRepairedData = function (showOriginalData) {
@@ -706,7 +706,7 @@
 
     /**
     * Shows original or repaired data.
-    * @param {boolean} showOriginalData - True to show original data, false to
+    * @param {Boolean} showOriginalData True to show original data, false to
     *     show repaired data.
     */
     Viewer.prototype.showOriginalOrRepairedData = function (showOriginalData) {
@@ -749,7 +749,7 @@
 
     /**
     * Updates the state of the viewer to reflect query-string arguments parsed.
-    * @param {Object} parsedQueryString - Parsed query-string object.
+    * @param {Object} parsedQueryString Parsed query-string object.
     */
     Viewer.prototype.updateFromQueryString = function (parsedQueryString) {
         if (parsedQueryString.classes === null) {
@@ -801,8 +801,8 @@
     /**
     * Shows a message that appears if SplitsBrowser is unable to load event
     * data.
-    * @param {String} key - The key of the message to show.
-    * @param {Object} params - Object mapping parameter names to values.
+    * @param {String} key The key of the message to show.
+    * @param {Object} params Object mapping parameter names to values.
     */
     function showLoadFailureMessage(key, params) {
         var errorDiv = d3.select("body")
@@ -818,8 +818,8 @@
 
     /**
     * Reads in the data in the given string and starts SplitsBrowser.
-    * @param {String} data - String containing the data to read.
-    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    * @param {String} data String containing the data to read.
+    * @param {Object|String|HTMLElement|undefined} options Optional object
     *     containing various options to SplitsBrowser.  It can also be used for
     *     an HTML element that forms a 'banner' across the top of the page.
     *     This element can be specified by a CSS selector for the element, or
@@ -883,9 +883,9 @@
     /**
     * Handles an asynchronous callback that fetched event data, by parsing the
     * data and starting SplitsBrowser.
-    * @param {String} data - The data returned from the AJAX request.
-    * @param {String} status - The status of the request.
-    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    * @param {String} data The data returned from the AJAX request.
+    * @param {String} status The status of the request.
+    * @param {Object|String|HTMLElement|undefined} options Optional object
     *     containing various options to SplitsBrowser.  It can also be used for
     *     an HTML element that forms a 'banner' across the top of the page.
     *     This element can be specified by a CSS selector for the element, or
@@ -901,9 +901,9 @@
 
     /**
     * Handles the failure to read an event.
-    * @param {jQuery.jqXHR} jqXHR - jQuery jqXHR object.
-    * @param {String} textStatus - The text status of the request.
-    * @param {String} errorThrown - The error message returned from the server.
+    * @param {jQuery.jqXHR} jqXHR jQuery jqXHR object.
+    * @param {String} textStatus The text status of the request.
+    * @param {String} errorThrown The error message returned from the server.
     */
     function readEventDataError(jqXHR, textStatus, errorThrown) {
         showLoadFailureMessage("LoadFailedReadError", {"$$ERROR$$": errorThrown});
@@ -911,8 +911,8 @@
 
     /**
     * Loads the event data in the given URL and starts SplitsBrowser.
-    * @param {String} eventUrl - The URL that points to the event data to load.
-    * @param {Object|String|HTMLElement|undefined} options - Optional object
+    * @param {String} eventUrl The URL that points to the event data to load.
+    * @param {Object|String|HTMLElement|undefined} options Optional object
     *     containing various options to SplitsBrowser.  It can also be used for
     *     an HTML element that forms a 'banner' across the top of the page.
     *     This element can be specified by a CSS selector for the element, or

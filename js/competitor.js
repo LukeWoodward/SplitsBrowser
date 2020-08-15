@@ -25,8 +25,8 @@
     * Object that represents the data for a single competitor.
     *
     * @constructor
-    * @param {String} name - The name of the competitor.
-    * @param {String} club - The name of the competitor's club.
+    * @param {String} name The name of the competitor.
+    * @param {String} club The name of the competitor's club.
     */
     function Competitor(name, club) {
         this.name = name;
@@ -38,7 +38,7 @@
 
     /**
     * Sets the competitor's year of birth.
-    * @param {Number} yearOfBirth - The competitor's year of birth.
+    * @param {Number} yearOfBirth The competitor's year of birth.
     */
     Competitor.prototype.setYearOfBirth = function (yearOfBirth) {
         this.yearOfBirth = yearOfBirth;
@@ -46,7 +46,7 @@
 
     /**
     * Sets the competitor's gender.  This should be "M" or "F".
-    * @param {String} gender - The competitor's gender, "M" or "F".
+    * @param {String} gender The competitor's gender, "M" or "F".
     */
     Competitor.prototype.setGender = function (gender) {
         this.gender = gender;

@@ -29,7 +29,7 @@
     /**
     * Constructs a new WarningViewer object.
     * @constructor
-    * @param {d3.selection} parent - d3 selection containing the parent to
+    * @param {d3.selection} parent d3 selection containing the parent to
     *     insert the selector into.
     */
     function WarningViewer(parent) {
@@ -109,7 +109,7 @@
 
     /**
     * Sets the list of visible warnings.
-    * @param {Array} warnings - Array of warning messages.
+    * @param {Array} warnings Array of warning messages.
     */
     WarningViewer.prototype.setWarnings = function (warnings) {
         var errorsSelection = this.warningList.selectAll("div")
