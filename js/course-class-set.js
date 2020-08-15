@@ -446,11 +446,13 @@
     * array containing the split time and the name.  The array is returned in
     * ascending order of split time.
     *
-    * @param {Number} numSplits - Maximum number of split times to return.
-    * @param {Number} controlIdx - Index of the control.
+    * @param {Number} numSplits Maximum number of split times to return.
+    * @param {Number} controlIdx Index of the control.
+    * @param {Number|null} selectedLegIndex The index of the selected leg, or null
+    *       to not filter by selected leg.
     * @return {Array} Array of the fastest splits to the given control.
     */
-    CourseClassSet.prototype.getFastestSplitsTo = function (numSplits, controlIdx) {
+    CourseClassSet.prototype.getFastestSplitsTo = function (numSplits, controlIdx, selectedLegIndex) {
         if (typeof numSplits !== "number" || numSplits <= 0) {
             throwInvalidData("The number of splits must be a positive integer");
         } else if (typeof controlIdx !== "number" || controlIdx <= 0 || controlIdx > this.numControls + 1) {
@@ -468,7 +470,7 @@
             results.sort(comparator);
             var fastestSplits = [];
             for (var i = 0; i < results.length && i < numSplits; i += 1) {
-                fastestSplits.push({name: results[i].owner.name, split: results[i].getSplitTimeTo(controlIdx)});
+                fastestSplits.push({name: results[i].getOwnerNameForLeg(selectedLegIndex), split: results[i].getSplitTimeTo(controlIdx)});
             }
 
             return fastestSplits;

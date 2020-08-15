@@ -138,6 +138,12 @@
         return createTeamResult(1, [teamMemberResult1, teamMemberResult2], new Team("Team 1", "ABC"));
     }
 
+    function getTeamResult2() {
+        var teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 78, 287, 486, 603], {name: "Third Runner"});
+        var teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 603, [0, 74, 292, 488, 641], {name: "Fourth Runner"});
+        return createTeamResult(1, [teamMemberResult1, teamMemberResult2], new Team("Team 2", "DEF"));
+    }
+
     QUnit.test("Can create a CourseClassSet from an empty array of course-classes", function (assert) {
         var emptySet = new CourseClassSet([]);
         assert.ok(emptySet.isEmpty());
@@ -564,7 +570,7 @@
         var result3 = getResult3();
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3);
+        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
         assert.deepEqual(fastestSplits, [{split: 199, name: result3.owner.name}, {split: 209, name: result1.owner.name}]);
     });
 
@@ -574,7 +580,7 @@
         var result3 = getResult3();
         var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [result1]), new CourseClass("Test 2", 3, [result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3);
+        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
         assert.deepEqual(fastestSplits, [{split: 199, name: result3.owner.name}, {split: 209, name: result1.owner.name}]);
     });
 
@@ -584,7 +590,7 @@
         var result3 = getResult3();
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 4);
+        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 4, null);
         assert.deepEqual(fastestSplits, [{split: 100, name: result1.owner.name}, {split: 106, name: result2.owner.name}]);
     });
 
@@ -594,7 +600,7 @@
         var result3 = getResult3();
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(4, 3);
+        var fastestSplits = courseClassSet.getFastestSplitsTo(4, 3, null);
         assert.deepEqual(fastestSplits, [{split: 199, name: result3.owner.name}, {split: 209, name: result1.owner.name}, {split: 212, name: result2.owner.name}]);
     });
 
@@ -604,7 +610,7 @@
         var result3 = getResult3();
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3);
+        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
         assert.deepEqual(fastestSplits, [{split: 199, name: result3.owner.name}, {split: 212, name: result2.owner.name}]);
     });
 
@@ -614,7 +620,7 @@
         var result3 = getResult3WithNullSplitForControl2();
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3);
+        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
         assert.deepEqual(fastestSplits, [{split: 209, name: result1.owner.name}, {split: 212, name: result2.owner.name}]);
     });
 
@@ -624,7 +630,7 @@
         var result3 = getResult3WithNullSplitForControl3();
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3);
+        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
         assert.deepEqual(fastestSplits, [{split: 212, name: result2.owner.name}]);
     });
 
@@ -634,8 +640,35 @@
         var result3 = getResult3();
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(3, 2);
+        var fastestSplits = courseClassSet.getFastestSplitsTo(3, 2, null);
         assert.deepEqual(fastestSplits, [{split: 197, name: result2.owner.name}, {split: 209, name: result3.owner.name}]);
+    });
+
+    QUnit.test("Can get fastest splits in team course-class set", function (assert) {
+        var result1 = getTeamResult();
+        var result2 = getTeamResult2();
+        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
+
+        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 2, null);
+        assert.deepEqual(fastestSplits, [{split: 209, name: result2.owner.name}, {split: 221, name: result1.owner.name}]);
+    });
+
+    QUnit.test("Can get fastest splits in first leg of team course-class set", function (assert) {
+        var result1 = getTeamResult();
+        var result2 = getTeamResult2();
+        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
+
+        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 2, 0);
+        assert.deepEqual(fastestSplits, [{split: 209, name: result2.owner.members[0].name}, {split: 221, name: result1.owner.members[0].name}]);
+    });
+
+    QUnit.test("Can get fastest splits in second leg of team course-class set", function (assert) {
+        var result1 = getTeamResult();
+        var result2 = getTeamResult2();
+        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
+
+        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 2, 1);
+        assert.deepEqual(fastestSplits, [{split: 209, name: result2.owner.members[1].name}, {split: 221, name: result1.owner.members[1].name}]);
     });
 
     /**

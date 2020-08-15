@@ -120,6 +120,7 @@ SplitsBrowser.Messages.en_gb = {
     // because no results registered a split for the control, or those
     // that did only registered a dubious split.
     SelectedClassesPopupPlaceholder: "No competitors",
+    SelectedClassesPopupPlaceholderTeams: "No teams",
     
     // Header for the 'Fastest leg time' popup dialog.
     FastestLegTimePopupHeader: "Fastest leg-time $$START$$ to $$END$$",

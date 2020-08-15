@@ -120,6 +120,8 @@ SplitsBrowser.Messages.sl_si = {
     // because no results registered a split for the control, or those
     // that did only registered a dubious split.
     SelectedClassesPopupPlaceholder: "Ni tekmovalcev",
+    // TO BE TRANSLATED
+    SelectedClassesPopupPlaceholderTeams: "No teams", 
 
     // Header for the 'Fastest leg time' popup dialog.
     FastestLegTimePopupHeader: "Najhitrejši čas etape $$START$$ do $$END$$",

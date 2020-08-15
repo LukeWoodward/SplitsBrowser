@@ -38,18 +38,27 @@
 
     /**
     * Returns the fastest splits to a control.
-    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet - The
+    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet The
     *     course-class set containing the splits data.
-    * @param {Number} controlIndex - The index of the control.
+    * @param {Number} controlIndex The index of the control.
+    * @param {Number|null} selectedLegIndex The index of the selected leg, or null
+    *     to not return leg-specific data.
     * @return {Object} Fastest-split data.
     */
-    ChartPopupData.getFastestSplitsPopupData = function (courseClassSet, controlIndex) {
-        var data = courseClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, controlIndex);
+    ChartPopupData.getFastestSplitsPopupData = function (courseClassSet, controlIndex, selectedLegIndex) {
+        var data = courseClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, controlIndex, selectedLegIndex);
         data = data.map(function (comp) {
             return {time: comp.split, name: comp.name, highlight: false};
         });
 
-        return {title: getMessage("SelectedClassesPopupHeader"), data: data, placeholder: getMessage("SelectedClassesPopupPlaceholder")};
+        var placeholderMessageKey;
+        if (courseClassSet.hasTeamData() && selectedLegIndex === null) {
+            placeholderMessageKey = "SelectedClassesPopupPlaceholderTeams";
+        } else {
+            placeholderMessageKey = "SelectedClassesPopupPlaceholder";
+        }
+
+        return {title: getMessage("SelectedClassesPopupHeader"), data: data, placeholder: getMessage(placeholderMessageKey)};
     };
 
     /**

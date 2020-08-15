@@ -26,6 +26,8 @@
     var formatTime = SplitsBrowser.formatTime;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
+    var Team = SplitsBrowser.Model.Team;
     var CourseClass = SplitsBrowser.Model.CourseClass;
     var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
     var Course = SplitsBrowser.Model.Course;
@@ -44,10 +46,24 @@
         return new CourseClassSet([new CourseClass("Test class", 3, results)]);
     }
 
+    function getTestTeamCourseClassSet() {
+        var results = d3.range(0, 5).map(function (num) {
+            var timeOffset1 = (num * 7) % 11;
+            var memberResult1 = fromSplitTimes(1, "Name" + num, "Club" + num, 10 * 3600 + 127 * num, [65 + 10 * timeOffset1, 221 + 20 * timeOffset1, 209 + 15 * timeOffset1, 100 + 5 * timeOffset1]);
+            var timeOffset2 = ((num + 5) * 7) % 11;
+            var memberResult2 = fromSplitTimes(1, "SecondName" + num, "Club" + num, 10 * 3600 + 127 * num, [65 + 10 * timeOffset2, 221 + 20 * timeOffset2, 209 + 15 * timeOffset2, 100 + 5 * timeOffset2]);
+            return createTeamResult(1, [memberResult1, memberResult2], new Team("Team " + num, "Club " + num));
+        });
+
+        var courseClass = new CourseClass("Test class", 3, results);
+        courseClass.setIsTeamClass([3, 3]);
+        return new CourseClassSet([courseClass]);
+    }
+
     QUnit.test("Can get selected classes popup data", function (assert) {
 
         var courseClassSet = getTestCourseClassSet();
-        var actualData = ChartPopupData.getFastestSplitsPopupData(courseClassSet, 2);
+        var actualData = ChartPopupData.getFastestSplitsPopupData(courseClassSet, 2, null);
 
         var expectedData = {
             title: getMessage("SelectedClassesPopupHeader"),
@@ -57,6 +73,42 @@
                 // multiplying by 7 modulo 11.
                 var compIndex = (num * 8) % 11;
                 return { name: "Name" + compIndex, time: 221 + num * 20, highlight: false };
+            }),
+            placeholder: getMessage("SelectedClassesPopupPlaceholder")
+        };
+
+        assert.deepEqual(actualData, expectedData);
+    });
+
+    QUnit.test("Can get selected classes popup data for team event", function (assert) {
+
+        var courseClassSet = getTestTeamCourseClassSet();
+        var actualData = ChartPopupData.getFastestSplitsPopupData(courseClassSet, 2, null);
+
+        var expectedTimes = [221, 281, 341, 361, 421];
+        var expectedData = {
+            title: getMessage("SelectedClassesPopupHeader"),
+            data: d3.range(0, 5).map(function (num) {
+                var teamIndex = (num * 2) % 5;
+                return { name: "Team " + teamIndex, time: expectedTimes[num], highlight: false };
+            }),
+            placeholder: getMessage("SelectedClassesPopupPlaceholderTeams")
+        };
+
+        assert.deepEqual(actualData, expectedData);
+    });
+
+    QUnit.test("Can get selected classes popup data for second leg of team event", function (assert) {
+
+        var courseClassSet = getTestTeamCourseClassSet();
+        var actualData = ChartPopupData.getFastestSplitsPopupData(courseClassSet, 1, 1);
+
+        var expectedTimes = [65, 95, 125, 135, 165];
+        var expectedData = {
+            title: getMessage("SelectedClassesPopupHeader"),
+            data: d3.range(0, 5).map(function (num) {
+                var teamIndex = (num * 2) % 5;
+                return { name: "SecondName" + teamIndex, time: expectedTimes[num], highlight: false };
             }),
             placeholder: getMessage("SelectedClassesPopupPlaceholder")
         };

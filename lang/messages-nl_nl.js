@@ -115,6 +115,8 @@ SplitsBrowser.Messages.nl_nl = {
     // Chart popups. 
       
     SelectedClassesPopupHeader: "Geselecteerde routes", 
+    // TO BE TRANSLATED
+    SelectedClassesPopupPlaceholderTeams: "No teams", 
       
     // Placeholder text shown when the Selected classes dialog is empty, 
     // because no results registered a split for the control, or those 

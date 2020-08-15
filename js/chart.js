@@ -239,7 +239,7 @@
     * @return {Array} Array of fastest-split data.
     */
     Chart.prototype.getFastestSplitsPopupData = function () {
-        return ChartPopupData.getFastestSplitsPopupData(this.courseClassSet, this.currentControlIndex);
+        return ChartPopupData.getFastestSplitsPopupData(this.courseClassSet, this.currentControlIndex, this.selectedLegIndex);
     };
 
     /**

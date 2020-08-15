@@ -120,6 +120,8 @@ SplitsBrowser.Messages.pt_br = {
     // porque não tem competidores registrado na pernada para o controle, ou que
     // apenas tinha apresentado pernada duvidosa.
     SelectedClassesPopupPlaceholder: "Sem compeditores",
+    // TO BE TRANSLATED
+    SelectedClassesPopupPlaceholderTeams: "No teams", 
     
     // Cabeçalho para janela 'Tempo da pernada mais rápida'.
     FastestLegTimePopupHeader: "Tempo da pernada mais rápida $$START$$ até $$END$$",

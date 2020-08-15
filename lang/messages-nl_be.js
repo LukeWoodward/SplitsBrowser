@@ -121,6 +121,8 @@ SplitsBrowser.Messages.nl_be = {
     // because no competitors registered a split for the control, or those
     // that did only registered a dubious split.
     SelectedClassesPopupPlaceholder: "Geen deelnemers",
+    // TO BE TRANSLATED
+    SelectedClassesPopupPlaceholderTeams: "No teams", 
     
     // Header for the 'Fastest leg time' popup dialog.
     FastestLegTimePopupHeader: "Snelste tijd $$START$$ tot $$END$$",

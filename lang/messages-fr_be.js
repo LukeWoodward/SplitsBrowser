@@ -120,7 +120,9 @@ SplitsBrowser.Messages.fr_be = {
     // because no results registered a split for the control, or those
     // that did only registered a dubious split.
     SelectedClassesPopupPlaceholder: "Aucun coureur n'a terminé ce circuit",
-    
+    // TO BE TRANSLATED
+    SelectedClassesPopupPlaceholderTeams: "No teams", 
+
     // Header for the 'Fastest leg time' popup dialog.
     FastestLegTimePopupHeader: "Intermédiaire le plus rapide $$START$$ - $$END$$",
 
