@@ -86,6 +86,8 @@
         assert.ok(courseClass.isTeamClass, "Course-class should be a team class");
         assert.deepEqual(courseClass.numbersOfControls, [3, 3]);
         assert.deepEqual(courseClass.offsets, [0, 4]);
+        assert.deepEqual(courseClass.results[0].offsets, courseClass.offsets);
+        assert.deepEqual(courseClass.results[1].offsets, courseClass.offsets);
     });
 
     QUnit.test("Course-class that has recorded that it is a team class with legs of varying length reports itself as so.", function (assert) {
@@ -94,6 +96,8 @@
         assert.ok(courseClass.isTeamClass, "Course-class should be a team class");
         assert.deepEqual(courseClass.numbersOfControls, [3, 8, 7, 2, 6]);
         assert.deepEqual(courseClass.offsets, [0, 4, 13, 21, 24]);
+        assert.deepEqual(courseClass.results[0].offsets, courseClass.offsets);
+        assert.deepEqual(courseClass.results[1].offsets, courseClass.offsets);
     });
 
     QUnit.test("Creating a class with results sets the class name in each result's result", function (assert) {

@@ -281,11 +281,22 @@
         ];
     }
 
+    /**
+    * Returns some test team result-details objects for testing the crossing-
+    * runners functionality.
+    * @return {Array} Array of result-details objects.
+    */
+    function getTeamResultDetailsForCrossingRunners() {
+        var resultDetailsArray = getResultDetailsForCrossingRunners();
+        resultDetailsArray.forEach(function (resultDetails) { resultDetails.result.setOffsets([0, 2]); });
+        return resultDetailsArray;
+    }
+
     QUnit.test("If no runners are selected, when crossing results are selected, no other results are selected", function (assert) {
         reset();
         var selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
-        selection.selectCrossingRunners(getResultDetailsForCrossingRunners());
+        selection.selectCrossingRunners(getResultDetailsForCrossingRunners(), null);
         assert.strictEqual(callCount, 0, "No call to the change-handler should be registered");
     });
 
@@ -294,7 +305,7 @@
         var selection = new ResultSelection(3);
         selection.toggle(1);
         selection.registerChangeHandler(testHandler);
-        selection.selectCrossingRunners(getResultDetailsForCrossingRunners());
+        selection.selectCrossingRunners(getResultDetailsForCrossingRunners(), null);
         assert.deepEqual(lastIndexes, [1, 2], "Selected indexes should be 1 and 2");
         assert.strictEqual(callCount, 1, "One call to the change-handler should be registered");
     });
@@ -305,7 +316,7 @@
         selection.toggle(0);
         selection.toggle(1);
         selection.registerChangeHandler(testHandler);
-        selection.selectCrossingRunners(getResultDetailsForCrossingRunners());
+        selection.selectCrossingRunners(getResultDetailsForCrossingRunners(), null);
         assert.strictEqual(callCount, 0, "No call to the change-handler should be registered");
     });
 
@@ -316,9 +327,39 @@
         selection.registerChangeHandler(testHandler);
         var resultDetails = getResultDetailsForCrossingRunners();
         resultDetails[2].visible = false;
-        selection.selectCrossingRunners(resultDetails);
+        selection.selectCrossingRunners(resultDetails, null);
         assert.deepEqual(lastIndexes, [1], "Selected indexes should be just 1");
-        assert.strictEqual(callCount, 1, "No call to the change-handler should be registered");
+        assert.strictEqual(callCount, 1, "One call to the change-handler should be registered");
+    });
+
+    QUnit.test("If a single team is selected, when crossing results for the team are selected, then one other result is selected", function (assert) {
+        reset();
+        var selection = new ResultSelection(3);
+        selection.toggle(1);
+        selection.registerChangeHandler(testHandler);
+        selection.selectCrossingRunners(getTeamResultDetailsForCrossingRunners(), null);
+        assert.deepEqual(lastIndexes, [1, 2], "Selected indexes should be 1 and 2");
+        assert.strictEqual(callCount, 1, "One call to the change-handler should be registered");
+    });
+
+    QUnit.test("If a single team is selected, when crossing results for the first leg are selected, then no other result is selected", function (assert) {
+        reset();
+        var selection = new ResultSelection(3);
+        selection.toggle(1);
+        selection.registerChangeHandler(testHandler);
+        selection.selectCrossingRunners(getTeamResultDetailsForCrossingRunners(), 0);
+        assert.deepEqual(lastIndexes, [1], "Selected indexes should be just 1");
+        assert.strictEqual(callCount, 1, "One call to the change-handler should be registered");
+    });
+
+    QUnit.test("If a single team is selected, when crossing results for the second leg are selected, then one other result is selected", function (assert) {
+        reset();
+        var selection = new ResultSelection(3);
+        selection.toggle(1);
+        selection.registerChangeHandler(testHandler);
+        selection.selectCrossingRunners(getTeamResultDetailsForCrossingRunners(), 1);
+        assert.deepEqual(lastIndexes, [1, 2], "Selected indexes should be 1 and 2");
+        assert.strictEqual(callCount, 1, "One call to the change-handler should be registered");
     });
 
     QUnit.test("Cannot migrate from an old list of results that isn't an array", function (assert) {

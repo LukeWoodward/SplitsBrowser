@@ -65,6 +65,9 @@
         for (var index = 1; index < numbersOfControls.length; index += 1) {
             this.offsets.push(this.offsets[index - 1] + numbersOfControls[index - 1] + 1);
         }
+        this.results.forEach(function (result) {
+            result.setOffsets(this.offsets);
+        }, this);
     };
 
     /**

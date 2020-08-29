@@ -77,13 +77,15 @@
     * Given that a single runner is selected, select also all of the runners
     * that 'cross' this runner and are also marked as visible.
     * @param {Array} resultDetails Array of result details to check within.
+    * @param {Number|null} selectedLegIndex The index of the selected leg, or null
+    *     to not filter by leg.
     */
-    ResultSelection.prototype.selectCrossingRunners = function (resultDetails) {
+    ResultSelection.prototype.selectCrossingRunners = function (resultDetails, selectedLegIndex) {
         if (this.isSingleRunnerSelected()) {
             var refResult = resultDetails[this.currentIndexes[0]].result;
 
             resultDetails.forEach(function (resultDetails, idx) {
-                if (resultDetails.visible && resultDetails.result.crosses(refResult)) {
+                if (resultDetails.visible && resultDetails.result.crosses(refResult, selectedLegIndex)) {
                     this.currentIndexes.push(idx);
                 }
             }, this);

@@ -623,55 +623,75 @@
         var result2 = fromCumTimes(2, 12 * 3600, [0, 71, 218, 379, 440, 491], {});
 
         SplitsBrowserTest.assertInvalidData(assert, function () {
-            result1.crosses(result2);
+            result1.crosses(result2, null);
         });
     });
 
     QUnit.test("Can determine that a result does not cross themselves", function (assert) {
         var result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
-        assert.ok(!result.crosses(result), "Result should not cross themselves");
+        assert.ok(!result.crosses(result, null), "Result should not cross themselves");
     });
 
     QUnit.test("Can determine that a result does not cross a result with identical splits starting an hour later", function (assert) {
         var result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
         var result2 = fromCumTimes(2, 11 * 3600, [0, 65, 221, 384, 421], {});
-        assert.ok(!result1.crosses(result2), "Results should not cross");
+        assert.ok(!result1.crosses(result2, null), "Results should not cross");
     });
 
     QUnit.test("Can determine that a result does not cross a result with identical splits starting an hour earlier", function (assert) {
         var result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
         var result2 = fromCumTimes(2, 9 * 3600, [0, 65, 221, 384, 421], {});
-        assert.ok(!result1.crosses(result2), "Results should not cross");
+        assert.ok(!result1.crosses(result2, null), "Results should not cross");
     });
 
     QUnit.test("Can determine that two results cross on the way to control 1", function (assert) {
         var result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
         var result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 265, 421, 584, 621], {});
-        assert.ok(result1.crosses(result2), "Results should cross");
+        assert.ok(result1.crosses(result2, null), "Results should cross");
     });
 
     QUnit.test("Can determine that two results cross between controls 2 and 3", function (assert) {
         var result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
         var result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 65, 221, 584, 621], {});
-        assert.ok(result1.crosses(result2), "Results should cross");
+        assert.ok(result1.crosses(result2, null), "Results should cross");
     });
 
     QUnit.test("Can determine that two results cross between controls 1 and 2 and cross back later", function (assert) {
         var result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 721], {});
         var result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 65, 421, 584, 621], {});
-        assert.ok(result1.crosses(result2), "Results should cross");
+        assert.ok(result1.crosses(result2, null), "Results should cross");
     });
 
     QUnit.test("Can determine that two results do not cross between because the first one has a null split", function (assert) {
         var result1 = fromCumTimes(1, 10 * 3600, [0, 65, null, 384, 521], {});
         var result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 65, 221, 384, 521], {});
-        assert.ok(!result1.crosses(result2), "Results should not cross");
+        assert.ok(!result1.crosses(result2, null), "Results should not cross");
     });
 
     QUnit.test("Can determine that two results do not cross between because the second one has a null split", function (assert) {
         var result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
         var result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 65, 221, null, 521], {});
-        assert.ok(!result1.crosses(result2), "Results should not cross");
+        assert.ok(!result1.crosses(result2, null), "Results should not cross");
+    });
+
+    QUnit.test("Can determine that two results cross on the way to control 1 in a relay", function (assert) {
+        var result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
+        var result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 265, 421, 584, 621], {});
+        result1.setOffsets([0, 2]);
+        result2.setOffsets([0, 2]);
+        assert.ok(result1.crosses(result2, null), "Results should cross for the team");
+        assert.ok(result1.crosses(result2, 0), "Results should cross in the first leg");
+        assert.ok(!result1.crosses(result2, 1), "Results should not cross in the second leg");
+    });
+
+    QUnit.test("Can determine that two results cross between controls 2 and 3 in a relay", function (assert) {
+        var result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
+        var result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 65, 221, 584, 621], {});
+        result1.setOffsets([0, 2]);
+        result2.setOffsets([0, 2]);
+        assert.ok(result1.crosses(result2, null), "Results should cross for the team");
+        assert.ok(!result1.crosses(result2, 0), "Results should not cross in the first leg");
+        assert.ok(result1.crosses(result2, 1), "Results should cross in the second leg");
     });
 
     QUnit.test("Returns null value for cumulative rank when no ranks set", function (assert) {

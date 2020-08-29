@@ -142,6 +142,7 @@
         this.cumRanks = null;
         this.timeLosses = null;
         this.className = null;
+        this.offsets = null;
 
         this.totalTime = (originalCumTimes === null || originalCumTimes.indexOf(null) > -1) ? null : originalCumTimes[originalCumTimes.length - 1];
     }
@@ -199,6 +200,16 @@
     */
     Result.prototype.setClassName = function (className) {
         this.className = className;
+    };
+
+    /**
+     * Sets the control offsets of the various competitors that make up the team.
+     * offsets[legIndex] should be the index of the start control of the competitor
+     * who ran in leg 'legIndex'.
+     * @param {Array} offsets The control offsets of the competitors.
+     */
+    Result.prototype.setOffsets = function (offsets) {
+        this.offsets = offsets;
     };
 
     /**
@@ -553,9 +564,11 @@
     * Returns whether this result 'crosses' another.  Two results are considered
     * to have crossed if their chart lines on the Race Graph cross.
     * @param {Result} other The result to compare against.
+    * @param {Number|null} selectedLegIndex The index of the selected leg, or null to
+    *     not filter by selected leg.
     * @return {Boolean} True if the results cross, false if they don't.
     */
-    Result.prototype.crosses = function (other) {
+    Result.prototype.crosses = function (other, selectedLegIndex) {
         if (other.cumTimes.length !== this.cumTimes.length) {
             throwInvalidData("Two results with different numbers of controls cannot cross");
         }
@@ -566,7 +579,18 @@
         var beforeOther = false;
         var afterOther = false;
 
-        for (var controlIdx = 0; controlIdx < this.cumTimes.length; controlIdx += 1) {
+        // Determine the range of controls to check.
+        var startIndex;
+        var endIndex;
+        if (selectedLegIndex === null || this.offsets === null) {
+            startIndex = 0;
+            endIndex = this.cumTimes.length;
+        } else {
+            startIndex = this.offsets[selectedLegIndex];
+            endIndex = (selectedLegIndex + 1 === this.offsets.length) ? this.cumTimes.length : this.offsets[selectedLegIndex + 1] + 1;
+        }
+
+        for (var controlIdx = startIndex; controlIdx < endIndex; controlIdx += 1) {
             if (this.cumTimes[controlIdx] !== null && other.cumTimes[controlIdx] !== null) {
                 var thisTotalTime = this.startTime + this.cumTimes[controlIdx];
                 var otherTotalTime = other.startTime + other.cumTimes[controlIdx];
@@ -783,7 +807,7 @@
             throwInvalidData("Team results can only be created from at least two other results");
         }
 
-        // Firstly, compute offsets for each of the component results.
+        // Firstly, compute cumulative-time offsets for each of the component results.
         var offsets = calculateOffsets(results);
         owner.setMembers(results.map(function (result) { return result.owner; }));
 

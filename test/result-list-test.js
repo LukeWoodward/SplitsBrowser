@@ -200,14 +200,12 @@
     }
 
     /**
-    * Creates a list with three results in it, and return the list and the
+    * Creates a list with three team results in it, and return the list and the
     * selection.
     * @param {Array} selectedIndexes Indexes of selected results in the selection.
-    * @param {Boolean} multipleClasses Whether the list of results is built from
-    *                                  multiple classes.
     * @return {Object} 2-element object containing the selection and list.
     */
-    function createSampleTeamList() {
+    function createSampleTeamList(selectedIndexes) {
         var parent = d3.select("div#qunit-fixture").node();
 
         var resultList = [
@@ -218,17 +216,20 @@
             ),
             createTeamResult(
                 2,
-                [fromSplitTimes(1, "Third Runner", "GHO", 10 * 3600, [15, 79, 41]), fromSplitTimes(1, "Fourth Runner", "GHO", 10 * 3600 + 135, [22, 100, 41])],
+                [fromSplitTimes(1, "Third Runner", "GHO", 10 * 3600, [15, 79, 41]), fromSplitTimes(1, "Fourth Runner", "GHO", 10 * 3600 + 135, [22, 42, 41])],
                 new Team("Second Team", "GHO")
             ),
             createTeamResult(
                 3,
-                [fromSplitTimes(1, "Fifth Runner", "KLO", 10 * 3600, [18, 81, 37]), fromSplitTimes(1, "Sixth Runner", "KLO", 10 * 3600 + 136, [20, 99, 44])],
+                [fromSplitTimes(1, "Fifth Runner", "KLO", 10 * 3600, [118, 81, 37]), fromSplitTimes(1, "Sixth Runner", "KLO", 10 * 3600 + 236, [20, 99, 44])],
                 new Team("Third Team", "KLO")
             )
         ];
 
+        resultList.forEach(function (result) { result.setOffsets([0, 4]); });
+
         var selection = new ResultSelection(resultList.length);
+        selectedIndexes.forEach(function (index) { selection.toggle(index); });
 
         var list = new ResultList(parent, customAlert);
         list.setResultList(resultList, false, true, null);
@@ -246,6 +247,19 @@
     */
     function createSampleListForRaceGraph(selectedIndexes, multipleClasses) {
         var listAndSelection = createSampleList(selectedIndexes, multipleClasses);
+        listAndSelection.list.setChartType(ChartTypes.RaceGraph);
+        listAndSelection.list.enableOrDisableCrossingRunnersButton();
+        return listAndSelection;
+    }
+
+    /**
+    * Creates a list with three team options in it, set it up on the race graph
+    * and return the list and the selection.
+    * @param {Array} selectedIndexes Indexes of selected results in the selection.
+    * @return {Object} 2-element object containing the selection and list.
+    */
+    function createSampleTeamListForRaceGraph(selectedIndexes) {
+        var listAndSelection = createSampleTeamList(selectedIndexes);
         listAndSelection.list.setChartType(ChartTypes.RaceGraph);
         listAndSelection.list.enableOrDisableCrossingRunnersButton();
         return listAndSelection;
@@ -348,7 +362,7 @@
     });
 
     QUnit.test("Can create a list for a single team class with all results deselected and with the correct tooltips", function (assert) {
-        createSampleTeamList([], false);
+        createSampleTeamList([]);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.result").size(), 3);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.result.selected").size(), 0);
         assert.strictEqual(d3.selectAll("div#qunit-fixture div.result[title]").size(), 3);
@@ -367,7 +381,7 @@
     });
 
     QUnit.test("Can create a list for the first leg of a team class with the correct tooltips", function (assert) {
-        var list = createSampleTeamList([], false).list;
+        var list = createSampleTeamList([]).list;
         list.setResultList(list.allResults, false, true, 0);
 
         var nodes = d3.selectAll("div#qunit-fixture div.result").nodes();
@@ -384,7 +398,7 @@
     });
 
     QUnit.test("Can create a list for the second leg of a team class with the correct tooltips", function (assert) {
-        var list = createSampleTeamList([], false).list;
+        var list = createSampleTeamList([]).list;
         list.setResultList(list.allResults, false, true, 1);
 
         var nodes = d3.selectAll("div#qunit-fixture div.result").nodes();
@@ -1105,7 +1119,7 @@
         }
     });
 
-    QUnit.test("Clicking the Crossing Runners button when a filter is active but there are no crossing runners among the filtered results pops up an alert messages", function (assert) {
+    QUnit.test("Clicking the Crossing Runners button when a filter is active but there are no crossing runners among the filtered results pops up an alert message", function (assert) {
         resetAlert();
         var listAndSelection = createSampleListForRaceGraph([1], false);
         assert.ok(!$(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":disabled"));
@@ -1115,6 +1129,54 @@
         assert.ok(typeof lastAlertMessage !== "undefined" && lastAlertMessage !== null);
         for (var i = 0; i < 3; i += 1) {
             assert.strictEqual(listAndSelection.selection.isSelected(i), (i === 1));
+        }
+    });
+
+    QUnit.test("Clicking the Crossing Runners button when a crossing team exists selects the crossing team", function (assert) {
+        resetAlert();
+        var listAndSelection = createSampleTeamListForRaceGraph([1]);
+        assert.ok(!$(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":disabled"), "Crossing runners button enabled");
+        $(CROSSING_RUNNERS_BUTTON_SELECTOR).click();
+        assert.strictEqual(alertCount, 0);
+        for (var i = 0; i < 3; i += 1) {
+            assert.strictEqual(listAndSelection.selection.isSelected(i), (i < 2), "Selectedness for result " + i);
+        }
+    });
+
+    QUnit.test("Clicking the Crossing Runners button when a runner crosses in the first leg selects the crossing team", function (assert) {
+        resetAlert();
+        var listAndSelection = createSampleTeamListForRaceGraph([1]);
+        listAndSelection.list.selectedLegIndex = 0;
+        assert.ok(!$(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":disabled"), "Crossing runners button enabled");
+        $(CROSSING_RUNNERS_BUTTON_SELECTOR).click();
+        assert.strictEqual(alertCount, 0);
+        for (var i = 0; i < 3; i += 1) {
+            assert.strictEqual(listAndSelection.selection.isSelected(i), (i < 2), "Selectedness for result " + i);
+        }
+    });
+
+    QUnit.test("Clicking the Crossing Runners button when no runner crosses in the second leg pops up an alert message", function (assert) {
+        resetAlert();
+        var listAndSelection = createSampleTeamListForRaceGraph([1]);
+        listAndSelection.list.selectedLegIndex = 1;
+        assert.ok(!$(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":disabled"), "Crossing runners button enabled");
+        $(CROSSING_RUNNERS_BUTTON_SELECTOR).click();
+        assert.strictEqual(alertCount, 1);
+        assert.ok(lastAlertMessage !== null && lastAlertMessage.indexOf("Fourth Runner") >= 0);
+        for (var i = 0; i < 3; i += 1) {
+            assert.strictEqual(listAndSelection.selection.isSelected(i), (i === 1), "Selectedness for result " + i);
+        }
+    });
+
+    QUnit.test("Clicking the Crossing Runners button when no crossing team exists pops up an alert message", function (assert) {
+        resetAlert();
+        var listAndSelection = createSampleTeamListForRaceGraph([2]);
+        assert.ok(!$(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":disabled"), "Crossing runners button enabled");
+        $(CROSSING_RUNNERS_BUTTON_SELECTOR).click();
+        assert.strictEqual(alertCount, 1);
+        assert.ok(lastAlertMessage !== null && lastAlertMessage.indexOf("Third Team") >= 0);
+        for (var i = 0; i < 3; i += 1) {
+            assert.strictEqual(listAndSelection.selection.isSelected(i), (i === 2), "Selectedness for result " + i);
         }
     });
 

@@ -379,11 +379,11 @@
     * Select all of the results that cross the unique selected result.
     */
     ResultList.prototype.selectCrossingRunners = function () {
-        this.resultSelection.selectCrossingRunners(this.allResultDetails);
+        this.resultSelection.selectCrossingRunners(this.allResultDetails, this.selectedLegIndex);
         if (this.resultSelection.isSingleRunnerSelected()) {
             // Only a single runner is still selected, so nobody crossed the
             // selected runner.
-            var resultName = this.allResults[this.resultSelection.getSingleRunnerIndex()].owner.name;
+            var resultName = this.allResults[this.resultSelection.getSingleRunnerIndex()].getOwnerNameForLeg(this.selectedLegIndex);
             var filterInEffect = (this.lastFilterString.length > 0);
             var messageKey = (filterInEffect) ? "RaceGraphNoCrossingRunnersFiltered" : "RaceGraphNoCrossingRunners";
             this.alerter(getMessageWithFormatting(messageKey, {"$$NAME$$": resultName}));
