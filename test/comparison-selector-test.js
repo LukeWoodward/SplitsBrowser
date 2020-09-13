@@ -24,6 +24,9 @@
     var ComparisonSelector = SplitsBrowser.Controls.ComparisonSelector;
     var getMessage = SplitsBrowser.getMessage;
     var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    var Result = SplitsBrowser.Model.Result;
+    var Competitor = SplitsBrowser.Model.Competitor;
+    var Team = SplitsBrowser.Model.Team;
 
     QUnit.module("Comparison Selector");
 
@@ -71,48 +74,57 @@
         };
     }
 
-    function returnFalse() {
-        return false;
-    }
-
-    function returnTrue() {
-        return true;
-    }
-
     var results =  [
-        { owner: { name: "one" }, getAllCumulativeTimes: function() { return [1, 2]; }, completed: returnTrue },
-        { owner: { name: "two" }, getAllCumulativeTimes: function() { return [3, 4]; }, completed: returnTrue },
-        { owner: { name: "three" }, getAllCumulativeTimes: function() { return [5, 6]; }, completed: returnTrue }
+        Result.fromCumTimes(1, null, [0, 1, 2], new Competitor("one", null)),
+        Result.fromCumTimes(2, null, [0, 3, 4], new Competitor("two", null)),
+        Result.fromCumTimes(3, null, [0, 5, 6], new Competitor("three", null)),
     ];
 
-    var extraResult = {owner: { name: "four" }, getAllCumulativeTimes: function () { return [7, 8]; }, completed: returnTrue };
+    var extraResult = Result.fromCumTimes(4, null, [0, 7, 8], new Competitor("four", null));
 
     var DUMMY_CLASS_SET = getDummyCourseClassSet(results, false);
 
     function getDummyCourseClassSetWithMispuncher() {
         var resultsWithMispuncher = results.slice(0);
-        resultsWithMispuncher[1] = { owner: results[1].owner, completed: function () { return false; } };
+        resultsWithMispuncher[1] = Result.fromCumTimes(2, null, [0, 3, null], results[1].owner);
         return getDummyCourseClassSet(resultsWithMispuncher, false);
     }
 
-    function getDummyCourseClassSetWithNoWinner(hasTeamData) {
-        var winnerlessResults = results.map(function (result) {
-            return { owner: result.owner, getAllCumulativeTimes: result.getAllCumulativeTimes, completed: returnFalse };
-        });
+    /**
+     * Clones the given result and disqualifies them.  (This is used for creating classes
+     * that have no winners.)
+     * @param {Result} result The result to clone.
+     * @returns {Result} The cloned result.
+     */
+    function cloneAndDisqualify(result) {
+        var dsqResult = Result.fromCumTimes(result.order, null, result.getAllCumulativeTimes(), result.owner);
+        dsqResult.disqualify();
+        return dsqResult;
+    }
 
-        return getDummyCourseClassSet(winnerlessResults, hasTeamData);
+    function getDummyCourseClassSetWithNoWinner(hasTeamData) {
+        return getDummyCourseClassSet(results.map(cloneAndDisqualify), hasTeamData);
     }
 
     function getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother() {
-        var allResults = [extraResult].concat(results.map(function (result) {
-            return { owner: result.owner, getAllCumulativeTimes: result.getAllCumulativeTimes, completed: returnFalse };
-        }));
-
+        var allResults = [extraResult].concat(results.map(cloneAndDisqualify));
         return getDummyCourseClassSet(allResults, false);
     }
 
     function getDummyTeamCourseClassSet() {
-        return getDummyCourseClassSet(results, true);
+        var team1 = new Team("Team 1", null);
+        var team2 = new Team("Team 2", null);
+        var team3 = new Team("Team 3", null);
+
+        team1.setMembers([new Competitor("1a", null), new Competitor("1b", null)]);
+        team2.setMembers([new Competitor("2a", null), new Competitor("2b", null)]);
+        team3.setMembers([new Competitor("3a", null), new Competitor("3b", null)]);
+
+        return getDummyCourseClassSet([
+            Result.fromCumTimes(1, null, [0, 1, 2], team1),
+            Result.fromCumTimes(1, null, [0, 3, 4], team2),
+            Result.fromCumTimes(1, null, [0, 5, 6], team3)
+        ], true);
     }
 
     function createSelector() {
@@ -336,12 +348,22 @@
         assert.strictEqual(htmlSelect.options.length, DUMMY_CLASS_SET.allResults.length, "Expected "  + DUMMY_CLASS_SET.allResults.length + " options to be created");
 
         selector.setCourseClassSet(getDummyCourseClassSet(
-            [{owner: { name: "four" }, completed: returnTrue}, {owner: { name: "five" }, completed: returnTrue}, {owner: { name: "six" }, completed: returnTrue}, {owner: { name: "seven" }, completed: returnTrue}],
+            [
+                Result.fromCumTimes(4, null, [0, 7, 8], new Competitor("four", null)),
+                Result.fromCumTimes(4, null, [0, 9, 10], new Competitor("five", null)),
+                Result.fromCumTimes(4, null, [0, 11, 12], new Competitor("six", null)),
+                Result.fromCumTimes(4, null, [0, 13, 14], new Competitor("seven", null))
+            ],
             false
         ));
         assert.strictEqual(htmlSelect.options.length, 4, "Wrong number of options created");
 
-        selector.setCourseClassSet(getDummyCourseClassSet([{owner: { name: "eight" }, completed: returnTrue}, {owner: { name: "nine" }, completed: returnTrue}], false));
+        selector.setCourseClassSet(getDummyCourseClassSet(
+            [
+                Result.fromCumTimes(4, null, [0, 15, 16], new Competitor("eight", null)),
+                Result.fromCumTimes(4, null, [0, 17, 18], new Competitor("nine", null))
+            ],
+            false));
         assert.strictEqual(htmlSelect.options.length, 2, "Wrong number of options created");
 
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
@@ -604,6 +626,68 @@
         selector.setCourseClassSet(DUMMY_CLASS_SET);
         assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyRunner"));
         assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyRunnerLabel"));
+    });
+
+    QUnit.test("Comparison type option changes from Any Team to Any Runner when changing from all legs to one specific leg", function (assert) {
+        var selector = createSelector();
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        var resultSpan = $(_RESULT_SPAN_SELECTOR);
+        selector.setCourseClassSet(getDummyTeamCourseClassSet());
+        assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyTeam"));
+        assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyTeamLabel"));
+        selector.setSelectedLeg(1);
+        assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyRunner"));
+        assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyRunnerLabel"));
+    });
+
+    QUnit.test("Comparison type option changes from Any Team to Any Runner when changing from one specific leg to all legs", function (assert) {
+        var selector = createSelector();
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        var resultSpan = $(_RESULT_SPAN_SELECTOR);
+        selector.setCourseClassSet(getDummyTeamCourseClassSet());
+        selector.setSelectedLeg(1);
+        assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyRunner"));
+        assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyRunnerLabel"));
+        selector.setSelectedLeg(null);
+        assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyTeam"));
+        assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyTeamLabel"));
+    });
+
+    QUnit.test("Items in result-selector drop-down record individual names if individual leg selected", function (assert) {
+        var selector = createSelector();
+        var htmlSelect = d3.select(_RESULT_SELECTOR_SELECTOR).node();
+        selector.setCourseClassSet(getDummyTeamCourseClassSet());
+
+        function getOptions() {
+            return [0, 1, 2].map(function (index) {
+                return $(htmlSelect.options[index]).text();
+            });
+        }
+
+        selector.setSelectedLeg(0);
+        assert.strictEqual(htmlSelect.options.length, 3);
+        assert.deepEqual(["1a", "2a", "3a"], getOptions());
+
+        selector.setSelectedLeg(1);
+        assert.strictEqual(htmlSelect.options.length, 3);
+        assert.deepEqual(["1b", "2b", "3b"], getOptions());
+
+        selector.setSelectedLeg(null);
+        assert.strictEqual(htmlSelect.options.length, 3);
+        assert.deepEqual(["Team 1", "Team 2", "Team 3"], getOptions());
+    });
+
+    QUnit.test("Changing course class resets the selected leg to all legs", function (assert) {
+        var selector = createSelector();
+        var htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        var resultSpan = $(_RESULT_SPAN_SELECTOR);
+        selector.setCourseClassSet(getDummyTeamCourseClassSet());
+        selector.setSelectedLeg(1);
+        assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyRunner"));
+        assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyRunnerLabel"));
+        selector.setCourseClassSet(getDummyTeamCourseClassSet());
+        assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyTeam"));
+        assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyTeamLabel"));
     });
 
     QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has teams but no winner and 'Winner' option chosen", function(assert) {

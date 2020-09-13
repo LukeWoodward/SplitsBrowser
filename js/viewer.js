@@ -716,9 +716,10 @@
     };
 
     /**
-     * Sets the selected leg index in the results list and the results table.
+     * Sets the selected leg index in the comparison selector, results list and the results table.
      */
-    Viewer.prototype.setSelectedLegIndexInResultsListAndResultsTable = function() {
+    Viewer.prototype.setSelectedLegIndex = function() {
+        this.comparisonSelector.setSelectedLeg(this.legSelector.getSelectedLeg());
         this.resultList.setResultList(this.courseClassSet.allResults, (this.currentClasses.length > 1), this.courseClassSet.hasTeamData(), this.legSelector.getSelectedLeg());
         this.resultsTable.setSelectedLegIndex(this.legSelector.getSelectedLeg());
     };
@@ -727,7 +728,7 @@
     * Handles a change in the selected leg.
     */
     Viewer.prototype.handleLegSelectionChanged = function () {
-        this.setSelectedLegIndexInResultsListAndResultsTable();
+        this.setSelectedLegIndex();
         this.setChartSize();
         this.drawChart();
         this.updateDirectLink();
@@ -789,7 +790,7 @@
 
         if (parsedQueryString.selectedLeg !== null) {
             this.legSelector.setSelectedLeg(parsedQueryString.selectedLeg);
-            this.setSelectedLegIndexInResultsListAndResultsTable();
+            this.setSelectedLegIndex();
         }
 
         if (parsedQueryString.filterText !== "") {

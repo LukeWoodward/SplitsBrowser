@@ -99,6 +99,7 @@
         this.hasWinner = false;
         this.previousSelectedIndex = -1;
         this.courseClassSet = null;
+        this.selectedLegIndex = null;
         this.comparisonOptions = ALL_INDIVIDUAL_COMPARISON_OPTIONS;
 
         var div = d3.select(parent).append("div")
@@ -157,11 +158,11 @@
     };
 
     /**
-    * Updates the 'Compare with any' label, following a change of language or
-    * course-class set.
+    * Updates the 'Compare with any' label, following a change of language,
+    * course-class set or selected leg index.
     */
     ComparisonSelector.prototype.setCompareWithAnyLabel = function () {
-        if (this.courseClassSet !== null && this.courseClassSet.hasTeamData()) {
+        if (this.courseClassSet !== null && this.courseClassSet.hasTeamData() && this.selectedLegIndex === null) {
             this.resultSpan.text(getMessage("CompareWithAnyTeamLabel"));
         }
         else {
@@ -198,12 +199,25 @@
     */
     ComparisonSelector.prototype.setCourseClassSet = function (courseClassSet) {
         this.courseClassSet = courseClassSet;
+        this.selectedLegIndex = null;
         this.comparisonOptions = (courseClassSet.hasTeamData()) ? ALL_TEAM_COMPARISON_OPTIONS : ALL_INDIVIDUAL_COMPARISON_OPTIONS;
         this.optionsList = d3.select(this.dropDown).selectAll("option")
                                                    .data(this.comparisonOptions);
         this.optionsList.text(function (opt) { return getMessageWithFormatting(opt.nameKey, {"$$PERCENT$$": opt.percentage}); });
         this.setResults();
         this.setCompareWithAnyLabel();
+    };
+
+    /**
+     * Handles a change of selected leg.
+     * @param {Number|null} selectedLegIndex The index of the selected leg.
+     */
+    ComparisonSelector.prototype.setSelectedLeg = function (selectedLegIndex) {
+        this.selectedLegIndex = selectedLegIndex;
+        this.setResults();
+        this.setCompareWithAnyLabel();
+        this.optionsList.data(selectedLegIndex === null ? ALL_TEAM_COMPARISON_OPTIONS : ALL_INDIVIDUAL_COMPARISON_OPTIONS);
+        this.optionsList.text(function (opt) { return getMessageWithFormatting(opt.nameKey, {"$$PERCENT$$": opt.percentage}); });
     };
 
     /**
@@ -215,6 +229,7 @@
         var completingResults = results.filter(function (result) { return result.completed(); });
 
         this.hasWinner = (completingResults.length > 0);
+        var selectedLegIndex = this.selectedLegIndex;
 
         var optionsList = d3.select(this.resultDropDown).selectAll("option")
                                                         .data(completingResults);
@@ -223,7 +238,7 @@
         optionsList = d3.select(this.resultDropDown).selectAll("option")
                                                     .data(completingResults);
         optionsList.attr("value", function (_res, complResultIndex) { return completingResultIndexes[complResultIndex].toString(); })
-                   .text(function (result) { return result.owner.name; });
+                   .text(function (result) { return result.getOwnerNameForLeg(selectedLegIndex); });
         optionsList.exit().remove();
 
         if (this.previousResultList === null) {
