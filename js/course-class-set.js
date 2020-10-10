@@ -68,7 +68,7 @@
         sortedData.sort(d3.ascending);
 
         // Now construct a map that maps from source value to rank.
-        var rankMap = new d3.map();
+        var rankMap = new Map();
         sortedData.forEach(function(value, index) {
             if (!rankMap.has(value)) {
                 rankMap.set(value, index + 1);

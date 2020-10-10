@@ -1153,7 +1153,7 @@
     *     different classes, false otherwise.
     */
     HtmlFormatParser.prototype.areClassesUniqueWithinCourses = function () {
-        var classesToCoursesMap = d3.map();
+        var classesToCoursesMap = new Map();
         for (var courseIndex = 0; courseIndex < this.courses.length; courseIndex += 1) {
             var course = this.courses[courseIndex];
             for (var competitorIndex = 0; competitorIndex < course.competitors.length; competitorIndex += 1) {
@@ -1191,7 +1191,7 @@
 
         this.courses.forEach(function (course) {
             // Firstly, sort competitors by class.
-            var classToCompetitorsMap = d3.map();
+            var classToCompetitorsMap = new Map();
             course.competitors.forEach(function (competitor) {
                 var className = (competitorsHaveClasses && classesUniqueWithinCourses) ? competitor.className : course.name;
                 if (classToCompetitorsMap.has(className)) {
@@ -1203,7 +1203,7 @@
 
             var classesForThisCourse = [];
 
-            classToCompetitorsMap.keys().forEach(function (className) {
+            for (var className of classToCompetitorsMap.keys()) {
                 var numControls = course.controls.length - 1;
                 var oldCompetitors = classToCompetitorsMap.get(className);
                 var newResults = oldCompetitors.map(function (competitor, index) {
@@ -1213,7 +1213,7 @@
                 var courseClass = new CourseClass(className, numControls, newResults);
                 classesForThisCourse.push(courseClass);
                 classes.push(courseClass);
-            }, this);
+            }
 
             var newCourse = new Course(course.name, classesForThisCourse, course.distance, course.climb, course.controls.slice(0, course.controls.length - 1));
             newCourses.push(newCourse);

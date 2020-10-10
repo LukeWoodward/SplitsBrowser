@@ -110,11 +110,11 @@
         this.listDiv = this.containerDiv.append("div")
                                         .attr("id", RESULT_LIST_ID);
 
-        this.listDiv.on("mousedown", function () { outerThis.startDrag(CONTAINER_RESULT_INDEX); })
-                    .on("mousemove", function () { outerThis.mouseMove(CONTAINER_RESULT_INDEX); })
-                    .on("mouseup", function () { outerThis.stopDrag(); });
+        this.listDiv.on("mousedown", function (event) { outerThis.startDrag(event, CONTAINER_RESULT_INDEX); })
+                    .on("mousemove", function (event) { outerThis.mouseMove(event, CONTAINER_RESULT_INDEX); })
+                    .on("mouseup", function (event) { outerThis.stopDrag(event); });
 
-        d3.select(document.body).on("mouseup", function () { outerThis.stopDrag(); });
+        d3.select(document.body).on("mouseup", function (event) { outerThis.stopDrag(event); });
 
         this.setMessages();
     };
@@ -188,11 +188,12 @@
     /**
     * Returns whether the current mouse event is off the bottom of the list of
     * result divs.
+    * @param {Event} event The event.
     * @return {Boolean} True if the mouse is below the last visible div, false
     *     if not.
     */
-    ResultList.prototype.isMouseOffBottomOfResultList = function () {
-        return this.lastVisibleDiv === null || d3.mouse(this.lastVisibleDiv)[1] >= $(this.lastVisibleDiv).height();
+    ResultList.prototype.isMouseOffBottomOfResultList = function (event) {
+        return this.lastVisibleDiv === null || d3.pointer(event)[1] >= $(this.lastVisibleDiv).height();
     };
 
     /**
@@ -206,20 +207,21 @@
 
     /**
     * Handles the start of a drag over the list of results.
+    * @param {Event} event The mouse event.
     * @param {Number} index Index of the result div that the drag started
     *     over, or RESULT_CONTAINER_INDEX if below the list of results.
     */
-    ResultList.prototype.startDrag = function (index) {
-        if (d3.event.which === LEFT_BUTTON) {
+    ResultList.prototype.startDrag = function (event, index) {
+        if (event.which === LEFT_BUTTON) {
             this.dragStartResultIndex = index;
             this.currentDragResultIndex = index;
             this.allResultDivs = $("div.result");
             var visibleDivs = this.allResultDivs.filter(":visible");
             this.lastVisibleDiv = (visibleDivs.length === 0) ? null : visibleDivs[visibleDivs.length - 1];
-            this.inverted = d3.event.shiftKey;
+            this.inverted = event.shiftKey;
             if (index === CONTAINER_RESULT_INDEX) {
                 // Drag not starting on one of the results.
-                if (!this.isMouseOffBottomOfResultList()) {
+                if (!this.isMouseOffBottomOfResultList(event)) {
                     // User has started the drag in the scrollbar.  Ignore it.
                     return;
                 }
@@ -227,7 +229,7 @@
                 d3.select(this.allResultDivs[index]).classed(this.getDragClassName(), true);
             }
 
-            d3.event.stopPropagation();
+            event.stopPropagation();
             this.dragging = true;
         }
     };
@@ -235,11 +237,12 @@
     /**
     * Handles a mouse-move event. by adjust the range of dragged results to
     * include the current index.
+    * @param {Event} event The event. 
     * @param {Number} dragIndex The index to which the drag has now moved.
     */
-    ResultList.prototype.mouseMove = function (dragIndex) {
+    ResultList.prototype.mouseMove = function (event, dragIndex) {
         if (this.dragging) {
-            d3.event.stopPropagation();
+            event.stopPropagation();
             if (dragIndex !== this.currentDragResultIndex) {
                 var dragClassName = this.getDragClassName();
                 d3.selectAll("div.result." + dragClassName).classed(dragClassName, false);
@@ -247,7 +250,7 @@
                 if (this.dragStartResultIndex === CONTAINER_RESULT_INDEX && dragIndex === CONTAINER_RESULT_INDEX) {
                     // Drag is currently all off the list, so do nothing further.
                     return;
-                } else if (dragIndex === CONTAINER_RESULT_INDEX && !this.isMouseOffBottomOfResultList()) {
+                } else if (dragIndex === CONTAINER_RESULT_INDEX && !this.isMouseOffBottomOfResultList(event)) {
                     // Drag currently goes onto the div's scrollbar.
                     return;
                 }
@@ -277,8 +280,9 @@
 
     /**
     * Handles the end of a drag in the result list.
+    * @param {Event} event The event.
     */
-    ResultList.prototype.stopDrag = function () {
+    ResultList.prototype.stopDrag = function (event) {
         if (!this.dragging) {
             // This handler is wired up to mouseUp on the entire document, in
             // order to cancel the drag if it is let go away from the list.  If
@@ -299,9 +303,9 @@
 
         d3.selectAll("div.result." + dragClassName).classed(dragClassName, false);
 
-        if (d3.event.currentTarget === document) {
+        if (event.currentTarget === document) {
             // Drag ended outside the list.
-        } else if (this.currentDragResultIndex === CONTAINER_RESULT_INDEX && !this.isMouseOffBottomOfResultList()) {
+        } else if (this.currentDragResultIndex === CONTAINER_RESULT_INDEX && !this.isMouseOffBottomOfResultList(event)) {
             // Drag ended in the scrollbar.
         } else if (selectedResultIndexes.length === 1) {
             // User clicked, or maybe dragged within the same result.
@@ -315,7 +319,7 @@
         this.dragStartResultIndex = null;
         this.currentDragResultIndex = null;
 
-        d3.event.stopPropagation();
+        event.stopPropagation();
     };
 
     /**
@@ -546,9 +550,9 @@
         this.noneButton.property("disabled", this.allResults.length === 0);
         this.filter.property("disabled", this.allResults.length === 0);
 
-        resultDivs.on("mousedown", function (_datum, index) { outerThis.startDrag(index); })
-                  .on("mousemove", function (_datum, index) { outerThis.mouseMove(index); })
-                  .on("mouseup", function () { outerThis.stopDrag(); });
+        resultDivs.on("mousedown", function (event, index) { outerThis.startDrag(event, index); })
+                  .on("mousemove", function (event, index) { outerThis.mouseMove(event, index); })
+                  .on("mouseup", function (event) { outerThis.stopDrag(event); });
 
         // Force an update on the filtering.
         this.updateFilter();

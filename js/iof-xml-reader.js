@@ -937,11 +937,11 @@
         // course data but not yet in a suitable form to return.
         var tempCourses = [];
 
-        // d3 map that maps course IDs plus comma-separated lists of controls
+        // Map that maps course IDs plus comma-separated lists of controls
         // to the temporary course with that ID and controls.
         // (We expect that all classes with the same course ID have consistent
         // controls, but we don't assume that.)
-        var coursesMap = d3.map();
+        var coursesMap = new Map();
 
         var warnings = [];
 

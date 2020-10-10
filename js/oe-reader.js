@@ -113,10 +113,10 @@
 
         // Map that associates classes to all of the results running on
         // that class.
-        this.classes = d3.map();
+        this.classes = new Map();
 
         // Map that associates course names to length and climb values.
-        this.courseDetails = d3.map();
+        this.courseDetails = new Map();
 
         // Set of all pairs of classes and courses.
         // (While it is common that one course may have multiple classes, it
@@ -464,8 +464,8 @@
     */
     Reader.prototype.getMapsBetweenClassesAndCourses = function () {
 
-        var classesToCourses = d3.map();
-        var coursesToClasses = d3.map();
+        var classesToCourses = new Map();
+        var coursesToClasses = new Map();
 
         this.classCoursePairs.forEach(function (pair) {
             var className = pair[0];
@@ -492,7 +492,7 @@
     * @return {Array} Array of CourseClass objects.
     */
     Reader.prototype.createClasses = function () {
-        var classNames = this.classes.keys();
+        var classNames = Array.from(this.classes.keys());
         classNames.sort();
         return classNames.map(function (className) {
             var courseClass = this.classes.get(className);
@@ -517,10 +517,10 @@
     * @param {String} initCourseName The name of the initial course.
     * @param {Object} manyToManyMaps Object that contains the two maps that
     *     map between class names and course names.
-    * @param {d3.set} doneCourseNames Set of all course names that have been
+    * @param {Set} doneCourseNames Set of all course names that have been
     *     'done', i.e. included in a Course object that has been returned from
     *     a call to this method.
-    * @param {d3.map} classesMap Map that maps class names to CourseClass
+    * @param {Map} classesMap Map that maps class names to CourseClass
     *     objects.
     * @return {SplitsBrowser.Model.Course} - The created Course object.
     */
@@ -593,21 +593,21 @@
         // uses course 1A and 1B).  In this set we collect up all of the
         // courses that we have now processed, so that if we later come across
         // one we've already dealt with, we can ignore it.
-        var doneCourseNames = d3.set();
+        var doneCourseNames = new Set();
 
-        var classesMap = d3.map();
+        var classesMap = new Map();
         classes.forEach(function (courseClass) {
             classesMap.set(courseClass.name, courseClass);
         });
 
         // List of all Course objects created so far.
         var courses = [];
-        manyToManyMaps.coursesToClasses.keys().forEach(function (courseName) {
+        for (var courseName of manyToManyMaps.coursesToClasses.keys()) {
             if (!doneCourseNames.has(courseName)) {
                 var course = this.createCourseFromLinkedClassesAndCourses(courseName, manyToManyMaps, doneCourseNames, classesMap);
                 courses.push(course);
             }
-        }, this);
+        }
 
         return courses;
     };

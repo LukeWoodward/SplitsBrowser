@@ -207,7 +207,7 @@
         }
 
         // Remove from the set of indexes given any that are already selected.
-        var currentIndexSet = d3.set(this.currentIndexes);
+        var currentIndexSet = new Set(this.currentIndexes);
         indexes = indexes.filter(function (index) { return !currentIndexSet.has(index); });
 
         if (indexes.length > 0) {
@@ -230,17 +230,17 @@
         }
 
         // Remove from the set of indexes given any that are not already selected.
-        var currentIndexSet = d3.set(this.currentIndexes);
+        var currentIndexSet = new Set(this.currentIndexes);
         var anyRemoved = false;
         for (var i = 0; i < indexes.length; i += 1) {
             if (currentIndexSet.has(indexes[i])) {
-                currentIndexSet.remove(indexes[i]);
+                currentIndexSet.delete(indexes[i]);
                 anyRemoved = true;
             }
         }
 
         if (anyRemoved) {
-            this.currentIndexes = currentIndexSet.values().map(function (index) { return parseInt(index, 10); });
+            this.currentIndexes = Array.from(currentIndexSet.values()).map(function (index) { return parseInt(index, 10); });
             this.currentIndexes.sort(d3.ascending);
             this.fireChangeHandlers();
         }

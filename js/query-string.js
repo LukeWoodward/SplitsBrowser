@@ -55,13 +55,13 @@
             // No class name specified in the URL.
             return null;
         } else {
-            var classesByName = d3.map();
+            var classesByName = new Map();
             for (var index = 0; index < eventData.classes.length; index += 1) {
                 classesByName.set(eventData.classes[index].name, eventData.classes[index]);
             }
 
             var classNames = decodeURIComponent(classNameMatch[1]).split(";");
-            classNames = d3.set(classNames).values();
+            classNames = Array.from(new Set(classNames));
             var selectedClasses = classNames.filter(function (className) { return classesByName.has(className); })
                                             .map(function (className) { return classesByName.get(className); });
 
@@ -231,7 +231,7 @@
                     return d3.range(0, courseClassSet.allResults.length);
                 }
 
-                resultNames = d3.set(resultNames).values();
+                resultNames = Array.from(new Set(resultNames));
                 var allResultNames = courseClassSet.allResults.map(function (result) { return result.owner.name; });
                 var selectedResultIndexes = [];
                 resultNames.forEach(function (resultName) {

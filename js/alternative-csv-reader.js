@@ -87,7 +87,7 @@
     */
     function Reader (format) {
         this.format = format;
-        this.classes = d3.map();
+        this.classes = new Map();
         this.delimiter = null;
         this.hasAnyStarters = false;
         this.warnings = [];
@@ -263,11 +263,9 @@
 
         // Group the classes by the list of controls.  Two classes using the
         // same list of controls can be assumed to be using the same course.
-        var coursesByControlsLists = d3.map();
+        var coursesByControlsLists = new Map();
 
-        this.classes.entries().forEach(function (keyValuePair) {
-            var className = keyValuePair.key;
-            var cls = keyValuePair.value;
+        for (var [className, cls] of this.classes.entries()) {
             var courseClass = new CourseClass(className, cls.controls.length, cls.results);
             courseClasses.push(courseClass);
 
@@ -278,14 +276,14 @@
                 coursesByControlsLists.set(
                     controlsList, {name: className, classes: [courseClass], length: cls.length, climb: cls.climb, controls: cls.controls});
             }
-        });
+        }
 
         var courses = [];
-        coursesByControlsLists.values().forEach(function (courseObject) {
+        for (var courseObject of coursesByControlsLists.values()) {
             var course = new Course(courseObject.name, courseObject.classes, courseObject.length, courseObject.climb, courseObject.controls);
             courseObject.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
             courses.push(course);
-        });
+        }
 
         return {classes: courseClasses, courses: courses};
     };

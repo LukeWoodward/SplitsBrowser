@@ -1221,7 +1221,7 @@
     Chart.prototype.sortReferenceCumTimes = function () {
         // Put together a map that maps cumulative times to the first split to
         // register that time.
-        var cumTimesToControlIndex = d3.map();
+        var cumTimesToControlIndex = new Map();
         this.referenceCumTimes.forEach(function (cumTime, index) {
             if (!cumTimesToControlIndex.has(cumTime)) {
                 cumTimesToControlIndex.set(cumTime, index);

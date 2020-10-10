@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser ClassSelector - Provides a choice of classes to compare.
  *
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -40,7 +40,7 @@
         var outerThis = this;
         this.dropDown = div.append("select").node();
         $(this.dropDown).bind("change", function() {
-            outerThis.updateOtherClasses(d3.set());
+            outerThis.updateOtherClasses(new Set());
             outerThis.onSelectionChanged();
         });
 
@@ -69,7 +69,7 @@
         this.setClasses([]);
 
         // Indexes of the selected 'other classes'.
-        this.selectedOtherClassIndexes = d3.set();
+        this.selectedOtherClassIndexes = new Set();
 
         // Ensure that a click outside of the drop-down list or the selector
         // box closes it.
@@ -136,7 +136,7 @@
 
             optionsList.exit().remove();
 
-            this.updateOtherClasses(d3.set());
+            this.updateOtherClasses(new Set());
         } else {
             throwInvalidData("ClassSelector.setClasses: classes is not an array");
         }
@@ -166,7 +166,7 @@
     ClassSelector.prototype.selectClasses = function (selectedIndexes) {
         if (selectedIndexes.length > 0 && selectedIndexes.every(function (index) { return 0 <= index && index < this.dropDown.options.length; }, this)) {
             this.dropDown.selectedIndex = selectedIndexes[0];
-            this.updateOtherClasses(d3.set(selectedIndexes.slice(1)));
+            this.updateOtherClasses(new Set(selectedIndexes.slice(1)));
             this.onSelectionChanged();
         }
     };
@@ -180,7 +180,7 @@
             return [];
         } else {
             var indexes = [this.dropDown.selectedIndex];
-            this.selectedOtherClassIndexes.each(function (index) { indexes.push(parseInt(index, 10)); });
+            this.selectedOtherClassIndexes.forEach(function (index) { indexes.push(parseInt(index, 10)); });
             return indexes;
         }
     };
@@ -200,7 +200,7 @@
     * text if none are selected.
     */
     ClassSelector.prototype.updateOtherClassText = function () {
-        var classIdxs = this.selectedOtherClassIndexes.values();
+        var classIdxs = Array.from(this.selectedOtherClassIndexes.values());
         classIdxs.sort(d3.ascending);
         var text;
         if (classIdxs.length === 0) {
@@ -216,7 +216,7 @@
     /**
     * Updates the other-classes selector div following a change of selected
     * 'main' class.
-    * @param {d3.set} selectedOtherClassIndexes Array of selected other-class indexes.
+    * @param {Set} selectedOtherClassIndexes Array of selected other-class indexes.
     */
     ClassSelector.prototype.updateOtherClasses = function (selectedOtherClassIndexes) {
         this.otherClassesList.style("display", "none");
@@ -282,7 +282,7 @@
     */
     ClassSelector.prototype.toggleOtherClass = function (classIdx) {
         if (this.selectedOtherClassIndexes.has(classIdx)) {
-            this.selectedOtherClassIndexes.remove(classIdx);
+            this.selectedOtherClassIndexes.delete(classIdx);
         } else {
             this.selectedOtherClassIndexes.add(classIdx);
         }

@@ -59,16 +59,16 @@
     var ResultsTable = Controls.ResultsTable;
 
     /**
-    * Checks that D3 version 4 or later is present.
-    * @return {Boolean} True if D3 version 4 is present, false if no D3 was found
-    *     or a version of D3 older version 4 was found.
+    * Checks that D3 version 6 or later is present.
+    * @return {Boolean} True if D3 version 6 is present, false if no D3 was found
+    *     or a version of D3 older than version 6 was found.
     */
-    function checkD3Version4() {
+    function checkD3Version6() {
         if (!window.d3) {
-            alert("D3 was not found.  SplitsBrowser requires D3 version 4 or later.");
+            alert("D3 was not found.  SplitsBrowser requires D3 version 6 or later.");
             return false;
-        } else if (parseFloat(d3.version) < 4) {
-            alert("D3 version " + d3.version + " was found.  SplitsBrowser requires D3 version 4 or later.");
+        } else if (parseFloat(d3.version) < 6) {
+            alert("D3 version " + d3.version + " was found.  SplitsBrowser requires D3 version 6 or later.");
             return false;
         } else {
             return true;
@@ -835,7 +835,7 @@
     *     the HTML element itself, although this behaviour is deprecated.
     */
     SplitsBrowser.readEvent = function (data, options) {
-        if (!checkD3Version4()) {
+        if (!checkD3Version6()) {
             return;
         }
 
@@ -928,7 +928,7 @@
     *     the HTML element itself, although this behaviour is deprecated.
     */
     SplitsBrowser.loadEvent = function (eventUrl, options) {
-        if (!checkD3Version4()) {
+        if (!checkD3Version6()) {
             return;
         }
 
