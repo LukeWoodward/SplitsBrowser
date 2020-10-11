@@ -53,7 +53,7 @@
     SplitsBrowser.Model.ChartTypes = {
         SplitsGraph: {
             nameKey: "SplitsGraphChartType",
-            dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes); },
+            dataSelector: (result, referenceCumTimes) => result.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes),
             yAxisLabelKey: "SplitsGraphYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
@@ -62,7 +62,7 @@
         },
         RaceGraph: {
             nameKey: "RaceGraphChartType",
-            dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
+            dataSelector: (result, referenceCumTimes) => result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes),
             yAxisLabelKey: "RaceGraphYAxisLabel",
             isRaceGraph: true,
             isResultsTable: false,
@@ -71,7 +71,7 @@
         },
         PositionAfterLeg: {
             nameKey:  "PositionAfterLegChartType",
-            dataSelector: function (result) { return result.cumRanks; },
+            dataSelector: result => result.cumRanks,
             yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
@@ -80,7 +80,7 @@
         },
         SplitPosition: {
             nameKey: "SplitPositionChartType",
-            dataSelector: function (result) { return result.splitRanks; },
+            dataSelector: result => result.splitRanks,
             yAxisLabelKey: "PositionYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,
@@ -89,7 +89,7 @@
         },
         PercentBehind: {
             nameKey: "PercentBehindChartType",
-            dataSelector: function (result, referenceCumTimes) { return result.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes); },
+            dataSelector: (result, referenceCumTimes) => result.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes),
             yAxisLabelKey: "PercentBehindYAxisLabel",
             isRaceGraph: false,
             isResultsTable: false,

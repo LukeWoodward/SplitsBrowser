@@ -118,7 +118,7 @@
     * @param {Object} listAndSelection Object containing the result list and
     *     the result selection.
     */
-   function setUpEventAndStartDragAndStopDrag(targetIndex, options, listAndSelection) {
+    function setUpEventAndStartDragAndStopDrag(targetIndex, options, listAndSelection) {
         verifyNumeric(targetIndex);
         var event = setUpEvent(targetIndex, options);
         listAndSelection.list.startDrag(event, targetIndex);
@@ -196,7 +196,7 @@
     * @param {Object} listAndSelection Object containing the result list and
     *     the selected results.
     */
-   function setUpEventAndMoveMouseOffTheBottomAndStopDrag(listAndSelection) {
+    function setUpEventAndMoveMouseOffTheBottomAndStopDrag(listAndSelection) {
         var event = setUpEvent($("#resultList")[0], {yOffset: 200});
         listAndSelection.list.mouseMove(event, -1);
         listAndSelection.list.stopDrag(event);
@@ -218,11 +218,11 @@
     * @param {Object} listAndSelection Object containing the result list and
     *     the selected results.
     */
-   function setUpEventAndMoveMouseIntoTheScrollbarAndStopDrag(listAndSelection) {
-    var event = setUpEvent($("#resultList")[0], {yOffset: -20});
-    listAndSelection.list.mouseMove(event, -1);
-    listAndSelection.list.stopDrag(event);
-}
+    function setUpEventAndMoveMouseIntoTheScrollbarAndStopDrag(listAndSelection) {
+        var event = setUpEvent($("#resultList")[0], {yOffset: -20});
+        listAndSelection.list.mouseMove(event, -1);
+        listAndSelection.list.stopDrag(event);
+    }
 
     /**
     * Creates a list with three results in it, and return the list and the

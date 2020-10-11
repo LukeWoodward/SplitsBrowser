@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - ChartPopup tests.
  *
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -23,16 +23,16 @@
 
     QUnit.module("Chart popup");
 
-    var Popup = SplitsBrowser.Controls.ChartPopup;
+    var ChartPopup = SplitsBrowser.Controls.ChartPopup;
 
     QUnit.test("Can create a popup without it initially being hidden", function (assert) {
-        var popup = new Popup(d3.select("#qunit-fixture").node(), {});
+        var popup = new ChartPopup(d3.select("#qunit-fixture").node());
 
         assert.ok(!popup.isShown(), "Popup should initially be hidden");
     });
 
     QUnit.test("Can create a popup, show it and then hide it", function (assert) {
-        var popup = new Popup(d3.select("#qunit-fixture").node(), {});
+        var popup = new ChartPopup(d3.select("#qunit-fixture").node());
 
         popup.show({x: 0, y: 0});
         assert.ok(popup.isShown(), "Popup should be shown");

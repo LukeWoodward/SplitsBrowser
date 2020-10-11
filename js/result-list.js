@@ -237,7 +237,7 @@
     /**
     * Handles a mouse-move event. by adjust the range of dragged results to
     * include the current index.
-    * @param {Event} event The event. 
+    * @param {Event} event The event.
     * @param {Number} dragIndex The index to which the drag has now moved.
     */
     ResultList.prototype.mouseMove = function (event, dragIndex) {

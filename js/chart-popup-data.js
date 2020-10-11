@@ -22,19 +22,19 @@
     "use strict";
 
     // The maximum number of fastest splits to show when the popup is open.
-    var MAX_FASTEST_SPLITS = 10;
+    const MAX_FASTEST_SPLITS = 10;
 
     // Width of the time interval, in seconds, when viewing nearby results
     // at a control on the race graph.
-    var RACE_GRAPH_RESULT_WINDOW = 240;
+    const RACE_GRAPH_RESULT_WINDOW = 240;
 
-    var formatTime = SplitsBrowser.formatTime;
-    var getMessage = SplitsBrowser.getMessage;
-    var getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
+    const formatTime = SplitsBrowser.formatTime;
+    const getMessage = SplitsBrowser.getMessage;
+    const getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
 
-    var Course = SplitsBrowser.Model.Course;
+    const Course = SplitsBrowser.Model.Course;
 
-    var ChartPopupData = {};
+    const ChartPopupData = {};
 
     /**
     * Returns the fastest splits to a control.
@@ -46,12 +46,10 @@
     * @return {Object} Fastest-split data.
     */
     ChartPopupData.getFastestSplitsPopupData = function (courseClassSet, controlIndex, selectedLegIndex) {
-        var data = courseClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, controlIndex, selectedLegIndex);
-        data = data.map(function (comp) {
-            return {time: comp.split, name: comp.name, highlight: false};
-        });
+        let data = courseClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, controlIndex, selectedLegIndex);
+        data = data.map(comp => ({time: comp.split, name: comp.name, highlight: false}));
 
-        var placeholderMessageKey;
+        let placeholderMessageKey;
         if (courseClassSet.hasTeamData() && selectedLegIndex === null) {
             placeholderMessageKey = "SelectedClassesPopupPlaceholderTeams";
         } else {
@@ -73,18 +71,18 @@
     *     array of data to show within it.
     */
     ChartPopupData.getFastestSplitsForLegPopupData = function (courseClassSet, eventData, controlIndex) {
-        var course = courseClassSet.getCourse();
-        var startCode = course.getControlCode(controlIndex - 1);
-        var endCode = course.getControlCode(controlIndex);
+        let course = courseClassSet.getCourse();
+        let startCode = course.getControlCode(controlIndex - 1);
+        let endCode = course.getControlCode(controlIndex);
 
-        var startControl = (startCode === Course.START) ? getMessage("StartName") : startCode;
-        var endControl = (endCode === Course.FINISH) ? getMessage("FinishName") : endCode;
+        let startControl = (startCode === Course.START) ? getMessage("StartName") : startCode;
+        let endControl = (endCode === Course.FINISH) ? getMessage("FinishName") : endCode;
 
-        var title = getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": startControl, "$$END$$": endControl});
+        let title = getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": startControl, "$$END$$": endControl});
 
-        var primaryClass = courseClassSet.getPrimaryClassName();
-        var data = eventData.getFastestSplitsForLeg(startCode, endCode)
-                            .map(function (row) { return { name: row.name, className: row.className, time: row.split, highlight: (row.className === primaryClass)}; });
+        let primaryClass = courseClassSet.getPrimaryClassName();
+        let data = eventData.getFastestSplitsForLeg(startCode, endCode)
+                            .map(row => ({ name: row.name, className: row.className, time: row.split, highlight: (row.className === primaryClass)}));
 
         return {title: title, data: data, placeholder: null};
     };
@@ -101,15 +99,15 @@
     * @return {Object} Object containing result data.
     */
     ChartPopupData.getResultsVisitingCurrentControlPopupData = function (courseClassSet, eventData, controlIndex, time) {
-        var controlCode = courseClassSet.getCourse().getControlCode(controlIndex);
-        var intervalStart = Math.round(time) - RACE_GRAPH_RESULT_WINDOW / 2;
-        var intervalEnd = Math.round(time) + RACE_GRAPH_RESULT_WINDOW / 2;
-        var results = eventData.getResultsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
+        let controlCode = courseClassSet.getCourse().getControlCode(controlIndex);
+        let intervalStart = Math.round(time) - RACE_GRAPH_RESULT_WINDOW / 2;
+        let intervalEnd = Math.round(time) + RACE_GRAPH_RESULT_WINDOW / 2;
+        let results = eventData.getResultsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
 
-        var primaryClass = courseClassSet.getPrimaryClassName();
-        var resultData = results.map(function (row) { return {name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}; });
+        let primaryClass = courseClassSet.getPrimaryClassName();
+        let resultData = results.map(row => ({name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}));
 
-        var controlName;
+        let controlName;
         if (controlCode === Course.START) {
             controlName = getMessage("StartName");
         } else if (controlCode === Course.FINISH) {
@@ -118,7 +116,7 @@
             controlName = getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
         }
 
-        var title = getMessageWithFormatting(
+        let title = getMessageWithFormatting(
             "NearbyCompetitorsPopupHeader",
             {"$$START$$": formatTime(intervalStart), "$$END$$": formatTime(intervalEnd), "$$CONTROL$$": controlName});
 
@@ -139,13 +137,13 @@
             return (name1 < name2) ? -1 : 1;
         } else {
             // Both courses begin with the same letter.
-            var regexResult = /^[^0-9]+/.exec(name1);
+            let regexResult = /^[^0-9]+/.exec(name1);
             if (regexResult !== null && regexResult.length > 0) {
                 // regexResult should be a 1-element array.
-                var result = regexResult[0];
+                let result = regexResult[0];
                 if (0 < result.length && result.length < name1.length && name2.substring(0, result.length) === result) {
-                    var num1 = parseInt(name1.substring(result.length), 10);
-                    var num2 = parseInt(name2.substring(result.length), 10);
+                    let num1 = parseInt(name1.substring(result.length), 10);
+                    let num2 = parseInt(name2.substring(result.length), 10);
                     if (!isNaN(num1) && !isNaN(num2)) {
                         return num1 - num2;
                     }
@@ -164,7 +162,7 @@
     */
     function tidyNextControlsList(nextControls) {
         return nextControls.map(function (nextControlRec) {
-            var codes = nextControlRec.nextControls.slice(0);
+            let codes = nextControlRec.nextControls.slice(0);
             if (codes[codes.length - 1] === Course.FINISH) {
                 codes[codes.length - 1] = getMessage("FinishName");
             }
@@ -183,12 +181,12 @@
     * @return {Object} Next-control data.
     */
     ChartPopupData.getNextControlData = function (course, eventData, controlIndex) {
-        var controlIdx = Math.min(controlIndex, course.controls.length);
-        var controlCode = course.getControlCode(controlIdx);
-        var nextControls = eventData.getNextControlsAfter(controlCode);
-        nextControls.sort(function (c1, c2) { return compareCourseNames(c1.course.name, c2.course.name); });
-        var thisControlName = (controlCode === Course.START) ? getMessage("StartName") : getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
-        return {thisControl: thisControlName, nextControls: tidyNextControlsList(nextControls) };
+        let controlIdx = Math.min(controlIndex, course.controls.length);
+        let controlCode = course.getControlCode(controlIdx);
+        let nextControls = eventData.getNextControlsAfter(controlCode);
+        nextControls.sort((c1, c2) => compareCourseNames(c1.course.name, c2.course.name));
+        let thisControlName = (controlCode === Course.START) ? getMessage("StartName") : getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
+        return {thisControl: thisControlName, nextControls: tidyNextControlsList(nextControls)};
     };
 
     SplitsBrowser.Model.ChartPopupData = ChartPopupData;

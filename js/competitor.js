@@ -28,29 +28,31 @@
     * @param {String} name The name of the competitor.
     * @param {String} club The name of the competitor's club.
     */
-    function Competitor(name, club) {
-        this.name = name;
-        this.club = club;
+    class Competitor {
+        constructor(name, club) {
+            this.name = name;
+            this.club = club;
 
-        this.yearOfBirth = null;
-        this.gender = null; // "M" or "F" for male or female.
+            this.yearOfBirth = null;
+            this.gender = null; // "M" or "F" for male or female.
+        }
+
+        /**
+        * Sets the competitor's year of birth.
+        * @param {Number} yearOfBirth The competitor's year of birth.
+        */
+        setYearOfBirth(yearOfBirth) {
+            this.yearOfBirth = yearOfBirth;
+        }
+
+        /**
+        * Sets the competitor's gender.  This should be "M" or "F".
+        * @param {String} gender The competitor's gender, "M" or "F".
+        */
+        setGender(gender) {
+            this.gender = gender;
+        }
     }
-
-    /**
-    * Sets the competitor's year of birth.
-    * @param {Number} yearOfBirth The competitor's year of birth.
-    */
-    Competitor.prototype.setYearOfBirth = function (yearOfBirth) {
-        this.yearOfBirth = yearOfBirth;
-    };
-
-    /**
-    * Sets the competitor's gender.  This should be "M" or "F".
-    * @param {String} gender The competitor's gender, "M" or "F".
-    */
-    Competitor.prototype.setGender = function (gender) {
-        this.gender = gender;
-    };
 
     SplitsBrowser.Model.Competitor = Competitor;
 })();
