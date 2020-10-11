@@ -69,12 +69,12 @@ SplitsBrowser.Messages.fr_be = {
     CompareWithFastestTimePlusPercentage: "Meilleur temps + $$PERCENT$$%",
     CompareWithAnyRunner: "N'importe quel coureur...",
     CompareWithAnyRunnerLabel: "Coureur: ",
-    CompareWithAnyTeam: "Any team...", // TO BE TRANSLATED
-    CompareWithAnyTeamLabel: "Team: ", // TO BE TRANSLATED
+    CompareWithAnyTeam: "Une autre équipe...",
+    CompareWithAnyTeamLabel: "Equipe: ",
     // Warning message shown to the user when a comparison option cannot be
     // chosen because the course has no winner.
     CannotCompareAsNoWinner: "Impossible de comparer avec '$$OPTION$$' car aucun coureur de ce circuit n'a terminé le parcours.",
-    CannotCompareAsNoWinnerTeam: "Cannot compare against '$$OPTION$$' because no teams in this class complete the course.", // TO BE TRANSLATED
+    CannotCompareAsNoWinnerTeam: "Impossible de comparer avec '$$OPTION$$' car aucune équipe de cette catégorie n'a terminé son parcours.",
     
     // Label of checkbox that shows the original data as opposed to the
     // 'repaired' data.  This only appears if data that needs repair has been
@@ -120,8 +120,7 @@ SplitsBrowser.Messages.fr_be = {
     // because no results registered a split for the control, or those
     // that did only registered a dubious split.
     SelectedClassesPopupPlaceholder: "Aucun coureur n'a terminé ce circuit",
-    // TO BE TRANSLATED
-    SelectedClassesPopupPlaceholderTeams: "No teams", 
+    SelectedClassesPopupPlaceholderTeams: "Aucune équipe", 
 
     // Header for the 'Fastest leg time' popup dialog.
     FastestLegTimePopupHeader: "Intermédiaire le plus rapide $$START$$ - $$END$$",
@@ -133,8 +132,7 @@ SplitsBrowser.Messages.fr_be = {
     // graph when there aren't any competitors or teams visiting the control
     // within the +/- 2 minute window.
     NoNearbyCompetitors: "Aucun coureur",
-    // TO BE TRANSLATED
-    NoNearbyTeams: "No nearby teams",
+    NoNearbyTeams: "Aucune équipe",
 
     // Link that appears at the top and opens SplitsBrowser with the settings
     // (selected classes, results, comparison, chart type, etc.) that are
@@ -155,8 +153,7 @@ SplitsBrowser.Messages.fr_be = {
     // Placeholder message shown inside the result list if all competitors or teams
     // in the class did not start.
     NoCompetitorsStarted: "Aucun coureur n'a encore pris le départ",
-    // TO BE TRANSLATED
-    NoTeamsStarted: "No teams started",
+    NoTeamsStarted: "Aucune équipe n'a encore pris le départ",
     
     // Label of the language-selector control.
     LanguageSelectorLabel: "Langue:",
@@ -174,8 +171,7 @@ SplitsBrowser.Messages.fr_be = {
     WarningsTooltip: "Impossible de lire toutes les données de cette compétition.  Un(e) ou plusieurs coureurs ou catégories peuvent avoir été omis.  Cliquer pour d'autres détails.",
     
     // Options in the leg-selector control when viewing results for a team.
-    // TO BE TRANSLATED
-    LegSelectorLabel: "Leg: ",
-    ShowAllLegs: "All",
-    ShowLeg: "Leg $$LEG_NUMBER$$"
+    LegSelectorLabel: "Tronçon: ",
+    ShowAllLegs: "Tous",
+    ShowLeg: "Tronçon $$LEG_NUMBER$$"
 };
