@@ -23,9 +23,9 @@
 
     // ID of the div used to contain the object.
     // Must match the name defined in styles.css.
-    var CONTAINER_DIV_ID = "originalDataSelectorContainer";
+    const CONTAINER_DIV_ID = "originalDataSelectorContainer";
 
-    var getMessage = SplitsBrowser.getMessage;
+    const getMessage = SplitsBrowser.getMessage;
 
     /**
     * Constructs a new OriginalDataSelector object.
@@ -33,114 +33,117 @@
     * @param {d3.selection} parent d3 selection containing the parent to
     *     insert the selector into.
     */
-    function OriginalDataSelector(parent) {
-        this.parent = parent;
+    class OriginalDataSelector {
+        constructor(parent) {
+            this.parent = parent;
 
-        var checkboxId = "originalDataCheckbox";
-        this.containerDiv = parent.append("div")
-                                  .classed("topRowStart", true)
-                                  .attr("id", CONTAINER_DIV_ID);
+            let checkboxId = "originalDataCheckbox";
+            this.containerDiv = parent.append("div")
+                .classed("topRowStart", true)
+                .attr("id", CONTAINER_DIV_ID);
 
-        this.containerDiv.append("div").classed("topRowStartSpacer", true);
+            this.containerDiv.append("div").classed("topRowStartSpacer", true);
 
-        var span = this.containerDiv.append("span");
+            let span = this.containerDiv.append("span");
 
-        var outerThis = this;
-        this.checkbox = span.append("input")
-                            .attr("type", "checkbox")
-                            .attr("id", checkboxId)
-                            .on("click", function() { outerThis.fireChangeHandlers(); })
-                            .node();
+            this.checkbox = span.append("input")
+                .attr("type", "checkbox")
+                .attr("id", checkboxId)
+                .on("click", () => this.fireChangeHandlers())
+                .node();
 
-        this.label = span.append("label")
-                         .attr("for", checkboxId)
-                         .classed("originalDataSelectorLabel", true);
+            this.label = span.append("label")
+                .attr("for", checkboxId)
+                .classed("originalDataSelectorLabel", true);
 
-        this.handlers = [];
-        this.setMessages();
+            this.handlers = [];
+            this.setMessages();
+        }
+
+        /**
+        * Sets the messages in this control, following either its creation of a
+        * change of selected language.
+        */
+        setMessages() {
+            this.label.text(getMessage("ShowOriginalData"));
+            this.containerDiv.attr("title", getMessage("ShowOriginalDataTooltip"));
+        }
+
+        /**
+        * Register a change handler to be called whenever the choice of original or
+        * repaired data is changed.
+        *
+        * If the handler was already registered, nothing happens.
+        * @param {Function} handler Function to be called whenever the choice
+        *                           changes.
+        */
+        registerChangeHandler(handler) {
+            if (!this.handlers.includes(handler)) {
+                this.handlers.push(handler);
+            }
+        }
+
+        /**
+        * Deregister a change handler from being called whenever the choice of
+        * original or repaired data is changed.
+        *
+        * If the handler given was never registered, nothing happens.
+        * @param {Function} handler Function to be called whenever the choice
+        *                           changes.
+        */
+        deregisterChangeHandler(handler) {
+            var index = this.handlers.indexOf(handler);
+            if (index !== -1) {
+                this.handlers.splice(index, 1);
+            }
+        }
+
+        /**
+        * Fires all change handlers registered.
+        */
+        fireChangeHandlers() {
+            for (let handler of this.handlers) {
+                handler(this.checkbox.checked);
+            }
+        }
+
+        /**
+        * Returns whether original data is selected.
+        * @return {Boolean} True if original data is selected, false if not.
+        */
+        isOriginalDataSelected() {
+            return this.checkbox.checked;
+        }
+
+        /**
+        * Selects original data.
+        */
+        selectOriginalData() {
+            this.checkbox.checked = true;
+            this.fireChangeHandlers();
+        }
+
+        /**
+        * Sets whether this original-data selector should be visible.
+        * @param {Boolean} isVisible True if the original-data selector should be
+        *     visible, false if it should be hidden.
+        */
+        setVisible(isVisible) {
+            this.containerDiv.style("display", (isVisible) ? null : "none");
+        }
+
+        /**
+        * Sets whether the control is enabled.
+        * @param {Boolean} isEnabled True if the control is enabled, false if
+        *      disabled.
+        */
+        setEnabled(isEnabled) {
+            this.parent.selectAll("label.originalDataSelectorLabel")
+                .classed("disabled", !isEnabled);
+
+            this.checkbox.disabled = !isEnabled;
+        }
     }
-
-    /**
-    * Sets the messages in this control, following either its creation of a
-    * change of selected language.
-    */
-    OriginalDataSelector.prototype.setMessages = function () {
-        this.label.text(getMessage("ShowOriginalData"));
-        this.containerDiv.attr("title", getMessage("ShowOriginalDataTooltip"));
-    };
-
-    /**
-    * Register a change handler to be called whenever the choice of original or
-    * repaired data is changed.
-    *
-    * If the handler was already registered, nothing happens.
-    * @param {Function} handler Function to be called whenever the choice
-    *                           changes.
-    */
-    OriginalDataSelector.prototype.registerChangeHandler = function (handler) {
-        if (this.handlers.indexOf(handler) === -1) {
-            this.handlers.push(handler);
-        }
-    };
-
-    /**
-    * Deregister a change handler from being called whenever the choice of
-    * original or repaired data is changed.
-    *
-    * If the handler given was never registered, nothing happens.
-    * @param {Function} handler Function to be called whenever the choice
-    *                           changes.
-    */
-    OriginalDataSelector.prototype.deregisterChangeHandler = function (handler) {
-        var index = this.handlers.indexOf(handler);
-        if (index !== -1) {
-            this.handlers.splice(index, 1);
-        }
-    };
-
-    /**
-    * Fires all change handlers registered.
-    */
-    OriginalDataSelector.prototype.fireChangeHandlers = function () {
-        this.handlers.forEach(function (handler) { handler(this.checkbox.checked); }, this);
-    };
-
-    /**
-    * Returns whether original data is selected.
-    * @return {Boolean} True if original data is selected, false if not.
-    */
-    OriginalDataSelector.prototype.isOriginalDataSelected = function () {
-        return this.checkbox.checked;
-    };
-
-    /**
-    * Selects original data.
-    */
-    OriginalDataSelector.prototype.selectOriginalData = function () {
-        this.checkbox.checked = true;
-        this.fireChangeHandlers();
-    };
-
-    /**
-    * Sets whether this original-data selector should be visible.
-    * @param {Boolean} isVisible True if the original-data selector should be
-    *     visible, false if it should be hidden.
-    */
-    OriginalDataSelector.prototype.setVisible = function (isVisible) {
-        this.containerDiv.style("display", (isVisible) ? null : "none");
-    };
-
-    /**
-    * Sets whether the control is enabled.
-    * @param {Boolean} isEnabled True if the control is enabled, false if
-    *      disabled.
-    */
-    OriginalDataSelector.prototype.setEnabled = function (isEnabled) {
-        this.parent.selectAll("label.originalDataSelectorLabel")
-                   .classed("disabled", !isEnabled);
-
-        this.checkbox.disabled = !isEnabled;
-    };
 
     SplitsBrowser.Controls.OriginalDataSelector = OriginalDataSelector;
 })();

@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - StatisticsSelector tests.
  *
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -21,65 +21,66 @@
 (function () {
     "use strict";
 
-    var Selector = SplitsBrowser.Controls.StatisticsSelector;
+    const Selector = SplitsBrowser.Controls.StatisticsSelector;
+    const makeStatsMap = SplitsBrowserTest.makeStatsMap;
 
     QUnit.module("Statistics selector");
 
-    var lastVisibleStats = null;
-    var callCount = 0;
+    let lastVisibleStats = null;
+    let callCount = 0;
 
-    var testChangeHandler = function (visibleStats) {
+    const testChangeHandler = function (visibleStats) {
         lastVisibleStats = visibleStats;
         callCount += 1;
     };
 
-    var reset = function () {
+    function reset() {
         lastVisibleStats = null;
         callCount = 0;
-    };
+    }
 
     QUnit.test("All statistics disabled by clearAll method", function (assert) {
-        var selector = new Selector(d3.select("#qunit-fixture").node());
+        let selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
-        assert.deepEqual(selector.getVisibleStatistics(), {TotalTime: false, SplitTime: false, BehindFastest: false, TimeLoss: false});
+        assert.deepEqual(selector.getVisibleStatistics(), makeStatsMap(false, false, false, false));
     });
 
     QUnit.test("Can register change handler and have it called", function (assert) {
         reset();
-        var selector = new Selector(d3.select("#qunit-fixture").node());
+        let selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
 
         selector.registerChangeHandler(testChangeHandler);
 
-        var checkboxes = $("#qunit-fixture input");
+        let checkboxes = $("#qunit-fixture input");
         $(checkboxes[0]).prop("checked", true).change();
-        assert.deepEqual(lastVisibleStats, {TotalTime: true, SplitTime: false, BehindFastest: false, TimeLoss: false});
+        assert.deepEqual(lastVisibleStats, makeStatsMap(true, false, false, false));
         assert.strictEqual(1, callCount);
     });
 
     QUnit.test("Can register change handler twice and have it called only once", function (assert) {
         reset();
-        var selector = new Selector(d3.select("#qunit-fixture").node());
+        let selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
 
         selector.registerChangeHandler(testChangeHandler);
         selector.registerChangeHandler(testChangeHandler);
 
-        var checkboxes = $("#qunit-fixture input");
+        let checkboxes = $("#qunit-fixture input");
         $(checkboxes[1]).prop("checked", true).change();
 
-        assert.deepEqual(lastVisibleStats, {TotalTime: false, SplitTime: true, BehindFastest: false, TimeLoss: false});
+        assert.deepEqual(lastVisibleStats, makeStatsMap(false, true, false, false));
         assert.strictEqual(1, callCount);
     });
 
     QUnit.test("Can register two change handlers and have them both called", function (assert) {
         reset();
-        var selector = new Selector(d3.select("#qunit-fixture").node());
+        let selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
 
-        var lastVisibleStats2 = null;
-        var callCount2 = 0;
-        var secondHandler = function (visibleStats) {
+        let lastVisibleStats2 = null;
+        let callCount2 = 0;
+        let secondHandler = (visibleStats) => {
             lastVisibleStats2 = visibleStats;
             callCount2 += 1;
         };
@@ -87,11 +88,10 @@
         selector.registerChangeHandler(testChangeHandler);
         selector.registerChangeHandler(secondHandler);
 
-
-        var checkboxes = $("#qunit-fixture input");
+        let checkboxes = $("#qunit-fixture input");
         $(checkboxes[2]).prop("checked", true).change();
 
-        var expectedStats = {TotalTime: false, SplitTime: false, BehindFastest: true, TimeLoss: false};
+        let expectedStats = makeStatsMap(false, false, true, false);
         assert.deepEqual(lastVisibleStats, expectedStats);
         assert.strictEqual(1, callCount);
         assert.deepEqual(lastVisibleStats2, expectedStats);
@@ -100,14 +100,14 @@
 
     QUnit.test("Can deregister change handler and have it no longer called", function (assert) {
         reset();
-        var selector = new Selector(d3.select("#qunit-fixture").node());
+        let selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
 
         selector.registerChangeHandler(testChangeHandler);
 
-        var checkboxes = $("#qunit-fixture input");
+        let checkboxes = $("#qunit-fixture input");
         $(checkboxes[3]).prop("checked", true).change();
-        var expectedResult = {TotalTime: false, SplitTime: false, BehindFastest: false, TimeLoss: true};
+        let expectedResult = makeStatsMap(false, false, false, true);
         assert.deepEqual(lastVisibleStats, expectedResult);
         assert.strictEqual(1, callCount);
 
@@ -119,7 +119,7 @@
 
     QUnit.test("Can deregister change handler that was never registered without error", function (assert) {
         reset();
-        var selector = new Selector(d3.select("#qunit-fixture").node());
+        let selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
 
         selector.deregisterChangeHandler(testChangeHandler);
@@ -129,16 +129,16 @@
 
     QUnit.test("Can set selected statistics", function (assert) {
         reset();
-        var selector = new Selector(d3.select("#qunit-fixture").node());
+        let selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
 
         selector.registerChangeHandler(testChangeHandler);
 
-        selector.setVisibleStatistics({TotalTime: false, SplitTime: true, BehindFastest: false, TimeLoss: true});
-        assert.deepEqual(lastVisibleStats, {TotalTime: false, SplitTime: true, BehindFastest: false, TimeLoss: true});
+        selector.setVisibleStatistics(makeStatsMap(false, true, false, true));
+        assert.deepEqual(lastVisibleStats, makeStatsMap(false, true, false, true));
         assert.strictEqual(1, callCount);
-        var checkboxes = $("#qunit-fixture input");
-        for (var index = 0; index < 4; index += 1) {
+        let checkboxes = $("#qunit-fixture input");
+        for (let index = 0; index < 4; index += 1) {
             assert.strictEqual(checkboxes[index].checked, index % 2 === 1);
         }
     });

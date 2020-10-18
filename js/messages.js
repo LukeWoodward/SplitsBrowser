@@ -21,24 +21,24 @@
 (function () {
     "use strict";
 
-    var hasProperty = SplitsBrowser.hasProperty;
+    const hasProperty = SplitsBrowser.hasProperty;
 
     // Whether a warning about missing messages has been given.  We don't
     // really want to irritate the user with many alert boxes if there's a
     // problem with the messages.
-    var warnedAboutMessages = false;
+    let warnedAboutMessages = false;
 
     // Default alerter function, just calls window.alert.
-    var alertFunc = function (message) { window.alert(message); };
+    let alertFunc = message => window.alert(message);
 
     // The currently-chosen language, or null if none chosen or found yet.
-    var currentLanguage = null;
+    let currentLanguage = null;
 
     // The list of all languages read in, or null if none.
-    var allLanguages = null;
+    let allLanguages = null;
 
     // The messages object.
-    var messages = SplitsBrowser.Messages;
+    const messages = SplitsBrowser.Messages;
 
     /**
     * Issue a warning about the messages, if a warning hasn't already been
@@ -91,7 +91,7 @@
             if (hasProperty(messages[currentLanguage], key)) {
                 return messages[currentLanguage][key];
             } else {
-                warn("Message not found for key '" + key + "' in language '" + currentLanguage + "'");
+                warn(`Message not found for key '${key}' in language '${currentLanguage}'`);
                 return "?????";
             }
         } else {
@@ -111,8 +111,8 @@
     * @return {String} The resulting message.
     */
     SplitsBrowser.getMessageWithFormatting = function (key, params) {
-        var message = SplitsBrowser.getMessage(key);
-        for (var paramName in params) {
+        let message = SplitsBrowser.getMessage(key);
+        for (let paramName in params) {
             if (hasProperty(params, paramName)) {
                 // Irritatingly there isn't a way of doing global replace
                 // without using regexps.  So we must escape any magic regex
@@ -130,17 +130,13 @@
     * Returns an array of codes of languages that have been loaded.
     * @return {Array} Array of language codes.
     */
-    SplitsBrowser.getAllLanguages = function () {
-        return allLanguages.slice(0);
-    };
+    SplitsBrowser.getAllLanguages = () => allLanguages.slice(0);
 
     /**
     * Returns the language code of the current language, e.g. "en_gb".
     * @return {String} Language code of the current language.
     */
-    SplitsBrowser.getLanguage = function () {
-        return currentLanguage;
-    };
+    SplitsBrowser.getLanguage = () => currentLanguage;
 
     /**
     * Returns the name of the language with the given code.

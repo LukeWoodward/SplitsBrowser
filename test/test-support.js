@@ -126,6 +126,23 @@ var SplitsBrowserTest = {};
         return result;
     };
 
+    /**
+     * Creates and returns a Map containing selected statistics.
+     * @param {Boolean} totalTime Whether the 'Total Time' statistic is selected.
+     * @param {Boolean} splitTime Whether the 'Split Time' statistic is selected.
+     * @param {Boolean} behindFastest Whether the 'Behind Fastest' statistic is selected.
+     * @param {Boolean} timeLoss Whether the 'Time Loss' statistic is selected.
+     * @return {Map} The created map.
+     */
+    SplitsBrowserTest.makeStatsMap = function(totalTime, splitTime, behindFastest, timeLoss) {
+        let map = new Map();
+        map.set("TotalTime", totalTime);
+        map.set("SplitTime", splitTime);
+        map.set("BehindFastest", behindFastest);
+        map.set("TimeLoss", timeLoss);
+        return map;
+    };
+
     // Polyfill HTMLElement.prototype.click for the benefit of PhantomJS.
     // See http://stackoverflow.com/a/17789929
     if (!HTMLElement.prototype.click) {

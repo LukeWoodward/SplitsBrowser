@@ -21,20 +21,20 @@
 (function () {
     "use strict";
 
-    var throwInvalidData = SplitsBrowser.throwInvalidData;
-    var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
-    var isNaNStrict = SplitsBrowser.isNaNStrict;
-    var parseTime = SplitsBrowser.parseTime;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
-    var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
-    var Competitor = SplitsBrowser.Model.Competitor;
-    var Team = SplitsBrowser.Model.Team;
-    var CourseClass = SplitsBrowser.Model.CourseClass;
-    var Course = SplitsBrowser.Model.Course;
-    var Event = SplitsBrowser.Model.Event;
+    const throwInvalidData = SplitsBrowser.throwInvalidData;
+    const throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    const isNaNStrict = SplitsBrowser.isNaNStrict;
+    const parseTime = SplitsBrowser.parseTime;
+    const fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    const createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
+    const Competitor = SplitsBrowser.Model.Competitor;
+    const Team = SplitsBrowser.Model.Team;
+    const CourseClass = SplitsBrowser.Model.CourseClass;
+    const Course = SplitsBrowser.Model.Course;
+    const Event = SplitsBrowser.Model.Event;
 
     // Number of feet in a kilometre.
-    var FEET_PER_KILOMETRE = 3280;
+    const FEET_PER_KILOMETRE = 3280;
 
     /**
     * Returns whether the given value is undefined.
@@ -51,7 +51,7 @@
     * @return {Number} The sum of the numbers in the given array.
     */
     function arraySum(array) {
-        return array.reduce(function (a, b) { return a + b; }, 0);
+        return array.reduce((a, b) => a + b, 0);
     }
 
     /**
@@ -60,7 +60,7 @@
     * @return {XMLDocument} The parsed XML document.
     */
     function parseXml(xmlString) {
-        var xml;
+        let xml;
         try {
             xml = $.parseXML(xmlString);
         } catch (e) {
@@ -88,10 +88,8 @@
     * @return {String} Name read from the element.
     */
     function readCompetitorName(nameElement) {
-
-        var forename = $("> Given", nameElement).text();
-        var surname = $("> Family", nameElement).text();
-
+        let forename = $("> Given", nameElement).text();
+        let surname = $("> Family", nameElement).text();
         if (forename === "") {
             return surname;
         } else if (surname === "") {
@@ -104,11 +102,11 @@
     // Regexp that matches the year in an ISO-8601 date.
     // Both XML formats use ISO-8601 (YYYY-MM-DD) dates, so parsing is
     // fortunately straightforward.
-    var yearRegexp = /^\d{4}/;
+    const yearRegexp = /^\d{4}/;
 
     // Object that contains various functions for parsing bits of data from
     // IOF v2.0.3 XML event data.
-    var Version2Reader = {};
+    const Version2Reader = {};
 
     /**
     * Returns whether the given event data is likely to be results data of the
@@ -122,9 +120,7 @@
     * @return {Boolean} True if the data is likely to be v2.0.3-format data,
     *     false if not.
     */
-    Version2Reader.isOfThisVersion = function (data) {
-        return data.indexOf("IOFdata.dtd") >= 0;
-    };
+    Version2Reader.isOfThisVersion = data => data.indexOf("IOFdata.dtd") >= 0;
 
     /**
     * Makes a more thorough check that the parsed XML data is likely to be of
@@ -132,19 +128,19 @@
     * @param {jQuery.selection} rootElement The root element.
     */
     Version2Reader.checkVersion = function (rootElement) {
-        var iofVersionElement = $("> IOFVersion", rootElement);
+        let iofVersionElement = $("> IOFVersion", rootElement);
         if (iofVersionElement.length === 0) {
             throwWrongFileFormat("Could not find IOFVersion element");
         } else {
-            var version = iofVersionElement.attr("version");
+            let version = iofVersionElement.attr("version");
             if (isUndefined(version)) {
                 throwWrongFileFormat("Version attribute missing from IOFVersion element");
             } else if (version !== "2.0.3") {
-                throwWrongFileFormat("Found unrecognised IOF XML data format '" + version + "'");
+                throwWrongFileFormat(`Found unrecognised IOF XML data format '${version}'`);
             }
         }
 
-        var status = rootElement.attr("status");
+        let status = rootElement.attr("status");
         if (!isUndefined(status) && status.toLowerCase() !== "complete") {
             throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
         }
@@ -156,9 +152,7 @@
     *     containing the course details.
     * @return {String} Class name.
     */
-    Version2Reader.readClassName = function (classResultElement) {
-        return $("> ClassShortName", classResultElement).text();
-    };
+    Version2Reader.readClassName = classResultElement => $("> ClassShortName", classResultElement).text();
 
     /**
     * Reads the team name from a TeamResult element.
@@ -166,9 +160,7 @@
     *     containing the team result details.
     * @return {String} Team name.
     */
-    Version2Reader.readTeamName = function (teamResultElement) {
-        return $("> TeamName", teamResultElement).text();
-    };
+    Version2Reader.readTeamName = teamResultElement => $("> TeamName", teamResultElement).text();
 
     /**
     * Returns a list of elements to be read to pull out team-member information.
@@ -176,9 +168,7 @@
     *     containing the team result details.
     * @return {Array} Elements to parse to read team member results.
     */
-    Version2Reader.readTeamMemberResults = function (teamResultElement) {
-        return $("> PersonResult", teamResultElement);
-    };
+    Version2Reader.readTeamMemberResults = teamResultElement => $("> PersonResult", teamResultElement);
 
     /**
     * Reads the course details from the given ClassResult element.
@@ -192,21 +182,21 @@
         // haven't been specified in any of the files I've seen.
         // So instead grab course details from the class and the first
         // competitor.
-        var courseName = $("> ClassShortName", classResultElement).text();
+        let courseName = $("> ClassShortName", classResultElement).text();
 
-        var firstResult = $("> PersonResult > Result", classResultElement).first();
-        var length = null;
+        let firstResult = $("> PersonResult > Result", classResultElement).first();
+        let length = null;
 
         if (firstResult.length > 0) {
-            var lengthElement = $("> CourseLength", firstResult);
-            var lengthStr = lengthElement.text();
+            let lengthElement = $("> CourseLength", firstResult);
+            let lengthStr = lengthElement.text();
 
             // Course lengths in IOF v2 are a pain, as you have to handle three
             // units.
             if (lengthStr.length > 0) {
                 length = parseFloat(lengthStr);
                 if (isFinite(length)) {
-                    var unit = lengthElement.attr("unit");
+                    let unit = lengthElement.attr("unit");
                     if (isUndefined(unit) || unit === "m") {
                         length /= 1000;
                     } else if (unit === "km") {
@@ -214,11 +204,11 @@
                     } else if (unit === "ft") {
                         length /= FEET_PER_KILOMETRE;
                     } else {
-                        warnings.push("Course '" + courseName + "' gives its length in a unit '" + unit + "', but this unit was not recognised");
+                        warnings.push(`Course '${courseName}' gives its length in a unit '${unit}', but this unit was not recognised`);
                         length = null;
                     }
                 } else {
-                    warnings.push("Course '" + courseName + "' specifies a course length that was not understood: '" + lengthStr + "'");
+                    warnings.push(`Course '${courseName}' specifies a course length that was not understood: '${lengthStr}'`);
                     length = null;
                 }
             }
@@ -237,9 +227,7 @@
     * @return {jQuery.selection} jQuery selection containing any child
     *     PersonName element.
     */
-    Version2Reader.getCompetitorNameElement = function (element) {
-        return $("> Person > PersonName", element);
-    };
+    Version2Reader.getCompetitorNameElement = element => $("> Person > PersonName", element);
 
     /**
     * Returns the name of the competitor or team's club.
@@ -248,7 +236,7 @@
     * @return {String} Competitor or team's club name.
     */
     Version2Reader.readClubName = function (element) {
-        var clubName = $("> Club > ShortName", element).text();
+        let clubName = $("> Club > ShortName", element).text();
         return (clubName === "") ?  $("> Club > Name", element).text() : clubName;
     };
 
@@ -258,9 +246,7 @@
     *     PersonResult element.
     * @return {String} The competitor's date of birth, as a string.
     */
-    Version2Reader.readDateOfBirth = function (element) {
-        return $("> Person > BirthDate > Date", element).text();
-    };
+    Version2Reader.readDateOfBirth = element => $("> Person > BirthDate > Date", element).text();
 
     /**
     * Reads a start time from the given Result element.
@@ -270,8 +256,8 @@
     *     not found.
     */
     Version2Reader.readStartTime = function (resultElement) {
-        var startTimeStr = $("> StartTime > Clock", resultElement).text();
-        var startTime = (startTimeStr === "") ? null : parseTime(startTimeStr);
+        let startTimeStr = $("> StartTime > Clock", resultElement).text();
+        let startTime = (startTimeStr === "") ? null : parseTime(startTimeStr);
         return startTime;
     };
 
@@ -283,8 +269,8 @@
     *     a valid time was not found.
     */
     Version2Reader.readTotalTime = function (resultElement) {
-        var totalTimeStr = $("> Time", resultElement).text();
-        var totalTime = (totalTimeStr === "") ? null : parseTime(totalTimeStr);
+        let totalTimeStr = $("> Time", resultElement).text();
+        let totalTime = (totalTimeStr === "") ? null : parseTime(totalTimeStr);
         return totalTime;
     };
 
@@ -295,7 +281,7 @@
     * @return {String} Status of the competitor.
     */
     Version2Reader.getStatus = function (resultElement) {
-        var statusElement = $("> CompetitorStatus", resultElement);
+        let statusElement = $("> CompetitorStatus", resultElement);
         return (statusElement.length === 1) ? statusElement.attr("value") : "";
     };
 
@@ -310,9 +296,7 @@
     * support additional controls.
     * @return {Boolean} false.
     */
-    Version2Reader.isAdditional = function () {
-        return false;
-    };
+    Version2Reader.isAdditional = () => false;
 
     /**
     * Reads a control code and split time from a SplitTime element.
@@ -322,7 +306,7 @@
     */
     Version2Reader.readSplitTime = function (splitTimeElement) {
         // IOF v2 allows ControlCode or Control elements.
-        var code = $("> ControlCode", splitTimeElement).text();
+        let code = $("> ControlCode", splitTimeElement).text();
         if (code === "") {
             code = $("> Control > ControlCode", splitTimeElement).text();
         }
@@ -331,8 +315,8 @@
             throwInvalidData("Control code missing for control");
         }
 
-        var timeStr = $("> Time", splitTimeElement).text();
-        var time = (timeStr === "") ? null : parseTime(timeStr);
+        let timeStr = $("> Time", splitTimeElement).text();
+        let time = (timeStr === "") ? null : parseTime(timeStr);
         return {code: code, time: time};
     };
 
@@ -340,11 +324,11 @@
     // Ignores timezone info - always display times as local time.
     // We don't assume there are separator characters, and we also don't assume
     // that the seconds will be specified.
-    var ISO_8601_RE = /^\d\d\d\d-?\d\d-?\d\dT?(\d\d):?(\d\d)(?::?(\d\d))?/;
+    const ISO_8601_RE = /^\d\d\d\d-?\d\d-?\d\dT?(\d\d):?(\d\d)(?::?(\d\d))?/;
 
     // Object that contains various functions for parsing bits of data from
     // IOF v3.0 XML event data.
-    var Version3Reader = {};
+    const Version3Reader = {};
 
     /**
     * Returns whether the given event data is likely to be results data of the
@@ -358,9 +342,7 @@
     * @return {Boolean} True if the data is likely to be v3.0-format data,
     *     false if not.
     */
-    Version3Reader.isOfThisVersion = function (data) {
-        return data.indexOf("http://www.orienteering.org/datastandard/3.0") >= 0;
-    };
+    Version3Reader.isOfThisVersion = data => data.indexOf("http://www.orienteering.org/datastandard/3.0") >= 0;
 
     /**
     * Makes a more thorough check that the parsed XML data is likely to be of
@@ -368,14 +350,14 @@
     * @param {jQuery.selection} rootElement The root element.
     */
     Version3Reader.checkVersion = function (rootElement) {
-        var iofVersion = rootElement.attr("iofVersion");
+        let iofVersion = rootElement.attr("iofVersion");
         if (isUndefined(iofVersion)) {
             throwWrongFileFormat("Could not find IOF version number");
         } else if (iofVersion !== "3.0") {
-            throwWrongFileFormat("Found unrecognised IOF XML data format '" + iofVersion + "'");
+            throwWrongFileFormat(`Found unrecognised IOF XML data format '${iofVersion}'`);
         }
 
-        var status = rootElement.attr("status");
+        let status = rootElement.attr("status");
         if (!isUndefined(status) && status.toLowerCase() !== "complete") {
             throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
         }
@@ -387,9 +369,7 @@
     *     containing the course details.
     * @return {String} Class name.
     */
-    Version3Reader.readClassName = function (classResultElement) {
-        return $("> Class > Name", classResultElement).text();
-    };
+    Version3Reader.readClassName = classResultElement =>$("> Class > Name", classResultElement).text();
 
     /**
     * Reads the team name from a TeamResult element.
@@ -397,9 +377,7 @@
     *     containing the team result details.
     * @return {String} Team name.
     */
-    Version3Reader.readTeamName = function (teamResultElement) {
-        return $("> Name", teamResultElement).text();
-    };
+    Version3Reader.readTeamName = teamResultElement => $("> Name", teamResultElement).text();
 
     /**
     * Returns a list of elements to be read to pull out team-member information.
@@ -407,9 +385,7 @@
     *     containing the team result details.
     * @return {Array} Elements to parse to read team member results.
     */
-    Version3Reader.readTeamMemberResults = function (teamResultElement) {
-        return $("> TeamMemberResult", teamResultElement);
-    };
+    Version3Reader.readTeamMemberResults = teamResultElement => $("> TeamMemberResult", teamResultElement);
 
     /**
     * Reads the course details from the given ClassResult element.
@@ -420,17 +396,17 @@
     *     controls.
     */
     Version3Reader.readCourseFromClass = function (classResultElement, warnings) {
-        var courseElement = $("> Course", classResultElement);
-        var id = $("> Id", courseElement).text() || null;
-        var name = $("> Name", courseElement).text();
-        var lengthStr = $("> Length", courseElement).text();
-        var length;
+        let courseElement = $("> Course", classResultElement);
+        let id = $("> Id", courseElement).text() || null;
+        let name = $("> Name", courseElement).text();
+        let lengthStr = $("> Length", courseElement).text();
+        let length;
         if (lengthStr === "") {
             length = null;
         } else {
             length = parseInt(lengthStr, 10);
             if (isNaNStrict(length)) {
-                warnings.push("Course '" + name + "' specifies a course length that was not understood: '" + lengthStr + "'");
+                warnings.push(`Course '${name}' specifies a course length that was not understood: '${lengthStr}'`);
                 length = null;
             } else {
                 // Convert from metres to kilometres.
@@ -438,14 +414,14 @@
             }
         }
 
-        var numberOfControlsStr = $("> NumberOfControls", courseElement).text();
-        var numberOfControls = parseInt(numberOfControlsStr, 10);
+        let numberOfControlsStr = $("> NumberOfControls", courseElement).text();
+        let numberOfControls = parseInt(numberOfControlsStr, 10);
         if (isNaNStrict(numberOfControls)) {
             numberOfControls = null;
         }
 
-        var climbStr = $("> Climb", courseElement).text();
-        var climb = parseInt(climbStr, 10);
+        let climbStr = $("> Climb", courseElement).text();
+        let climb = parseInt(climbStr, 10);
         if (isNaNStrict(climb)) {
             climb = null;
         }
@@ -461,9 +437,7 @@
     * @return {jQuery.selection} jQuery selection containing any child Name
     *     element.
     */
-    Version3Reader.getCompetitorNameElement = function (element) {
-        return $("> Person > Name", element);
-    };
+    Version3Reader.getCompetitorNameElement = element => $("> Person > Name", element);
 
     /**
     * Returns the name of the competitor or team's club.
@@ -472,7 +446,7 @@
     * @return {String} Competitor or team's club name.
     */
     Version3Reader.readClubName = function (element) {
-        var clubName = $("> Organisation > ShortName", element).text();
+        let clubName = $("> Organisation > ShortName", element).text();
         return (clubName === "") ? $("> Organisation > Name", element).text() : clubName;
     };
 
@@ -483,8 +457,8 @@
     * @return {String} The competitor's date of birth, as a string.
     */
     Version3Reader.readDateOfBirth = function (element) {
-        var birthDate = $("> Person > BirthDate", element).text();
-        var regexResult = yearRegexp.exec(birthDate);
+        let birthDate = $("> Person > BirthDate", element).text();
+        let regexResult = yearRegexp.exec(birthDate);
         return (regexResult === null) ? null : parseInt(regexResult[0], 10);
     };
 
@@ -496,14 +470,14 @@
     *     or null if not known.
     */
     Version3Reader.readStartTime = function (resultElement) {
-        var startTimeStr = $("> StartTime", resultElement).text();
-        var result = ISO_8601_RE.exec(startTimeStr);
+        let startTimeStr = $("> StartTime", resultElement).text();
+        let result = ISO_8601_RE.exec(startTimeStr);
         if (result === null) {
             return null;
         } else {
-            var hours = parseInt(result[1], 10);
-            var minutes = parseInt(result[2], 10);
-            var seconds = (isUndefined(result[3])) ? 0 : parseInt(result[3], 10);
+            let hours = parseInt(result[1], 10);
+            let minutes = parseInt(result[2], 10);
+            let seconds = (isUndefined(result[3])) ? 0 : parseInt(result[3], 10);
             return hours * 60 * 60 + minutes * 60 + seconds;
         }
     };
@@ -518,7 +492,7 @@
     Version3Reader.readTime = function (timeStr) {
         // IOF v3 allows fractional seconds, so we use parseFloat instead
         // of parseInt.
-        var time = parseFloat(timeStr);
+        let time = parseFloat(timeStr);
         return (isFinite(time)) ? time : null;
     };
 
@@ -530,7 +504,7 @@
     *     was not found or was invalid.
     */
     Version3Reader.readTotalTime = function (resultElement) {
-        var totalTimeStr = $("> Time", resultElement).text();
+        let totalTimeStr = $("> Time", resultElement).text();
         return Version3Reader.readTime(totalTimeStr);
     };
 
@@ -540,9 +514,7 @@
     *     Result element.
     * @return {String} Status of the competitor.
     */
-    Version3Reader.getStatus = function (resultElement) {
-        return $("> Status", resultElement).text();
-    };
+    Version3Reader.getStatus = resultElement => $("> Status", resultElement).text();
 
     Version3Reader.StatusNonCompetitive = "NotCompeting";
     Version3Reader.StatusNonStarter = "DidNotStart";
@@ -557,9 +529,7 @@
     *     a SplitTime element.
     * @return {Boolean} True if the control is additional, false if not.
     */
-    Version3Reader.isAdditional = function (splitTimeElement) {
-        return (splitTimeElement.attr("status") === "Additional");
-    };
+    Version3Reader.isAdditional = splitTimeElement => (splitTimeElement.attr("status") === "Additional");
 
     /**
     * Reads a control code and split time from a SplitTime element.
@@ -568,24 +538,24 @@
     * @return {Object} Object containing code and time.
     */
     Version3Reader.readSplitTime = function (splitTimeElement) {
-        var code = $("> ControlCode", splitTimeElement).text();
+        let code = $("> ControlCode", splitTimeElement).text();
         if (code === "") {
             throwInvalidData("Control code missing for control");
         }
 
-        var time;
+        let time;
         if (splitTimeElement.attr("status") === "Missing") {
             // Missed controls have their time omitted.
             time = null;
         } else {
-            var timeStr = $("> Time", splitTimeElement).text();
+            let timeStr = $("> Time", splitTimeElement).text();
             time = (timeStr === "") ? null : Version3Reader.readTime(timeStr);
         }
 
         return {code: code, time: time};
     };
 
-    var ALL_READERS = [Version2Reader, Version3Reader];
+    const ALL_READERS = [Version2Reader, Version3Reader];
 
     /**
     * Check that the XML document passed is in a suitable format for parsing.
@@ -597,11 +567,11 @@
     *     XML reading.
     */
     function validateData(xml, reader) {
-        var rootElement = $("> *", xml);
-        var rootElementNodeName = rootElement.prop("tagName");
+        let rootElement = $("> *", xml);
+        let rootElementNodeName = rootElement.prop("tagName");
 
         if (rootElementNodeName !== "ResultList")  {
-            throwWrongFileFormat("Root element of XML document does not have expected name 'ResultList', got '" + rootElementNodeName + "'");
+            throwWrongFileFormat(`Root element of XML document does not have expected name 'ResultList', got '${rootElementNodeName}'`);
         }
 
         reader.checkVersion(rootElement);
@@ -619,49 +589,49 @@
     *     competitor could be read.
     */
     function parseCompetitor(element, number, reader, warnings) {
-        var jqElement = $(element);
+        let jqElement = $(element);
 
-        var nameElement = reader.getCompetitorNameElement(jqElement);
-        var name = readCompetitorName(nameElement);
+        let nameElement = reader.getCompetitorNameElement(jqElement);
+        let name = readCompetitorName(nameElement);
 
         if (name === "") {
             warnings.push("Could not find a name for a competitor");
             return null;
         }
 
-        var club = reader.readClubName(jqElement);
+        let club = reader.readClubName(jqElement);
 
-        var dateOfBirth =  reader.readDateOfBirth(jqElement);
-        var regexResult = yearRegexp.exec(dateOfBirth);
-        var yearOfBirth = (regexResult === null) ? null : parseInt(regexResult[0], 10);
+        let dateOfBirth =  reader.readDateOfBirth(jqElement);
+        let regexResult = yearRegexp.exec(dateOfBirth);
+        let yearOfBirth = (regexResult === null) ? null : parseInt(regexResult[0], 10);
 
-        var gender = $("> Person", jqElement).attr("sex");
+        let gender = $("> Person", jqElement).attr("sex");
 
-        var resultElement = $("Result", jqElement);
+        let resultElement = $("Result", jqElement);
         if (resultElement.length === 0) {
-            warnings.push("Could not find any result information for competitor '" + name + "'");
+            warnings.push(`Could not find any result information for competitor '${name}'`);
             return null;
         }
 
-        var startTime = reader.readStartTime(resultElement);
+        let startTime = reader.readStartTime(resultElement);
 
-        var totalTime = reader.readTotalTime(resultElement);
+        let totalTime = reader.readTotalTime(resultElement);
 
-        var status = reader.getStatus(resultElement);
+        let status = reader.getStatus(resultElement);
 
-        var splitTimes = $("> SplitTime", resultElement).toArray();
-        var splitData = splitTimes.filter(function (splitTime) { return !reader.isAdditional($(splitTime)); })
-                                  .map(function (splitTime) { return reader.readSplitTime($(splitTime)); });
+        let splitTimes = $("> SplitTime", resultElement).toArray();
+        let splitData = splitTimes.filter(splitTime => !reader.isAdditional($(splitTime)))
+                                  .map(splitTime => reader.readSplitTime($(splitTime)));
 
-        var controls = splitData.map(function (datum) { return datum.code; });
-        var cumTimes = splitData.map(function (datum) { return datum.time; });
+        let controls = splitData.map(datum => datum.code);
+        let cumTimes = splitData.map(datum => datum.time);
 
         cumTimes.unshift(0); // Prepend a zero time for the start.
 
         // Append the total time, ignoring any value given for a non-starter.
         cumTimes.push((status === reader.StatusNonStarter) ? null : totalTime);
 
-        var competitor = new Competitor(name, club);
+        let competitor = new Competitor(name, club);
 
         if (yearOfBirth !== null) {
             competitor.setYearOfBirth(yearOfBirth);
@@ -671,9 +641,9 @@
             competitor.setGender(gender);
         }
 
-        var result = fromOriginalCumTimes(number, startTime, cumTimes, competitor);
+        let result = fromOriginalCumTimes(number, startTime, cumTimes, competitor);
 
-        if (status === "OK" && totalTime !== null && cumTimes.indexOf(null) >= 0) {
+        if (status === "OK" && totalTime !== null && cumTimes.includes(null)) {
             result.setOKDespiteMissingTimes();
         } else if (status === reader.StatusNonCompetitive) {
             result.setNonCompetitive();
@@ -703,10 +673,10 @@
     * @param {Array} warnings Array that accumulates warning messages.
     */
     function parsePersonResult(element, number, cls, reader, warnings) {
-        var resultAndControls = parseCompetitor(element, number, reader, warnings);
+        let resultAndControls = parseCompetitor(element, number, reader, warnings);
         if (resultAndControls !== null) {
-            var result = resultAndControls.result;
-            var controls = resultAndControls.controls;
+            let result = resultAndControls.result;
+            let controls = resultAndControls.controls;
             if (cls.results.length === 0 && !(result.isNonStarter && controls.length === 0)) {
                 // First result (not including non-starters with no controls).
                 // Record the list of controls.
@@ -721,17 +691,17 @@
             }
 
             // Subtract 2 for the start and finish cumulative times.
-            var actualControlCount = result.getAllOriginalCumulativeTimes().length - 2;
-            var warning = null;
+            let actualControlCount = result.getAllOriginalCumulativeTimes().length - 2;
+            let warning = null;
             if (result.isNonStarter && actualControlCount === 0) {
                 // Don't generate warnings for non-starting competitors with no controls.
             } else if (actualControlCount !== cls.course.numberOfControls) {
-                warning = "Competitor '" + result.owner.name + "' in class '" + cls.name + "' has an unexpected number of controls: expected " + cls.course.numberOfControls + ", actual " + actualControlCount;
+                warning = `Competitor '${result.owner.name}' in class '${cls.name}' has an unexpected number of controls: expected ${cls.course.numberOfControls}, actual ${actualControlCount}`;
             } else {
-                for (var controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
+                for (let controlIndex = 0; controlIndex < actualControlCount; controlIndex += 1) {
                     if (cls.controls[controlIndex] !== controls[controlIndex]) {
-                        warning = "Competitor '" + result.owner.name + "' has an unexpected control code at control " + (controlIndex + 1) +
-                            ": expected '" + cls.controls[controlIndex] + "', actual '" + controls[controlIndex] + "'";
+                        warning = `Competitor '${result.owner.name}' has an unexpected control code at control ${controlIndex + 1}` +
+                            `: expected '${cls.controls[controlIndex]}', actual '${controls[controlIndex]}'`;
                         break;
                     }
                 }
@@ -755,9 +725,9 @@
     * @param {Array} warnings Array that accumulates warning messages.
     */
     function parseTeamResult(teamResultElement, number, cls, reader, warnings) {
-        var teamName = reader.readTeamName(teamResultElement);
-        var teamClubName = reader.readClubName(teamResultElement);
-        var members = reader.readTeamMemberResults(teamResultElement);
+        let teamName = reader.readTeamName(teamResultElement);
+        let teamClubName = reader.readClubName(teamResultElement);
+        let members = reader.readTeamMemberResults(teamResultElement);
 
         if (members.length === 0) {
             warnings.push("Ignoring team " + (teamName === "" ? "(unnamed team)" : teamName) + " with no members");
@@ -771,10 +741,10 @@
             return;
         }
 
-        var results = [];
-        var allControls = [];
-        for (var index = 0; index < members.length; index += 1) {
-            var resultAndControls = parseCompetitor(members[index], number, reader, warnings);
+        let results = [];
+        let allControls = [];
+        for (let member of members) {
+            let resultAndControls = parseCompetitor(member, number, reader, warnings);
             if (resultAndControls === null) {
                 // A warning for this competitor rules out the entire team.
                 return;
@@ -784,16 +754,16 @@
             allControls.push(resultAndControls.controls);
         }
 
-        for (index = 1; index < members.length; index += 1) {
-            var previousFinishTime = $("> Result > FinishTime", members[index - 1]).text();
-            var nextStartTime = $("> Result > StartTime", members[index]).text();
+        for (let index = 1; index < members.length; index += 1) {
+            let previousFinishTime = $("> Result > FinishTime", members[index - 1]).text();
+            let nextStartTime = $("> Result > StartTime", members[index]).text();
             if (!results[index].isNonStarter && previousFinishTime !== nextStartTime) {
-                warnings.push("In team " + (teamName === "" ? "(unnamed team)" : teamName) + " in class '" + cls.name + "', " + results[index - 1].owner.name + " does not finish at the same time as " + results[index].owner.name + " starts" );
+                warnings.push(`In team ${(teamName === "" ? "(unnamed team)" : teamName)} in class '${cls.name}', ${results[index - 1].owner.name} does not finish at the same time as ${results[index].owner.name} starts`);
                 return;
             }
         }
 
-        var thisTeamControlCounts = allControls.map(function (controls) { return controls.length; });
+        let thisTeamControlCounts = allControls.map(controls => controls.length);
 
         if (cls.results.length === 0) {
             // First team.  Record the team size.
@@ -808,21 +778,21 @@
         }
 
         if (results.length !== cls.teamSize) {
-            warnings.push("Team " + (teamName === "" ? "(unnamed team)" : "'" + teamName + "'") + " in class '" + cls.name + "' has an unexpected number of members: expected " + cls.teamSize + " but was actually " + results.length);
+            warnings.push(`Team ${(teamName === "" ? "(unnamed team)" : "'" + teamName + "'")} in class '${cls.name}' has an unexpected number of members: expected ${cls.teamSize} but was actually ${results.length}`);
         }
         else {
-            var warning = null;
-            var teamResult = createTeamResult(number, results, new Team(teamName, teamClubName));
+            let warning = null;
+            let teamResult = createTeamResult(number, results, new Team(teamName, teamClubName));
 
-            for (var teamMemberIndex = 0; teamMemberIndex < results.length; teamMemberIndex += 1) {
-                var expectedControlCount = cls.course.numbersOfControls[teamMemberIndex];
-                var memberResult = results[teamMemberIndex];
+            for (let teamMemberIndex = 0; teamMemberIndex < results.length; teamMemberIndex += 1) {
+                let expectedControlCount = cls.course.numbersOfControls[teamMemberIndex];
+                let memberResult = results[teamMemberIndex];
 
                 // Subtract 2 for the start and finish cumulative times.
-                var actualControlCount = memberResult.getAllOriginalCumulativeTimes().length - 2;
+                let actualControlCount = memberResult.getAllOriginalCumulativeTimes().length - 2;
 
                 if (actualControlCount !== expectedControlCount) {
-                    warning = "Competitor '" + memberResult.owner.name + "' in team '" + teamName + "' in class '" + cls.name + "' has an unexpected number of controls: expected " + expectedControlCount + ", actual " + actualControlCount;
+                    warning = `Competitor '${memberResult.owner.name}' in team '${teamName}' in class '${cls.name}' has an unexpected number of controls: expected ${expectedControlCount}, actual ${actualControlCount}`;
                     break;
                 }
             }
@@ -844,12 +814,12 @@
     * @return {Object} Object containing parsed data.
     */
     function parseClassData(element, reader, warnings) {
-        var jqElement = $(element);
-        var cls = {name: null, results: [], teamSize: null, controls: [], course: null};
+        let jqElement = $(element);
+        let cls = {name: null, results: [], teamSize: null, controls: [], course: null};
 
         cls.course = reader.readCourseFromClass(jqElement, warnings);
 
-        var className = reader.readClassName(jqElement);
+        let className = reader.readClassName(jqElement);
 
         if (className === "") {
             className = "<unnamed class>";
@@ -858,22 +828,22 @@
         cls.name = className;
         cls.course.numbersOfControls = null;
 
-        var personResults = $("> PersonResult", jqElement);
-        var teamResults = $("> TeamResult", jqElement);
+        let personResults = $("> PersonResult", jqElement);
+        let teamResults = $("> TeamResult", jqElement);
 
         if (personResults.length > 0 && teamResults.length > 0) {
-            warnings.push("Class '" + className + "' has a combination of relay teams and individual results");
+            warnings.push(`Class '${className}' has a combination of relay teams and individual results`);
             return null;
         } else if (personResults.length > 0) {
-            for (var personIndex = 0; personIndex < personResults.length; personIndex += 1) {
+            for (let personIndex = 0; personIndex < personResults.length; personIndex += 1) {
                 parsePersonResult(personResults[personIndex], personIndex + 1, cls, reader, warnings);
             }
         } else if (teamResults.length > 0) {
-            for (var teamIndex = 0; teamIndex < teamResults.length; teamIndex += 1) {
+            for (let teamIndex = 0; teamIndex < teamResults.length; teamIndex += 1) {
                 parseTeamResult(teamResults[teamIndex], teamIndex + 1, cls, reader, warnings);
             }
         } else {
-            warnings.push("Class '" + className + "' has no competitors");
+            warnings.push(`Class '${className}' has no competitors`);
             return null;
         }
 
@@ -901,8 +871,7 @@
     * @return {Object} XML reader used to read version-specific information.
     */
     function determineReader(data) {
-        for (var index = 0; index < ALL_READERS.length; index += 1) {
-            var reader = ALL_READERS[index];
+        for (let reader of ALL_READERS) {
             if (reader.isOfThisVersion(data)) {
                 return reader;
             }
@@ -919,44 +888,44 @@
     */
     function parseEventData(data) {
 
-        var reader = determineReader(data);
+        let reader = determineReader(data);
 
-        var xml = parseXml(data);
+        let xml = parseXml(data);
 
         validateData(xml, reader);
 
-        var classResultElements = $("> ResultList > ClassResult", $(xml)).toArray();
+        let classResultElements = $("> ResultList > ClassResult", $(xml)).toArray();
 
         if (classResultElements.length === 0) {
             throwInvalidData("No class result elements found");
         }
 
-        var classes = [];
+        let classes = [];
 
         // Array of all 'temporary' courses, intermediate objects that contain
         // course data but not yet in a suitable form to return.
-        var tempCourses = [];
+        let tempCourses = [];
 
         // Map that maps course IDs plus comma-separated lists of controls
         // to the temporary course with that ID and controls.
         // (We expect that all classes with the same course ID have consistent
         // controls, but we don't assume that.)
-        var coursesMap = new Map();
+        let coursesMap = new Map();
 
-        var warnings = [];
+        let warnings = [];
 
-        classResultElements.forEach(function (classResultElement) {
-            var parsedClass = parseClassData(classResultElement, reader, warnings);
+        for (let classResultElement of classResultElements) {
+            let parsedClass = parseClassData(classResultElement, reader, warnings);
             if (parsedClass === null) {
                 // Class could not be parsed.
-                return;
+                continue;
             }
 
-            var tempCourse = parsedClass.course;
+            let tempCourse = parsedClass.course;
 
-            var numberOfControls;
-            var courseKey;
-            var isTeamClass;
+            let numberOfControls;
+            let courseKey;
+            let isTeamClass;
             if (parsedClass.teams !== null && parsedClass.course.numbersOfControls !== null && parsedClass.course.numbersOfControls.length > 0) {
                 numberOfControls = arraySum(parsedClass.course.numbersOfControls) + parsedClass.teamSize - 1;
                 parsedClass.controls = null;
@@ -968,7 +937,7 @@
                 isTeamClass = false;
             }
 
-            var courseClass = new CourseClass(parsedClass.name, numberOfControls, parsedClass.results);
+            let courseClass = new CourseClass(parsedClass.name, numberOfControls, parsedClass.results);
             if (isTeamClass) {
                 courseClass.setIsTeamClass(parsedClass.course.numbersOfControls);
             }
@@ -989,12 +958,14 @@
                     coursesMap.set(courseKey, tempCourse);
                 }
             }
-        });
+        }
 
         // Now build up the array of courses.
-        var courses = tempCourses.map(function (tempCourse) {
-            var course = new Course(tempCourse.name, tempCourse.classes, tempCourse.length, tempCourse.climb, tempCourse.controls);
-            tempCourse.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
+        let courses = tempCourses.map(tempCourse => {
+            let course = new Course(tempCourse.name, tempCourse.classes, tempCourse.length, tempCourse.climb, tempCourse.controls);
+            for (let courseClass of tempCourse.classes) {
+                courseClass.setCourse(course);
+            }
             return course;
         });
 

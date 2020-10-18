@@ -21,18 +21,18 @@
 (function () {
     "use strict";
 
-    var isTrue = SplitsBrowser.isTrue;
-    var isNotNull = SplitsBrowser.isNotNull;
-    var throwInvalidData = SplitsBrowser.throwInvalidData;
-    var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
-    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
-    var parseTime = SplitsBrowser.parseTime;
-    var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
-    var Competitor = SplitsBrowser.Model.Competitor;
-    var compareResults = SplitsBrowser.Model.compareResults;
-    var CourseClass = SplitsBrowser.Model.CourseClass;
-    var Course = SplitsBrowser.Model.Course;
-    var Event = SplitsBrowser.Model.Event;
+    const isTrue = SplitsBrowser.isTrue;
+    const isNotNull = SplitsBrowser.isNotNull;
+    const throwInvalidData = SplitsBrowser.throwInvalidData;
+    const throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    const normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
+    const parseTime = SplitsBrowser.parseTime;
+    const fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
+    const Competitor = SplitsBrowser.Model.Competitor;
+    const compareResults = SplitsBrowser.Model.compareResults;
+    const CourseClass = SplitsBrowser.Model.CourseClass;
+    const Course = SplitsBrowser.Model.Course;
+    const Event = SplitsBrowser.Model.Event;
 
     /**
     * Parse a row of competitor data.
@@ -45,7 +45,7 @@
     */
     function parseResults(index, line, controlCount, className, warnings) {
         // Expect forename, surname, club, start time then (controlCount + 1) split times in the form MM:SS.
-        var parts = line.split(",");
+        let parts = line.split(",");
 
         while (parts.length > controlCount + 5 && parts[3].match(/[^0-9.,:-]/)) {
             // As this line is too long and the 'start time' cell has something
@@ -55,14 +55,14 @@
             parts.splice(3, 1);
         }
 
-        var originalPartCount = parts.length;
-        var forename = parts.shift() || "";
-        var surname = parts.shift() || "";
-        var name = (forename + " " + surname).trim() || "<name unknown>";
+        let originalPartCount = parts.length;
+        let forename = parts.shift() || "";
+        let surname = parts.shift() || "";
+        let name = (forename + " " + surname).trim() || "<name unknown>";
         if (originalPartCount === controlCount + 5) {
-            var club = parts.shift();
-            var startTimeStr = parts.shift();
-            var startTime = parseTime(startTimeStr);
+            let club = parts.shift();
+            let startTimeStr = parts.shift();
+            let startTime = parseTime(startTimeStr);
             if (startTime === 0) {
                 startTime = null;
             } else if (!startTimeStr.match(/^\d+:\d\d:\d\d$/)) {
@@ -71,28 +71,28 @@
                 startTime *= 60;
             }
 
-            var cumTimes = [0];
-            var lastCumTimeRecorded = 0;
-            parts.map(function (part) {
-                var splitTime = parseTime(part);
+            let cumTimes = [0];
+            let lastCumTimeRecorded = 0;
+            for (let part of parts) {
+                let splitTime = parseTime(part);
                 if (splitTime !== null && splitTime > 0) {
                     lastCumTimeRecorded += splitTime;
                     cumTimes.push(lastCumTimeRecorded);
                 } else {
                     cumTimes.push(null);
                 }
-            });
+            }
 
-            var result = fromCumTimes(index + 1, startTime, cumTimes, new Competitor(name, club));
+            let result = fromCumTimes(index + 1, startTime, cumTimes, new Competitor(name, club));
             if (lastCumTimeRecorded === 0) {
                 result.setNonStarter();
             }
             return result;
         } else {
-            var difference = originalPartCount - (controlCount + 5);
-            var error = (difference < 0) ? (-difference) + " too few" : difference + " too many";
-            warnings.push("Competitor '" + name + "' appears to have the wrong number of split times - " + error +
-                                  " (row " + (index + 1) + " of class '" + className + "')");
+            let difference = originalPartCount - (controlCount + 5);
+            let error = (difference < 0) ? (-difference) + " too few" : difference + " too many";
+            warnings.push(`Competitor '${name}' appears to have the wrong number of split times - ${error}` +
+                                  ` (row ${index + 1} of class '${className}')`);
             return null;
         }
     }
@@ -104,32 +104,32 @@
     * @return {SplitsBrowser.Model.CourseClass} Parsed class data.
     */
     function parseCourseClass (courseClass, warnings) {
-        var lines = courseClass.split(/\r?\n/).filter(isTrue);
+        let lines = courseClass.split(/\r?\n/).filter(isTrue);
         if (lines.length === 0) {
             throwInvalidData("parseCourseClass got an empty list of lines");
         }
 
-        var firstLineParts = lines.shift().split(",");
+        let firstLineParts = lines.shift().split(",");
         if (firstLineParts.length === 2) {
-            var className = firstLineParts.shift();
-            var controlCountStr = firstLineParts.shift();
-            var controlCount = parseInt(controlCountStr, 10);
+            let className = firstLineParts.shift();
+            let controlCountStr = firstLineParts.shift();
+            let controlCount = parseInt(controlCountStr, 10);
             if (isNaN(controlCount)) {
-                throwInvalidData("Could not read control count: '" + controlCountStr + "'");
+                throwInvalidData(`Could not read control count: '${controlCountStr}'`);
             } else if (controlCount < 0 && lines.length > 0) {
                 // Only complain about a negative control count if there are
                 // any results.  Event 7632 ends with a line 'NOCLAS,-1' -
                 // we may as well ignore this.
-                throwInvalidData("Expected a non-negative control count, got " + controlCount + " instead");
+                throwInvalidData(`Expected a non-negative control count, got ${controlCount} instead`);
             } else {
-                var results = lines.map(function (line, index) { return parseResults(index, line, controlCount, className, warnings); })
+                let results = lines.map((line, index) => parseResults(index, line, controlCount, className, warnings))
                                        .filter(isNotNull);
 
                 results.sort(compareResults);
                 return new CourseClass(className, controlCount, results);
             }
         } else {
-            throwWrongFileFormat("Expected first line to have two parts (class name and number of controls), got " + firstLineParts.length + " part(s) instead");
+            throwWrongFileFormat(`Expected first line to have two parts (class name and number of controls), got ${firstLineParts.length} part(s) instead`);
         }
     }
 
@@ -149,12 +149,11 @@
         // Remove trailing commas.
         eventData = eventData.replace(/,+\n/g, "\n").replace(/,+$/, "");
 
-        var classSections = eventData.split(/\n\n/).map(function (s) { return s.trim(); }).filter(isTrue);
-        var warnings = [];
+        let classSections = eventData.split(/\n\n/).map(s =>s.trim()).filter(isTrue);
+        let warnings = [];
 
-        var classes = classSections.map(function (section) { return parseCourseClass(section, warnings); });
-
-        classes = classes.filter(function (courseClass) { return !courseClass.isEmpty(); });
+        let classes = classSections.map(section => parseCourseClass(section, warnings));
+        classes = classes.filter(courseClass => !courseClass.isEmpty());
 
         if (classes.length === 0) {
             throwInvalidData("No competitor data was found");
@@ -162,9 +161,9 @@
 
         // Nulls are for the course length, climb and controls, which aren't in
         // the source data files, so we can't do anything about them.
-        var courses = classes.map(function (cls) { return new Course(cls.name, [cls], null, null, null); });
+        let courses = classes.map(cls => new Course(cls.name, [cls], null, null, null));
 
-        for (var i = 0; i < classes.length; i += 1) {
+        for (let i = 0; i < classes.length; i += 1) {
             classes[i].setCourse(courses[i]);
         }
 

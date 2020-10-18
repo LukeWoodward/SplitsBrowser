@@ -33,12 +33,14 @@
 
     var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
 
+    const makeStatsMap = SplitsBrowserTest.makeStatsMap;
+
     var VALID_SPLIT_TIMES = [177, 99, 211, 121];
 
     var INVALID_SPLIT_TIMES = [null, null, null, null];
 
-    var TOTAL_TIME_AND_TIME_LOSS = {TotalTime: true, SplitTime: false, BehindFastest: false, TimeLoss: true};
-    var NO_STATS = {TotalTime: false, SplitTime: false, BehindFastest: false, TimeLoss: false};
+    const TOTAL_TIME_AND_TIME_LOSS = makeStatsMap(true, false, false, true);
+    const NO_STATS = makeStatsMap(false, false, false, false);
 
     /**
     * Fabricates an Event object from the data given.
@@ -408,14 +410,14 @@
     QUnit.test("Can parse a query-string containing a single statistic", function (assert) {
         assert.deepEqual(
             parseQueryString("stats=BehindFastest"),
-            makeExpectedData({stats: {TotalTime: false, SplitTime: false, BehindFastest: true, TimeLoss: false}})
+            makeExpectedData({stats: makeStatsMap(false, false, true, false)})
         );
     });
 
     QUnit.test("Can parse a query-string containing a single statistic repeated", function (assert) {
         assert.deepEqual(
             parseQueryString("stats=BehindFastest;BehindFastest"),
-            makeExpectedData({stats: {TotalTime: false, SplitTime: false, BehindFastest: true, TimeLoss: false}})
+            makeExpectedData({stats: makeStatsMap(false, false, true, false)})
         );
     });
 
@@ -429,7 +431,7 @@
     QUnit.test("Can parse a query-string containing all four statistics", function (assert) {
         assert.deepEqual(
             parseQueryString("stats=TotalTime;SplitTime;BehindFastest;TimeLoss"),
-            makeExpectedData({stats: {TotalTime: true, SplitTime: true, BehindFastest: true, TimeLoss: true}})
+            makeExpectedData({stats: makeStatsMap(true, true, true, true)})
         );
     });
 

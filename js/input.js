@@ -22,7 +22,7 @@
     "use strict";
 
     // All the parsers for parsing event data that are known about.
-    var PARSERS = [
+    const PARSERS = [
         SplitsBrowser.Input.CSV.parseEventData,
         SplitsBrowser.Input.OE.parseEventData,
         SplitsBrowser.Input.Html.parseEventData,
@@ -38,8 +38,7 @@
     * @return {Event} Event data read in, or null for failure.
     */
     SplitsBrowser.Input.parseEventData = function (data) {
-        for (var i = 0; i < PARSERS.length; i += 1) {
-            var parser = PARSERS[i];
+        for (let parser of PARSERS) {
             try {
                 return parser(data);
             } catch (e) {
