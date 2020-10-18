@@ -328,16 +328,20 @@
                 return;
             }
 
-            let splitRanksByResult = Array(this.allResults.length).fill(null);
-            let cumRanksByResult = Array(this.allResults.length).fill(null);
+            let splitRanksByResult = [];
+            let cumRanksByResult = [];
+            for (let index = 0; index < this.allResults.length; index += 1) {
+                splitRanksByResult.push([null]);
+                cumRanksByResult.push([null]);
+            }
 
-            d3.range(1, this.numControls + 2).forEach(control => {
+            for (let control of d3.range(1, this.numControls + 2)) {
                 let splitsByResult = this.allResults.map(result => result.getSplitTimeTo(control));
                 let splitRanksForThisControl = getRanks(splitsByResult);
                 this.allResults.forEach((_result, idx) => { splitRanksByResult[idx].push(splitRanksForThisControl[idx]); });
-            });
+            }
 
-            d3.range(1, this.numControls + 2).forEach(control => {
+            for (let control of d3.range(1, this.numControls + 2)) {
                 // We want to null out all subsequent cumulative ranks after a
                 // result mispunches.
                 let cumSplitsByResult = this.allResults.map((result, idx) => {
@@ -355,7 +359,7 @@
                 });
                 let cumRanksForThisControl = getRanks(cumSplitsByResult);
                 this.allResults.forEach((_res, idx) => { cumRanksByResult[idx].push(cumRanksForThisControl[idx]); });
-            });
+            }
 
             this.allResults.forEach((result, idx) => {
                 result.setSplitAndCumulativeRanks(splitRanksByResult[idx], cumRanksByResult[idx]);
