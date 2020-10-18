@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Original Data Selector - Selects original/repaired data.
  *
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -92,7 +92,7 @@
         *                           changes.
         */
         deregisterChangeHandler(handler) {
-            var index = this.handlers.indexOf(handler);
+            let index = this.handlers.indexOf(handler);
             if (index !== -1) {
                 this.handlers.splice(index, 1);
             }

@@ -139,7 +139,7 @@
                 return null;
             }
 
-            var dropDownIndex = Math.max(this.dropDown.selectedIndex, 0);
+            let dropDownIndex = Math.max(this.dropDown.selectedIndex, 0);
             return (dropDownIndex === 0) ? null : dropDownIndex - 1;
         }
 

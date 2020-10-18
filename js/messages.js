@@ -118,7 +118,7 @@
                 // without using regexps.  So we must escape any magic regex
                 // metacharacters first, so that we have a regexp that will
                 // match a single static string.
-                var paramNameRegexEscaped = paramName.replace(/([.+*?|{}()^$[\]\\])/g, "\\$1");
+                let paramNameRegexEscaped = paramName.replace(/([.+*?|{}()^$[\]\\])/g, "\\$1");
                 message = message.replace(new RegExp(paramNameRegexEscaped, "g"), params[paramName]);
             }
         }
@@ -175,7 +175,7 @@
                  "others loaded after it, will not work.\n\nPlease check the messages files.");
         }
 
-        for (var messageKey in messages) {
+        for (let messageKey in messages) {
             if (hasProperty(messages, messageKey)) {
                 allLanguages.push(messageKey);
             }
