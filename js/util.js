@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser - Assorted utility functions.
  *
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -23,21 +23,21 @@
 
     // Minimum length of a course that is considered to be given in metres as
     // opposed to kilometres.
-    var MIN_COURSE_LENGTH_METRES = 500;
+    const MIN_COURSE_LENGTH_METRES = 500;
 
     /**
      * Utility function used with filters that simply returns the object given.
      * @param {any} x Any input value
      * @return {any} The input value.
      */
-    SplitsBrowser.isTrue = function (x) { return x; };
+    SplitsBrowser.isTrue = x => x;
 
     /**
     * Utility function that returns whether a value is not null.
     * @param {any} x Any input value.
     * @return {Boolean} True if the value is not null, false otherwise.
     */
-    SplitsBrowser.isNotNull = function (x) { return x !== null; };
+    SplitsBrowser.isNotNull = x => x !== null;
 
     /**
     * Returns whether the value given is the numeric value NaN.
@@ -51,7 +51,7 @@
     * @param {any} x Any input value.
     * @return {Boolean} True if x is NaN, false if x is any other value.
     */
-    SplitsBrowser.isNaNStrict = function (x) { return x !== x; };
+    SplitsBrowser.isNaNStrict = x => x !== x;
 
     /**
     * Returns whether the value given is neither null nor NaN.
@@ -59,25 +59,27 @@
     * @return {Boolean} False if the value given is null or NaN, true
     *     otherwise.
     */
-    SplitsBrowser.isNotNullNorNaN = function (x) { return x !== null && x === x; };
+    SplitsBrowser.isNotNullNorNaN = x => x !== null && x === x;
 
     /**
     * Exception object raised if invalid data is passed.
     * @constructor
     * @param {String} message The exception detail message.
     */
-    function InvalidData(message) {
-        this.name = "InvalidData";
-        this.message = message;
-    }
+    class InvalidData {
+        constructor(message) {
+            this.name = "InvalidData";
+            this.message = message;
+        }
 
-    /**
-    * Returns a string representation of this exception.
-    * @return {String} String representation.
-    */
-    InvalidData.prototype.toString = function () {
-        return this.name + ": " + this.message;
-    };
+        /**
+        * Returns a string representation of this exception.
+        * @return {String} String representation.
+        */
+        toString() {
+            return this.name + ": " + this.message;
+        }
+    }
 
     /**
     * Utility function to throw an 'InvalidData' exception object.
@@ -94,18 +96,20 @@
     * @constructor
     * @param {String} message The exception message.
     */
-    function WrongFileFormat(message) {
-        this.name = "WrongFileFormat";
-        this.message = message;
-    }
+    class WrongFileFormat {
+        constructor(message) {
+            this.name = "WrongFileFormat";
+            this.message = message;
+        }
 
-    /**
-    * Returns a string representation of this exception.
-    * @return {String} String representation.
-    */
-    WrongFileFormat.prototype.toString = function () {
-        return this.name + ": " + this.message;
-    };
+        /**
+        * Returns a string representation of this exception.
+        * @return {String} String representation.
+        */
+        toString() {
+            return `${this.name} : ${this.message}`;
+        }
+    }
 
     /**
     * Utility function to throw a 'WrongFileFormat' exception object.
@@ -159,7 +163,7 @@
     * @return {Number|null} The parsed course length, or null if not valid.
     */
     SplitsBrowser.parseCourseLength = function (stringValue) {
-        var courseLength = parseFloat(stringValue.replace(",", "."));
+        let courseLength = parseFloat(stringValue.replace(",", "."));
         if (!isFinite(courseLength)) {
             return null;
         }
@@ -178,7 +182,7 @@
     * @return {Number|null} The parsed course climb, or null if not valid.
     */
     SplitsBrowser.parseCourseClimb = function (stringValue) {
-        var courseClimb = parseInt(stringValue, 10);
+        let courseClimb = parseInt(stringValue, 10);
         if (SplitsBrowser.isNaNStrict(courseClimb)) {
             return null;
         } else {
@@ -193,7 +197,5 @@
     *     within.
     * @return {String} String value with the line-endings normalised.
     */
-    SplitsBrowser.normaliseLineEndings = function (stringValue) {
-        return stringValue.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-    };
+    SplitsBrowser.normaliseLineEndings = stringValue => stringValue.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 })();

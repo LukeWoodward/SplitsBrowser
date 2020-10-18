@@ -28,18 +28,20 @@
     * @param {String} name The name of the team.
     * @param {String} club The name of the team's club.
     */
-    function Team(name, club) {
-        this.name = name;
-        this.club = club;
-    }
+    class Team {
+        constructor(name, club) {
+            this.name = name;
+            this.club = club;
+        }
 
-    /**
-    * Sets the members of the team.
-    * @param {Array} members The members of the team.
-    */
-    Team.prototype.setMembers = function (members) {
-        this.members = members;
-    };
+        /**
+        * Sets the members of the team.
+        * @param {Array} members The members of the team.
+        */
+        setMembers(members) {
+            this.members = members;
+        }
+    }
 
     SplitsBrowser.Model.Team = Team;
 })();

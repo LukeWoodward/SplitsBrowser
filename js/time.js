@@ -23,7 +23,7 @@
 
     SplitsBrowser.NULL_TIME_PLACEHOLDER = "-----";
 
-    var isNaNStrict = SplitsBrowser.isNaNStrict;
+    const isNaNStrict = SplitsBrowser.isNaNStrict;
 
     /**
      * Formats a number to two digits, preceding it with a zero if necessary,
@@ -44,22 +44,21 @@
     * @return {String} The string formatting of the time.
     */
     SplitsBrowser.formatTime = function (seconds, precision) {
-
         if (seconds === null) {
             return SplitsBrowser.NULL_TIME_PLACEHOLDER;
         } else if (isNaNStrict(seconds)) {
             return "???";
         }
 
-        var result = "";
+        let result = "";
         if (seconds < 0) {
             result = "-";
             seconds = -seconds;
         }
 
-        var hours = Math.floor(seconds / (60 * 60));
-        var mins = Math.floor(seconds / 60) % 60;
-        var secs = seconds % 60;
+        let hours = Math.floor(seconds / (60 * 60));
+        let mins = Math.floor(seconds / 60) % 60;
+        let secs = seconds % 60;
         if (hours > 0) {
             result += hours.toString() + ":";
         }
@@ -86,9 +85,9 @@
     * @return {String} The time of day formatted as a string.
     */
     SplitsBrowser.formatTimeOfDay = function (seconds) {
-        var hours = Math.floor((seconds / (60 * 60)) % 24);
-        var mins = Math.floor(seconds / 60) % 60;
-        var secs = Math.floor(seconds % 60);
+        let hours = Math.floor((seconds / (60 * 60)) % 24);
+        let mins = Math.floor(seconds / 60) % 60;
+        let secs = Math.floor(seconds % 60);
         return formatToTwoDigits(hours) + ":" + formatToTwoDigits(mins) + ":" + formatToTwoDigits(secs);
     };
 
@@ -100,11 +99,11 @@
     SplitsBrowser.parseTime = function (time) {
         time = time.trim();
         if (/^(-?\d+:)?-?\d+:-?\d\d([,.]\d+)?$/.test(time)) {
-            var timeParts = time.replace(",", ".").split(":");
-            var totalTime = 0;
-            timeParts.forEach(function (timePart) {
+            let timeParts = time.replace(",", ".").split(":");
+            let totalTime = 0;
+            for (let timePart of timeParts) {
                 totalTime = totalTime * 60 + parseFloat(timePart);
-            });
+            }
             return totalTime;
         } else {
             // Assume anything unrecognised is a missed split.
