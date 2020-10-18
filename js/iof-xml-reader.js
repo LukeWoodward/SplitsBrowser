@@ -60,20 +60,11 @@
     * @return {XMLDocument} The parsed XML document.
     */
     function parseXml(xmlString) {
-        let xml;
         try {
-            xml = $.parseXML(xmlString);
+            return $.parseXML(xmlString);
         } catch (e) {
             throwInvalidData("XML data not well-formed");
         }
-
-        if ($("> *", $(xml)).length === 0) {
-            // PhantomJS doesn't always fail parsing invalid XML; we may be
-            // left with 'xml' just containing the DOCTYPE and no root element.
-            throwInvalidData("XML data not well-formed: " + xmlString);
-        }
-
-        return xml;
     }
 
     /**

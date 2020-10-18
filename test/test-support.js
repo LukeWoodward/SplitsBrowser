@@ -142,21 +142,4 @@ var SplitsBrowserTest = {};
         map.set("TimeLoss", timeLoss);
         return map;
     };
-
-    // Polyfill HTMLElement.prototype.click for the benefit of PhantomJS.
-    // See http://stackoverflow.com/a/17789929
-    if (!HTMLElement.prototype.click) {
-        HTMLElement.prototype.click = function() {
-            var ev = document.createEvent("MouseEvent");
-            ev.initMouseEvent(
-                "click",
-                /*bubble*/true, /*cancelable*/true,
-                window, null,
-                0, 0, 0, 0, /*coordinates*/
-                false, false, false, false, /*modifier keys*/
-                0/*button=left*/, null
-            );
-            this.dispatchEvent(ev);
-        };
-    }
 })();
