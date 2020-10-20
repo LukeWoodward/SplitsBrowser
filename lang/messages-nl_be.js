@@ -38,7 +38,7 @@ SplitsBrowser.Messages.nl_be = {
     // Button labels.
     SelectAllCompetitors: "Allen",
     SelectNoCompetitors: "Geen",
-    SelectCrossingRunners: "Kruisende lopers",
+    SelectCrossingRunners: "Gepasseerde lopers", 
     
     LowerXAxisChartLabel: "Tijd (min)",
 
@@ -70,12 +70,12 @@ SplitsBrowser.Messages.nl_be = {
     CompareWithFastestTimePlusPercentage: "Snelste tijd + $$PERCENT$$%",
     CompareWithAnyRunner: "Een deelnemer...",
     CompareWithAnyRunnerLabel: "Deelnemer: ",
-    CompareWithAnyTeam: "Any team...", // TO BE TRANSLATED
-    CompareWithAnyTeamLabel: "Team: ", // TO BE TRANSLATED
+    CompareWithAnyTeam: "Een team...", 
+    CompareWithAnyTeamLabel: "Team: ", 
     // Warning message shown to the user when a comparison option cannot be
     // chosen because the course has no winner.
-    CannotCompareAsNoWinner: "Kan niet vergelijken met '$$OPTION$$' omdat geen enkele deelnemer in deze omloop de wedstrijd beëindigde.",
-    CannotCompareAsNoWinnerTeam: "Cannot compare against '$$OPTION$$' because no teams in this class complete the course.", // TO BE TRANSLATED
+    CannotCompareAsNoWinner: "Een vergelijking met '$$OPTION$$' is niet mogelijk omdat geen enkele deelnemer in deze omloop de wedstrijd volbracht.", 
+    CannotCompareAsNoWinnerTeam: "Een vergelijking met '$$OPTION$$' is niet mogelijk omdat geen enkel team in deze klasse de wedstrijd volbracht.", 
     
     // Label of checkbox that shows the original data as opposed to the
     // 'repaired' data.  This only appears if data that needs repair has been
@@ -85,7 +85,7 @@ SplitsBrowser.Messages.nl_be = {
     // Tooltip of 'Show original' checkbox.  This appears when SplitsBrowser
     // deduces that some of the cumulatives times in the data shown are
     // unrealistic.
-    ShowOriginalDataTooltip: "SplitsBrowser heeft sommige tijden verwijderd uit de gegevens van de geselecteerde omloop omdat de tijden als ongeloofwaardig worden aanzien.  " +
+    ShowOriginalDataTooltip: "SplitsBrowser heeft sommige tijden verwijderd uit de gegevens van de geselecteerde omloop omdat de tijden als ongeloofwaardig worden aangezien.  " +
                              "Gebruik deze checkbox om te controleren of er originele of gewijzigde data worden gebruikt.",
     
     StatisticsTotalTime: "Totale tijd",
@@ -121,8 +121,7 @@ SplitsBrowser.Messages.nl_be = {
     // because no competitors registered a split for the control, or those
     // that did only registered a dubious split.
     SelectedClassesPopupPlaceholder: "Geen deelnemers",
-    // TO BE TRANSLATED
-    SelectedClassesPopupPlaceholderTeams: "No teams", 
+    SelectedClassesPopupPlaceholderTeams: "Geen teams", 
     
     // Header for the 'Fastest leg time' popup dialog.
     FastestLegTimePopupHeader: "Snelste tijd $$START$$ tot $$END$$",
@@ -134,8 +133,7 @@ SplitsBrowser.Messages.nl_be = {
     // graph when there aren't any competitors or teams visiting the control
     // within the +/- 2 minute window.
     NoNearbyCompetitors: "Geen deelnemers",
-    // TO BE TRANSLATED
-    NoNearbyTeams: "No teams",
+    NoNearbyTeams: "Geen teams in de buurt",
     
     // Link that appears at the top and opens SplitsBrowser with the settings
     // (selected classes, competitors, comparison, chart type, etc.) that are
@@ -145,45 +143,36 @@ SplitsBrowser.Messages.nl_be = {
     
     // The placeholder text shown in the result-list filter box when no
     // text has been entered into this box.
-    // TO BE TRANSLATED
     CompetitorListFilter: "Filter",
     
     // Labels that appear beside a result on the Results Table to indicate
     // that they did not start, did not finish, or were disqualified.
-    // TO BE TRANSLATED
     DidNotStartShort: "dns",
-    DidNotFinishShort: "dnf",
+    DidNotFinishShort: "ncl",
     DisqualifiedShort: "dsq",
     
     // Placeholder message shown inside the result list if all competitors or teams
     // in the class did not start.
-    // TO BE TRANSLATED
-    NoCompetitorsStarted: "No competitors started",
-    // TO BE TRANSLATED
-    NoTeamsStarted: "No teams started",
+    NoCompetitorsStarted: "Geen deelnemers gestart",
+    NoTeamsStarted: "Geen teams gestart",
     
     // Label of the language-selector control.
-    // TO BE TRANSLATED?
-    LanguageSelectorLabel: "Language:",
+    LanguageSelectorLabel: "Taal:",
     
     // Label that appears beside a result on the Results Table to indicate
     // that they were over the maximum time.
-    // TO BE TRANSLATED
-    OverMaxTimeShort: "over max time",
+    OverMaxTimeShort: "buiten de tijd",
 
     // Alert message shown when you click 'Crossing runners' but there are no
     // crossing runners to show and also a filter is active.
-    // TO BE TRANSLATED
-    RaceGraphNoCrossingRunnersFiltered: "$$NAME$$ has no crossing runners among the filtered competitors.",
+    RaceGraphNoCrossingRunnersFiltered: "$$NAME$$ heeft geen andere lopers gepasseerd (binnen het actieve filter).",
     
     // Tooltip of the warning-triangle shown along the top if warnings were
     // issued reading in the file.
-    // TO BE TRANSLATED
-    WarningsTooltip: "It was not possible to read all of the data for this event.  One or more competitors or classes may have been omitted.  Click for more details.",
+    WarningsTooltip: "Het is niet gelukt om alle gegevens van dit evenement in te lezen. Één of meer deelnemers of klassen kunnen ontbreken. Klik voor meer details.",
     
     // Options in the leg-selector control when viewing results for a team.
-    // TO BE TRANSLATED
-    LegSelectorLabel: "Leg: ",
-    ShowAllLegs: "All",
-    ShowLeg: "Leg $$LEG_NUMBER$$"
+    LegSelectorLabel: "Been: ",
+    ShowAllLegs: "Alle",
+    ShowLeg: "Been $$LEG_NUMBER$$"
 };
