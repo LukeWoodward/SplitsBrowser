@@ -21,10 +21,10 @@
 (function () {
     "use strict";
 
-    var parseTripleColumnEventData = SplitsBrowser.Input.AlternativeCSV.parseTripleColumnEventData;
-    var formatTime = SplitsBrowser.formatTime;
+    const parseTripleColumnEventData = SplitsBrowser.Input.AlternativeCSV.parseTripleColumnEventData;
+    const formatTime = SplitsBrowser.formatTime;
 
-    var TRIPLE_COLUMN_HEADER = "RaceNumber,CardNumbers,MembershipNumbers,Name,AgeClass,Club,Country,CourseClass,StartTime,FinishTime,RaceTime,NonCompetitive,Position,Status,Handicap," +
+    const TRIPLE_COLUMN_HEADER = "RaceNumber,CardNumbers,MembershipNumbers,Name,AgeClass,Club,Country,CourseClass,StartTime,FinishTime,RaceTime,NonCompetitive,Position,Status,Handicap," +
                                "PenaltyScore,ManualScoreAdjust,FinalScore,HandicapTime,HandicapScore,AwardLevel,SiEntriesIDs,Eligibility,NotUsed3,NotUsed4,NotUsed5,NotUsed6,NotUsed7," +
                                "NotUsed8,NotUsed9,NotUsed10,NumSplits,ControlCode1,Split1,Points1,ControlCode2,Split2,Points2,ControlCode3,Split3,Points3,ControlCode4,Split4,Points4," +
                                "ControlCode5,Split5,Points5,ControlCode6,Split6,Points6";
@@ -45,11 +45,11 @@
             throw new Error("Controls and cumulative times must have the same length");
         }
 
-        var row = [];
+        let row = [];
 
         // Add some empty cells on the end for good measure.
-        var rowWidth = 38 + 3 * controls.length + 8;
-        for (var index = 0; index < rowWidth; index += 1) {
+        let rowWidth = 38 + 3 * controls.length + 8;
+        for (let index = 0; index < rowWidth; index += 1) {
             row.push("");
         }
 
@@ -58,7 +58,7 @@
         row[7] = courseName;
         row[8] = (startTime === null) ? "" : formatTime(startTime);
 
-        for (var controlIndex = 0; controlIndex < controls.length; controlIndex += 1) {
+        for (let controlIndex = 0; controlIndex < controls.length; controlIndex += 1) {
             row[38 + controlIndex * 3] = controls[controlIndex];
             if (cumTimes[controlIndex] !== null) {
                 row[39 + controlIndex * 3] = formatTime(cumTimes[controlIndex]);
@@ -101,16 +101,16 @@
     });
 
     QUnit.test("Can parse a string that contains a single valid competitor", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
-        var eventData = parseTripleColumnEventData(data);
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
+        let eventData = parseTripleColumnEventData(data);
 
         assert.strictEqual(eventData.classes.length, 1);
-        var courseClass = eventData.classes[0];
+        let courseClass = eventData.classes[0];
         assert.strictEqual(courseClass.name, "Course 1");
         assert.strictEqual(courseClass.numControls, 3);
 
         assert.strictEqual(courseClass.results.length, 1);
-        var result = courseClass.results[0];
+        let result = courseClass.results[0];
         assert.strictEqual(result.owner.name, "First Runner");
         assert.strictEqual(result.owner.club, "TEST");
         assert.strictEqual(result.startTime, 10 * 3600 + 38 * 60);
@@ -122,7 +122,7 @@
         assert.ok(!result.isDisqualified);
 
         assert.strictEqual(eventData.courses.length, 1);
-        var course = eventData.courses[0];
+        let course = eventData.courses[0];
         assert.strictEqual(courseClass.course, course);
         assert.strictEqual(course.name, "Course 1");
         assert.strictEqual(course.length, null);
@@ -131,67 +131,67 @@
     });
 
     QUnit.test("Can parse a string that contains a single valid competitor with LF line endings", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
         data = data.replace(/\r/g, "");
-        var eventData = parseTripleColumnEventData(data);
+        let eventData = parseTripleColumnEventData(data);
         assert.strictEqual(eventData.classes.length, 1);
         assert.strictEqual(eventData.courses.length, 1);
     });
 
     QUnit.test("Can parse a string that contains a single valid competitor with CR line endings", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
         data = data.replace(/\n/g, "");
-        var eventData = parseTripleColumnEventData(data);
+        let eventData = parseTripleColumnEventData(data);
         assert.strictEqual(eventData.classes.length, 1);
         assert.strictEqual(eventData.courses.length, 1);
     });
 
     QUnit.test("Can parse a string that contains a single valid competitor with data delimited by semicolons", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
         data = data.replace(/,/g, ";");
-        var eventData = parseTripleColumnEventData(data);
+        let eventData = parseTripleColumnEventData(data);
         assert.strictEqual(eventData.classes.length, 1);
         assert.strictEqual(eventData.courses.length, 1);
     });
 
     QUnit.test("Can parse a string that contains a single valid competitor with alphanumeric but not numeric control code", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "ABC188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "ABC188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
         data = data.replace(/,/g, ";");
-        var eventData = parseTripleColumnEventData(data);
+        let eventData = parseTripleColumnEventData(data);
         assert.strictEqual(eventData.classes.length, 1);
         assert.strictEqual(eventData.courses.length, 1);
-        var course = eventData.courses[0];
+        let course = eventData.courses[0];
         assert.deepEqual(course.controls, ["152", "ABC188", "163"]);
     });
 
     QUnit.test("Can parse a string that contains a single valid competitor with two names", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner, Second Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
-        var eventData = parseTripleColumnEventData(data);
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner, Second Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
+        let eventData = parseTripleColumnEventData(data);
         assert.strictEqual(eventData.classes.length, 1);
 
-        var courseClass = eventData.classes[0];
+        let courseClass = eventData.classes[0];
         assert.strictEqual(courseClass.results.length, 1);
 
-        var result = courseClass.results[0];
+        let result = courseClass.results[0];
         assert.strictEqual(result.owner.name, "First Runner, Second Runner");
     });
 
     QUnit.test("Can parse a string that contains two valid competitors on the same course", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
                                      fabricateTripleColumnRow("Second Runner", "ABCD", "Course 1", ["152", "188", "163", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 217]);
-        var eventData = parseTripleColumnEventData(data);
+        let eventData = parseTripleColumnEventData(data);
 
         assert.strictEqual(eventData.classes.length, 1);
-        var courseClass = eventData.classes[0];
+        let courseClass = eventData.classes[0];
 
         assert.strictEqual(courseClass.results.length, 2);
-        var result1 = courseClass.results[0];
+        let result1 = courseClass.results[0];
         assert.strictEqual(result1.owner.name, "First Runner");
         assert.strictEqual(result1.owner.club, "TEST");
         assert.strictEqual(result1.startTime, 10 * 3600 + 38 * 60);
         assert.deepEqual(result1.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, 202]);
 
-        var result2 = courseClass.results[1];
+        let result2 = courseClass.results[1];
         assert.strictEqual(result2.owner.name, "Second Runner");
         assert.strictEqual(result2.owner.club, "ABCD");
         assert.strictEqual(result2.startTime, 11 * 3600 + 19 * 60);
@@ -201,20 +201,20 @@
     });
 
     QUnit.test("Can parse a string that contains one valid competitor and issue warning for one competitor that contains no times and some other nonsense", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
-        var secondLine = fabricateTripleColumnRow("Second Runner", "ABCD", "Course 1", [], null, []);
-        var secondLineParts = secondLine.split(",");
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
+        let secondLine = fabricateTripleColumnRow("Second Runner", "ABCD", "Course 1", [], null, []);
+        let secondLineParts = secondLine.split(",");
         secondLineParts[37] = "10";
         secondLine = secondLineParts.join(",");
-        var eventData = parseTripleColumnEventData(data + secondLine);
+        let eventData = parseTripleColumnEventData(data + secondLine);
         assert.strictEqual(eventData.classes.length, 1);
         assert.strictEqual(eventData.warnings.length, 1);
     });
 
     QUnit.test("Can parse a string that contains two valid competitors on the same course but in different classes", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Class 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Class 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
                                      fabricateTripleColumnRow("Second Runner", "ABCD", "Class 2", ["152", "188", "163", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 217]);
-        var eventData = parseTripleColumnEventData(data);
+        let eventData = parseTripleColumnEventData(data);
 
         assert.strictEqual(eventData.classes.length, 2);
         assert.strictEqual(eventData.courses.length, 1);
@@ -223,18 +223,18 @@
     });
 
     QUnit.test("Can parse a string that contains two valid competitors on different courses and in different classes", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Class 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Class 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
                                      fabricateTripleColumnRow("Second Runner", "ABCD", "Class 2", ["152", "174", "119", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 217]);
-        var eventData = parseTripleColumnEventData(data);
+        let eventData = parseTripleColumnEventData(data);
 
         assert.strictEqual(eventData.classes.length, 2);
         assert.strictEqual(eventData.courses.length, 2);
     });
 
     QUnit.test("Issues a warning for a string that contains two competitors on the same course with different numbers of controls", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
                                      fabricateTripleColumnRow("Second Runner", "ABCD", "Course 1", ["152", "188", "163", "186", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 257, 282]);
-        var eventData = parseTripleColumnEventData(data);
+        let eventData = parseTripleColumnEventData(data);
         assert.strictEqual(eventData.classes.length, 1);
         assert.strictEqual(eventData.courses.length, 1);
         assert.strictEqual(eventData.classes[0].results.length, 1);
@@ -242,14 +242,14 @@
     });
 
     QUnit.test("Can parse a string that contains a single competitor missing an intermediate control", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, null, 186, 202]);
-        var eventData = parseTripleColumnEventData(data);
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, null, 186, 202]);
+        let eventData = parseTripleColumnEventData(data);
 
         assert.strictEqual(eventData.classes.length, 1);
-        var courseClass = eventData.classes[0];
+        let courseClass = eventData.classes[0];
 
         assert.strictEqual(courseClass.results.length, 1);
-        var result = courseClass.results[0];
+        let result = courseClass.results[0];
         assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 72, null, 186, 202]);
         assert.ok(!result.completed());
         assert.ok(!result.isNonStarter);
@@ -258,14 +258,14 @@
     });
 
     QUnit.test("Can parse a string that contains a single competitor missing the finish control", function (assert) {
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, null]);
-        var eventData = parseTripleColumnEventData(data);
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, null]);
+        let eventData = parseTripleColumnEventData(data);
 
         assert.strictEqual(eventData.classes.length, 1);
-        var courseClass = eventData.classes[0];
+        let courseClass = eventData.classes[0];
 
         assert.strictEqual(courseClass.results.length, 1);
-        var result = courseClass.results[0];
+        let result = courseClass.results[0];
         assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 72, 141, 186, null]);
         assert.ok(!result.completed());
         assert.ok(!result.isNonStarter);
@@ -276,15 +276,15 @@
     QUnit.test("Can parse a string that contains a single competitor missing all controls and mark said competitor as a non-starter", function (assert) {
         // Add a second okay competitor as if all competitors have no times the
         // file is assumed not to be alternative CSV.
-        var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [null, null, null, null]) +
+        let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [null, null, null, null]) +
                                           "\r\n" + fabricateTripleColumnRow("Second Runner", "ABCD", "Class 2", ["152", "174", "119", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 217]);
-        var eventData = parseTripleColumnEventData(data);
+        let eventData = parseTripleColumnEventData(data);
 
         assert.strictEqual(eventData.classes.length, 2);
-        var courseClass = eventData.classes[0];
+        let courseClass = eventData.classes[0];
 
         assert.strictEqual(courseClass.results.length, 1);
-        var result = courseClass.results[0];
+        let result = courseClass.results[0];
         assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, null, null, null, null]);
         assert.ok(!result.completed());
         assert.ok(result.isNonStarter);
@@ -294,7 +294,7 @@
 
     QUnit.test("Cannot parse a string that contains two competitors missing all controls", function (assert) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", function () {
-            var data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [null, null, null, null]) +
+            let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [null, null, null, null]) +
                                               "\r\n" + fabricateTripleColumnRow("Second Runner", "ABCD", "Class 2", ["152", "174", "119", "F1"], 11 * 3600 + 19 * 60, [null, null, null, null]);
             parseTripleColumnEventData(data);
         }, "Should throw an exception for parsing a string containing only non-starting competitors");

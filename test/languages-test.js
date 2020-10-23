@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Language-file consistency tests.
  *
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -21,9 +21,9 @@
 (function () {
     "use strict";
 
-    var hasProperty = SplitsBrowser.hasProperty;
+    const hasProperty = SplitsBrowser.hasProperty;
 
-    var REFERENCE_LANGUAGE = "en_gb";
+    const REFERENCE_LANGUAGE = "en_gb";
 
     /**
     * Checks that an 'other' language has all of the message keys that a given
@@ -34,12 +34,12 @@
     *     found.
     */
     function verifyConsistency(referenceLanguageKey, otherLanguageKey, consistencyErrors) {
-        var referenceLanguage = SplitsBrowser.Messages[referenceLanguageKey];
-        var otherLanguage = SplitsBrowser.Messages[otherLanguageKey];
-        for (var refKey in referenceLanguage) {
+        let referenceLanguage = SplitsBrowser.Messages[referenceLanguageKey];
+        let otherLanguage = SplitsBrowser.Messages[otherLanguageKey];
+        for (let refKey in referenceLanguage) {
             if (hasProperty(referenceLanguage, refKey)) {
                 if (!hasProperty(otherLanguage, refKey)) {
-                    consistencyErrors.push("Language '" + referenceLanguageKey + "' has message with key '" + refKey + "', but language '" + otherLanguageKey + "' does not");
+                    consistencyErrors.push(`Language '${referenceLanguageKey}' has message with key '${refKey}', but language '${otherLanguageKey}' does not`);
                 }
             }
         }
@@ -52,9 +52,9 @@
             throw new Error("Reference language not found");
         }
 
-        var consistencyErrors = [];
-        var languageCount = 1;
-        for (var language in SplitsBrowser.Messages) {
+        let consistencyErrors = [];
+        let languageCount = 1;
+        for (let language in SplitsBrowser.Messages) {
             if (hasProperty(SplitsBrowser.Messages, language) && language !== REFERENCE_LANGUAGE) {
                 verifyConsistency(REFERENCE_LANGUAGE, language, consistencyErrors);
                 verifyConsistency(language, REFERENCE_LANGUAGE, consistencyErrors);
@@ -62,6 +62,6 @@
             }
         }
 
-        assert.deepEqual(consistencyErrors, [], "The " + languageCount + " language files should be consistent");
+        assert.deepEqual(consistencyErrors, [], `The ${languageCount} language files should be consistent`);
     });
 })();

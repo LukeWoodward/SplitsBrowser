@@ -21,17 +21,17 @@
 (function() {
     "use strict";
 
-    var isNotNull = SplitsBrowser.isNotNull;
-    var isNaNStrict = SplitsBrowser.isNaNStrict;
-    var isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
-    var throwInvalidData = SplitsBrowser.throwInvalidData;
-    var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
-    var hasProperty = SplitsBrowser.hasProperty;
-    var addIfNotNull = SplitsBrowser.addIfNotNull;
-    var subtractIfNotNull = SplitsBrowser.subtractIfNotNull;
-    var parseCourseLength = SplitsBrowser.parseCourseLength;
-    var parseCourseClimb = SplitsBrowser.parseCourseClimb;
-    var normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
+    const isNotNull = SplitsBrowser.isNotNull;
+    const isNaNStrict = SplitsBrowser.isNaNStrict;
+    const isNotNullNorNaN = SplitsBrowser.isNotNullNorNaN;
+    const throwInvalidData = SplitsBrowser.throwInvalidData;
+    const throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    const hasProperty = SplitsBrowser.hasProperty;
+    const addIfNotNull = SplitsBrowser.addIfNotNull;
+    const subtractIfNotNull = SplitsBrowser.subtractIfNotNull;
+    const parseCourseLength = SplitsBrowser.parseCourseLength;
+    const parseCourseClimb = SplitsBrowser.parseCourseClimb;
+    const normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
 
     QUnit.module("Utilities - isNotNull");
 
@@ -83,7 +83,7 @@
             throwInvalidData("Test message");
             assert.ok(false, "This should not be reached");
         } catch (e) {
-            assert.strictEqual(e.name, "InvalidData", "Exception should have name InvalidData, exception message is " + e.message);
+            assert.strictEqual(e.name, "InvalidData", `Exception should have name InvalidData, exception message is ${e.message}`);
             assert.strictEqual(e.message, "Test message", "Exception message should be the test message in the function call");
         }
     });
@@ -96,7 +96,7 @@
             throwWrongFileFormat("Test message");
             assert.ok(false, "This should not be reached");
         } catch (e) {
-            assert.strictEqual(e.name, "WrongFileFormat", "Exception should have name WrongFileFormat, exception message is " + e.message);
+            assert.strictEqual(e.name, "WrongFileFormat", `Exception should have name WrongFileFormat, exception message is ${e.message}`);
             assert.strictEqual(e.message, "Test message", "Exception message should be the test message in the function call");
         }
     });

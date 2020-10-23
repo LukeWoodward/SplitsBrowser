@@ -20,13 +20,13 @@
  */
 // Tell ESLint not to complain that this is redeclaring a constant.
 /* eslint no-redeclare: "off" */
-var SplitsBrowserTest = {};
+const SplitsBrowserTest = {};
 
 (function () {
 
-    var isNaNStrict = SplitsBrowser.isNaNStrict;
-    var Competitor = SplitsBrowser.Model.Competitor;
-    var Result = SplitsBrowser.Model.Result;
+    const isNaNStrict = SplitsBrowser.isNaNStrict;
+    const Competitor = SplitsBrowser.Model.Competitor;
+    const Result = SplitsBrowser.Model.Result;
 
     /**
     * Asserts that calling the given function throws an exception with the
@@ -44,9 +44,9 @@ var SplitsBrowserTest = {};
     SplitsBrowserTest.assertException = function (assert, exceptionName, func, failureMessage) {
         try {
             func();
-            assert.ok(false, failureMessage || "An exception with name '" + exceptionName + "' should have been thrown, but no exception was thrown");
+            assert.ok(false, failureMessage || `An exception with name '${exceptionName}' should have been thrown, but no exception was thrown`);
         } catch (e) {
-            assert.strictEqual(e.name, exceptionName, "Exception with name '" + exceptionName + "' should have been thrown, message was " + e.message);
+            assert.strictEqual(e.name, exceptionName, `Exception with name '${exceptionName}' should have been thrown, message was ${e.message}`);
         }
     };
 
@@ -78,13 +78,13 @@ var SplitsBrowserTest = {};
         assert.ok($.isArray(actualArray), "actualArray is not an array");
         assert.ok($.isArray(expectedArray), "expectedArray is not an array");
         assert.strictEqual(actualArray.length, expectedArray.length,
-            "Lengths should be the same: expected " + expectedArray.length + ", actual " + actualArray.length);
+            `Lengths should be the same: expected ${expectedArray.length}, actual ${actualArray.length}`);
 
-        for (var index = 0; index < expectedArray.length; index += 1) {
+        for (let index = 0; index < expectedArray.length; index += 1) {
             if (isNaNStrict(expectedArray[index])) {
-                assert.ok(isNaNStrict(actualArray[index]), "Expected array has NaN at index " + index + " so actual array should do too.  Actual value " + actualArray[index]);
+                assert.ok(isNaNStrict(actualArray[index]), `Expected array has NaN at index ${index} so actual array should do too.  Actual value ${actualArray[index]}`);
             } else {
-                assert.strictEqual(actualArray[index], expectedArray[index], "Array values at index " + index + " should be strict-equal");
+                assert.strictEqual(actualArray[index], expectedArray[index], `Array values at index ${index} should be strict-equal`);
             }
         }
     };
@@ -115,12 +115,12 @@ var SplitsBrowserTest = {};
     * @return {Result} Created result.
     */
     SplitsBrowserTest.fromSplitTimes = function (order, name, club, startTime, splitTimes) {
-        var cumTimes = [0];
-        for (var i = 0; i < splitTimes.length; i += 1) {
+        let cumTimes = [0];
+        for (let i = 0; i < splitTimes.length; i += 1) {
             cumTimes.push(addIfNotNull(cumTimes[i], splitTimes[i]));
         }
 
-        var result = new Result(order, startTime, splitTimes, cumTimes, new Competitor(name, club));
+        let result = new Result(order, startTime, splitTimes, cumTimes, new Competitor(name, club));
         result.splitTimes = splitTimes;
         result.cumTimes = cumTimes;
         return result;
@@ -135,11 +135,11 @@ var SplitsBrowserTest = {};
      * @return {Map} The created map.
      */
     SplitsBrowserTest.makeStatsMap = function(totalTime, splitTime, behindFastest, timeLoss) {
-        let map = new Map();
-        map.set("TotalTime", totalTime);
-        map.set("SplitTime", splitTime);
-        map.set("BehindFastest", behindFastest);
-        map.set("TimeLoss", timeLoss);
-        return map;
+        return new Map([
+            ["TotalTime", totalTime],
+            ["SplitTime", splitTime],
+            ["BehindFastest", behindFastest],
+            ["TimeLoss", timeLoss]
+        ]);
     };
 })();

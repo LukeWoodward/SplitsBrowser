@@ -29,10 +29,10 @@
     let lastVisibleStats = null;
     let callCount = 0;
 
-    const testChangeHandler = function (visibleStats) {
+    function testChangeHandler(visibleStats) {
         lastVisibleStats = visibleStats;
         callCount += 1;
-    };
+    }
 
     function reset() {
         lastVisibleStats = null;

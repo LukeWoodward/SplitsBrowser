@@ -21,12 +21,12 @@
 (function () {
     "use strict";
 
-    var parseEventData = SplitsBrowser.Input.CSV.parseEventData;
-    var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
-    var Competitor = SplitsBrowser.Model.Competitor;
-    var CourseClass = SplitsBrowser.Model.CourseClass;
-    var Course = SplitsBrowser.Model.Course;
-    var Event = SplitsBrowser.Model.Event;
+    const parseEventData = SplitsBrowser.Input.CSV.parseEventData;
+    const fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
+    const Competitor = SplitsBrowser.Model.Competitor;
+    const CourseClass = SplitsBrowser.Model.CourseClass;
+    const Course = SplitsBrowser.Model.Course;
+    const Event = SplitsBrowser.Model.Event;
 
     QUnit.module("Input.CSV");
 

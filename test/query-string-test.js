@@ -22,22 +22,22 @@
 (function () {
     "use strict";
 
-    var CourseClass = SplitsBrowser.Model.CourseClass;
-    var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
-    var Course = SplitsBrowser.Model.Course;
-    var Event = SplitsBrowser.Model.Event;
-    var ChartTypes = SplitsBrowser.Model.ChartTypes;
+    const CourseClass = SplitsBrowser.Model.CourseClass;
+    const CourseClassSet = SplitsBrowser.Model.CourseClassSet;
+    const Course = SplitsBrowser.Model.Course;
+    const Event = SplitsBrowser.Model.Event;
+    const ChartTypes = SplitsBrowser.Model.ChartTypes;
 
-    var parseQueryString = SplitsBrowser.parseQueryString;
-    var formatQueryString = SplitsBrowser.formatQueryString;
+    const parseQueryString = SplitsBrowser.parseQueryString;
+    const formatQueryString = SplitsBrowser.formatQueryString;
 
-    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
+    const fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
 
     const makeStatsMap = SplitsBrowserTest.makeStatsMap;
 
-    var VALID_SPLIT_TIMES = [177, 99, 211, 121];
+    const VALID_SPLIT_TIMES = [177, 99, 211, 121];
 
-    var INVALID_SPLIT_TIMES = [null, null, null, null];
+    const INVALID_SPLIT_TIMES = [null, null, null, null];
 
     const TOTAL_TIME_AND_TIME_LOSS = makeStatsMap(true, false, false, true);
     const NO_STATS = makeStatsMap(false, false, false, false);
@@ -48,24 +48,25 @@
     * @return {Event} The fabricated Event.
     */
     function makeEvent(courseData) {
-        var courses = [];
-        var allClasses = [];
-        courseData.forEach(function (course) {
-            var courseClasses = [];
-            course.classes.forEach(function (courseClass) {
-                var classResults = (courseClass.competitors || []).map(function (result, index) {
-                    return fromSplitTimes(index + 1, result.name, "club", null, (result.invalid) ? INVALID_SPLIT_TIMES : VALID_SPLIT_TIMES);
-                });
+        let courses = [];
+        let allClasses = [];
+        for (let course of courseData) {
+            let courseClasses = [];
+            for (let courseClass of course.classes) {
+                let classResults = (courseClass.competitors || []).map((result, index) =>
+                    fromSplitTimes(index + 1, result.name, "club", null, (result.invalid) ? INVALID_SPLIT_TIMES : VALID_SPLIT_TIMES));
 
-                var createdClass = new CourseClass(courseClass.name, 3, classResults);
+                let createdClass = new CourseClass(courseClass.name, 3, classResults);
                 courseClasses.push(createdClass);
                 allClasses.push(createdClass);
-            });
+            }
 
-            var createdCourse = new Course(course.name, courseClasses, null, null, null);
-            courseClasses.forEach(function (courseClass) { courseClass.setCourse(createdCourse); });
+            let createdCourse = new Course(course.name, courseClasses, null, null, null);
+            for (let courseClass of courseClasses) {
+                courseClass.setCourse(createdCourse);
+            }
             courses.push(createdCourse);
-        });
+        }
 
         return new Event(allClasses, courses, []);
     }
@@ -97,7 +98,7 @@
     QUnit.module("Query-string");
 
     QUnit.test("Parsing an empty string should return all-null values", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test class 1"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "Test class 1"}]}]);
         assert.deepEqual(
             parseQueryString("", eventData),
             makeExpectedData({})
@@ -105,7 +106,7 @@
     });
 
     QUnit.test("Parsing a string containing a single class with a question-mark prefix should return only that class", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
         assert.deepEqual(
             parseQueryString("?class=TestClass1", eventData),
             makeExpectedData({classes: [0]})
@@ -113,7 +114,7 @@
     });
 
     QUnit.test("Parsing a string containing a single class should return only that class", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1", eventData),
             makeExpectedData({classes: [0]})
@@ -121,7 +122,7 @@
     });
 
     QUnit.test("Parsing a string containing a single unrecognised class should return null", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
         assert.deepEqual(
             parseQueryString("class=Unrecognised", eventData),
             makeExpectedData({classes: null})
@@ -129,7 +130,7 @@
     });
 
     QUnit.test("Parsing a string containing a single recognised class and a single unrecognised class should return only the recognised class", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
         assert.deepEqual(
             parseQueryString("class=Unrecognised;TestClass1", eventData),
             makeExpectedData({classes: [0]})
@@ -137,7 +138,7 @@
     });
 
     QUnit.test("Parsing a string containing a single class that needs URL-encoding should return only that class", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class %^$ 1"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class %^$ 1"}]}]);
         assert.deepEqual(
             parseQueryString("class=Test%20Class%20%25%5e%24%201", eventData),
             makeExpectedData({classes: [0]})
@@ -145,7 +146,7 @@
     });
 
     QUnit.test("Parsing a string containing multiple classes should return only those classes", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}, {name: "TestClass2"}, {name: "TestClass3"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}, {name: "TestClass2"}, {name: "TestClass3"}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1;TestClass2;TestClass3", eventData),
             makeExpectedData({classes: [0, 1, 2]})
@@ -153,7 +154,7 @@
     });
 
     QUnit.test("Parsing a string containing a single class repeated should return that class only once", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}, {name: "TestClass2"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}, {name: "TestClass2"}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass2;TestClass2", eventData),
             makeExpectedData({classes: [1]})
@@ -161,7 +162,7 @@
     });
 
     QUnit.test("Parsing a string containing multiple classes in multiple courses should return only those on the same course as the first", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}, {name: "TestClass2"}]}, {name: "Course2", classes:[{name: "TestClass3"}, {name: "TestClass4"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}, {name: "TestClass2"}]}, {name: "Course2", classes:[{name: "TestClass3"}, {name: "TestClass4"}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1;TestClass4;TestClass2;TestClass3", eventData),
             makeExpectedData({classes: [0, 1]})
@@ -225,7 +226,7 @@
     });
 
     QUnit.test("Parsing a string containing the winner comparison type returns that comparison type if a class is selected and the class has a winner", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1&compareWith=Winner", eventData),
             makeExpectedData({classes: [0], compareWith: {index: 0, result: null}})
@@ -233,7 +234,7 @@
     });
 
     QUnit.test("Parsing a string with a leading question mark containing the winner comparison type returns that comparison type if a class is selected and the class has a winner", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("?compareWith=Winner&class=TestClass1", eventData),
             makeExpectedData({classes: [0], compareWith: {index: 0, result: null}})
@@ -241,7 +242,7 @@
     });
 
     QUnit.test("Parsing a string containing the winner comparison type returns null if no classes are specified", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("compareWith=Winner", eventData),
             makeExpectedData({compareWith: null})
@@ -249,7 +250,7 @@
     });
 
     QUnit.test("Parsing a string containing the winner comparison type when the selected class has no winner returns null", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner", invalid: true}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner", invalid: true}]}]}]);
         assert.deepEqual(
             parseQueryString("compareWith=Winner", eventData),
             makeExpectedData({compareWith: null})
@@ -257,7 +258,7 @@
     });
 
     QUnit.test("Parsing a string containing the fastest-time comparison type returns that comparison type", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
         assert.deepEqual(
             parseQueryString("compareWith=FastestTime", eventData),
             makeExpectedData({compareWith: {index: 1, result: null}})
@@ -265,7 +266,7 @@
     });
 
     QUnit.test("Parsing a string containing the fastest-time-plus-5% comparison type returns that comparison type", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
         assert.deepEqual(
             parseQueryString("compareWith=FastestTimePlus5", eventData),
             makeExpectedData({compareWith: {index: 2, result: null}})
@@ -273,7 +274,7 @@
     });
 
     QUnit.test("Parsing a string containing the fastest-time-plus-25% comparison type returns that comparison type", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
         assert.deepEqual(
             parseQueryString("compareWith=FastestTimePlus25", eventData),
             makeExpectedData({compareWith: {index: 3, result: null}})
@@ -281,7 +282,7 @@
     });
 
     QUnit.test("Parsing a string containing the fastest-time-plus-50% comparison type returns that comparison type", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
         assert.deepEqual(
             parseQueryString("compareWith=FastestTimePlus50", eventData),
             makeExpectedData({compareWith: {index: 4, result: null}})
@@ -289,7 +290,7 @@
     });
 
     QUnit.test("Parsing a string containing the fastest-time-plus-100% comparison type returns that comparison type", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1"}]}]);
         assert.deepEqual(
             parseQueryString("compareWith=FastestTimePlus100", eventData),
             makeExpectedData({compareWith: {index: 5, result: null}})
@@ -297,7 +298,7 @@
     });
 
     QUnit.test("Parsing a string containing the compare-against-named-result comparison type returns that comparison type if the result is recognised", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1&compareWith=First%20Runner", eventData),
             makeExpectedData({classes: [0], compareWith: {index: 6, result: eventData.classes[0].results[0]}})
@@ -305,7 +306,7 @@
     });
 
     QUnit.test("Parsing a string containing the compare-against-named-result comparison type returns that comparison type if the result is recognised in the second of two classes", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}, {name: "TestClass2", competitors: [{name: "Second Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}, {name: "TestClass2", competitors: [{name: "Second Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1;TestClass2&compareWith=Second%20Runner", eventData),
             makeExpectedData({classes: [0, 1], compareWith: {index: 6, result: eventData.classes[1].results[0]}})
@@ -313,7 +314,7 @@
     });
 
     QUnit.test("Parsing a string containing the compare-against-named-result comparison type returns null if the result is recognised but no classes are selected", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("compareWith=First%20Runner", eventData),
             makeExpectedData({compareWith: null})
@@ -321,7 +322,7 @@
     });
 
     QUnit.test("Parsing a string containing the compare-against-named-result comparison type returns null if the result is unrecognised", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1&compareWith=WrongName", eventData),
             makeExpectedData({classes: [0], compareWith: null})
@@ -329,7 +330,7 @@
     });
 
     QUnit.test("Parsing a string containing the compare-against-named-result comparison type returns null if the result does not finish", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner", invalid: true}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner", invalid: true}]}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1&compareWith=First%20Runner", eventData),
             makeExpectedData({classes: [0], compareWith: null})
@@ -337,7 +338,7 @@
     });
 
     QUnit.test("Parsing a string with a single result selected returns that result as selected", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1&selected=First%20Runner", eventData),
             makeExpectedData({classes: [0], selected: [0]})
@@ -345,7 +346,7 @@
     });
 
     QUnit.test("Parsing a string with a leading question-mark and a single result selected returns that result as selected", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("?selected=First%20Runner&class=TestClass1", eventData),
             makeExpectedData({classes: [0], selected: [0]})
@@ -353,7 +354,7 @@
     });
 
     QUnit.test("Parsing a string with an unrecognised result name returns no selected results", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1&selected=Unrecognised%20Person", eventData),
             makeExpectedData({classes: [0], selected: null})
@@ -361,7 +362,7 @@
     });
 
     QUnit.test("Parsing a string with a valid selected result name but no selected classes returns no selected results", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("selected=First%20Runner", eventData),
             makeExpectedData({selected: null})
@@ -369,7 +370,7 @@
     });
 
     QUnit.test("Parsing a string with two results selected returns those results as selected", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1&selected=First%20Runner;Third%20Runner", eventData),
             makeExpectedData({classes:[0], selected: [0, 2]})
@@ -377,7 +378,7 @@
     });
 
     QUnit.test("Parsing a string with a single result selected twice returns that result as selected once", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1&selected=First%20Runner;First%20Runner", eventData),
             makeExpectedData({classes: [0], selected: [0]})
@@ -385,7 +386,7 @@
     });
 
     QUnit.test("Parsing a string with an asterisk in the selected string selects all competitors", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1&selected=*", eventData),
             makeExpectedData({classes:[0], selected: [0, 1, 2]})
@@ -393,7 +394,7 @@
     });
 
     QUnit.test("Parsing a string with an asterisk in the selected string and other names selects all results", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
         assert.deepEqual(
             parseQueryString("class=TestClass1&selected=Second%20Runner;*;First%20Runner", eventData),
             makeExpectedData({classes: [0], selected: [0, 1, 2]})
@@ -492,43 +493,43 @@
     });
 
     QUnit.test("Can parse a query string containing values for all eight arguments", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        var courseClass = eventData.classes[0];
-        var compareWith = {index: 6, result: courseClass.results[2]};
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "TestClass1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let courseClass = eventData.classes[0];
+        let compareWith = {index: 6, result: courseClass.results[2]};
         assert.deepEqual(
             parseQueryString("class=TestClass1&chartType=PositionAfterLeg&compareWith=Third%20Runner&selected=Second%20Runner;First%20Runner&stats=TimeLoss;TotalTime&showOriginal=1&selectedLeg=2&filterText=test", eventData),
             {classes: [0], chartType: ChartTypes.PositionAfterLeg, compareWith: compareWith, selected: [0, 1], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test"});
     });
 
     QUnit.test("Can format an empty query-string with values for all eight arguments", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        var data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test 1"};
-        var courseClassSet = new CourseClassSet([eventData.classes[0]]);
-        var queryString = formatQueryString("", eventData, courseClassSet, data);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test 1"};
+        let courseClassSet = new CourseClassSet([eventData.classes[0]]);
+        let queryString = formatQueryString("", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "class=Test%20Class%201&chartType=SplitPosition&compareWith=FastestTime&selected=Second%20Runner%3BThird%20Runner&stats=TotalTime%3BTimeLoss&showOriginal=1&selectedLeg=2&filterText=test%201");
     });
 
     QUnit.test("Can format a query-string with a value for some other parameter, adding values for all eight arguments and retaining the existing parameter", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        var data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test"};
-        var courseClassSet = new CourseClassSet([eventData.classes[0]]);
-        var queryString = formatQueryString("?eventId=6789", eventData, courseClassSet, data);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test"};
+        let courseClassSet = new CourseClassSet([eventData.classes[0]]);
+        let queryString = formatQueryString("?eventId=6789", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "?eventId=6789&class=Test%20Class%201&chartType=SplitPosition&compareWith=FastestTime&selected=Second%20Runner%3BThird%20Runner&stats=TotalTime%3BTimeLoss&showOriginal=1&selectedLeg=2&filterText=test");
     });
 
     QUnit.test("Can format a query-string that contains existing values with new values for all eight arguments", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        var data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "testNew"};
-        var courseClassSet = new CourseClassSet([eventData.classes[0]]);
-        var queryString = formatQueryString("class=SomeOtherClass&chartType=SomeChartType&compareWith=SomeComparison&selected=SomeCompetitors&stats=SomeStats&showOriginal=Yes&selectedLeg=1&filterText=testOld", eventData, courseClassSet, data);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "testNew"};
+        let courseClassSet = new CourseClassSet([eventData.classes[0]]);
+        let queryString = formatQueryString("class=SomeOtherClass&chartType=SomeChartType&compareWith=SomeComparison&selected=SomeCompetitors&stats=SomeStats&showOriginal=Yes&selectedLeg=1&filterText=testOld", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "class=Test%20Class%201&chartType=SplitPosition&compareWith=FastestTime&selected=Second%20Runner%3BThird%20Runner&stats=TotalTime%3BTimeLoss&showOriginal=1&selectedLeg=2&filterText=testNew");
     });
 
     QUnit.test("Can format a query-string that contains multiple existing values with new values for all eight arguments", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        var data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test"};
-        var courseClassSet = new CourseClassSet([eventData.classes[0]]);
-        var queryString = formatQueryString(
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test"};
+        let courseClassSet = new CourseClassSet([eventData.classes[0]]);
+        let queryString = formatQueryString(
             "class=SomeOtherClass&class=YetAnotherClass&chartType=SomeChartType&compareWith=SomeComparison&compareWith=SomeOtherComparison&chartType=SomeOtherChartType" +
             "&selected=SomeCompetitors&stats=SomeStats&selected=SomeOtherCompetitors&stats=SomeOtherStats&showOriginal=Oui&showOriginal=Ja&selectedLeg=3&selectedLeg=4&filterText=testOld&filterText=testNew",
             eventData, courseClassSet, data);
@@ -536,54 +537,53 @@
     });
 
     QUnit.test("Can format a query-string that contains no selected results and no statistics, does not show original data and has no filter text", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        var data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
-        var courseClassSet = new CourseClassSet([eventData.classes[0]]);
-        var queryString = formatQueryString("", eventData, courseClassSet, data);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
+        let courseClassSet = new CourseClassSet([eventData.classes[0]]);
+        let queryString = formatQueryString("", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "class=Test%20Class%201&chartType=SplitPosition&compareWith=FastestTime&stats=");
     });
 
     QUnit.test("Can format a query-string that contains all selected results and no statistics", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        var data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [0, 1, 2], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
-        var courseClassSet = new CourseClassSet([eventData.classes[0]]);
-        var queryString = formatQueryString("", eventData, courseClassSet, data);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [0, 1, 2], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
+        let courseClassSet = new CourseClassSet([eventData.classes[0]]);
+        let queryString = formatQueryString("", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "class=Test%20Class%201&chartType=SplitPosition&compareWith=FastestTime&selected=*&stats=");
     });
 
     QUnit.test("Can format a query-string that compares against a named result", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        var courseClassSet = new CourseClassSet([eventData.classes[0]]);
-        var data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 6, result: courseClassSet.allResults[0]}, selected: [], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
-        var queryString = formatQueryString("", eventData, courseClassSet, data);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let courseClassSet = new CourseClassSet([eventData.classes[0]]);
+        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 6, result: courseClassSet.allResults[0]}, selected: [], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
+        let queryString = formatQueryString("", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "class=Test%20Class%201&chartType=SplitPosition&compareWith=First%20Runner&stats=");
     });
 
     QUnit.test("Can format a query-string that has an unrecognised chart type and comparison", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        var courseClassSet = new CourseClassSet([eventData.classes[0]]);
-        var data = {classes: [0], chartType: "This is not a valid chart type", compareWith: {index: 77, result: null}, selected: [], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
-        var queryString = formatQueryString("", eventData, courseClassSet, data);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let courseClassSet = new CourseClassSet([eventData.classes[0]]);
+        let data = {classes: [0], chartType: "This is not a valid chart type", compareWith: {index: 77, result: null}, selected: [], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
+        let queryString = formatQueryString("", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "class=Test%20Class%201&stats=");
     });
 
     QUnit.test("Can obtain the same data by formatting and parsing a query string using a built-in comparison and original data", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}, {name: "Test Class 2"}]}]);
-        var data = {classes: [0, 1], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: null, filterText: "test"};
-        var courseClassSet = new CourseClassSet(eventData.classes.slice(0));
-        var queryString = formatQueryString("", eventData, courseClassSet, data);
-        var parsedData = parseQueryString(queryString, eventData);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}, {name: "Test Class 2"}]}]);
+        let data = {classes: [0, 1], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: null, filterText: "test"};
+        let courseClassSet = new CourseClassSet(eventData.classes.slice(0));
+        let queryString = formatQueryString("", eventData, courseClassSet, data);
+        let parsedData = parseQueryString(queryString, eventData);
         assert.deepEqual(parsedData, data, "Should have read the same data back after formatting a query string.  Query string: " + queryString);
     });
 
     QUnit.test("Can obtain the same data by formatting and parsing a query string comparing against a runner and not showing original data", function (assert) {
-        var eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        var result = eventData.classes[0].results[1];
-        var data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 6, result: result}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: false, selectedLeg: null, filterText: "test"};
-        var courseClassSet = new CourseClassSet(eventData.classes.slice(0));
-        var queryString = formatQueryString("", eventData, courseClassSet, data);
-        var parsedData = parseQueryString(queryString, eventData);
+        let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
+        let result = eventData.classes[0].results[1];
+        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 6, result: result}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: false, selectedLeg: null, filterText: "test"};
+        let courseClassSet = new CourseClassSet(eventData.classes.slice(0));
+        let queryString = formatQueryString("", eventData, courseClassSet, data);
+        let parsedData = parseQueryString(queryString, eventData);
         assert.deepEqual(parsedData, data, "Should have read the same data back after formatting a query string.  Query string: " + queryString);
     });
-
 }());

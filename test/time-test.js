@@ -20,9 +20,9 @@
  */
 (function () {
 
-    var formatTime = SplitsBrowser.formatTime;
-    var formatTimeOfDay = SplitsBrowser.formatTimeOfDay;
-    var parseTime = SplitsBrowser.parseTime;
+    const formatTime = SplitsBrowser.formatTime;
+    const formatTimeOfDay = SplitsBrowser.formatTimeOfDay;
+    const parseTime = SplitsBrowser.parseTime;
 
     QUnit.module("Time");
 

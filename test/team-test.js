@@ -21,13 +21,13 @@
 (function (){
     "use strict";
 
-    var Competitor = SplitsBrowser.Model.Competitor;
-    var Team = SplitsBrowser.Model.Team;
+    const Competitor = SplitsBrowser.Model.Competitor;
+    const Team = SplitsBrowser.Model.Team;
 
     QUnit.module("Team");
 
     QUnit.test("Can create a team and set members", function (assert) {
-        var team = new Team("Team 1", "ABC");
+        let team = new Team("Team 1", "ABC");
         team.setMembers([new Competitor("First Runner", "ABC"), new Competitor("Second Runner", "ABC")]);
         assert.strictEqual(team.name, "Team 1");
         assert.strictEqual(team.club, "ABC");

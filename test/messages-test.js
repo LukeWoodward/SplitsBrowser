@@ -1,7 +1,7 @@
 ﻿/*
  *  Messages Tests - Tests for the messages.
  *
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -23,13 +23,13 @@
 
     QUnit.module("Messages");
 
-    var alerterCalled = false;
+    const DEFAULT_LANGUAGE = "en_gb";
 
-    var DEFAULT_LANGUAGE = "en_gb";
+    let alerterCalled = false;
 
     function setAlerter() {
         alerterCalled = false;
-        SplitsBrowser.setMessageAlerter(function () { alerterCalled = true; });
+        SplitsBrowser.setMessageAlerter(() => alerterCalled = true);
     }
 
     QUnit.test("Can look up a test message that exists", function (assert) {
@@ -48,7 +48,7 @@
     QUnit.test("Can look up a test message that exists and apply formatting", function (assert) {
         setAlerter();
         SplitsBrowser.Messages[DEFAULT_LANGUAGE].TestMessage = "This is $$ONE$$ test $$TWO$$";
-        var result = SplitsBrowser.getMessageWithFormatting("TestMessage", {"$$ONE$$": "one", "$$TWO$$": "two"});
+        let result = SplitsBrowser.getMessageWithFormatting("TestMessage", {"$$ONE$$": "one", "$$TWO$$": "two"});
         assert.strictEqual(result, "This is one test two");
         assert.ok(!alerterCalled, "Alerter should not have been called");
     });
@@ -56,7 +56,7 @@
     QUnit.test("Can look up a test message that exists and apply formatting, replacing the same parameter name twice", function (assert) {
         setAlerter();
         SplitsBrowser.Messages[DEFAULT_LANGUAGE].TestMessage = "This is $$ONE$$ test $$ONE$$";
-        var result = SplitsBrowser.getMessageWithFormatting("TestMessage", {"$$ONE$$": "one"});
+        let result = SplitsBrowser.getMessageWithFormatting("TestMessage", {"$$ONE$$": "one"});
         assert.strictEqual(result, "This is one test one");
         assert.ok(!alerterCalled, "Alerter should not have been called");
     });
@@ -109,6 +109,4 @@
         assert.strictEqual("English", SplitsBrowser.getMessage("Language"));
         assert.strictEqual(SplitsBrowser.getLanguage(), "en_gb");
     });
-
-
 })();

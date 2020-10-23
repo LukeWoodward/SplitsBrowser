@@ -23,22 +23,22 @@
 
     QUnit.module("Course-class set");
 
-    var _DUMMY_CHART_TYPE = {
+    const _DUMMY_CHART_TYPE = {
         name: "dummy",
-        dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes); },
-        indexesAroundOmittedTimesFunc: function (result) { return result.getControlIndexesAroundOmittedCumulativeTimes(); }
+        dataSelector: (result, referenceCumTimes) => result.getCumTimesAdjustedToReference(referenceCumTimes),
+        indexesAroundOmittedTimesFunc: result => result.getControlIndexesAroundOmittedCumulativeTimes()
     };
 
-    var isNaNStrict = SplitsBrowser.isNaNStrict;
-    var CourseClass = SplitsBrowser.Model.CourseClass;
-    var Course = SplitsBrowser.Model.Course;
-    var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
-    var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
-    var Team = SplitsBrowser.Model.Team;
-    var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
+    const isNaNStrict = SplitsBrowser.isNaNStrict;
+    const CourseClass = SplitsBrowser.Model.CourseClass;
+    const Course = SplitsBrowser.Model.Course;
+    const fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
+    const createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
+    const fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    const Team = SplitsBrowser.Model.Team;
+    const CourseClassSet = SplitsBrowser.Model.CourseClassSet;
 
-    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
+    const fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
 
     function getResult1() {
         return fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [65, 221, 209, 100]);
@@ -53,19 +53,19 @@
     }
 
     function getResult1WithDubiousSplitForControl2() {
-        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100], {name: "First Runner"});
+        let result = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100], {name: "First Runner"});
         result.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         return result;
     }
 
     function getResult1WithDubiousFinishTime() {
-        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184], {});
+        let result = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184], {});
         result.setRepairedCumulativeTimes([0, 65, 65 + 221, 65 + 221 + 184, NaN]);
         return result;
     }
 
     function getResult1WithDubiousTimeToLastControlAndFinish() {
-        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221, 65 + 221], {});
+        let result = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221, 65 + 221], {});
         result.setRepairedCumulativeTimes([0, 65, 65 + 221, NaN, NaN]);
         return result;
     }
@@ -83,7 +83,7 @@
     }
 
     function getNonStartingResult1() {
-        var result = fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [null, null, null, null]);
+        let result = fromSplitTimes(1, "First Runner", "ABC", 10 * 3600, [null, null, null, null]);
         result.setNonStarter();
         return result;
     }
@@ -133,19 +133,19 @@
     }
 
     function getTeamResult() {
-        var teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {name: "First Runner"});
-        var teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533], {name: "Second Runner"});
+        let teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {name: "First Runner"});
+        let teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533], {name: "Second Runner"});
         return createTeamResult(1, [teamMemberResult1, teamMemberResult2], new Team("Team 1", "ABC"));
     }
 
     function getTeamResult2() {
-        var teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 78, 287, 486, 603], {name: "Third Runner"});
-        var teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 603, [0, 74, 292, 488, 641], {name: "Fourth Runner"});
+        let teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 78, 287, 486, 603], {name: "Third Runner"});
+        let teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 603, [0, 74, 292, 488, 641], {name: "Fourth Runner"});
         return createTeamResult(1, [teamMemberResult1, teamMemberResult2], new Team("Team 2", "DEF"));
     }
 
     QUnit.test("Can create a CourseClassSet from an empty array of course-classes", function (assert) {
-        var emptySet = new CourseClassSet([]);
+        let emptySet = new CourseClassSet([]);
         assert.ok(emptySet.isEmpty());
         assert.strictEqual(emptySet.getCourse(), null);
         assert.strictEqual(emptySet.getPrimaryClassName(), null);
@@ -154,142 +154,140 @@
     });
 
     QUnit.test("Can create a CourseClassSet from a single course-class", function (assert) {
-        var courseClass = new CourseClass("Test", 3, [getResult1(), getResult2(), getResult3()]);
-        var courseClassSet = new CourseClassSet([courseClass]);
+        let courseClass = new CourseClass("Test", 3, [getResult1(), getResult2(), getResult3()]);
+        let courseClassSet = new CourseClassSet([courseClass]);
         assert.deepEqual(courseClassSet.allResults, courseClass.results, "A CourseClassSet created from one course-class should contain the only the results of that class");
     });
 
     QUnit.test("Can create a CourseClassSet from a single course-class, ignoring non-starting result", function (assert) {
-        var courseClass = new CourseClass("Test", 3, [getNonStartingResult1(), getResult2(), getResult3()]);
-        var courseClassSet = new CourseClassSet([courseClass]);
+        let courseClass = new CourseClass("Test", 3, [getNonStartingResult1(), getResult2(), getResult3()]);
+        let courseClassSet = new CourseClassSet([courseClass]);
         assert.deepEqual(courseClassSet.allResults, courseClass.results.slice(1), "A CourseClassSet created from one course-class should contain the only the results of that class that started");
     });
 
     QUnit.test("Can create a CourseClassSet from a single course-class and get the course", function (assert) {
-        var courseClass = new CourseClass("Test", 3, [getResult1()]);
-        var course = new Course("Test course", [courseClass], null, null, null);
+        let courseClass = new CourseClass("Test", 3, [getResult1()]);
+        let course = new Course("Test course", [courseClass], null, null, null);
         courseClass.setCourse(course);
-        var courseClassSet = new CourseClassSet([courseClass]);
+        let courseClassSet = new CourseClassSet([courseClass]);
         assert.deepEqual(courseClassSet.getCourse(), course);
     });
 
     QUnit.test("Can create a CourseClassSet from a single course-class and get the primary class name as that of the given class", function (assert) {
-        var courseClass = new CourseClass("Test", 3, [getResult1()]);
-        var courseClassSet = new CourseClassSet([courseClass]);
+        let courseClass = new CourseClass("Test", 3, [getResult1()]);
+        let courseClassSet = new CourseClassSet([courseClass]);
         assert.deepEqual(courseClassSet.getPrimaryClassName(), courseClass.name);
     });
 
     QUnit.test("Can create a CourseClassSet from a multiple course-class and get the primary class name as that of the first class", function (assert) {
-        var courseClass1 = new CourseClass("Test class 1", 3, [getResult1()]);
-        var courseClass2 = new CourseClass("Test class 2", 3, [getResult2()]);
-        var courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
+        let courseClass1 = new CourseClass("Test class 1", 3, [getResult1()]);
+        let courseClass2 = new CourseClass("Test class 2", 3, [getResult2()]);
+        let courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
         assert.deepEqual(courseClassSet.getPrimaryClassName(), courseClass1.name);
     });
 
     QUnit.test("Can create a CourseClassSet from a single course-class, sorting results into order", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2();
-        var result3 = getResult3();
-        var courseClass = new CourseClass("Test", 3, [result3, result1, result2]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var expectedResults = [result1, result2, result3];
+        let result1 = getResult1();
+        let result2 = getResult2();
+        let result3 = getResult3();
+        let courseClass = new CourseClass("Test", 3, [result3, result1, result2]);
+        let courseClassSet = new CourseClassSet([courseClass]);
+        let expectedResults = [result1, result2, result3];
         assert.deepEqual(courseClassSet.allResults, expectedResults, "A CourseClassSet created from one course-class should contain the only the results of that class");
     });
 
     QUnit.test("Can create a CourseClassSet from two course-classes", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2();
-        var result3 = getResult3();
-        var courseClass1 = new CourseClass("Test", 3, [result3, result1]);
-        var courseClass2 = new CourseClass("Test", 3, [result2]);
-        var courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
-        var expectedResults = [result1, result2, result3];
+        let result1 = getResult1();
+        let result2 = getResult2();
+        let result3 = getResult3();
+        let courseClass1 = new CourseClass("Test", 3, [result3, result1]);
+        let courseClass2 = new CourseClass("Test", 3, [result2]);
+        let courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
+        let expectedResults = [result1, result2, result3];
         assert.deepEqual(courseClassSet.allResults, expectedResults, "Merging one course-class should return the only the results of that class");
     });
 
     QUnit.test("Cannot create a CourseClassSet from two course-classes with different numbers of controls", function (assert) {
-        var result2 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 108]);
-        var courseClass1 = new CourseClass("Test", 3, [getResult1()]);
-        var courseClass2 = new CourseClass("Test", 4, [result2]);
-        SplitsBrowserTest.assertInvalidData(assert, function () {
-            new CourseClassSet([courseClass1, courseClass2]);
-        });
+        let result2 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 108]);
+        let courseClass1 = new CourseClass("Test", 3, [getResult1()]);
+        let courseClass2 = new CourseClass("Test", 4, [result2]);
+        SplitsBrowserTest.assertInvalidData(assert, () => new CourseClassSet([courseClass1, courseClass2]));
     });
 
     QUnit.test("CourseClassSet created from two course-classes has two course-classes", function (assert) {
-        var courseClass1 = new CourseClass("Test class 1", 3, [getResult1()]);
-        var courseClass2 = new CourseClass("Test class 2", 3, [getResult2()]);
-        var courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
+        let courseClass1 = new CourseClass("Test class 1", 3, [getResult1()]);
+        let courseClass2 = new CourseClass("Test class 2", 3, [getResult2()]);
+        let courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
         assert.deepEqual(courseClassSet.getNumClasses(), 2, "Course-class set should have two classes");
     });
 
     QUnit.test("Cumulative times of the winner of an empty course-class set is null", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
         assert.strictEqual(courseClassSet.getWinnerCumTimes(), null, "There should be no winner if there are no results");
     });
 
     QUnit.test("Course-class set made up of course-class without dubious data that should itself not have dubious data", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
         assert.ok(!courseClassSet.hasDubiousData());
     });
 
     QUnit.test("Course-class set made up of course-class with dubious data should also have dubious data", function (assert) {
-        var courseClass = new CourseClass("Test", 3, []);
+        let courseClass = new CourseClass("Test", 3, []);
         courseClass.recordHasDubiousData();
-        var courseClassSet = new CourseClassSet([courseClass]);
+        let courseClassSet = new CourseClassSet([courseClass]);
         assert.ok(courseClassSet.hasDubiousData());
     });
 
     QUnit.test("Course-class set made up of two course-classes, one with dubious data and one without, should have dubious data", function (assert) {
-        var courseClass1 = new CourseClass("Test 1", 3, []);
+        let courseClass1 = new CourseClass("Test 1", 3, []);
         courseClass1.recordHasDubiousData();
-        var courseClass2 = new CourseClass("Test 2", 3, []);
-        var courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
+        let courseClass2 = new CourseClass("Test 2", 3, []);
+        let courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
         assert.ok(courseClassSet.hasDubiousData());
     });
 
     QUnit.test("Course-class set made up of course-class without team data should not have team data", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
         assert.ok(!courseClassSet.hasTeamData());
         assert.strictEqual(courseClassSet.getLegCount(), null);
     });
 
     QUnit.test("Course-class set made up of course-class with team data should have team data", function (assert) {
-        var courseClass = new CourseClass("Test", 3, []);
+        let courseClass = new CourseClass("Test", 3, []);
         courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
+        let courseClassSet = new CourseClassSet([courseClass]);
         assert.ok(courseClassSet.hasTeamData());
         assert.strictEqual(courseClassSet.getLegCount(), 2);
     });
 
     QUnit.test("Course-class set made up of two course-classes, one with team data and one without, should not have team data", function (assert) {
         // This is a combination that in practice shouldn't happen.
-        var courseClass1 = new CourseClass("Test 1", 3, []);
+        let courseClass1 = new CourseClass("Test 1", 3, []);
         courseClass1.setIsTeamClass([3, 3]);
-        var courseClass2 = new CourseClass("Test 2", 3, []);
-        var courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
+        let courseClass2 = new CourseClass("Test 2", 3, []);
+        let courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
         assert.ok(!courseClassSet.hasTeamData());
         assert.strictEqual(courseClassSet.getLegCount(), null);
     });
 
     QUnit.test("Course-class set made up of two team course-classes with different numbers of legs should not have a leg count", function (assert) {
         // This is a combination that in practice shouldn't happen.
-        var courseClass1 = new CourseClass("Test 1", 3, []);
+        let courseClass1 = new CourseClass("Test 1", 3, []);
         courseClass1.setIsTeamClass([3, 3]);
-        var courseClass2 = new CourseClass("Test 2", 3, []);
+        let courseClass2 = new CourseClass("Test 2", 3, []);
         courseClass1.setIsTeamClass([3, 3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
+        let courseClassSet = new CourseClassSet([courseClass1, courseClass2]);
         assert.ok(!courseClassSet.hasTeamData());
         assert.strictEqual(courseClassSet.getLegCount(), null);
     });
 
     QUnit.test("Course-class set with no course-classes should not have team data", function (assert) {
-        var courseClassSet = new CourseClassSet([]);
+        let courseClassSet = new CourseClassSet([]);
         assert.ok(!courseClassSet.hasTeamData());
     });
 
     QUnit.test("Cumulative times of the winner of a course-class set with only mispunchers is null", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [
             getResult1WithNullFinishSplit(),
             getResult2WithNullSplitForControl2()
         ])]);
@@ -298,46 +296,46 @@
     });
 
     QUnit.test("Cumulative times of the winner of a single-class set are those with quickest time", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult2(), getFasterResult1()])]);
-        var winTimes = courseClassSet.getWinnerCumTimes();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult2(), getFasterResult1()])]);
+        let winTimes = courseClassSet.getWinnerCumTimes();
         assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], "First Runner (second result) should be the winner");
     });
 
     QUnit.test("Cumulative times of the winner of a multiple-class set are those with quickest time", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult2()]), new CourseClass("Test 2", 3, [getFasterResult1()])]);
-        var winTimes = courseClassSet.getWinnerCumTimes();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult2()]), new CourseClass("Test 2", 3, [getFasterResult1()])]);
+        let winTimes = courseClassSet.getWinnerCumTimes();
         assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], "First Runner (second result) from the second course should be the winner");
     });
 
     QUnit.test("Cumulative times of the winner of a class containing only a single result with a dubious cumulative time include a filled gap", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult1WithDubiousSplitForControl2()])]);
-        var winTimes = courseClassSet.getWinnerCumTimes();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult1WithDubiousSplitForControl2()])]);
+        let winTimes = courseClassSet.getWinnerCumTimes();
         assert.deepEqual(winTimes, [0, 65, 65 + (221 + 184) / 2, 65 + 221 + 184, 65 + 221 + 184 + 100], "Cumulative times should have filled-in gap");
     });
 
     QUnit.test("Cumulative times of the winner of a class containing only a single result with a dubious finish time include a filled gap", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult1WithDubiousFinishTime()])]);
-        var winTimes = courseClassSet.getWinnerCumTimes();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult1WithDubiousFinishTime()])]);
+        let winTimes = courseClassSet.getWinnerCumTimes();
         assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 60], "Cumulative times should have filled-in time to finish");
     });
 
     QUnit.test("Cumulative times of the winner of a class containing only a single result with dubious times to the last control and finish include a filled gap", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult1WithDubiousTimeToLastControlAndFinish()])]);
-        var winTimes = courseClassSet.getWinnerCumTimes();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult1WithDubiousTimeToLastControlAndFinish()])]);
+        let winTimes = courseClassSet.getWinnerCumTimes();
         assert.deepEqual(winTimes, [0, 65, 65 + 221, 65 + 221 + 180, 65 + 221 + 180 + 60], "Cumulative times should have filled-in time to last control and finish");
     });
 
     QUnit.test("Fastest cumulative times on course-class set with no results should have backpopulated dummy cumulative times", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
         assert.deepEqual(courseClassSet.getFastestCumTimes(), [0, 180, 360, 540, 600], "Empty course-class set should have dummy fastest times");
     });
 
     QUnit.test("Fastest cumulative times on course-class set when both results have dubious time at one control has backpopulated value for missing control", function (assert) {
-        var result1 = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65, 65 + 221 + 209, 65 + 221 + 209 + 100], {});
+        let result1 = fromOriginalCumTimes(1, 10 * 3600, [0, 65, 65, 65 + 221 + 209, 65 + 221 + 209 + 100], {});
         result1.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 209, 65 + 221 + 209 + 100]);
-        var result2 = fromOriginalCumTimes(2, 10 * 3600 + 30, [0, 81, 81, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+        let result2 = fromOriginalCumTimes(2, 10 * 3600 + 30, [0, 81, 81, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
         result2.setRepairedCumulativeTimes([0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
 
         assert.deepEqual(
             courseClassSet.getFastestCumTimes(), [0, 65, 65 + (197 + 212) / 2, 65 + 197 + 212, 65 + 197 + 212 + 100],
@@ -345,82 +343,82 @@
     });
 
     QUnit.test("Fastest cumulative times on course-class set when only result has missing time at last control has backpopulated values from that result", function (assert) {
-        var result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, null, 65 + 221 + 209 + 100], {});
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result])]);
+        let result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, null, 65 + 221 + 209 + 100], {});
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result])]);
         assert.deepEqual(
             courseClassSet.getFastestCumTimes(), [0, 65, 65 + 221, 65 + 221 + (209 + 100) / 2, 65 + 221 + 209 + 100],
             "Class with penultimate control mispunched by only result should have correct dummy value for missing control");
     });
 
     QUnit.test("Fastest cumulative times on course-class set with one control mispunched by all has dummy fastest split for missing control", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithNullSplitForControl2(), getResult2WithNullSplitForControl2()])]);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithNullSplitForControl2(), getResult2WithNullSplitForControl2()])]);
         assert.deepEqual(courseClassSet.getFastestCumTimes(), [0, 65, 245, 429, 529], "Class with one control mispunched by all should have dummy value for missing control");
     });
 
     QUnit.test("Fastest cumulative times on a single-class set should be made up of fastest times", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
         assert.deepEqual(courseClassSet.getFastestCumTimes(), [0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100], "Fastest cumulative time should be made up of fastest splits");
     });
 
     QUnit.test("Fastest cumulative times on a multiple-class set should be made up of fastest times from results from both classes", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test 1 ", 3, [getFasterResult1()]), new CourseClass("Test 2", 3, [getResult2()])]);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test 1 ", 3, [getFasterResult1()]), new CourseClass("Test 2", 3, [getResult2()])]);
         assert.deepEqual(courseClassSet.getFastestCumTimes(), [0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100], "Fastest cumulative time should be made up of fastest splits");
     });
 
     QUnit.test("Fastest cumulative times plus 75% on single-class set should be made up of fastest times with 75%", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
         assert.deepEqual(
             courseClassSet.getFastestCumTimesPlusPercentage(75), [0, 65 * 1.75, (65 + 197) * 1.75, (65 + 197 + 184) * 1.75, (65 + 197 + 184 + 100) * 1.75],
             "Fastest cumulative times + 75% should be made up of fastest cumulative splits with 75% added");
     });
 
     QUnit.test("Fastest cumulative times on single-class set should be made up of fastest split times ignoring nulls", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithNullFinishSplit(), getResult2WithNullSplitForControl2()])]);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithNullFinishSplit(), getResult2WithNullSplitForControl2()])]);
         assert.deepEqual(
             courseClassSet.getFastestCumTimes(), [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 106],
             "Fastest cumulative times should be made up of fastest splits where not null");
     });
 
     QUnit.test("Fastest cumulative times on single-class set should be made up of fastest split times ignoring dubious splits", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithDubiousSplitForControl2(), getResult2()])]);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithDubiousSplitForControl2(), getResult2()])]);
         assert.deepEqual(
             courseClassSet.getFastestCumTimes(), [0, 65, 65 + 197, 65 + 197 + 212, 65 + 197 + 212 + 100],
             "Fastest cumulative times should be made up of fastest splits where not NaN");
     });
 
     QUnit.test("Cumulative times of the second result in a single-class set are those of the second result", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult2(), getFasterResult1()])]);
-        var resultTimes = courseClassSet.getCumulativeTimesForResult(1);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult2(), getFasterResult1()])]);
+        let resultTimes = courseClassSet.getCumulativeTimesForResult(1);
         assert.deepEqual(resultTimes, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], "Second Runner (first result) should be the second result");
     });
 
     QUnit.test("Cumulative times of the second result of a multiple-class set are those of the second result", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult2()]), new CourseClass("Test 2", 3, [getFasterResult1()])]);
-        var resultTimes = courseClassSet.getCumulativeTimesForResult(1);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult2()]), new CourseClass("Test 2", 3, [getFasterResult1()])]);
+        let resultTimes = courseClassSet.getCumulativeTimesForResult(1);
         assert.deepEqual(resultTimes, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], "Second Runner (first result) from the first course should be the second result");
     });
 
     QUnit.test("Cumulative times of the result in a class containing only a single result with a dubious cumulative time include a filled gap", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult1WithDubiousSplitForControl2()])]);
-        var resultTimes = courseClassSet.getCumulativeTimesForResult(0);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult1WithDubiousSplitForControl2()])]);
+        let resultTimes = courseClassSet.getCumulativeTimesForResult(0);
         assert.deepEqual(resultTimes, [0, 65, 65 + (221 + 184) / 2, 65 + 221 + 184, 65 + 221 + 184 + 100], "Cumulative times should have filled-in gap");
     });
 
     QUnit.test("Cumulative times of the result in a class containing only a single result with a dubious finish time include a filled gap", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult1WithDubiousFinishTime()])]);
-        var resultTimes = courseClassSet.getCumulativeTimesForResult(0);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult1WithDubiousFinishTime()])]);
+        let resultTimes = courseClassSet.getCumulativeTimesForResult(0);
         assert.deepEqual(resultTimes, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 60], "Cumulative times should have filled-in time to finish include a filled gap");
     });
 
     QUnit.test("Cumulative times of the result in a class containing only a single result with dubious times to the last control and finish have the gap filled", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult1WithDubiousTimeToLastControlAndFinish()])]);
-        var resultTimes = courseClassSet.getCumulativeTimesForResult(0);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getResult1WithDubiousTimeToLastControlAndFinish()])]);
+        let resultTimes = courseClassSet.getCumulativeTimesForResult(0);
         assert.deepEqual(resultTimes, [0, 65, 65 + 221, 65 + 221 + 180, 65 + 221 + 180 + 60], "Cumulative times should have filled-in time to last control and finish");
     });
 
     function assertSplitRanks(assert, result, expectedSplitRanks) {
-        expectedSplitRanks.forEach(function (splitRank, index) {
-            var message = "Split rank " + (index + 1) + " for result " + result.owner.name;
+        expectedSplitRanks.forEach((splitRank, index) => {
+            let message = `Split rank ${index + 1} for result ${result.owner.name}`;
             if (isNaNStrict(splitRank)) {
                 assert.ok(isNaNStrict(result.getSplitRankTo(index + 1)), message);
             } else {
@@ -430,8 +428,8 @@
     }
 
     function assertCumulativeRanks(assert, result, expectedCumulativeRanks) {
-        expectedCumulativeRanks.forEach(function (cumulativeRank, index) {
-            var message = "Cumulative rank " + (index + 1) + " for result " + result.owner.name;
+        expectedCumulativeRanks.forEach((cumulativeRank, index) => {
+            let message = `Cumulative rank ${index + 1} for result ${result.owner.name}`;
             if (isNaNStrict(cumulativeRank)) {
                 assert.ok(isNaNStrict(result.getCumulativeRankTo(index + 1)), message);
             } else {
@@ -446,14 +444,14 @@
     }
 
     QUnit.test("Can compute ranks of single result as all 1s", function (assert) {
-        var result = getResult1();
+        let result = getResult1();
         new CourseClassSet([new CourseClass("Test", 3, [result])]);
         assertSplitAndCumulativeRanks(assert, result, [1, 1, 1, 1], [1, 1, 1, 1]);
     });
 
     QUnit.test("Can compute ranks in single-class set when there are two results with no equal times", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2();
+        let result1 = getResult1();
+        let result2 = getResult2();
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
 
         assertSplitAndCumulativeRanks(assert, result1, [1, 2, 1, 1], [1, 2, 2, 1]);
@@ -461,8 +459,8 @@
     });
 
     QUnit.test("Can compute ranks in multiple-class set when there are two results with no equal times", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2();
+        let result1 = getResult1();
+        let result2 = getResult2();
         new CourseClassSet([new CourseClass("Test 1", 3, [result1]), new CourseClass("Test 2", 3, [result2])]);
 
         assertSplitAndCumulativeRanks(assert, result1, [1, 2, 1, 1], [1, 2, 2, 1]);
@@ -470,9 +468,9 @@
     });
 
     QUnit.test("Can compute ranks when there are three results with no equal times", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2();
-        var result3 = getResult3();
+        let result1 = getResult1();
+        let result2 = getResult2();
+        let result3 = getResult3();
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
         assertSplitAndCumulativeRanks(assert, result1, [1, 3, 2, 1], [1, 2, 3, 1]);
@@ -481,9 +479,9 @@
     });
 
     QUnit.test("Can compute ranks when there are three results with one pair of equal split times", function (assert) {
-        var result1 = getResult1WithSameControl2SplitAsThatOfResult2();
-        var result2 = getResult2();
-        var result3 = getResult3();
+        let result1 = getResult1WithSameControl2SplitAsThatOfResult2();
+        let result2 = getResult2();
+        let result3 = getResult3();
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
         assertSplitAndCumulativeRanks(assert, result1, [1, 1, 2, 1], [1, 1, 1, 1]);
@@ -492,9 +490,9 @@
     });
 
     QUnit.test("Can compute ranks when there are three results with one pair of equal cumulative times", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2();
-        var result3 = getResult3WithSameTotalTimeAsResult1();
+        let result1 = getResult1();
+        let result2 = getResult2();
+        let result3 = getResult3WithSameTotalTimeAsResult1();
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
         assertSplitAndCumulativeRanks(assert, result1, [1, 3, 2, 1], [1, 2, 3, 1]);
@@ -503,9 +501,9 @@
     });
 
     QUnit.test("Can compute ranks when there are three results with one missing split times", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2WithNullSplitForControl2();
-        var result3 = getResult3();
+        let result1 = getResult1();
+        let result2 = getResult2WithNullSplitForControl2();
+        let result3 = getResult3();
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
         assertSplitAndCumulativeRanks(assert, result1, [1, 2, 2, 1], [1, 1, 2, 1]);
@@ -514,10 +512,10 @@
     });
 
     QUnit.test("Can compute ranks when there are three results with one marked as OK despite missing split times", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2FromCumulativeTimesWithNullSplitForControl2();
+        let result1 = getResult1();
+        let result2 = getResult2FromCumulativeTimesWithNullSplitForControl2();
         result2.setOKDespiteMissingTimes();
-        var result3 = getResult3();
+        let result3 = getResult3();
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
         assertSplitAndCumulativeRanks(assert, result1, [1, 2, 2, 1], [1, 1, 3, 1]);
@@ -526,9 +524,9 @@
     });
 
     QUnit.test("Can compute ranks when there is one control that all three results mispunch", function (assert) {
-        var result1 = getResult1WithNullFinishSplit();
-        var result2 = getResult2WithNullFinishSplit();
-        var result3 = getResult3WithNullFinishSplit();
+        let result1 = getResult1WithNullFinishSplit();
+        let result2 = getResult2WithNullFinishSplit();
+        let result3 = getResult3WithNullFinishSplit();
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
         assertSplitAndCumulativeRanks(assert, result1, [1, 3, 1, null], [1, 2, 1, null]);
@@ -537,9 +535,9 @@
     });
 
     QUnit.test("Can compute ranks when there are three results specified by cumulative times with one missing split times", function (assert) {
-        var result1 = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var result2 = fromCumTimes(2, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100], {});
-        var result3 = fromCumTimes(2, 11 * 3600, [0, 78, null,     78 + 209 + 199, 78 + 209 + 199 + 117], {});
+        let result1 = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+        let result2 = fromCumTimes(2, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100], {});
+        let result3 = fromCumTimes(2, 11 * 3600, [0, 78, null,     78 + 209 + 199, 78 + 209 + 199 + 117], {});
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
         assertSplitAndCumulativeRanks(assert, result1, [3, 1, 2, 2], [3, 1, 1, 2]);
@@ -552,9 +550,9 @@
     });
 
     QUnit.test("Can compute ranks when there are three results specified by cumulative times with one having a dubious split time", function (assert) {
-        var result1 = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var result2 = fromCumTimes(2, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100], {});
-        var result3 = fromOriginalCumTimes(2, 11 * 3600, [0, 78, 78 - 30, 78 + 209 + 199, 78 + 209 + 199 + 117], {});
+        let result1 = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+        let result2 = fromCumTimes(2, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 209, 65 + 221 + 209 + 100], {});
+        let result3 = fromOriginalCumTimes(2, 11 * 3600, [0, 78, 78 - 30, 78 + 209 + 199, 78 + 209 + 199 + 117], {});
         result3.setRepairedCumulativeTimes([0, 78, NaN, 78 + 209 + 199, 78 + 209 + 199 + 117]);
         new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
@@ -565,109 +563,109 @@
     });
 
     QUnit.test("Can get fastest two splits to control 3 from single-class set with three results", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2();
-        var result3 = getResult3();
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
+        let result1 = getResult1();
+        let result2 = getResult2();
+        let result3 = getResult3();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
+        let fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
         assert.deepEqual(fastestSplits, [{split: 199, name: result3.owner.name}, {split: 209, name: result1.owner.name}]);
     });
 
     QUnit.test("Can get fastest two splits to control 3 from multiple-class set with three results", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2();
-        var result3 = getResult3();
-        var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [result1]), new CourseClass("Test 2", 3, [result2, result3])]);
+        let result1 = getResult1();
+        let result2 = getResult2();
+        let result3 = getResult3();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [result1]), new CourseClass("Test 2", 3, [result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
+        let fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
         assert.deepEqual(fastestSplits, [{split: 199, name: result3.owner.name}, {split: 209, name: result1.owner.name}]);
     });
 
     QUnit.test("Can get fastest two splits to finish from single-class set with three results", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2();
-        var result3 = getResult3();
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
+        let result1 = getResult1();
+        let result2 = getResult2();
+        let result3 = getResult3();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 4, null);
+        let fastestSplits = courseClassSet.getFastestSplitsTo(2, 4, null);
         assert.deepEqual(fastestSplits, [{split: 100, name: result1.owner.name}, {split: 106, name: result2.owner.name}]);
     });
 
     QUnit.test("When getting fastest four splits to control 3 from single-class set with three results then three splits returned", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2();
-        var result3 = getResult3();
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
+        let result1 = getResult1();
+        let result2 = getResult2();
+        let result3 = getResult3();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(4, 3, null);
+        let fastestSplits = courseClassSet.getFastestSplitsTo(4, 3, null);
         assert.deepEqual(fastestSplits, [{split: 199, name: result3.owner.name}, {split: 209, name: result1.owner.name}, {split: 212, name: result2.owner.name}]);
     });
 
     QUnit.test("When getting fastest two splits to control 3 from single-class set with three results with one mispunching control 3 then splits for other two results returned", function (assert) {
-        var result1 = getResult1WithNullSplitForControl3();
-        var result2 = getResult2();
-        var result3 = getResult3();
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
+        let result1 = getResult1WithNullSplitForControl3();
+        let result2 = getResult2();
+        let result3 = getResult3();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
+        let fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
         assert.deepEqual(fastestSplits, [{split: 199, name: result3.owner.name}, {split: 212, name: result2.owner.name}]);
     });
 
     QUnit.test("When getting fastest two splits to control 3 from single-class set with three results with one mispunching a different control then splits for other two results returned", function (assert) {
-        var result1 = getResult1();
-        var result2 = getResult2();
-        var result3 = getResult3WithNullSplitForControl2();
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
+        let result1 = getResult1();
+        let result2 = getResult2();
+        let result3 = getResult3WithNullSplitForControl2();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
+        let fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
         assert.deepEqual(fastestSplits, [{split: 209, name: result1.owner.name}, {split: 212, name: result2.owner.name}]);
     });
 
     QUnit.test("When getting fastest two splits to control 3 from single-class set with three results with two mispunching control 3 then one split returned", function (assert) {
-        var result1 = getResult1WithNullSplitForControl3();
-        var result2 = getResult2();
-        var result3 = getResult3WithNullSplitForControl3();
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
+        let result1 = getResult1WithNullSplitForControl3();
+        let result2 = getResult2();
+        let result3 = getResult3WithNullSplitForControl3();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
+        let fastestSplits = courseClassSet.getFastestSplitsTo(2, 3, null);
         assert.deepEqual(fastestSplits, [{split: 212, name: result2.owner.name}]);
     });
 
     QUnit.test("When getting fastest three splits to control 2 from single-class set with three results with one having a dubious split then result with dubious split omitted", function (assert) {
-        var result1 = getResult1WithDubiousSplitForControl2();
-        var result2 = getResult2();
-        var result3 = getResult3();
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
+        let result1 = getResult1WithDubiousSplitForControl2();
+        let result2 = getResult2();
+        let result3 = getResult3();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2, result3])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(3, 2, null);
+        let fastestSplits = courseClassSet.getFastestSplitsTo(3, 2, null);
         assert.deepEqual(fastestSplits, [{split: 197, name: result2.owner.name}, {split: 209, name: result3.owner.name}]);
     });
 
     QUnit.test("Can get fastest splits in team course-class set", function (assert) {
-        var result1 = getTeamResult();
-        var result2 = getTeamResult2();
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
+        let result1 = getTeamResult();
+        let result2 = getTeamResult2();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 2, null);
+        let fastestSplits = courseClassSet.getFastestSplitsTo(2, 2, null);
         assert.deepEqual(fastestSplits, [{split: 209, name: result2.owner.name}, {split: 221, name: result1.owner.name}]);
     });
 
     QUnit.test("Can get fastest splits in first leg of team course-class set", function (assert) {
-        var result1 = getTeamResult();
-        var result2 = getTeamResult2();
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
+        let result1 = getTeamResult();
+        let result2 = getTeamResult2();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 2, 0);
+        let fastestSplits = courseClassSet.getFastestSplitsTo(2, 2, 0);
         assert.deepEqual(fastestSplits, [{split: 209, name: result2.owner.members[0].name}, {split: 221, name: result1.owner.members[0].name}]);
     });
 
     QUnit.test("Can get fastest splits in second leg of team course-class set", function (assert) {
-        var result1 = getTeamResult();
-        var result2 = getTeamResult2();
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
+        let result1 = getTeamResult();
+        let result2 = getTeamResult2();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [result1, result2])]);
 
-        var fastestSplits = courseClassSet.getFastestSplitsTo(2, 2, 1);
+        let fastestSplits = courseClassSet.getFastestSplitsTo(2, 2, 1);
         assert.deepEqual(fastestSplits, [{split: 209, name: result2.owner.members[1].name}, {split: 221, name: result1.owner.members[1].name}]);
     });
 
@@ -680,10 +678,8 @@
     * @param {Number} controlIdx The index of the control.
     */
     function assertCannotGetFastestSplits(assert, results, numSplits, controlIdx) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, results)]);
-        SplitsBrowserTest.assertInvalidData(assert, function () {
-            courseClassSet.getFastestSplitsTo(numSplits, controlIdx);
-        });
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, results)]);
+        SplitsBrowserTest.assertInvalidData(assert, () => courseClassSet.getFastestSplitsTo(numSplits, controlIdx));
     }
 
     QUnit.test("Cannot return fastest 0 splits to a control", function (assert) {
@@ -707,48 +703,48 @@
     });
 
     QUnit.test("Can return a data for an individual course-class set", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
-        var cumTimes = [0, 1, 2, 3, 4];
-        var slicedTimes = courseClassSet.sliceForLegIndex(cumTimes, null);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
+        let cumTimes = [0, 1, 2, 3, 4];
+        let slicedTimes = courseClassSet.sliceForLegIndex(cumTimes, null);
         assert.deepEqual(cumTimes, slicedTimes);
         assert.ok(cumTimes !== slicedTimes);
     });
 
     QUnit.test("Can return a slice of data for all legs of a team course-class set", function (assert) {
-        var courseClass = new CourseClass("Test 1", 3, []);
+        let courseClass = new CourseClass("Test 1", 3, []);
         courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var data = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-        var slicedData = courseClassSet.sliceForLegIndex(data, null);
+        let courseClassSet = new CourseClassSet([courseClass]);
+        let data = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        let slicedData = courseClassSet.sliceForLegIndex(data, null);
         assert.deepEqual(data, slicedData);
         assert.ok(data !== slicedData);
     });
 
     QUnit.test("Can return a slice of data for the first leg of a team course-class set", function (assert) {
-        var courseClass = new CourseClass("Test 1", 3, []);
+        let courseClass = new CourseClass("Test 1", 3, []);
         courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var data = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-        var slicedData = courseClassSet.sliceForLegIndex(data, 0);
+        let courseClassSet = new CourseClassSet([courseClass]);
+        let data = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        let slicedData = courseClassSet.sliceForLegIndex(data, 0);
         assert.deepEqual([0, 1, 2, 3, 4], slicedData);
     });
 
     QUnit.test("Can return a slice of data for the second leg of a team course-class set", function (assert) {
-        var courseClass = new CourseClass("Test 1", 3, []);
+        let courseClass = new CourseClass("Test 1", 3, []);
         courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var data = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-        var slicedData = courseClassSet.sliceForLegIndex(data, 1);
+        let courseClassSet = new CourseClassSet([courseClass]);
+        let data = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        let slicedData = courseClassSet.sliceForLegIndex(data, 1);
         assert.deepEqual([4, 5, 6, 7, 8], slicedData);
     });
 
     QUnit.test("Can return chart data for two results in same class", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
-        var fastestTime = courseClassSet.getFastestCumTimes();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
+        let fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
+        let chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [
                 { x: 0, ys: [0, 0] },
                 { x: 65, ys: [0, 16] },
@@ -767,12 +763,12 @@
     });
 
     QUnit.test("Can return chart data for two results where one of them has a dubious split", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithDubiousSplitForControl2(), getResult2()])]);
-        var fastestTime = courseClassSet.getFastestCumTimes();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getResult1WithDubiousSplitForControl2(), getResult2()])]);
+        let fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
+        let chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [
                 { x: 0, ys: [0, 0] },
                 { x: 65, ys: [0, 16] },
@@ -791,12 +787,12 @@
     });
 
     QUnit.test("Can return chart data for two results in same class with correct X-extent when one result has cumulative times not in order", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2WithFinishCumTimeNotTheLargest()])]);
-        var fastestTime = courseClassSet.getFastestCumTimes();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2WithFinishCumTimeNotTheLargest()])]);
+        let fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
+        let chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [
                 { x: 0, ys: [0, 0] },
                 { x: 65, ys: [16, 0] },
@@ -815,13 +811,13 @@
     });
 
     QUnit.test("Can return chart data for two results in same class with correct X-extent when one result has the first cumulative time larger than all others", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2WithFirstControlLargerThanAllOthers()])]);
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2WithFirstControlLargerThanAllOthers()])]);
 
-        var fastestTime = courseClassSet.getFastestCumTimes();
+        let fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
+        let chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [
                 { x: 0, ys: [0, 0] },
                 { x: 65, ys: [0, 4038] },
@@ -840,12 +836,12 @@
     });
 
     QUnit.test("Can return chart data for two results in different classes of the set", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getFasterResult1()]), new CourseClass("Test 2", 3, [getResult2()])]);
-        var fastestTime = courseClassSet.getFastestCumTimes();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test 1", 3, [getFasterResult1()]), new CourseClass("Test 2", 3, [getResult2()])]);
+        let fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
+        let chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [
                 { x: 0, ys: [0, 0] },
                 { x: 65, ys: [0, 16] },
@@ -864,12 +860,12 @@
     });
 
     QUnit.test("Can return chart data for first result only", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
-        var fastestTime = courseClassSet.getFastestCumTimes();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
+        let fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, null);
+        let chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, null);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [
                 { x: 0, ys: [0] },
                 { x: 65, ys: [0] },
@@ -888,12 +884,12 @@
     });
 
     QUnit.test("Can return chart data for second result only", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
-        var fastestTime = courseClassSet.getFastestCumTimes();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
+        let fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [1], _DUMMY_CHART_TYPE, null);
+        let chartData = courseClassSet.getChartData(fastestTime, [1], _DUMMY_CHART_TYPE, null);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [
                 { x: 0, ys: [0] },
                 { x: 65, ys: [16] },
@@ -912,12 +908,12 @@
     });
 
     QUnit.test("Can return chart data for empty list of results", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
-        var fastestTime = courseClassSet.getFastestCumTimes();
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
+        let fastestTime = courseClassSet.getFastestCumTimes();
 
-        var chartData = courseClassSet.getChartData(fastestTime, [], _DUMMY_CHART_TYPE, null);
+        let chartData = courseClassSet.getChartData(fastestTime, [], _DUMMY_CHART_TYPE, null);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [],
             xExtent: [0, 65 + 197 + 184 + 100],
             yExtent: chartData.yExtent, // Deliberately set this equal, we'll test it later.
@@ -932,9 +928,9 @@
     });
 
     QUnit.test("Can return empty chart data when no results", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
-        var data = courseClassSet.getChartData([0, 87, 87 + 147, 87 + 147 + 92], [], _DUMMY_CHART_TYPE, null);
-        var expectedChartData = {
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
+        let data = courseClassSet.getChartData([0, 87, 87 + 147, 87 + 147 + 92], [], _DUMMY_CHART_TYPE, null);
+        let expectedChartData = {
             dataColumns: [],
             xExtent: data.xExtent,
             yExtent: data.yExtent,
@@ -946,14 +942,14 @@
     });
 
     QUnit.test("Can return chart data for team result", function (assert) {
-        var courseClass = new CourseClass("Test", 7, [getTeamResult()]);
+        let courseClass = new CourseClass("Test", 7, [getTeamResult()]);
         courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+        let courseClassSet = new CourseClassSet([courseClass]);
+        let fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, null);
+        let chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, null);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [
                 { x: 0, ys: [0] },
                 { x: 61, ys: [4] },
@@ -976,14 +972,14 @@
     });
 
     QUnit.test("Can return chart data for first leg of team result", function (assert) {
-        var courseClass = new CourseClass("Test", 7, [getTeamResult()]);
+        let courseClass = new CourseClass("Test", 7, [getTeamResult()]);
         courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+        let courseClassSet = new CourseClassSet([courseClass]);
+        let fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 0);
+        let chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 0);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [
                 { x: 0, ys: [0] },
                 { x: 61, ys: [4] },
@@ -1002,14 +998,14 @@
     });
 
     QUnit.test("Can return chart data for second leg of team result", function (assert) {
-        var courseClass = new CourseClass("Test", 7, [getTeamResult()]);
+        let courseClass = new CourseClass("Test", 7, [getTeamResult()]);
         courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+        let courseClassSet = new CourseClassSet([courseClass]);
+        let fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 1);
+        let chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 1);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [
                 { x: 570, ys: [0] },
                 { x: 628, ys: [3] },
@@ -1028,18 +1024,18 @@
     });
 
     QUnit.test("Can return chart data for first leg of team result with omitted time", function (assert) {
-        var teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 65, 286, NaN, 570], {name: "First Runner"});
-        var teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533], {name: "Second Runner"});
-        var teamResult = createTeamResult(1, [teamMemberResult1, teamMemberResult2], new Team("Team 1", "ABC"));
+        let teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 65, 286, NaN, 570], {name: "First Runner"});
+        let teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533], {name: "Second Runner"});
+        let teamResult = createTeamResult(1, [teamMemberResult1, teamMemberResult2], new Team("Team 1", "ABC"));
 
-        var courseClass = new CourseClass("Test", 7, [teamResult]);
+        let courseClass = new CourseClass("Test", 7, [teamResult]);
         courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+        let courseClassSet = new CourseClassSet([courseClass]);
+        let fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 0);
+        let chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 0);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [
                 { x: 0, ys: [0] },
                 { x: 61, ys: [4] },
@@ -1058,18 +1054,18 @@
     });
 
     QUnit.test("Can return chart data for second leg of team result with omitted time", function (assert) {
-        var teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {name: "First Runner"});
-        var teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 570, [0, NaN, 254, 430, 533], {name: "Second Runner"});
-        var teamResult = createTeamResult(1, [teamMemberResult1, teamMemberResult2], new Team("Team 1", "ABC"));
+        let teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {name: "First Runner"});
+        let teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 570, [0, NaN, 254, 430, 533], {name: "Second Runner"});
+        let teamResult = createTeamResult(1, [teamMemberResult1, teamMemberResult2], new Team("Team 1", "ABC"));
 
-        var courseClass = new CourseClass("Test", 7, [teamResult]);
+        let courseClass = new CourseClass("Test", 7, [teamResult]);
         courseClass.setIsTeamClass([3, 3]);
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+        let courseClassSet = new CourseClassSet([courseClass]);
+        let fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
 
-        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 1);
+        let chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 1);
 
-        var expectedChartData = {
+        let expectedChartData = {
             dataColumns: [
                 { x: 570, ys: [0] },
                 { x: 628, ys: [NaN] },
@@ -1088,15 +1084,13 @@
     });
 
     QUnit.test("Cannot return chart data when no reference data given", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
-        SplitsBrowserTest.assertException(assert, "TypeError", function () {
-            courseClassSet.getChartData();
-        });
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
+        SplitsBrowserTest.assertException(assert, "TypeError", () => courseClassSet.getChartData());
     });
 
     QUnit.test("Cannot return chart data when no current indexes given", function (assert) {
-        var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
-        SplitsBrowserTest.assertException(assert, "TypeError", function () {
+        let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
+        SplitsBrowserTest.assertException(assert, "TypeError", () => {
             courseClassSet.getChartData([0, 65, 65 + 197, 65 + 197 + 184, 65 + 197 + 184 + 100], _DUMMY_CHART_TYPE, null);
         });
     });

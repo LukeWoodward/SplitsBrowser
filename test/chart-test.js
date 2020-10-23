@@ -21,24 +21,24 @@
 (function () {
     "use strict";
 
-    var Chart = SplitsBrowser.Controls.Chart;
-    var fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
-    var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
-    var Competitor = SplitsBrowser.Model.Competitor;
-    var Team = SplitsBrowser.Model.Team;
-    var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
-    var CourseClass = SplitsBrowser.Model.CourseClass;
-    var CourseClassSet = SplitsBrowser.Model.CourseClassSet;
-    var Course = SplitsBrowser.Model.Course;
-    var Event = SplitsBrowser.Model.Event;
+    const Chart = SplitsBrowser.Controls.Chart;
+    const fromCumTimes = SplitsBrowser.Model.Result.fromCumTimes;
+    const fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
+    const Competitor = SplitsBrowser.Model.Competitor;
+    const Team = SplitsBrowser.Model.Team;
+    const createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
+    const CourseClass = SplitsBrowser.Model.CourseClass;
+    const CourseClassSet = SplitsBrowser.Model.CourseClassSet;
+    const Course = SplitsBrowser.Model.Course;
+    const Event = SplitsBrowser.Model.Event;
 
-    var fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
+    const fromSplitTimes = SplitsBrowserTest.fromSplitTimes;
 
     function getIndexesAroundOmittedCumTimes(result) {
         return result.getControlIndexesAroundOmittedCumulativeTimes();
     }
 
-    var DUMMY_CHART_TYPE = {
+    const DUMMY_CHART_TYPE = {
         name: "dummy",
         dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes); },
         yAxisLabelKey: "SplitsGraphYAxisLabel",
@@ -46,7 +46,7 @@
         indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumTimes
     };
 
-    var DUMMY_CHART_TYPE_RACE_GRAPH = {
+    const DUMMY_CHART_TYPE_RACE_GRAPH = {
         name: "dummy race graph",
         dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes); },
         yAxisLabelKey: "SplitsGraphYAxisLabel",
@@ -54,24 +54,24 @@
         indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumTimes
     };
 
-    var TEXT_WIDTHS = {
-        "Second Runner": 85,
-        "First Runner": 100,
-        "00:28": 58,
-        "03:41 (2)": 77,
-        "09:56 (2)": 77,
-        "00:00:00 Second Runner": 175,
-        "00:00:00 First Runner": 190,
-        "Team 1": 70,
-        "Team 2": 70
-    };
+    const TEXT_WIDTHS = new Map([
+        ["Second Runner", 85],
+        ["First Runner", 100],
+        ["00:28", 58],
+        ["03:41 (2)", 77],
+        ["09:56 (2)", 77],
+        ["00:00:00 Second Runner", 175],
+        ["00:00:00 First Runner", 190],
+        ["Team 1", 70],
+        ["Team 2", 70]
+    ]);
 
-    var TEXT_HEIGHTS = {
-        "Second Runner": 12,
-        "First Runner": 12,
-        "Team 1": 12,
-        "Team 2": 12
-    };
+    const TEXT_HEIGHTS = new Map([
+        ["Second Runner", 12],
+        ["First Runner", 12],
+        ["Team 1", 12],
+        ["Team 2", 12],
+    ]);
 
     // Dummy functions for returning the width/height of pieces of text.
     function getTextWidth(text) {
@@ -79,26 +79,26 @@
             text = text.substring(1);
         }
 
-        if (text in TEXT_WIDTHS) {
-            return TEXT_WIDTHS[text];
+        if (TEXT_WIDTHS.has(text)) {
+            return TEXT_WIDTHS.get(text);
         } else {
-            throw new Error("Width of text '" + text + "' not known");
+            throw new Error(`Width of text '${text}' not known`);
         }
     }
 
     function getTextHeight(text) {
-        if (text in TEXT_HEIGHTS) {
-            return TEXT_HEIGHTS[text];
+        if (TEXT_HEIGHTS.has(text)) {
+            return TEXT_HEIGHTS.get(text);
         } else {
-            throw new Error("Height of text '" + text + "' not known");
+            throw new Error(`Height of text '${text}' not known`);
         }
     }
 
     // Utility function to set up a chart in a parent element and mock out the
     // width and height methods.
     function createTestChart() {
-        var div = document.createElement("div");
-        var chart = new Chart(div);
+        let div = document.createElement("div");
+        let chart = new Chart(div);
         chart.getTextWidth = getTextWidth;
         chart.getTextHeight = getTextHeight;
         chart.setSize(1000, 1000);
@@ -116,8 +116,8 @@
     */
     function getTestCourseClass(results) {
         if (typeof results === "undefined") {
-            var result1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-            var result2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
+            let result1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+            let result2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
             results = [result1, result2];
         }
 
@@ -143,13 +143,13 @@
     * @param {CourseClass} courseClass The course-class to run the tests on.
     */
     function runChartCreationTestGivenCourseClass(assert, chartType, courseClass) {
-        var courseClassSet = new CourseClassSet([courseClass]);
-        var course = new Course("Test course", [courseClass], null, null, null);
+        let courseClassSet = new CourseClassSet([courseClass]);
+        let course = new Course("Test course", [courseClass], null, null, null);
         courseClass.setCourse(course);
-        var eventData = new Event([courseClass], [course]);
-        var fastestCumTimes = courseClassSet.getFastestCumTimes();
-        var chart = createTestChart(chartType);
-        var data = {
+        let eventData = new Event([courseClass], [course]);
+        let fastestCumTimes = courseClassSet.getFastestCumTimes();
+        let chart = createTestChart(chartType);
+        let data = {
             chartData: courseClassSet.getChartData(fastestCumTimes, [0, 1], chartType, null),
             eventData: eventData,
             courseClassSet: courseClassSet,
@@ -179,7 +179,7 @@
     });
 
     QUnit.test("Can create a chart with dubious info", function (assert) {
-        var results = [
+        let results = [
             fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], new Competitor("Second Runner", "DEF")),
             fromOriginalCumTimes(2, 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100], new Competitor("First Runner", "ABC"))
         ];
@@ -190,15 +190,15 @@
     });
 
     QUnit.test("Can create a chart for a team event", function (assert) {
-        var result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        var result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        var result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 199, 103]);
-        var result2b = fromSplitTimes(2, "Fourth Runner", "ABC", 10 * 3600 + 596, [88, 192, 220, 111]);
-        var team1 = new Team("Team 1", "DEF");
-        var team2 = new Team("Team 2", "ABC");
-        var results = [createTeamResult(1, [result1a, result1b], team1), createTeamResult(2, [result2a, result2b], team2)];
+        let result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
+        let result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
+        let result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 199, 103]);
+        let result2b = fromSplitTimes(2, "Fourth Runner", "ABC", 10 * 3600 + 596, [88, 192, 220, 111]);
+        let team1 = new Team("Team 1", "DEF");
+        let team2 = new Team("Team 2", "ABC");
+        let results = [createTeamResult(1, [result1a, result1b], team1), createTeamResult(2, [result2a, result2b], team2)];
 
-        var courseClass = new CourseClass("Test", 7, results);
+        let courseClass = new CourseClass("Test", 7, results);
         courseClass.setIsTeamClass([3, 3]);
 
         runChartCreationTestGivenCourseClass(assert, DUMMY_CHART_TYPE, courseClass);
