@@ -25,10 +25,10 @@
 
     const isNotNull = SplitsBrowser.isNotNull;
     const isNaNStrict = SplitsBrowser.isNaNStrict;
-    const hasProperty = SplitsBrowser.hasProperty;
     const addIfNotNull = SplitsBrowser.addIfNotNull;
     const subtractIfNotNull = SplitsBrowser.subtractIfNotNull;
     const throwInvalidData = SplitsBrowser.throwInvalidData;
+    const Team = SplitsBrowser.Model.Team;
 
     /**
     * Function used with the JavaScript sort method to sort results in order.
@@ -628,7 +628,7 @@
         * @return {String} The name of the owner for that leg.
         */
         getOwnerNameForLeg(legIndex) {
-            if (hasProperty(this.owner, "members") && legIndex !== null) {
+            if (this.owner instanceof Team && legIndex !== null) {
                 return this.owner.members[legIndex].name;
             } else {
                 return this.owner.name;
