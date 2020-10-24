@@ -531,27 +531,27 @@
 
             if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
                 let okDespites = selectedResults.map(result => result.isOKDespiteMissingTimes);
-                if (this.visibleStatistics.TotalTime) {
+                if (this.visibleStatistics.get("TotalTime")) {
                     let cumTimes = selectedResults.map(result => result.getCumulativeTimeTo(this.currentControlIndex));
                     let cumRanks = selectedResults.map(result => result.getCumulativeRankTo(this.currentControlIndex));
                     labelTexts = d3.zip(labelTexts, cumTimes, cumRanks, okDespites)
                         .map(quad => quad[0] + formatTimeAndRank(quad[1], quad[2], quad[3]));
                 }
 
-                if (this.visibleStatistics.SplitTime) {
+                if (this.visibleStatistics.get("SplitTime")) {
                     let splitTimes = selectedResults.map(result => result.getSplitTimeTo(this.currentControlIndex));
                     let splitRanks = selectedResults.map(result => result.getSplitRankTo(this.currentControlIndex));
                     labelTexts = d3.zip(labelTexts, splitTimes, splitRanks, okDespites)
                         .map(quad => quad[0] + formatTimeAndRank(quad[1], quad[2], quad[3]));
                 }
 
-                if (this.visibleStatistics.BehindFastest) {
+                if (this.visibleStatistics.get("BehindFastest")) {
                     let timesBehind = this.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                     labelTexts = d3.zip(labelTexts, timesBehind, okDespites)
                         .map(triple => triple[0] + SPACER + formatTime((triple[2] && triple[1] === null) ? NaN : triple[1]));
                 }
 
-                if (this.visibleStatistics.TimeLoss) {
+                if (this.visibleStatistics.get("TimeLoss")) {
                     let timeLosses = this.getTimeLosses(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                     labelTexts = d3.zip(labelTexts, timeLosses)
                         .map(pair => pair[0] + SPACER + formatTime(pair[1]));
@@ -728,16 +728,16 @@
         */
         determineMaxStatisticTextWidth() {
             let maxWidth = 0;
-            if (this.visibleStatistics.TotalTime) {
+            if (this.visibleStatistics.get("TotalTime")) {
                 maxWidth += this.getMaxCumulativeTimeAndRankTextWidth();
             }
-            if (this.visibleStatistics.SplitTime) {
+            if (this.visibleStatistics.get("SplitTime")) {
                 maxWidth += this.getMaxSplitTimeAndRankTextWidth();
             }
-            if (this.visibleStatistics.BehindFastest) {
+            if (this.visibleStatistics.get("BehindFastest")) {
                 maxWidth += this.getMaxTimeBehindFastestWidth();
             }
-            if (this.visibleStatistics.TimeLoss) {
+            if (this.visibleStatistics.get("TimeLoss")) {
                 maxWidth += this.getMaxTimeLossWidth();
             }
 
