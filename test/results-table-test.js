@@ -291,7 +291,7 @@
         let tableCells = $("tbody tr td", table);
         assert.strictEqual(tableCells.length, 7);
 
-        for (var cellIndex = 0; cellIndex < 7; cellIndex += 1) {
+        for (let cellIndex = 0; cellIndex < 7; cellIndex += 1) {
             let cell = tableCells[cellIndex];
 
             // Cell index 4 is control 2, and index 5 is control 3.
@@ -320,7 +320,7 @@
         let tableCells = $("tbody tr td", table);
         assert.strictEqual(tableCells.length, 7);
 
-        for (var cellIndex = 0; cellIndex < 7; cellIndex += 1) {
+        for (let cellIndex = 0; cellIndex < 7; cellIndex += 1) {
             let cell = tableCells[cellIndex];
 
             // Cell index 4 is control 2, and index 5 is control 3.
