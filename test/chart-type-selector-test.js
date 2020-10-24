@@ -26,9 +26,9 @@
     QUnit.module("Chart Type Selector");
 
     const chartTypes = [
-        SplitsBrowser.Model.ChartTypes.SplitsGraph,
-        SplitsBrowser.Model.ChartTypes.RaceGraph,
-        SplitsBrowser.Model.ChartTypes.PositionAfterLeg
+        SplitsBrowser.Model.ChartTypes.get("SplitsGraph"),
+        SplitsBrowser.Model.ChartTypes.get("RaceGraph"),
+        SplitsBrowser.Model.ChartTypes.get("PositionAfterLeg")
     ];
 
     let lastChartTypeName = null;

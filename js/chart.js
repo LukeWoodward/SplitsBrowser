@@ -1223,8 +1223,7 @@
         * @param {Array} selectedIndexes Array of indexes of selected results
         *                (0 in this array means the first result is selected, 1
         *                means the second is selected, and so on.)
-        * @param {Array} visibleStatistics Array of boolean flags indicating whether
-        *                                  certain statistics are visible.
+        * @param {Map} visibleStatistics Map of visible statistics.
         * @param {Object} chartType The type of chart being drawn.
         * @param {Number|null} selectedLegIndex The selected leg index, or null for all
         *                                       legs.

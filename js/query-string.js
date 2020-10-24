@@ -106,7 +106,7 @@
         } else {
             let chartTypeName = chartTypeMatch[1];
             if (ChartTypes.has(chartTypeName)) {
-                return ChartTypes.get("chartTypeName");
+                return ChartTypes.get(chartTypeName);
             } else {
                 return null;
             }
@@ -121,7 +121,7 @@
     */
     function formatChartType(queryString, givenChartType) {
         queryString = removeAll(queryString, CHART_TYPE_REGEXP);
-        for (let [chartTypeName, chartType] in ChartTypes.entries()) {
+        for (let [chartTypeName, chartType] of ChartTypes.entries()) {
             if (chartType === givenChartType) {
                 return queryString + "&chartType=" + encodeURIComponent(chartTypeName);
             }

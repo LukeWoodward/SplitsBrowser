@@ -304,7 +304,7 @@
     */
     function createSampleListForRaceGraph(selectedIndexes, multipleClasses) {
         let listAndSelection = createSampleList(selectedIndexes, multipleClasses);
-        listAndSelection.list.setChartType(ChartTypes.RaceGraph);
+        listAndSelection.list.setChartType(ChartTypes.get("RaceGraph"));
         listAndSelection.list.enableOrDisableCrossingRunnersButton();
         return listAndSelection;
     }
@@ -317,7 +317,7 @@
     */
     function createSampleTeamListForRaceGraph(selectedIndexes) {
         let listAndSelection = createSampleTeamList(selectedIndexes);
-        listAndSelection.list.setChartType(ChartTypes.RaceGraph);
+        listAndSelection.list.setChartType(ChartTypes.get("RaceGraph"));
         listAndSelection.list.enableOrDisableCrossingRunnersButton();
         return listAndSelection;
     }
@@ -1102,7 +1102,7 @@
 
     QUnit.test("Cannot view the Crossing Runners button if not showing the race graph", function (assert) {
         let listAndSelection = createSampleList([], false);
-        listAndSelection.list.setChartType(ChartTypes.SplitsGraph);
+        listAndSelection.list.setChartType(ChartTypes.get("SplitsGraph"));
         assert.strictEqual($(CROSSING_RUNNERS_BUTTON_SELECTOR).length, 1);
         assert.ok(!$(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":visible"));
     });

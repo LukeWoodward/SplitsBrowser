@@ -40,7 +40,7 @@
 
     const DUMMY_CHART_TYPE = {
         name: "dummy",
-        dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes); },
+        dataSelector: (result, referenceCumTimes) => result.getCumTimesAdjustedToReference(referenceCumTimes),
         yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: false,
         indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumTimes
@@ -48,7 +48,7 @@
 
     const DUMMY_CHART_TYPE_RACE_GRAPH = {
         name: "dummy race graph",
-        dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes); },
+        dataSelector: (result, referenceCumTimes) => result.getCumTimesAdjustedToReference(referenceCumTimes),
         yAxisLabelKey: "SplitsGraphYAxisLabel",
         isRaceGraph: true,
         indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumTimes
@@ -60,6 +60,7 @@
         ["00:28", 58],
         ["03:41 (2)", 77],
         ["09:56 (2)", 77],
+        ["20:07 (2)", 77],
         ["00:00:00 Second Runner", 175],
         ["00:00:00 First Runner", 190],
         ["Team 1", 70],
@@ -157,7 +158,7 @@
             fastestCumTimes: fastestCumTimes
         };
 
-        chart.drawChart(data, [0, 1], [true, true, true], chartType, null);
+        chart.drawChart(data, [0, 1], new Map([["TotalTime", true], ["SplitTime", false], ["BehindFastest", false], ["TimeLoss", false]]), chartType, null);
         assert.expect(0);
     }
 

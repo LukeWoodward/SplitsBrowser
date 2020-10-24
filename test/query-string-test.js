@@ -172,49 +172,49 @@
     QUnit.test("Parsing a string containing the splits-graph chart type should return the splits-graph chart type", function (assert) {
         assert.deepEqual(
             parseQueryString("chartType=SplitsGraph"),
-            makeExpectedData({chartType: ChartTypes.SplitsGraph})
+            makeExpectedData({chartType: ChartTypes.get("SplitsGraph")})
         );
     });
 
     QUnit.test("Parsing a string containing the splits-graph chart type with a leading question-mark should return the splits-graph chart type", function (assert) {
         assert.deepEqual(
             parseQueryString("?chartType=SplitsGraph"),
-            makeExpectedData({chartType: ChartTypes.SplitsGraph})
+            makeExpectedData({chartType: ChartTypes.get("SplitsGraph")})
         );
     });
 
     QUnit.test("Parsing a string containing the race-graph chart type should return the race-graph chart type", function (assert) {
         assert.deepEqual(
             parseQueryString("chartType=RaceGraph"),
-            makeExpectedData({chartType: ChartTypes.RaceGraph})
+            makeExpectedData({chartType: ChartTypes.get("RaceGraph")})
         );
     });
 
     QUnit.test("Parsing a string containing the position-after-leg chart type should return the position-after-leg chart type", function (assert) {
         assert.deepEqual(
             parseQueryString("chartType=PositionAfterLeg"),
-            makeExpectedData({chartType: ChartTypes.PositionAfterLeg})
+            makeExpectedData({chartType: ChartTypes.get("PositionAfterLeg")})
         );
     });
 
     QUnit.test("Parsing a string containing the split-position chart type should return the split-position chart type", function (assert) {
         assert.deepEqual(
             parseQueryString("chartType=SplitPosition"),
-            makeExpectedData({chartType: ChartTypes.SplitPosition})
+            makeExpectedData({chartType: ChartTypes.get("SplitPosition")})
         );
     });
 
     QUnit.test("Parsing a string containing the percent-behind chart type should return the percent-behind chart type", function (assert) {
         assert.deepEqual(
             parseQueryString("chartType=PercentBehind"),
-            makeExpectedData({chartType: ChartTypes.PercentBehind})
+            makeExpectedData({chartType: ChartTypes.get("PercentBehind")})
         );
     });
 
     QUnit.test("Parsing a string containing the results-table chart type should return the results-table chart type", function (assert) {
         assert.deepEqual(
             parseQueryString("chartType=ResultsTable"),
-            makeExpectedData({chartType: ChartTypes.ResultsTable})
+            makeExpectedData({chartType: ChartTypes.get("ResultsTable")})
         );
     });
 
@@ -498,12 +498,12 @@
         let compareWith = {index: 6, result: courseClass.results[2]};
         assert.deepEqual(
             parseQueryString("class=TestClass1&chartType=PositionAfterLeg&compareWith=Third%20Runner&selected=Second%20Runner;First%20Runner&stats=TimeLoss;TotalTime&showOriginal=1&selectedLeg=2&filterText=test", eventData),
-            {classes: [0], chartType: ChartTypes.PositionAfterLeg, compareWith: compareWith, selected: [0, 1], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test"});
+            {classes: [0], chartType: ChartTypes.get("PositionAfterLeg"), compareWith: compareWith, selected: [0, 1], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test"});
     });
 
     QUnit.test("Can format an empty query-string with values for all eight arguments", function (assert) {
         let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test 1"};
+        let data = {classes: [0], chartType: ChartTypes.get("SplitPosition"), compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test 1"};
         let courseClassSet = new CourseClassSet([eventData.classes[0]]);
         let queryString = formatQueryString("", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "class=Test%20Class%201&chartType=SplitPosition&compareWith=FastestTime&selected=Second%20Runner%3BThird%20Runner&stats=TotalTime%3BTimeLoss&showOriginal=1&selectedLeg=2&filterText=test%201");
@@ -511,7 +511,7 @@
 
     QUnit.test("Can format a query-string with a value for some other parameter, adding values for all eight arguments and retaining the existing parameter", function (assert) {
         let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test"};
+        let data = {classes: [0], chartType: ChartTypes.get("SplitPosition"), compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test"};
         let courseClassSet = new CourseClassSet([eventData.classes[0]]);
         let queryString = formatQueryString("?eventId=6789", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "?eventId=6789&class=Test%20Class%201&chartType=SplitPosition&compareWith=FastestTime&selected=Second%20Runner%3BThird%20Runner&stats=TotalTime%3BTimeLoss&showOriginal=1&selectedLeg=2&filterText=test");
@@ -519,7 +519,7 @@
 
     QUnit.test("Can format a query-string that contains existing values with new values for all eight arguments", function (assert) {
         let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "testNew"};
+        let data = {classes: [0], chartType: ChartTypes.get("SplitPosition"), compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "testNew"};
         let courseClassSet = new CourseClassSet([eventData.classes[0]]);
         let queryString = formatQueryString("class=SomeOtherClass&chartType=SomeChartType&compareWith=SomeComparison&selected=SomeCompetitors&stats=SomeStats&showOriginal=Yes&selectedLeg=1&filterText=testOld", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "class=Test%20Class%201&chartType=SplitPosition&compareWith=FastestTime&selected=Second%20Runner%3BThird%20Runner&stats=TotalTime%3BTimeLoss&showOriginal=1&selectedLeg=2&filterText=testNew");
@@ -527,7 +527,7 @@
 
     QUnit.test("Can format a query-string that contains multiple existing values with new values for all eight arguments", function (assert) {
         let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test"};
+        let data = {classes: [0], chartType: ChartTypes.get("SplitPosition"), compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: 2, filterText: "test"};
         let courseClassSet = new CourseClassSet([eventData.classes[0]]);
         let queryString = formatQueryString(
             "class=SomeOtherClass&class=YetAnotherClass&chartType=SomeChartType&compareWith=SomeComparison&compareWith=SomeOtherComparison&chartType=SomeOtherChartType" +
@@ -538,7 +538,7 @@
 
     QUnit.test("Can format a query-string that contains no selected results and no statistics, does not show original data and has no filter text", function (assert) {
         let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
+        let data = {classes: [0], chartType: ChartTypes.get("SplitPosition"), compareWith: {index: 1, result: null}, selected: [], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
         let courseClassSet = new CourseClassSet([eventData.classes[0]]);
         let queryString = formatQueryString("", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "class=Test%20Class%201&chartType=SplitPosition&compareWith=FastestTime&stats=");
@@ -546,7 +546,7 @@
 
     QUnit.test("Can format a query-string that contains all selected results and no statistics", function (assert) {
         let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
-        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [0, 1, 2], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
+        let data = {classes: [0], chartType: ChartTypes.get("SplitPosition"), compareWith: {index: 1, result: null}, selected: [0, 1, 2], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
         let courseClassSet = new CourseClassSet([eventData.classes[0]]);
         let queryString = formatQueryString("", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "class=Test%20Class%201&chartType=SplitPosition&compareWith=FastestTime&selected=*&stats=");
@@ -555,7 +555,7 @@
     QUnit.test("Can format a query-string that compares against a named result", function (assert) {
         let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
         let courseClassSet = new CourseClassSet([eventData.classes[0]]);
-        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 6, result: courseClassSet.allResults[0]}, selected: [], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
+        let data = {classes: [0], chartType: ChartTypes.get("SplitPosition"), compareWith: {index: 6, result: courseClassSet.allResults[0]}, selected: [], stats: NO_STATS, showOriginal: false, selectedLeg: null, filterText: ""};
         let queryString = formatQueryString("", eventData, courseClassSet, data);
         assert.strictEqual(queryString, "class=Test%20Class%201&chartType=SplitPosition&compareWith=First%20Runner&stats=");
     });
@@ -570,7 +570,7 @@
 
     QUnit.test("Can obtain the same data by formatting and parsing a query string using a built-in comparison and original data", function (assert) {
         let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}, {name: "Test Class 2"}]}]);
-        let data = {classes: [0, 1], chartType: ChartTypes.SplitPosition, compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: null, filterText: "test"};
+        let data = {classes: [0, 1], chartType: ChartTypes.get("SplitPosition"), compareWith: {index: 1, result: null}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: true, selectedLeg: null, filterText: "test"};
         let courseClassSet = new CourseClassSet(eventData.classes.slice(0));
         let queryString = formatQueryString("", eventData, courseClassSet, data);
         let parsedData = parseQueryString(queryString, eventData);
@@ -580,7 +580,7 @@
     QUnit.test("Can obtain the same data by formatting and parsing a query string comparing against a runner and not showing original data", function (assert) {
         let eventData = makeEvent([{name: "Course1", classes: [{name: "Test Class 1", competitors: [{name: "First Runner"}, {name: "Second Runner"}, {name: "Third Runner"}]}]}]);
         let result = eventData.classes[0].results[1];
-        let data = {classes: [0], chartType: ChartTypes.SplitPosition, compareWith: {index: 6, result: result}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: false, selectedLeg: null, filterText: "test"};
+        let data = {classes: [0], chartType: ChartTypes.get("SplitPosition"), compareWith: {index: 6, result: result}, selected: [1, 2], stats: TOTAL_TIME_AND_TIME_LOSS, showOriginal: false, selectedLeg: null, filterText: "test"};
         let courseClassSet = new CourseClassSet(eventData.classes.slice(0));
         let queryString = formatQueryString("", eventData, courseClassSet, data);
         let parsedData = parseQueryString(queryString, eventData);
