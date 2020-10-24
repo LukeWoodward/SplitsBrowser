@@ -215,8 +215,8 @@
         */
         addChartTypeSelector() {
             let chartTypes = [
-                ChartTypes.SplitsGraph, ChartTypes.RaceGraph, ChartTypes.PositionAfterLeg,
-                ChartTypes.SplitPosition, ChartTypes.PercentBehind, ChartTypes.ResultsTable
+                ChartTypes.get("SplitsGraph"), ChartTypes.get("RaceGraph"), ChartTypes.get("PositionAfterLeg"),
+                ChartTypes.get("SplitPosition"), ChartTypes.get("PercentBehind"), ChartTypes.get("ResultsTable")
             ];
 
             this.chartTypeSelector = new ChartTypeSelector(this.topPanel.node(), chartTypes);

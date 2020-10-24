@@ -50,8 +50,8 @@
         return result.getControlIndexesAroundOmittedSplitTimes();
     }
 
-    SplitsBrowser.Model.ChartTypes = {
-        SplitsGraph: {
+    SplitsBrowser.Model.ChartTypes = new Map([
+        ["SplitsGraph", {
             nameKey: "SplitsGraphChartType",
             dataSelector: (result, referenceCumTimes) => result.getCumTimesAdjustedToReference(referenceCumTimes).map(secondsToMinutes),
             yAxisLabelKey: "SplitsGraphYAxisLabel",
@@ -59,8 +59,8 @@
             isResultsTable: false,
             minViewableControl: 1,
             indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumulativeTimes
-        },
-        RaceGraph: {
+        }],
+        ["RaceGraph", {
             nameKey: "RaceGraphChartType",
             dataSelector: (result, referenceCumTimes) => result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes),
             yAxisLabelKey: "RaceGraphYAxisLabel",
@@ -68,8 +68,8 @@
             isResultsTable: false,
             minViewableControl: 0,
             indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumulativeTimes
-        },
-        PositionAfterLeg: {
+        }],
+        ["PositionAfterLeg", {
             nameKey:  "PositionAfterLegChartType",
             dataSelector: result => result.cumRanks,
             yAxisLabelKey: "PositionYAxisLabel",
@@ -77,8 +77,8 @@
             isResultsTable: false,
             minViewableControl: 1,
             indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumulativeTimes
-        },
-        SplitPosition: {
+        }],
+        ["SplitPosition", {
             nameKey: "SplitPositionChartType",
             dataSelector: result => result.splitRanks,
             yAxisLabelKey: "PositionYAxisLabel",
@@ -86,8 +86,8 @@
             isResultsTable: false,
             minViewableControl: 1,
             indexesAroundOmittedTimesFunc: getIndexesAroundOmittedSplitTimes
-        },
-        PercentBehind: {
+        }],
+        ["PercentBehind", {
             nameKey: "PercentBehindChartType",
             dataSelector: (result, referenceCumTimes) => result.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes),
             yAxisLabelKey: "PercentBehindYAxisLabel",
@@ -95,8 +95,8 @@
             isResultsTable: false,
             minViewableControl: 1,
             indexesAroundOmittedTimesFunc: getIndexesAroundOmittedSplitTimes
-        },
-        ResultsTable: {
+        }],
+        ["ResultsTable", {
             nameKey: "ResultsTableChartType",
             dataSelector: null,
             yAxisLabelKey: null,
@@ -104,6 +104,6 @@
             isResultsTable: true,
             minViewableControl: 1,
             indexesAroundOmittedTimesFunc: null
-        }
-    };
+        }]
+    ]);
 })();

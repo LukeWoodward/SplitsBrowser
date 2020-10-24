@@ -23,7 +23,6 @@
     "use strict";
 
     const isNaNStrict = SplitsBrowser.isNaNStrict;
-    const hasProperty = SplitsBrowser.hasProperty;
     const ChartTypes = SplitsBrowser.Model.ChartTypes;
     const CourseClassSet = SplitsBrowser.Model.CourseClassSet;
 
@@ -106,8 +105,8 @@
             return null;
         } else {
             let chartTypeName = chartTypeMatch[1];
-            if (hasProperty(ChartTypes, chartTypeName)) {
-                return ChartTypes[chartTypeName];
+            if (ChartTypes.has(chartTypeName)) {
+                return ChartTypes.get("chartTypeName");
             } else {
                 return null;
             }
@@ -117,13 +116,13 @@
     /**
     * Formats the given chart type into the query-string
     * @param {String} queryString The original query-string.
-    * @param {Object} chartType The chart type
+    * @param {Object} givenChartType The given chart type
     * @return {String} The query-string with the chart-type formatted in.
     */
-    function formatChartType(queryString, chartType) {
+    function formatChartType(queryString, givenChartType) {
         queryString = removeAll(queryString, CHART_TYPE_REGEXP);
-        for (let chartTypeName in ChartTypes) {
-            if (hasProperty(ChartTypes, chartTypeName) && ChartTypes[chartTypeName] === chartType) {
+        for (let [chartTypeName, chartType] in ChartTypes.entries()) {
+            if (chartType === givenChartType) {
                 return queryString + "&chartType=" + encodeURIComponent(chartTypeName);
             }
         }
