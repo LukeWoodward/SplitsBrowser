@@ -24,7 +24,6 @@
     const throwInvalidData = SplitsBrowser.throwInvalidData;
     const throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
     const isNaNStrict = SplitsBrowser.isNaNStrict;
-    const hasProperty = SplitsBrowser.hasProperty;
     const parseCourseLength = SplitsBrowser.parseCourseLength;
     const parseCourseClimb = SplitsBrowser.parseCourseClimb;
     const normaliseLineEndings = SplitsBrowser.normaliseLineEndings;
@@ -39,51 +38,51 @@
 
     // Indexes of the various columns relative to the column for control-1.
 
-    const COLUMN_INDEXES = {};
+    const COLUMN_INDEXES = new Map();
 
     for (let columnOffset of [44, 46, 60]) {
-        COLUMN_INDEXES[columnOffset] = {
-            course: columnOffset - 7,
-            distance: columnOffset - 6,
-            climb: columnOffset - 5,
-            controlCount: columnOffset - 4,
-            placing: columnOffset - 3,
-            startPunch: columnOffset - 2,
-            finish: columnOffset - 1,
-            control1: columnOffset
-        };
+        COLUMN_INDEXES.set(columnOffset, new Map([
+            ["course", columnOffset - 7],
+            ["distance", columnOffset - 6],
+            ["climb", columnOffset - 5],
+            ["controlCount", columnOffset - 4],
+            ["placing", columnOffset - 3],
+            ["startPunch", columnOffset - 2],
+            ["finish", columnOffset - 1],
+            ["control1", columnOffset]
+        ]));
     }
 
     for (let columnOffset of [44, 46]) {
-        COLUMN_INDEXES[columnOffset].nonCompetitive = columnOffset - 38;
-        COLUMN_INDEXES[columnOffset].startTime = columnOffset - 37;
-        COLUMN_INDEXES[columnOffset].time = columnOffset - 35;
-        COLUMN_INDEXES[columnOffset].classifier = columnOffset - 34;
-        COLUMN_INDEXES[columnOffset].club =  columnOffset - 31;
-        COLUMN_INDEXES[columnOffset].className = columnOffset - 28;
+        COLUMN_INDEXES.get(columnOffset).set("nonCompetitive", columnOffset - 38);
+        COLUMN_INDEXES.get(columnOffset).set("startTime", columnOffset - 37);
+        COLUMN_INDEXES.get(columnOffset).set("time", columnOffset - 35);
+        COLUMN_INDEXES.get(columnOffset).set("classifier", columnOffset - 34);
+        COLUMN_INDEXES.get(columnOffset).set("club", columnOffset - 31);
+        COLUMN_INDEXES.get(columnOffset).set("className", columnOffset - 28);
     }
 
-    COLUMN_INDEXES[44].combinedName = 3;
-    COLUMN_INDEXES[44].yearOfBirth = 4;
+    COLUMN_INDEXES.get(44).set("combinedName", 3);
+    COLUMN_INDEXES.get(44).set("yearOfBirth", 4);
 
-    COLUMN_INDEXES[46].forename = 4;
-    COLUMN_INDEXES[46].surname = 3;
-    COLUMN_INDEXES[46].yearOfBirth = 5;
-    COLUMN_INDEXES[46].gender = 6;
+    COLUMN_INDEXES.get(46).set("forename", 4);
+    COLUMN_INDEXES.get(46).set("surname", 3);
+    COLUMN_INDEXES.get(46).set("yearOfBirth", 5);
+    COLUMN_INDEXES.get(46).set("gender", 6);
 
-    COLUMN_INDEXES[60].forename = 6;
-    COLUMN_INDEXES[60].surname = 5;
-    COLUMN_INDEXES[60].yearOfBirth = 7;
-    COLUMN_INDEXES[60].gender = 8;
-    COLUMN_INDEXES[60].combinedName = 3;
-    COLUMN_INDEXES[60].nonCompetitive = 10;
-    COLUMN_INDEXES[60].startTime = 11;
-    COLUMN_INDEXES[60].time = 13;
-    COLUMN_INDEXES[60].classifier = 14;
-    COLUMN_INDEXES[60].club = 20;
-    COLUMN_INDEXES[60].className = 26;
-    COLUMN_INDEXES[60].classNameFallback = COLUMN_INDEXES[60].course;
-    COLUMN_INDEXES[60].clubFallback = 18;
+    COLUMN_INDEXES.get(60).set("forename", 6);
+    COLUMN_INDEXES.get(60).set("surname", 5);
+    COLUMN_INDEXES.get(60).set("yearOfBirth", 7);
+    COLUMN_INDEXES.get(60).set("gender", 8);
+    COLUMN_INDEXES.get(60).set("combinedName", 3);
+    COLUMN_INDEXES.get(60).set("nonCompetitive", 10);
+    COLUMN_INDEXES.get(60).set("startTime", 11);
+    COLUMN_INDEXES.get(60).set("time", 13);
+    COLUMN_INDEXES.get(60).set("classifier", 14);
+    COLUMN_INDEXES.get(60).set("club", 20);
+    COLUMN_INDEXES.get(60).set("className", 26);
+    COLUMN_INDEXES.get(60).set("classNameFallback", COLUMN_INDEXES.get(60).get("course"));
+    COLUMN_INDEXES.get(60).set("clubFallback", 18);
 
     // Minimum control offset.
     const MIN_CONTROLS_OFFSET = 37;
@@ -166,27 +165,21 @@
             let firstLine = this.lines[1].split(delimiter);
 
             let controlCodeRegexp = /^[A-Za-z0-9]+$/;
-            for (let columnOffset in COLUMN_INDEXES) {
-                if (hasProperty(COLUMN_INDEXES, columnOffset)) {
-                    // Convert columnOffset to a number.  It will presently be a
-                    // string because it is an object property.
-                    columnOffset = parseInt(columnOffset, 10);
+            for (let [columnOffset, columnIndexes] of COLUMN_INDEXES.entries()) {
+                // We want there to be a control code at columnOffset, with
+                // both preceding columns either blank or containing a valid
+                // time.
+                if (columnOffset < firstLine.length &&
+                    controlCodeRegexp.test(firstLine[columnOffset]) &&
+                    (firstLine[columnOffset - 2].trim() === "" || parseTime(firstLine[columnOffset - 2]) !== null) &&
+                    (firstLine[columnOffset - 1].trim() === "" || parseTime(firstLine[columnOffset - 1]) !== null)) {
 
-                    // We want there to be a control code at columnOffset, with
-                    // both preceding columns either blank or containing a valid
-                    // time.
-                    if (columnOffset < firstLine.length &&
-                        controlCodeRegexp.test(firstLine[columnOffset]) &&
-                        (firstLine[columnOffset - 2].trim() === "" || parseTime(firstLine[columnOffset - 2]) !== null) &&
-                        (firstLine[columnOffset - 1].trim() === "" || parseTime(firstLine[columnOffset - 1]) !== null)) {
-
-                        // Now check the control count exists.  If not, we've
-                        // probably got a triple-column CSV file instead.
-                        let controlCountColumnIndex = COLUMN_INDEXES[columnOffset].controlCount;
-                        if (firstLine[controlCountColumnIndex].trim() !== "") {
-                            this.columnIndexes = COLUMN_INDEXES[columnOffset];
-                            return;
-                        }
+                    // Now check the control count exists.  If not, we've
+                    // probably got a triple-column CSV file instead.
+                    let controlCountColumnIndex = columnIndexes.get("controlCount");
+                    if (firstLine[controlCountColumnIndex].trim() !== "") {
+                        this.columnIndexes = columnIndexes;
+                        return;
                     }
                 }
             }
@@ -200,10 +193,10 @@
         * @return {String} Class name.
         */
         getClassName(row) {
-            let className = row[this.columnIndexes.className];
-            if (className === "" && hasProperty(this.columnIndexes, "classNameFallback")) {
+            let className = row[this.columnIndexes.get("className")];
+            if (className === "" && this.columnIndexes.has("classNameFallback")) {
                 // 'Nameless' variation: no class names.
-                className = row[this.columnIndexes.classNameFallback];
+                className = row[this.columnIndexes.get("classNameFallback")];
             }
             return className;
         }
@@ -215,9 +208,9 @@
         * @return {Number|null} Parsed start time, or null for none.
         */
         getStartTime(row) {
-            let startTimeStr = row[this.columnIndexes.startPunch];
+            let startTimeStr = row[this.columnIndexes.get("startPunch")];
             if (startTimeStr === "") {
-                startTimeStr = row[this.columnIndexes.startTime];
+                startTimeStr = row[this.columnIndexes.get("startTime")];
             }
 
             return parseTime(startTimeStr);
@@ -239,12 +232,12 @@
             } else if (this.classes.has(className)) {
                 return this.classes.get(className).numControls;
             } else {
-                let numControls = parseInt(row[this.columnIndexes.controlCount], 10);
+                let numControls = parseInt(row[this.columnIndexes.get("controlCount")], 10);
                 if (isFinite(numControls)) {
                     return numControls;
                 } else {
                     name = this.getName(row) || "<name unknown>";
-                    this.warnings.push(`Could not read the control count '${row[this.columnIndexes.controlCount]}' for competitor '${name}' from line ${lineNumber}`);
+                    this.warnings.push(`Could not read the control count '${row[this.columnIndexes.get("controlCount")]}' for competitor '${name}' from line ${lineNumber}`);
                     return null;
                 }
             }
@@ -261,18 +254,18 @@
             let cumTimes = [0];
 
             for (let controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
-                let cellIndex = this.columnIndexes.control1 + 1 + 2 * controlIdx;
+                let cellIndex = this.columnIndexes.get("control1") + 1 + 2 * controlIdx;
                 let cumTimeStr = (cellIndex < row.length) ? row[cellIndex] : null;
                 let cumTime = (cumTimeStr === null) ? null : parseTime(cumTimeStr);
                 cumTimes.push(cumTime);
             }
 
-            let totalTime = parseTime(row[this.columnIndexes.time]);
+            let totalTime = parseTime(row[this.columnIndexes.get("time")]);
             if (totalTime === null) {
                 // 'Nameless' variation: total time missing, so calculate from
                 // start and finish times.
                 let startTime = this.getStartTime(row);
-                let finishTime = parseTime(row[this.columnIndexes.finish]);
+                let finishTime = parseTime(row[this.columnIndexes.get("finish")]);
                 if (startTime !== null && finishTime !== null) {
                     totalTime = finishTime - startTime;
                 }
@@ -303,12 +296,12 @@
         * @param {Number} numControls The number of controls to read.
         */
         createCourseIfNecessary(row, numControls) {
-            let courseName = row[this.columnIndexes.course];
+            let courseName = row[this.columnIndexes.get("course")];
             if (!this.courseDetails.has(courseName)) {
-                let controlNums = d3.range(0, numControls).map(controlIdx => row[this.columnIndexes.control1 + 2 * controlIdx]);
+                let controlNums = d3.range(0, numControls).map(controlIdx => row[this.columnIndexes.get("control1") + 2 * controlIdx]);
                 this.courseDetails.set(courseName, {
-                    length: parseCourseLength(row[this.columnIndexes.distance]),
-                    climb: parseCourseClimb(row[this.columnIndexes.climb]),
+                    length: parseCourseLength(row[this.columnIndexes.get("distance")]),
+                    climb: parseCourseClimb(row[this.columnIndexes.get("climb")]),
                     controls: controlNums
                 });
             }
@@ -321,7 +314,7 @@
         */
         createClassCoursePairIfNecessary(row) {
             let className = this.getClassName(row);
-            let courseName = row[this.columnIndexes.course];
+            let courseName = row[this.columnIndexes.get("course")];
 
             if (!this.classCoursePairs.some(pair => pair[0] === className && pair[1] === courseName)) {
                 this.classCoursePairs.push([className, courseName]);
@@ -336,15 +329,15 @@
         getName(row) {
             let name = "";
 
-            if (hasProperty(this.columnIndexes, "forename") && hasProperty(this.columnIndexes, "surname")) {
-                let forename = row[this.columnIndexes.forename];
-                let surname = row[this.columnIndexes.surname];
+            if (this.columnIndexes.has("forename") && this.columnIndexes.has("surname")) {
+                let forename = row[this.columnIndexes.get("forename")];
+                let surname = row[this.columnIndexes.get("surname")];
                 name = (forename + " " + surname).trim();
             }
 
-            if (name === "" && hasProperty(this.columnIndexes, "combinedName")) {
+            if (name === "" && this.columnIndexes.has("combinedName")) {
                 // 'Nameless' or 44-column variation.
-                name = row[this.columnIndexes.combinedName];
+                name = row[this.columnIndexes.get("combinedName")];
             }
 
             return name;
@@ -359,11 +352,11 @@
         addCompetitor(row, cumTimes) {
 
             let className = this.getClassName(row);
-            let placing = row[this.columnIndexes.placing];
-            let club = row[this.columnIndexes.club];
-            if (club === "" && hasProperty(this.columnIndexes, "clubFallback")) {
+            let placing = row[this.columnIndexes.get("placing")];
+            let club = row[this.columnIndexes.get("club")];
+            if (club === "" && this.columnIndexes.has("clubFallback")) {
                 // Nameless variation: no club name, just number...
-                club = row[this.columnIndexes.clubFallback];
+                club = row[this.columnIndexes.get("clubFallback")];
             }
 
             let startTime = this.getStartTime(row);
@@ -377,7 +370,7 @@
             let order = this.classes.get(className).results.length + 1;
             let competitor = new Competitor(name, club);
 
-            let yearOfBirthStr = row[this.columnIndexes.yearOfBirth];
+            let yearOfBirthStr = row[this.columnIndexes.get("yearOfBirth")];
             if (yearOfBirthStr !== "") {
                 let yearOfBirth = parseInt(yearOfBirthStr, 10);
                 if (!isNaNStrict(yearOfBirth)) {
@@ -385,22 +378,22 @@
                 }
             }
 
-            if (hasProperty(this.columnIndexes, "gender")) {
-                let gender = row[this.columnIndexes.gender];
+            if (this.columnIndexes.has("gender")) {
+                let gender = row[this.columnIndexes.get("gender")];
                 if (gender === "M" || gender === "F") {
                     competitor.setGender(gender);
                 }
             }
 
             let result = fromOriginalCumTimes(order, startTime, cumTimes, competitor);
-            if ((row[this.columnIndexes.nonCompetitive] === "1" || isPlacingNonNumeric) && result.completed()) {
+            if ((row[this.columnIndexes.get("nonCompetitive")] === "1" || isPlacingNonNumeric) && result.completed()) {
                 // Competitor either marked as non-competitive, or has completed
                 // the course but has a non-numeric placing.  In the latter case,
                 // assume that they are non-competitive.
                 result.setNonCompetitive();
             }
 
-            let classifier = row[this.columnIndexes.classifier];
+            let classifier = row[this.columnIndexes.get("classifier")];
             if (classifier !== "") {
                 if (classifier === "0" && cumTimes.includes(null) && cumTimes[cumTimes.length - 1] !== null) {
                     result.setOKDespiteMissingTimes();
