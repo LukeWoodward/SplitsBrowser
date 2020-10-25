@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - ClassSelector tests.
  *
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -49,11 +49,11 @@
     }
 
     /**
-    * Sets the selector to have three classes, the first being in a course of
-    * its own and the other two sharing a course.
-    * @param {SplitsBrowser.Controls.ClassSelector} selector -
-                The class-selector to set up.
-    */
+     * Sets the selector to have three classes, the first being in a course of
+     * its own and the other two sharing a course.
+     * @param {SplitsBrowser.Controls.ClassSelector} selector
+     *          The class-selector to set up.
+     */
     function setClassesInSelectorWithTwoCourses(selector) {
         let classes = [new CourseClass("Class 1", 11, []), new CourseClass("Class 2", 17, []), new CourseClass("Class 3", 22, [])];
         let course1 = new Course("Test 1", [classes[0]], null, null);
@@ -66,11 +66,11 @@
     }
 
     /**
-    * Asserts whether the other-class selector should be visible.
-    * @param {Qunit.assert} assert QUnit assert object.
-    * @param {Boolean} isVisible Whether the other-class selector should be
-    *     visible.
-    */
+     * Asserts whether the other-class selector should be visible.
+     * @param {Qunit.assert} assert QUnit assert object.
+     * @param {Boolean} isVisible Whether the other-class selector should be
+     *     visible.
+     */
     function assertOtherClassSelectorVisibility(assert, isVisible) {
         let shouldOrShouldNot = (isVisible) ? "should" : "should not";
         let selector = d3.select("#otherClassesContainer");
@@ -83,14 +83,14 @@
     }
 
     /**
-    * Assert whether the div that contains the list of other classes is
-    * visible, and, optionally, how many other classes are in this list.
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {Boolean} isVisible Whether the list of other classes should be
-    *      visible.
-    * @param {Number|undefined} itemCount Optional number of items to check
-    *      for in the list of other classes.  If omitted, no check is made.
-    */
+     * Assert whether the div that contains the list of other classes is
+     * visible, and, optionally, how many other classes are in this list.
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {Boolean} isVisible Whether the list of other classes should be
+     *      visible.
+     * @param {Number|undefined} itemCount Optional number of items to check
+     *      for in the list of other classes.  If omitted, no check is made.
+     */
     function assertOtherClassListVisibility(assert, isVisible, itemCount) {
         let shouldOrShouldNot = (isVisible) ? "should" : "should not";
         let list = d3.selectAll("#qunit-fixture .otherClassList");

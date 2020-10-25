@@ -670,13 +670,13 @@
     });
 
     /**
-    * Asserts that attempting to get the fastest splits of the given results
-    * will fail with an InvalidData exception.
-    * @param {QUnit.assert} assert QUnit assertion object.
-    * @param {Array} results Array of result objects.
-    * @param {Number} numSplits The number of fastest splits to attempt to return.
-    * @param {Number} controlIdx The index of the control.
-    */
+     * Asserts that attempting to get the fastest splits of the given results
+     * will fail with an InvalidData exception.
+     * @param {QUnit.assert} assert QUnit assertion object.
+     * @param {Array} results Array of result objects.
+     * @param {Number} numSplits The number of fastest splits to attempt to return.
+     * @param {Number} controlIdx The index of the control.
+     */
     function assertCannotGetFastestSplits(assert, results, numSplits, controlIdx) {
         let courseClassSet = new CourseClassSet([new CourseClass("Test", 3, results)]);
         SplitsBrowserTest.assertInvalidData(assert, () => courseClassSet.getFastestSplitsTo(numSplits, controlIdx));

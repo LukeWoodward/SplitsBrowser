@@ -41,10 +41,10 @@
     const messages = SplitsBrowser.Messages;
 
     /**
-    * Issue a warning about the messages, if a warning hasn't already been
-    * issued.
-    * @param {String} warning The warning message to issue.
-    */
+     * Issue a warning about the messages, if a warning hasn't already been
+     * issued.
+     * @param {String} warning The warning message to issue.
+     */
     function warn(warning) {
         if (!warnedAboutMessages) {
             alertFunc(warning);
@@ -53,35 +53,35 @@
     }
 
     /**
-    * Sets the alerter to use when a warning message should be shown.
-    *
-    * This function is intended only for testing purposes.
-
-    * @param {Function} alerter The function to be called when a warning is
-    *     to be shown.
-    */
+     * Sets the alerter to use when a warning message should be shown.
+     *
+     * This function is intended only for testing purposes.
+     *
+     * @param {Function} alerter The function to be called when a warning is
+     *     to be shown.
+     */
     SplitsBrowser.setMessageAlerter = function (alerter) {
         alertFunc = alerter;
     };
 
     /**
-    * Attempts to get a message, returning a default string if it does not
-    * exist.
-    * @param {String} key The key of the message.
-    * @param {String} defaultValue Value to be used
-    * @return {String} The message with the given key, if the key exists,
-    *     otherwise the default value.
-    */
+     * Attempts to get a message, returning a default string if it does not
+     * exist.
+     * @param {String} key The key of the message.
+     * @param {String} defaultValue Value to be used
+     * @return {String} The message with the given key, if the key exists,
+     *     otherwise the default value.
+     */
     SplitsBrowser.tryGetMessage = function (key, defaultValue) {
         return (currentLanguage !== null && hasProperty(messages[currentLanguage], key)) ? SplitsBrowser.getMessage(key) : defaultValue;
     };
 
     /**
-    * Returns the message with the given key.
-    * @param {String} key The key of the message.
-    * @return {String} The message with the given key, or a placeholder string
-    *     if the message could not be looked up.
-    */
+     * Returns the message with the given key.
+     * @param {String} key The key of the message.
+     * @return {String} The message with the given key, or a placeholder string
+     *     if the message could not be looked up.
+     */
     SplitsBrowser.getMessage = function (key) {
         if (allLanguages === null) {
             SplitsBrowser.initialiseMessages();
@@ -101,15 +101,15 @@
     };
 
     /**
-    * Returns the message with the given key, with some string formatting
-    * applied to the result.
-    *
-    * The object 'params' should map search strings to their replacements.
-    *
-    * @param {String} key The key of the message.
-    * @param {Object} params Object mapping parameter names to values.
-    * @return {String} The resulting message.
-    */
+     * Returns the message with the given key, with some string formatting
+     * applied to the result.
+     *
+     * The object 'params' should map search strings to their replacements.
+     *
+     * @param {String} key The key of the message.
+     * @param {Object} params Object mapping parameter names to values.
+     * @return {String} The resulting message.
+     */
     SplitsBrowser.getMessageWithFormatting = function (key, params) {
         let message = SplitsBrowser.getMessage(key);
         for (let paramName in params) {
@@ -127,22 +127,22 @@
     };
 
     /**
-    * Returns an array of codes of languages that have been loaded.
-    * @return {Array} Array of language codes.
-    */
+     * Returns an array of codes of languages that have been loaded.
+     * @return {Array} Array of language codes.
+     */
     SplitsBrowser.getAllLanguages = () => allLanguages.slice(0);
 
     /**
-    * Returns the language code of the current language, e.g. "en_gb".
-    * @return {String} Language code of the current language.
-    */
+     * Returns the language code of the current language, e.g. "en_gb".
+     * @return {String} Language code of the current language.
+     */
     SplitsBrowser.getLanguage = () => currentLanguage;
 
     /**
-    * Returns the name of the language with the given code.
-    * @param {String} language The code of the language, e.g. "en_gb".
-    * @return {String} The name of the language, e.g. "English".
-    */
+     * Returns the name of the language with the given code.
+     * @param {String} language The code of the language, e.g. "en_gb".
+     * @return {String} The name of the language, e.g. "English".
+     */
     SplitsBrowser.getLanguageName = function (language) {
         if (hasProperty(messages, language) && hasProperty(messages[language], "Language")) {
             return messages[language].Language;
@@ -152,9 +152,9 @@
     };
 
     /**
-    * Sets the current language.
-    * @param {String} language The code of the new language to set.
-    */
+     * Sets the current language.
+     * @param {String} language The code of the new language to set.
+     */
     SplitsBrowser.setLanguage = function (language) {
         if (hasProperty(messages, language)) {
             currentLanguage = language;
@@ -162,10 +162,10 @@
     };
 
     /**
-    * Initialises the messages from those read in.
-    *
-    * @param {String} defaultLanguage (Optional) The default language to choose.
-    */
+     * Initialises the messages from those read in.
+     *
+     * @param {String} defaultLanguage (Optional) The default language to choose.
+     */
     SplitsBrowser.initialiseMessages = function (defaultLanguage) {
         allLanguages = [];
         if (messages !== SplitsBrowser.Messages) {

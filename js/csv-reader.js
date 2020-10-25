@@ -35,14 +35,14 @@
     const Event = SplitsBrowser.Model.Event;
 
     /**
-    * Parse a row of competitor data.
-    * @param {Number} index Index of the competitor line.
-    * @param {String} line The line of competitor data read from a CSV file.
-    * @param {Number} controlCount The number of controls (not including the finish).
-    * @param {String} className The name of the class.
-    * @param {Array} warnings Array of warnings to add any warnings found to.
-    * @return {Object} Competitor object representing the competitor data read in.
-    */
+     * Parse a row of competitor data.
+     * @param {Number} index Index of the competitor line.
+     * @param {String} line The line of competitor data read from a CSV file.
+     * @param {Number} controlCount The number of controls (not including the finish).
+     * @param {String} className The name of the class.
+     * @param {Array} warnings Array of warnings to add any warnings found to.
+     * @return {Object} Competitor object representing the competitor data read in.
+     */
     function parseResults(index, line, controlCount, className, warnings) {
         // Expect forename, surname, club, start time then (controlCount + 1) split times in the form MM:SS.
         let parts = line.split(",");
@@ -98,11 +98,11 @@
     }
 
     /**
-    * Parse CSV data for a class.
-    * @param {String} courseClass The string containing data for that class.
-    * @param {Array} warnings Array of warnings to add any warnings found to.
-    * @return {SplitsBrowser.Model.CourseClass} Parsed class data.
-    */
+     * Parse CSV data for a class.
+     * @param {String} courseClass The string containing data for that class.
+     * @param {Array} warnings Array of warnings to add any warnings found to.
+     * @return {SplitsBrowser.Model.CourseClass} Parsed class data.
+     */
     function parseCourseClass (courseClass, warnings) {
         let lines = courseClass.split(/\r?\n/).filter(isTrue);
         if (lines.length === 0) {
@@ -134,10 +134,10 @@
     }
 
     /**
-    * Parse CSV data for an entire event.
-    * @param {String} eventData String containing the entire event data.
-    * @return {SplitsBrowser.Model.Event} All event data read in.
-    */
+     * Parse CSV data for an entire event.
+     * @param {String} eventData String containing the entire event data.
+     * @return {SplitsBrowser.Model.Event} All event data read in.
+     */
     function parseEventData (eventData) {
 
         if (/<html/i.test(eventData)) {

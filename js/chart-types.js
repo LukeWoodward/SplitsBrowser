@@ -21,31 +21,31 @@
 (function () {
 
     /**
-    * Converts a number of seconds into the corresponding number of minutes.
-    * This conversion is as simple as dividing by 60.
-    * @param {Number|null} seconds The number of seconds to convert.
-    * @return {Number|null} The corresponding number of minutes.
-    */
+     * Converts a number of seconds into the corresponding number of minutes.
+     * This conversion is as simple as dividing by 60.
+     * @param {Number|null} seconds The number of seconds to convert.
+     * @return {Number|null} The corresponding number of minutes.
+     */
     function secondsToMinutes(seconds) {
         return (seconds === null) ? null : seconds / 60;
     }
 
     /**
-    * Returns indexes around the given competitor's omitted cumulative times.
-    * @param {Result} result The result to get the indexes for.
-    * @return {Array} Array of objects containing indexes around omitted
-    *     cumulative times.
-    */
+     * Returns indexes around the given competitor's omitted cumulative times.
+     * @param {Result} result The result to get the indexes for.
+     * @return {Array} Array of objects containing indexes around omitted
+     *     cumulative times.
+     */
     function getIndexesAroundOmittedCumulativeTimes(result) {
         return result.getControlIndexesAroundOmittedCumulativeTimes();
     }
 
     /**
-    * Returns indexes around the given competitor's omitted split times.
-    * @param {Result} result The result to get the indexes for.
-    * @return {Array} Array of objects containing indexes around omitted split
-    *     times.
-    */
+     * Returns indexes around the given competitor's omitted split times.
+     * @param {Result} result The result to get the indexes for.
+     * @return {Array} Array of objects containing indexes around omitted split
+     *     times.
+     */
     function getIndexesAroundOmittedSplitTimes(result) {
         return result.getControlIndexesAroundOmittedSplitTimes();
     }

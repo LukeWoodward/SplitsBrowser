@@ -34,10 +34,10 @@
     QUnit.module("Input.IOFXml");
 
     /**
-    * Returns a person map with values for the forename, surname, club, startTime,
-    * totalTime, courseLength, controls and cumTimes keys.
-    * @return {Map} Person map.
-    */
+     * Returns a person map with values for the forename, surname, club, startTime,
+     * totalTime, courseLength, controls and cumTimes keys.
+     * @return {Map} Person map.
+     */
     function getPerson() {
         return new Map([
             ["forename", "First"],
@@ -84,25 +84,25 @@
     };
 
     /**
-    * Returns a chunk of XML that contains a class name.
-    * @param {String} className The name of the class.
-    * @return {String} XML string containing the class name.
-    */
+     * Returns a chunk of XML that contains a class name.
+     * @param {String} className The name of the class.
+     * @return {String} XML string containing the class name.
+     */
     Version2Formatter.getClassXml = className => `<ClassShortName>${className}</ClassShortName>\n`;
 
     /**
-    * Returns a chunk of XML that contains course details.
-    * This formatter does not support course details, so this function returns
-    * an empty string.
-    * @return {String} An empty string.
-    */
+     * Returns a chunk of XML that contains course details.
+     * This formatter does not support course details, so this function returns
+     * an empty string.
+     * @return {String} An empty string.
+     */
     Version2Formatter.getCourseXml = () => "";
 
     /**
-    * Returns a chunk of XML that contains club details.
-    * @param {Map} resultData The person or team data
-    * @return {String} Generated XML string.
-    */
+     * Returns a chunk of XML that contains club details.
+     * @param {Map} resultData The person or team data
+     * @return {String} Generated XML string.
+     */
     Version2Formatter.getClubXml = resultData => {
         if (resultData.has("club")) {
             return `<Club><ShortName>${resultData.get("club")}</ShortName></Club>\n`;
@@ -114,35 +114,35 @@
     };
 
     /**
-    * Generates some XML for a person.
-    *
-    * The properties supported are as follows.  Unless specified otherwise, the
-    * XML generated for each property is omitted if the property is not
-    * specified:
-    * * forename (String) - The person's forename.
-    * * surname (String) - The person's surname.
-    * * club {String} The person's club.
-    * * startTime (Number) - The person's start time, in seconds since
-    *       midnight.
-    * * finishTime (Number) - The person's finish time, in seconds since
-    *       midnight.
-    * * totalTime (Number) - The person's total time, in seconds.
-    * * competitive (boolean) - True if competitive, false if non-competitive.
-    *       Assumed competitive if not specified.
-    * * controls (Array) - Array of control codes.  Must be specified.
-    * * cumTimes {Array} - Array of cumulative times.  Must be specified.
-    * * result {Any} - Specified to include the <Result> element, omit to
-    *       skip it.
-    *
-    * Additionally the classData object has the following properties:
-    * * courseLength (Number) - The length of the course.
-    * * courseLengthUnit (String) - The unit that the length of the course is
-    *       measured in.
-    *
-    * @param {Map} personData The person data.
-    * @param {Map} classData The class data.
-    * @return {String} Generated XML string.
-    */
+     * Generates some XML for a person.
+     *
+     * The properties supported are as follows.  Unless specified otherwise, the
+     * XML generated for each property is omitted if the property is not
+     * specified:
+     * * forename (String) - The person's forename.
+     * * surname (String) - The person's surname.
+     * * club {String} The person's club.
+     * * startTime (Number) - The person's start time, in seconds since
+     *       midnight.
+     * * finishTime (Number) - The person's finish time, in seconds since
+     *       midnight.
+     * * totalTime (Number) - The person's total time, in seconds.
+     * * competitive (boolean) - True if competitive, false if non-competitive.
+     *       Assumed competitive if not specified.
+     * * controls (Array) - Array of control codes.  Must be specified.
+     * * cumTimes {Array} - Array of cumulative times.  Must be specified.
+     * * result {Any} - Specified to include the <Result> element, omit to
+     *       skip it.
+     *
+     * Additionally the classData object has the following properties:
+     * * courseLength (Number) - The length of the course.
+     * * courseLengthUnit (String) - The unit that the length of the course is
+     *       measured in.
+     *
+     * @param {Map} personData The person data.
+     * @param {Map} classData The class data.
+     * @return {String} Generated XML string.
+     */
     Version2Formatter.getPersonResultXml = (personData, classData) => {
         if (!personData.has("controls") || !personData.has("cumTimes")) {
             throw new Error("controls and cumTimes must both be specified");
@@ -222,28 +222,28 @@
     };
 
     /**
-    * Generates some XML for a team name.
-    * @param {String} name The name of the team.
-    * @return {String} Generated XML string.
-    */
+     * Generates some XML for a team name.
+     * @param {String} name The name of the team.
+     * @return {String} Generated XML string.
+     */
     Version2Formatter.getTeamNameXml = name => `<TeamName>${name}</TeamName>`;
 
     /**
-    * Generates some XML for a team member result.
-    *
-    * For IOF XML v2 the format is identical to that for a PersonResult.
-    *
-    * @param {Map} personData The person data.
-    * @param {Map} classData The class data.
-    * @return {String} Generated XML string.
-    */
+     * Generates some XML for a team member result.
+     *
+     * For IOF XML v2 the format is identical to that for a PersonResult.
+     *
+     * @param {Map} personData The person data.
+     * @param {Map} classData The class data.
+     * @return {String} Generated XML string.
+     */
     Version2Formatter.getTeamMemberResultXml = (personData, classData) => Version2Formatter.getPersonResultXml(personData, classData);
 
     /**
-    * Zero-pads the given value to two digits.
-    * @param {Number} value The value to pad.
-    * @return {String} Zero-padded number as a string.
-    */
+     * Zero-pads the given value to two digits.
+     * @param {Number} value The value to pad.
+     * @return {String} Zero-padded number as a string.
+     */
     function zeroPadTwoDigits (value) {
         return (value < 10) ? "0" + value : value.toString();
     }
@@ -253,30 +253,30 @@
     function seconds (value) { return zeroPadTwoDigits(value % 60); }
 
     /**
-    * Formats a start or finish time as an ISO-8601 date.
-    * @param {Number} time The time to format.
-    * @return {String} The formatted date.
-    */
+     * Formats a start or finish time as an ISO-8601 date.
+     * @param {Number} time The time to format.
+     * @return {String} The formatted date.
+     */
     function formatStartOrFinishTime(time) {
         return `2014-06-07T${hours(time)}:${minutes(time)}:${seconds(time)}.000+01:00`;
     }
 
     /**
-    * Formats a start or finish time as an ISO-8601 date, but ending after the
-    * minutes.
-    * @param {Number} time The time to format.
-    * @return {String} The formatted date.
-    */
+     * Formats a start or finish time as an ISO-8601 date, but ending after the
+     * minutes.
+     * @param {Number} time The time to format.
+     * @return {String} The formatted date.
+     */
     function formatStartOrFinishTimeNoSeconds (time) {
         return `2014-06-07T${hours(time)}:${minutes(time)}`;
     }
 
     /**
-    * Formats a start or finish time as a 'basic' ISO-8601 date, i.e. one
-    * without all of the separating characters.
-    * @param {Number} time The time to format.
-    * @return {String} The formatted date.
-    */
+     * Formats a start or finish time as a 'basic' ISO-8601 date, i.e. one
+     * without all of the separating characters.
+     * @param {Number} time The time to format.
+     * @return {String} The formatted date.
+     */
     function formatStartOrFinishTimeBasic (time) {
         return `20140607${hours(time)}${minutes(time)}${seconds(time)}`;
     }
@@ -287,17 +287,17 @@
     };
 
     /**
-    * Returns a chunk of XML that contains a class name.
-    * @param {String} className The name of the class.
-    * @return {String} XML string containing the class name.
-    */
+     * Returns a chunk of XML that contains a class name.
+     * @param {String} className The name of the class.
+     * @return {String} XML string containing the class name.
+     */
     Version3Formatter.getClassXml = className => `<Class><Name>${className}</Name></Class>\n`;
 
     /**
-    * Returns a chunk of XML that contains course details.
-    * @param {Map} class_ Map containing class data.
-    * @return {String} XML string.
-    */
+     * Returns a chunk of XML that contains course details.
+     * @param {Map} class_ Map containing class data.
+     * @return {String} XML string.
+     */
     Version3Formatter.getCourseXml = class_ => {
         let xml = "<Course>\n";
         if (class_.has("courseId")) {
@@ -328,10 +328,10 @@
     };
 
     /**
-    * Returns a chunk of XML that contains club details.
-    * @param {Map} resultData The person or team data
-    * @return {String} Generated XML string.
-    */
+     * Returns a chunk of XML that contains club details.
+     * @param {Map} resultData The person or team data
+     * @return {String} Generated XML string.
+     */
     Version3Formatter.getClubXml = resultData => {
         if (resultData.has("club")) {
             return `<Organisation><ShortName>${resultData.get("club")}</ShortName></Organisation>\n`;
@@ -343,31 +343,31 @@
     };
 
     /**
-    * Generates some XML for an individual result, either a competitor in an
-    * individual event or a team member in a relay.
-    *
-    * The properties supported are as follows.  Unless specified otherwise, the
-    * XML generated for each property is omitted if the property is not
-    * specified:
-    * * forename (String) - The person's forename.
-    * * surname (String) - The person's surname.
-    * * club {String} The person's club.
-    * * startTime (Number) - The person's start time, in seconds since
-    *       midnight.
-    * * finishTime (Number) - The person's start time, in seconds since
-    *       midnight.
-    * * totalTime (Number) - The person's total time, in seconds.
-    * * competitive (boolean) - True if competitive, false if non-competitive.
-    *       Assumed competitive if not specified.
-    * * controls (Array) - Array of control codes.  Must be specified.
-    * * cumTimes {Array} - Array of cumulative times.  Must be specified.
-    * * result {Any} - Specified to include the <Result> element, omit to
-    *       skip it.
-    *
-    * @param {Map} personData The person data.
-    * @param {String} elementName The name of the root element.
-    * @return {String} Generated XML string.
-    */
+     * Generates some XML for an individual result, either a competitor in an
+     * individual event or a team member in a relay.
+     *
+     * The properties supported are as follows.  Unless specified otherwise, the
+     * XML generated for each property is omitted if the property is not
+     * specified:
+     * * forename (String) - The person's forename.
+     * * surname (String) - The person's surname.
+     * * club {String} The person's club.
+     * * startTime (Number) - The person's start time, in seconds since
+     *       midnight.
+     * * finishTime (Number) - The person's start time, in seconds since
+     *       midnight.
+     * * totalTime (Number) - The person's total time, in seconds.
+     * * competitive (boolean) - True if competitive, false if non-competitive.
+     *       Assumed competitive if not specified.
+     * * controls (Array) - Array of control codes.  Must be specified.
+     * * cumTimes {Array} - Array of cumulative times.  Must be specified.
+     * * result {Any} - Specified to include the <Result> element, omit to
+     *       skip it.
+     *
+     * @param {Map} personData The person data.
+     * @param {String} elementName The name of the root element.
+     * @return {String} Generated XML string.
+     */
     Version3Formatter.getIndividualResultXml = (personData, elementName) => {
         if (!personData.has("controls") || !personData.has("cumTimes")) {
             throw new Error("controls and cumTimes must both be specified");
@@ -468,41 +468,41 @@
     };
 
     /**
-    * Generates some XML for an individual competitor result.
-    *
-    * For IOF XML v3 this uses a PersonResult element.
-    *
-    * @param {Map} personData The person data.
-    * @return {String} Generated XML string.
-    */
+     * Generates some XML for an individual competitor result.
+     *
+     * For IOF XML v3 this uses a PersonResult element.
+     *
+     * @param {Map} personData The person data.
+     * @return {String} Generated XML string.
+     */
     Version3Formatter.getPersonResultXml = personData => Version3Formatter.getIndividualResultXml(personData, "PersonResult");
 
     /**
-    * Generates some XML for a team name.
-    * @param {String} name The name of the team.
-    * @return {String} Generated XML string.
-    */
+     * Generates some XML for a team name.
+     * @param {String} name The name of the team.
+     * @return {String} Generated XML string.
+     */
     Version3Formatter.getTeamNameXml = name => `<Name>${name}</Name>`;
 
     /**
-    * Generates some XML for an team member result.
-    *
-    * For IOF XML v3 this uses a TeamMemberResult element.
-    *
-    * @param {Map} personData The person data.
-    * @return {String} Generated XML string.
-    */
+     * Generates some XML for an team member result.
+     *
+     * For IOF XML v3 this uses a TeamMemberResult element.
+     *
+     * @param {Map} personData The person data.
+     * @return {String} Generated XML string.
+     */
     Version3Formatter.getTeamMemberResultXml = personData => Version3Formatter.getIndividualResultXml(personData, "TeamMemberResult");
 
     const ALL_FORMATTERS = [Version2Formatter, Version3Formatter];
 
     /**
-    * Formats a relay team to XML
-    * @param {Object} formatter The formatter to generate the XML with.
-    * @param {Map} team The team data.
-    * @param {Map} class_ The class data.
-    * @return {String} Generated XML string.
-    */
+     * Formats a relay team to XML
+     * @param {Object} formatter The formatter to generate the XML with.
+     * @param {Map} team The team data.
+     * @param {Map} class_ The class data.
+     * @return {String} Generated XML string.
+     */
     function formatRelayTeam(formatter, team, class_) {
         return "<TeamResult>\n" + formatter.getTeamNameXml(team.get("name")) + formatter.getClubXml(team) +
                     team.get("members").map(member => formatter.getTeamMemberResultXml(member, class_)).join("\n") +
@@ -510,11 +510,11 @@
     }
 
     /**
-    * Uses the given formatter to format the given class data as XML.
-    * @param {Object} formatter Formatter object.
-    * @param {Array} classes Array of maps containing data to format.
-    * @return {String} Formatted XML string.
-    */
+     * Uses the given formatter to format the given class data as XML.
+     * @param {Object} formatter Formatter object.
+     * @param {Array} classes Array of maps containing data to format.
+     * @return {String} Formatted XML string.
+     */
     function getXmlFromFormatter(formatter, classes) {
         let xml = formatter.header;
         for (let class_ of classes) {
@@ -545,17 +545,17 @@
     }
 
     /**
-    * Returns the single result in the given event.
-    *
-    * This function also asserts that the event has exactly one course-class and
-    * exactly one result within that class.  This one result is what
-    * it returns.
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {Event} eventData Event data parsed by the reader.
-    * @param {String} formatterName Name of the formatter used to generate
-    *     the XML.
-    * @return {Result} The single result.
-    */
+     * Returns the single result in the given event.
+     *
+     * This function also asserts that the event has exactly one course-class and
+     * exactly one result within that class.  This one result is what
+     * it returns.
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {Event} eventData Event data parsed by the reader.
+     * @param {String} formatterName Name of the formatter used to generate
+     *     the XML.
+     * @return {Result} The single result.
+     */
     function getSingleResult(assert, eventData, formatterName) {
         assert.strictEqual(eventData.classes.length, 1, `Expected one class - ${formatterName}`);
         if (eventData.classes.length === 1) {
@@ -572,51 +572,51 @@
     }
 
     /**
-    * Asserts that attempting to parse the given XML string will fail with an
-    * InvalidData exception being thrown.
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {String} xml The XML string to attempt to parse.
-    * @param {String|undefined} failureMessage Optional message to show in assertion
-    *     failure message if no exception is thrown.  A default message is used
-    *     instead if this is not specified.
-    */
+     * Asserts that attempting to parse the given XML string will fail with an
+     * InvalidData exception being thrown.
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {String} xml The XML string to attempt to parse.
+     * @param {String|undefined} failureMessage Optional message to show in assertion
+     *     failure message if no exception is thrown.  A default message is used
+     *     instead if this is not specified.
+     */
     function assertInvalidData(assert, xml, failureMessage) {
         SplitsBrowserTest.assertInvalidData(assert, () => parseEventData(xml), failureMessage);
     }
 
     /**
-    * Asserts that attempting to parse the given string will fail with a
-    * WrongFileFormat exception being thrown.
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {String} data The string to attempt to parse.
-    * @param {String|undefined} failureMessage Optional message to show in assertion
-    *     failure message if no exception is thrown.  A default message is used
-    *     instead if this is not specified.
-    */
+     * Asserts that attempting to parse the given string will fail with a
+     * WrongFileFormat exception being thrown.
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {String} data The string to attempt to parse.
+     * @param {String|undefined} failureMessage Optional message to show in assertion
+     *     failure message if no exception is thrown.  A default message is used
+     *     instead if this is not specified.
+     */
     function assertWrongFileFormat(assert, data, failureMessage) {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", () => parseEventData(data), failureMessage);
     }
 
     /**
-    * Generates XML using each available formatter, parses the resulting XML,
-    * and calls the given checking function on the result.
-    *
-    * The options supported are:
-    * * formatters (Array): Array of formatters to use with this parser.
-    *       Defaults to all formatters.
-    * * preprocessor (Function): Function used to preprocess the
-    *       XML before it is parsed.  Defaults to no preprocessing.
-    * If none of the above options are required, the options object itself can
-    * be omitted.
-    *
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {Array} classes Array of class objects to generate the XML from.
-    * @param {Function} checkFunc Checking function called for each parsed
-    *     event data object.  It is passed the data, and also the name of the
-    *     formatter used.
-    * @param {Object} options Options object, the contents of which are
-    *     described above.
-    */
+     * Generates XML using each available formatter, parses the resulting XML,
+     * and calls the given checking function on the result.
+     *
+     * The options supported are:
+     * * formatters (Array): Array of formatters to use with this parser.
+     *       Defaults to all formatters.
+     * * preprocessor (Function): Function used to preprocess the
+     *       XML before it is parsed.  Defaults to no preprocessing.
+     * If none of the above options are required, the options object itself can
+     * be omitted.
+     *
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {Array} classes Array of class objects to generate the XML from.
+     * @param {Function} checkFunc Checking function called for each parsed
+     *     event data object.  It is passed the data, and also the name of the
+     *     formatter used.
+     * @param {Object} options Options object, the contents of which are
+     *     described above.
+     */
     function runXmlFormatParseTest(classes, checkFunc, options) {
         let formatters = (options && options.formatters) || ALL_FORMATTERS;
         for (let formatter of formatters) {
@@ -630,20 +630,20 @@
     }
 
     /**
-    * Generates XML using each available formatter, parses the resulting XML,
-    * and calls the given checking function on the result.  This function
-    * asserts that the resulting data contains only a single result, and
-    * then calls the check function with the parsed result.
-    *
-    * The options supported are the same as those for runXmlFormatParseTest.
-    *
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {Map} class_ Class map to generate the XML from.
-    * @param {Function} checkFunc Checking function called for the parsed
-    *     result, if a single result results.  It is passed the parsed result.
-    * @param {Object} options Options object, the contents of which are
-    *     described above.
-    */
+     * Generates XML using each available formatter, parses the resulting XML,
+     * and calls the given checking function on the result.  This function
+     * asserts that the resulting data contains only a single result, and
+     * then calls the check function with the parsed result.
+     *
+     * The options supported are the same as those for runXmlFormatParseTest.
+     *
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {Map} class_ Class map to generate the XML from.
+     * @param {Function} checkFunc Checking function called for the parsed
+     *     result, if a single result results.  It is passed the parsed result.
+     * @param {Object} options Options object, the contents of which are
+     *     described above.
+     */
     function runSingleCompetitorXmlFormatParseTest(assert, class_, checkFunc, options) {
         runXmlFormatParseTest([class_], (eventData, formatterName) => {
             let result = getSingleResult(assert, eventData, formatterName);
@@ -654,19 +654,19 @@
     }
 
     /**
-    * Generates XML using each available formatter, parses the resulting XML,
-    * and calls the given checking function on the result.  This function
-    * asserts that the resulting data contains only a single course, and
-    * then calls the check function with the parsed course.
-    *
-    * The options supported are the same as those for runXmlFormatParseTest.
-    *
-    * @param {Array} classes Array of class objects to generate the XML from.
-    * @param {Function} checkFunc Checking function called for the parsed
-    *     course, if a single course results.  It is passed the parsed course.
-    * @param {Object} options Options object, the contents of which are
-    *     described above.
-    */
+     * Generates XML using each available formatter, parses the resulting XML,
+     * and calls the given checking function on the result.  This function
+     * asserts that the resulting data contains only a single course, and
+     * then calls the check function with the parsed course.
+     *
+     * The options supported are the same as those for runXmlFormatParseTest.
+     *
+     * @param {Array} classes Array of class objects to generate the XML from.
+     * @param {Function} checkFunc Checking function called for the parsed
+     *     course, if a single course results.  It is passed the parsed course.
+     * @param {Object} options Options object, the contents of which are
+     *     described above.
+     */
     function runSingleCourseXmlFormatParseTest(assert, classes, checkFunc, options) {
         runXmlFormatParseTest(classes, (eventData, formatterName) => {
             assert.strictEqual(eventData.courses.length, 1, `Expected one course - ${formatterName}`);
@@ -677,23 +677,23 @@
     }
 
     /**
-    * Generates XML using each available formatter, attempts to parse each
-    * generated XML string and asserts that each attempt fails.
-    *
-    * The options supported are:
-    * * formatters (Array): Array of formatters to use with this parser.
-    *       Defaults to all formatters.
-    * * preprocessor (Function): Function used to preprocess the
-    *       XML before it is parsed.  Defaults to no preprocessing.
-    * If none of the above options are required, the options object itself can
-    * be omitted.
-    *
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {Array} classes Array of class objects to generate the XML
-    *     using.
-    * @param {Object} options Options object, the contents of which are
-    *     described above.
-    */
+     * Generates XML using each available formatter, attempts to parse each
+     * generated XML string and asserts that each attempt fails.
+     *
+     * The options supported are:
+     * * formatters (Array): Array of formatters to use with this parser.
+     *       Defaults to all formatters.
+     * * preprocessor (Function): Function used to preprocess the
+     *       XML before it is parsed.  Defaults to no preprocessing.
+     * If none of the above options are required, the options object itself can
+     * be omitted.
+     *
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {Array} classes Array of class objects to generate the XML
+     *     using.
+     * @param {Object} options Options object, the contents of which are
+     *     described above.
+     */
     function runFailingXmlFormatParseTest(assert, classes, options) {
         let formatters = (options && options.formatters) || ALL_FORMATTERS;
         for (let formatter of formatters) {
@@ -706,11 +706,11 @@
     }
 
     /**
-    * Asserts that the given event data contains a single class with no results.
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {Event} eventData The event data parsed.
-    * @param {String} formatterName The name of the formatter used to generate the XML.
-    */
+     * Asserts that the given event data contains a single class with no results.
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {Event} eventData The event data parsed.
+     * @param {String} formatterName The name of the formatter used to generate the XML.
+     */
     function assertSingleClassNoResults(assert, eventData, formatterName) {
         assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatterName}`);
         if (eventData.classes.length === 1) {
@@ -719,11 +719,11 @@
     }
 
     /**
-    * Asserts that the given event data contains a single class with a single result.
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {Event} eventData The event data parsed.
-    * @param {String} formatterName The name of the formatter used to generate the XML.
-    */
+     * Asserts that the given event data contains a single class with a single result.
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {Event} eventData The event data parsed.
+     * @param {String} formatterName The name of the formatter used to generate the XML.
+     */
     function assertSingleClassSingleResult(assert, eventData, formatterName) {
         assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatterName}`);
         if (eventData.classes.length === 1) {

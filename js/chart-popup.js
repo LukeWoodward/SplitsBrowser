@@ -24,10 +24,10 @@
     const formatTime = SplitsBrowser.formatTime;
 
     /**
-    * Creates a ChartPopup control.
-    * @constructor
-    * @param {HTMLElement} parent Parent HTML element.
-    */
+     * Creates a ChartPopup control.
+     * @constructor
+     * @param {HTMLElement} parent Parent HTML element.
+     */
     class ChartPopup {
         constructor(parent) {
             this.shown = false;
@@ -53,39 +53,39 @@
         }
 
         /**
-        * Returns whether the popup is currently shown.
-        * @return {Boolean} True if the popup is shown, false otherwise.
-        */
+         * Returns whether the popup is currently shown.
+         * @return {Boolean} True if the popup is shown, false otherwise.
+         */
         isShown() {
             return this.shown;
         }
 
         /**
-        * Returns whether the mouse is currently over the popup.
-        * @return {Boolean} True if the mouse is over the popup, false otherwise.
-        */
+         * Returns whether the mouse is currently over the popup.
+         * @return {Boolean} True if the mouse is over the popup, false otherwise.
+         */
         isMouseIn() {
             return this.mouseIn;
         }
 
         /**
-        * Populates the chart popup with data.
-        *
-        * 'competitorData' should be an object that contains a 'title', a 'data'
-        * and a 'placeholder' property.  The 'title' is a string used as the
-        * popup's title.  The 'data' property is an array where each element should
-        * be an object that contains the following properties:
-        * * time - A time associated with a competitor.  This may be a split time,
-        *   cumulative time or the time of day.
-        * * className (Optional) - Name of the competitor's class.
-        * * name - The name of the competitor.
-        * * highlight - A boolean value which indicates whether to highlight the
-        *   competitor.
-        * The 'placeholder' property is a placeholder string to show if there is no
-        * 'data' array is empty.  It can be null to show no such message.
-        * @param {Object} competitorData Array of data to show.
-        * @param {Boolean} includeClassNames Whether to include class names.
-        */
+         * Populates the chart popup with data.
+         *
+         * 'competitorData' should be an object that contains a 'title', a 'data'
+         * and a 'placeholder' property.  The 'title' is a string used as the
+         * popup's title.  The 'data' property is an array where each element should
+         * be an object that contains the following properties:
+         * * time - A time associated with a competitor.  This may be a split time,
+         *   cumulative time or the time of day.
+         * * className (Optional) - Name of the competitor's class.
+         * * name - The name of the competitor.
+         * * highlight - A boolean value which indicates whether to highlight the
+         *   competitor.
+         * The 'placeholder' property is a placeholder string to show if there is no
+         * 'data' array is empty.  It can be null to show no such message.
+         * @param {Object} competitorData Array of data to show.
+         * @param {Boolean} includeClassNames Whether to include class names.
+         */
         setData(competitorData, includeClassNames) {
             this.dataHeader.text(competitorData.title);
 
@@ -115,15 +115,15 @@
         }
 
         /**
-        * Sets the next-controls data.
-        *
-        * The next-controls data should be an object that contains two properties:
-        * * thisControl - The 'current' control.
-        * * nextControls - Array of objects, each with 'course' and 'nextControl'
-        *   properties.
-        *
-        * @param {Object} nextControlsData The next-controls data.
-        */
+         * Sets the next-controls data.
+         *
+         * The next-controls data should be an object that contains two properties:
+         * * thisControl - The 'current' control.
+         * * nextControls - Array of objects, each with 'course' and 'nextControl'
+         *   properties.
+         *
+         * @param {Object} nextControlsData The next-controls data.
+         */
         setNextControlData(nextControlsData) {
             this.dataHeader.text(nextControlsData.thisControl);
 
@@ -141,26 +141,26 @@
         }
 
         /**
-        * Adjusts the location of the chart popup.
-        *
-        * The location object should contain "x" and "y" properties.  The two
-        * coordinates are in units of pixels from top-left corner of the viewport.
-        *
-        * @param {Object} location The location of the chart popup.
-        */
+         * Adjusts the location of the chart popup.
+         *
+         * The location object should contain "x" and "y" properties.  The two
+         * coordinates are in units of pixels from top-left corner of the viewport.
+         *
+         * @param {Object} location The location of the chart popup.
+         */
         setLocation(location) {
             this.popupDiv.style("left", `${location.x}px`)
                 .style("top", `${location.y}px`);
         }
 
         /**
-        * Shows the chart popup.
-        *
-        * The location object should contain "x" and "y" properties.  The two
-        * coordinates are in units of pixels from top-left corner of the viewport.
-        *
-        * @param {Object} location The location of the chart popup.
-        */
+         * Shows the chart popup.
+         *
+         * The location object should contain "x" and "y" properties.  The two
+         * coordinates are in units of pixels from top-left corner of the viewport.
+         *
+         * @param {Object} location The location of the chart popup.
+         */
         show(location) {
             this.popupDiv.style("display", null);
             this.shown = true;
@@ -168,17 +168,17 @@
         }
 
         /**
-        * Hides the chart popup.
-        */
+         * Hides the chart popup.
+         */
         hide() {
             this.popupDiv.style("display", "none");
             this.shown = false;
         }
 
         /**
-        * Returns the height of the popup, in units of pixels.
-        * @return {Number} Height of the popup, in pixels.
-        */
+         * Returns the height of the popup, in units of pixels.
+         * @return {Number} Height of the popup, in pixels.
+         */
         height() {
             return $(this.popupDiv.node()).height();
         }

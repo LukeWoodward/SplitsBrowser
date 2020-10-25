@@ -88,10 +88,10 @@
     const MIN_CONTROLS_OFFSET = 37;
 
     /**
-    * Remove any leading and trailing double-quotes from the given string.
-    * @param {String} value The value to trim quotes from.
-    * @return {String} The string with any leading and trailing quotes removed.
-    */
+     * Remove any leading and trailing double-quotes from the given string.
+     * @param {String} value The value to trim quotes from.
+     * @return {String} The string with any leading and trailing quotes removed.
+     */
     function dequote(value) {
         if (value[0] === '"' && value[value.length - 1] === '"') {
             value = value.substring(1, value.length - 1).replace(/""/g, '"').trim();
@@ -101,12 +101,12 @@
     }
 
     /**
-    * Constructs an OE-format data reader.
-    *
-    * NOTE: The reader constructed can only be used to read data in once.
-    * @constructor
-    * @param {String} data The OE data to read in.
-    */
+     * Constructs an OE-format data reader.
+     *
+     * NOTE: The reader constructed can only be used to read data in once.
+     * @constructor
+     * @param {String} data The OE data to read in.
+     */
     class Reader {
         constructor(data) {
             this.data = normaliseLineEndings(data);
@@ -132,9 +132,9 @@
         }
 
         /**
-        * Identifies the delimiter character that delimits the columns of data.
-        * @return {String} The delimiter character identified.
-        */
+         * Identifies the delimiter character that delimits the columns of data.
+         * @return {String} The delimiter character identified.
+         */
         identifyDelimiter() {
             if (this.lines.length <= 1) {
                 throwWrongFileFormat("No data found to read");
@@ -151,15 +151,15 @@
         }
 
         /**
-        * Identifies which variation on the OE CSV format we are parsing.
-        *
-        * At present, the only variations supported are 44-column, 46-column and
-        * 60-column.  In all cases, the numbers count the columns before the
-        * controls data.
-        *
-        * @param {String} delimiter The character used to delimit the columns of
-        *     data.
-        */
+         * Identifies which variation on the OE CSV format we are parsing.
+         *
+         * At present, the only variations supported are 44-column, 46-column and
+         * 60-column.  In all cases, the numbers count the columns before the
+         * controls data.
+         *
+         * @param {String} delimiter The character used to delimit the columns of
+         *     data.
+         */
         identifyFormatVariation(delimiter) {
 
             let firstLine = this.lines[1].split(delimiter);
@@ -188,10 +188,10 @@
         }
 
         /**
-        * Returns the name of the class in the given row.
-        * @param {Array} row Array of row data.
-        * @return {String} Class name.
-        */
+         * Returns the name of the class in the given row.
+         * @param {Array} row Array of row data.
+         * @return {String} Class name.
+         */
         getClassName(row) {
             let className = row[this.columnIndexes.get("className")];
             if (className === "" && this.columnIndexes.has("classNameFallback")) {
@@ -202,11 +202,11 @@
         }
 
         /**
-        * Reads the start-time in the given row.  The start punch time will
-        * be used if it is available, otherwise the start time.
-        * @param {Array} row Array of row data.
-        * @return {Number|null} Parsed start time, or null for none.
-        */
+         * Reads the start-time in the given row.  The start punch time will
+         * be used if it is available, otherwise the start time.
+         * @param {Array} row Array of row data.
+         * @return {Number|null} Parsed start time, or null for none.
+         */
         getStartTime(row) {
             let startTimeStr = row[this.columnIndexes.get("startPunch")];
             if (startTimeStr === "") {
@@ -217,11 +217,11 @@
         }
 
         /**
-        * Returns the number of controls to expect on the given line.
-        * @param {Array} row Array of row data items.
-        * @param {Number} lineNumber The line number of the line.
-        * @return {Number|null} The number of controls, or null if the count could not be read.
-        */
+         * Returns the number of controls to expect on the given line.
+         * @param {Array} row Array of row data items.
+         * @param {Number} lineNumber The line number of the line.
+         * @return {Number|null} The number of controls, or null if the count could not be read.
+         */
         getNumControls(row, lineNumber) {
             let className = this.getClassName(row);
             let name;
@@ -244,12 +244,12 @@
         }
 
         /**
-        * Reads the cumulative times out of a row of competitor data.
-        * @param {Array} row Array of row data items.
-        * @param {Number} lineNumber Line number of the row within the source data.
-        * @param {Number} numControls The number of controls to read.
-        * @return {Array} Array of cumulative times.
-        */
+         * Reads the cumulative times out of a row of competitor data.
+         * @param {Array} row Array of row data items.
+         * @param {Number} lineNumber Line number of the row within the source data.
+         * @param {Number} numControls The number of controls to read.
+         * @return {Array} Array of cumulative times.
+         */
         readCumulativeTimes(row, lineNumber, numControls) {
             let cumTimes = [0];
 
@@ -277,11 +277,11 @@
         }
 
         /**
-        * Checks to see whether the given row contains a new class, and if so,
-        * creates it.
-        * @param {Array} row Array of row data items.
-        * @param {Number} numControls The number of controls to read.
-        */
+         * Checks to see whether the given row contains a new class, and if so,
+         * creates it.
+         * @param {Array} row Array of row data items.
+         * @param {Number} numControls The number of controls to read.
+         */
         createClassIfNecessary(row, numControls) {
             let className = this.getClassName(row);
             if (!this.classes.has(className)) {
@@ -290,11 +290,11 @@
         }
 
         /**
-        * Checks to see whether the given row contains a new course, and if so,
-        * creates it.
-        * @param {Array} row Array of row data items.
-        * @param {Number} numControls The number of controls to read.
-        */
+         * Checks to see whether the given row contains a new course, and if so,
+         * creates it.
+         * @param {Array} row Array of row data items.
+         * @param {Number} numControls The number of controls to read.
+         */
         createCourseIfNecessary(row, numControls) {
             let courseName = row[this.columnIndexes.get("course")];
             if (!this.courseDetails.has(courseName)) {
@@ -308,10 +308,10 @@
         }
 
         /**
-        * Checks to see whether the given row contains a class-course pairing that
-        * we haven't seen so far, and adds one if not.
-        * @param {Array} row Array of row data items.
-        */
+         * Checks to see whether the given row contains a class-course pairing that
+         * we haven't seen so far, and adds one if not.
+         * @param {Array} row Array of row data items.
+         */
         createClassCoursePairIfNecessary(row) {
             let className = this.getClassName(row);
             let courseName = row[this.columnIndexes.get("course")];
@@ -322,10 +322,10 @@
         }
 
         /**
-        * Reads the name of the competitor from the row.
-        * @param {Array} row Array of row data items.
-        * @return {String} The name of the competitor.
-        */
+         * Reads the name of the competitor from the row.
+         * @param {Array} row Array of row data items.
+         * @return {String} The name of the competitor.
+         */
         getName(row) {
             let name = "";
 
@@ -344,11 +344,11 @@
         }
 
         /**
-        * Reads in the competitor-specific data from the given row and adds it to
-        * the event data read so far.
-        * @param {Array} row Row of items read from a line of the input data.
-        * @param {Array} cumTimes Array of cumulative times for the competitor.
-        */
+         * Reads in the competitor-specific data from the given row and adds it to
+         * the event data read so far.
+         * @param {Array} row Row of items read from a line of the input data.
+         * @param {Array} cumTimes Array of cumulative times for the competitor.
+         */
         addCompetitor(row, cumTimes) {
 
             let className = this.getClassName(row);
@@ -414,13 +414,13 @@
         }
 
         /**
-        * Parses the given line and adds it to the event data accumulated so far.
-        * @param {String} line The line to parse.
-        * @param {Number} lineNumber The number of the line (used in error
-        *     messages).
-        * @param {String} delimiter The character used to delimit the columns of
-        *     data.
-        */
+         * Parses the given line and adds it to the event data accumulated so far.
+         * @param {String} line The line to parse.
+         * @param {Number} lineNumber The number of the line (used in error
+         *     messages).
+         * @param {String} delimiter The character used to delimit the columns of
+         *     data.
+         */
         readLine(line, lineNumber, delimiter) {
 
             if (line.trim() === "") {
@@ -449,11 +449,11 @@
         }
 
         /**
-        * Creates maps that describe the many-to-many join between the class names
-        * and course names.
-        * @return {Object} Object that contains two maps describing the
-        *     many-to-many join.
-        */
+         * Creates maps that describe the many-to-many join between the class names
+         * and course names.
+         * @return {Object} Object that contains two maps describing the
+         *     many-to-many join.
+         */
         getMapsBetweenClassesAndCourses() {
 
             let classesToCourses = new Map();
@@ -480,9 +480,9 @@
         }
 
         /**
-        * Creates and return a list of CourseClass objects from all of the data read.
-        * @return {Array} Array of CourseClass objects.
-        */
+         * Creates and return a list of CourseClass objects from all of the data read.
+         * @return {Array} Array of CourseClass objects.
+         */
         createClasses() {
             let classNames = Array.from(this.classes.keys());
             classNames.sort();
@@ -493,29 +493,29 @@
         }
 
         /**
-        * Find all of the courses and classes that are related to the given course.
-        *
-        * It's not always as simple as one course having multiple classes, as there
-        * can be multiple courses for one single class, and even multiple courses
-        * among multiple classes (e.g. M20E, M18E on courses 3, 3B at BOC 2013.)
-        * Essentially, we have a many-to-many join, and we want to pull out of that
-        * all of the classes and courses linked to the one course with the given
-        * name.
-        *
-        * (For the graph theorists among you, imagine the bipartite graph with
-        * classes on one side and courses on the other.  We want to find the
-        * connected subgraph that this course belongs to.)
-        *
-        * @param {String} initCourseName The name of the initial course.
-        * @param {Object} manyToManyMaps Object that contains the two maps that
-        *     map between class names and course names.
-        * @param {Set} doneCourseNames Set of all course names that have been
-        *     'done', i.e. included in a Course object that has been returned from
-        *     a call to this method.
-        * @param {Map} classesMap Map that maps class names to CourseClass
-        *     objects.
-        * @return {SplitsBrowser.Model.Course} - The created Course object.
-        */
+         * Find all of the courses and classes that are related to the given course.
+         *
+         * It's not always as simple as one course having multiple classes, as there
+         * can be multiple courses for one single class, and even multiple courses
+         * among multiple classes (e.g. M20E, M18E on courses 3, 3B at BOC 2013.)
+         * Essentially, we have a many-to-many join, and we want to pull out of that
+         * all of the classes and courses linked to the one course with the given
+         * name.
+         *
+         * (For the graph theorists among you, imagine the bipartite graph with
+         * classes on one side and courses on the other.  We want to find the
+         * connected subgraph that this course belongs to.)
+         *
+         * @param {String} initCourseName The name of the initial course.
+         * @param {Object} manyToManyMaps Object that contains the two maps that
+         *     map between class names and course names.
+         * @param {Set} doneCourseNames Set of all course names that have been
+         *     'done', i.e. included in a Course object that has been returned from
+         *     a call to this method.
+         * @param {Map} classesMap Map that maps class names to CourseClass
+         *     objects.
+         * @return {SplitsBrowser.Model.Course} - The created Course object.
+         */
         createCourseFromLinkedClassesAndCourses(initCourseName, manyToManyMaps, doneCourseNames, classesMap) {
             let courseNamesToDo = [initCourseName];
             let classNamesToDo = [];
@@ -568,11 +568,11 @@
         }
 
         /**
-        * Sort through the data read in and create Course objects representing each
-        * course in the event.
-        * @param {Array} classes Array of CourseClass objects read.
-        * @return {Array} Array of course objects.
-        */
+         * Sort through the data read in and create Course objects representing each
+         * course in the event.
+         * @param {Array} classes Array of CourseClass objects read.
+         * @return {Array} Array of course objects.
+         */
         determineCourses(classes) {
 
             let manyToManyMaps = this.getMapsBetweenClassesAndCourses();
@@ -602,9 +602,9 @@
         }
 
         /**
-        * Parses the read-in data and returns it.
-        * @return {SplitsBrowser.Model.Event} Event-data read.
-        */
+         * Parses the read-in data and returns it.
+         * @return {SplitsBrowser.Model.Event} Event-data read.
+         */
         parseEventData() {
 
             this.warnings = [];
@@ -637,10 +637,10 @@
     SplitsBrowser.Input.OE = {};
 
     /**
-    * Parse OE data read from a semicolon-separated data string.
-    * @param {String} data The input data string read.
-    * @return {SplitsBrowser.Model.Event} All event data read.
-    */
+     * Parse OE data read from a semicolon-separated data string.
+     * @param {String} data The input data string read.
+     * @return {SplitsBrowser.Model.Event} All event data read.
+     */
     SplitsBrowser.Input.OE.parseEventData = function (data) {
         let reader = new Reader(data);
         return reader.parseEventData();

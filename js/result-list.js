@@ -42,11 +42,11 @@
     const getMessageWithFormatting = SplitsBrowser.getMessageWithFormatting;
 
     /**
-    * Object that controls a list of results from which the user can select.
-    * @constructor
-    * @param {HTMLElement} parent Parent element to add this list to.
-    * @param {Function} alerter Function to call to issue an alert message.
-    */
+     * Object that controls a list of results from which the user can select.
+     * @constructor
+     * @param {HTMLElement} parent Parent element to add this list to.
+     * @param {Function} alerter Function to call to issue an alert message.
+     */
     class ResultList {
         constructor(parent, alerter) {
             this.parent = parent;
@@ -120,9 +120,9 @@
         }
 
         /**
-            * Sets messages within this control, following either its creation or a
-            * change of language.
-            */
+         * Sets messages within this control, following either its creation or a
+         * change of language.
+         */
         setMessages() {
             this.allButton.text(getMessage("SelectAllCompetitors"));
             this.noneButton.text(getMessage("SelectNoCompetitors"));
@@ -131,8 +131,8 @@
         }
 
         /**
-        * Retranslates this control following a change of language.
-        */
+         * Retranslates this control following a change of language.
+         */
         retranslate() {
             this.setMessages();
             if (this.placeholderDiv !== null) {
@@ -142,22 +142,22 @@
         }
 
         /**
-        * Sets the text in the placeholder div shown when the list of results
-        * contains only non-starters.
-        */
+         * Sets the text in the placeholder div shown when the list of results
+         * contains only non-starters.
+         */
         setPlaceholderDivText() {
             this.placeholderDiv.text(getMessage((this.hasTeamData) ? "NoTeamsStarted" : "NoCompetitorsStarted"));
         }
 
         /**
-        * Register a handler to be called whenever the filter text changes.
-        *
-        * When a change is made, this function will be called, with no arguments.
-        *
-        * If the handler has already been registered, nothing happens.
-        *
-        * @param {Function} handler The handler to register.
-        */
+         * Register a handler to be called whenever the filter text changes.
+         *
+         * When a change is made, this function will be called, with no arguments.
+         *
+         * If the handler has already been registered, nothing happens.
+         *
+         * @param {Function} handler The handler to register.
+         */
         registerChangeHandler(handler) {
             if (!this.changeHandlers.includes(handler)) {
                 this.changeHandlers.push(handler);
@@ -165,12 +165,12 @@
         }
 
         /**
-        * Unregister a handler from being called when the filter text changes.
-        *
-        * If the handler given was never registered, nothing happens.
-        *
-        * @param {Function} handler The handler to register.
-        */
+         * Unregister a handler from being called when the filter text changes.
+         *
+         * If the handler given was never registered, nothing happens.
+         *
+         * @param {Function} handler The handler to register.
+         */
         deregisterChangeHandler(handler) {
             let index = this.changeHandlers.indexOf(handler);
             if (index > -1) {
@@ -179,8 +179,8 @@
         }
 
         /**
-        * Fires all of the change handlers currently registered.
-        */
+         * Fires all of the change handlers currently registered.
+         */
         fireChangeHandlers() {
             for (let handler of this.changeHandlers) {
                 handler();
@@ -188,31 +188,31 @@
         }
 
         /**
-        * Returns whether the current mouse event is off the bottom of the list of
-        * result divs.
-        * @param {Event} event The event.
-        * @return {Boolean} True if the mouse is below the last visible div, false
-        *     if not.
-        */
+         * Returns whether the current mouse event is off the bottom of the list of
+         * result divs.
+         * @param {Event} event The event.
+         * @return {Boolean} True if the mouse is below the last visible div, false
+         *     if not.
+         */
         isMouseOffBottomOfResultList(event) {
             return this.lastVisibleDiv === null || d3.pointer(event)[1] >= $(this.lastVisibleDiv).height();
         }
 
         /**
-        * Returns the name of the CSS class to apply to result divs currently
-        * part of the selection/deselection.
-        * @return {String} CSS class name;
-        */
+         * Returns the name of the CSS class to apply to result divs currently
+         * part of the selection/deselection.
+         * @return {String} CSS class name;
+         */
         getDragClassName() {
             return (this.inverted) ? "dragDeselected" : "dragSelected";
         }
 
         /**
-        * Handles the start of a drag over the list of results.
-        * @param {Event} event The mouse event.
-        * @param {Number} index Index of the result div that the drag started
-        *     over, or RESULT_CONTAINER_INDEX if below the list of results.
-        */
+         * Handles the start of a drag over the list of results.
+         * @param {Event} event The mouse event.
+         * @param {Number} index Index of the result div that the drag started
+         *     over, or RESULT_CONTAINER_INDEX if below the list of results.
+         */
         startDrag(event, index) {
             if (event.which === LEFT_BUTTON) {
                 this.dragStartResultIndex = index;
@@ -237,11 +237,11 @@
         }
 
         /**
-        * Handles a mouse-move event. by adjust the range of dragged results to
-        * include the current index.
-        * @param {Event} event The event.
-        * @param {Number} dragIndex The index to which the drag has now moved.
-        */
+         * Handles a mouse-move event. by adjust the range of dragged results to
+         * include the current index.
+         * @param {Event} event The event.
+         * @param {Number} dragIndex The index to which the drag has now moved.
+         */
         mouseMove(event, dragIndex) {
             if (this.dragging) {
                 event.stopPropagation();
@@ -281,9 +281,9 @@
         }
 
         /**
-        * Handles the end of a drag in the result list.
-        * @param {Event} event The event.
-        */
+         * Handles the end of a drag in the result list.
+         * @param {Event} event The event.
+         */
         stopDrag(event) {
             if (!this.dragging) {
                 // This handler is wired up to mouseUp on the entire document, in
@@ -325,63 +325,63 @@
         }
 
         /**
-        * Returns the width of the list, in pixels.
-        * @return {Number} Width of the list.
-        */
+         * Returns the width of the list, in pixels.
+         * @return {Number} Width of the list.
+         */
         width() {
             return $(this.containerDiv.node()).width();
         }
 
         /**
-        * Sets the overall height of the result list.
-        * @param {Number} height The height of the control, in pixels.
-        */
+         * Sets the overall height of the result list.
+         * @param {Number} height The height of the control, in pixels.
+         */
         setHeight(height) {
             $(this.listDiv.node()).height(height - $(this.buttonsPanel.node()).height());
         }
 
         /**
-        * Returns all visible indexes.  This is the indexes of all results that
-        * have not been excluded by the filters.
-        * @return {Array} Array of indexes of visible results.
-        */
+         * Returns all visible indexes.  This is the indexes of all results that
+         * have not been excluded by the filters.
+         * @return {Array} Array of indexes of visible results.
+         */
         getAllVisibleIndexes() {
             return d3.range(this.allResultDetails.length).filter(index => this.allResultDetails[index].visible);
         }
 
         /**
-        * Selects all of the result that are matched by the filter.
-        */
+         * Selects all of the result that are matched by the filter.
+         */
         selectAllFiltered() {
             this.resultSelection.bulkSelect(this.getAllVisibleIndexes());
         }
 
         /**
-        * Selects none of the results that are matched by the filter.
-        */
+         * Selects none of the results that are matched by the filter.
+         */
         selectNoneFiltered() {
             this.resultSelection.bulkDeselect(this.getAllVisibleIndexes());
         }
 
         /**
-        * Selects none of the results at all.
-        */
+         * Selects none of the results at all.
+         */
         selectNone() {
             this.resultSelection.selectNone();
         }
 
         /**
-        * Returns whether the result with the given index is selected.
-        * @param {Number} index Index of the result within the list.
-        * @return {Boolean} True if the result is selected, false if not.
-        */
+         * Returns whether the result with the given index is selected.
+         * @param {Number} index Index of the result within the list.
+         * @return {Boolean} True if the result is selected, false if not.
+         */
         isSelected(index) {
             return this.resultSelection !== null && this.resultSelection.isSelected(index);
         }
 
         /**
-        * Select all of the results that cross the unique selected result.
-        */
+         * Select all of the results that cross the unique selected result.
+         */
         selectCrossingRunners() {
             this.resultSelection.selectCrossingRunners(this.allResultDetails, this.selectedLegIndex);
             if (this.resultSelection.isSingleRunnerSelected()) {
@@ -395,25 +395,25 @@
         }
 
         /**
-        * Enables or disables the crossing-runners button as appropriate.
-        */
+         * Enables or disables the crossing-runners button as appropriate.
+         */
         enableOrDisableCrossingRunnersButton() {
             this.crossingRunnersButton.node().disabled = !this.resultSelection.isSingleRunnerSelected();
         }
 
         /**
-        * Sets the chart type, so that the result list knows whether to show or
-        * hide the Crossing Runners button.
-        * @param {Object} chartType The chart type selected.
-        */
+         * Sets the chart type, so that the result list knows whether to show or
+         * hide the Crossing Runners button.
+         * @param {Object} chartType The chart type selected.
+         */
         setChartType(chartType) {
             this.crossingRunnersButton.style("display", (chartType.isRaceGraph) ? "block" : "none");
         }
 
         /**
-        * Handles a change to the selection of results, by highlighting all
-        * those selected and unhighlighting all those no longer selected.
-        */
+         * Handles a change to the selection of results, by highlighting all
+         * those selected and unhighlighting all those no longer selected.
+         */
         selectionChanged() {
             this.listDiv.selectAll("div.result")
                 .data(d3.range(this.resultSelection.count))
@@ -421,18 +421,18 @@
         }
 
         /**
-        * Toggle the selectedness of a result.
-        * @param {Number} index The index of the result to toggle.
-        */
+         * Toggle the selectedness of a result.
+         * @param {Number} index The index of the result to toggle.
+         */
         toggleResult(index) {
             this.resultSelection.toggle(index);
         }
 
         /**
-        * Formats a tooltip for a team.
-        * @param {Result} result The result to format the tooltip for
-        * @return {String} The formatted tooltip contents.
-        */
+         * Formats a tooltip for a team.
+         * @param {Result} result The result to format the tooltip for
+         * @return {String} The formatted tooltip contents.
+         */
         formatTooltip(result) {
             let names = [result.owner.name];
             for (let competitor of result.owner.members) {
@@ -445,21 +445,21 @@
         }
 
         /**
-        * Sets the list of results.
-        * @param {Array} results Array of result data.
-        * @param {Boolean} multipleClasses Whether the list of results is
-        *      made up from those in multiple classes.
-        * @param {Boolean} hasTeamData Whether the list of results shows
-        *      team data as opposed to individual data.
-        * @param {Number|null} selectedLegIndex The selected leg index, or
-        *      null to show the team.
-        */
+         * Sets the list of results.
+         * @param {Array} results Array of result data.
+         * @param {Boolean} multipleClasses Whether the list of results is
+         *      made up from those in multiple classes.
+         * @param {Boolean} hasTeamData Whether the list of results shows
+         *      team data as opposed to individual data.
+         * @param {Number|null} selectedLegIndex The selected leg index, or
+         *      null to show the team.
+         */
         setResultList(results, multipleClasses, hasTeamData, selectedLegIndex) {
             /**
-            * Returns the text to show for a result's name.
-            * @param {Result} result The result.
-            * @return {String} The text to show for a result's name.
-            */
+             * Returns the text to show for a result's name.
+             * @param {Result} result The result.
+             * @return {String} The text to show for a result's name.
+             */
             function resultText(result) {
                 let name;
                 if (hasTeamData && selectedLegIndex !== null) {
@@ -541,9 +541,9 @@
         }
 
         /**
-        * Sets the result selection object.
-        * @param {SplitsBrowser.Controls.ResultSelection} selection Result selection.
-        */
+         * Sets the result selection object.
+         * @param {SplitsBrowser.Controls.ResultSelection} selection Result selection.
+         */
         setSelection(selection) {
             if (this.resultSelection !== null) {
                 this.resultSelection.deregisterChangeHandler(this.handler);
@@ -556,25 +556,25 @@
         }
 
         /**
-        * Returns the filter text currently being used.
-        * @return {String} Filter text.
-        */
+         * Returns the filter text currently being used.
+         * @return {String} Filter text.
+         */
         getFilterText() {
             return this.filter.node().value;
         }
 
         /**
-        * Sets the filter text to use.
-        * @param {String} filterText The filter text to use.
-        */
+         * Sets the filter text to use.
+         * @param {String} filterText The filter text to use.
+         */
         setFilterText(filterText) {
             this.filter.node().value = filterText;
             this.updateFilterIfChanged();
         }
 
         /**
-        * Updates the filtering.
-        */
+         * Updates the filtering.
+         */
         updateFilter() {
             let currentFilterString = this.filter.node().value;
             let normedFilter = normaliseName(currentFilterString);
@@ -587,9 +587,9 @@
         }
 
         /**
-        * Updates the filtering following a change in the filter text input, if the
-        * filter text has changed since last time.  If not, nothing happens.
-        */
+         * Updates the filtering following a change in the filter text input, if the
+         * filter text has changed since last time.  If not, nothing happens.
+         */
         updateFilterIfChanged() {
             let currentFilterString = this.getFilterText();
             if (currentFilterString !== this.lastFilterString) {
@@ -600,27 +600,27 @@
         }
 
         /**
-        * Updates the filtering following a change in the filter text input
-        * in a short whiie.
-        */
+         * Updates the filtering following a change in the filter text input
+         * in a short whiie.
+         */
         updateFilterIfChangedDelayed() {
             setTimeout(() => this.updateFilterIfChanged(), 1);
         }
     }
 
     /**
-    * 'Normalise' a name or a search string into a common format.
-    *
-    * This is used before searching: a name matches a search string if the
-    * normalised name contains the normalised search string.
-    *
-    * At present, the normalisations carried out are:
-    * * Conversion to lower case
-    * * Removing all non-alphanumeric characters.
-    *
-    * @param {String} name The name to normalise.
-    * @return {String} The normalised names.
-    */
+     * 'Normalise' a name or a search string into a common format.
+     *
+     * This is used before searching: a name matches a search string if the
+     * normalised name contains the normalised search string.
+     *
+     * At present, the normalisations carried out are:
+     * * Conversion to lower case
+     * * Removing all non-alphanumeric characters.
+     *
+     * @param {String} name The name to normalise.
+     * @return {String} The normalised names.
+     */
     function normaliseName(name) {
         return name.toLowerCase().replace(/\W/g, "");
     }

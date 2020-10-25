@@ -33,39 +33,39 @@
     SplitsBrowser.isTrue = x => x;
 
     /**
-    * Utility function that returns whether a value is not null.
-    * @param {any} x Any input value.
-    * @return {Boolean} True if the value is not null, false otherwise.
-    */
+     * Utility function that returns whether a value is not null.
+     * @param {any} x Any input value.
+     * @return {Boolean} True if the value is not null, false otherwise.
+     */
     SplitsBrowser.isNotNull = x => x !== null;
 
     /**
-    * Returns whether the value given is the numeric value NaN.
-    *
-    * This differs from the JavaScript built-in function isNaN, in that isNaN
-    * attempts to convert the value to a number first, with non-numeric strings
-    * being converted to NaN.  So isNaN("abc") will be true, even though "abc"
-    * isn't NaN.  This function only returns true if you actually pass it NaN,
-    * rather than any value that fails to convert to a number.
-    *
-    * @param {any} x Any input value.
-    * @return {Boolean} True if x is NaN, false if x is any other value.
-    */
+     * Returns whether the value given is the numeric value NaN.
+     *
+     * This differs from the JavaScript built-in function isNaN, in that isNaN
+     * attempts to convert the value to a number first, with non-numeric strings
+     * being converted to NaN.  So isNaN("abc") will be true, even though "abc"
+     * isn't NaN.  This function only returns true if you actually pass it NaN,
+     * rather than any value that fails to convert to a number.
+     *
+     * @param {any} x Any input value.
+     * @return {Boolean} True if x is NaN, false if x is any other value.
+     */
     SplitsBrowser.isNaNStrict = x => x !== x;
 
     /**
-    * Returns whether the value given is neither null nor NaN.
-    * @param {Number|null} x A value to test.
-    * @return {Boolean} False if the value given is null or NaN, true
-    *     otherwise.
-    */
+     * Returns whether the value given is neither null nor NaN.
+     * @param {Number|null} x A value to test.
+     * @return {Boolean} False if the value given is null or NaN, true
+     *     otherwise.
+     */
     SplitsBrowser.isNotNullNorNaN = x => x !== null && x === x;
 
     /**
-    * Exception object raised if invalid data is passed.
-    * @constructor
-    * @param {String} message The exception detail message.
-    */
+     * Exception object raised if invalid data is passed.
+     * @constructor
+     * @param {String} message The exception detail message.
+     */
     class InvalidData {
         constructor(message) {
             this.name = "InvalidData";
@@ -73,29 +73,29 @@
         }
 
         /**
-        * Returns a string representation of this exception.
-        * @return {String} String representation.
-        */
+         * Returns a string representation of this exception.
+         * @return {String} String representation.
+         */
         toString() {
             return this.name + ": " + this.message;
         }
     }
 
     /**
-    * Utility function to throw an 'InvalidData' exception object.
-    * @param {String} message The exception message.
-    * @throws {InvalidData} if invoked.
-    */
+     * Utility function to throw an 'InvalidData' exception object.
+     * @param {String} message The exception message.
+     * @throws {InvalidData} if invoked.
+     */
     SplitsBrowser.throwInvalidData = function (message) {
         throw new InvalidData(message);
     };
 
     /**
-    * Exception object raised if a data parser for a format deems that the data
-    * given is not of that format.
-    * @constructor
-    * @param {String} message The exception message.
-    */
+     * Exception object raised if a data parser for a format deems that the data
+     * given is not of that format.
+     * @constructor
+     * @param {String} message The exception message.
+     */
     class WrongFileFormat {
         constructor(message) {
             this.name = "WrongFileFormat";
@@ -103,19 +103,19 @@
         }
 
         /**
-        * Returns a string representation of this exception.
-        * @return {String} String representation.
-        */
+         * Returns a string representation of this exception.
+         * @return {String} String representation.
+         */
         toString() {
             return `${this.name} : ${this.message}`;
         }
     }
 
     /**
-    * Utility function to throw a 'WrongFileFormat' exception object.
-    * @param {String} message The exception message.
-    * @throws {WrongFileFormat} if invoked.
-    */
+     * Utility function to throw a 'WrongFileFormat' exception object.
+     * @param {String} message The exception message.
+     * @throws {WrongFileFormat} if invoked.
+     */
     SplitsBrowser.throwWrongFileFormat = function (message) {
         throw new WrongFileFormat(message);
     };
@@ -132,36 +132,36 @@
     };
 
     /**
-    * Returns the sum of two numbers, or null if either is null.
-    * @param {Number|null} a One number, or null, to add.
-    * @param {Number|null} b The other number, or null, to add.
-    * @return {Number|null} null if at least one of a or b is null,
-    *      otherwise a + b.
-    */
+     * Returns the sum of two numbers, or null if either is null.
+     * @param {Number|null} a One number, or null, to add.
+     * @param {Number|null} b The other number, or null, to add.
+     * @return {Number|null} null if at least one of a or b is null,
+     *      otherwise a + b.
+     */
     SplitsBrowser.addIfNotNull = function (a, b) {
         return (a === null || b === null) ? null : (a + b);
     };
 
     /**
-    * Returns the difference of two numbers, or null if either is null.
-    * @param {Number|null} a One number, or null, to add.
-    * @param {Number|null} b The other number, or null, to add.
-    * @return {Number|null} null if at least one of a or b is null,
-    *      otherwise a - b.
-    */
+     * Returns the difference of two numbers, or null if either is null.
+     * @param {Number|null} a One number, or null, to add.
+     * @param {Number|null} b The other number, or null, to add.
+     * @return {Number|null} null if at least one of a or b is null,
+     *      otherwise a - b.
+     */
     SplitsBrowser.subtractIfNotNull = function (a, b) {
         return (a === null || b === null) ? null : (a - b);
     };
 
     /**
-    * Parses a course length.
-    *
-    * This can be specified as a decimal number of kilometres or metres, with
-    * either a full stop or a comma as the decimal separator.
-    *
-    * @param {String} stringValue The course length to parse, as a string.
-    * @return {Number|null} The parsed course length, or null if not valid.
-    */
+     * Parses a course length.
+     *
+     * This can be specified as a decimal number of kilometres or metres, with
+     * either a full stop or a comma as the decimal separator.
+     *
+     * @param {String} stringValue The course length to parse, as a string.
+     * @return {Number|null} The parsed course length, or null if not valid.
+     */
     SplitsBrowser.parseCourseLength = function (stringValue) {
         let courseLength = parseFloat(stringValue.replace(",", "."));
         if (!isFinite(courseLength)) {
@@ -176,11 +176,11 @@
     };
 
     /**
-    * Parses a course climb, specified as a whole number of metres.
-    *
-    * @param {String} stringValue The course climb to parse, as a string.
-    * @return {Number|null} The parsed course climb, or null if not valid.
-    */
+     * Parses a course climb, specified as a whole number of metres.
+     *
+     * @param {String} stringValue The course climb to parse, as a string.
+     * @return {Number|null} The parsed course climb, or null if not valid.
+     */
     SplitsBrowser.parseCourseClimb = function (stringValue) {
         let courseClimb = parseInt(stringValue, 10);
         if (SplitsBrowser.isNaNStrict(courseClimb)) {
@@ -191,11 +191,11 @@
     };
 
     /**
-    * Normalise line endings so that all lines end with LF, instead of
-    * CRLF or CR.
-    * @param {String} stringValue The string value to normalise line endings
-    *     within.
-    * @return {String} String value with the line-endings normalised.
-    */
+     * Normalise line endings so that all lines end with LF, instead of
+     * CRLF or CR.
+     * @param {String} stringValue The string value to normalise line endings
+     *     within.
+     * @return {String} String value with the line-endings normalised.
+     */
     SplitsBrowser.normaliseLineEndings = stringValue => stringValue.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 })();

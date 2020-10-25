@@ -59,10 +59,10 @@
     const ResultsTable = Controls.ResultsTable;
 
     /**
-    * Checks that D3 version 6 or later is present.
-    * @return {Boolean} True if D3 version 6 is present, false if no D3 was found
-    *     or a version of D3 older than version 6 was found.
-    */
+     * Checks that D3 version 6 or later is present.
+     * @return {Boolean} True if D3 version 6 is present, false if no D3 was found
+     *     or a version of D3 older than version 6 was found.
+     */
     function checkD3Version6() {
         if (!window.d3) {
             alert("D3 was not found.  SplitsBrowser requires D3 version 6 or later.");
@@ -76,11 +76,11 @@
     }
 
     /**
-    * The 'overall' viewer object responsible for viewing the splits graph.
-    * @constructor
-    * @param {Object|String|HTMLElement|undefined} options Optional object
-    *     containing various options to SplitsBrowser.
-    */
+     * The 'overall' viewer object responsible for viewing the splits graph.
+     * @constructor
+     * @param {Object|String|HTMLElement|undefined} options Optional object
+     *     containing various options to SplitsBrowser.
+     */
     class Viewer {
         constructor(options) {
             this.options = options;
@@ -116,18 +116,18 @@
         }
 
         /**
-        * Enables or disables the race graph option in the chart type selector
-        * depending on whether all visible results have start times.
-        */
+         * Enables or disables the race graph option in the chart type selector
+         * depending on whether all visible results have start times.
+         */
         enableOrDisableRaceGraph() {
             let anyStartTimesMissing = this.courseClassSet.allResults.some(result => result.lacksStartTime());
             this.chartTypeSelector.setRaceGraphDisabledNotifier((anyStartTimesMissing) ? alertRaceGraphDisabledAsStartTimesMissing : null);
         }
 
         /**
-        * Sets the classes that the viewer can view.
-        * @param {SplitsBrowser.Model.Event} eventData All event data loaded.
-        */
+         * Sets the classes that the viewer can view.
+         * @param {SplitsBrowser.Model.Event} eventData All event data loaded.
+         */
         setEvent(eventData) {
             this.eventData = eventData;
             this.classes = eventData.classes;
@@ -139,8 +139,8 @@
         }
 
         /**
-        * Draws the logo in the top panel.
-        */
+         * Draws the logo in the top panel.
+         */
         drawLogo() {
             this.logoSvg = this.topPanel.append("svg")
                 .classed("topRowStart", true);
@@ -178,31 +178,31 @@
         }
 
         /**
-        * Sets messages in the logo, following either its creation or a change of
-        * selected language.
-        */
+         * Sets messages in the logo, following either its creation or a change of
+         * selected language.
+         */
         setLogoMessages() {
             this.logoSvg.selectAll("title")
                 .text(getMessageWithFormatting("ApplicationVersion", { "$$VERSION$$": Version }));
         }
 
         /**
-        * Adds a spacer between controls on the top row.
-        */
+         * Adds a spacer between controls on the top row.
+         */
         addSpacer() {
             this.topPanel.append("div").classed("topRowStartSpacer", true);
         }
 
         /**
-        * Adds the language selector control to the top panel.
-        */
+         * Adds the language selector control to the top panel.
+         */
         addLanguageSelector() {
             this.languageSelector = new LanguageSelector(this.topPanel.node());
         }
 
         /**
-        * Adds the class selector control to the top panel.
-        */
+         * Adds the class selector control to the top panel.
+         */
         addClassSelector() {
             this.classSelector = new ClassSelector(this.topPanel.node());
             if (this.classes !== null) {
@@ -211,8 +211,8 @@
         }
 
         /**
-        * Adds the chart-type selector to the top panel.
-        */
+         * Adds the chart-type selector to the top panel.
+         */
         addChartTypeSelector() {
             let chartTypes = [
                 ChartTypes.get("SplitsGraph"), ChartTypes.get("RaceGraph"), ChartTypes.get("PositionAfterLeg"),
@@ -223,8 +223,8 @@
         }
 
         /**
-        * Adds the comparison selector to the top panel.
-        */
+         * Adds the comparison selector to the top panel.
+         */
         addComparisonSelector() {
             this.comparisonSelector = new ComparisonSelector(this.topPanel.node(), alerter);
             if (this.classes !== null) {
@@ -233,24 +233,24 @@
         }
 
         /**
-        * Adds a checkbox to select the 'original' data or data after SplitsBrowser
-        * has attempted to repair it.
-        */
+         * Adds a checkbox to select the 'original' data or data after SplitsBrowser
+         * has attempted to repair it.
+         */
         addOriginalDataSelector() {
             this.originalDataSelector = new OriginalDataSelector(this.topPanel);
         }
 
         /**
-        * Adds the leg-selctor control to choose between legs on a relay class.
-        */
+         * Adds the leg-selctor control to choose between legs on a relay class.
+         */
         addLegSelector() {
             this.legSelector = new LegSelector(this.topPanel);
         }
 
         /**
-        * Adds a direct link which links directly to SplitsBrowser with the given
-        * settings.
-        */
+         * Adds a direct link which links directly to SplitsBrowser with the given
+         * settings.
+         */
         addDirectLink() {
             this.directLink = this.topPanel.append("a")
                 .classed("topRowStart", true)
@@ -260,24 +260,24 @@
         }
 
         /**
-        * Adds the warning viewer to the top panel.
-        */
+         * Adds the warning viewer to the top panel.
+         */
         addWarningViewer() {
             this.warningViewer = new WarningViewer(this.topPanel);
         }
 
         /**
-        * Sets the text in the direct-link, following either its creation or a
-        * change in selected language.
-        */
+         * Sets the text in the direct-link, following either its creation or a
+         * change in selected language.
+         */
         setDirectLinkMessages() {
             this.directLink.attr("title", tryGetMessage("DirectLinkToolTip", ""))
                 .text(getMessage("DirectLink"));
         }
 
         /**
-        * Updates the URL that the direct link points to.
-        */
+         * Updates the URL that the direct link points to.
+         */
         updateDirectLink() {
             let data = {
                 classes: this.classSelector.getSelectedClasses(),
@@ -297,15 +297,15 @@
         }
 
         /**
-        * Adds the list of results, and the buttons, to the page.
-        */
+         * Adds the list of results, and the buttons, to the page.
+         */
         addResultList() {
             this.resultList = new ResultList(this.mainPanel.node(), alerter);
         }
 
         /**
-        * Construct the UI inside the HTML body.
-        */
+         * Construct the UI inside the HTML body.
+         */
         buildUi() {
             let body = d3.select("body");
             body.style("overflow", "hidden");
@@ -362,8 +362,8 @@
         }
 
         /**
-        * Registers change handlers.
-        */
+         * Registers change handlers.
+         */
         registerChangeHandlers() {
             this.languageSelector.registerChangeHandler(() => this.retranslate());
             this.classSelector.registerChangeHandler(indexes => this.selectClasses(indexes));
@@ -386,8 +386,8 @@
         }
 
         /**
-        * Resize the chart following a change of size of the chart.
-        */
+         * Resize the chart following a change of size of the chart.
+         */
         postResizeHook() {
             this.currentResizeTimeout = null;
             this.setResultListHeight();
@@ -397,18 +397,18 @@
         }
 
         /**
-        * Hides all transient elements that happen to be open.
-        */
+         * Hides all transient elements that happen to be open.
+         */
         hideTransientElements() {
             d3.selectAll(".transient").style("display", "none");
         }
 
         /**
-        * Returns the horizontal margin around the container, i.e. the sum of the
-        * left and right margin, padding and border for the body element and the
-        * container element.
-        * @return {Number} Total horizontal margin.
-        */
+         * Returns the horizontal margin around the container, i.e. the sum of the
+         * left and right margin, padding and border for the body element and the
+         * container element.
+         * @return {Number} Total horizontal margin.
+         */
         getHorizontalMargin() {
             let body = $("body");
             let container = $(this.container.node());
@@ -416,11 +416,11 @@
         }
 
         /**
-        * Returns the vertical margin around the container, i.e. the sum of the top
-        * and bottom margin, padding and border for the body element and the
-        * container element.
-        * @return {Number} Total vertical margin.
-        */
+         * Returns the vertical margin around the container, i.e. the sum of the top
+         * and bottom margin, padding and border for the body element and the
+         * container element.
+         * @return {Number} Total vertical margin.
+         */
         getVerticalMargin() {
             let body = $("body");
             let container = $(this.container.node());
@@ -428,11 +428,11 @@
         }
 
         /**
-        * Gets the usable height of the window, i.e. the height of the window minus
-        * margin and the height of the top bar, if any.  This height is used for
-        * the result list and the chart.
-        * @return {Number} Usable height of the window.
-        */
+         * Gets the usable height of the window, i.e. the height of the window minus
+         * margin and the height of the top bar, if any.  This height is used for
+         * the result list and the chart.
+         * @return {Number} Usable height of the window.
+         */
         getUsableHeight() {
             let bodyHeight = $(window).outerHeight() - this.getVerticalMargin() - this.topBarHeight;
             let topPanelHeight = $(this.topPanel.node()).height();
@@ -440,15 +440,15 @@
         }
 
         /**
-        * Sets the height of the result list.
-        */
+         * Sets the height of the result list.
+         */
         setResultListHeight() {
             this.resultList.setHeight(this.getUsableHeight());
         }
 
         /**
-        * Determines the size of the chart and sets it.
-        */
+         * Determines the size of the chart and sets it.
+         */
         setChartSize() {
             // Margin around the body element.
             let horzMargin = this.getHorizontalMargin();
@@ -471,8 +471,8 @@
         }
 
         /**
-        * Draw the chart using the current data.
-        */
+         * Draw the chart using the current data.
+         */
         drawChart() {
             if (this.chartTypeSelector.getChartType().isResultsTable) {
                 return;
@@ -516,8 +516,8 @@
         }
 
         /**
-        * Redraws the chart using all of the current data.
-        */
+         * Redraws the chart using all of the current data.
+         */
         redrawChart() {
             let data = {
                 chartData: this.chartData,
@@ -531,8 +531,8 @@
         }
 
         /**
-        * Redraw the chart, possibly using new data.
-        */
+         * Redraw the chart, possibly using new data.
+         */
         redraw() {
             let chartType = this.chartTypeSelector.getChartType();
             if (!chartType.isResultsTable) {
@@ -542,8 +542,8 @@
         }
 
         /**
-        * Retranslates the UI following a change of language.
-        */
+         * Retranslates the UI following a change of language.
+         */
         retranslate() {
             this.setLogoMessages();
             this.languageSelector.setMessages();
@@ -563,10 +563,10 @@
         }
 
         /**
-        * Sets the currently-selected classes in various objects that need it:
-        * current course-class set, comparison selector and results table.
-        * @param {Array} classIndexes Array of selected class indexes.
-        */
+         * Sets the currently-selected classes in various objects that need it:
+         * current course-class set, comparison selector and results table.
+         * @param {Array} classIndexes Array of selected class indexes.
+         */
         setClasses(classIndexes) {
             this.currentClasses = classIndexes.map(index => this.classes[index]);
             this.courseClassSet = new CourseClassSet(this.currentClasses);
@@ -578,9 +578,9 @@
         }
 
         /**
-        * Initialises the viewer with the given initial classes.
-        * @param {Array} classIndexes Array of selected class indexes.
-        */
+         * Initialises the viewer with the given initial classes.
+         * @param {Array} classIndexes Array of selected class indexes.
+         */
         initClasses(classIndexes) {
             this.classSelector.selectClasses(classIndexes);
             this.setClasses(classIndexes);
@@ -591,9 +591,9 @@
         }
 
         /**
-        * Change the graph to show the classes with the given indexes.
-        * @param {Number} classIndexes The (zero-based) indexes of the classes.
-        */
+         * Change the graph to show the classes with the given indexes.
+         * @param {Number} classIndexes The (zero-based) indexes of the classes.
+         */
         selectClasses(classIndexes) {
             if (classIndexes.length > 0 && this.currentClasses.length > 0 && this.classes[classIndexes[0]] === this.currentClasses[0]) {
                 // The 'primary' class hasn't changed, only the 'other' ones.
@@ -615,17 +615,17 @@
         }
 
         /**
-        * Change the graph to compare against a different reference.
-        */
+         * Change the graph to compare against a different reference.
+         */
         selectComparison() {
             this.drawChart();
             this.updateDirectLink();
         }
 
         /**
-        * Change the type of chart shown.
-        * @param {Object} chartType The type of chart to draw.
-        */
+         * Change the type of chart shown.
+         * @param {Object} chartType The type of chart to draw.
+         */
         selectChartType(chartType) {
             if (chartType.isResultsTable) {
                 this.mainPanel.style("display", "none");
@@ -650,9 +650,9 @@
         }
 
         /**
-        * Change the type of chart shown.
-        * @param {Object} chartType The type of chart to draw.
-        */
+         * Change the type of chart shown.
+         * @param {Object} chartType The type of chart to draw.
+         */
         selectChartTypeAndRedraw(chartType) {
             this.selectChartType(chartType);
             if (!chartType.isResultsTable) {
@@ -664,10 +664,10 @@
         }
 
         /**
-        * Selects original or repaired data, doing any recalculation necessary.
-        * @param {Boolean} showOriginalData True to show original data, false to
-        *     show repaired data.
-        */
+         * Selects original or repaired data, doing any recalculation necessary.
+         * @param {Boolean} showOriginalData True to show original data, false to
+         *     show repaired data.
+         */
         selectOriginalOrRepairedData(showOriginalData) {
             if (showOriginalData) {
                 transferResultData(this.eventData);
@@ -679,10 +679,10 @@
         }
 
         /**
-        * Shows original or repaired data.
-        * @param {Boolean} showOriginalData True to show original data, false to
-        *     show repaired data.
-        */
+         * Shows original or repaired data.
+         * @param {Boolean} showOriginalData True to show original data, false to
+         *     show repaired data.
+         */
         showOriginalOrRepairedData(showOriginalData) {
             this.selectOriginalOrRepairedData(showOriginalData);
             this.drawChart();
@@ -699,8 +699,8 @@
         }
 
         /**
-        * Handles a change in the selected leg.
-        */
+         * Handles a change in the selected leg.
+         */
         handleLegSelectionChanged() {
             this.setSelectedLegIndex();
             this.setChartSize();
@@ -709,8 +709,8 @@
         }
 
         /**
-        * Handles a change in the filter text in the result list.
-        */
+         * Handles a change in the filter text in the result list.
+         */
         handleFilterTextChanged() {
             this.setChartSize();
             this.redraw();
@@ -718,8 +718,8 @@
         }
 
         /**
-        * Updates whether a number of controls are enabled.
-        */
+         * Updates whether a number of controls are enabled.
+         */
         updateControlEnabledness() {
             let chartType = this.chartTypeSelector.getChartType();
             this.classSelector.setOtherClassesEnabled(!chartType.isResultsTable);
@@ -730,9 +730,9 @@
         }
 
         /**
-        * Updates the state of the viewer to reflect query-string arguments parsed.
-        * @param {Object} parsedQueryString Parsed query-string object.
-        */
+         * Updates the state of the viewer to reflect query-string arguments parsed.
+         * @param {Object} parsedQueryString Parsed query-string object.
+         */
         updateFromQueryString(parsedQueryString) {
             if (parsedQueryString.classes === null) {
                 this.setDefaultSelectedClass();
@@ -773,30 +773,30 @@
         }
 
         /**
-        * Sets the default selected class.
-        */
+         * Sets the default selected class.
+         */
         setDefaultSelectedClass() {
             this.initClasses((this.classes.length > 0) ? [0] : []);
         }
     }
 
     /**
-    * Pops up an alert box with the given message.
-    *
-    * The viewer passes this function to various controls so that they can pop
-    * up an alert box in normal use and call some other function during
-    * testing.
-    *
-    * @param {String} message The message to show.
-    */
+     * Pops up an alert box with the given message.
+     *
+     * The viewer passes this function to various controls so that they can pop
+     * up an alert box in normal use and call some other function during
+     * testing.
+     *
+     * @param {String} message The message to show.
+     */
     function alerter(message) {
         alert(message);
     }
 
     /**
-    * Pops up an alert box informing the user that the race graph cannot be
-    * chosen as the start times are missing.
-    */
+     * Pops up an alert box informing the user that the race graph cannot be
+     * chosen as the start times are missing.
+     */
     function alertRaceGraphDisabledAsStartTimesMissing() {
         alert(getMessage("RaceGraphDisabledAsStartTimesMissing"));
     }
@@ -804,11 +804,11 @@
     SplitsBrowser.Viewer = Viewer;
 
     /**
-    * Shows a message that appears if SplitsBrowser is unable to load event
-    * data.
-    * @param {String} key The key of the message to show.
-    * @param {Object} params Object mapping parameter names to values.
-    */
+     * Shows a message that appears if SplitsBrowser is unable to load event
+     * data.
+     * @param {String} key The key of the message to show.
+     * @param {Object} params Object mapping parameter names to values.
+     */
     function showLoadFailureMessage(key, params) {
         let errorDiv = d3.select("body")
                          .append("div")
@@ -822,14 +822,14 @@
     }
 
     /**
-    * Reads in the data in the given string and starts SplitsBrowser.
-    * @param {String} data String containing the data to read.
-    * @param {Object|String|HTMLElement|undefined} options Optional object
-    *     containing various options to SplitsBrowser.  It can also be used for
-    *     an HTML element that forms a 'banner' across the top of the page.
-    *     This element can be specified by a CSS selector for the element, or
-    *     the HTML element itself, although this behaviour is deprecated.
-    */
+     * Reads in the data in the given string and starts SplitsBrowser.
+     * @param {String} data String containing the data to read.
+     * @param {Object|String|HTMLElement|undefined} options Optional object
+     *     containing various options to SplitsBrowser.  It can also be used for
+     *     an HTML element that forms a 'banner' across the top of the page.
+     *     This element can be specified by a CSS selector for the element, or
+     *     the HTML element itself, although this behaviour is deprecated.
+     */
     SplitsBrowser.readEvent = function (data, options) {
         if (!checkD3Version6()) {
             return;
@@ -886,16 +886,16 @@
     };
 
     /**
-    * Handles an asynchronous callback that fetched event data, by parsing the
-    * data and starting SplitsBrowser.
-    * @param {String} data The data returned from the AJAX request.
-    * @param {String} status The status of the request.
-    * @param {Object|String|HTMLElement|undefined} options Optional object
-    *     containing various options to SplitsBrowser.  It can also be used for
-    *     an HTML element that forms a 'banner' across the top of the page.
-    *     This element can be specified by a CSS selector for the element, or
-    *     the HTML element itself, although this behaviour is deprecated.
-    */
+     * Handles an asynchronous callback that fetched event data, by parsing the
+     * data and starting SplitsBrowser.
+     * @param {String} data The data returned from the AJAX request.
+     * @param {String} status The status of the request.
+     * @param {Object|String|HTMLElement|undefined} options Optional object
+     *     containing various options to SplitsBrowser.  It can also be used for
+     *     an HTML element that forms a 'banner' across the top of the page.
+     *     This element can be specified by a CSS selector for the element, or
+     *     the HTML element itself, although this behaviour is deprecated.
+     */
     function readEventData(data, status, options) {
         if (status === "success") {
             SplitsBrowser.readEvent(data, options);
@@ -905,24 +905,24 @@
     }
 
     /**
-    * Handles the failure to read an event.
-    * @param {jQuery.jqXHR} jqXHR jQuery jqXHR object.
-    * @param {String} textStatus The text status of the request.
-    * @param {String} errorThrown The error message returned from the server.
-    */
+     * Handles the failure to read an event.
+     * @param {jQuery.jqXHR} jqXHR jQuery jqXHR object.
+     * @param {String} textStatus The text status of the request.
+     * @param {String} errorThrown The error message returned from the server.
+     */
     function readEventDataError(jqXHR, textStatus, errorThrown) {
         showLoadFailureMessage("LoadFailedReadError", {"$$ERROR$$": errorThrown});
     }
 
     /**
-    * Loads the event data in the given URL and starts SplitsBrowser.
-    * @param {String} eventUrl The URL that points to the event data to load.
-    * @param {Object|String|HTMLElement|undefined} options Optional object
-    *     containing various options to SplitsBrowser.  It can also be used for
-    *     an HTML element that forms a 'banner' across the top of the page.
-    *     This element can be specified by a CSS selector for the element, or
-    *     the HTML element itself, although this behaviour is deprecated.
-    */
+     * Loads the event data in the given URL and starts SplitsBrowser.
+     * @param {String} eventUrl The URL that points to the event data to load.
+     * @param {Object|String|HTMLElement|undefined} options Optional object
+     *     containing various options to SplitsBrowser.  It can also be used for
+     *     an HTML element that forms a 'banner' across the top of the page.
+     *     This element can be specified by a CSS selector for the element, or
+     *     the HTML element itself, although this behaviour is deprecated.
+     */
     SplitsBrowser.loadEvent = function (eventUrl, options) {
         if (!checkD3Version6()) {
             return;

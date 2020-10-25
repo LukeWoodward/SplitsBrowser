@@ -25,9 +25,9 @@
     const getMessage = SplitsBrowser.getMessage;
 
     /**
-    * A control that wraps a drop-down list used to choose between classes.
-    * @param {HTMLElement} parent The parent element to add the control to.
-    */
+     * A control that wraps a drop-down list used to choose between classes.
+     * @param {HTMLElement} parent The parent element to add the control to.
+     */
     class ClassSelector {
         constructor(parent) {
             this.changeHandlers = [];
@@ -88,32 +88,33 @@
         }
 
         /**
-        * Sets some messages following either the creation of this control or a
-        * change of selected language.
-        */
+         * Sets some messages following either the creation of this control or a
+         * change of selected language.
+         */
         setMessages() {
             this.labelSpan.text(getMessage("ClassSelectorLabel"));
             this.otherClassesCombiningLabel.text(getMessage("AdditionalClassSelectorLabel"));
         }
 
         /**
-        * Sets whether the other-classes selector is enabled, if it is shown at
-        * all.
-        * @param {Boolean} otherClassesEnabled True to enable the selector, false
-        *      to disable it.
-        */
+         * Sets whether the other-classes selector is enabled, if it is shown at
+         * all.
+         * @param {Boolean} otherClassesEnabled True to enable the selector, false
+         *      to disable it.
+         */
         setOtherClassesEnabled(otherClassesEnabled) {
             this.otherClassesCombiningLabel.classed("disabled", !otherClassesEnabled);
             this.otherClassesSelector.classed("disabled", !otherClassesEnabled);
             this.otherClassesEnabled = otherClassesEnabled;
         }
+
         /**
-        * Sets the list of classes that this selector can choose between.
-        *
-        * If there are no classes, a 'dummy' entry is added
-        * @param {Array} classes Array of CourseClass objects containing class
-        *     data.
-        */
+         * Sets the list of classes that this selector can choose between.
+         *
+         * If there are no classes, a 'dummy' entry is added
+         * @param {Array} classes Array of CourseClass objects containing class
+         *     data.
+         */
         setClasses(classes) {
             if ($.isArray(classes)) {
                 this.classes = classes;
@@ -142,16 +143,16 @@
         }
 
         /**
-        * Add a change handler to be called whenever the selected class or classes
-        * is changed.
-        *
-        * An array containing the indexes of the newly-selected classes is passed to
-        * each handler function.  This array is guaranteed to be non-empty.  The
-        * first index in the array is the 'primary' class.
-        *
-        * @param {Function} handler Handler function to be called whenever the class
-        *                   changes.
-        */
+         * Add a change handler to be called whenever the selected class or classes
+         * is changed.
+         *
+         * An array containing the indexes of the newly-selected classes is passed to
+         * each handler function.  This array is guaranteed to be non-empty.  The
+         * first index in the array is the 'primary' class.
+         *
+         * @param {Function} handler Handler function to be called whenever the class
+         *                   changes.
+         */
         registerChangeHandler(handler) {
             if (!this.changeHandlers.includes(handler)) {
                 this.changeHandlers.push(handler);
@@ -159,9 +160,9 @@
         }
 
         /**
-        * Sets the selected classes.
-        * @param {Array} selectedIndexes Array of indexes of classes.
-        */
+         * Sets the selected classes.
+         * @param {Array} selectedIndexes Array of indexes of classes.
+         */
         selectClasses(selectedIndexes) {
             if (selectedIndexes.length > 0 && selectedIndexes.every(index => 0 <= index && index < this.dropDown.options.length)) {
                 this.dropDown.selectedIndex = selectedIndexes[0];
@@ -171,9 +172,9 @@
         }
 
         /**
-        * Returns the indexes of the selected classes.
-        * @return {Array} Indexes of selected classes.
-        */
+         * Returns the indexes of the selected classes.
+         * @return {Array} Indexes of selected classes.
+         */
         getSelectedClasses() {
             if (this.dropDown.disabled) {
                 return [];
@@ -185,19 +186,19 @@
         }
 
         /**
-        * Handle a change of the selected option in the drop-down list.
-        */
+         * Handle a change of the selected option in the drop-down list.
+         */
         onSelectionChanged() {
             let indexes = this.getSelectedClasses();
             this.changeHandlers.forEach(handler => handler(indexes));
         }
 
         /**
-        * Updates the text in the other-class box at the top.
-        *
-        * This text contains either a list of the selected classes, or placeholder
-        * text if none are selected.
-        */
+         * Updates the text in the other-class box at the top.
+         *
+         * This text contains either a list of the selected classes, or placeholder
+         * text if none are selected.
+         */
         updateOtherClassText() {
             let classIdxs = Array.from(this.selectedOtherClassIndexes.values());
             classIdxs.sort(d3.ascending);
@@ -213,10 +214,10 @@
         }
 
         /**
-        * Updates the other-classes selector div following a change of selected
-        * 'main' class.
-        * @param {Set} selectedOtherClassIndexes Array of selected other-class indexes.
-        */
+         * Updates the other-classes selector div following a change of selected
+         * 'main' class.
+         * @param {Set} selectedOtherClassIndexes Array of selected other-class indexes.
+         */
         updateOtherClasses(selectedOtherClassIndexes) {
             this.otherClassesList.style("display", "none");
             this.selectedOtherClassIndexes = selectedOtherClassIndexes;
@@ -266,8 +267,8 @@
         }
 
         /**
-        * Shows or hides the other-class selector, if it is enabled.
-        */
+         * Shows or hides the other-class selector, if it is enabled.
+         */
         showHideClassSelector() {
             if (this.otherClassesEnabled) {
                 this.otherClassesList.style("display", (this.otherClassesList.style("display") === "none") ? null : "none");
@@ -275,9 +276,9 @@
         }
 
         /**
-        * Toggles the selection of an other class.
-        * @param {Number} classIdx Index of the class among the list of all classes.
-        */
+         * Toggles the selection of an other class.
+         * @param {Number} classIdx Index of the class among the list of all classes.
+         */
         toggleOtherClass(classIdx) {
             if (this.selectedOtherClassIndexes.has(classIdx)) {
                 this.selectedOtherClassIndexes.delete(classIdx);
@@ -291,8 +292,8 @@
         }
 
         /**
-        * Retranslates this control following a change of selected language.
-        */
+         * Retranslates this control following a change of selected language.
+         */
         retranslate() {
             this.setMessages();
             if (this.classes.length === 0) {

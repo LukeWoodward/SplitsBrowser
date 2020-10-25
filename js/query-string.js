@@ -27,12 +27,12 @@
     const CourseClassSet = SplitsBrowser.Model.CourseClassSet;
 
     /**
-    * Remove all matches of the given regular expression from the given string.
-    * The regexp is not assumed to contain the "g" flag.
-    * @param {String} queryString The query-string to process.
-    * @param {RegExp} regexp The regular expression to use to remove text.
-    * @return {String} The given query-string with all regexp matches removed.
-    */
+     * Remove all matches of the given regular expression from the given string.
+     * The regexp is not assumed to contain the "g" flag.
+     * @param {String} queryString The query-string to process.
+     * @param {RegExp} regexp The regular expression to use to remove text.
+     * @return {String} The given query-string with all regexp matches removed.
+     */
     function removeAll(queryString, regexp) {
         return queryString.replace(new RegExp(regexp.source, "g"), "");
     }
@@ -40,14 +40,14 @@
     const CLASS_NAME_REGEXP = /(?:^|&|\?)class=([^&]+)/;
 
     /**
-    * Reads the selected class names from a query string.
-    * @param {String} queryString The query string to read the class name
-    *     from.
-    * @param {Event} eventData The event data read in, used to validate the
-    *     selected classes.
-    * @return {CourseClassSet|null} Array of selected CourseClass objects, or null
-    *     if none were found.
-    */
+     * Reads the selected class names from a query string.
+     * @param {String} queryString The query string to read the class name
+     *     from.
+     * @param {Event} eventData The event data read in, used to validate the
+     *     selected classes.
+     * @return {CourseClassSet|null} Array of selected CourseClass objects, or null
+     *     if none were found.
+     */
     function readSelectedClasses(queryString, eventData) {
         let classNameMatch = CLASS_NAME_REGEXP.exec(queryString);
         if (classNameMatch === null) {
@@ -78,13 +78,13 @@
     }
 
     /**
-    * Formats the selected classes into the given query-string, removing any
-    * previous matches.
-    * @param {String} queryString The original query-string.
-    * @param {Event} eventData The event data.
-    * @param {Array} classIndexes Array of indexes of selected classes.
-    * @return {String} The query-string with the selected classes formatted in.
-    */
+     * Formats the selected classes into the given query-string, removing any
+     * previous matches.
+     * @param {String} queryString The original query-string.
+     * @param {Event} eventData The event data.
+     * @param {Array} classIndexes Array of indexes of selected classes.
+     * @return {String} The query-string with the selected classes formatted in.
+     */
     function formatSelectedClasses(queryString, eventData, classIndexes) {
         queryString = removeAll(queryString, CLASS_NAME_REGEXP);
         let classNames = classIndexes.map(index => eventData.classes[index].name);
@@ -94,11 +94,11 @@
     const CHART_TYPE_REGEXP = /(?:^|&|\?)chartType=([^&]+)/;
 
     /**
-    * Reads the selected chart type from a query string.
-    * @param {String} queryString The query string to read the chart type
-    *     from.
-    * @return {Object|null} Selected chart type, or null if not recognised.
-    */
+     * Reads the selected chart type from a query string.
+     * @param {String} queryString The query string to read the chart type
+     *     from.
+     * @return {Object|null} Selected chart type, or null if not recognised.
+     */
     function readChartType(queryString) {
         let chartTypeMatch = CHART_TYPE_REGEXP.exec(queryString);
         if (chartTypeMatch === null) {
@@ -114,11 +114,11 @@
     }
 
     /**
-    * Formats the given chart type into the query-string
-    * @param {String} queryString The original query-string.
-    * @param {Object} givenChartType The given chart type
-    * @return {String} The query-string with the chart-type formatted in.
-    */
+     * Formats the given chart type into the query-string
+     * @param {String} queryString The original query-string.
+     * @param {Object} givenChartType The given chart type
+     * @return {String} The query-string with the chart-type formatted in.
+     */
     function formatChartType(queryString, givenChartType) {
         queryString = removeAll(queryString, CHART_TYPE_REGEXP);
         for (let [chartTypeName, chartType] of ChartTypes.entries()) {
@@ -136,14 +136,14 @@
     const BUILTIN_COMPARISON_TYPES = ["Winner", "FastestTime", "FastestTimePlus5", "FastestTimePlus25", "FastestTimePlus50", "FastestTimePlus100"];
 
     /**
-    * Reads what to compare against.
-    * @param {String} queryString The query string to read the comparison
-    *     type from.
-    * @param {CourseClassSet|null} courseClassSet Course-class set containing
-    *     selected course-classes, or null if none are selected.
-    * @return {Object|null} Selected comparison type, or null if not
-    *     recognised.
-    */
+     * Reads what to compare against.
+     * @param {String} queryString The query string to read the comparison
+     *     type from.
+     * @param {CourseClassSet|null} courseClassSet Course-class set containing
+     *     selected course-classes, or null if none are selected.
+     * @return {Object|null} Selected comparison type, or null if not
+     *     recognised.
+     */
     function readComparison(queryString, courseClassSet) {
         let comparisonMatch = COMPARE_WITH_REGEXP.exec(queryString);
         if (comparisonMatch === null) {
@@ -180,12 +180,12 @@
     }
 
     /**
-    * Formats the given comparison into the given query-string.
-    * @param {String} queryString The original query-string.
-    * @param {Number} index Index of the comparison type.
-    * @param {Result} result The result to format.
-    * @return {String} The formatted query-string.
-    */
+     * Formats the given comparison into the given query-string.
+     * @param {String} queryString The original query-string.
+     * @param {Number} index Index of the comparison type.
+     * @param {Result} result The result to format.
+     * @return {String} The formatted query-string.
+     */
     function formatComparison(queryString, index, result) {
         queryString = removeAll(queryString, COMPARE_WITH_REGEXP);
         let comparison = null;
@@ -205,14 +205,14 @@
     const SELECTED_RESULTS_REGEXP = /(?:^|&|\?)selected=([^&]+)/;
 
     /**
-    * Reads what to compare against.
-    * @param {String} queryString The query string to read the comparison
-    *     type from.
-    * @param {CourseClassSet|null} courseClassSet Course-class set containing
-    *     selected course-classes, or null if none are selected.
-    * @return {Array|null} Array of selected result indexes, or null if none
-    *     found.
-    */
+     * Reads what to compare against.
+     * @param {String} queryString The query string to read the comparison
+     *     type from.
+     * @param {CourseClassSet|null} courseClassSet Course-class set containing
+     *     selected course-classes, or null if none are selected.
+     * @return {Array|null} Array of selected result indexes, or null if none
+     *     found.
+     */
     function readSelectedResults(queryString, courseClassSet) {
         if (courseClassSet === null) {
             return null;
@@ -244,13 +244,13 @@
     }
 
     /**
-    * Formats the given selected results into the given query-string.
-    * @param {String} queryString The original query-string.
-    * @param {CourseClassSet} courseClassSet The current course-class set.
-    * @param {Array} selected Array of indexes within the course-class set's
-    *     list of results of those that are selected.
-    * @return {String} Query-string with the selected result formatted into it.
-    */
+     * Formats the given selected results into the given query-string.
+     * @param {String} queryString The original query-string.
+     * @param {CourseClassSet} courseClassSet The current course-class set.
+     * @param {Array} selected Array of indexes within the course-class set's
+     *     list of results of those that are selected.
+     * @return {String} Query-string with the selected result formatted into it.
+     */
     function formatSelectedResults(queryString, courseClassSet, selected) {
         queryString = removeAll(queryString, SELECTED_RESULTS_REGEXP);
         let selectedResults = selected.map(index => courseClassSet.allResults[index]);
@@ -271,12 +271,12 @@
     const ALL_STATS_NAMES = ["TotalTime", "SplitTime", "BehindFastest", "TimeLoss"];
 
     /**
-    * Reads the selected statistics from the query string.
-    * @param {String} queryString The query string to read the selected
-    *     statistics from.
-    * @return {Map|null} Map containing the statistics read, or null
-    *     if no statistics parameter was found.
-    */
+     * Reads the selected statistics from the query string.
+     * @param {String} queryString The query string to read the selected
+     *     statistics from.
+     * @return {Map|null} Map containing the statistics read, or null
+     *     if no statistics parameter was found.
+     */
     function readSelectedStatistics(queryString) {
         let statsMatch = SELECTED_STATISTICS_REGEXP.exec(queryString);
         if (statsMatch === null) {
@@ -302,11 +302,11 @@
     }
 
     /**
-    * Formats the selected statistics into the given query string.
-    * @param {String} queryString The original query-string.
-    * @param {Map} stats The statistics to format.
-    * @return {String} Query-string with the selected statistics formatted in.
-    */
+     * Formats the selected statistics into the given query string.
+     * @param {String} queryString The original query-string.
+     * @param {Map} stats The statistics to format.
+     * @return {String} Query-string with the selected statistics formatted in.
+     */
     function formatSelectedStatistics(queryString, stats) {
         queryString = removeAll(queryString, SELECTED_STATISTICS_REGEXP);
         let statsNames = ALL_STATS_NAMES.filter(name => stats.get(name));
@@ -316,27 +316,27 @@
     const SHOW_ORIGINAL_REGEXP = /(?:^|&|\?)showOriginal=([^&]*)/;
 
     /**
-    * Reads the show-original-data flag from the given query-string.
-    *
-    * To show original data, the parameter showOriginal=1 must be part of the
-    * URL.  If this parameter does not exist or has some other value, original
-    * data will not be shown.  If the selected classes do not contain any
-    * dubious splits, this option will have no effect.
-    * @param {String} queryString The query-string to read.
-    * @return {Boolean} True to show original data, false not to.
-    */
+     * Reads the show-original-data flag from the given query-string.
+     *
+     * To show original data, the parameter showOriginal=1 must be part of the
+     * URL.  If this parameter does not exist or has some other value, original
+     * data will not be shown.  If the selected classes do not contain any
+     * dubious splits, this option will have no effect.
+     * @param {String} queryString The query-string to read.
+     * @return {Boolean} True to show original data, false not to.
+     */
     function readShowOriginal(queryString) {
         let showOriginalMatch = SHOW_ORIGINAL_REGEXP.exec(queryString);
         return (showOriginalMatch !== null && showOriginalMatch[1] === "1");
     }
 
     /**
-    * Formats the show-original-data flag into the given query-string.
-    * @param {String} queryString The original query-string.
-    * @param {Boolean} showOriginal True to show original data, false not to.
-    * @return {String} The query-string with the show-original-data flag
-    *     formatted in.
-    */
+     * Formats the show-original-data flag into the given query-string.
+     * @param {String} queryString The original query-string.
+     * @param {Boolean} showOriginal True to show original data, false not to.
+     * @return {String} The query-string with the show-original-data flag
+     *     formatted in.
+     */
     function formatShowOriginal(queryString, showOriginal) {
         queryString = removeAll(queryString, SHOW_ORIGINAL_REGEXP);
         return (showOriginal) ? queryString + "&showOriginal=1" : queryString;
@@ -345,10 +345,10 @@
     const SELECTED_LEG_REGEXP = /(?:^|&|\?)selectedLeg=([^&]*)/;
 
     /**
-    * Reads the selected leg from the given query-string
-    * @param {String} queryString The query-string to read.
-    * @return {Number|null} The selected leg, or null for none.
-    */
+     * Reads the selected leg from the given query-string
+     * @param {String} queryString The query-string to read.
+     * @return {Number|null} The selected leg, or null for none.
+     */
     function readSelectedLeg(queryString) {
         let selectedLegMatch = SELECTED_LEG_REGEXP.exec(queryString);
         if (selectedLegMatch === null) {
@@ -360,12 +360,12 @@
     }
 
     /**
-    * Formats the selected leg into the given query-string.
-    * @param {String} queryString The original query-string.
-    * @param {Number|null} selectedLeg The selected leg, or null for none.
-    * @return {String} The query string with the selected-leg value formatted
-    *     in.
-    */
+     * Formats the selected leg into the given query-string.
+     * @param {String} queryString The original query-string.
+     * @param {Number|null} selectedLeg The selected leg, or null for none.
+     * @return {String} The query string with the selected-leg value formatted
+     *     in.
+     */
     function formatSelectedLeg(queryString, selectedLeg) {
         queryString = removeAll(queryString, SELECTED_LEG_REGEXP);
         return (selectedLeg === null) ? queryString : queryString + "&selectedLeg=" + encodeURIComponent(selectedLeg);
@@ -374,13 +374,13 @@
     const FILTER_TEXT_REGEXP = /(?:^|&|\?)filterText=([^&]*)/;
 
     /**
-    * Reads the filter text from the given query string.
-    *
-    * If no filter text is found, an empty string is returned.
-    *
-    * @param {String} queryString The query-string to read.
-    * @return {String} The filter text read.
-    */
+     * Reads the filter text from the given query string.
+     *
+     * If no filter text is found, an empty string is returned.
+     *
+     * @param {String} queryString The query-string to read.
+     * @return {String} The filter text read.
+     */
     function readFilterText(queryString) {
         let filterTextMatch = FILTER_TEXT_REGEXP.exec(queryString);
         if (filterTextMatch === null) {
@@ -391,22 +391,22 @@
     }
 
     /**
-    * Formats filter text into the given query-string.
-    * @param {String} queryString The original query-string.
-    * @param {String} filterText The filter text.
-    * @return {String} The query-string with the filter text formatted in.
-    */
+     * Formats filter text into the given query-string.
+     * @param {String} queryString The original query-string.
+     * @param {String} filterText The filter text.
+     * @return {String} The query-string with the filter text formatted in.
+     */
     function formatFilterText(queryString, filterText) {
         queryString = removeAll(queryString, FILTER_TEXT_REGEXP);
         return (filterText === "") ? queryString : queryString + "&filterText=" + encodeURIComponent(filterText);
     }
 
     /**
-    * Attempts to parse the given query string.
-    * @param {String} queryString The query string to parse.
-    * @param {Event} eventData The parsed event data.
-    * @return {Object} The data parsed from the given query string.
-    */
+     * Attempts to parse the given query string.
+     * @param {String} queryString The query string to parse.
+     * @param {Event} eventData The parsed event data.
+     * @return {Object} The data parsed from the given query string.
+     */
     function parseQueryString(queryString, eventData) {
         let courseClassSet = readSelectedClasses(queryString, eventData);
         let classIndexes = (courseClassSet === null) ? null : courseClassSet.classes.map(courseClass => eventData.classes.indexOf(courseClass));
@@ -423,20 +423,20 @@
     }
 
     /**
-    * Formats a query string with the given data.
-    *
-    * The original query-string is provided, and any argument values within it
-    * are replaced with those given, and new ones added.  Unrecognised query-
-    * string parameters are preserved; they could be used server-side by
-    * whatever web application is hosting SplitsBrowser.
-    *
-    * @param {String} queryString The original query-string.
-    * @param {Event} eventData The event data.
-    * @param {CourseClassSet} courseClassSet The current course-class set.
-    * @param {Object} data Object containing the data to format into the
-    *     query-string.
-    * @return {String} The formatted query-string.
-    */
+     * Formats a query string with the given data.
+     *
+     * The original query-string is provided, and any argument values within it
+     * are replaced with those given, and new ones added.  Unrecognised query-
+     * string parameters are preserved; they could be used server-side by
+     * whatever web application is hosting SplitsBrowser.
+     *
+     * @param {String} queryString The original query-string.
+     * @param {Event} eventData The event data.
+     * @param {CourseClassSet} courseClassSet The current course-class set.
+     * @param {Object} data Object containing the data to format into the
+     *     query-string.
+     * @return {String} The formatted query-string.
+     */
     function formatQueryString(queryString, eventData, courseClassSet, data) {
         queryString = formatSelectedClasses(queryString, eventData, data.classes);
         queryString = formatChartType(queryString, data.chartType);

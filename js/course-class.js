@@ -47,18 +47,18 @@
         }
 
         /**
-        * Records that this course-class has result data that SplitsBrowser has
-        * deduced as dubious.
-        */
+         * Records that this course-class has result data that SplitsBrowser has
+         * deduced as dubious.
+         */
         recordHasDubiousData() {
             this.hasDubiousData = true;
         }
 
         /**
-        * Records that this course-class contains team results rather than
-        * individual results.
-        * @param {Array} numbersOfControls The numbers of controls on the relay legs.
-        */
+         * Records that this course-class contains team results rather than
+         * individual results.
+         * @param {Array} numbersOfControls The numbers of controls on the relay legs.
+         */
         setIsTeamClass(numbersOfControls) {
             this.isTeamClass = true;
             this.numbersOfControls = numbersOfControls;
@@ -70,9 +70,10 @@
                 result.setOffsets(this.offsets);
             }
         }
+
         /**
-            * Determines the time losses for the results in this course-class.
-            */
+         * Determines the time losses for the results in this course-class.
+         */
         determineTimeLosses() {
             let fastestSplitTimes = d3.range(1, this.numControls + 2).map(controlIdx => {
                 let splitRec = this.getFastestSplitTo(controlIdx);
@@ -85,31 +86,31 @@
         }
 
         /**
-        * Returns whether this course-class is empty, i.e. has no results.
-        * @return {Boolean} True if this course-class has no results, false if it
-        *     has at least one result.
-        */
+         * Returns whether this course-class is empty, i.e. has no results.
+         * @return {Boolean} True if this course-class has no results, false if it
+         *     has at least one result.
+         */
         isEmpty() {
             return (this.results.length === 0);
         }
 
         /**
-        * Sets the course that this course-class belongs to.
-        * @param {SplitsBrowser.Model.Course} course The course this class belongs to.
-        */
+         * Sets the course that this course-class belongs to.
+         * @param {SplitsBrowser.Model.Course} course The course this class belongs to.
+         */
         setCourse(course) {
             this.course = course;
         }
 
         /**
-        * Returns the fastest split time recorded by results in this class.  If
-        * no fastest split time is recorded (e.g. because all results
-        * mispunched that control, or the class is empty), null is returned.
-        * @param {Number} controlIdx The index of the control to return the
-        *      fastest split to.
-        * @return {Object|null} Object containing the name and fastest split, or
-        *      null if no split times for that control were recorded.
-        */
+         * Returns the fastest split time recorded by results in this class.  If
+         * no fastest split time is recorded (e.g. because all results
+         * mispunched that control, or the class is empty), null is returned.
+         * @param {Number} controlIdx The index of the control to return the
+         *      fastest split to.
+         * @return {Object|null} Object containing the name and fastest split, or
+         *      null if no split times for that control were recorded.
+         */
         getFastestSplitTo(controlIdx) {
             if (typeof controlIdx !== "number" || controlIdx < 1 || controlIdx > this.numControls + 1) {
                 throwInvalidData(`Cannot return splits to leg '${controlIdx}' in a course with ${this.numControls} control(s)`);
@@ -131,17 +132,17 @@
         }
 
         /**
-        * Returns all results that visited the control in the given time
-        * interval.
-        * @param {Number} controlNum The number of the control, with 0 being the
-        *     start, and this.numControls + 1 being the finish.
-        * @param {Number} intervalStart The start time of the interval, as
-        *     seconds past midnight.
-        * @param {Number} intervalEnd The end time of the interval, as seconds
-        *     past midnight.
-        * @return {Array} Array of objects listing the name and start time of each
-        *     result visiting the control within the given time interval.
-        */
+         * Returns all results that visited the control in the given time
+         * interval.
+         * @param {Number} controlNum The number of the control, with 0 being the
+         *     start, and this.numControls + 1 being the finish.
+         * @param {Number} intervalStart The start time of the interval, as
+         *     seconds past midnight.
+         * @param {Number} intervalEnd The end time of the interval, as seconds
+         *     past midnight.
+         * @return {Array} Array of objects listing the name and start time of each
+         *     result visiting the control within the given time interval.
+         */
         getResultsAtControlInTimeRange(controlNum, intervalStart, intervalEnd) {
             if (typeof controlNum !== "number" || isNaN(controlNum) || controlNum < 0 || controlNum > this.numControls + 1) {
                 throwInvalidData(`Control number must be a number between 0 and ${this.numControls} inclusive`);

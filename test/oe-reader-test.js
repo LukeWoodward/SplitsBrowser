@@ -56,15 +56,15 @@
     ];
 
     /**
-    * Generates a row of data for an OE-format file.
-    * @param {Object} data Object that maps key names to the data for those
-    *     keys.
-    * @param {Array} controls Array of objects, each of which contains a code
-    *     and a time.
-    * @param {String} template String template that describes how to generate
-    *     the row.
-    * @return {String} Row of data.
-    */
+     * Generates a row of data for an OE-format file.
+     * @param {Object} data Object that maps key names to the data for those
+     *     keys.
+     * @param {Array} controls Array of objects, each of which contains a code
+     *     and a time.
+     * @param {String} template String template that describes how to generate
+     *     the row.
+     * @return {String} Row of data.
+     */
     function generateRow(data, controls, template) {
         if (typeof template === "undefined") {
             throw new Error("No template given");
@@ -83,9 +83,9 @@
     }
 
     /**
-    * Returns data for a test competitor.
-    * @return {Map} Test competitor data.
-    */
+     * Returns data for a test competitor.
+     * @return {Map} Test competitor data.
+     */
     function getCompetitor1() {
         return new Map([
             ["forename", "First"],
@@ -111,9 +111,9 @@
     }
 
     /**
-    * Returns data for a second test competitor.
-    * @return {Object} Test competitor data.
-    */
+     * Returns data for a second test competitor.
+     * @return {Object} Test competitor data.
+     */
     function getCompetitor2() {
         return new Map([
             ["forename", "Second"],
@@ -139,9 +139,9 @@
     }
 
     /**
-    * Returns data for a second test competitor, on a longer course.
-    * @return {Object} Test competitor data.
-    */
+     * Returns data for a second test competitor, on a longer course.
+     * @return {Object} Test competitor data.
+     */
     function getCompetitor2OnLongerCourse() {
         let comp2 = getCompetitor2();
         comp2.set("numControls", "4");
@@ -152,9 +152,9 @@
     }
 
     /**
-    * Returns data for a third test competitor.
-    * @return {Object} Test competitor data.
-    */
+     * Returns data for a third test competitor.
+     * @return {Object} Test competitor data.
+     */
     function getCompetitor3() {
         return new Map([
             ["forename", "Third"],
@@ -180,76 +180,76 @@
     }
 
     /**
-    * Returns an array of test controls for competitor 1.
-    * @return {Array} Test controls data.
-    */
+     * Returns an array of test controls for competitor 1.
+     * @return {Array} Test controls data.
+     */
     function getControls1() {
         return [{code: "208", time: "01:50"}, {code: "227", time: "03:38"}, {code: "212", time: "06:02"}];
     }
 
     /**
-    * Returns an array of test controls for competitor 1, with one blank time.
-    * @return {Array} Test controls data.
-    */
+     * Returns an array of test controls for competitor 1, with one blank time.
+     * @return {Array} Test controls data.
+     */
     function getControls1WithBlankTimeForLast() {
         return [{code: "208", time: "01:50"}, {code: "227", time: "03:38"}, {code: "212", time: ""}];
     }
 
     /**
-    * Returns an array of test controls for competitor 1, with a non-numeric control code.
-    * @return {Array} Test controls data.
-    */
+     * Returns an array of test controls for competitor 1, with a non-numeric control code.
+     * @return {Array} Test controls data.
+     */
     function getControls1WithNonNumericControlCode() {
         return [{code: "208", time: "01:50"}, {code: "ST2", time: "03:38"}, {code: "212", time: "06:02"}];
     }
 
     /**
-    * Returns an array of test controls for competitor 1, with all times
-    * missing.
-    * @return {Array} Test controls data.
-    */
+     * Returns an array of test controls for competitor 1, with all times
+     * missing.
+     * @return {Array} Test controls data.
+     */
     function getControls1AllMissed() {
         return [{code: "208", time: "-----"}, {code: "227", time: "-----"}, {code: "212", time: "-----"}];
     }
 
     /**
-    * Returns an array of test controls for competitor 1, with an extra control
-    * with blank code and missing time.
-    * @return {Array} Test controls data.
-    */
+     * Returns an array of test controls for competitor 1, with an extra control
+     * with blank code and missing time.
+     * @return {Array} Test controls data.
+     */
     function getControls1WithBlankCodeAndMissingTimeAtTheEnd() {
         return [{code: "208", time: "01:50"}, {code: "227", time: "03:38"}, {code: "212", time: "06:02"}, {code: "", time: "-----"}];
     }
 
     /**
-    * Returns an array of test controls for competitor 1, with an extra control
-    * with blank code and missing time, followed by an additional control.
-    * @return {Array} Test controls data.
-    */
+     * Returns an array of test controls for competitor 1, with an extra control
+     * with blank code and missing time, followed by an additional control.
+     * @return {Array} Test controls data.
+     */
     function getControls1WithBlankCodeAndMissingTimeAtTheEndFollowedByAdditionalControl() {
         return [{code: "208", time: "01:50"}, {code: "227", time: "03:38"}, {code: "212", time: "06:02"}, {code: "", time: "-----"}, {code: "223", time: "04:11"}];
     }
 
     /**
-    * Returns an array of test controls for competitor 2.
-    * @return {Array} Test controls data.
-    */
+     * Returns an array of test controls for competitor 2.
+     * @return {Array} Test controls data.
+     */
     function getControls2() {
         return [{code: "208", time: "02:01"}, {code: "227", time: "04:06"}, {code: "212", time: "06:37"}];
     }
 
     /**
-    * Returns a longer list of test controls for competitor 2.
-    * @return {Array} Test controls data.
-    */
+     * Returns a longer list of test controls for competitor 2.
+     * @return {Array} Test controls data.
+     */
     function getLongerControls2() {
         return [{code: "208", time: "02:01"}, {code: "222", time: "04:06"}, {code: "219", time: "06:37"}, {code: "213", time: "09:10"}];
     }
 
     /**
-    * Returns an array of test controls for competitor 3.
-    * @return {Array} Test controls data.
-    */
+     * Returns an array of test controls for competitor 3.
+     * @return {Array} Test controls data.
+     */
     function getControls3() {
         return [{code: "208", time: "01:48"}, {code: "227", time: "03:46"}, {code: "212", time: "05:59"}];
     }
@@ -257,13 +257,13 @@
     QUnit.module("Input.OE");
 
     /**
-    * Runs a test for parsing invalid data that should fail.
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {String} invalidData The invalid string to parse.
-    * @param {String} what Description of the invalid data.
-    * @param {String|undefined} exceptionName Optional name of the exception (defaults
-    *     to InvalidData.
-    */
+     * Runs a test for parsing invalid data that should fail.
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {String} invalidData The invalid string to parse.
+     * @param {String} what Description of the invalid data.
+     * @param {String|undefined} exceptionName Optional name of the exception (defaults
+     *     to InvalidData.
+     */
     function runInvalidDataTest(assert, invalidData, what, exceptionName) {
         try {
             parseEventData(invalidData);
@@ -294,14 +294,14 @@
     });
 
     /**
-    * Formats some competitor data into a string that can be read by the reader.
-    * @param {Object} format The format used to generate the data string.
-    * @param {Array} competitors Array of 2-element arrays containing
-    *     competitor and control data.
-    * @param {Function} preprocessor Function called on the event data string
-    *     immediately before it is passed to the parser.  If not specified,
-    *     no preprocessing is done.
-    */
+     * Formats some competitor data into a string that can be read by the reader.
+     * @param {Object} format The format used to generate the data string.
+     * @param {Array} competitors Array of 2-element arrays containing
+     *     competitor and control data.
+     * @param {Function} preprocessor Function called on the event data string
+     *     immediately before it is passed to the parser.  If not specified,
+     *     no preprocessing is done.
+     */
     function generateData(format, competitors, preprocessor) {
         let text = format.header;
         for (let [comp, controls] of competitors) {
@@ -321,16 +321,16 @@
     }
 
     /**
-    * Calls a test function for the result of formatting the given competitor
-    * data using all formats.  The data is expected to be parsed successfully.
-    * @param {Array} competitors Array of 2-element arrays containing
-    *     competitor and control data.
-    * @param {Function} testFunc Function called with the parsed event data
-    *     and the format used to generate it.
-    * @param {Function} preprocessor Function called on the event data string
-    *     immediately before it is passed to the parser.  If not specified,
-    *     no preprocessing is done.
-    */
+     * Calls a test function for the result of formatting the given competitor
+     * data using all formats.  The data is expected to be parsed successfully.
+     * @param {Array} competitors Array of 2-element arrays containing
+     *     competitor and control data.
+     * @param {Function} testFunc Function called with the parsed event data
+     *     and the format used to generate it.
+     * @param {Function} preprocessor Function called on the event data string
+     *     immediately before it is passed to the parser.  If not specified,
+     *     no preprocessing is done.
+     */
     function runTestOverAllFormats (competitors, testFunc, preprocessor) {
         for (let format of ALL_FORMATS) {
             let text = generateData(format, competitors, preprocessor);

@@ -30,17 +30,17 @@
 
     /**
      * Construct a Repairer, for repairing some data.
-    */
+     */
     class Repairer {
         constructor() {
             this.madeAnyChanges = false;
         }
 
         /**
-        * Remove, by setting to NaN, any cumulative time that is equal to the
-        * previous cumulative time.
-        * @param {Array} cumTimes Array of cumulative times.
-        */
+         * Remove, by setting to NaN, any cumulative time that is equal to the
+         * previous cumulative time.
+         * @param {Array} cumTimes Array of cumulative times.
+         */
         removeCumulativeTimesEqualToPrevious(cumTimes) {
             let lastCumTime = cumTimes[0];
             for (let index = 1; index + 1 < cumTimes.length; index += 1) {
@@ -56,17 +56,17 @@
         }
 
         /**
-        * Remove from the cumulative times given any individual times that cause
-        * negative splits and whose removal leaves all of the remaining splits in
-        * strictly-ascending order.
-        *
-        * This method does not compare the last two cumulative times, so if the
-        * finish time is not after the last control time, no changes will be made.
-        *
-        * @param {Array} cumTimes Array of cumulative times.
-        * @return {Array} Array of cumulaive times with perhaps some cumulative
-        *     times taken out.
-        */
+         * Remove from the cumulative times given any individual times that cause
+         * negative splits and whose removal leaves all of the remaining splits in
+         * strictly-ascending order.
+         *
+         * This method does not compare the last two cumulative times, so if the
+         * finish time is not after the last control time, no changes will be made.
+         *
+         * @param {Array} cumTimes Array of cumulative times.
+         * @return {Array} Array of cumulaive times with perhaps some cumulative
+         *     times taken out.
+         */
         removeCumulativeTimesCausingNegativeSplits(cumTimes) {
             let nonAscIndexes = getFirstNonAscendingIndexes(cumTimes);
             while (nonAscIndexes !== null && nonAscIndexes.second + 1 < cumTimes.length) {
@@ -128,14 +128,14 @@
         }
 
         /**
-        * Removes the finish cumulative time from a result if it is absurd.
-        *
-        * It is absurd if it is less than the time at the previous control by at
-        * least the maximum amount of time that can be added to finish splits.
-        *
-        * @param {Array} cumTimes The cumulative times to perhaps remove the
-        *     finish split from.
-        */
+         * Removes the finish cumulative time from a result if it is absurd.
+         *
+         * It is absurd if it is less than the time at the previous control by at
+         * least the maximum amount of time that can be added to finish splits.
+         *
+         * @param {Array} cumTimes The cumulative times to perhaps remove the
+         *     finish split from.
+         */
         removeFinishTimeIfAbsurd(cumTimes) {
             let finishTime = cumTimes[cumTimes.length - 1];
             let lastControlTime = cumTimes[cumTimes.length - 2];
@@ -146,11 +146,11 @@
         }
 
         /**
-        * Attempts to repair the cumulative times within a result.  The repaired
-        * cumulative times are written back into the result.
-        *
-        * @param {Result} result Result whose cumulative times we wish to repair.
-        */
+         * Attempts to repair the cumulative times within a result.  The repaired
+         * cumulative times are written back into the result.
+         *
+         * @param {Result} result Result whose cumulative times we wish to repair.
+         */
         repairResult(result) {
             let cumTimes = result.originalCumTimes.slice(0);
 
@@ -166,10 +166,10 @@
         }
 
         /**
-        * Attempt to repair all of the data within a course-class.
-        * @param {CourseClass} courseClass The class whose data we wish to
-        *     repair.
-        */
+         * Attempt to repair all of the data within a course-class.
+         * @param {CourseClass} courseClass The class whose data we wish to
+         *     repair.
+         */
         repairCourseClass(courseClass) {
             this.madeAnyChanges = false;
             for (let result of courseClass.results) {
@@ -182,9 +182,9 @@
         }
 
         /**
-        * Attempt to carry out repairs to the data in an event.
-        * @param {Event} eventData The event data to repair.
-        */
+         * Attempt to carry out repairs to the data in an event.
+         * @param {Event} eventData The event data to repair.
+         */
         repairEventData(eventData) {
             for (let courseClass of eventData.classes) {
                 this.repairCourseClass(courseClass);
@@ -193,17 +193,17 @@
     }
 
     /**
-    * Returns the positions at which the first pair of non-ascending cumulative
-    * times are found.  This is returned as an object with 'first' and 'second'
-    * properties.
-    *
-    * If the entire array of cumulative times is strictly ascending, this
-    * returns null.
-    *
-    * @param {Array} cumTimes Array of cumulative times.
-    * @return {Object|null} Object containing indexes of non-ascending entries, or
-    *     null if none found.
-    */
+     * Returns the positions at which the first pair of non-ascending cumulative
+     * times are found.  This is returned as an object with 'first' and 'second'
+     * properties.
+     *
+     * If the entire array of cumulative times is strictly ascending, this
+     * returns null.
+     *
+     * @param {Array} cumTimes Array of cumulative times.
+     * @return {Object|null} Object containing indexes of non-ascending entries, or
+     *     null if none found.
+     */
     function getFirstNonAscendingIndexes(cumTimes) {
         if (cumTimes.length === 0 || cumTimes[0] !== 0) {
             throwInvalidData("cumulative times array does not start with a zero cumulative time");
@@ -228,22 +228,22 @@
     }
 
     /**
-    * Attempt to carry out repairs to the data in an event.
-    * @param {Event} eventData The event data to repair.
-    */
+     * Attempt to carry out repairs to the data in an event.
+     * @param {Event} eventData The event data to repair.
+     */
     function repairEventData(eventData) {
         let repairer = new Repairer();
         repairer.repairEventData(eventData);
     }
 
     /**
-    * Transfer the 'original' data for each result to the 'final' data.
-    *
-    * This is used if the input data has been read in a format that requires
-    * the data to be checked, but the user has opted not to perform any such
-    * reparations and wishes to view the
-    * @param {Event} eventData The event data to repair.
-    */
+     * Transfer the 'original' data for each result to the 'final' data.
+     *
+     * This is used if the input data has been read in a format that requires
+     * the data to be checked, but the user has opted not to perform any such
+     * reparations and wishes to view the
+     * @param {Event} eventData The event data to repair.
+     */
     function transferResultData(eventData) {
         for (let courseClass of eventData.classes) {
             for (let result of courseClass.results) {

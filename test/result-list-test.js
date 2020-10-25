@@ -64,9 +64,9 @@
     let propagationStopped = false;
 
     /**
-    * Verifies that the given value is a Number.
-    * @param {any} value Value to verify.
-    */
+     * Verifies that the given value is a Number.
+     * @param {any} value Value to verify.
+     */
     function verifyNumeric(value) {
         if (typeof value !== NUMBER_TYPE) {
             throw new Error(`${value} of type ${typeof value} is not a number`);
@@ -74,12 +74,12 @@
     }
 
     /**
-    * Sets up and returns the event before event handlers are called.
-    * @param {Number|HTMLElement} target The target element, or the index of
-    *     the result.
-    * @param {Object} options The options.
-    * @return {Object} The created event.
-    */
+     * Sets up and returns the event before event handlers are called.
+     * @param {Number|HTMLElement} target The target element, or the index of
+     *     the result.
+     * @param {Object} options The options.
+     * @return {Object} The created event.
+     */
     function setUpEvent(target, options) {
         propagationStopped = false;
         if (typeof target === NUMBER_TYPE) {
@@ -97,13 +97,13 @@
     }
 
     /**
-    * Sets up the event before event handlers are called and initiates a
-    * start-drag.
-    * @param {Number} targetIndex The index of the target result element.
-    * @param {Object} options The options.
-    * @param {Object} listAndSelection Object containing the result list and
-    *     the result selection.
-    */
+     * Sets up the event before event handlers are called and initiates a
+     * start-drag.
+     * @param {Number} targetIndex The index of the target result element.
+     * @param {Object} options The options.
+     * @param {Object} listAndSelection Object containing the result list and
+     *     the result selection.
+     */
     function setUpEventAndStartDrag(targetIndex, options, listAndSelection) {
         verifyNumeric(targetIndex);
         let event = setUpEvent(targetIndex, options);
@@ -111,13 +111,13 @@
     }
 
     /**
-    * Sets up the event before event handlers are called and initiates a
-    * start-drag followed by a stop-drag.
-    * @param {Number} targetIndex The index of the target result element.
-    * @param {Object} options The options.
-    * @param {Object} listAndSelection Object containing the result list and
-    *     the result selection.
-    */
+     * Sets up the event before event handlers are called and initiates a
+     * start-drag followed by a stop-drag.
+     * @param {Number} targetIndex The index of the target result element.
+     * @param {Object} options The options.
+     * @param {Object} listAndSelection Object containing the result list and
+     *     the result selection.
+     */
     function setUpEventAndStartDragAndStopDrag(targetIndex, options, listAndSelection) {
         verifyNumeric(targetIndex);
         let event = setUpEvent(targetIndex, options);
@@ -126,12 +126,12 @@
     }
 
     /**
-    * Sets up the event before event handlers are called and initiates a
-    * start-drag from off the bottom of the list of results.
-    * @param {Object} listAndSelection Object containing the result list and
-    *     the result selection.
-    * @param {Object} options The options.
-    */
+     * Sets up the event before event handlers are called and initiates a
+     * start-drag from off the bottom of the list of results.
+     * @param {Object} listAndSelection Object containing the result list and
+     *     the result selection.
+     * @param {Object} options The options.
+     */
     function setUpEventAndStartDragOffTheBottom(listAndSelection, options) {
         options.yOffset = 250;
         let event = setUpEvent($("#resultList")[0], options);
@@ -139,12 +139,12 @@
     }
 
     /**
-    * Sets up the event before event handlers are called and initiates a
-    * start-drag from within the scrollbar.
-    * @param {Object} listAndSelection Object containing the result list and
-    *     the result selection.
-    * @param {Object} options The options.
-    */
+     * Sets up the event before event handlers are called and initiates a
+     * start-drag from within the scrollbar.
+     * @param {Object} listAndSelection Object containing the result list and
+     *     the result selection.
+     * @param {Object} options The options.
+     */
     function setUpEventAndStartDragInTheScrollbar(listAndSelection, options) {
         options.yOffset = -20;
         let event = setUpEvent($("#resultList")[0], options);
@@ -152,12 +152,12 @@
     }
 
     /**
-    * Sets up the event and initiates a mouse-move event.
-    * @param {Number|HTMLElement} target The target element, or the index of
-    *     the result.
-    * @param {Object} listAndSelection Object containing the result list and
-    *     the selected results.
-    */
+     * Sets up the event and initiates a mouse-move event.
+     * @param {Number|HTMLElement} target The target element, or the index of
+     *     the result.
+     * @param {Object} listAndSelection Object containing the result list and
+     *     the selected results.
+     */
     function setUpEventAndMoveMouse(targetIndex, listAndSelection) {
         verifyNumeric(targetIndex);
         let event = setUpEvent(targetIndex);
@@ -165,13 +165,13 @@
     }
 
     /**
-    * Sets up the event and initiates a mouse-move event and a stop-drag
-    * event.
-    * @param {Number|HTMLElement} target The target element, or the index of
-    *     the result.
-    * @param {Object} listAndSelection Object containing the result list and
-    *     the selected results.
-    */
+     * Sets up the event and initiates a mouse-move event and a stop-drag
+     * event.
+     * @param {Number|HTMLElement} target The target element, or the index of
+     *     the result.
+     * @param {Object} listAndSelection Object containing the result list and
+     *     the selected results.
+     */
     function setUpEventAndMoveMouseAndStopDrag(targetIndex, listAndSelection) {
         verifyNumeric(targetIndex);
         let event = setUpEvent(targetIndex);
@@ -180,22 +180,22 @@
     }
 
     /**
-    * Sets up the event and initiates a mouse-move event off the bottom of
-    * the result list.
-    * @param {Object} listAndSelection Object containing the result list and
-    *     the selected results.
-    */
+     * Sets up the event and initiates a mouse-move event off the bottom of
+     * the result list.
+     * @param {Object} listAndSelection Object containing the result list and
+     *     the selected results.
+     */
     function setUpEventAndMoveMouseOffTheBottom(listAndSelection) {
         let event = setUpEvent($("#resultList")[0], {yOffset: 200});
         listAndSelection.list.mouseMove(event, -1);
     }
 
     /**
-    * Sets up the event and initiates a stop-drag event off the bottom of
-    * the result list and stops the drag there.
-    * @param {Object} listAndSelection Object containing the result list and
-    *     the selected results.
-    */
+     * Sets up the event and initiates a stop-drag event off the bottom of
+     * the result list and stops the drag there.
+     * @param {Object} listAndSelection Object containing the result list and
+     *     the selected results.
+     */
     function setUpEventAndMoveMouseOffTheBottomAndStopDrag(listAndSelection) {
         let event = setUpEvent($("#resultList")[0], {yOffset: 200});
         listAndSelection.list.mouseMove(event, -1);
@@ -203,21 +203,21 @@
     }
 
     /**
-    * Sets up the event and initiates a mouse-move event into the scrollbar.
-    * @param {Object} listAndSelection Object containing the result list and
-    *     the selected results.
-    */
+     * Sets up the event and initiates a mouse-move event into the scrollbar.
+     * @param {Object} listAndSelection Object containing the result list and
+     *     the selected results.
+     */
     function setUpEventAndMoveMouseIntoTheScrollbar(listAndSelection) {
         let event = setUpEvent($("#resultList")[0], {yOffset: -20});
         listAndSelection.list.mouseMove(event, -1);
     }
 
     /**
-    * Sets up the event and initiates a mouse-move event into the scrollbar
-    * and a stop-drag event there.
-    * @param {Object} listAndSelection Object containing the result list and
-    *     the selected results.
-    */
+     * Sets up the event and initiates a mouse-move event into the scrollbar
+     * and a stop-drag event there.
+     * @param {Object} listAndSelection Object containing the result list and
+     *     the selected results.
+     */
     function setUpEventAndMoveMouseIntoTheScrollbarAndStopDrag(listAndSelection) {
         let event = setUpEvent($("#resultList")[0], {yOffset: -20});
         listAndSelection.list.mouseMove(event, -1);
@@ -225,13 +225,13 @@
     }
 
     /**
-    * Creates a list with three results in it, and return the list and the
-    * selection.
-    * @param {Array} selectedIndexes Indexes of selected results in the selection.
-    * @param {Boolean} multipleClasses Whether the list of results is built from
-    *                                  multiple classes.
-    * @return {Object} 2-element object containing the selection and list.
-    */
+     * Creates a list with three results in it, and return the list and the
+     * selection.
+     * @param {Array} selectedIndexes Indexes of selected results in the selection.
+     * @param {Boolean} multipleClasses Whether the list of results is built from
+     *                                  multiple classes.
+     * @return {Object} 2-element object containing the selection and list.
+     */
     function createSampleList(selectedIndexes, multipleClasses) {
         let parent = d3.select("div#qunit-fixture").node();
 
@@ -253,11 +253,11 @@
     }
 
     /**
-    * Creates a list with three team results in it, and return the list and the
-    * selection.
-    * @param {Array} selectedIndexes Indexes of selected results in the selection.
-    * @return {Object} 2-element object containing the selection and list.
-    */
+     * Creates a list with three team results in it, and return the list and the
+     * selection.
+     * @param {Array} selectedIndexes Indexes of selected results in the selection.
+     * @return {Object} 2-element object containing the selection and list.
+     */
     function createSampleTeamList(selectedIndexes) {
         let parent = d3.select("div#qunit-fixture").node();
 
@@ -295,13 +295,13 @@
     }
 
     /**
-    * Creates a list with three options in it, set it up on the race graph
-    * and return the list and the selection.
-    * @param {Array} selectedIndexes Indexes of selected results in the selection.
-    * @param {Boolean} multipleClasses Whether the list of results is built from
-    *                                    multiple classes.
-    * @return {Object} 2-element object containing the selection and list.
-    */
+     * Creates a list with three options in it, set it up on the race graph
+     * and return the list and the selection.
+     * @param {Array} selectedIndexes Indexes of selected results in the selection.
+     * @param {Boolean} multipleClasses Whether the list of results is built from
+     *                                  multiple classes.
+     * @return {Object} 2-element object containing the selection and list.
+     */
     function createSampleListForRaceGraph(selectedIndexes, multipleClasses) {
         let listAndSelection = createSampleList(selectedIndexes, multipleClasses);
         listAndSelection.list.setChartType(ChartTypes.get("RaceGraph"));
@@ -310,11 +310,11 @@
     }
 
     /**
-    * Creates a list with three team options in it, set it up on the race graph
-    * and return the list and the selection.
-    * @param {Array} selectedIndexes Indexes of selected results in the selection.
-    * @return {Object} 2-element object containing the selection and list.
-    */
+     * Creates a list with three team options in it, set it up on the race graph
+     * and return the list and the selection.
+     * @param {Array} selectedIndexes Indexes of selected results in the selection.
+     * @return {Object} 2-element object containing the selection and list.
+     */
     function createSampleTeamListForRaceGraph(selectedIndexes) {
         let listAndSelection = createSampleTeamList(selectedIndexes);
         listAndSelection.list.setChartType(ChartTypes.get("RaceGraph"));
@@ -323,13 +323,13 @@
     }
 
     /**
-    * Creates a list with three options in it, wires up the test change handler
-    * and returns the list and the selection.
-    * @param {Array} selectedIndexes Indexes of selected results in the selection.
-    * @param {Boolean} multipleClasses Whether the list of results is built from
-    *                                    multiple classes.
-    * @return {Object} 2-element object containing the selection and list.
-    */
+     * Creates a list with three options in it, wires up the test change handler
+     * and returns the list and the selection.
+     * @param {Array} selectedIndexes Indexes of selected results in the selection.
+     * @param {Boolean} multipleClasses Whether the list of results is built from
+     *                                    multiple classes.
+     * @return {Object} 2-element object containing the selection and list.
+     */
     function createSampleListWithChangeHandler(selectedIndexes, multipleClasses) {
         let listAndSelection = createSampleList(selectedIndexes, multipleClasses);
         listAndSelection.list.registerChangeHandler(testHandler);
@@ -337,14 +337,14 @@
     }
 
     /**
-    * Asserts that the given expected list of results all have the given
-    * CSS class in their associated div, and other result divs do not.
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {Number} count Total number of results.
-    * @param {String} className The name of the CSS class to test for.
-    * @param {Array} expectedResults Array that contains the indexes of
-    *     all results that should have the given CSS class.
-    */
+     * Asserts that the given expected list of results all have the given
+     * CSS class in their associated div, and other result divs do not.
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {Number} count Total number of results.
+     * @param {String} className The name of the CSS class to test for.
+     * @param {Array} expectedResults Array that contains the indexes of
+     *     all results that should have the given CSS class.
+     */
     function assertResultsClassed(assert, count, className, expectedResults) {
         let results = $("div.result");
         for (let index = 0; index < count; index += 1) {
@@ -353,35 +353,35 @@
     }
 
     /**
-    * Asserts that the currently-drag-selected results are as expected.
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {Number} count Total number of results.
-    * @param {Array} expectedDragSelected Array that contains the indexes of
-    *     all results that should be drag-selected.
-    */
+     * Asserts that the currently-drag-selected results are as expected.
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {Number} count Total number of results.
+     * @param {Array} expectedDragSelected Array that contains the indexes of
+     *     all results that should be drag-selected.
+     */
     function assertDragSelected(assert, count, expectedDragSelected) {
         assertResultsClassed(assert, count, "dragSelected", expectedDragSelected);
     }
 
     /**
-    * Asserts that the currently-drag-deselected results are as expected.
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {Number} count Total number of results.
-    * @param {Array} expectedDragDeselected Array that contains the indexes of
-    *     all results that should be drag-deselected.
-    */
+     * Asserts that the currently-drag-deselected results are as expected.
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {Number} count Total number of results.
+     * @param {Array} expectedDragDeselected Array that contains the indexes of
+     *     all results that should be drag-deselected.
+     */
     function assertDragDeselected(assert, count, expectedDragDeselected) {
         assertResultsClassed(assert, count, "dragDeselected", expectedDragDeselected);
     }
 
     /**
-    * Asserts that the currently-selected results are as expected,  both in
-    * the the divs and the underlying selection.
-    * @param {QUnit.assert} assert QUnit assert object.
-    * @param {Number} count Total number of results.
-    * @param {Array} expectedSelected Array that contains the indexes of
-    *     all results that should be selected.
-    */
+     * Asserts that the currently-selected results are as expected,  both in
+     * the the divs and the underlying selection.
+     * @param {QUnit.assert} assert QUnit assert object.
+     * @param {Number} count Total number of results.
+     * @param {Array} expectedSelected Array that contains the indexes of
+     *     all results that should be selected.
+     */
     function assertSelected(assert, count, expectedSelected, listAndSelection) {
         let results = $("div.result");
         for (let index = 0; index < count; index += 1) {
@@ -392,9 +392,9 @@
     }
 
     /**
-    * Asserts that there are no drag-selected results.
-    * @param {QUnit.assert} assert QUnit assert object.
-    */
+     * Asserts that there are no drag-selected results.
+     * @param {QUnit.assert} assert QUnit assert object.
+     */
     function assertNoDragSelected(assert) {
         assert.strictEqual($("div.result.dragSelected").length, 0);
     }

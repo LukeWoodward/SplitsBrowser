@@ -36,13 +36,13 @@
     }
 
     /**
-    * Formats a time period given as a number of seconds as a string in the form
-    * [-][h:]mm:ss.ss .
-    * @param {Number} seconds The number of seconds.
-    * @param {Number|null} precision Optional number of decimal places to format
-    *     using, or the default if not specified.
-    * @return {String} The string formatting of the time.
-    */
+     * Formats a time period given as a number of seconds as a string in the form
+     * [-][h:]mm:ss.ss .
+     * @param {Number} seconds The number of seconds.
+     * @param {Number|null} precision Optional number of decimal places to format
+     *     using, or the default if not specified.
+     * @return {String} The string formatting of the time.
+     */
     SplitsBrowser.formatTime = function (seconds, precision) {
         if (seconds === null) {
             return SplitsBrowser.NULL_TIME_PLACEHOLDER;
@@ -79,11 +79,11 @@
     };
 
     /**
-    * Formats a number of seconds as a time of day.  This returns a string
-    * of the form HH:MM:SS, with HH no more than 24.
-    * @param {Number} seconds The number of seconds
-    * @return {String} The time of day formatted as a string.
-    */
+     * Formats a number of seconds as a time of day.  This returns a string
+     * of the form HH:MM:SS, with HH no more than 24.
+     * @param {Number} seconds The number of seconds
+     * @return {String} The time of day formatted as a string.
+     */
     SplitsBrowser.formatTimeOfDay = function (seconds) {
         let hours = Math.floor((seconds / (60 * 60)) % 24);
         let mins = Math.floor(seconds / 60) % 60;
@@ -92,10 +92,10 @@
     };
 
     /**
-    * Parse a time of the form MM:SS or H:MM:SS into a number of seconds.
-    * @param {String} time The time of the form MM:SS.
-    * @return {Number|null} The number of seconds.
-    */
+     * Parse a time of the form MM:SS or H:MM:SS into a number of seconds.
+     * @param {String} time The time of the form MM:SS.
+     * @return {Number|null} The number of seconds.
+     */
     SplitsBrowser.parseTime = function (time) {
         time = time.trim();
         if (/^(-?\d+:)?-?\d+:-?\d\d([,.]\d+)?$/.test(time)) {

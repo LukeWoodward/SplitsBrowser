@@ -24,14 +24,14 @@
     const Course = SplitsBrowser.Model.Course;
 
     /**
-    * Contains all of the data for an event.
-    * @param {Array} classes Array of CourseClass objects representing all of
-    *     the classes of competitors.
-    * @param {Array} courses Array of Course objects representing all of the
-    *     courses of the event.
-    * @param {Array} warnings Array of strings containing warning messages
-    *     encountered when reading in the event dara.
-    */
+     * Contains all of the data for an event.
+     * @param {Array} classes Array of CourseClass objects representing all of
+     *     the classes of competitors.
+     * @param {Array} courses Array of Course objects representing all of the
+     *     courses of the event.
+     * @param {Array} warnings Array of strings containing warning messages
+     *     encountered when reading in the event dara.
+     */
     class Event {
         constructor(classes, courses, warnings) {
             this.classes = classes;
@@ -40,11 +40,11 @@
         }
 
         /**
-        * Determines time losses for each result in each class.
-        *
-        * This method should be called after reading in the event data but before
-        * attempting to plot it.
-        */
+         * Determines time losses for each result in each class.
+         *
+         * This method should be called after reading in the event data but before
+         * attempting to plot it.
+         */
         determineTimeLosses() {
             for (let courseClass of this.classes) {
                 courseClass.determineTimeLosses();
@@ -52,14 +52,14 @@
         }
 
         /**
-            * Returns whether the event data needs any repairing.
-            *
-            * The event data needs repairing if any results are missing their
-            * 'repaired' cumulative times.
-            *
-            * @return {Boolean} True if the event data needs repairing, false
-            *     otherwise.
-            */
+         * Returns whether the event data needs any repairing.
+         *
+         * The event data needs repairing if any results are missing their
+         * 'repaired' cumulative times.
+         *
+         * @return {Boolean} True if the event data needs repairing, false
+         *     otherwise.
+         */
         needsRepair() {
             return this.classes.some(courseClass => {
                 return courseClass.results.some(result => (result.getAllCumulativeTimes() === null));
@@ -67,17 +67,17 @@
         }
 
         /**
-        * Returns the fastest splits for each class on a given leg.
-        *
-        * The fastest splits are returned as an array of objects, where each object
-        * lists the results name, the class, and the split time in seconds.
-        *
-        * @param {String} startCode Code for the control at the start of the leg,
-        *     or null for the start.
-        * @param {String} endCode Code for the control at the end of the leg, or
-        *     null for the finish.
-        * @return {Array} Array of objects containing fastest splits for that leg.
-        */
+         * Returns the fastest splits for each class on a given leg.
+         *
+         * The fastest splits are returned as an array of objects, where each object
+         * lists the results name, the class, and the split time in seconds.
+         *
+         * @param {String} startCode Code for the control at the start of the leg,
+         *     or null for the start.
+         * @param {String} endCode Code for the control at the end of the leg, or
+         *     null for the finish.
+         * @return {Array} Array of objects containing fastest splits for that leg.
+         */
         getFastestSplitsForLeg(startCode, endCode) {
             let fastestSplits = [];
             for (let course of this.courses) {
@@ -92,19 +92,19 @@
         }
 
         /**
-        * Returns a list of results that visit the control with the given code
-        * within the given time interval.
-        *
-        * The fastest splits are returned as an array of objects, where each object
-        * lists the results name, the class, and the split time in seconds.
-        *
-        * @param {String} controlCode Code for the control.
-        * @param {Number} intervalStart Start of the time interval, in seconds
-        *     since midnight.
-        * @param {Number|null} intervalEnd End of the time interval, in seconds, or
-        *     null for the finish.
-        * @return {Array} Array of objects containing fastest splits for that leg.
-        */
+         * Returns a list of results that visit the control with the given code
+         * within the given time interval.
+         *
+         * The fastest splits are returned as an array of objects, where each object
+         * lists the results name, the class, and the split time in seconds.
+         *
+         * @param {String} controlCode Code for the control.
+         * @param {Number} intervalStart Start of the time interval, in seconds
+         *     since midnight.
+         * @param {Number|null} intervalEnd End of the time interval, in seconds, or
+         *     null for the finish.
+         * @return {Array} Array of objects containing fastest splits for that leg.
+         */
         getResultsAtControlInTimeRange(controlCode, intervalStart, intervalEnd) {
             let results = [];
             for (let course of this.courses) {
@@ -119,11 +119,11 @@
         }
 
         /**
-        * Returns the list of controls that follow after a given control.
-        * @param {String} controlCode The code for the control.
-        * @return {Array} Array of objects for each course using that control,
-        *    with each object listing course name and next control.
-        */
+         * Returns the list of controls that follow after a given control.
+         * @param {String} controlCode The code for the control.
+         * @return {Array} Array of objects for each course using that control,
+         *    with each object listing course name and next control.
+         */
         getNextControlsAfter(controlCode) {
             let courses = this.courses;
             if (controlCode !== Course.START) {

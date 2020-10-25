@@ -24,10 +24,10 @@
     const getMessage = SplitsBrowser.getMessage;
 
     /**
-    * A control that wraps a drop-down list used to choose the types of chart to view.
-    * @param {HTMLElement} parent The parent element to add the control to.
-    * @param {Array} chartTypes Array of types of chart to list.
-    */
+     * A control that wraps a drop-down list used to choose the types of chart to view.
+     * @param {HTMLElement} parent The parent element to add the control to.
+     * @param {Array} chartTypes Array of types of chart to list.
+     */
     class ChartTypeSelector {
         constructor(parent, chartTypes) {
             this.changeHandlers = [];
@@ -55,24 +55,24 @@
         }
 
         /**
-        * Sets the messages displayed within this control, following either its
-        * creation or a change of selected language.
-        */
+         * Sets the messages displayed within this control, following either its
+         * creation or a change of selected language.
+         */
         setMessages() {
             this.labelSpan.text(getMessage("ChartTypeSelectorLabel"));
             this.optionsList.text(value => getMessage(value.nameKey));
         }
 
         /**
-        * Sets the function used to disable the selection of the race graph.
-        *
-        * If not null, this will be called whenever an attempt to select the race
-        * graph is made, and the selection will revert to what it was before.  If
-        * it is null, the race graph can be selected.
-        *
-        * @param {Function|null} raceGraphDisabledNotifier Function to call when the
-        *     race graph is selected
-        */
+         * Sets the function used to disable the selection of the race graph.
+         *
+         * If not null, this will be called whenever an attempt to select the race
+         * graph is made, and the selection will revert to what it was before.  If
+         * it is null, the race graph can be selected.
+         *
+         * @param {Function|null} raceGraphDisabledNotifier Function to call when the
+         *     race graph is selected
+         */
         setRaceGraphDisabledNotifier(raceGraphDisabledNotifier) {
             this.raceGraphDisabledNotifier = raceGraphDisabledNotifier;
             if (this.raceGraphDisabledNotifier !== null && this.chartTypes[this.dropDown.selectedIndex].isRaceGraph) {
@@ -85,13 +85,13 @@
         }
 
         /**
-        * Add a change handler to be called whenever the selected type of chart is changed.
-        *
-        * The selected type of chart is passed to the handler function.
-        *
-        * @param {Function} handler Handler function to be called whenever the
-        *                           chart type changes.
-        */
+         * Add a change handler to be called whenever the selected type of chart is changed.
+         *
+         * The selected type of chart is passed to the handler function.
+         *
+         * @param {Function} handler Handler function to be called whenever the
+         *                           chart type changes.
+         */
         registerChangeHandler(handler) {
             if (!this.changeHandlers.includes(handler)) {
                 this.changeHandlers.push(handler);
@@ -99,18 +99,18 @@
         }
 
         /**
-        * Returns the currently-selected chart type.
-        * @return {Object} The currently-selected chart type.
-        */
+         * Returns the currently-selected chart type.
+         * @return {Object} The currently-selected chart type.
+         */
         getChartType() {
             return this.chartTypes[Math.max(this.dropDown.selectedIndex, 0)];
         }
 
         /**
-        * Sets the chart type.  If the chart type given is not recognised, nothing
-        * happens.
-        * @param {Object} chartType The chart type selected.
-        */
+         * Sets the chart type.  If the chart type given is not recognised, nothing
+         * happens.
+         * @param {Object} chartType The chart type selected.
+         */
         setChartType(chartType) {
             let index = this.chartTypes.indexOf(chartType);
             if (index >= 0) {
@@ -120,8 +120,8 @@
         }
 
         /**
-        * Handle a change of the selected option in the drop-down list.
-        */
+         * Handle a change of the selected option in the drop-down list.
+         */
         onSelectionChanged() {
             if (this.raceGraphDisabledNotifier !== null && this.chartTypes[this.dropDown.selectedIndex].isRaceGraph) {
                 this.raceGraphDisabledNotifier();

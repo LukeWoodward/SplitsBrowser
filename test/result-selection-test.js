@@ -259,10 +259,10 @@
     });
 
     /**
-    * Returns some test result-details objects for testing the crossing-
-    * runners functionality.
-    * @return {Array} Array of result-details objects.
-    */
+     * Returns some test result-details objects for testing the crossing-
+     * runners functionality.
+     * @return {Array} Array of result-details objects.
+     */
     function getResultDetailsForCrossingRunners() {
         return [
             {result: fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301], {}), visible: true},
@@ -272,10 +272,10 @@
     }
 
     /**
-    * Returns some test team result-details objects for testing the crossing-
-    * runners functionality.
-    * @return {Array} Array of result-details objects.
-    */
+     * Returns some test team result-details objects for testing the crossing-
+     * runners functionality.
+     * @return {Array} Array of result-details objects.
+     */
     function getTeamResultDetailsForCrossingRunners() {
         let resultDetailsArray = getResultDetailsForCrossingRunners();
         for (let resultDetails of resultDetailsArray) {
@@ -495,12 +495,12 @@
     });
 
     /**
-    * Creates and returns a ResultSelection object with all results
-    * selected
-    * @param {Number} count The number of results to create.
-    * @return {ResultSelection} ResultSelection object with the given
-    *     number of results, all selected.
-    */
+     * Creates and returns a ResultSelection object with all results
+     * selected
+     * @param {Number} count The number of results to create.
+     * @return {ResultSelection} ResultSelection object with the given
+     *     number of results, all selected.
+     */
     function createSelectionWithAllSelected(count) {
         let selection = new ResultSelection(count);
         for (let i = 0; i < count; i += 1) {

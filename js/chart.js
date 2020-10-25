@@ -72,14 +72,14 @@
     const ChartPopup = SplitsBrowser.Controls.ChartPopup;
 
     /**
-    * Format a time and a rank as a string, with the split time in mm:ss or h:mm:ss
-    * as appropriate.
-    * @param {Number|null} time The time, in seconds, or null.
-    * @param {Number|null} rank The rank, or null.
-    * @param {Boolean} isOKDespiteMissingTimes True if the result is marked as
-    *     OK despite having missing controls.
-    * @return {String} Time and rank formatted as a string.
-    */
+     * Format a time and a rank as a string, with the split time in mm:ss or h:mm:ss
+     * as appropriate.
+     * @param {Number|null} time The time, in seconds, or null.
+     * @param {Number|null} rank The rank, or null.
+     * @param {Boolean} isOKDespiteMissingTimes True if the result is marked as
+     *     OK despite having missing controls.
+     * @return {String} Time and rank formatted as a string.
+     */
     function formatTimeAndRank(time, rank, isOKDespiteMissingTimes) {
         if (isOKDespiteMissingTimes && time === null) {
             time = NaN;
@@ -99,24 +99,24 @@
     }
 
     /**
-    * Formats and returns a result's name and optional suffix.
-    * @param {String} name The name associated with the result.
-    * @param {String} suffix The optional suffix of the result (may be an
-    *      empty string to indicate no suffix).
-    * @return {String} Result's associated name and suffix, formatted.
-    */
+     * Formats and returns a result's name and optional suffix.
+     * @param {String} name The name associated with the result.
+     * @param {String} suffix The optional suffix of the result (may be an
+     *      empty string to indicate no suffix).
+     * @return {String} Result's associated name and suffix, formatted.
+     */
     function formatNameAndSuffix(name, suffix) {
         return (suffix === "") ? name : name + " (" + suffix + ")";
     }
 
     /**
-    * Returns the 'suffix' to use with the given result.
-    * The suffix indicates whether they are non-competitive or a mispuncher,
-    * were disqualified or did not finish.  If none of the above apply, an
-    * empty string is returned.
-    * @param {Result} result The result to get the suffix for.
-    * @return {String} Suffix to use with the given result.
-    */
+     * Returns the 'suffix' to use with the given result.
+     * The suffix indicates whether they are non-competitive or a mispuncher,
+     * were disqualified or did not finish.  If none of the above apply, an
+     * empty string is returned.
+     * @param {Result} result The result to get the suffix for.
+     * @return {String} Suffix to use with the given result.
+     */
     function getSuffix(result) {
         // Non-starters are not catered for here, as this is intended to only
         // be used on the chart and non-starters shouldn't appear on the chart.
@@ -136,10 +136,10 @@
     }
 
     /**
-    * A chart object in a window.
-    * @constructor
-    * @param {HTMLElement} parent The parent object to create the element within.
-    */
+     * A chart object in a window.
+     * @constructor
+     * @param {HTMLElement} parent The parent object to create the element within.
+     */
     class Chart {
         constructor(parent) {
             this.parent = parent;
@@ -209,20 +209,20 @@
         }
 
         /**
-        * Sets the left margin of the chart.
-        * @param {Number} leftMargin The left margin of the chart.
-        */
+         * Sets the left margin of the chart.
+         * @param {Number} leftMargin The left margin of the chart.
+         */
         setLeftMargin(leftMargin) {
             this.currentLeftMargin = leftMargin;
             this.svgGroup.attr("transform", `translate(${this.currentLeftMargin},${MARGIN.top})`);
         }
 
         /**
-        * Gets the location the chart popup should be at following a mouse-button
-        * press or a mouse movement.
-        * @param {jQuery.event} event jQuery mouse-down or mouse-move event.
-        * @return {Object} Location of the popup.
-        */
+         * Gets the location the chart popup should be at following a mouse-button
+         * press or a mouse movement.
+         * @param {jQuery.event} event jQuery mouse-down or mouse-move event.
+         * @return {Object} Location of the popup.
+         */
         getPopupLocation(event) {
             return {
                 x: event.pageX + CHART_POPUP_X_OFFSET,
@@ -231,53 +231,53 @@
         }
 
         /**
-        * Returns the fastest splits to the current control.
-        * @return {Array} Array of fastest-split data.
-        */
+         * Returns the fastest splits to the current control.
+         * @return {Array} Array of fastest-split data.
+         */
         getFastestSplitsPopupData() {
             return ChartPopupData.getFastestSplitsPopupData(this.courseClassSet, this.currentControlIndex, this.selectedLegIndex);
         }
 
         /**
-        * Returns the fastest splits for the currently-shown leg.  The list
-        * returned contains the fastest splits for the current leg for each class.
-        * @return {Object} Object that contains the title for the popup and the
-        *     array of data to show within it.
-        */
+         * Returns the fastest splits for the currently-shown leg.  The list
+         * returned contains the fastest splits for the current leg for each class.
+         * @return {Object} Object that contains the title for the popup and the
+         *     array of data to show within it.
+         */
         getFastestSplitsForCurrentLegPopupData() {
             return ChartPopupData.getFastestSplitsForLegPopupData(this.courseClassSet, this.eventData, this.currentControlIndex);
         }
 
         /**
-        * Stores the current time the mouse is at, on the race graph.
-        * @param {jQuery.event} event The mouse-down or mouse-move event.
-        */
+         * Stores the current time the mouse is at, on the race graph.
+         * @param {jQuery.event} event The mouse-down or mouse-move event.
+         */
         setCurrentChartTime(event) {
             let yOffset = event.pageY - $(this.svg.node()).offset().top - MARGIN.top;
             this.currentChartTime = Math.round(this.yScale.invert(yOffset) * 60) + this.referenceCumTimes[this.currentControlIndex];
         }
 
         /**
-        * Returns an array of the results visiting the current control at the
-        * current time.
-        * @return {Array} Array of result data.
-        */
+         * Returns an array of the results visiting the current control at the
+         * current time.
+         * @return {Array} Array of result data.
+         */
         getResultsVisitingCurrentControlPopupData() {
             return ChartPopupData.getResultsVisitingCurrentControlPopupData(this.courseClassSet, this.eventData, this.currentControlIndex, this.currentChartTime);
         }
 
         /**
-        * Returns next-control data to show on the chart popup.
-        * @return {Array} Array of next-control data.
-        */
+         * Returns next-control data to show on the chart popup.
+         * @return {Array} Array of next-control data.
+         */
         getNextControlData() {
             return ChartPopupData.getNextControlData(this.courseClassSet.getCourse(), this.eventData, this.actualControlIndex);
         }
 
         /**
-        * Handle the mouse entering the chart.
-        * @param {jQuery.event} event jQuery event object.
-        */
+         * Handle the mouse entering the chart.
+         * @param {jQuery.event} event jQuery event object.
+         */
         onMouseEnter(event) {
             if (this.mouseOutTimeout !== null) {
                 clearTimeout(this.mouseOutTimeout);
@@ -291,9 +291,9 @@
         }
 
         /**
-        * Handle a mouse movement.
-        * @param {jQuery.event} event jQuery event object.
-        */
+         * Handle a mouse movement.
+         * @param {jQuery.event} event jQuery event object.
+         */
         onMouseMove(event) {
             if (this.hasData && this.isMouseIn && this.xScale !== null) {
                 this.updateControlLineLocation(event);
@@ -301,8 +301,8 @@
         }
 
         /**
-        * Handle the mouse leaving the chart.
-        */
+         * Handle the mouse leaving the chart.
+         */
         onMouseLeave() {
             // Check that the mouse hasn't entered the popup.
             // It seems that the mouseleave event for the chart is sent before the
@@ -324,9 +324,9 @@
         }
 
         /**
-        * Handles a mouse button being pressed over the chart.
-        * @param {jQuery.Event} event jQuery event object.
-        */
+         * Handles a mouse button being pressed over the chart.
+         * @param {jQuery.Event} event jQuery event object.
+         */
         onMouseDown(event) {
             // Use a timeout to open the dialog as we require other events
             // (mouseover in particular) to be processed first, and the precise
@@ -335,19 +335,19 @@
         }
 
         /**
-        * Handles a mouse button being pressed over the chart.
-        * @param {jQuery.event} event The jQuery onMouseUp event.
-        */
+         * Handles a mouse button being pressed over the chart.
+         * @param {jQuery.event} event The jQuery onMouseUp event.
+         */
         onMouseUp(event) {
             this.popup.hide();
             event.preventDefault();
         }
 
         /**
-        * Shows the popup window, populating it with data as necessary
-        * @param {jQuery.event} event The jQuery onMouseDown event that triggered
-        *     the popup.
-        */
+         * Shows the popup window, populating it with data as necessary
+         * @param {jQuery.event} event The jQuery onMouseDown event that triggered
+         *     the popup.
+         */
         showPopupDialog(event) {
             if (this.isMouseIn && this.currentControlIndex !== null) {
                 let showPopup = false;
@@ -375,14 +375,14 @@
         }
 
         /**
-        * Updates the chart popup with the contents it should contain.
-        *
-        * If the current course has control data, and the cursor is above the top
-        * X-axis, control information is shown instead of whatever other data would
-        * be being shown.
-        *
-        * @param {jQuery.event} event jQuery mouse-move event.
-        */
+         * Updates the chart popup with the contents it should contain.
+         *
+         * If the current course has control data, and the cursor is above the top
+         * X-axis, control information is shown instead of whatever other data would
+         * be being shown.
+         *
+         * @param {jQuery.event} event jQuery mouse-move event.
+         */
         updatePopupContents(event) {
             let yOffset = event.pageY - $(this.svg.node()).offset().top;
             let showNextControls = this.hasControls && yOffset < MARGIN.top;
@@ -394,8 +394,8 @@
         }
 
         /**
-        * Updates the next-control information.
-        */
+         * Updates the next-control information.
+         */
         updateNextControlInformation() {
             if (this.hasControls) {
                 this.popup.setNextControlData(this.getNextControlData());
@@ -403,11 +403,11 @@
         }
 
         /**
-        * Draw a 'control line'.  This is a vertical line running the entire height of
-        * the chart, at one of the controls.
-        * @param {Number} controlIndex The index of the control at which to draw the
-        *                              control line.
-        */
+         * Draw a 'control line'.  This is a vertical line running the entire height of
+         * the chart, at one of the controls.
+         * @param {Number} controlIndex The index of the control at which to draw the
+         *                              control line.
+         */
         drawControlLine(controlIndex) {
             this.currentControlIndex = controlIndex;
             this.updateResultStatistics();
@@ -422,9 +422,9 @@
         }
 
         /**
-        * Updates the location of the control line from the given mouse event.
-        * @param {jQuery.event} event jQuery mousedown or mousemove event.
-        */
+         * Updates the location of the control line from the given mouse event.
+         * @param {jQuery.event} event jQuery mousedown or mousemove event.
+         */
         updateControlLineLocation(event) {
 
             let svgNodeAsJQuery = $(this.svg.node());
@@ -480,9 +480,9 @@
         }
 
         /**
-        * Remove any previously-drawn control line.  If no such line existed, nothing
-        * happens.
-        */
+         * Remove any previously-drawn control line.  If no such line existed, nothing
+         * happens.
+         */
         removeControlLine() {
             this.currentControlIndex = null;
             this.actualControlIndex = null;
@@ -494,13 +494,13 @@
         }
 
         /**
-        * Returns an array of the the times that the selected results are behind
-        * the fastest time at the given control.
-        * @param {Number} controlIndex Index of the given control.
-        * @param {Array} indexes Array of indexes of selected results.
-        * @return {Array} Array of times in seconds that the given results are
-        *     behind the fastest time.
-        */
+         * Returns an array of the the times that the selected results are behind
+         * the fastest time at the given control.
+         * @param {Number} controlIndex Index of the given control.
+         * @param {Array} indexes Array of indexes of selected results.
+         * @return {Array} Array of times in seconds that the given results are
+         *     behind the fastest time.
+         */
         getTimesBehindFastest(controlIndex, indexes) {
             let selectedResults = indexes.map(index => this.courseClassSet.allResults[index]);
             let fastestSplit = this.fastestCumTimes[controlIndex] - this.fastestCumTimes[controlIndex - 1];
@@ -509,13 +509,13 @@
         }
 
         /**
-        * Returns an array of the the time losses of the selected results at the
-        * given control.
-        * @param {Number} controlIndex Index of the given control.
-        * @param {Array} indexes Array of indexes of selected results.
-        * @return {Array} Array of times in seconds that the given results are
-        *     deemed to have lost at the given control.
-        */
+         * Returns an array of the the time losses of the selected results at the
+         * given control.
+         * @param {Number} controlIndex Index of the given control.
+         * @param {Array} indexes Array of indexes of selected results.
+         * @return {Array} Array of times in seconds that the given results are
+         *     deemed to have lost at the given control.
+         */
         getTimeLosses(controlIndex, indexes) {
             let selectedResults = indexes.map(index => this.courseClassSet.allResults[index]);
             let timeLosses = selectedResults.map(result => result.getTimeLossAt(controlIndex));
@@ -523,8 +523,8 @@
         }
 
         /**
-        * Updates the statistics text shown after the results.
-        */
+         * Updates the statistics text shown after the results.
+         */
         updateResultStatistics() {
             let selectedResults = this.selectedIndexesOrderedByLastYValue.map(index => this.courseClassSet.allResults[index]);
             let labelTexts = selectedResults.map(result => formatNameAndSuffix(result.getOwnerNameForLeg(this.selectedLegIndex), getSuffix(result)));
@@ -568,13 +568,13 @@
         }
 
         /**
-        * Returns a tick-formatting function that formats the label of a tick on the
-        * top X-axis.
-        *
-        * The function returned is suitable for use with the D3 axis.tickFormat method.
-        *
-        * @return {Function} Tick-formatting function.
-        */
+         * Returns a tick-formatting function that formats the label of a tick on the
+         * top X-axis.
+         *
+         * The function returned is suitable for use with the D3 axis.tickFormat method.
+         *
+         * @return {Function} Tick-formatting function.
+         */
         getTickFormatter() {
             if (this.courseClassSet.hasTeamData()) {
                 let allControls = [getMessage("StartNameShort")];
@@ -599,31 +599,31 @@
         }
 
         /**
-        * Get the width of a piece of text.
-        * @param {String} text The piece of text to measure the width of.
-        * @return {Number} The width of the piece of text, in pixels.
-        */
+         * Get the width of a piece of text.
+         * @param {String} text The piece of text to measure the width of.
+         * @return {Number} The width of the piece of text, in pixels.
+         */
         getTextWidth(text) {
             return this.textSizeElement.text(text).node().getBBox().width;
         }
 
         /**
-        * Gets the height of a piece of text.
-        *
-        * @param {String} text The piece of text to measure the height of.
-        * @return {Number} The height of the piece of text, in pixels.
-        */
+         * Gets the height of a piece of text.
+         *
+         * @param {String} text The piece of text to measure the height of.
+         * @return {Number} The height of the piece of text, in pixels.
+         */
         getTextHeight(text) {
             return this.textSizeElement.text(text).node().getBBox().height;
         }
 
         /**
-        * Return the maximum width of the end-text shown to the right of the graph.
-        *
-        * This function considers only the results whose indexes are in the list
-        * given.  This method returns zero if the list is empty.
-        * @return {Number} Maximum width of text, in pixels.
-        */
+         * Return the maximum width of the end-text shown to the right of the graph.
+         *
+         * This function considers only the results whose indexes are in the list
+         * given.  This method returns zero if the list is empty.
+         * @return {Number} Maximum width of text, in pixels.
+         */
         getMaxGraphEndTextWidth() {
             if (this.selectedIndexes.length === 0) {
                 // No results selected.  Avoid problems caused by trying to find
@@ -639,14 +639,14 @@
         }
 
         /**
-        * Return the maximum width of a piece of time and rank text shown to the right
-        * of each result.
-        * @param {String} timeFuncName Name of the function to call to get the time
-        *                               data.
-        * @param {String} rankFuncName Name of the function to call to get the rank
-        *                               data.
-        * @return {Number} Maximum width of split-time and rank text, in pixels.
-        */
+         * Return the maximum width of a piece of time and rank text shown to the right
+         * of each result.
+         * @param {String} timeFuncName Name of the function to call to get the time
+         *                               data.
+         * @param {String} rankFuncName Name of the function to call to get the rank
+         *                               data.
+         * @return {Number} Maximum width of split-time and rank text, in pixels.
+         */
         getMaxTimeAndRankTextWidth(timeFuncName, rankFuncName) {
             let maxTime = 0;
             let maxRank = 0;
@@ -666,29 +666,29 @@
         }
 
         /**
-        * Return the maximum width of the split-time and rank text shown to the right
-        * of each result.
-        * @return {Number} Maximum width of split-time and rank text, in pixels.
-        */
+         * Return the maximum width of the split-time and rank text shown to the right
+         * of each result.
+         * @return {Number} Maximum width of split-time and rank text, in pixels.
+         */
         getMaxSplitTimeAndRankTextWidth() {
             return this.getMaxTimeAndRankTextWidth("getSplitTimeTo", "getSplitRankTo");
         }
 
         /**
-        * Return the maximum width of the cumulative time and cumulative-time rank text
-        * shown to the right of each result.
-        * @return {Number} Maximum width of cumulative time and cumulative-time rank text, in
-        *                  pixels.
-        */
+         * Return the maximum width of the cumulative time and cumulative-time rank text
+         * shown to the right of each result.
+         * @return {Number} Maximum width of cumulative time and cumulative-time rank text, in
+         *                  pixels.
+         */
         getMaxCumulativeTimeAndRankTextWidth() {
             return this.getMaxTimeAndRankTextWidth("getCumulativeTimeTo", "getCumulativeRankTo");
         }
 
         /**
-        * Return the maximum width of the behind-fastest time shown to the right of
-        * each result.
-        * @return {Number} Maximum width of behind-fastest time rank text, in pixels.
-        */
+         * Return the maximum width of the behind-fastest time shown to the right of
+         * each result.
+         * @return {Number} Maximum width of behind-fastest time rank text, in pixels.
+         */
         getMaxTimeBehindFastestWidth() {
             let maxTime = 0;
 
@@ -699,11 +699,12 @@
 
             return this.getTextWidth(SPACER + formatTime(maxTime));
         }
+
         /**
-            * Return the maximum width of the behind-fastest time shown to the right of
-            * each result.
-            * @return {Number} Maximum width of behind-fastest time rank text, in pixels.
-            */
+         * Return the maximum width of the behind-fastest time shown to the right of
+         * each result.
+         * @return {Number} Maximum width of behind-fastest time rank text, in pixels.
+         */
         getMaxTimeLossWidth() {
             let maxTimeLoss = 0;
             let minTimeLoss = 0;
@@ -723,9 +724,9 @@
         }
 
         /**
-        * Determines the maximum width of the statistics text at the end of the result.
-        * @return {Number} Maximum width of the statistics text, in pixels.
-        */
+         * Determines the maximum width of the statistics text at the end of the result.
+         * @return {Number} Maximum width of the statistics text, in pixels.
+         */
         determineMaxStatisticTextWidth() {
             let maxWidth = 0;
             if (this.visibleStatistics.get("TotalTime")) {
@@ -745,11 +746,11 @@
         }
 
         /**
-        * Determines the maximum width of all of the visible start time labels.
-        * If none are presently visible, zero is returned.
-        * @param {Object} chartData Object containing the chart data.
-        * @return {Number} Maximum width of a start time label.
-        */
+         * Determines the maximum width of all of the visible start time labels.
+         * If none are presently visible, zero is returned.
+         * @param {Object} chartData Object containing the chart data.
+         * @return {Number} Maximum width of a start time label.
+         */
         determineMaxStartTimeLabelWidth(chartData) {
             let maxWidth;
             if (chartData.resultNames.length > 0) {
@@ -762,9 +763,9 @@
         }
 
         /**
-        * Creates the X and Y scales necessary for the chart and its axes.
-        * @param {Object} chartData Chart data object.
-        */
+         * Creates the X and Y scales necessary for the chart and its axes.
+         * @param {Object} chartData Chart data object.
+         */
         createScales(chartData) {
             this.xScale = d3.scaleLinear().domain(chartData.xExtent).range([0, this.contentWidth]);
             this.yScale = d3.scaleLinear().domain(chartData.yExtent).range([0, this.contentHeight]);
@@ -772,9 +773,9 @@
         }
 
         /**
-        * Draw the background rectangles that indicate sections of the course
-        * between controls.
-        */
+         * Draw the background rectangles that indicate sections of the course
+         * between controls.
+         */
         drawBackgroundRectangles() {
 
             // We can't guarantee that the reference cumulative times are in
@@ -822,19 +823,19 @@
         }
 
         /**
-        * Returns a function used to format tick labels on the Y-axis.
-        *
-        * If start times are to be shown (i.e. for the race graph), then the Y-axis
-        * values are start times.  We format these as times, as long as there isn't
-        * a result's start time too close to it.
-        *
-        * For other graph types, this method returns null, which tells d3 to use
-        * its default tick formatter.
-        *
-        * @param {Object} chartData The chart data to read start times from.
-        * @return {Function|null} Tick formatter function, or null to use the default
-        *     d3 formatter.
-        */
+         * Returns a function used to format tick labels on the Y-axis.
+         *
+         * If start times are to be shown (i.e. for the race graph), then the Y-axis
+         * values are start times.  We format these as times, as long as there isn't
+         * a result's start time too close to it.
+         *
+         * For other graph types, this method returns null, which tells d3 to use
+         * its default tick formatter.
+         *
+         * @param {Object} chartData The chart data to read start times from.
+         * @return {Function|null} Tick formatter function, or null to use the default
+         *     d3 formatter.
+         */
         determineYAxisTickFormatter(chartData) {
             if (this.isRaceGraph) {
                 // Assume column 0 of the data is the start times.
@@ -859,10 +860,10 @@
         }
 
         /**
-        * Draw the chart axes.
-        * @param {String} yAxisLabel The label to use for the Y-axis.
-        * @param {Object} chartData The chart data to use.
-        */
+         * Draw the chart axes.
+         * @param {String} yAxisLabel The label to use for the Y-axis.
+         * @param {Object} chartData The chart data to use.
+         */
         drawAxes(yAxisLabel, chartData) {
 
             let tickFormatter = this.determineYAxisTickFormatter(chartData);
@@ -910,9 +911,9 @@
         }
 
         /**
-        * Draw the lines on the chart.
-        * @param {Array} chartData Array of chart data.
-        */
+         * Draw the lines on the chart.
+         * @param {Array} chartData Array of chart data.
+         */
         drawChartLines(chartData) {
             let lineFunctionGenerator = selResultIdx => {
                 if (!chartData.dataColumns.some(col => isNotNullNorNaN(col.ys[selResultIdx]))) {
@@ -968,9 +969,9 @@
         }
 
         /**
-        * Highlights the result with the given index.
-        * @param {Number} resultIdx The index of the result to highlight.
-        */
+         * Highlights the result with the given index.
+         * @param {Number} resultIdx The index of the result to highlight.
+         */
         highlight(resultIdx) {
             this.svg.selectAll("path.graphLine.result" + resultIdx).classed("selected", true);
             this.svg.selectAll("line.resultLegendLine.result" + resultIdx).classed("selected", true);
@@ -980,8 +981,8 @@
         }
 
         /**
-        * Removes any result-specific higlighting.
-        */
+         * Removes any result-specific higlighting.
+         */
         unhighlight() {
             this.svg.selectAll("path.graphLine.selected").classed("selected", false);
             this.svg.selectAll("line.resultLegendLine.selected").classed("selected", false);
@@ -991,9 +992,9 @@
         }
 
         /**
-        * Draws the start-time labels for the currently-selected results.
-        * @param {Object} chartData The chart data that contains the start offsets.
-        */
+         * Draws the start-time labels for the currently-selected results.
+         * @param {Object} chartData The chart data that contains the start offsets.
+         */
         drawResultStartTimeLabels(chartData) {
             let startColumn = chartData.dataColumns[0];
             let startLabels = this.svgGroup.selectAll("text.startLabel").data(this.selectedIndexes);
@@ -1013,16 +1014,16 @@
         }
 
         /**
-        * Removes all of the result start-time labels from the chart.
-        */
+         * Removes all of the result start-time labels from the chart.
+         */
         removeResultStartTimeLabels() {
             this.svgGroup.selectAll("text.startLabel").remove();
         }
 
         /**
-        * Adjust the locations of the legend labels downwards so that two labels
-        * do not overlap.
-        */
+         * Adjust the locations of the legend labels downwards so that two labels
+         * do not overlap.
+         */
         adjustResultLegendLabelsDownwardsIfNecessary() {
             for (let i = 1; i < this.numLines; i += 1) {
                 let prevResult = this.currentResultData[i - 1];
@@ -1034,15 +1035,15 @@
         }
 
         /**
-        * Adjusts the locations of the legend labels upwards so that as many as
-        * possible can fit on the chart.  If all result labels are already on the
-        * chart, then this method does nothing.
-        *
-        * This method does not move off the chart any label that is currently on
-        * the chart.
-        *
-        * @param {Number} minLastY The minimum Y-coordinate of the lowest label.
-        */
+         * Adjusts the locations of the legend labels upwards so that as many as
+         * possible can fit on the chart.  If all result labels are already on the
+         * chart, then this method does nothing.
+         *
+         * This method does not move off the chart any label that is currently on
+         * the chart.
+         *
+         * @param {Number} minLastY The minimum Y-coordinate of the lowest label.
+         */
         adjustResultLegendLabelsUpwardsIfNecessary(minLastY) {
             if (this.numLines > 0 && this.currentResultData[this.numLines - 1].y > this.contentHeight) {
                 // The list of results runs off the bottom.
@@ -1063,10 +1064,10 @@
         }
 
         /**
-        * Draw legend labels to the right of the chart.
-        * Draw legend labels to the right of the chart.
-        * @param {Object} chartData The chart data that contains the final time offsets.
-        */
+         * Draw legend labels to the right of the chart.
+         * Draw legend labels to the right of the chart.
+         * @param {Object} chartData The chart data that contains the final time offsets.
+         */
         drawResultLegendLabels(chartData) {
 
             let minLastY = 0;
@@ -1141,15 +1142,15 @@
         }
 
         /**
-        * Adjusts the computed values for the content size of the chart.
-        *
-        * This method should be called after any of the following occur:
-        * (1) the overall size of the chart changes.
-        * (2) the currently-selected set of indexes changes
-        * (3) the chart data is set.
-        * If you find part of the chart is missing sometimes, chances are you've
-        * omitted a necessary call to this method.
-        */
+         * Adjusts the computed values for the content size of the chart.
+         *
+         * This method should be called after any of the following occur:
+         * (1) the overall size of the chart changes.
+         * (2) the currently-selected set of indexes changes
+         * (3) the chart data is set.
+         * If you find part of the chart is missing sometimes, chances are you've
+         * omitted a necessary call to this method.
+         */
         adjustContentSize() {
             // Extra length added to the maximum start-time label width to
             // include the lengths of the Y-axis ticks.
@@ -1161,10 +1162,10 @@
         }
 
         /**
-        * Sets the overall size of the chart control, including margin, axes and legend labels.
-        * @param {Number} overallWidth Overall width
-        * @param {Number} overallHeight Overall height
-        */
+         * Sets the overall size of the chart control, including margin, axes and legend labels.
+         * @param {Number} overallWidth Overall width
+         * @param {Number} overallHeight Overall height
+         */
         setSize(overallWidth, overallHeight) {
             this.overallWidth = overallWidth;
             this.overallHeight = overallHeight;
@@ -1173,20 +1174,20 @@
         }
 
         /**
-        * Clears the graph by removing all controls from it.
-        */
+         * Clears the graph by removing all controls from it.
+         */
         clearGraph() {
             this.svgGroup.selectAll("*").remove();
         }
 
         /**
-        * Sorts the reference cumulative times, and creates a list of the sorted
-        * reference cumulative times and their indexes into the actual list of
-        * reference cumulative times.
-        *
-        * This sorted list is used by the chart to find which control the cursor
-        * is closest to.
-        */
+         * Sorts the reference cumulative times, and creates a list of the sorted
+         * reference cumulative times and their indexes into the actual list of
+         * reference cumulative times.
+         *
+         * This sorted list is used by the chart to find which control the cursor
+         * is closest to.
+         */
         sortReferenceCumTimes() {
             // Put together a map that maps cumulative times to the first split to
             // register that time.
@@ -1210,24 +1211,24 @@
         }
 
         /**
-        * Draws the chart.
-        * @param {Object} data Object that contains various chart data.  This
-        *     must contain the following properties:
-        *     * chartData {Object} - the data to plot on the chart
-        *     * eventData {SplitsBrowser.Model.Event} - the overall Event object.
-        *     * courseClassSet {SplitsBrowser.Model.Event} - the course-class set.
-        *     * referenceCumTimes {Array} - Array of cumulative split times of the
-        *       'reference'.
-        *     * fastestCumTimes {Array} - Array of cumulative times of the
-        *       imaginary 'fastest' result.
-        * @param {Array} selectedIndexes Array of indexes of selected results
-        *                (0 in this array means the first result is selected, 1
-        *                means the second is selected, and so on.)
-        * @param {Map} visibleStatistics Map of visible statistics.
-        * @param {Object} chartType The type of chart being drawn.
-        * @param {Number|null} selectedLegIndex The selected leg index, or null for all
-        *                                       legs.
-        */
+         * Draws the chart.
+         * @param {Object} data Object that contains various chart data.  This
+         *     must contain the following properties:
+         *     * chartData {Object} - the data to plot on the chart
+         *     * eventData {SplitsBrowser.Model.Event} - the overall Event object.
+         *     * courseClassSet {SplitsBrowser.Model.Event} - the course-class set.
+         *     * referenceCumTimes {Array} - Array of cumulative split times of the
+         *       'reference'.
+         *     * fastestCumTimes {Array} - Array of cumulative times of the
+         *       imaginary 'fastest' result.
+         * @param {Array} selectedIndexes Array of indexes of selected results
+         *                (0 in this array means the first result is selected, 1
+         *                means the second is selected, and so on.)
+         * @param {Map} visibleStatistics Map of visible statistics.
+         * @param {Object} chartType The type of chart being drawn.
+         * @param {Number|null} selectedLegIndex The selected leg index, or null for all
+         *                                       legs.
+         */
         drawChart(data, selectedIndexes, visibleStatistics, chartType, selectedLegIndex) {
             let chartData = data.chartData;
             this.numControls = chartData.numControls;
@@ -1263,12 +1264,12 @@
     }
 
     /**
-    * Returns the maximum value from the given array, not including any null or
-    * NaN values.  If the array contains no non-null, non-NaN values, zero is
-    * returned.
-    * @param {Array} values Array of values.
-    * @return {Number} Maximum non-null or NaN value.
-    */
+     * Returns the maximum value from the given array, not including any null or
+     * NaN values.  If the array contains no non-null, non-NaN values, zero is
+     * returned.
+     * @param {Array} values Array of values.
+     * @return {Number} Maximum non-null or NaN value.
+     */
     function maxNonNullNorNaNValue(values) {
         let nonNullNorNaNValues = values.filter(isNotNullNorNaN);
         return (nonNullNorNaNValues.length > 0) ? d3.max(nonNullNorNaNValues) : 0;

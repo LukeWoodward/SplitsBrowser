@@ -83,12 +83,12 @@
     const RESULT_SPAN_ID = "resultSpan";
 
     /**
-    * A control that wraps a drop-down list used to choose what to compare
-    * times against.
-    * @param {HTMLElement} parent The parent element to add the control to.
-    * @param {Function} alerter Function to call with any messages to show to
-    *     the user.
-    */
+     * A control that wraps a drop-down list used to choose what to compare
+     * times against.
+     * @param {HTMLElement} parent The parent element to add the control to.
+     * @param {Function} alerter Function to call with any messages to show to
+     *     the user.
+     */
     class ComparisonSelector {
         constructor(parent, alerter) {
             this.changeHandlers = [];
@@ -147,9 +147,9 @@
         }
 
         /**
-        * Sets the messages in this control, following its creation or a change of
-        * selected language.
-        */
+         * Sets the messages in this control, following its creation or a change of
+         * selected language.
+         */
         setMessages() {
             this.comparisonSelectorLabel.text(getMessage("ComparisonSelectorLabel"));
             this.setCompareWithAnyLabel();
@@ -157,9 +157,9 @@
         }
 
         /**
-        * Updates the 'Compare with any' label, following a change of language,
-        * course-class set or selected leg index.
-        */
+         * Updates the 'Compare with any' label, following a change of language,
+         * course-class set or selected leg index.
+         */
         setCompareWithAnyLabel() {
             if (this.courseClassSet !== null && this.courseClassSet.hasTeamData() && this.selectedLegIndex === null) {
                 this.resultSpan.text(getMessage("CompareWithAnyTeamLabel"));
@@ -170,13 +170,13 @@
         }
 
         /**
-        * Add a change handler to be called whenever the selected class is changed.
-        *
-        * The function used to return the comparison result is returned.
-        *
-        * @param {Function} handler Handler function to be called whenever the class
-        *                   changes.
-        */
+         * Add a change handler to be called whenever the selected class is changed.
+         *
+         * The function used to return the comparison result is returned.
+         *
+         * @param {Function} handler Handler function to be called whenever the class
+         *                   changes.
+         */
         registerChangeHandler(handler) {
             if (!this.changeHandlers.includes(handler)) {
                 this.changeHandlers.push(handler);
@@ -184,18 +184,18 @@
         }
 
         /**
-        * Returns whether the 'Any Result...' option is selected.
-        * @return {Boolean} True if the 'Any Result...' option is selected, false
-        *     if any other option is selected.
-        */
+         * Returns whether the 'Any Result...' option is selected.
+         * @return {Boolean} True if the 'Any Result...' option is selected, false
+         *     if any other option is selected.
+         */
         isAnyResultSelected() {
             return this.dropDown.selectedIndex === this.comparisonOptions.length - 1;
         }
 
         /**
-        * Sets the course-class set to use.
-        * @param {CourseClassSet} courseClassSet The course-class set to set.
-        */
+         * Sets the course-class set to use.
+         * @param {CourseClassSet} courseClassSet The course-class set to set.
+         */
         setCourseClassSet(courseClassSet) {
             this.courseClassSet = courseClassSet;
             this.selectedLegIndex = null;
@@ -220,8 +220,8 @@
         }
 
         /**
-        * Populates the drop-down list of results from a course-class set.
-        */
+         * Populates the drop-down list of results from a course-class set.
+         */
         setResults() {
             let results = this.courseClassSet.allResults;
             let completingResultIndexes = d3.range(results.length).filter(idx => results[idx].completed());
@@ -260,10 +260,10 @@
         }
 
         /**
-        * Sets whether the control is enabled.
-        * @param {Boolean} isEnabled True if the control is enabled, false if
-        *      disabled.
-        */
+         * Sets whether the control is enabled.
+         * @param {Boolean} isEnabled True if the control is enabled, false if
+         *      disabled.
+         */
         setEnabled(isEnabled) {
             d3.select(this.parent).selectAll("span.comparisonSelectorLabel")
                 .classed("disabled", !isEnabled);
@@ -273,10 +273,10 @@
         }
 
         /**
-        * Returns the function that compares a result's splits against some
-        * reference data.
-        * @return {Function} Comparison function.
-        */
+         * Returns the function that compares a result's splits against some
+         * reference data.
+         * @return {Function} Comparison function.
+         */
         getComparisonFunction() {
             if (this.isAnyResultSelected()) {
                 return courseClassSet => courseClassSet.getCumulativeTimesForResult(this.currentResultIndex);
@@ -286,9 +286,9 @@
         }
 
         /**
-        * Returns the comparison type.
-        * @return {Object} Object containing the comparison type (type index and result).
-        */
+         * Returns the comparison type.
+         * @return {Object} Object containing the comparison type (type index and result).
+         */
         getComparisonType() {
             let result;
             if (this.isAnyResultSelected()) {
@@ -305,11 +305,11 @@
         }
 
         /**
-        * Sets the comparison type.
-        * @param {Number} typeIndex The index of the comparison type.
-        * @param {Result|null} result The selected 'Any result', or null if
-        *     'Any Result' has not been selected.
-        */
+         * Sets the comparison type.
+         * @param {Number} typeIndex The index of the comparison type.
+         * @param {Result|null} result The selected 'Any result', or null if
+         *     'Any Result' has not been selected.
+         */
         setComparisonType(typeIndex, result) {
             if (0 <= typeIndex && typeIndex < this.comparisonOptions.length) {
                 if (typeIndex === this.comparisonOptions.length - 1) {
@@ -327,8 +327,8 @@
         }
 
         /**
-        * Handle a change of the selected option in either drop-down list.
-        */
+         * Handle a change of the selected option in either drop-down list.
+         */
         onSelectionChanged() {
             let resultDropdownSelectedIndex = Math.max(this.resultDropDown.selectedIndex, 0);
             let option = this.comparisonOptions[this.dropDown.selectedIndex];

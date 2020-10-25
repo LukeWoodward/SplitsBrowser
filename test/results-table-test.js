@@ -37,8 +37,8 @@
     QUnit.module("Results Table");
 
     /**
-    * Computes the ranks within the course-class.
-    */
+     * Computes the ranks within the course-class.
+     */
     function calculateRanks(courseClass) {
         // Course-class sets compute ranks on construction, so let's create one
         // just for that purpose.

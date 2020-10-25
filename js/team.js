@@ -22,12 +22,12 @@
     "use strict";
 
     /**
-    * Object that represents the data for a single team.
-    *
-    * @constructor
-    * @param {String} name The name of the team.
-    * @param {String} club The name of the team's club.
-    */
+     * Object that represents the data for a single team.
+     *
+     * @constructor
+     * @param {String} name The name of the team.
+     * @param {String} club The name of the team's club.
+     */
     class Team {
         constructor(name, club) {
             this.name = name;
@@ -35,9 +35,9 @@
         }
 
         /**
-        * Sets the members of the team.
-        * @param {Array} members The members of the team.
-        */
+         * Sets the members of the team.
+         * @param {Array} members The members of the team.
+         */
         setMembers(members) {
             this.members = members;
         }

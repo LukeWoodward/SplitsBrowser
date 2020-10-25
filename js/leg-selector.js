@@ -29,11 +29,11 @@
     const LEG_SELECTOR_CONTAINER_ID = "legSelectorContainer";
 
     /**
-    * A control that wraps a drop-down list used to choose which leg of a relay
-    * team to show, or whether to show all legs.
-    * @param {d3.selection} parent D3 selection containing the parent element
-    *     to add the control to.
-    */
+     * A control that wraps a drop-down list used to choose which leg of a relay
+     * team to show, or whether to show all legs.
+     * @param {d3.selection} parent D3 selection containing the parent element
+     *     to add the control to.
+     */
     class LegSelector {
         constructor(parent) {
             this.changeHandlers = [];
@@ -66,22 +66,22 @@
         }
 
         /**
-        * Sets the messages in this control, following its creation or a change of
-        * selected language.
-        */
+         * Sets the messages in this control, following its creation or a change of
+         * selected language.
+         */
         setMessages() {
             this.legSelectorLabel.text(getMessage("LegSelectorLabel"));
             this.setLegNames();
         }
 
         /**
-        * Add a change handler to be called whenever the selected class is changed.
-        *
-        * The function used to return the comparison result is returned.
-        *
-        * @param {Function} handler Handler function to be called whenever the class
-        *                   changes.
-        */
+         * Add a change handler to be called whenever the selected class is changed.
+         *
+         * The function used to return the comparison result is returned.
+         *
+         * @param {Function} handler Handler function to be called whenever the class
+         *                   changes.
+         */
         registerChangeHandler(handler) {
             if (!this.changeHandlers.includes(handler)) {
                 this.changeHandlers.push(handler);
@@ -89,8 +89,8 @@
         }
 
         /**
-        * Sets the names of the legs within the control's drop-down list.
-        */
+         * Sets the names of the legs within the control's drop-down list.
+         */
         setLegNames() {
             let legNames = [getMessage("ShowAllLegs")];
             for (let legIndex = 0; legIndex < this.legCount; legIndex += 1) {
@@ -110,10 +110,10 @@
         }
 
         /**
-        * Sets the course-class set to use.  This will also show or hide the control
-        * as appropriate.
-        * @param {CourseClassSet} courseClassSet The course-class set to set.
-        */
+         * Sets the course-class set to use.  This will also show or hide the control
+         * as appropriate.
+         * @param {CourseClassSet} courseClassSet The course-class set to set.
+         */
         setCourseClassSet(courseClassSet) {
             this.courseClassSet = courseClassSet;
             this.legCount = this.courseClassSet.getLegCount();
@@ -129,11 +129,11 @@
         }
 
         /**
-        * Returns the selected leg, i.e. the (0-based) leg index if a leg has been
-        * chosen, or null if all legs are visible or a team class is not being
-        * shown.
-        * @return {Number|null} Leg index, or null.
-        */
+         * Returns the selected leg, i.e. the (0-based) leg index if a leg has been
+         * chosen, or null if all legs are visible or a team class is not being
+         * shown.
+         * @return {Number|null} Leg index, or null.
+         */
         getSelectedLeg() {
             if (this.options === null) {
                 return null;
@@ -144,11 +144,11 @@
         }
 
         /**
-        * Sets the selected leg, i.e. the (0-based) leg index if a leg has been
-        * chosen, or null if all legs are visible or a team class is not being
-        * shown.
-        * @param {Number|null} selectedLeg The leg index to set, or null.
-        */
+         * Sets the selected leg, i.e. the (0-based) leg index if a leg has been
+         * chosen, or null if all legs are visible or a team class is not being
+         * shown.
+         * @param {Number|null} selectedLeg The leg index to set, or null.
+         */
         setSelectedLeg(selectedLeg) {
             if (this.options === null) {
                 // Not a relay class so do nothing.
@@ -165,8 +165,8 @@
         }
 
         /**
-        * Handle a change of the selected option in the drop-down list.
-        */
+         * Handle a change of the selected option in the drop-down list.
+         */
         onSelectionChanged() {
             let selectedLeg = this.getSelectedLeg();
             for (let handler of this.changeHandlers) {

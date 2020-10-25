@@ -37,14 +37,14 @@
     const ChartPopupData = {};
 
     /**
-    * Returns the fastest splits to a control.
-    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet The
-    *     course-class set containing the splits data.
-    * @param {Number} controlIndex The index of the control.
-    * @param {Number|null} selectedLegIndex The index of the selected leg, or null
-    *     to not return leg-specific data.
-    * @return {Object} Fastest-split data.
-    */
+     * Returns the fastest splits to a control.
+     * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet The
+     *     course-class set containing the splits data.
+     * @param {Number} controlIndex The index of the control.
+     * @param {Number|null} selectedLegIndex The index of the selected leg, or null
+     *     to not return leg-specific data.
+     * @return {Object} Fastest-split data.
+     */
     ChartPopupData.getFastestSplitsPopupData = function (courseClassSet, controlIndex, selectedLegIndex) {
         let data = courseClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, controlIndex, selectedLegIndex);
         data = data.map(comp => ({time: comp.split, name: comp.name, highlight: false}));
@@ -60,16 +60,16 @@
     };
 
     /**
-    * Returns the fastest splits for the currently-shown leg.  The list
-    * returned contains the fastest splits for the current leg for each class.
-    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet The course-class set
-    *     containing the splits data.
-    * @param {SplitsBrowser.Model.EventData} eventData Data for the entire
-    *     event.
-    * @param {Number} controlIndex The index of the control.
-    * @return {Object} Object that contains the title for the popup and the
-    *     array of data to show within it.
-    */
+     * Returns the fastest splits for the currently-shown leg.  The list
+     * returned contains the fastest splits for the current leg for each class.
+     * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet The course-class set
+     *     containing the splits data.
+     * @param {SplitsBrowser.Model.EventData} eventData Data for the entire
+     *     event.
+     * @param {Number} controlIndex The index of the control.
+     * @return {Object} Object that contains the title for the popup and the
+     *     array of data to show within it.
+     */
     ChartPopupData.getFastestSplitsForLegPopupData = function (courseClassSet, eventData, controlIndex) {
         let course = courseClassSet.getCourse();
         let startCode = course.getControlCode(controlIndex - 1);
@@ -88,16 +88,16 @@
     };
 
     /**
-    * Returns an object containing an array of the results visiting a
-    * control at a given time.
-    * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet The course-class set
-    *     containing the splits data.
-    * @param {SplitsBrowser.Model.EventData} eventData Data for the entire
-    *     event.
-    * @param {Number} controlIndex The index of the control.
-    * @param {Number} time The current time, in units of seconds past midnight.
-    * @return {Object} Object containing result data.
-    */
+     * Returns an object containing an array of the results visiting a
+     * control at a given time.
+     * @param {SplitsBrowser.Model.CourseClassSet} courseClassSet The course-class set
+     *     containing the splits data.
+     * @param {SplitsBrowser.Model.EventData} eventData Data for the entire
+     *     event.
+     * @param {Number} controlIndex The index of the control.
+     * @param {Number} time The current time, in units of seconds past midnight.
+     * @return {Object} Object containing result data.
+     */
     ChartPopupData.getResultsVisitingCurrentControlPopupData = function (courseClassSet, eventData, controlIndex, time) {
         let controlCode = courseClassSet.getCourse().getControlCode(controlIndex);
         let intervalStart = Math.round(time) - RACE_GRAPH_RESULT_WINDOW / 2;
@@ -124,12 +124,12 @@
     };
 
     /**
-    * Compares two course names.
-    * @param {String} name1 One course name to compare.
-    * @param {String} name2 The other course name to compare.
-    * @return {Number} Comparison result: negative if name1 < name2,
-    *     positive if name1 > name2 and zero if name1 === name2.
-    */
+     * Compares two course names.
+     * @param {String} name1 One course name to compare.
+     * @param {String} name2 The other course name to compare.
+     * @return {Number} Comparison result: negative if name1 < name2,
+     *     positive if name1 > name2 and zero if name1 === name2.
+     */
     function compareCourseNames(name1, name2) {
         if (name1 === name2) {
             return 0;
@@ -155,11 +155,11 @@
     }
 
     /**
-    * Tidy next-control data, by joining up multiple controls into one string,
-    * and substituting the display-name of the finish if necessary.
-    * @param {Array} nextControls Array of next-control information objects.
-    * @return {String} Next-control information containing joined-up control names.
-    */
+     * Tidy next-control data, by joining up multiple controls into one string,
+     * and substituting the display-name of the finish if necessary.
+     * @param {Array} nextControls Array of next-control information objects.
+     * @return {String} Next-control information containing joined-up control names.
+     */
     function tidyNextControlsList(nextControls) {
         return nextControls.map(function (nextControlRec) {
             let codes = nextControlRec.nextControls.slice(0);
@@ -172,14 +172,14 @@
     }
 
     /**
-    * Returns next-control data to show on the chart popup.
-    * @param {SplitsBrowser.Model.Course} course The course containing the
-    *     controls data.
-    * @param {SplitsBrowser.Model.EventData} eventData Data for the entire
-    *     event.
-    * @param {Number} controlIndex The index of the control.
-    * @return {Object} Next-control data.
-    */
+     * Returns next-control data to show on the chart popup.
+     * @param {SplitsBrowser.Model.Course} course The course containing the
+     *     controls data.
+     * @param {SplitsBrowser.Model.EventData} eventData Data for the entire
+     *     event.
+     * @param {Number} controlIndex The index of the control.
+     * @return {Object} Next-control data.
+     */
     ChartPopupData.getNextControlData = function (course, eventData, controlIndex) {
         let controlIdx = Math.min(controlIndex, course.controls.length);
         let controlCode = course.getControlCode(controlIdx);

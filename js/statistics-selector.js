@@ -40,11 +40,11 @@
     const DEFAULT_SELECTED_STATISTICS = ["SplitTime", "TimeLoss"];
 
     /**
-    * Control that contains a number of checkboxes for enabling and/or disabling
-    * the display of various statistics.
-    * @constructor
-    * @param {HTMLElement} parent The parent element.
-    */
+     * Control that contains a number of checkboxes for enabling and/or disabling
+     * the display of various statistics.
+     * @constructor
+     * @param {HTMLElement} parent The parent element.
+     */
     class StatisticsSelector {
         constructor(parent) {
             this.div = d3.select(parent).append("div")
@@ -74,27 +74,27 @@
         }
 
         /**
-        * Sets the messages in this control, following either its creation or a
-        * change of selected language.
-        */
+         * Sets the messages in this control, following either its creation or a
+         * change of selected language.
+         */
         setMessages() {
             this.statisticLabels.text((_name, index) => getMessage(STATISTIC_NAME_KEYS[index]));
         }
 
         /**
-        * Deselects all checkboxes.
-        *
-        * This method is intended only for test purposes.
-        */
+         * Deselects all checkboxes.
+         *
+         * This method is intended only for test purposes.
+         */
         clearAll() {
             this.div.selectAll("input").attr("checked", null);
         }
 
         /**
-        * Sets whether the statistics selector controls are enabled.
-        * @param {Boolean} isEnabled True if the controls are to be enabled,
-        *      false if the controls are to be disabled.
-        */
+         * Sets whether the statistics selector controls are enabled.
+         * @param {Boolean} isEnabled True if the controls are to be enabled,
+         *      false if the controls are to be disabled.
+         */
         setEnabled(isEnabled) {
             this.div.selectAll("label.statisticsSelectorLabel")
                 .classed("disabled", !isEnabled);
@@ -103,13 +103,13 @@
         }
 
         /**
-        * Register a change handler to be called whenever the choice of currently-
-        * visible statistics is changed.
-        *
-        * If the handler was already registered, nothing happens.
-        * @param {Function} handler Function to be called whenever the choice
-        *                           changes.
-        */
+         * Register a change handler to be called whenever the choice of currently-
+         * visible statistics is changed.
+         *
+         * If the handler was already registered, nothing happens.
+         * @param {Function} handler Function to be called whenever the choice
+         *                           changes.
+         */
         registerChangeHandler(handler) {
             if (!this.handlers.includes(handler)) {
                 this.handlers.push(handler);
@@ -117,13 +117,13 @@
         }
 
         /**
-        * Deregister a change handler from being called whenever the choice of
-        *  currently-visible statistics is changed.
-        *
-        * If the handler given was never registered, nothing happens.
-        * @param {Function} handler Function to be called whenever the choice
-        *                           changes.
-        */
+         * Deregister a change handler from being called whenever the choice of
+         *  currently-visible statistics is changed.
+         *
+         * If the handler given was never registered, nothing happens.
+         * @param {Function} handler Function to be called whenever the choice
+         *                           changes.
+         */
         deregisterChangeHandler(handler) {
             let index = this.handlers.indexOf(handler);
             if (index !== -1) {
@@ -132,10 +132,10 @@
         }
 
         /**
-        * Return the statistics that are currently enabled.
-        * @return {Map} Map that lists all the statistics and whether they
-        *     are enabled.
-        */
+         * Return the statistics that are currently enabled.
+         * @return {Map} Map that lists all the statistics and whether they
+         *     are enabled.
+         */
         getVisibleStatistics() {
             let visibleStats = new Map();
             this.div.selectAll("input").nodes().forEach((checkbox, index) => {
@@ -146,9 +146,9 @@
         }
 
         /**
-        * Sets the visible statistics.
-        * @param {Map} visibleStats Map that contains the statistics to make visible.
-        */
+         * Sets the visible statistics.
+         * @param {Map} visibleStats Map that contains the statistics to make visible.
+         */
         setVisibleStatistics(visibleStats) {
             this.div.selectAll("input").nodes().forEach((checkbox, index) => {
                 checkbox.checked = visibleStats.has(STATISTIC_NAMES[index]) && visibleStats.get(STATISTIC_NAMES[index]);
@@ -158,8 +158,8 @@
         }
 
         /**
-        * Handles the change in state of a checkbox, by firing all of the handlers.
-        */
+         * Handles the change in state of a checkbox, by firing all of the handlers.
+         */
         onCheckboxChanged() {
             let checkedFlags = this.getVisibleStatistics();
             for (let handler of this.handlers) {

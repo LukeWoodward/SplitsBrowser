@@ -34,10 +34,10 @@
     const MAX_PERMITTED_PRECISION = 2;
 
     /**
-    * A control that shows an entire table of results.
-    * @constructor
-    * @param {HTMLElement} parent The parent element to add this control to.
-    */
+     * A control that shows an entire table of results.
+     * @constructor
+     * @param {HTMLElement} parent The parent element to add this control to.
+     */
     class ResultsTable {
         constructor(parent) {
             this.parent = parent;
@@ -50,8 +50,8 @@
         }
 
         /**
-        * Build the results table.
-        */
+         * Build the results table.
+         */
         buildTable() {
             this.div = d3.select(this.parent).append("div")
                 .attr("id", "resultsTableContainer");
@@ -70,8 +70,8 @@
         }
 
         /**
-        * Populates the contents of the table with the course-class data.
-        */
+         * Populates the contents of the table with the course-class data.
+         */
         populateTable() {
             let headerText = this.courseClass.name + ", ";
 
@@ -256,9 +256,9 @@
         }
 
         /**
-        * Sets the class whose data is displayed.
-        * @param {SplitsBrowser.Model.CourseClass} courseClass The class displayed.
-        */
+         * Sets the class whose data is displayed.
+         * @param {SplitsBrowser.Model.CourseClass} courseClass The class displayed.
+         */
         setClass(courseClass) {
             this.courseClass = courseClass;
             this.selectedLegIndex = null;
@@ -268,9 +268,9 @@
         }
 
         /**
-        * Sets the selected leg index.
-        * @param {Number|null} selectedLegIndex The selected leg index.
-        */
+         * Sets the selected leg index.
+         * @param {Number|null} selectedLegIndex The selected leg index.
+         */
         setSelectedLegIndex(selectedLegIndex) {
             this.selectedLegIndex = selectedLegIndex;
             if (this.courseClass !== null) {
@@ -279,38 +279,38 @@
         }
 
         /**
-        * Shows the table of results.
-        */
+         * Shows the table of results.
+         */
         show() {
             this.div.style("display", null);
         }
 
         /**
-        * Hides the table of results.
-        */
+         * Hides the table of results.
+         */
         hide() {
             this.div.style("display", "none");
         }
 
         /**
-        * Retranslates the results table following a change of selected language.
-        */
+         * Retranslates the results table following a change of selected language.
+         */
         retranslate() {
             this.populateTable();
         }
     }
 
     /**
-    * Determines the precision with which to show the results.
-    *
-    * If there are some fractional times, then all times should be shown with
-    * the same precision, even if not all of them need to.  For example, a
-    * split time between controls punched after 62.7 and 108.7 seconds must be
-    * shown as 46.0 seconds, not 46.
-    *
-    * @param {Array} results Array of Result objects.
-    * @return {Number} Maximum precision to use.
-    */
+     * Determines the precision with which to show the results.
+     *
+     * If there are some fractional times, then all times should be shown with
+     * the same precision, even if not all of them need to.  For example, a
+     * split time between controls punched after 62.7 and 108.7 seconds must be
+     * shown as 46.0 seconds, not 46.
+     *
+     * @param {Array} results Array of Result objects.
+     * @return {Number} Maximum precision to use.
+     */
     function determinePrecision(results) {
         let maxPrecision = 0;
         let maxPrecisionFactor = 1;
@@ -329,16 +329,16 @@
     }
 
     /**
-    * Returns the contents of the time or status column for the given
-    * result.
-    *
-    * The status may be a string that indicates the result mispunched.
-    *
-    * @param {Result} result The result to get the status of.
-    * @param {Number|null} time The time to format, if the result is OK.
-    * @param {Number} precision The precision to use.
-    * @return {String} Time or status for the given result.
-    */
+     * Returns the contents of the time or status column for the given
+     * result.
+     *
+     * The status may be a string that indicates the result mispunched.
+     *
+     * @param {Result} result The result to get the status of.
+     * @param {Number|null} time The time to format, if the result is OK.
+     * @param {Number} precision The precision to use.
+     * @return {String} Time or status for the given result.
+     */
     function getTimeOrStatus (result, time, precision) {
         if (result.isNonStarter) {
             return getMessage("DidNotStartShort");
@@ -356,25 +356,25 @@
     }
 
     /**
-    * Escapes a piece of text as HTML so that it can be concatenated into an
-    * HTML string without the risk of any injection.
-    * @param {String} value The HTML value to escape.
-    * @return {String} The HTML value escaped.
-    */
+     * Escapes a piece of text as HTML so that it can be concatenated into an
+     * HTML string without the risk of any injection.
+     * @param {String} value The HTML value to escape.
+     * @return {String} The HTML value escaped.
+     */
     function escapeHtml(value) {
         return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
     /**
-    * Formats a time (cumulative or split) for a result.  If the result is
-    * deemed as completed despite having missing times, any such missing times are
-    * replaced with "??:??".
-    * @param {Number|null} time The time to format, in seconds.
-    * @param {Number} precision The precision to format the time to.
-    * @param {Boolean} resultOKDespiteMissingTimes True if the result is known to
-    *       have completed the course despite having missing times, false otherwise.
-    * @return {String} Formatted time
-    */
+     * Formats a time (cumulative or split) for a result.  If the result is
+     * deemed as completed despite having missing times, any such missing times are
+     * replaced with "??:??".
+     * @param {Number|null} time The time to format, in seconds.
+     * @param {Number} precision The precision to format the time to.
+     * @param {Boolean} resultOKDespiteMissingTimes True if the result is known to
+     *       have completed the course despite having missing times, false otherwise.
+     * @return {String} Formatted time
+     */
     function formatPossiblyMissingTime(time, precision, resultOKDespiteMissingTimes) {
         if (time === null && resultOKDespiteMissingTimes) {
             return "??:??";

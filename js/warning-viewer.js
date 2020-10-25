@@ -27,11 +27,11 @@
     const CONTAINER_DIV_ID = "warningViewerContainer";
 
     /**
-    * Constructs a new WarningViewer object.
-    * @constructor
-    * @param {d3.selection} parent d3 selection containing the parent to
-    *     insert the selector into.
-    */
+     * Constructs a new WarningViewer object.
+     * @constructor
+     * @param {d3.selection} parent d3 selection containing the parent to
+     *     insert the selector into.
+     */
     class WarningViewer {
         constructor(parent) {
             this.parent = parent;
@@ -68,17 +68,17 @@
         }
 
         /**
-        * Sets the message shown in the tooltip, either as part of initialisation or
-        * following a change of selected language.
-        */
+         * Sets the message shown in the tooltip, either as part of initialisation or
+         * following a change of selected language.
+         */
         setMessages() {
             this.containerDiv.attr("title", getMessage("WarningsTooltip"));
         }
 
         /**
-        * Creates the warning triangle.
-        * @return {Object} d3 selection containing the warning triangle.
-        */
+         * Creates the warning triangle.
+         * @return {Object} d3 selection containing the warning triangle.
+         */
         createWarningTriangle() {
             let svgContainer = this.containerDiv.append("div")
                 .attr("id", "warningTriangleContainer");
@@ -107,9 +107,9 @@
         }
 
         /**
-        * Sets the list of visible warnings.
-        * @param {Array} warnings Array of warning messages.
-        */
+         * Sets the list of visible warnings.
+         * @param {Array} warnings Array of warning messages.
+         */
         setWarnings(warnings) {
             let errorsSelection = this.warningList.selectAll("div")
                 .data(warnings);
@@ -126,8 +126,8 @@
         }
 
         /**
-        * Shows or hides the list of warnings.
-        */
+         * Shows or hides the list of warnings.
+         */
         showHideErrorList() {
             if (this.warningList.style("display") === "none") {
                 let offset = $(this.warningTriangle.node()).offset();

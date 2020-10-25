@@ -66,10 +66,10 @@
     const controlCodeRegexp = /^[A-Za-z0-9]+$/;
 
     /**
-    * Trim trailing empty-string entries from the given array.
-    * The given array is mutated.
-    * @param {Array} array The array of string values.
-    */
+     * Trim trailing empty-string entries from the given array.
+     * The given array is mutated.
+     * @param {Array} array The array of string values.
+     */
     function trimTrailingEmptyCells (array) {
         let index = array.length - 1;
         while (index >= 0 && array[index] === "") {
@@ -80,10 +80,10 @@
     }
 
     /**
-    * Object used to read data from an alternative CSV file.
-    * @constructor
-    * @param {Object} format Object that describes the data format to read.
-    */
+     * Object used to read data from an alternative CSV file.
+     * @constructor
+     * @param {Object} format Object that describes the data format to read.
+     */
     class Reader {
         constructor(format) {
             this.format = format;
@@ -101,11 +101,11 @@
         }
 
         /**
-        * Determine the delimiter used to delimit data.
-        * @param {String} firstDataLine The first data line of the file.
-        * @return {String|null} The delimiter separating the data, or null if no
-        *    suitable delimiter was found.
-        */
+         * Determine the delimiter used to delimit data.
+         * @param {String} firstDataLine The first data line of the file.
+         * @return {String|null} The delimiter separating the data, or null if no
+         *    suitable delimiter was found.
+         */
         determineDelimiter(firstDataLine) {
             for (let delimiter of DELIMITERS) {
                 let lineParts = firstDataLine.split(delimiter);
@@ -119,11 +119,11 @@
         }
 
         /**
-        * Some lines of some formats can have multiple delimited competitors, which
-        * will move the following columns out of their normal place.  Identify any
-        * such situations and merge them together.
-        * @param {Array} row The row of data read from the file.
-        */
+         * Some lines of some formats can have multiple delimited competitors, which
+         * will move the following columns out of their normal place.  Identify any
+         * such situations and merge them together.
+         * @param {Array} row The row of data read from the file.
+         */
         adjustLinePartsForMultipleCompetitors(row) {
             if (this.format.allowMultipleCompetitorNames) {
                 while (row.length > this.format.name + 1 && row[this.format.name + 1].match(/^\s\S/)) {
@@ -134,11 +134,11 @@
         }
 
         /**
-        * Check the first line of data read in to verify that all of the control
-        * codes specified are alphanumeric.
-        * @param {String} firstLine The first line of data from the file (not
-        *     the header line).
-        */
+         * Check the first line of data read in to verify that all of the control
+         * codes specified are alphanumeric.
+         * @param {String} firstLine The first line of data from the file (not
+         *     the header line).
+         */
         checkControlCodesAlphaNumeric(firstLine) {
             let lineParts = firstLine.split(this.delimiter);
             trimTrailingEmptyCells(lineParts);
@@ -152,11 +152,11 @@
         }
 
         /**
-        * Adds the result to the course with the given name.
-        * @param {Result} result The result object read from the row.
-        * @param {String} courseName The name of the course.
-        * @param {Array} row Array of string parts making up the row of data read.
-        */
+         * Adds the result to the course with the given name.
+         * @param {Result} result The result object read from the row.
+         * @param {String} courseName The name of the course.
+         * @param {Array} row Array of string parts making up the row of data read.
+         */
         addResultToCourse(result, courseName, row) {
             if (this.classes.has(courseName)) {
                 let cls = this.classes.get(courseName);
@@ -186,9 +186,9 @@
         }
 
         /**
-        * Read a row of data from a line of the file.
-        * @param {String} line The line of data read from the file.
-        */
+         * Read a row of data from a line of the file.
+         * @param {String} line The line of data read from the file.
+         */
         readDataRow(line) {
             let row = line.split(this.delimiter);
             trimTrailingEmptyCells(row);
@@ -251,11 +251,11 @@
         }
 
         /**
-        * Given an array of objects containing information about each of the
-        * course-classes in the data, create CourseClass and Course objects,
-        * grouping classes by the list of controls
-        * @return {Object} Object that contains the courses and classes.
-        */
+         * Given an array of objects containing information about each of the
+         * course-classes in the data, create CourseClass and Course objects,
+         * grouping classes by the list of controls
+         * @return {Object} Object that contains the courses and classes.
+         */
         createClassesAndCourses() {
             let courseClasses = [];
 
@@ -287,10 +287,10 @@
         }
 
         /**
-        * Parse alternative CSV data for an entire event.
-        * @param {String} eventData String containing the entire event data.
-        * @return {SplitsBrowser.Model.Event} All event data read in.
-        */
+         * Parse alternative CSV data for an entire event.
+         * @param {String} eventData String containing the entire event data.
+         * @return {SplitsBrowser.Model.Event} All event data read in.
+         */
         parseEventData(eventData) {
             this.warnings = [];
             eventData = normaliseLineEndings(eventData);
