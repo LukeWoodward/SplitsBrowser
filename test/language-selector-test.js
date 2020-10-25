@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - LanguageSelector tests.
  *
- *  Copyright (C) 2000-2019 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -93,10 +93,10 @@
     QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", function(assert) {
         reset();
 
-        let callCount2 = null;
-        const secondHandler = function () {
+        let callCount2 = 0;
+        function secondHandler() {
             callCount2 += 1;
-        };
+        }
 
         const selector = createSelector();
         selector.registerChangeHandler(handleLanguageChanged);

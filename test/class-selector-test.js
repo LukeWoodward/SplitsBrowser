@@ -210,10 +210,10 @@
 
         let lastClassIdxs2 = null;
         let callCount2 = null;
-        const secondHandler = function(classId) {
+        function secondHandler(classId) {
             lastClassIdxs2 = classId;
             callCount2 += 1;
-        };
+        }
 
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
         selector.registerChangeHandler(handleClassChanged);

@@ -77,10 +77,10 @@
 
         let lastChartTypeName2 = null;
         let callCount2 = null;
-        const secondHandler = function (chartType) {
+        function secondHandler(chartType) {
             lastChartTypeName2 = chartType.nameKey;
             callCount2 += 1;
-        };
+        }
 
         const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);

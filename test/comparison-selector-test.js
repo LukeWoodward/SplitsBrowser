@@ -255,10 +255,10 @@
 
         let lastSelector2 = null;
         let callCount2 = null;
-        const secondHandler = function(selector) {
+        function secondHandler(selector) {
             lastSelector2 = selector;
             callCount2 += 1;
-        };
+        }
 
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
