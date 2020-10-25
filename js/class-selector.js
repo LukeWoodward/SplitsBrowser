@@ -33,7 +33,7 @@
             this.changeHandlers = [];
             this.otherClassesEnabled = true;
 
-            let div = d3.select(parent).append("div")
+            const div = d3.select(parent).append("div")
                 .classed("topRowStart", true);
 
             this.labelSpan = div.append("span");
@@ -74,10 +74,10 @@
             // Ensure that a click outside of the drop-down list or the selector
             // box closes it.
             // Taken from http://stackoverflow.com/questions/1403615 and adjusted.
-            $(document).click((event) => {
-                let listDiv = this.otherClassesList.node();
+            $(document).click(event => {
+                const listDiv = this.otherClassesList.node();
                 if (listDiv.style.display !== "none") {
-                    let container = $("div.otherClassList,div.otherClassSelector");
+                    const container = $("div.otherClassList,div.otherClassSelector");
                     if (!container.is(event.target) && container.has(event.target).length === 0) {
                         listDiv.style.display = "none";
                     }
@@ -180,7 +180,9 @@
                 return [];
             } else {
                 let indexes = [this.dropDown.selectedIndex];
-                this.selectedOtherClassIndexes.forEach(index => indexes.push(parseInt(index, 10)));
+                for (let index of this.selectedOtherClassIndexes) {
+                    indexes.push(parseInt(index, 10));
+                }
                 return indexes;
             }
         }
@@ -189,8 +191,10 @@
          * Handle a change of the selected option in the drop-down list.
          */
         onSelectionChanged() {
-            let indexes = this.getSelectedClasses();
-            this.changeHandlers.forEach(handler => handler(indexes));
+            const indexes = this.getSelectedClasses();
+            for (let handler of this.changeHandlers) {
+                handler(indexes);
+            }
         }
 
         /**
@@ -200,7 +204,7 @@
          * text if none are selected.
          */
         updateOtherClassText() {
-            let classIdxs = Array.from(this.selectedOtherClassIndexes.values());
+            const classIdxs = Array.from(this.selectedOtherClassIndexes.values());
             classIdxs.sort(d3.ascending);
             let text;
             if (classIdxs.length === 0) {
@@ -233,7 +237,7 @@
                 otherClasses = [];
             }
 
-            let otherClassIndexes = otherClasses.map(cls => this.classes.indexOf(cls));
+            const otherClassIndexes = otherClasses.map(cls => this.classes.indexOf(cls));
 
             let otherClassesSelection = this.otherClassesList.selectAll("div")
                 .data(otherClassIndexes);
@@ -256,8 +260,8 @@
                 this.otherClassesContainer.style("display", "none");
             }
 
-            let offset = $(this.otherClassesSelector.node()).offset();
-            let height = $(this.otherClassesSelector.node()).outerHeight();
+            const offset = $(this.otherClassesSelector.node()).offset();
+            const height = $(this.otherClassesSelector.node()).outerHeight();
             this.otherClassesList.style("left", `${offset.left}px`)
                 .style("top", `${offset.top + height}px`);
 

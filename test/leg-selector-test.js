@@ -44,18 +44,18 @@
     const individualCourseClassSet = new CourseClassSet([new CourseClass("Test", 3, [])]);
 
     const teamCourseClassSet = (function () {
-        let courseClass = new CourseClass("Test", 3, []);
+        const courseClass = new CourseClass("Test", 3, []);
         courseClass.setIsTeamClass([3, 3]);
         return new CourseClassSet([courseClass]);
     })();
 
     function setSelectorValue(newValue) {
-        let parent = d3.select("#qunit-fixture");
+        const parent = d3.select("#qunit-fixture");
         $(parent.select("select").node()).val(newValue).change();
     }
 
     QUnit.test("Can create selector", function (assert) {
-        let parent = d3.select("#qunit-fixture");
+        const parent = d3.select("#qunit-fixture");
         new LegSelector(parent);
 
         assert.strictEqual(parent.select("select").size(), 1);
@@ -63,15 +63,15 @@
     });
 
     QUnit.test("Selector is initially invisible", function (assert) {
-        let parent = d3.select("#qunit-fixture");
+        const parent = d3.select("#qunit-fixture");
         new LegSelector(parent);
         assert.strictEqual($(LEG_SELECTOR_CONTAINER_SELECTOR, $("#qunit-fixture")).is(":visible"), false);
         assert.strictEqual($(LEG_SELECTOR_SELECTOR, $("#qunit-fixture")).is(":visible"), false);
     });
 
     QUnit.test("Selector remains invisible for individual course-class set", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(individualCourseClassSet);
 
         assert.strictEqual($(LEG_SELECTOR_CONTAINER_SELECTOR, $("#qunit-fixture")).is(":visible"), false);
@@ -79,16 +79,16 @@
     });
 
     QUnit.test("Selected leg is null for individual course-class set", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(individualCourseClassSet);
 
         assert.strictEqual(selector.getSelectedLeg(), null);
     });
 
     QUnit.test("Selector becomes visible when team class set", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
 
         selector.setCourseClassSet(teamCourseClassSet);
 
@@ -97,8 +97,8 @@
     });
 
     QUnit.test("Selector becomes invisible when team class set and then individual class set", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
 
         selector.setCourseClassSet(teamCourseClassSet);
 
@@ -112,8 +112,8 @@
     });
 
     QUnit.test("Can return the selected leg when changed", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
 
         selector.setCourseClassSet(teamCourseClassSet);
 
@@ -123,8 +123,8 @@
     });
 
     QUnit.test("Can return the selected leg when changed several times", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(teamCourseClassSet);
 
         setSelectorValue(1);
@@ -141,23 +141,23 @@
     });
 
     QUnit.test("Setting selected leg when course-class set never set does nothing", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setSelectedLeg(1);
         assert.expect(0);
     });
 
     QUnit.test("Setting selected leg for individual course-class set does nothing", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(individualCourseClassSet);
         selector.setSelectedLeg(1);
         assert.expect(0);
     });
 
     QUnit.test("Can set the selected leg to a not-null value", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(teamCourseClassSet);
 
         setSelectorValue(0);
@@ -168,8 +168,8 @@
     });
 
     QUnit.test("Can set the selected leg to null when something else selected", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(teamCourseClassSet);
 
         setSelectorValue(1);
@@ -180,16 +180,16 @@
     });
 
     QUnit.test("Setting the selected leg to a negative value sets it to null", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(teamCourseClassSet);
         selector.setSelectedLeg(-1);
         assert.strictEqual(selector.getSelectedLeg(), null);
     });
 
     QUnit.test("Setting the selected leg to a value too large sets it to null", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(teamCourseClassSet);
         selector.setSelectedLeg(2);
         assert.strictEqual(selector.getSelectedLeg(), null);
@@ -197,8 +197,8 @@
 
     QUnit.test("Calls change handler when registered", function (assert) {
         reset();
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(teamCourseClassSet);
         selector.registerChangeHandler(testChangeHandler);
 
@@ -209,8 +209,8 @@
 
     QUnit.test("Calls change handler for all changes in turn", function (assert) {
         reset();
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(teamCourseClassSet);
         selector.registerChangeHandler(testChangeHandler);
 
@@ -225,8 +225,8 @@
 
     QUnit.test("Calls change handler once when registered twice", function (assert) {
         reset();
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(teamCourseClassSet);
         selector.registerChangeHandler(testChangeHandler);
         selector.registerChangeHandler(testChangeHandler);
@@ -238,12 +238,12 @@
 
     QUnit.test("Calls multiple change handlers when unchecked and clicked", function (assert) {
         reset();
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(teamCourseClassSet);
         selector.registerChangeHandler(testChangeHandler);
 
-        let legIndexes2 = [];
+        const legIndexes2 = [];
         selector.registerChangeHandler(legIndex => legIndexes2.push(legIndex));
 
         setSelectorValue(1);
@@ -253,8 +253,8 @@
     });
 
     QUnit.test("Resets leg selection when setting course class", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new LegSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new LegSelector(parent);
         selector.setCourseClassSet(teamCourseClassSet);
 
         setSelectorValue(1);

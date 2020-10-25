@@ -85,7 +85,7 @@
     const DUMMY_CLASS_SET = getDummyCourseClassSet(results, false);
 
     function getDummyCourseClassSetWithMispuncher() {
-        let resultsWithMispuncher = results.slice(0);
+        const resultsWithMispuncher = results.slice(0);
         resultsWithMispuncher[1] = Result.fromCumTimes(2, null, [0, 3, null], results[1].owner);
         return getDummyCourseClassSet(resultsWithMispuncher, false);
     }
@@ -97,7 +97,7 @@
      * @returns {Result} The cloned result.
      */
     function cloneAndDisqualify(result) {
-        let dsqResult = Result.fromCumTimes(result.order, null, result.getAllCumulativeTimes(), result.owner);
+        const dsqResult = Result.fromCumTimes(result.order, null, result.getAllCumulativeTimes(), result.owner);
         dsqResult.disqualify();
         return dsqResult;
     }
@@ -107,14 +107,14 @@
     }
 
     function getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother() {
-        let allResults = [extraResult].concat(results.map(cloneAndDisqualify));
+        const allResults = [extraResult].concat(results.map(cloneAndDisqualify));
         return getDummyCourseClassSet(allResults, false);
     }
 
     function getDummyTeamCourseClassSet() {
-        let team1 = new Team("Team 1", null);
-        let team2 = new Team("Team 2", null);
-        let team3 = new Team("Team 3", null);
+        const team1 = new Team("Team 1", null);
+        const team2 = new Team("Team 2", null);
+        const team3 = new Team("Team 3", null);
 
         team1.setMembers([new Competitor("1a", null), new Competitor("1b", null)]);
         team2.setMembers([new Competitor("2a", null), new Competitor("2b", null)]);
@@ -133,7 +133,7 @@
 
     QUnit.test("Comparison selector created enabled and with result selector populated but not displayed", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
 
         let htmlSelectSelection = d3.select(_COMPARISON_SELECTOR_SELECTOR);
@@ -144,7 +144,7 @@
         assert.ok(htmlSelect.options.length > 2, "More than two options should be created");
         assert.ok(htmlSelect.selectedIndex >= 0, "Selected index should not be negative");
 
-        let func = selector.getComparisonFunction();
+        const func = selector.getComparisonFunction();
         assert.strictEqual(_FASTEST_TIME, func(DUMMY_CLASS_SET));
 
         htmlSelectSelection = d3.select(_RESULT_SELECTOR_SELECTOR);
@@ -163,14 +163,14 @@
 
     QUnit.test("Comparison selector created enabled and with result selector populated with completing results only", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
-        let courseClassSet = getDummyCourseClassSetWithMispuncher();
+        const selector = createSelector();
+        const courseClassSet = getDummyCourseClassSetWithMispuncher();
         selector.setCourseClassSet(courseClassSet);
 
-        let htmlSelectSelection = d3.select(_RESULT_SELECTOR_SELECTOR);
+        const htmlSelectSelection = d3.select(_RESULT_SELECTOR_SELECTOR);
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
 
-        let htmlSelect = htmlSelectSelection.node();
+        const htmlSelect = htmlSelectSelection.node();
         assert.strictEqual(htmlSelect.options.length, courseClassSet.allResults.length - 1, "Expected one fewer item than the number of results");
         assert.strictEqual(htmlSelect.selectedIndex, 0, "Result selector should be created with the first item selected");
 
@@ -183,13 +183,13 @@
 
     QUnit.test("Comparison selector created and result selector displayed when selecting last item", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
 
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(htmlSelect.options.length - 1).change();
 
-        let func = selector.getComparisonFunction();
+        const func = selector.getComparisonFunction();
         assert.deepEqual(func(DUMMY_CLASS_SET), DUMMY_CLASS_SET.allResults[0].getAllCumulativeTimes());
 
         assert.strictEqual($(_RESULT_SELECTOR_SELECTOR).is(":visible"), true, "Result selector should be shown");
@@ -199,17 +199,17 @@
 
     QUnit.test("Correct result index selected when result list contains a mispuncher", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
-        let courseClassSet = getDummyCourseClassSetWithMispuncher();
+        const selector = createSelector();
+        const courseClassSet = getDummyCourseClassSetWithMispuncher();
         selector.setCourseClassSet(courseClassSet);
 
-        let htmlComparisonSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlComparisonSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         $(htmlComparisonSelect).val(htmlComparisonSelect.options.length - 1).change();
 
-        let htmlResultSelector = d3.select(_RESULT_SELECTOR_SELECTOR).node();
+        const htmlResultSelector = d3.select(_RESULT_SELECTOR_SELECTOR).node();
         $(htmlResultSelector).val(2).change();
         assert.strictEqual(htmlResultSelector.selectedIndex, 1);
-        let func = selector.getComparisonFunction();
+        const func = selector.getComparisonFunction();
         assert.deepEqual(func(DUMMY_CLASS_SET), DUMMY_CLASS_SET.allResults[2].getAllCumulativeTimes());
 
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
@@ -217,17 +217,17 @@
 
     QUnit.test("Registering a handler and changing a value in the comparison selector triggers a call to change callback", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
         selector.registerChangeHandler(handleComparisonChanged);
 
-        let htmlSelectSelection = d3.select(_COMPARISON_SELECTOR_SELECTOR);
+        const htmlSelectSelection = d3.select(_COMPARISON_SELECTOR_SELECTOR);
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
-        let htmlSelect = htmlSelectSelection.node();
+        const htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(2).change();
 
-        let func = selector.getComparisonFunction();
+        const func = selector.getComparisonFunction();
         assert.strictEqual(func(DUMMY_CLASS_SET), _FASTEST_TIME + ":5");
         assert.strictEqual(callCount, 1, "One change should have been recorded");
 
@@ -236,10 +236,10 @@
 
     QUnit.test("Registering a handler and changing a value in the result selector triggers a call to change callback", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
 
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
 
         assert.strictEqual($(_RESULT_SELECTOR_SELECTOR).is(":visible"), false, "Result selector should not be shown");
         $(htmlSelect).val(htmlSelect.options.length - 1).change();
@@ -255,20 +255,20 @@
 
         let lastSelector2 = null;
         let callCount2 = null;
-        let secondHandler = function(selector) {
+        const secondHandler = function(selector) {
             lastSelector2 = selector;
             callCount2 += 1;
         };
 
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
 
         selector.registerChangeHandler(handleComparisonChanged);
         selector.registerChangeHandler(secondHandler);
 
-        let htmlSelectSelection = d3.select(_COMPARISON_SELECTOR_SELECTOR);
+        const htmlSelectSelection = d3.select(_COMPARISON_SELECTOR_SELECTOR);
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
-        let htmlSelect = htmlSelectSelection.node();
+        const htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(2).change();
 
@@ -283,15 +283,15 @@
 
     QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
 
         selector.registerChangeHandler(handleComparisonChanged);
         selector.registerChangeHandler(handleComparisonChanged);
 
-        let htmlSelectSelection = d3.select(_COMPARISON_SELECTOR_SELECTOR);
+        const htmlSelectSelection = d3.select(_COMPARISON_SELECTOR_SELECTOR);
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
-        let htmlSelect = htmlSelectSelection.node();
+        const htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(2).change();
 
@@ -304,7 +304,7 @@
 
     QUnit.test("Result selector appears if 'Any Result...' is selected and disappears when deselected", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
 
         let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
@@ -316,7 +316,7 @@
         htmlSelect = d3.select(_RESULT_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(1).change();
 
-        let func = selector.getComparisonFunction();
+        const func = selector.getComparisonFunction();
         assert.deepEqual(func(DUMMY_CLASS_SET), DUMMY_CLASS_SET.allResults[1].getAllCumulativeTimes());
         assert.strictEqual(callCount, 1, "One change should have been recorded");
 
@@ -325,24 +325,24 @@
 
     QUnit.test("Can get comparison type when selecting a result from the 'Any result...' drop-down", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
 
         let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
-        let anyResultOptionIndex = htmlSelect.options.length - 1;
+        const anyResultOptionIndex = htmlSelect.options.length - 1;
         $(htmlSelect).val(anyResultOptionIndex).change();
 
         htmlSelect = d3.select(_RESULT_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(1).change();
 
-        let comparisonType = selector.getComparisonType();
+        const comparisonType = selector.getComparisonType();
         assert.deepEqual(comparisonType, {index: anyResultOptionIndex, result: results[1]}, "Selected result should be in the comparison type");
     });
 
     QUnit.test("Result selector repopulated when class data changes", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
-        let htmlSelect = d3.select(_RESULT_SELECTOR_SELECTOR).node();
+        const selector = createSelector();
+        const htmlSelect = d3.select(_RESULT_SELECTOR_SELECTOR).node();
 
         selector.setCourseClassSet(DUMMY_CLASS_SET);
         assert.strictEqual(htmlSelect.options.length, DUMMY_CLASS_SET.allResults.length, "Expected "  + DUMMY_CLASS_SET.allResults.length + " options to be created");
@@ -371,7 +371,7 @@
 
     QUnit.test("Result selector remains selected on same result if course-class set changes and selected result still in list", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
         let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(htmlSelect.options.length - 1).change();
@@ -388,7 +388,7 @@
 
     QUnit.test("Result selector returns to first result if course-class set changes and selected result no longer in list", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
         let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(htmlSelect.options.length - 1).change();
@@ -405,9 +405,9 @@
 
     QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has no winner and 'Winner' option chosen", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner(false));
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(2).change();
 
         selector.registerChangeHandler(handleComparisonChanged);
@@ -422,9 +422,9 @@
 
     QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has no winner and 'Any result...' option chosen", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner(false));
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(3).change();
 
         selector.registerChangeHandler(handleComparisonChanged);
@@ -438,13 +438,13 @@
 
     QUnit.test("Can set selector value to a given index that isn't Any Result", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
         selector.registerChangeHandler(handleComparisonChanged);
 
         selector.setComparisonType(3, null);
 
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         assert.strictEqual($(htmlSelect).val(), "3");
         assert.strictEqual(callCount, 1, "One call to the change-handler should have been made");
         assert.strictEqual(alertsReceived.length, 0, "No alert should have been issued");
@@ -453,13 +453,13 @@
 
     QUnit.test("Cannot set selector value to a negative index", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
         selector.registerChangeHandler(handleComparisonChanged);
 
         selector.setComparisonType(-1, null);
 
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         assert.strictEqual($(htmlSelect).val(), "1");
         assert.strictEqual(callCount, 0, "No calls to the change-handler should have been made");
         assert.strictEqual(alertsReceived.length, 0, "No alert should have been issued");
@@ -468,11 +468,11 @@
 
     QUnit.test("Cannot set selector value to an index too large", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
         selector.registerChangeHandler(handleComparisonChanged);
 
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         selector.setComparisonType(htmlSelect.options.length, null);
 
         assert.strictEqual($(htmlSelect).val(), "1");
@@ -483,29 +483,29 @@
 
     QUnit.test("Can set selector value to a named result", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
         selector.registerChangeHandler(handleComparisonChanged);
 
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         selector.setComparisonType(htmlSelect.options.length - 1,  results[1]);
 
         assert.strictEqual($(htmlSelect).val(), (htmlSelect.options.length - 1).toString());
         assert.strictEqual(callCount, 1, "One call to the change-handler should have been made");
         assert.strictEqual(alertsReceived.length, 0, "No alert should have been issued");
 
-        let resultSelect = $(_RESULT_SELECTOR_SELECTOR);
+        const resultSelect = $(_RESULT_SELECTOR_SELECTOR);
         assert.strictEqual(resultSelect.is(":visible"), true, "Result should not be shown");
         assert.strictEqual(resultSelect.val(), "1", "Second result should have been selected");
     });
 
     QUnit.test("Setting selector value to a nonexistent result has no effect", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
         selector.registerChangeHandler(handleComparisonChanged);
 
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         selector.setComparisonType(htmlSelect.options.length - 1, "This is not a valid result");
 
         assert.strictEqual($(htmlSelect).val(), "1");
@@ -516,11 +516,11 @@
 
     QUnit.test("Can get the compared-against result after selecting to compare against any result", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother());
         selector.registerChangeHandler(handleComparisonChanged);
 
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         selector.setComparisonType(htmlSelect.options.length - 1, extraResult);
 
         assert.strictEqual($(htmlSelect).val(), (htmlSelect.options.length - 1).toString(), "Initially the comparison should be set to 'Any result...'");
@@ -533,11 +533,11 @@
 
     QUnit.test("Comparison type reverts to from Winner to Fastest Time if removing a class removes the winner", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother());
         selector.registerChangeHandler(handleComparisonChanged);
 
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         selector.setComparisonType(0, extraResult);
 
         assert.strictEqual($(htmlSelect).val(), "0", "Initially the comparison should be set to 'Winner'");
@@ -554,11 +554,11 @@
 
     QUnit.test("Comparison type doesn't change from Fastest Time + 5% if removing a class removes the winner", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother());
         selector.registerChangeHandler(handleComparisonChanged);
 
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         selector.setComparisonType(2, extraResult);
 
         assert.strictEqual($(htmlSelect).val(), "2", "Initially the comparison should be set to 'Fastest Time + 5%'");
@@ -575,11 +575,11 @@
 
     QUnit.test("Comparison type reverts to from Any Result to Fastest Time if removing a class removes the winner", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother());
         selector.registerChangeHandler(handleComparisonChanged);
 
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         selector.setComparisonType(htmlSelect.options.length - 1, extraResult);
 
         assert.strictEqual($(htmlSelect).val(), (htmlSelect.options.length - 1).toString(), "Initially the comparison should be set to 'Any result...'");
@@ -597,17 +597,17 @@
     });
 
     QUnit.test("Comparison type set to Any Team for a team class", function(assert) {
-        let selector = createSelector();
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const selector = createSelector();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         selector.setCourseClassSet(getDummyTeamCourseClassSet());
         assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyTeam"));
         assert.strictEqual($(_RESULT_SPAN_SELECTOR).text(), getMessage("CompareWithAnyTeamLabel"));
     });
 
     QUnit.test("Comparison type option changes from Any Runner to Any Team when changing from an individual to a team class", function(assert) {
-        let selector = createSelector();
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
-        let resultSpan = $(_RESULT_SPAN_SELECTOR);
+        const selector = createSelector();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const resultSpan = $(_RESULT_SPAN_SELECTOR);
         selector.setCourseClassSet(DUMMY_CLASS_SET);
         assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyRunner"));
         assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyRunnerLabel"));
@@ -617,9 +617,9 @@
     });
 
     QUnit.test("Comparison type option changes from Any Team back to Any Runner when changing from a team to an individual class", function(assert) {
-        let selector = createSelector();
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
-        let resultSpan = $(_RESULT_SPAN_SELECTOR);
+        const selector = createSelector();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const resultSpan = $(_RESULT_SPAN_SELECTOR);
         selector.setCourseClassSet(getDummyTeamCourseClassSet());
         assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyTeam"));
         assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyTeamLabel"));
@@ -629,9 +629,9 @@
     });
 
     QUnit.test("Comparison type option changes from Any Team to Any Runner when changing from all legs to one specific leg", function (assert) {
-        let selector = createSelector();
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
-        let resultSpan = $(_RESULT_SPAN_SELECTOR);
+        const selector = createSelector();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const resultSpan = $(_RESULT_SPAN_SELECTOR);
         selector.setCourseClassSet(getDummyTeamCourseClassSet());
         assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyTeam"));
         assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyTeamLabel"));
@@ -641,9 +641,9 @@
     });
 
     QUnit.test("Comparison type option changes from Any Team to Any Runner when changing from one specific leg to all legs", function (assert) {
-        let selector = createSelector();
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
-        let resultSpan = $(_RESULT_SPAN_SELECTOR);
+        const selector = createSelector();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const resultSpan = $(_RESULT_SPAN_SELECTOR);
         selector.setCourseClassSet(getDummyTeamCourseClassSet());
         selector.setSelectedLeg(1);
         assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyRunner"));
@@ -654,8 +654,8 @@
     });
 
     QUnit.test("Items in result-selector drop-down record individual names if individual leg selected", function (assert) {
-        let selector = createSelector();
-        let htmlSelect = d3.select(_RESULT_SELECTOR_SELECTOR).node();
+        const selector = createSelector();
+        const htmlSelect = d3.select(_RESULT_SELECTOR_SELECTOR).node();
         selector.setCourseClassSet(getDummyTeamCourseClassSet());
 
         function getOptions() {
@@ -676,9 +676,9 @@
     });
 
     QUnit.test("Changing course class resets the selected leg to all legs", function (assert) {
-        let selector = createSelector();
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
-        let resultSpan = $(_RESULT_SPAN_SELECTOR);
+        const selector = createSelector();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const resultSpan = $(_RESULT_SPAN_SELECTOR);
         selector.setCourseClassSet(getDummyTeamCourseClassSet());
         selector.setSelectedLeg(1);
         assert.strictEqual($(htmlSelect.options[htmlSelect.options.length - 1]).text(), getMessage("CompareWithAnyRunner"));
@@ -690,9 +690,9 @@
 
     QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has teams but no winner and 'Winner' option chosen", function(assert) {
         resetLastSelector();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner(true));
-        let htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
+        const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         $(htmlSelect).val(2).change();
 
         selector.registerChangeHandler(handleComparisonChanged);

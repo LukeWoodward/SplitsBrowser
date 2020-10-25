@@ -92,7 +92,7 @@
          * Sets the names of the legs within the control's drop-down list.
          */
         setLegNames() {
-            let legNames = [getMessage("ShowAllLegs")];
+            const legNames = [getMessage("ShowAllLegs")];
             for (let legIndex = 0; legIndex < this.legCount; legIndex += 1) {
                 legNames.push(getMessageWithFormatting("ShowLeg", { "$$LEG_NUMBER$$": legIndex + 1 }));
             }
@@ -139,7 +139,7 @@
                 return null;
             }
 
-            let dropDownIndex = Math.max(this.dropDown.selectedIndex, 0);
+            const dropDownIndex = Math.max(this.dropDown.selectedIndex, 0);
             return (dropDownIndex === 0) ? null : dropDownIndex - 1;
         }
 
@@ -168,7 +168,7 @@
          * Handle a change of the selected option in the drop-down list.
          */
         onSelectionChanged() {
-            let selectedLeg = this.getSelectedLeg();
+            const selectedLeg = this.getSelectedLeg();
             for (let handler of this.changeHandlers) {
                 handler(selectedLeg);
             }

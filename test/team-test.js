@@ -27,7 +27,7 @@
     QUnit.module("Team");
 
     QUnit.test("Can create a team and set members", function (assert) {
-        let team = new Team("Team 1", "ABC");
+        const team = new Team("Team 1", "ABC");
         team.setMembers([new Competitor("First Runner", "ABC"), new Competitor("Second Runner", "ABC")]);
         assert.strictEqual(team.name, "Team 1");
         assert.strictEqual(team.club, "ABC");

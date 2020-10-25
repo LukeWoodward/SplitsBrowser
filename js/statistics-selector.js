@@ -51,7 +51,7 @@
                 .classed("topRowEnd", true)
                 .attr("id", STATISTIC_SELECTOR_ID);
 
-            let childDivs = this.div.selectAll("div")
+            const childDivs = this.div.selectAll("div")
                 .data(STATISTIC_NAMES)
                 .enter()
                 .append("div")
@@ -125,7 +125,7 @@
          *                           changes.
          */
         deregisterChangeHandler(handler) {
-            let index = this.handlers.indexOf(handler);
+            const index = this.handlers.indexOf(handler);
             if (index !== -1) {
                 this.handlers.splice(index, 1);
             }
@@ -137,7 +137,7 @@
          *     are enabled.
          */
         getVisibleStatistics() {
-            let visibleStats = new Map();
+            const visibleStats = new Map();
             this.div.selectAll("input").nodes().forEach((checkbox, index) => {
                 visibleStats.set(STATISTIC_NAMES[index], checkbox.checked);
             });

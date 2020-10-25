@@ -83,10 +83,10 @@
          */
         selectCrossingRunners(resultDetails, selectedLegIndex) {
             if (this.isSingleRunnerSelected()) {
-                let refResult = resultDetails[this.currentIndexes[0]].result;
+                const refResult = resultDetails[this.currentIndexes[0]].result;
 
                 for (let resultIndex = 0; resultIndex < resultDetails.length; resultIndex += 1) {
-                    let result = resultDetails[resultIndex];
+                    const result = resultDetails[resultIndex];
                     if (result.visible && result.result.crosses(refResult, selectedLegIndex)) {
                         this.currentIndexes.push(resultIndex);
                     }
@@ -168,7 +168,7 @@
          * @param {Function} handler The handler to register.
          */
         deregisterChangeHandler(handler) {
-            let index = this.changeHandlers.indexOf(handler);
+            const index = this.changeHandlers.indexOf(handler);
             if (index > -1) {
                 this.changeHandlers.splice(index, 1);
             }
@@ -181,7 +181,7 @@
         toggle(index) {
             if (typeof index === NUMBER_TYPE) {
                 if (0 <= index && index < this.count) {
-                    let position = this.currentIndexes.indexOf(index);
+                    const position = this.currentIndexes.indexOf(index);
                     if (position === -1) {
                         this.currentIndexes.push(index);
                         this.currentIndexes.sort(d3.ascending);
@@ -209,7 +209,7 @@
             }
 
             // Remove from the set of indexes given any that are already selected.
-            let currentIndexSet = new Set(this.currentIndexes);
+            const currentIndexSet = new Set(this.currentIndexes);
             indexes = indexes.filter(index => !currentIndexSet.has(index));
 
             if (indexes.length > 0) {
@@ -230,7 +230,7 @@
             }
 
             // Remove from the set of indexes given any that are not already selected.
-            let currentIndexSet = new Set(this.currentIndexes);
+            const currentIndexSet = new Set(this.currentIndexes);
             let anyRemoved = false;
             for (let i = 0; i < indexes.length; i += 1) {
                 if (currentIndexSet.has(indexes[i])) {
@@ -273,12 +273,12 @@
                 throwInvalidData("ResultSelection.migrate: newResults list must not be empty if current list has results selected");
             }
 
-            let selectedResults = this.currentIndexes.map(index => oldResults[index]);
+            const selectedResults = this.currentIndexes.map(index => oldResults[index]);
 
             this.count = newResults.length;
             this.currentIndexes = [];
             for (let idx = 0; idx < newResults.length; idx += 1) {
-                let result = newResults[idx];
+                const result = newResults[idx];
                 if (selectedResults.includes(result)) {
                     this.currentIndexes.push(idx);
                 }

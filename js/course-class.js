@@ -75,7 +75,7 @@
          * Determines the time losses for the results in this course-class.
          */
         determineTimeLosses() {
-            let fastestSplitTimes = d3.range(1, this.numControls + 2).map(controlIdx => {
+            const fastestSplitTimes = d3.range(1, this.numControls + 2).map(controlIdx => {
                 let splitRec = this.getFastestSplitTo(controlIdx);
                 return (splitRec === null) ? null : splitRec.split;
             });
@@ -119,7 +119,7 @@
             let fastestSplit = null;
             let fastestResult = null;
             for (let result of this.results) {
-                let resultSplit = result.getSplitTimeTo(controlIdx);
+                const resultSplit = result.getSplitTimeTo(controlIdx);
                 if (isNotNullNorNaN(resultSplit)) {
                     if (fastestSplit === null || resultSplit < fastestSplit) {
                         fastestSplit = resultSplit;
@@ -148,11 +148,11 @@
                 throwInvalidData(`Control number must be a number between 0 and ${this.numControls} inclusive`);
             }
 
-            let matchingResults = [];
+            const matchingResults = [];
             for (let result of this.results) {
-                let cumTime = result.getCumulativeTimeTo(controlNum);
+                const cumTime = result.getCumulativeTimeTo(controlNum);
                 if (cumTime !== null && result.startTime !== null) {
-                    let actualTimeAtControl = cumTime + result.startTime;
+                    const actualTimeAtControl = cumTime + result.startTime;
                     if (intervalStart <= actualTimeAtControl && actualTimeAtControl <= intervalEnd) {
                         matchingResults.push({ name: result.owner.name, time: actualTimeAtControl });
                     }

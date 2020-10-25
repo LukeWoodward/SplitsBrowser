@@ -115,12 +115,12 @@ const SplitsBrowserTest = {};
      * @return {Result} Created result.
      */
     SplitsBrowserTest.fromSplitTimes = function (order, name, club, startTime, splitTimes) {
-        let cumTimes = [0];
+        const cumTimes = [0];
         for (let i = 0; i < splitTimes.length; i += 1) {
             cumTimes.push(addIfNotNull(cumTimes[i], splitTimes[i]));
         }
 
-        let result = new Result(order, startTime, splitTimes, cumTimes, new Competitor(name, club));
+        const result = new Result(order, startTime, splitTimes, cumTimes, new Competitor(name, club));
         result.splitTimes = splitTimes;
         result.cumTimes = cumTimes;
         return result;

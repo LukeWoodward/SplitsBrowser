@@ -71,17 +71,17 @@
      *     array of data to show within it.
      */
     ChartPopupData.getFastestSplitsForLegPopupData = function (courseClassSet, eventData, controlIndex) {
-        let course = courseClassSet.getCourse();
-        let startCode = course.getControlCode(controlIndex - 1);
-        let endCode = course.getControlCode(controlIndex);
+        const course = courseClassSet.getCourse();
+        const startCode = course.getControlCode(controlIndex - 1);
+        const endCode = course.getControlCode(controlIndex);
 
-        let startControl = (startCode === Course.START) ? getMessage("StartName") : startCode;
-        let endControl = (endCode === Course.FINISH) ? getMessage("FinishName") : endCode;
+        const startControl = (startCode === Course.START) ? getMessage("StartName") : startCode;
+        const endControl = (endCode === Course.FINISH) ? getMessage("FinishName") : endCode;
 
-        let title = getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": startControl, "$$END$$": endControl});
+        const title = getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": startControl, "$$END$$": endControl});
 
-        let primaryClass = courseClassSet.getPrimaryClassName();
-        let data = eventData.getFastestSplitsForLeg(startCode, endCode)
+        const primaryClass = courseClassSet.getPrimaryClassName();
+        const data = eventData.getFastestSplitsForLeg(startCode, endCode)
                             .map(row => ({ name: row.name, className: row.className, time: row.split, highlight: (row.className === primaryClass)}));
 
         return {title: title, data: data, placeholder: null};
@@ -99,13 +99,13 @@
      * @return {Object} Object containing result data.
      */
     ChartPopupData.getResultsVisitingCurrentControlPopupData = function (courseClassSet, eventData, controlIndex, time) {
-        let controlCode = courseClassSet.getCourse().getControlCode(controlIndex);
-        let intervalStart = Math.round(time) - RACE_GRAPH_RESULT_WINDOW / 2;
-        let intervalEnd = Math.round(time) + RACE_GRAPH_RESULT_WINDOW / 2;
-        let results = eventData.getResultsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
+        const controlCode = courseClassSet.getCourse().getControlCode(controlIndex);
+        const intervalStart = Math.round(time) - RACE_GRAPH_RESULT_WINDOW / 2;
+        const intervalEnd = Math.round(time) + RACE_GRAPH_RESULT_WINDOW / 2;
+        const results = eventData.getResultsAtControlInTimeRange(controlCode, intervalStart, intervalEnd);
 
-        let primaryClass = courseClassSet.getPrimaryClassName();
-        let resultData = results.map(row => ({name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}));
+        const primaryClass = courseClassSet.getPrimaryClassName();
+        const resultData = results.map(row => ({name: row.name, className: row.className, time: row.time, highlight: (row.className === primaryClass)}));
 
         let controlName;
         if (controlCode === Course.START) {
@@ -116,7 +116,7 @@
             controlName = getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
         }
 
-        let title = getMessageWithFormatting(
+        const title = getMessageWithFormatting(
             "NearbyCompetitorsPopupHeader",
             {"$$START$$": formatTime(intervalStart), "$$END$$": formatTime(intervalEnd), "$$CONTROL$$": controlName});
 
@@ -137,13 +137,13 @@
             return (name1 < name2) ? -1 : 1;
         } else {
             // Both courses begin with the same letter.
-            let regexResult = /^[^0-9]+/.exec(name1);
+            const regexResult = /^[^0-9]+/.exec(name1);
             if (regexResult !== null && regexResult.length > 0) {
                 // regexResult should be a 1-element array.
-                let result = regexResult[0];
+                const result = regexResult[0];
                 if (0 < result.length && result.length < name1.length && name2.substring(0, result.length) === result) {
-                    let num1 = parseInt(name1.substring(result.length), 10);
-                    let num2 = parseInt(name2.substring(result.length), 10);
+                    const num1 = parseInt(name1.substring(result.length), 10);
+                    const num2 = parseInt(name2.substring(result.length), 10);
                     if (!isNaN(num1) && !isNaN(num2)) {
                         return num1 - num2;
                     }
@@ -162,7 +162,7 @@
      */
     function tidyNextControlsList(nextControls) {
         return nextControls.map(function (nextControlRec) {
-            let codes = nextControlRec.nextControls.slice(0);
+            const codes = nextControlRec.nextControls.slice(0);
             if (codes[codes.length - 1] === Course.FINISH) {
                 codes[codes.length - 1] = getMessage("FinishName");
             }
@@ -181,11 +181,11 @@
      * @return {Object} Next-control data.
      */
     ChartPopupData.getNextControlData = function (course, eventData, controlIndex) {
-        let controlIdx = Math.min(controlIndex, course.controls.length);
-        let controlCode = course.getControlCode(controlIdx);
-        let nextControls = eventData.getNextControlsAfter(controlCode);
+        const controlIdx = Math.min(controlIndex, course.controls.length);
+        const controlCode = course.getControlCode(controlIdx);
+        const nextControls = eventData.getNextControlsAfter(controlCode);
         nextControls.sort((c1, c2) => compareCourseNames(c1.course.name, c2.course.name));
-        let thisControlName = (controlCode === Course.START) ? getMessage("StartName") : getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
+        const thisControlName = (controlCode === Course.START) ? getMessage("StartName") : getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
         return {thisControl: thisControlName, nextControls: tidyNextControlsList(nextControls)};
     };
 

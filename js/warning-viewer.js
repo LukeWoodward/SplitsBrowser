@@ -57,7 +57,7 @@
             // Taken from http://stackoverflow.com/questions/1403615 and adjusted.
             $(document).click(e => {
                 if (this.warningList.style("display") !== "none") {
-                    let container = $("div#warningTriangleContainer,div.warningList");
+                    const container = $("div#warningTriangleContainer,div.warningList");
                     if (!container.is(e.target) && container.has(e.target).length === 0) {
                         this.warningList.style("display", "none");
                     }
@@ -80,9 +80,9 @@
          * @return {Object} d3 selection containing the warning triangle.
          */
         createWarningTriangle() {
-            let svgContainer = this.containerDiv.append("div")
+            const svgContainer = this.containerDiv.append("div")
                 .attr("id", "warningTriangleContainer");
-            let svg = svgContainer.append("svg");
+            const svg = svgContainer.append("svg");
 
             svg.style("width", "21px")
                 .style("height", "19px")
@@ -130,9 +130,9 @@
          */
         showHideErrorList() {
             if (this.warningList.style("display") === "none") {
-                let offset = $(this.warningTriangle.node()).offset();
-                let height = $(this.warningTriangle.node()).outerHeight();
-                let width = $(this.warningList.node()).outerWidth();
+                const offset = $(this.warningTriangle.node()).offset();
+                const height = $(this.warningTriangle.node()).outerHeight();
+                const width = $(this.warningList.node()).outerWidth();
                 this.warningList.style("left", Math.max(offset.left - width / 2, 0) + "px")
                     .style("top", (offset.top + height + 5) + "px")
                     .style("display", "block");

@@ -42,14 +42,14 @@
     // All 'Fastest time + N %' values (not including zero).
     const FASTEST_PLUS_PERCENTAGES = [5, 25, 50, 100];
 
-    FASTEST_PLUS_PERCENTAGES.forEach(percent => {
+    for (let percent of FASTEST_PLUS_PERCENTAGES) {
         ALL_COMPARISON_OPTIONS.push({
             nameKey: "CompareWithFastestTimePlusPercentage",
             selector: courseClassSet => courseClassSet.getFastestCumTimesPlusPercentage(percent),
             requiresWinner: false,
             percentage: percent
         });
-    });
+    }
 
     const ALL_INDIVIDUAL_COMPARISON_OPTIONS = ALL_COMPARISON_OPTIONS.slice(0);
 
@@ -103,7 +103,7 @@
             this.selectedLegIndex = null;
             this.comparisonOptions = ALL_INDIVIDUAL_COMPARISON_OPTIONS;
 
-            let div = d3.select(parent).append("div")
+            const div = d3.select(parent).append("div")
                 .classed("topRowStart", true);
 
             this.comparisonSelectorLabel = div.append("span")
@@ -223,12 +223,11 @@
          * Populates the drop-down list of results from a course-class set.
          */
         setResults() {
-            let results = this.courseClassSet.allResults;
-            let completingResultIndexes = d3.range(results.length).filter(idx => results[idx].completed());
-            let completingResults = results.filter(result => result.completed());
+            const results = this.courseClassSet.allResults;
+            const completingResultIndexes = d3.range(results.length).filter(idx => results[idx].completed());
+            const completingResults = results.filter(result => result.completed());
 
             this.hasWinner = (completingResults.length > 0);
-            let selectedLegIndex = this.selectedLegIndex;
 
             let optionsList = d3.select(this.resultDropDown).selectAll("option")
                 .data(completingResults);
@@ -237,14 +236,14 @@
             optionsList = d3.select(this.resultDropDown).selectAll("option")
                 .data(completingResults);
             optionsList.attr("value", (_res, complResultIndex) => completingResultIndexes[complResultIndex].toString())
-                .text(result => result.getOwnerNameForLeg(selectedLegIndex));
+                .text(result => result.getOwnerNameForLeg(this.selectedLegIndex));
             optionsList.exit().remove();
 
             if (this.previousResultList === null) {
                 this.currentResultIndex = 0;
             } else if (this.hasWinner) {
-                let oldSelectedResult = this.previousResultList[this.currentResultIndex];
-                let newIndex = results.indexOf(oldSelectedResult);
+                const oldSelectedResult = this.previousResultList[this.currentResultIndex];
+                const newIndex = results.indexOf(oldSelectedResult);
                 this.currentResultIndex = Math.max(newIndex, 0);
             } else if (this.comparisonOptions[this.dropDown.selectedIndex].requiresWinner) {
                 // We're currently viewing a comparison type that requires a
@@ -313,7 +312,7 @@
         setComparisonType(typeIndex, result) {
             if (0 <= typeIndex && typeIndex < this.comparisonOptions.length) {
                 if (typeIndex === this.comparisonOptions.length - 1) {
-                    let resultIndex = this.courseClassSet.allResults.indexOf(result);
+                    const resultIndex = this.courseClassSet.allResults.indexOf(result);
                     if (resultIndex >= 0) {
                         this.dropDown.selectedIndex = typeIndex;
                         this.resultDropDown.selectedIndex = resultIndex;
@@ -330,8 +329,8 @@
          * Handle a change of the selected option in either drop-down list.
          */
         onSelectionChanged() {
-            let resultDropdownSelectedIndex = Math.max(this.resultDropDown.selectedIndex, 0);
-            let option = this.comparisonOptions[this.dropDown.selectedIndex];
+            const resultDropdownSelectedIndex = Math.max(this.resultDropDown.selectedIndex, 0);
+            const option = this.comparisonOptions[this.dropDown.selectedIndex];
             if (!this.hasWinner && option.requiresWinner) {
                 // No winner on this course means you can't select this option.
                 this.alerter(getMessageWithFormatting(

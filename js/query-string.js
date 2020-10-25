@@ -49,12 +49,12 @@
      *     if none were found.
      */
     function readSelectedClasses(queryString, eventData) {
-        let classNameMatch = CLASS_NAME_REGEXP.exec(queryString);
+        const classNameMatch = CLASS_NAME_REGEXP.exec(queryString);
         if (classNameMatch === null) {
             // No class name specified in the URL.
             return null;
         } else {
-            let classesByName = new Map();
+            const classesByName = new Map();
             for (let courseClass of eventData.classes) {
                 classesByName.set(courseClass.name, courseClass);
             }
@@ -70,7 +70,7 @@
             } else {
                 // Ignore any classes that are not on the same course as the
                 // first class.
-                let course = selectedClasses[0].course;
+                const course = selectedClasses[0].course;
                 selectedClasses = selectedClasses.filter(selectedClass => selectedClass.course === course);
                 return new CourseClassSet(selectedClasses);
             }
@@ -87,7 +87,7 @@
      */
     function formatSelectedClasses(queryString, eventData, classIndexes) {
         queryString = removeAll(queryString, CLASS_NAME_REGEXP);
-        let classNames = classIndexes.map(index => eventData.classes[index].name);
+        const classNames = classIndexes.map(index => eventData.classes[index].name);
         return queryString + "&class=" + encodeURIComponent(classNames.join(";"));
     }
 
@@ -100,11 +100,11 @@
      * @return {Object|null} Selected chart type, or null if not recognised.
      */
     function readChartType(queryString) {
-        let chartTypeMatch = CHART_TYPE_REGEXP.exec(queryString);
+        const chartTypeMatch = CHART_TYPE_REGEXP.exec(queryString);
         if (chartTypeMatch === null) {
             return null;
         } else {
-            let chartTypeName = chartTypeMatch[1];
+            const chartTypeName = chartTypeMatch[1];
             if (ChartTypes.has(chartTypeName)) {
                 return ChartTypes.get(chartTypeName);
             } else {
@@ -145,16 +145,16 @@
      *     recognised.
      */
     function readComparison(queryString, courseClassSet) {
-        let comparisonMatch = COMPARE_WITH_REGEXP.exec(queryString);
+        const comparisonMatch = COMPARE_WITH_REGEXP.exec(queryString);
         if (comparisonMatch === null) {
             return null;
         } else {
-            let comparisonName = decodeURIComponent(comparisonMatch[1]);
-            let defaultIndex = BUILTIN_COMPARISON_TYPES.indexOf(comparisonName);
+            const comparisonName = decodeURIComponent(comparisonMatch[1]);
+            const defaultIndex = BUILTIN_COMPARISON_TYPES.indexOf(comparisonName);
             if (defaultIndex >= 1) {
                 return {index: defaultIndex, result: null};
             } else if (defaultIndex === 0 && courseClassSet !== null) {
-                let hasCompleters = courseClassSet.allResults.some(result => result.completed());
+                const hasCompleters = courseClassSet.allResults.some(result => result.completed());
                 if (hasCompleters) {
                     return {index: 0, result: null};
                 } else {
@@ -167,7 +167,7 @@
                 return null;
             } else {
                 for (let resultIndex = 0; resultIndex < courseClassSet.allResults.length; resultIndex += 1) {
-                    let result = courseClassSet.allResults[resultIndex];
+                    const result = courseClassSet.allResults[resultIndex];
                     if (result.owner.name === comparisonName && result.completed()) {
                         return {index: BUILTIN_COMPARISON_TYPES.length, result: result};
                     }
@@ -217,7 +217,7 @@
         if (courseClassSet === null) {
             return null;
         } else {
-            let selectedResultsMatch = SELECTED_RESULTS_REGEXP.exec(queryString);
+            const selectedResultsMatch = SELECTED_RESULTS_REGEXP.exec(queryString);
             if (selectedResultsMatch === null) {
                 return null;
             } else {
@@ -228,10 +228,10 @@
                 }
 
                 resultNames = Array.from(new Set(resultNames));
-                let allResultNames = courseClassSet.allResults.map(result => result.owner.name);
-                let selectedResultIndexes = [];
+                const allResultNames = courseClassSet.allResults.map(result => result.owner.name);
+                const selectedResultIndexes = [];
                 for (let resultName of resultNames) {
-                    let index = allResultNames.indexOf(resultName);
+                    const index = allResultNames.indexOf(resultName);
                     if (index >= 0) {
                         selectedResultIndexes.push(index);
                     }
@@ -253,7 +253,7 @@
      */
     function formatSelectedResults(queryString, courseClassSet, selected) {
         queryString = removeAll(queryString, SELECTED_RESULTS_REGEXP);
-        let selectedResults = selected.map(index => courseClassSet.allResults[index]);
+        const selectedResults = selected.map(index => courseClassSet.allResults[index]);
         if (selectedResults.length === 0) {
             return queryString;
         } else if (selectedResults.length === courseClassSet.allResults.length) {
@@ -261,7 +261,7 @@
             // selected.
             return queryString + "&selected=*";
         } else {
-            let resultNames = selectedResults.map(result => result.owner.name).join(";");
+            const resultNames = selectedResults.map(result => result.owner.name).join(";");
             return queryString + "&selected=" + encodeURIComponent(resultNames);
         }
     }
@@ -278,12 +278,12 @@
      *     if no statistics parameter was found.
      */
     function readSelectedStatistics(queryString) {
-        let statsMatch = SELECTED_STATISTICS_REGEXP.exec(queryString);
+        const statsMatch = SELECTED_STATISTICS_REGEXP.exec(queryString);
         if (statsMatch === null) {
             return null;
         } else {
-            let statsNames = decodeURIComponent(statsMatch[1]).split(";");
-            let stats = new Map();
+            const statsNames = decodeURIComponent(statsMatch[1]).split(";");
+            const stats = new Map();
             for (let statsName of ALL_STATS_NAMES) {
                 stats.set(statsName, false);
             }
@@ -309,7 +309,7 @@
      */
     function formatSelectedStatistics(queryString, stats) {
         queryString = removeAll(queryString, SELECTED_STATISTICS_REGEXP);
-        let statsNames = ALL_STATS_NAMES.filter(name => stats.get(name));
+        const statsNames = ALL_STATS_NAMES.filter(name => stats.get(name));
         return queryString + "&stats=" + encodeURIComponent(statsNames.join(";"));
     }
 
@@ -326,7 +326,7 @@
      * @return {Boolean} True to show original data, false not to.
      */
     function readShowOriginal(queryString) {
-        let showOriginalMatch = SHOW_ORIGINAL_REGEXP.exec(queryString);
+        const showOriginalMatch = SHOW_ORIGINAL_REGEXP.exec(queryString);
         return (showOriginalMatch !== null && showOriginalMatch[1] === "1");
     }
 
@@ -350,11 +350,11 @@
      * @return {Number|null} The selected leg, or null for none.
      */
     function readSelectedLeg(queryString) {
-        let selectedLegMatch = SELECTED_LEG_REGEXP.exec(queryString);
+        const selectedLegMatch = SELECTED_LEG_REGEXP.exec(queryString);
         if (selectedLegMatch === null) {
             return null;
         } else {
-            let legIndex = parseInt(selectedLegMatch[1], 10);
+            const legIndex = parseInt(selectedLegMatch[1], 10);
             return (isNaNStrict(legIndex)) ? null : legIndex;
         }
     }
@@ -382,7 +382,7 @@
      * @return {String} The filter text read.
      */
     function readFilterText(queryString) {
-        let filterTextMatch = FILTER_TEXT_REGEXP.exec(queryString);
+        const filterTextMatch = FILTER_TEXT_REGEXP.exec(queryString);
         if (filterTextMatch === null) {
             return "";
         } else {
@@ -408,8 +408,8 @@
      * @return {Object} The data parsed from the given query string.
      */
     function parseQueryString(queryString, eventData) {
-        let courseClassSet = readSelectedClasses(queryString, eventData);
-        let classIndexes = (courseClassSet === null) ? null : courseClassSet.classes.map(courseClass => eventData.classes.indexOf(courseClass));
+        const courseClassSet = readSelectedClasses(queryString, eventData);
+        const classIndexes = (courseClassSet === null) ? null : courseClassSet.classes.map(courseClass => eventData.classes.indexOf(courseClass));
         return {
             classes: classIndexes,
             chartType: readChartType(queryString),

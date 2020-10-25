@@ -106,7 +106,7 @@
          * @return {Array} Array of objects containing fastest splits for that leg.
          */
         getResultsAtControlInTimeRange(controlCode, intervalStart, intervalEnd) {
-            let results = [];
+            const results = [];
             for (let course of this.courses) {
                 for (let result of course.getResultsAtControlInTimeRange(controlCode, intervalStart, intervalEnd)) {
                     results.push(result);

@@ -86,14 +86,14 @@
                 // removes their total time as well.  If the result didn't
                 // complete the course, then we're not so bothered; they've
                 // mispunched so they don't have a total time anyway.
-                let first = nonAscIndexes.first;
-                let second = nonAscIndexes.second;
+                const first = nonAscIndexes.first;
+                const second = nonAscIndexes.second;
 
                 let progress = false;
 
                 for (let attempt = 1; attempt <= 3; attempt += 1) {
                     // 1 = remove second, 2 = remove first, 3 = remove first and the one before.
-                    let adjustedCumTimes = cumTimes.slice();
+                    const adjustedCumTimes = cumTimes.slice();
 
                     if (attempt === 3 && (first === 1 || !isNotNullNorNaN(cumTimes[first - 1]))) {
                         // Can't remove first and the one before because there
@@ -137,8 +137,8 @@
          *     finish split from.
          */
         removeFinishTimeIfAbsurd(cumTimes) {
-            let finishTime = cumTimes[cumTimes.length - 1];
-            let lastControlTime = cumTimes[cumTimes.length - 2];
+            const finishTime = cumTimes[cumTimes.length - 1];
+            const lastControlTime = cumTimes[cumTimes.length - 2];
             if (isNotNullNorNaN(finishTime) && isNotNullNorNaN(lastControlTime) && finishTime <= lastControlTime - MAX_FINISH_SPLIT_MINS_ADDED * 60) {
                 cumTimes[cumTimes.length - 1] = NaN;
                 this.madeAnyChanges = true;
@@ -212,7 +212,7 @@
         let lastNumericTimeIndex = 0;
 
         for (let index = 1; index < cumTimes.length; index += 1) {
-            let time = cumTimes[index];
+            const time = cumTimes[index];
             if (isNotNullNorNaN(time)) {
                 // This entry is numeric.
                 if (time <= cumTimes[lastNumericTimeIndex]) {
@@ -232,7 +232,7 @@
      * @param {Event} eventData The event data to repair.
      */
     function repairEventData(eventData) {
-        let repairer = new Repairer();
+        const repairer = new Repairer();
         repairer.repairEventData(eventData);
     }
 

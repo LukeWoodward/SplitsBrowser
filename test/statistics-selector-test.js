@@ -40,19 +40,19 @@
     }
 
     QUnit.test("All statistics disabled by clearAll method", function (assert) {
-        let selector = new Selector(d3.select("#qunit-fixture").node());
+        const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
         assert.deepEqual(selector.getVisibleStatistics(), makeStatsMap(false, false, false, false));
     });
 
     QUnit.test("Can register change handler and have it called", function (assert) {
         reset();
-        let selector = new Selector(d3.select("#qunit-fixture").node());
+        const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
 
         selector.registerChangeHandler(testChangeHandler);
 
-        let checkboxes = $("#qunit-fixture input");
+        const checkboxes = $("#qunit-fixture input");
         $(checkboxes[0]).prop("checked", true).change();
         assert.deepEqual(lastVisibleStats, makeStatsMap(true, false, false, false));
         assert.strictEqual(1, callCount);
@@ -60,13 +60,13 @@
 
     QUnit.test("Can register change handler twice and have it called only once", function (assert) {
         reset();
-        let selector = new Selector(d3.select("#qunit-fixture").node());
+        const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
 
         selector.registerChangeHandler(testChangeHandler);
         selector.registerChangeHandler(testChangeHandler);
 
-        let checkboxes = $("#qunit-fixture input");
+        const checkboxes = $("#qunit-fixture input");
         $(checkboxes[1]).prop("checked", true).change();
 
         assert.deepEqual(lastVisibleStats, makeStatsMap(false, true, false, false));
@@ -75,12 +75,12 @@
 
     QUnit.test("Can register two change handlers and have them both called", function (assert) {
         reset();
-        let selector = new Selector(d3.select("#qunit-fixture").node());
+        const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
 
         let lastVisibleStats2 = null;
         let callCount2 = 0;
-        let secondHandler = (visibleStats) => {
+        const secondHandler = (visibleStats) => {
             lastVisibleStats2 = visibleStats;
             callCount2 += 1;
         };
@@ -88,10 +88,10 @@
         selector.registerChangeHandler(testChangeHandler);
         selector.registerChangeHandler(secondHandler);
 
-        let checkboxes = $("#qunit-fixture input");
+        const checkboxes = $("#qunit-fixture input");
         $(checkboxes[2]).prop("checked", true).change();
 
-        let expectedStats = makeStatsMap(false, false, true, false);
+        const expectedStats = makeStatsMap(false, false, true, false);
         assert.deepEqual(lastVisibleStats, expectedStats);
         assert.strictEqual(1, callCount);
         assert.deepEqual(lastVisibleStats2, expectedStats);
@@ -100,14 +100,14 @@
 
     QUnit.test("Can deregister change handler and have it no longer called", function (assert) {
         reset();
-        let selector = new Selector(d3.select("#qunit-fixture").node());
+        const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
 
         selector.registerChangeHandler(testChangeHandler);
 
-        let checkboxes = $("#qunit-fixture input");
+        const checkboxes = $("#qunit-fixture input");
         $(checkboxes[3]).prop("checked", true).change();
-        let expectedResult = makeStatsMap(false, false, false, true);
+        const expectedResult = makeStatsMap(false, false, false, true);
         assert.deepEqual(lastVisibleStats, expectedResult);
         assert.strictEqual(1, callCount);
 
@@ -119,7 +119,7 @@
 
     QUnit.test("Can deregister change handler that was never registered without error", function (assert) {
         reset();
-        let selector = new Selector(d3.select("#qunit-fixture").node());
+        const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
 
         selector.deregisterChangeHandler(testChangeHandler);
@@ -129,7 +129,7 @@
 
     QUnit.test("Can set selected statistics", function (assert) {
         reset();
-        let selector = new Selector(d3.select("#qunit-fixture").node());
+        const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
 
         selector.registerChangeHandler(testChangeHandler);
@@ -137,7 +137,7 @@
         selector.setVisibleStatistics(makeStatsMap(false, true, false, true));
         assert.deepEqual(lastVisibleStats, makeStatsMap(false, true, false, true));
         assert.strictEqual(1, callCount);
-        let checkboxes = $("#qunit-fixture input");
+        const checkboxes = $("#qunit-fixture input");
         for (let index = 0; index < 4; index += 1) {
             assert.strictEqual(checkboxes[index].checked, index % 2 === 1);
         }

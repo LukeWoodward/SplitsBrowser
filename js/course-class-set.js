@@ -38,8 +38,8 @@
             return [];
         }
 
-        let allResults = [];
-        let expectedControlCount = classes[0].numControls;
+        const allResults = [];
+        const expectedControlCount = classes[0].numControls;
         for (let courseClass of classes) {
             if (courseClass.numControls !== expectedControlCount) {
                 throwInvalidData(`Cannot merge classes with ${expectedControlCount} and ${courseClass.numControls} controls`);
@@ -64,11 +64,11 @@
      */
     function getRanks(sourceData) {
         // First, sort the source data, removing nulls.
-        let sortedData = sourceData.filter(isNotNullNorNaN);
+        const sortedData = sourceData.filter(isNotNullNorNaN);
         sortedData.sort(d3.ascending);
 
         // Now construct a map that maps from source value to rank.
-        let rankMap = new Map();
+        const rankMap = new Map();
         sortedData.forEach((value, index) => {
             if (!rankMap.has(value)) {
                 rankMap.set(value, index + 1);
@@ -76,7 +76,7 @@
         });
 
         // Finally, build and return the list of ranks.
-        let ranks = sourceData.map(value => isNotNullNorNaN(value) ? rankMap.get(value) : value);
+        const ranks = sourceData.map(value => isNotNullNorNaN(value) ? rankMap.get(value) : value);
 
         return ranks;
     }
@@ -162,7 +162,7 @@
             let legCount = null;
             for (let courseClass of this.classes) {
                 if (courseClass.isTeamClass) {
-                    let thisLegCount = courseClass.numbersOfControls.length;
+                    const thisLegCount = courseClass.numbersOfControls.length;
                     if (legCount === null) {
                         legCount = thisLegCount;
                     } else if (legCount !== thisLegCount) {
@@ -187,7 +187,7 @@
                 return null;
             }
 
-            let firstResult = this.allResults[0];
+            const firstResult = this.allResults[0];
             return (firstResult.completed()) ? fillBlankRangesInCumulativeTimes(firstResult.cumTimes) : null;
         }
 
@@ -217,15 +217,15 @@
                 return null;
             }
 
-            let ratio = 1 + percent / 100;
+            const ratio = 1 + percent / 100;
 
-            let fastestSplits = new Array(this.numControls + 1);
+            const fastestSplits = new Array(this.numControls + 1);
             fastestSplits[0] = 0;
 
             for (let controlIdx = 1; controlIdx <= this.numControls + 1; controlIdx += 1) {
                 let fastestForThisControl = null;
                 for (let result of this.allResults) {
-                    let thisTime = result.getSplitTimeTo(controlIdx);
+                    const thisTime = result.getSplitTimeTo(controlIdx);
                     if (isNotNullNorNaN(thisTime) && (fastestForThisControl === null || thisTime < fastestForThisControl)) {
                         fastestForThisControl = thisTime;
                     }
@@ -242,12 +242,12 @@
                 // Find the blank-ranges of the fastest times.  Include the end
                 // of the range in case there are no cumulative times at the last
                 // control but there is to the finish.
-                let fastestBlankRanges = getBlankRanges(fastestSplits, true);
+                const fastestBlankRanges = getBlankRanges(fastestSplits, true);
 
                 // Find all blank-ranges of results.
-                let allResultBlankRanges = [];
+                const allResultBlankRanges = [];
                 for (let result of this.allResults) {
-                    let resultBlankRanges = getBlankRanges(result.getAllCumulativeTimes(), false);
+                    const resultBlankRanges = getBlankRanges(result.getAllCumulativeTimes(), false);
                     for (let range of resultBlankRanges) {
                         allResultBlankRanges.push({
                             start: range.start,
@@ -262,7 +262,7 @@
                 // size of the smallest result blank range that covers it,
                 // and then the fastest split among those results.
                 for (let fastestRange of fastestBlankRanges) {
-                    let coveringResultRanges = allResultBlankRanges.filter(compRange =>
+                    const coveringResultRanges = allResultBlankRanges.filter(compRange =>
                         compRange.start <= fastestRange.start && fastestRange.end <= compRange.end + 1);
 
                     let minSize = null;
@@ -328,23 +328,23 @@
                 return;
             }
 
-            let splitRanksByResult = [];
-            let cumRanksByResult = [];
+            const splitRanksByResult = [];
+            const cumRanksByResult = [];
             for (let index = 0; index < this.allResults.length; index += 1) {
                 splitRanksByResult.push([null]);
                 cumRanksByResult.push([null]);
             }
 
             for (let control of d3.range(1, this.numControls + 2)) {
-                let splitsByResult = this.allResults.map(result => result.getSplitTimeTo(control));
-                let splitRanksForThisControl = getRanks(splitsByResult);
+                const splitsByResult = this.allResults.map(result => result.getSplitTimeTo(control));
+                const splitRanksForThisControl = getRanks(splitsByResult);
                 this.allResults.forEach((_result, idx) => { splitRanksByResult[idx].push(splitRanksForThisControl[idx]); });
             }
 
             for (let control of d3.range(1, this.numControls + 2)) {
                 // We want to null out all subsequent cumulative ranks after a
                 // result mispunches.
-                let cumSplitsByResult = this.allResults.map((result, idx) => {
+                const cumSplitsByResult = this.allResults.map((result, idx) => {
                     // -1 for previous control.
                     if (control > 1 && cumRanksByResult[idx][control - 1] === null && !result.isOKDespiteMissingTimes) {
                         // This result has no cumulative rank for the previous
@@ -357,8 +357,8 @@
                         return result.getCumulativeTimeTo(control);
                     }
                 });
-                let cumRanksForThisControl = getRanks(cumSplitsByResult);
-                this.allResults.forEach((_res, idx) => { cumRanksByResult[idx].push(cumRanksForThisControl[idx]); });
+                const cumRanksForThisControl = getRanks(cumSplitsByResult);
+                this.allResults.forEach((_res, idx) => cumRanksByResult[idx].push(cumRanksForThisControl[idx]));
             }
 
             this.allResults.forEach((result, idx) => {
@@ -391,15 +391,15 @@
             } else {
                 // Compare results by split time at this control, and, if those are
                 // equal, total time.
-                let comparator = (resultA, resultB) => {
-                    let resultASplit = resultA.getSplitTimeTo(controlIdx);
-                    let resultBSplit = resultB.getSplitTimeTo(controlIdx);
+                const comparator = (resultA, resultB) => {
+                    const resultASplit = resultA.getSplitTimeTo(controlIdx);
+                    const resultBSplit = resultB.getSplitTimeTo(controlIdx);
                     return (resultASplit === resultBSplit) ? d3.ascending(resultA.totalTime, resultB.totalTime) : d3.ascending(resultASplit, resultBSplit);
                 };
 
-                let results = this.allResults.filter(result => result.completed() && !isNaNStrict(result.getSplitTimeTo(controlIdx)));
+                const results = this.allResults.filter(result => result.completed() && !isNaNStrict(result.getSplitTimeTo(controlIdx)));
                 results.sort(comparator);
-                let fastestSplits = [];
+                const fastestSplits = [];
                 for (let i = 0; i < results.length && i < numSplits; i += 1) {
                     fastestSplits.push({ name: results[i].getOwnerNameForLeg(selectedLegIndex), split: results[i].getSplitTimeTo(controlIdx) });
                 }
@@ -416,8 +416,8 @@
          */
         sliceForLegIndex(data, legIndex) {
             if (this.hasTeamData() && legIndex !== null) {
-                let numControls = this.classes[0].numbersOfControls[legIndex] + 2;
-                let offset = this.classes[0].offsets[legIndex];
+                const numControls = this.classes[0].numbersOfControls[legIndex] + 2;
+                const offset = this.classes[0].offsets[legIndex];
                 return data.slice(offset, offset + numControls);
             } else {
                 return data.slice(0);
@@ -445,7 +445,7 @@
                 throw new TypeError("legIndex undefined or missing");
             }
 
-            let resultData = this.allResults.map(result => chartType.dataSelector(result, referenceCumTimes));
+            const resultData = this.allResults.map(result => chartType.dataSelector(result, referenceCumTimes));
             let selectedResultData = currentIndexes.map(index => resultData[index]);
 
             let numControls;
@@ -457,8 +457,8 @@
                 numControls = this.numControls;
             }
 
-            let xMin = d3.min(referenceCumTimes);
-            let xMax = d3.max(referenceCumTimes);
+            const xMin = d3.min(referenceCumTimes);
+            const xMax = d3.max(referenceCumTimes);
             let yMin;
             let yMax;
             if (currentIndexes.length === 0) {
@@ -469,7 +469,7 @@
                     yMax = 60;
                 } else {
                     // Set yMin and yMax to the boundary values of the first result.
-                    let firstResultTimes = resultData[0];
+                    const firstResultTimes = resultData[0];
                     yMin = d3.min(firstResultTimes);
                     yMax = d3.max(firstResultTimes);
                 }
@@ -485,17 +485,17 @@
                 yMax = yMin + 1;
             }
 
-            let offset = (this.hasTeamData() && legIndex !== null) ? this.classes[0].offsets[legIndex] : 0;
-            let dubiousTimesInfo = currentIndexes.map(resultIndex => {
+            const offset = (this.hasTeamData() && legIndex !== null) ? this.classes[0].offsets[legIndex] : 0;
+            const dubiousTimesInfo = currentIndexes.map(resultIndex => {
                 let indexPairs = chartType.indexesAroundOmittedTimesFunc(this.allResults[resultIndex]);
                 return indexPairs.filter(indexPair => indexPair.start >= offset && indexPair.end <= offset + numControls + 2)
                     .map(indexPair =>({ start: indexPair.start - offset, end: indexPair.end - offset }));
             });
 
-            let cumulativeTimesByControl = d3.transpose(selectedResultData);
-            let xData = referenceCumTimes;
-            let zippedData = d3.zip(xData, cumulativeTimesByControl);
-            let resultNames = currentIndexes.map(index => this.allResults[index].getOwnerNameForLeg(legIndex));
+            const cumulativeTimesByControl = d3.transpose(selectedResultData);
+            const xData = referenceCumTimes;
+            const zippedData = d3.zip(xData, cumulativeTimesByControl);
+            const resultNames = currentIndexes.map(index => this.allResults[index].getOwnerNameForLeg(legIndex));
             return {
                 dataColumns: zippedData.map(data => ({ x: data[0], ys: data[1] })),
                 resultNames: resultNames,
@@ -517,7 +517,7 @@
      *    ranges of null and/or NaN values.
      */
     function getBlankRanges(times, includeEnd) {
-        let blankRangeInfo = [];
+        const blankRangeInfo = [];
         let startIndex = 1;
         while (startIndex + 1 < times.length) {
             if (isNotNullNorNaN(times[startIndex])) {
@@ -547,11 +547,11 @@
      */
     function fillBlankRangesInCumulativeTimes(cumTimes) {
         cumTimes = cumTimes.slice(0);
-        let blankRanges = getBlankRanges(cumTimes, false);
+        const blankRanges = getBlankRanges(cumTimes, false);
         for (let range of blankRanges) {
-            let timeBefore = cumTimes[range.start];
-            let timeAfter = cumTimes[range.end];
-            let avgTimePerControl = (timeAfter - timeBefore) / (range.end - range.start);
+            const timeBefore = cumTimes[range.start];
+            const timeAfter = cumTimes[range.end];
+            const avgTimePerControl = (timeAfter - timeBefore) / (range.end - range.start);
             for (let index = range.start + 1; index < range.end; index += 1) {
                 cumTimes[index] = timeBefore + (index - range.start) * avgTimePerControl;
             }

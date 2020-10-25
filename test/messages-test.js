@@ -48,7 +48,7 @@
     QUnit.test("Can look up a test message that exists and apply formatting", function (assert) {
         setAlerter();
         SplitsBrowser.Messages[DEFAULT_LANGUAGE].TestMessage = "This is $$ONE$$ test $$TWO$$";
-        let result = SplitsBrowser.getMessageWithFormatting("TestMessage", {"$$ONE$$": "one", "$$TWO$$": "two"});
+        const result = SplitsBrowser.getMessageWithFormatting("TestMessage", {"$$ONE$$": "one", "$$TWO$$": "two"});
         assert.strictEqual(result, "This is one test two");
         assert.ok(!alerterCalled, "Alerter should not have been called");
     });
@@ -56,7 +56,7 @@
     QUnit.test("Can look up a test message that exists and apply formatting, replacing the same parameter name twice", function (assert) {
         setAlerter();
         SplitsBrowser.Messages[DEFAULT_LANGUAGE].TestMessage = "This is $$ONE$$ test $$ONE$$";
-        let result = SplitsBrowser.getMessageWithFormatting("TestMessage", {"$$ONE$$": "one"});
+        const result = SplitsBrowser.getMessageWithFormatting("TestMessage", {"$$ONE$$": "one"});
         assert.strictEqual(result, "This is one test one");
         assert.ok(!alerterCalled, "Alerter should not have been called");
     });

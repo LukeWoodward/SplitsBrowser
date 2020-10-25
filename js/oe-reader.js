@@ -140,7 +140,7 @@
                 throwWrongFileFormat("No data found to read");
             }
 
-            let firstDataLine = this.lines[1];
+            const firstDataLine = this.lines[1];
             for (let delimiter of DELIMITERS) {
                 if (firstDataLine.split(delimiter).length > MIN_CONTROLS_OFFSET) {
                     return delimiter;
@@ -161,10 +161,9 @@
          *     data.
          */
         identifyFormatVariation(delimiter) {
+            const firstLine = this.lines[1].split(delimiter);
 
-            let firstLine = this.lines[1].split(delimiter);
-
-            let controlCodeRegexp = /^[A-Za-z0-9]+$/;
+            const controlCodeRegexp = /^[A-Za-z0-9]+$/;
             for (let [columnOffset, columnIndexes] of COLUMN_INDEXES.entries()) {
                 // We want there to be a control code at columnOffset, with
                 // both preceding columns either blank or containing a valid
@@ -176,7 +175,7 @@
 
                     // Now check the control count exists.  If not, we've
                     // probably got a triple-column CSV file instead.
-                    let controlCountColumnIndex = columnIndexes.get("controlCount");
+                    const controlCountColumnIndex = columnIndexes.get("controlCount");
                     if (firstLine[controlCountColumnIndex].trim() !== "") {
                         this.columnIndexes = columnIndexes;
                         return;
@@ -223,7 +222,7 @@
          * @return {Number|null} The number of controls, or null if the count could not be read.
          */
         getNumControls(row, lineNumber) {
-            let className = this.getClassName(row);
+            const className = this.getClassName(row);
             let name;
             if (className.trim() === "") {
                 name = this.getName(row) || "<name unknown>";
@@ -232,7 +231,7 @@
             } else if (this.classes.has(className)) {
                 return this.classes.get(className).numControls;
             } else {
-                let numControls = parseInt(row[this.columnIndexes.get("controlCount")], 10);
+                const numControls = parseInt(row[this.columnIndexes.get("controlCount")], 10);
                 if (isFinite(numControls)) {
                     return numControls;
                 } else {
@@ -251,12 +250,12 @@
          * @return {Array} Array of cumulative times.
          */
         readCumulativeTimes(row, lineNumber, numControls) {
-            let cumTimes = [0];
+            const cumTimes = [0];
 
             for (let controlIdx = 0; controlIdx < numControls; controlIdx += 1) {
-                let cellIndex = this.columnIndexes.get("control1") + 1 + 2 * controlIdx;
-                let cumTimeStr = (cellIndex < row.length) ? row[cellIndex] : null;
-                let cumTime = (cumTimeStr === null) ? null : parseTime(cumTimeStr);
+                const cellIndex = this.columnIndexes.get("control1") + 1 + 2 * controlIdx;
+                const cumTimeStr = (cellIndex < row.length) ? row[cellIndex] : null;
+                const cumTime = (cumTimeStr === null) ? null : parseTime(cumTimeStr);
                 cumTimes.push(cumTime);
             }
 
@@ -264,8 +263,8 @@
             if (totalTime === null) {
                 // 'Nameless' variation: total time missing, so calculate from
                 // start and finish times.
-                let startTime = this.getStartTime(row);
-                let finishTime = parseTime(row[this.columnIndexes.get("finish")]);
+                const startTime = this.getStartTime(row);
+                const finishTime = parseTime(row[this.columnIndexes.get("finish")]);
                 if (startTime !== null && finishTime !== null) {
                     totalTime = finishTime - startTime;
                 }
@@ -283,7 +282,7 @@
          * @param {Number} numControls The number of controls to read.
          */
         createClassIfNecessary(row, numControls) {
-            let className = this.getClassName(row);
+            const className = this.getClassName(row);
             if (!this.classes.has(className)) {
                 this.classes.set(className, { numControls: numControls, results: [] });
             }
@@ -296,9 +295,9 @@
          * @param {Number} numControls The number of controls to read.
          */
         createCourseIfNecessary(row, numControls) {
-            let courseName = row[this.columnIndexes.get("course")];
+            const courseName = row[this.columnIndexes.get("course")];
             if (!this.courseDetails.has(courseName)) {
-                let controlNums = d3.range(0, numControls).map(controlIdx => row[this.columnIndexes.get("control1") + 2 * controlIdx]);
+                const controlNums = d3.range(0, numControls).map(controlIdx => row[this.columnIndexes.get("control1") + 2 * controlIdx]);
                 this.courseDetails.set(courseName, {
                     length: parseCourseLength(row[this.columnIndexes.get("distance")]),
                     climb: parseCourseClimb(row[this.columnIndexes.get("climb")]),
@@ -313,8 +312,8 @@
          * @param {Array} row Array of row data items.
          */
         createClassCoursePairIfNecessary(row) {
-            let className = this.getClassName(row);
-            let courseName = row[this.columnIndexes.get("course")];
+            const className = this.getClassName(row);
+            const courseName = row[this.columnIndexes.get("course")];
 
             if (!this.classCoursePairs.some(pair => pair[0] === className && pair[1] === courseName)) {
                 this.classCoursePairs.push([className, courseName]);
@@ -330,8 +329,8 @@
             let name = "";
 
             if (this.columnIndexes.has("forename") && this.columnIndexes.has("surname")) {
-                let forename = row[this.columnIndexes.get("forename")];
-                let surname = row[this.columnIndexes.get("surname")];
+                const forename = row[this.columnIndexes.get("forename")];
+                const surname = row[this.columnIndexes.get("surname")];
                 name = (forename + " " + surname).trim();
             }
 
@@ -350,27 +349,26 @@
          * @param {Array} cumTimes Array of cumulative times for the competitor.
          */
         addCompetitor(row, cumTimes) {
-
-            let className = this.getClassName(row);
-            let placing = row[this.columnIndexes.get("placing")];
+            const className = this.getClassName(row);
+            const placing = row[this.columnIndexes.get("placing")];
             let club = row[this.columnIndexes.get("club")];
             if (club === "" && this.columnIndexes.has("clubFallback")) {
                 // Nameless variation: no club name, just number...
                 club = row[this.columnIndexes.get("clubFallback")];
             }
 
-            let startTime = this.getStartTime(row);
+            const startTime = this.getStartTime(row);
 
             let name = this.getName(row);
-            let isPlacingNonNumeric = (placing !== "" && isNaNStrict(parseInt(placing, 10)));
+            const isPlacingNonNumeric = (placing !== "" && isNaNStrict(parseInt(placing, 10)));
             if (isPlacingNonNumeric && name.substring(name.length - placing.length) === placing) {
                 name = name.substring(0, name.length - placing.length).trim();
             }
 
-            let order = this.classes.get(className).results.length + 1;
-            let competitor = new Competitor(name, club);
+            const order = this.classes.get(className).results.length + 1;
+            const competitor = new Competitor(name, club);
 
-            let yearOfBirthStr = row[this.columnIndexes.get("yearOfBirth")];
+            const yearOfBirthStr = row[this.columnIndexes.get("yearOfBirth")];
             if (yearOfBirthStr !== "") {
                 let yearOfBirth = parseInt(yearOfBirthStr, 10);
                 if (!isNaNStrict(yearOfBirth)) {
@@ -379,13 +377,13 @@
             }
 
             if (this.columnIndexes.has("gender")) {
-                let gender = row[this.columnIndexes.get("gender")];
+                const gender = row[this.columnIndexes.get("gender")];
                 if (gender === "M" || gender === "F") {
                     competitor.setGender(gender);
                 }
             }
 
-            let result = fromOriginalCumTimes(order, startTime, cumTimes, competitor);
+            const result = fromOriginalCumTimes(order, startTime, cumTimes, competitor);
             if ((row[this.columnIndexes.get("nonCompetitive")] === "1" || isPlacingNonNumeric) && result.completed()) {
                 // Competitor either marked as non-competitive, or has completed
                 // the course but has a non-numeric placing.  In the latter case,
@@ -393,7 +391,7 @@
                 result.setNonCompetitive();
             }
 
-            let classifier = row[this.columnIndexes.get("classifier")];
+            const classifier = row[this.columnIndexes.get("classifier")];
             if (classifier !== "") {
                 if (classifier === "0" && cumTimes.includes(null) && cumTimes[cumTimes.length - 1] !== null) {
                     result.setOKDespiteMissingTimes();
@@ -422,13 +420,12 @@
          *     data.
          */
         readLine(line, lineNumber, delimiter) {
-
             if (line.trim() === "") {
                 // Skip this blank line.
                 return;
             }
 
-            let row = line.split(delimiter).map(s => s.trim()).map(dequote);
+            const row = line.split(delimiter).map(s => s.trim()).map(dequote);
 
             // Check the row is long enough to have all the data besides the
             // controls data.
@@ -436,9 +433,9 @@
                 throwInvalidData(`Too few items on line ${lineNumber} of the input file: expected at least ${MIN_CONTROLS_OFFSET}, got ${row.length}`);
             }
 
-            let numControls = this.getNumControls(row, lineNumber);
+            const numControls = this.getNumControls(row, lineNumber);
             if (numControls !== null) {
-                let cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
+                const cumTimes = this.readCumulativeTimes(row, lineNumber, numControls);
 
                 this.createClassIfNecessary(row, numControls);
                 this.createCourseIfNecessary(row, numControls);
@@ -455,13 +452,12 @@
          *     many-to-many join.
          */
         getMapsBetweenClassesAndCourses() {
-
-            let classesToCourses = new Map();
-            let coursesToClasses = new Map();
+            const classesToCourses = new Map();
+            const coursesToClasses = new Map();
 
             for (let pair of this.classCoursePairs) {
-                let className = pair[0];
-                let courseName = pair[1];
+                const className = pair[0];
+                const courseName = pair[1];
 
                 if (classesToCourses.has(className)) {
                     classesToCourses.get(className).push(courseName);
@@ -484,10 +480,10 @@
          * @return {Array} Array of CourseClass objects.
          */
         createClasses() {
-            let classNames = Array.from(this.classes.keys());
+            const classNames = Array.from(this.classes.keys());
             classNames.sort();
             return classNames.map(className => {
-                let courseClass = this.classes.get(className);
+                const courseClass = this.classes.get(className);
                 return new CourseClass(className, courseClass.numControls, courseClass.results);
             });
         }
@@ -517,10 +513,10 @@
          * @return {SplitsBrowser.Model.Course} - The created Course object.
          */
         createCourseFromLinkedClassesAndCourses(initCourseName, manyToManyMaps, doneCourseNames, classesMap) {
-            let courseNamesToDo = [initCourseName];
-            let classNamesToDo = [];
-            let relatedCourseNames = [];
-            let relatedClassNames = [];
+            const courseNamesToDo = [initCourseName];
+            const classNamesToDo = [];
+            const relatedCourseNames = [];
+            const relatedClassNames = [];
 
             let courseName;
             let className;
@@ -528,7 +524,7 @@
             while (courseNamesToDo.length > 0 || classNamesToDo.length > 0) {
                 while (courseNamesToDo.length > 0) {
                     courseName = courseNamesToDo.shift();
-                    let classNames = manyToManyMaps.coursesToClasses.get(courseName);
+                    const classNames = manyToManyMaps.coursesToClasses.get(courseName);
                     for (let className of classNames) {
                         if (!classNamesToDo.includes(className) && !relatedClassNames.includes(className)) {
                             classNamesToDo.push(className);
@@ -540,7 +536,7 @@
 
                 while (classNamesToDo.length > 0) {
                     className = classNamesToDo.shift();
-                    let courseNames = manyToManyMaps.classesToCourses.get(className);
+                    const courseNames = manyToManyMaps.classesToCourses.get(className);
                     for (let courseName of courseNames) {
                         if (!courseNamesToDo.includes(courseName) && !relatedCourseNames.includes(courseName)) {
                             courseNamesToDo.push(courseName);
@@ -556,9 +552,9 @@
                 doneCourseNames.add(courseName);
             }
 
-            let classesForThisCourse = relatedClassNames.map(className => classesMap.get(className));
-            let details = this.courseDetails.get(initCourseName);
-            let course = new Course(initCourseName, classesForThisCourse, details.length, details.climb, details.controls);
+            const classesForThisCourse = relatedClassNames.map(className => classesMap.get(className));
+            const details = this.courseDetails.get(initCourseName);
+            const course = new Course(initCourseName, classesForThisCourse, details.length, details.climb, details.controls);
 
             for (let courseClass of classesForThisCourse) {
                 courseClass.setCourse(course);
@@ -574,26 +570,25 @@
          * @return {Array} Array of course objects.
          */
         determineCourses(classes) {
-
-            let manyToManyMaps = this.getMapsBetweenClassesAndCourses();
+            const manyToManyMaps = this.getMapsBetweenClassesAndCourses();
 
             // As we work our way through the courses and classes, we may find one
             // class made up from multiple courses (e.g. in BOC2013, class M21E
             // uses course 1A and 1B).  In this set we collect up all of the
             // courses that we have now processed, so that if we later come across
             // one we've already dealt with, we can ignore it.
-            let doneCourseNames = new Set();
+            const doneCourseNames = new Set();
 
-            let classesMap = new Map();
+            const classesMap = new Map();
             for (let courseClass of classes) {
                 classesMap.set(courseClass.name, courseClass);
             }
 
             // List of all Course objects created so far.
-            let courses = [];
+            const courses = [];
             for (let courseName of manyToManyMaps.coursesToClasses.keys()) {
                 if (!doneCourseNames.has(courseName)) {
-                    let course = this.createCourseFromLinkedClassesAndCourses(courseName, manyToManyMaps, doneCourseNames, classesMap);
+                    const course = this.createCourseFromLinkedClassesAndCourses(courseName, manyToManyMaps, doneCourseNames, classesMap);
                     courses.push(course);
                 }
             }
@@ -606,12 +601,11 @@
          * @return {SplitsBrowser.Model.Event} Event-data read.
          */
         parseEventData() {
-
             this.warnings = [];
 
             this.lines = this.data.split(/\n/);
 
-            let delimiter = this.identifyDelimiter();
+            const delimiter = this.identifyDelimiter();
 
             this.identifyFormatVariation(delimiter);
 
@@ -622,14 +616,14 @@
                 this.readLine(this.lines[lineIndex], lineIndex + 1, delimiter);
             }
 
-            let classes = this.createClasses();
+            const classes = this.createClasses();
             if (classes.length === 0 && this.warnings.length > 0) {
                 // A warning was generated for every single competitor in the file.
                 // This file is quite probably not an OE-CSV file.
                 throwWrongFileFormat("This file may have looked vaguely like an OE CSV file but no data could be read out of it");
             }
 
-            let courses = this.determineCourses(classes);
+            const courses = this.determineCourses(classes);
             return new Event(classes, courses, this.warnings);
         }
     }
@@ -642,7 +636,7 @@
      * @return {SplitsBrowser.Model.Event} All event data read.
      */
     SplitsBrowser.Input.OE.parseEventData = function (data) {
-        let reader = new Reader(data);
+        const reader = new Reader(data);
         return reader.parseEventData();
     };
 })();

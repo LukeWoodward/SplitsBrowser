@@ -98,8 +98,8 @@
     // Utility function to set up a chart in a parent element and mock out the
     // width and height methods.
     function createTestChart() {
-        let div = document.createElement("div");
-        let chart = new Chart(div);
+        const div = document.createElement("div");
+        const chart = new Chart(div);
         chart.getTextWidth = getTextWidth;
         chart.getTextHeight = getTextHeight;
         chart.setSize(1000, 1000);
@@ -117,8 +117,8 @@
      */
     function getTestCourseClass(results) {
         if (typeof results === "undefined") {
-            let result1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
-            let result2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
+            const result1 = fromSplitTimes(1, "Second Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106]);
+            const result2 = fromSplitTimes(2, "First Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
             results = [result1, result2];
         }
 
@@ -144,13 +144,13 @@
      * @param {CourseClass} courseClass The course-class to run the tests on.
      */
     function runChartCreationTestGivenCourseClass(assert, chartType, courseClass) {
-        let courseClassSet = new CourseClassSet([courseClass]);
-        let course = new Course("Test course", [courseClass], null, null, null);
+        const courseClassSet = new CourseClassSet([courseClass]);
+        const course = new Course("Test course", [courseClass], null, null, null);
         courseClass.setCourse(course);
-        let eventData = new Event([courseClass], [course]);
-        let fastestCumTimes = courseClassSet.getFastestCumTimes();
-        let chart = createTestChart(chartType);
-        let data = {
+        const eventData = new Event([courseClass], [course]);
+        const fastestCumTimes = courseClassSet.getFastestCumTimes();
+        const chart = createTestChart(chartType);
+        const data = {
             chartData: courseClassSet.getChartData(fastestCumTimes, [0, 1], chartType, null),
             eventData: eventData,
             courseClassSet: courseClassSet,
@@ -180,7 +180,7 @@
     });
 
     QUnit.test("Can create a chart with dubious info", function (assert) {
-        let results = [
+        const results = [
             fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], new Competitor("Second Runner", "DEF")),
             fromOriginalCumTimes(2, 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100], new Competitor("First Runner", "ABC"))
         ];
@@ -191,15 +191,15 @@
     });
 
     QUnit.test("Can create a chart for a team event", function (assert) {
-        let result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
-        let result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
-        let result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 199, 103]);
-        let result2b = fromSplitTimes(2, "Fourth Runner", "ABC", 10 * 3600 + 596, [88, 192, 220, 111]);
-        let team1 = new Team("Team 1", "DEF");
-        let team2 = new Team("Team 2", "ABC");
-        let results = [createTeamResult(1, [result1a, result1b], team1), createTeamResult(2, [result2a, result2b], team2)];
+        const result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
+        const result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
+        const result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 199, 103]);
+        const result2b = fromSplitTimes(2, "Fourth Runner", "ABC", 10 * 3600 + 596, [88, 192, 220, 111]);
+        const team1 = new Team("Team 1", "DEF");
+        const team2 = new Team("Team 2", "ABC");
+        const results = [createTeamResult(1, [result1a, result1b], team1), createTeamResult(2, [result2a, result2b], team2)];
 
-        let courseClass = new CourseClass("Test", 7, results);
+        const courseClass = new CourseClass("Test", 7, results);
         courseClass.setIsTeamClass([3, 3]);
 
         runChartCreationTestGivenCourseClass(assert, DUMMY_CHART_TYPE, courseClass);

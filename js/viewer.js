@@ -120,7 +120,7 @@
          * depending on whether all visible results have start times.
          */
         enableOrDisableRaceGraph() {
-            let anyStartTimesMissing = this.courseClassSet.allResults.some(result => result.lacksStartTime());
+            const anyStartTimesMissing = this.courseClassSet.allResults.some(result => result.lacksStartTime());
             this.chartTypeSelector.setRaceGraphDisabledNotifier((anyStartTimesMissing) ? alertRaceGraphDisabledAsStartTimesMissing : null);
         }
 
@@ -214,7 +214,7 @@
          * Adds the chart-type selector to the top panel.
          */
         addChartTypeSelector() {
-            let chartTypes = [
+            const chartTypes = [
                 ChartTypes.get("SplitsGraph"), ChartTypes.get("RaceGraph"), ChartTypes.get("PositionAfterLeg"),
                 ChartTypes.get("SplitPosition"), ChartTypes.get("PercentBehind"), ChartTypes.get("ResultsTable")
             ];
@@ -279,7 +279,7 @@
          * Updates the URL that the direct link points to.
          */
         updateDirectLink() {
-            let data = {
+            const data = {
                 classes: this.classSelector.getSelectedClasses(),
                 chartType: this.chartTypeSelector.getChartType(),
                 compareWith: this.comparisonSelector.getComparisonType(),
@@ -290,9 +290,9 @@
                 filterText: this.resultList.getFilterText()
             };
 
-            let oldQueryString = document.location.search;
-            let newQueryString = formatQueryString(oldQueryString, this.eventData, this.courseClassSet, data);
-            let oldHref = document.location.href;
+            const oldQueryString = document.location.search;
+            const newQueryString = formatQueryString(oldQueryString, this.eventData, this.courseClassSet, data);
+            const oldHref = document.location.href;
             this.directLink.attr("href", oldHref.substring(0, oldHref.length - oldQueryString.length) + "?" + newQueryString.replace(/^\?+/, ""));
         }
 
@@ -307,7 +307,7 @@
          * Construct the UI inside the HTML body.
          */
         buildUi() {
-            let body = d3.select("body");
+            const body = d3.select("body");
             body.style("overflow", "hidden");
 
             this.container = body.append("div")
@@ -410,8 +410,8 @@
          * @return {Number} Total horizontal margin.
          */
         getHorizontalMargin() {
-            let body = $("body");
-            let container = $(this.container.node());
+            const body = $("body");
+            const container = $(this.container.node());
             return (body.outerWidth(true) - body.width()) + (container.outerWidth() - container.width());
         }
 
@@ -422,8 +422,8 @@
          * @return {Number} Total vertical margin.
          */
         getVerticalMargin() {
-            let body = $("body");
-            let container = $(this.container.node());
+            const body = $("body");
+            const container = $(this.container.node());
             return (body.outerHeight(true) - body.height()) + (container.outerHeight() - container.height());
         }
 
@@ -434,8 +434,8 @@
          * @return {Number} Usable height of the window.
          */
         getUsableHeight() {
-            let bodyHeight = $(window).outerHeight() - this.getVerticalMargin() - this.topBarHeight;
-            let topPanelHeight = $(this.topPanel.node()).height();
+            const bodyHeight = $(window).outerHeight() - this.getVerticalMargin() - this.topBarHeight;
+            const topPanelHeight = $(this.topPanel.node()).height();
             return bodyHeight - topPanelHeight;
         }
 
@@ -451,21 +451,21 @@
          */
         setChartSize() {
             // Margin around the body element.
-            let horzMargin = this.getHorizontalMargin();
-            let vertMargin = this.getVerticalMargin();
+            const horzMargin = this.getHorizontalMargin();
+            const vertMargin = this.getVerticalMargin();
 
             // Extra amount subtracted off of the width of the chart in order to
             // prevent wrapping, in units of pixels.
             // 2 to prevent wrapping when zoomed out to 33% in Chrome.
-            let EXTRA_WRAP_PREVENTION_SPACE = 2;
+            const EXTRA_WRAP_PREVENTION_SPACE = 2;
 
-            let containerWidth = $(window).width() - horzMargin;
-            let containerHeight = $(window).height() - vertMargin - this.topBarHeight;
+            const containerWidth = $(window).width() - horzMargin;
+            const containerHeight = $(window).height() - vertMargin - this.topBarHeight;
 
             $(this.container.node()).width(containerWidth).height(containerHeight);
 
-            let chartWidth = containerWidth - this.resultList.width() - EXTRA_WRAP_PREVENTION_SPACE;
-            let chartHeight = this.getUsableHeight();
+            const chartWidth = containerWidth - this.resultList.width() - EXTRA_WRAP_PREVENTION_SPACE;
+            const chartHeight = this.getUsableHeight();
 
             this.chart.setSize(chartWidth, chartHeight);
         }
@@ -506,8 +506,8 @@
 
             this.updateControlEnabledness();
             if (this.classes.length > 0) {
-                let legIndex = this.legSelector.getSelectedLeg();
-                let comparisonFunction = this.comparisonSelector.getComparisonFunction();
+                const legIndex = this.legSelector.getSelectedLeg();
+                const comparisonFunction = this.comparisonSelector.getComparisonFunction();
                 this.referenceCumTimes = comparisonFunction(this.courseClassSet);
                 this.fastestCumTimes = this.courseClassSet.getFastestCumTimes(legIndex);
                 this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), this.chartTypeSelector.getChartType(), legIndex);
@@ -519,7 +519,7 @@
          * Redraws the chart using all of the current data.
          */
         redrawChart() {
-            let data = {
+            const data = {
                 chartData: this.chartData,
                 eventData: this.eventData,
                 courseClassSet: this.courseClassSet,
@@ -534,7 +534,7 @@
          * Redraw the chart, possibly using new data.
          */
         redraw() {
-            let chartType = this.chartTypeSelector.getChartType();
+            const chartType = this.chartTypeSelector.getChartType();
             if (!chartType.isResultsTable) {
                 this.chartData = this.courseClassSet.getChartData(this.referenceCumTimes, this.selection.getSelectedIndexes(), chartType, this.legSelector.getSelectedLeg());
                 this.redrawChart();
@@ -721,7 +721,7 @@
          * Updates whether a number of controls are enabled.
          */
         updateControlEnabledness() {
-            let chartType = this.chartTypeSelector.getChartType();
+            const chartType = this.chartTypeSelector.getChartType();
             this.classSelector.setOtherClassesEnabled(!chartType.isResultsTable);
             this.comparisonSelector.setEnabled(!chartType.isResultsTable);
             this.statisticsSelector.setEnabled(!chartType.isResultsTable);

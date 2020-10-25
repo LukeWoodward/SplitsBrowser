@@ -182,7 +182,7 @@
      * @return {Number|null} The parsed course climb, or null if not valid.
      */
     SplitsBrowser.parseCourseClimb = function (stringValue) {
-        let courseClimb = parseInt(stringValue, 10);
+        const courseClimb = parseInt(stringValue, 10);
         if (SplitsBrowser.isNaNStrict(courseClimb)) {
             return null;
         } else {

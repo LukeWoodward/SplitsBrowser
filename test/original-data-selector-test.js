@@ -40,7 +40,7 @@
     }
 
     QUnit.test("Can create selector with checkbox", function (assert) {
-        let parent = d3.select("#qunit-fixture");
+        const parent = d3.select("#qunit-fixture");
         new OriginalDataSelector(parent);
 
         assert.strictEqual(parent.select("input[type=checkbox]").size(), 1);
@@ -48,8 +48,8 @@
 
     QUnit.test("Calls change handler when unchecked and clicked", function (assert) {
         reset();
-        let parent = d3.select("#qunit-fixture");
-        let selector = new OriginalDataSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new OriginalDataSelector(parent);
         selector.registerChangeHandler(testChangeHandler);
 
         $(parent.select("input[type=checkbox]").node()).attr("checked", false).trigger("click");
@@ -60,8 +60,8 @@
 
     QUnit.test("Calls change handler when registered but not when deregistered", function (assert) {
         reset();
-        let parent = d3.select("#qunit-fixture");
-        let selector = new OriginalDataSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new OriginalDataSelector(parent);
         selector.registerChangeHandler(testChangeHandler);
 
         $(parent.select("input[type=checkbox]").node()).attr("checked", false).trigger("click");
@@ -74,8 +74,8 @@
 
     QUnit.test("Calls change handler once when registered twice", function (assert) {
         reset();
-        let parent = d3.select("#qunit-fixture");
-        let selector = new OriginalDataSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new OriginalDataSelector(parent);
         selector.registerChangeHandler(testChangeHandler);
         selector.registerChangeHandler(testChangeHandler);
 
@@ -84,21 +84,21 @@
     });
 
     QUnit.test("Can deregister handler that was never registered without error", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new OriginalDataSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new OriginalDataSelector(parent);
         selector.deregisterChangeHandler(testChangeHandler);
         assert.expect(0); // No assertions
     });
 
     QUnit.test("Calls multiple change handlers when unchecked and clicked", function (assert) {
         reset();
-        let parent = d3.select("#qunit-fixture");
-        let selector = new OriginalDataSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new OriginalDataSelector(parent);
         selector.registerChangeHandler(testChangeHandler);
 
         let lastShowOriginalData2 = null;
         let callCount2 = null;
-        let handler2 = showOriginalData => {
+        const handler2 = showOriginalData => {
             lastShowOriginalData2 = showOriginalData;
             callCount2 += 1;
         };
@@ -114,8 +114,8 @@
 
     QUnit.test("Calls change handler when checked and clicked", function (assert) {
         reset();
-        let parent = d3.select("#qunit-fixture");
-        let selector = new OriginalDataSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new OriginalDataSelector(parent);
         selector.registerChangeHandler(testChangeHandler);
 
         $(parent.select("input[type=checkbox]").node()).attr("checked", true).trigger("click");
@@ -125,8 +125,8 @@
 
     QUnit.test("Does nothing when disabled and clicked", function (assert) {
         reset();
-        let parent = d3.select("#qunit-fixture");
-        let selector = new OriginalDataSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new OriginalDataSelector(parent);
         selector.setEnabled(false);
         selector.registerChangeHandler(testChangeHandler);
 
@@ -135,15 +135,15 @@
     });
 
     QUnit.test("When selector is hidden, checkbox is no longer visible", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new OriginalDataSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new OriginalDataSelector(parent);
         selector.setVisible(false);
         assert.ok(!$("input[type=checkbox]", parent.node()).is(":visible"), "Selector should not be visible when set to not be visible");
     });
 
     QUnit.test("When selector is hidden and shown, checkbox is visible once again", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let selector = new OriginalDataSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new OriginalDataSelector(parent);
         selector.setVisible(false);
         selector.setVisible(true);
         assert.ok($("input[type=checkbox]", parent.node()).is(":visible"), "Selector should be visible when set to be visible");
@@ -151,8 +151,8 @@
 
     QUnit.test("Calling selectOriginalData selects original data", function (assert) {
         reset();
-        let parent = d3.select("#qunit-fixture");
-        let selector = new OriginalDataSelector(parent);
+        const parent = d3.select("#qunit-fixture");
+        const selector = new OriginalDataSelector(parent);
         selector.setVisible(true);
         selector.registerChangeHandler(testChangeHandler);
         selector.selectOriginalData();

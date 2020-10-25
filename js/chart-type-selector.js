@@ -35,7 +35,7 @@
             this.raceGraphDisabledNotifier = null;
             this.lastSelectedIndex = 0;
 
-            let div = d3.select(parent).append("div")
+            const div = d3.select(parent).append("div")
                 .classed("topRowStart", true);
 
             this.labelSpan = div.append("span");

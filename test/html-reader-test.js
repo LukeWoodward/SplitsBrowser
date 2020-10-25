@@ -95,15 +95,15 @@
     function assertResult(assert, actualResult, expectedDetails) {
         for (let propName of ["name", "club"]) {
             if (expectedDetails.has(propName)) {
-                let assertion = (propName === "originalCumTimes" || propName === "originalSplitTimes") ? assert.deepEqual.bind(assert) : assert.strictEqual.bind(assert);
+                const assertion = (propName === "originalCumTimes" || propName === "originalSplitTimes") ? assert.deepEqual.bind(assert) : assert.strictEqual.bind(assert);
                 assertion(actualResult.owner[propName], expectedDetails.get(propName), `Should have correct value for property '${propName}'`);
             }
         }
 
-        let resultOptionalProps = ["totalTime", "originalCumTimes", "originalSplitTimes", "isNonCompetitive", "isNonStarter", "isNonFinisher", "isDisqualified"];
+        const resultOptionalProps = ["totalTime", "originalCumTimes", "originalSplitTimes", "isNonCompetitive", "isNonStarter", "isNonFinisher", "isDisqualified"];
         for (let propName of resultOptionalProps) {
             if (expectedDetails.has(propName)) {
-                let assertion = (propName === "originalCumTimes" || propName === "originalSplitTimes") ? assert.deepEqual.bind(assert) : assert.strictEqual.bind(assert);
+                const assertion = (propName === "originalCumTimes" || propName === "originalSplitTimes") ? assert.deepEqual.bind(assert) : assert.strictEqual.bind(assert);
                 assertion(actualResult[propName], expectedDetails.get(propName), `Should have correct value for property '${propName}'`);
             }
         }
@@ -228,7 +228,7 @@
         let line2 = cellOld("") + ((startNum === null) ? "" : cellOld("")) + cellOld(club) + cellOld("");
 
         for (let index = 0; index < cumTimes.length; index += 1) {
-            let splitTime = (cumTimes[index] === "-----") ? "" : splits[index];
+            const splitTime = (cumTimes[index] === "-----") ? "" : splits[index];
             if (index % 5 === 3) {
                 line1 += "  " + cellOld(cumTimes[index]);
                 line2 += "  " + cellOld(splitTime);
@@ -268,7 +268,7 @@
      * @return {String} The created header line.
      */
     function getCourseHeaderNew(name, length, climb) {
-        let header = "<table width=1105px>\n<tbody>\n<tr>" +
+        const header = "<table width=1105px>\n<tbody>\n<tr>" +
                      cellNew(`${name} (21)`) +
                      cellNew((length === null) ? "" : `${length} Km`) +
                      cellNew((climb === null) ? "" : `${climb} m`) +
@@ -338,7 +338,7 @@
         let line2 = cellNew("") + ((startNum === null) ? "" : cellNew("")) + cellNew(club) + ((useClasses) ? cellNew("") : "") + cellNew("");
 
         for (let index = 0; index < cumTimes.length; index += 1) {
-            let splitTime = (cumTimes[index] === "-----") ? "" : splits[index];
+            const splitTime = (cumTimes[index] === "-----") ? "" : splits[index];
             line1 += "  " + cellNew(cumTimes[index]);
             line2 += "  " + cellNew(splitTime);
         }
@@ -405,7 +405,7 @@
         if (length === "" || climb === "") {
             contents = name;
         } else {
-            let lengthInMetres = Math.round(length * 1000);
+            const lengthInMetres = Math.round(length * 1000);
             contents = `${name}    (${lengthInMetres}m, ${climb}m)`;
         }
         return `<tr class="clubName"><td colspan="24">${contents}</td></tr>\n`;
@@ -420,7 +420,7 @@
      * @return {String} Line of the table.
      */
     function getControlsLineOEventTabular(codes, offset, includeFinish) {
-        let emptyCell = getCellOEventTabular("");
+        const emptyCell = getCellOEventTabular("");
         let line = emptyCell + emptyCell + emptyCell + emptyCell;
         for (let index = 0; index < codes.length; index += 1) {
             line += getCellOEventTabular((index + 1 + offset) + "-" + codes[index]) + emptyCell;
@@ -466,8 +466,8 @@
             throw new Error("Cumulative times and split times must have the same length");
         }
 
-        let emptyCell = getCellOEventTabular("");
-        let rankCell = getCellOEventTabular("(3)");
+        const emptyCell = getCellOEventTabular("");
+        const rankCell = getCellOEventTabular("(3)");
 
         let firstLine = "<tr>" + getCellOEventTabular((posn === "") ? "" : (posn + ".")) +
                                  getCellOEventTabular(startNum) +
@@ -484,7 +484,7 @@
         secondLine += emptyCell;
 
         for (let index = 0; index < cumTimes.length; index += 1) {
-            let splitTime = (cumTimes[index] === "-----") ? "" : splits[index];
+            const splitTime = (cumTimes[index] === "-----") ? "" : splits[index];
             firstLine += getCellOEventTabular(cumTimes[index]) + ((cumTimes[index] === "-----") ? emptyCell : rankCell);
             secondLine += getCellOEventTabular(splitTime) + ((splitTime === "") ? emptyCell : rankCell);
         }
@@ -563,7 +563,7 @@
 
             let offset = 0;
             course.controlsLines.forEach((controlLine, index) => {
-                let includeFinish = (index + 1 === course.controlsLines.length);
+                const includeFinish = (index + 1 === course.controlsLines.length);
                 html += template.controlsLineFunc(controlLine, offset, includeFinish);
                 offset += controlLine.length;
             });
@@ -602,14 +602,14 @@
      *     described above.
      */
     function runHtmlFormatParseTest(courses, checkFunc, options) {
-        let useClasses = (options && options.useClasses) || false;
-        let templates = (options && options.templates) || ALL_TEMPLATES;
+        const useClasses = (options && options.useClasses) || false;
+        const templates = (options && options.templates) || ALL_TEMPLATES;
         for (let template of templates) {
             let html = getHtmlFromTemplate(template, courses, useClasses);
             if (options && options.preprocessor) {
                 html = options.preprocessor(html);
             }
-            let eventData = parseEventData(html);
+            const eventData = parseEventData(html);
             checkFunc(eventData, template.name);
         }
     }
@@ -624,7 +624,7 @@
      */
     function runFailingHtmlFormatParseTest(assert, courses, useClasses) {
         for (let template of ALL_TEMPLATES) {
-            let html = getHtmlFromTemplate(template, courses, useClasses);
+            const html = getHtmlFromTemplate(template, courses, useClasses);
             runInvalidDataTest(assert, html, "invalid data - " + template.name);
         }
     }
@@ -719,10 +719,10 @@
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
 
-                let courseClass = eventData.classes[0];
+                const courseClass = eventData.classes[0];
                 assertCourseClass(assert, courseClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], "competitorCount": 1});
 
-                let result = courseClass.results[0];
+                const result = courseClass.results[0];
                 assertResult(assert, result, new Map([
                     ["name", "Test runner"], ["club", "TEST"], ["totalTime", 9 * 60 + 25],
                     ["originalCumTimes", [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25]],
@@ -731,7 +731,7 @@
                     ["isNonStarter", false], ["isNonFinisher", false], ["isDisqualified", false]
                 ]));
 
-                let course = eventData.courses[0];
+                const course = eventData.courses[0];
                 assertCourse(assert, course, new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "152", "141"], "classCount", 1]]));
                 assert.deepEqual(course.classes[0], courseClass);
             });
@@ -746,10 +746,10 @@
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
 
-                let courseClass = eventData.classes[0];
+                const courseClass = eventData.classes[0];
                 assertCourseClass(assert, courseClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
 
-                let result = courseClass.results[0];
+                const result = courseClass.results[0];
                 assertResult(assert, result, new Map([
                     ["name", "Test runner"], ["club", "TEST"], ["totalTime", null],
                     ["originalCumTimes", [0, null, null, null, null]],
@@ -769,10 +769,10 @@
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
 
-                let courseClass = eventData.classes[0];
+                const courseClass = eventData.classes[0];
                 assertCourseClass(assert, courseClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
 
-                let result = courseClass.results[0];
+                const result = courseClass.results[0];
                 assertResult(assert, result, new Map([
                     ["name", "Test runner"], ["club", "TEST"], ["totalTime", 9 * 60 + 25],
                     ["originalCumTimes", [0, 1 * 60 + 47, 4 * 60 +  2, 3 * 60 + 57, 9 * 60 + 25]],
@@ -780,7 +780,7 @@
                     ["isNonCompetitive", false], ["completed", true]
                 ]));
 
-                let course = eventData.courses[0];
+                const course = eventData.courses[0];
                 assertCourse(assert, course, new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "152", "141"]], ["classCount", 1]]));
                 assert.deepEqual(course.classes[0], courseClass);
             },
@@ -796,7 +796,7 @@
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
 
-                let courseClass = eventData.classes[0];
+                const courseClass = eventData.classes[0];
                 assertCourseClass(assert, courseClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
             },
             {
@@ -830,10 +830,10 @@
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
 
-                let courseClass = eventData.classes[0];
+                const courseClass = eventData.classes[0];
                 assertCourseClass(assert, courseClass, {name: "Test course 1", numControls: 3, course: eventData.courses[0], competitorCount: 1});
 
-                let result = courseClass.results[0];
+                const result = courseClass.results[0];
                 assertResult(assert, result, new Map([
                     ["name", "Test runner"], ["club", "TEST"], ["totalTime", 9 * 60 + 25],
                     ["originalCumTimes", [0, 1 * 60 + 47, 4 * 60 +  2, 8 * 60 + 13, 9 * 60 + 25]],
@@ -841,7 +841,7 @@
                     ["isNonCompetitive", false], ["completed", true]
                 ]));
 
-                let course = eventData.courses[0];
+                const course = eventData.courses[0];
                 assertCourse(assert, course, new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "152", "141"]], ["classCount", 1]]));
                 assert.deepEqual(course.classes[0], courseClass);
             });
@@ -870,7 +870,7 @@
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
 
-                let courseClass = eventData.classes[0];
+                const courseClass = eventData.classes[0];
                 assertCourseClass(assert, courseClass, {name: "Class1", numControls: 3, course: eventData.courses[0], competitorCount: 2});
 
                 assertResult(assert, courseClass.results[0], new Map([["name", "Test runner 1"], ["club", "TEST"], ["totalTime", 9 * 60 + 25]]));
@@ -891,13 +891,13 @@
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 2, `Two classes should have been read - ${formatName}`);
 
-                let course = eventData.courses[0];
+                const course = eventData.courses[0];
                 assert.strictEqual(course.name, "Test course 1");
 
-                let courseClass1 = eventData.classes[0];
+                const courseClass1 = eventData.classes[0];
                 assertCourseClass(assert, courseClass1, {name: "Class1", numControls: 3, course: course, competitorCount: 1});
 
-                let courseClass2 = eventData.classes[1];
+                const courseClass2 = eventData.classes[1];
                 assertCourseClass(assert, courseClass2, {name: "Class2", numControls: 3, course: course, competitorCount: 1});
 
                 assertResult(assert, courseClass1.results[0], new Map([["name", "Test runner 1"], ["club", "TEST"], ["totalTime", 9 * 60 + 25]]));
@@ -918,16 +918,16 @@
                 assert.strictEqual(eventData.courses.length, 2, "Two courses should have been read - " + formatName);
                 assert.strictEqual(eventData.classes.length, 2, `Two classes should have been read - ${formatName}`);
 
-                let course1 = eventData.courses[0];
+                const course1 = eventData.courses[0];
                 assertCourse(assert, course1, new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "152", "141"]]]));
 
-                let course2 = eventData.courses[1];
+                const course2 = eventData.courses[1];
                 assertCourse(assert, course2, new Map([["name", "Test course 2"], ["length", 2.4], ["climb", 30], ["controls", ["132", "143", "139"]]]));
 
-                let courseClass1 = eventData.classes[0];
+                const courseClass1 = eventData.classes[0];
                 assertCourseClass(assert, courseClass1, {name: "Class1", numControls: 3, course: course1, competitorCount: 1});
 
-                let courseClass2 = eventData.classes[1];
+                const courseClass2 = eventData.classes[1];
                 assertCourseClass(assert, courseClass2, {name: "Class2", numControls: 3, course: course2, competitorCount: 1});
 
                 assert.strictEqual(courseClass1.results[0].owner.name, "Test runner 1");
@@ -1005,7 +1005,7 @@
             (eventData, formatName) => {
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
-                let courseClass = eventData.classes[0];
+                const courseClass = eventData.classes[0];
                 assert.strictEqual(courseClass.results.length, 1);
                 assertResult(assert, courseClass.results[0], new Map([
                     ["totalTime", null],
@@ -1024,7 +1024,7 @@
             (eventData, formatName) => {
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
-                let courseClass = eventData.classes[0];
+                const courseClass = eventData.classes[0];
                 assert.strictEqual(courseClass.results.length, 1);
                 assertResult(assert, courseClass.results[0], new Map([
                     ["totalTime", null],
@@ -1043,7 +1043,7 @@
             (eventData, formatName) => {
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
-                let courseClass = eventData.classes[0];
+                const courseClass = eventData.classes[0];
                 assert.strictEqual(courseClass.results.length, 1);
                 assertResult(assert, courseClass.results[0], new Map([
                     ["totalTime", 9 * 60 + 25],
@@ -1063,7 +1063,7 @@
             (eventData, formatName) => {
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
-                let courseClass = eventData.classes[0];
+                const courseClass = eventData.classes[0];
                 assert.strictEqual(courseClass.results.length, 1);
                 assertResult(assert, courseClass.results[0], new Map([
                     ["totalTime", null],
@@ -1085,7 +1085,7 @@
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
 
-                let courseClass = eventData.classes[0];
+                const courseClass = eventData.classes[0];
                 assertCourseClass(assert, courseClass, {name: "Test course 1", numControls: 5, course: eventData.courses[0], competitorCount: 1});
 
                 assertResult(assert, courseClass.results[0], new Map([
@@ -1095,7 +1095,7 @@
                     ["isNonCompetitive", false], ["completed", true]
                 ]));
 
-                let course = eventData.courses[0];
+                const course = eventData.courses[0];
                 assertCourse(assert, course, new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "152", "141", "140", "154"]], ["classCount", 1]]));
                 assert.deepEqual(course.classes[0], courseClass);
             });
@@ -1111,7 +1111,7 @@
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
 
-                let courseClass = eventData.classes[0];
+                const courseClass = eventData.classes[0];
                 assertCourseClass(assert, courseClass, {name: "Class1", numControls: 5, course: eventData.courses[0], competitorCount: 1});
 
                 assertResult(assert, courseClass.results[0], new Map([
@@ -1121,7 +1121,7 @@
                     ["isNonCompetitive", false], ["completed", true]
                 ]));
 
-                let course = eventData.courses[0];
+                const course = eventData.courses[0];
                 assertCourse(assert, course, new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "152", "141", "140", "154"]], ["classCount", 1]]));
                 assert.deepEqual(course.classes[0], courseClass);
             },
@@ -1153,21 +1153,21 @@
     });
 
     QUnit.test("Cannot read event data without any closing table elements", function (assert) {
-        let html = NEW_FORMAT_DATA_HEADER.replace(/<\/table>/g, "") + "<table><table><table>" + NEW_FORMAT_DATA_FOOTER;
+        const html = NEW_FORMAT_DATA_HEADER.replace(/<\/table>/g, "") + "<table><table><table>" + NEW_FORMAT_DATA_FOOTER;
         runInvalidDataTest(assert, html, "no closing-table elements");
     });
 
     // Format-specific as handles a quirk of the old format.
     QUnit.test("Can parse event data with a single course and single valid competitor with no start number", function (assert) {
-        let html = OLD_FORMAT.header +
+        const html = OLD_FORMAT.header +
                    getCourseHeaderLineOld("Test course 1", "2.7", "35") +
                    getControlsLineOld(["138", "152", "141"], 0, true) +
                    getCompetitorLinesOld("1", null, "Test runner 1", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) +
                    OLD_FORMAT.footer;
-        let eventData = parseEventData(html);
+        const eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
         assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
-        let courseClass = eventData.classes[0];
+        const courseClass = eventData.classes[0];
         assert.strictEqual(courseClass.results.length, 1, "One competitor should should have been read");
         assertResult(assert, courseClass.results[0], new Map([
             ["name", "Test runner 1"], ["totalTime", 9 * 60 + 25],
@@ -1179,12 +1179,12 @@
 
     // Needs to remain format-specific as the newlines can only be inserted at specific locations.
     QUnit.test("Can parse event data with a single course and single competitor with extra blank lines in the old format", function (assert) {
-        let html = "<html><head></head><body>\n<pre>\n\n\n" +
+        const html = "<html><head></head><body>\n<pre>\n\n\n" +
                    getCourseHeaderLineOld("Test course 1", "2.7", "35") + "\n" +
                    getControlsLineOld(["138", "152", "141"], 0, true) + "\n\n\n\n\n\n" +
                    getCompetitorLinesOld("1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) + "\n\n\n" +
                    "</pre></body></html>\n\n\n\n";
-        let eventData = parseEventData(html);
+        const eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
         assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
         assert.strictEqual(eventData.classes[0].results.length, 1);
@@ -1192,13 +1192,13 @@
     });
 
     QUnit.test("Can parse event data with a single course and single competitor with extra blank lines in the new format", function (assert) {
-        let html = NEW_FORMAT_DATA_HEADER +
+        const html = NEW_FORMAT_DATA_HEADER +
                    getCourseHeaderNew("Test course 1", "2.7", "35") + "\n" +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
                    getControlsLineNew(["138", "152", "141"], 0, true) + "\n\n\n\n\n\n" +
                    getCompetitorLinesNew("1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) + "\n\n\n" +
                    NEW_FORMAT_COURSE_TABLE_FOOTER + NEW_FORMAT_DATA_FOOTER;
-        let eventData = parseEventData(html);
+        const eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
         assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
         assert.strictEqual(eventData.classes[0].results.length, 1);
@@ -1212,8 +1212,8 @@
                    getControlsLineOld(["138", "152", "141"], 0, true) +
                    getCompetitorLinesOld("1", "165", "Test runner", "TEST0123", false, "", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]);
 
-        let clubIndex = html.indexOf("TEST0123");
-        let lastNewlineIndex = html.lastIndexOf("\n", clubIndex);
+        const clubIndex = html.indexOf("TEST0123");
+        const lastNewlineIndex = html.lastIndexOf("\n", clubIndex);
         html = html.substring(0, lastNewlineIndex) + "\n</pre></body></html>";
         runInvalidDataTest(assert, html, "data with a missing second line of competitor data");
     });
@@ -1225,14 +1225,14 @@
                    getControlsLineNew(["138", "152", "141"], 0, true) +
                    getCompetitorLinesNew("1", "165", "Test runner", "TEST0123", false, "", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]);
 
-        let clubIndex = html.indexOf("TEST0123");
-        let lastNewlineIndex = html.lastIndexOf("\n", clubIndex);
+        const clubIndex = html.indexOf("TEST0123");
+        const lastNewlineIndex = html.lastIndexOf("\n", clubIndex);
         html = html.substring(0, lastNewlineIndex) + NEW_FORMAT_COURSE_TABLE_FOOTER + NEW_FORMAT_DATA_FOOTER;
         runInvalidDataTest(assert, html, "data with a missing second line of competitor data");
     });
 
     QUnit.test("Can parse event data with a single course and single valid and single mispunching competitor with mid-table separator", function (assert) {
-        let html = NEW_FORMAT_DATA_HEADER +
+        const html = NEW_FORMAT_DATA_HEADER +
                    getCourseHeaderNew("Test course 1", "2.7", "35") +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
                    getControlsLineNew(["138", "152", "141"], 0, true) +
@@ -1240,10 +1240,10 @@
                    NEW_FORMAT_MID_TABLE_SEPARATOR +
                    getCompetitorLinesNew("", "182", "Test runner 2", "ABCD", false, "", "mp", ["01:47", "04:02", "-----"], ["01:47", "02:15", "-----"]) +
                    NEW_FORMAT_COURSE_TABLE_FOOTER + NEW_FORMAT_DATA_FOOTER;
-        let eventData = parseEventData(html);
+        const eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
         assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
-        let courseClass = eventData.classes[0];
+        const courseClass = eventData.classes[0];
         assert.strictEqual(courseClass.results.length, 2, "Two competitors should should have been read");
         assertResult(assert, courseClass.results[1], new Map([
             ["name", "Test runner 2"], ["totalTime", null],
@@ -1254,7 +1254,7 @@
     });
 
     QUnit.test("Can parse event data with a single course and single valid and single mispunching competitor with corrected mid-table separator", function (assert) {
-        let html = NEW_FORMAT_DATA_HEADER +
+        const html = NEW_FORMAT_DATA_HEADER +
                    getCourseHeaderNew("Test course 1", "2.7", "35") +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
                    getControlsLineNew(["138", "152", "141"], 0, true) +
@@ -1262,10 +1262,10 @@
                    NEW_FORMAT_MID_TABLE_SEPARATOR.replace(/&nbsp/g, "&nbsp;") +
                    getCompetitorLinesNew("", "165", "Test runner 2", "ABCD", false, "", "mp", ["01:47", "04:02", "-----"], ["01:47", "02:15", "-----"]) +
                    NEW_FORMAT_COURSE_TABLE_FOOTER + NEW_FORMAT_DATA_FOOTER;
-        let eventData = parseEventData(html);
+        const eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
         assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
-        let courseClass = eventData.classes[0];
+        const courseClass = eventData.classes[0];
         assert.strictEqual(courseClass.results.length, 2, "Two competitors should should have been read");
         assertResult(assert, courseClass.results[1], new Map([
             ["name", "Test runner 2"], ["totalTime", null],
@@ -1276,7 +1276,7 @@
     });
 
     QUnit.test("Can parse event data with two courses and navigation elements", function (assert) {
-        let html = NEW_FORMAT_DATA_HEADER +
+        const html = NEW_FORMAT_DATA_HEADER +
                    '<a id="1"></a>' +
                    getCourseHeaderNew("Test course 1", "2.7", "35") +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
@@ -1293,7 +1293,7 @@
                    "<tr>\n<td>etc. etc. etc.</td>\n</tr>\n" +
                    "</table>\n</div>\n" +
                    NEW_FORMAT_DATA_FOOTER;
-        let eventData = parseEventData(html);
+        const eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 2, "Two courses should have been read");
         assert.strictEqual(eventData.classes.length, 2, "Two classes should have been read");
         assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should should have been read for course 1");
@@ -1301,13 +1301,13 @@
     });
 
     QUnit.test("Can parse event data in new-format with no start numbers", function (assert) {
-        let html = NEW_FORMAT_DATA_HEADER +
+        const html = NEW_FORMAT_DATA_HEADER +
                    getCourseHeaderNew("Test course 1", "2.7", "35") + "\n" +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS_NO_STARTNO + NEW_FORMAT_RESULTS_TABLE_HEADER +
                    getControlsLineNew(["138", "152", "141"], 0, true) + "\n\n\n\n\n\n" +
                    getCompetitorLinesNew("1", null, "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]) + "\n\n\n" +
                    NEW_FORMAT_COURSE_TABLE_FOOTER + NEW_FORMAT_DATA_FOOTER;
-        let eventData = parseEventData(html);
+        const eventData = parseEventData(html);
         assert.strictEqual(eventData.courses.length, 1, "One course should have been read");
         assert.strictEqual(eventData.classes.length, 1, "One class should have been read");
         assert.strictEqual(eventData.classes[0].results.length, 1);

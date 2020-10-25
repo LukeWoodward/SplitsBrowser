@@ -52,7 +52,7 @@
          * @return {Array} Array of other course-classes.
          */
         getOtherClasses(courseClass) {
-            let otherClasses = this.classes.filter(cls => cls !== courseClass);
+            const otherClasses = this.classes.filter(cls => cls !== courseClass);
             if (otherClasses.length === this.classes.length) {
                 // Given class not found.
                 throwInvalidData("Course.getOtherClasses: given class is not in this course");
@@ -185,16 +185,16 @@
                 throwInvalidData("Cannot determine fastest splits for a leg because leg information is not available");
             }
 
-            let legNumber = this.getLegNumber(startCode, endCode);
+            const legNumber = this.getLegNumber(startCode, endCode);
             if (legNumber < 0) {
-                let legStr = ((startCode === START) ? "start" : startCode) + " to " + ((endCode === FINISH) ? "end" : endCode);
-                throwInvalidData("Leg from " + legStr + " not found in course " + this.name);
+                const legStr = ((startCode === START) ? "start" : startCode) + " to " + ((endCode === FINISH) ? "end" : endCode);
+                throwInvalidData(`Leg from ${legStr} not found in course ${this.name}`);
             }
 
-            let controlNum = legNumber;
-            let fastestSplits = [];
+            const controlNum = legNumber;
+            const fastestSplits = [];
             for (let courseClass of this.classes) {
-                let classFastest = courseClass.getFastestSplitTo(controlNum);
+                const classFastest = courseClass.getFastestSplitTo(controlNum);
                 if (classFastest !== null) {
                     fastestSplits.push({ name: classFastest.name, className: courseClass.name, split: classFastest.split });
                 }
@@ -231,14 +231,14 @@
             } else {
                 // Be aware that the same control might be used more than once on a course.
                 let lastControlIdx = -1;
-                let matchingResults = [];
+                const matchingResults = [];
                 while (true) {
-                    let controlIdx = this.controls.indexOf(controlCode, lastControlIdx + 1);
+                    const controlIdx = this.controls.indexOf(controlCode, lastControlIdx + 1);
                     if (controlIdx < 0) {
                         // No more occurrences of this control.
                         return matchingResults;
                     } else {
-                        let results = this.getResultsAtControlNumInTimeRange(controlIdx + 1, intervalStart, intervalEnd);
+                        const results = this.getResultsAtControlNumInTimeRange(controlIdx + 1, intervalStart, intervalEnd);
                         for (let result of results) {
                             matchingResults.push(result);
                         }
@@ -261,7 +261,7 @@
          *     within the given time interval.
          */
         getResultsAtControlNumInTimeRange(controlNum, intervalStart, intervalEnd) {
-            let matchingResults = [];
+            const matchingResults = [];
             for (let courseClass of this.classes) {
                 for (let result of courseClass.getResultsAtControlInTimeRange(controlNum, intervalStart, intervalEnd)) {
                     matchingResults.push({ name: result.name, time: result.time, className: courseClass.name });
@@ -299,9 +299,9 @@
                 return [(this.controls.length === 0) ? FINISH : this.controls[0]];
             } else {
                 let lastControlIdx = -1;
-                let nextControls = [];
+                const nextControls = [];
                 do {
-                    let controlIdx = this.controls.indexOf(controlCode, lastControlIdx + 1);
+                    const controlIdx = this.controls.indexOf(controlCode, lastControlIdx + 1);
                     if (controlIdx === -1) {
                         break;
                     } else if (controlIdx === this.controls.length - 1) {

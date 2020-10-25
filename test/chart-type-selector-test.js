@@ -51,21 +51,21 @@
     QUnit.test("Can construct the selector", function(assert) {
         createSelector();
 
-        let htmlSelectSelection = d3.select("#qunit-fixture select");
+        const htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
 
-        let htmlSelect = htmlSelectSelection.node();
+        const htmlSelect = htmlSelectSelection.node();
         assert.strictEqual(htmlSelect.options.length, 3, "Three items should be created");
     });
 
     QUnit.test("Registering a handler and changing a value in the selector triggers a call to change callback", function(assert) {
         resetLastChartType();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
 
-        let htmlSelectSelection = d3.select("#qunit-fixture select");
+        const htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
-        let htmlSelect = htmlSelectSelection.node();
+        const htmlSelect = htmlSelectSelection.node();
         $(htmlSelect).val(2).change();
 
         assert.strictEqual(lastChartTypeName, chartTypes[2].nameKey, "The third chart type should have been selected");
@@ -77,18 +77,18 @@
 
         let lastChartTypeName2 = null;
         let callCount2 = null;
-        let secondHandler = function (chartType) {
+        const secondHandler = function (chartType) {
             lastChartTypeName2 = chartType.nameKey;
             callCount2 += 1;
         };
 
-        let selector = createSelector();
+        const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
         selector.registerChangeHandler(secondHandler);
 
-        let htmlSelectSelection = d3.select("#qunit-fixture select");
+        const htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
-        let htmlSelect = htmlSelectSelection.node();
+        const htmlSelect = htmlSelectSelection.node();
         $(htmlSelect).val(2).change();
 
         assert.strictEqual(lastChartTypeName, chartTypes[2].nameKey, "The third chart type should have been selected");
@@ -99,13 +99,13 @@
 
     QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", function(assert) {
         resetLastChartType();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
         selector.registerChangeHandler(handleChartTypeChanged);
 
-        let htmlSelectSelection = d3.select("#qunit-fixture select");
+        const htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
-        let htmlSelect = htmlSelectSelection.node();
+        const htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(2).change();
 
@@ -115,15 +115,15 @@
 
     QUnit.test("Race graph notifier function called and selection reverted if notifier set", function(assert) {
         resetLastChartType();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
 
         let notifierCalled = false;
         selector.setRaceGraphDisabledNotifier(() => notifierCalled = true);
 
-        let htmlSelectSelection = d3.select("#qunit-fixture select");
+        const htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
-        let htmlSelect = htmlSelectSelection.node();
+        const htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(1).change();
 
@@ -134,15 +134,15 @@
 
     QUnit.test("Race graph notifier function called and selection reverted to previous selection if notifier set", function(assert) {
         resetLastChartType();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
 
         let notifierCalled = false;
         selector.setRaceGraphDisabledNotifier(() => notifierCalled = true);
 
-        let htmlSelectSelection = d3.select("#qunit-fixture select");
+        const htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
-        let htmlSelect = htmlSelectSelection.node();
+        const htmlSelect = htmlSelectSelection.node();
 
         $(htmlSelect).val(2).change();
 
@@ -157,14 +157,14 @@
 
     QUnit.test("Setting the chart type to a recognised type sets the type and calls change handler", function(assert) {
         resetLastChartType();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
 
-        let htmlSelectSelection = d3.select("#qunit-fixture select");
+        const htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
-        let htmlSelect = htmlSelectSelection.node();
+        const htmlSelect = htmlSelectSelection.node();
 
-        let chartType = chartTypes[2];
+        const chartType = chartTypes[2];
 
         selector.setChartType(chartType);
 
@@ -177,12 +177,12 @@
 
     QUnit.test("Setting the chart type to an unrecognised type does nothing and does not call change handler", function(assert) {
         resetLastChartType();
-        let selector = createSelector();
+        const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
 
-        let htmlSelectSelection = d3.select("#qunit-fixture select");
+        const htmlSelectSelection = d3.select("#qunit-fixture select");
         assert.strictEqual(htmlSelectSelection.size(), 1, "One element should be selected");
-        let htmlSelect = htmlSelectSelection.node();
+        const htmlSelect = htmlSelectSelection.node();
 
         selector.setChartType("This is not a recognised chart type");
 
@@ -193,9 +193,9 @@
 
     QUnit.test("Race graph notifier function called and selection reverted to splits graph if notifier set while race graph selected", function(assert) {
         resetLastChartType();
-        let selector = createSelector();
+        const selector = createSelector();
 
-        let htmlSelect = $("#qunit-fixture select")[0];
+        const htmlSelect = $("#qunit-fixture select")[0];
         $(htmlSelect).val(1).change();
 
         selector.registerChangeHandler(handleChartTypeChanged);

@@ -108,7 +108,7 @@
          */
         determineDelimiter(firstDataLine) {
             for (let delimiter of DELIMITERS) {
-                let lineParts = firstDataLine.split(delimiter);
+                const lineParts = firstDataLine.split(delimiter);
                 trimTrailingEmptyCells(lineParts);
                 if (lineParts.length > this.format.controlsOffset) {
                     return delimiter;
@@ -140,7 +140,7 @@
          *     the header line).
          */
         checkControlCodesAlphaNumeric(firstLine) {
-            let lineParts = firstLine.split(this.delimiter);
+            const lineParts = firstLine.split(this.delimiter);
             trimTrailingEmptyCells(lineParts);
             this.adjustLinePartsForMultipleCompetitors(lineParts, this.format);
 
@@ -159,8 +159,8 @@
          */
         addResultToCourse(result, courseName, row) {
             if (this.classes.has(courseName)) {
-                let cls = this.classes.get(courseName);
-                let cumTimes = result.getAllOriginalCumulativeTimes();
+                const cls = this.classes.get(courseName);
+                const cumTimes = result.getAllOriginalCumulativeTimes();
                 // Subtract one from the list of cumulative times for the
                 // cumulative time at the start (always 0), and add one on to
                 // the count of controls in the class to cater for the finish.
@@ -173,7 +173,7 @@
             } else {
                 // New course/class.
                 // Determine the list of controls, ignoring the finish.
-                let controls = [];
+                const controls = [];
                 for (let controlIndex = this.format.controlsOffset; controlIndex + this.controlsTerminationOffset < row.length; controlIndex += this.format.step) {
                     controls.push(row[controlIndex]);
                 }
@@ -190,7 +190,7 @@
          * @param {String} line The line of data read from the file.
          */
         readDataRow(line) {
-            let row = line.split(this.delimiter);
+            const row = line.split(this.delimiter);
             trimTrailingEmptyCells(row);
             this.adjustLinePartsForMultipleCompetitors(row);
 
@@ -204,19 +204,19 @@
                 row.push("");
             }
 
-            let competitorName = row[this.format.name];
-            let club = row[this.format.club];
-            let courseName = row[this.format.courseName];
-            let startTime = parseTime(row[this.format.startTime]);
+            const competitorName = row[this.format.name];
+            const club = row[this.format.club];
+            const courseName = row[this.format.courseName];
+            const startTime = parseTime(row[this.format.startTime]);
 
-            let cumTimes = [0];
+            const cumTimes = [0];
             for (let cumTimeIndex = this.format.controlsOffset + 1; cumTimeIndex < row.length; cumTimeIndex += this.format.step) {
                 cumTimes.push(parseTime(row[cumTimeIndex]));
             }
 
             if (this.format.finishTime !== null) {
-                let finishTime = parseTime(row[this.format.finishTime]);
-                let totalTime = (startTime === null || finishTime === null) ? null : (finishTime - startTime);
+                const finishTime = parseTime(row[this.format.finishTime]);
+                const totalTime = (startTime === null || finishTime === null) ? null : (finishTime - startTime);
                 cumTimes.push(totalTime);
             }
 
@@ -230,11 +230,11 @@
                 return;
             }
 
-            let order = (this.classes.has(courseName)) ? this.classes.get(courseName).results.length + 1 : 1;
+            const order = (this.classes.has(courseName)) ? this.classes.get(courseName).results.length + 1 : 1;
 
-            let result = fromOriginalCumTimes(order, startTime, cumTimes, new Competitor(competitorName, club));
+            const result = fromOriginalCumTimes(order, startTime, cumTimes, new Competitor(competitorName, club));
             if (this.format.placing !== null && result.completed()) {
-                let placing = row[this.format.placing];
+                const placing = row[this.format.placing];
                 if (!placing.match(/^\d*$/)) {
                     result.setNonCompetitive();
                 }
@@ -257,17 +257,17 @@
          * @return {Object} Object that contains the courses and classes.
          */
         createClassesAndCourses() {
-            let courseClasses = [];
+            const courseClasses = [];
 
             // Group the classes by the list of controls.  Two classes using the
             // same list of controls can be assumed to be using the same course.
-            let coursesByControlsLists = new Map();
+            const coursesByControlsLists = new Map();
 
             for (let [className, cls] of this.classes.entries()) {
-                let courseClass = new CourseClass(className, cls.controls.length, cls.results);
+                const courseClass = new CourseClass(className, cls.controls.length, cls.results);
                 courseClasses.push(courseClass);
 
-                let controlsList = cls.controls.join(",");
+                const controlsList = cls.controls.join(",");
                 if (coursesByControlsLists.has(controlsList)) {
                     coursesByControlsLists.get(controlsList).classes.push(courseClass);
                 } else {
@@ -276,9 +276,9 @@
                 }
             }
 
-            let courses = [];
+            const courses = [];
             for (let courseObject of coursesByControlsLists.values()) {
-                let course = new Course(courseObject.name, courseObject.classes, courseObject.length, courseObject.climb, courseObject.controls);
+                const course = new Course(courseObject.name, courseObject.classes, courseObject.length, courseObject.climb, courseObject.controls);
                 courseObject.classes.forEach(courseClass => courseClass.setCourse(course));
                 courses.push(course);
             }
@@ -295,13 +295,13 @@
             this.warnings = [];
             eventData = normaliseLineEndings(eventData);
 
-            let lines = eventData.split(/\n/);
+            const lines = eventData.split(/\n/);
 
             if (lines.length < 2) {
                 throwWrongFileFormat("Data appears not to be in an alternative CSV format - too few lines");
             }
 
-            let firstDataLine = lines[1];
+            const firstDataLine = lines[1];
 
             this.delimiter = this.determineDelimiter(firstDataLine);
             if (this.delimiter === null) {
@@ -314,7 +314,7 @@
                 this.readDataRow(lines[rowIndex]);
             }
 
-            let classesAndCourses = this.createClassesAndCourses();
+            const classesAndCourses = this.createClassesAndCourses();
 
             if (!this.hasAnyStarters) {
                 // Everyone marked as a non-starter.  This file is probably not of this
@@ -328,7 +328,7 @@
 
     SplitsBrowser.Input.AlternativeCSV = {
         parseTripleColumnEventData: function (eventData) {
-            let reader = new Reader(TRIPLE_COLUMN_FORMAT);
+            const reader = new Reader(TRIPLE_COLUMN_FORMAT);
             return reader.parseEventData(eventData);
         }
     };

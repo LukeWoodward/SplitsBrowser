@@ -26,36 +26,36 @@
     const WarningViewer = SplitsBrowser.Controls.WarningViewer;
 
     QUnit.test("Can create viewer with SVG element", function (assert) {
-        let parent = d3.select("#qunit-fixture");
+        const parent = d3.select("#qunit-fixture");
         new WarningViewer(parent);
         assert.strictEqual(parent.select("svg").size(), 1);
     });
 
     QUnit.test("Viewer is hidden when no warnings set", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let viewer = new WarningViewer(parent);
+        const parent = d3.select("#qunit-fixture");
+        const viewer = new WarningViewer(parent);
         viewer.setWarnings([]);
         assert.ok(!$("svg", $("#qunit-fixture")).is(":visible"), "Warning viewer should not be visible when no warnings");
     });
 
     QUnit.test("Viewer is visible when warnings set", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let viewer = new WarningViewer(parent);
+        const parent = d3.select("#qunit-fixture");
+        const viewer = new WarningViewer(parent);
         viewer.setWarnings(["Warning 1", "Warning 2", "Warning 3"]);
         assert.ok($("svg", $("#qunit-fixture")).is(":visible"), "Warning viewer should be visible when warnings");
         assert.strictEqual(d3.selectAll("#qunit-fixture div.warning").size(), 3, "Three warnings should be created");
     });
 
     QUnit.test("Warnings hidden when warning viewer created", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let viewer = new WarningViewer(parent);
+        const parent = d3.select("#qunit-fixture");
+        const viewer = new WarningViewer(parent);
         viewer.setWarnings(["Warning 1", "Warning 2", "Warning 3"]);
         assert.ok(!$("div#warningList").is(":visible"), "Warning list should not be visible");
     });
 
     QUnit.test("Warnings visible when warning triangle clicked", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let viewer = new WarningViewer(parent);
+        const parent = d3.select("#qunit-fixture");
+        const viewer = new WarningViewer(parent);
         viewer.setWarnings(["Warning 1", "Warning 2", "Warning 3"]);
         assert.ok(!$("div.warningList").is(":visible"), "Warning list should not be visible");
         $("#qunit-fixture div#warningTriangleContainer").click();
@@ -63,8 +63,8 @@
     });
 
     QUnit.test("Warnings hidden when warning triangle clicked for the second time", function (assert) {
-        let parent = d3.select("#qunit-fixture");
-        let viewer = new WarningViewer(parent);
+        const parent = d3.select("#qunit-fixture");
+        const viewer = new WarningViewer(parent);
         viewer.setWarnings(["Warning 1", "Warning 2", "Warning 3"]);
         assert.ok(!$("div.warningList").is(":visible"), "Warning list should not be visible");
         $("#qunit-fixture div#warningTriangleContainer").click();

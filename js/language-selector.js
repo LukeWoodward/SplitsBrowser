@@ -48,7 +48,7 @@
             d3.select(parent).append("div")
                 .classed("topRowStartSpacer", true);
 
-            let div = d3.select(parent).append("div")
+            const div = d3.select(parent).append("div")
                 .classed("topRowStart", true);
 
             this.label = div.append("span");
@@ -97,7 +97,7 @@
          * @param {String} language The language code.
          */
         setLanguage(language) {
-            let index = this.allLanguages.indexOf(language);
+            const index = this.allLanguages.indexOf(language);
             if (index >= 0) {
                 this.dropDown.selectedIndex = index;
                 this.onLanguageChanged();

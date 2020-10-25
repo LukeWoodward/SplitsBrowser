@@ -172,7 +172,7 @@
          * @param {Function} handler The handler to register.
          */
         deregisterChangeHandler(handler) {
-            let index = this.changeHandlers.indexOf(handler);
+            const index = this.changeHandlers.indexOf(handler);
             if (index > -1) {
                 this.changeHandlers.splice(index, 1);
             }
@@ -246,7 +246,7 @@
             if (this.dragging) {
                 event.stopPropagation();
                 if (dragIndex !== this.currentDragResultIndex) {
-                    let dragClassName = this.getDragClassName();
+                    const dragClassName = this.getDragClassName();
                     d3.selectAll("div.result." + dragClassName).classed(dragClassName, false);
 
                     if (this.dragStartResultIndex === CONTAINER_RESULT_INDEX && dragIndex === CONTAINER_RESULT_INDEX) {
@@ -267,7 +267,7 @@
                         greatestIndex = Math.max(this.dragStartResultIndex, dragIndex);
                     }
 
-                    let selectedResults = [];
+                    const selectedResults = [];
                     for (let index = leastIndex; index <= greatestIndex; index += 1) {
                         if (this.allResultDetails[index].visible) {
                             selectedResults.push(this.allResultDivs[index]);
@@ -295,8 +295,8 @@
 
             this.dragging = false;
 
-            let selectedResultIndexes = [];
-            let dragClassName = this.getDragClassName();
+            const selectedResultIndexes = [];
+            const dragClassName = this.getDragClassName();
             for (let index = 0; index < this.allResultDivs.length; index += 1) {
                 if ($(this.allResultDivs[index]).hasClass(dragClassName)) {
                     selectedResultIndexes.push(index);
@@ -387,9 +387,9 @@
             if (this.resultSelection.isSingleRunnerSelected()) {
                 // Only a single runner is still selected, so nobody crossed the
                 // selected runner.
-                let resultName = this.allResults[this.resultSelection.getSingleRunnerIndex()].getOwnerNameForLeg(this.selectedLegIndex);
-                let filterInEffect = (this.lastFilterString.length > 0);
-                let messageKey = (filterInEffect) ? "RaceGraphNoCrossingRunnersFiltered" : "RaceGraphNoCrossingRunners";
+                const resultName = this.allResults[this.resultSelection.getSingleRunnerIndex()].getOwnerNameForLeg(this.selectedLegIndex);
+                const filterInEffect = (this.lastFilterString.length > 0);
+                const messageKey = (filterInEffect) ? "RaceGraphNoCrossingRunnersFiltered" : "RaceGraphNoCrossingRunners";
                 this.alerter(getMessageWithFormatting(messageKey, { "$$NAME$$": resultName }));
             }
         }
@@ -434,12 +434,12 @@
          * @return {String} The formatted tooltip contents.
          */
         formatTooltip(result) {
-            let names = [result.owner.name];
+            const names = [result.owner.name];
             for (let competitor of result.owner.members) {
                 names.push(competitor.name);
             }
 
-            let nameIndex = (this.selectedLegIndex === null) ? 0 : this.selectedLegIndex + 1;
+            const nameIndex = (this.selectedLegIndex === null) ? 0 : this.selectedLegIndex + 1;
             names[nameIndex] = SELECTED_RUNNER_TOOLTIP_PREFIX + names[nameIndex];
             return names.join("\n");
         }
@@ -576,8 +576,8 @@
          * Updates the filtering.
          */
         updateFilter() {
-            let currentFilterString = this.filter.node().value;
-            let normedFilter = normaliseName(currentFilterString);
+            const currentFilterString = this.filter.node().value;
+            const normedFilter = normaliseName(currentFilterString);
             for (let result of this.allResultDetails) {
                 result.visible = (result.normedName.includes(normedFilter));
             }
@@ -591,7 +591,7 @@
          * filter text has changed since last time.  If not, nothing happens.
          */
         updateFilterIfChanged() {
-            let currentFilterString = this.getFilterText();
+            const currentFilterString = this.getFilterText();
             if (currentFilterString !== this.lastFilterString) {
                 this.updateFilter();
                 this.lastFilterString = currentFilterString;

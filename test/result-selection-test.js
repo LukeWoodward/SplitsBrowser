@@ -50,32 +50,32 @@
     });
 
     QUnit.test("Can create a result selection if the number of results is zero", function (assert) {
-        let selection = new ResultSelection(0);
+        const selection = new ResultSelection(0);
         assert.strictEqual(selection.count, 0);
     });
 
     QUnit.test("Cannot toggle the selectedness of a result whose index is not numeric", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         SplitsBrowserTest.assertInvalidData(assert, () => selection.toggle("this is not a number"));
     });
 
     QUnit.test("Cannot toggle the selectedness of a result whose index is negative", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         SplitsBrowserTest.assertInvalidData(assert, () => selection.toggle(-1));
     });
 
     QUnit.test("Cannot toggle the selectedness of a result whose index is too large", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         SplitsBrowserTest.assertInvalidData(assert, () => selection.toggle(3));
     });
 
     QUnit.test("All results unselected in newly-created selection", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         assert.deepEqual(selection.getSelectedIndexes(), [], "Results should all be deselected");
     });
 
     QUnit.test("Toggling an unselected result makes them selected and vice versa", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         assert.deepEqual(selection.getSelectedIndexes(), [], "No results should be selected");
 
         selection.toggle(1);
@@ -88,7 +88,7 @@
     });
 
     QUnit.test("Selecting all results makes all results selected, and selecting none makes all results unselected", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         assert.deepEqual(selection.getSelectedIndexes(), [], "No results should be selected");
 
         selection.selectAll();
@@ -101,7 +101,7 @@
     });
 
     QUnit.test("Can determine whether individual results are selected", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.setSelectedIndexes([0, 2]);
         assert.ok(selection.isSelected(0), "Result 0 should be selected");
         assert.ok(!selection.isSelected(1), "Result 1 should not be selected");
@@ -110,7 +110,7 @@
 
     QUnit.test("Can register handler and have it called when result toggled", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.toggle(2);
         assert.deepEqual(lastIndexes, [2], "Only result 2 should be selected");
@@ -119,7 +119,7 @@
 
     QUnit.test("Modifying the returned list from a handler has no effect on the the selection", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.toggle(0);
         assert.deepEqual(lastIndexes, [0], "Only result 0 should be selected");
@@ -129,7 +129,7 @@
 
     QUnit.test("Can register handler and have it called multiple times when multiple results toggled", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.toggle(2);
         selection.toggle(0);
@@ -139,7 +139,7 @@
 
     QUnit.test("Can register handler and have it called when all results selected", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.selectAll();
         assert.deepEqual(lastIndexes, [0, 1, 2], "All results should be selected");
@@ -148,7 +148,7 @@
 
     QUnit.test("Can register handler and have it called when all results deselected", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.selectAll();
         selection.registerChangeHandler(testHandler);
         selection.selectNone();
@@ -158,11 +158,11 @@
 
     QUnit.test("Can register multiple handlers and have them all called when result selection toggled", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
 
         let lastIndexes2 = null;
         let callCount2 = 0;
-        let handler2 = indexes => {
+        const handler2 = indexes => {
             lastIndexes2 = indexes;
             callCount2 += 1;
         };
@@ -180,7 +180,7 @@
 
     QUnit.test("Handler only called once even if registered miltiple times", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.registerChangeHandler(testHandler);
         selection.toggle(2);
@@ -190,7 +190,7 @@
 
     QUnit.test("Can deregister previously-registered handler", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.toggle(2);
         assert.deepEqual(lastIndexes, [2], "Only result 2 should have been selected");
@@ -204,7 +204,7 @@
 
     QUnit.test("Can deregister previously-registered handler multiple times without error", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.toggle(2);
         assert.deepEqual(lastIndexes, [2], "Only result 2 should have been selected");
@@ -219,41 +219,41 @@
 
     QUnit.test("Can deregister handler that was never registered without error", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.deregisterChangeHandler(testHandler);
         assert.expect(0); // No assertions here, but there should also have been no errors.
     });
 
     QUnit.test("A single runner is not selected if no runners are selected", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         assert.ok(!selection.isSingleRunnerSelected(), "A single runner should not be selected if there are no results selected");
     });
 
     QUnit.test("A single runner is selected if one runner is selected", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.toggle(2);
         assert.ok(selection.isSingleRunnerSelected(), "A single runner should be selected if there one result is selected");
     });
 
     QUnit.test("A single runner is not selected if all runners are selected", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.selectAll();
         assert.ok(!selection.isSingleRunnerSelected(), "A single runner should not be selected if all results are selected");
     });
 
     QUnit.test("Cannot get single runner index if no runners are selected", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         assert.strictEqual(selection.getSingleRunnerIndex(), null);
     });
 
     QUnit.test("Can get single runner index if one runner is selected", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.toggle(2);
         assert.strictEqual(selection.getSingleRunnerIndex(), 2);
     });
 
     QUnit.test("A single runner is selected if one runners is selected", function (assert) {
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.selectAll();
         assert.strictEqual(selection.getSingleRunnerIndex(), null);
     });
@@ -277,7 +277,7 @@
      * @return {Array} Array of result-details objects.
      */
     function getTeamResultDetailsForCrossingRunners() {
-        let resultDetailsArray = getResultDetailsForCrossingRunners();
+        const resultDetailsArray = getResultDetailsForCrossingRunners();
         for (let resultDetails of resultDetailsArray) {
             resultDetails.result.setOffsets([0, 2]);
         }
@@ -286,7 +286,7 @@
 
     QUnit.test("If no runners are selected, when crossing results are selected, no other results are selected", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.selectCrossingRunners(getResultDetailsForCrossingRunners(), null);
         assert.strictEqual(callCount, 0, "No call to the change-handler should be registered");
@@ -294,7 +294,7 @@
 
     QUnit.test("If a single runner is selected, when crossing results are selected, then one other result is selected", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.toggle(1);
         selection.registerChangeHandler(testHandler);
         selection.selectCrossingRunners(getResultDetailsForCrossingRunners(), null);
@@ -304,7 +304,7 @@
 
     QUnit.test("If two runners are selected, when crossing results are selected, no other results are selected", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.toggle(0);
         selection.toggle(1);
         selection.registerChangeHandler(testHandler);
@@ -314,10 +314,10 @@
 
     QUnit.test("If a single runner is selected but the crossing runner is not visible then no further results are selected", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.toggle(1);
         selection.registerChangeHandler(testHandler);
-        let resultDetails = getResultDetailsForCrossingRunners();
+        const resultDetails = getResultDetailsForCrossingRunners();
         resultDetails[2].visible = false;
         selection.selectCrossingRunners(resultDetails, null);
         assert.deepEqual(lastIndexes, [1], "Selected indexes should be just 1");
@@ -326,7 +326,7 @@
 
     QUnit.test("If a single team is selected, when crossing results for the team are selected, then one other result is selected", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.toggle(1);
         selection.registerChangeHandler(testHandler);
         selection.selectCrossingRunners(getTeamResultDetailsForCrossingRunners(), null);
@@ -336,7 +336,7 @@
 
     QUnit.test("If a single team is selected, when crossing results for the first leg are selected, then no other result is selected", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.toggle(1);
         selection.registerChangeHandler(testHandler);
         selection.selectCrossingRunners(getTeamResultDetailsForCrossingRunners(), 0);
@@ -346,7 +346,7 @@
 
     QUnit.test("If a single team is selected, when crossing results for the second leg are selected, then one other result is selected", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.toggle(1);
         selection.registerChangeHandler(testHandler);
         selection.selectCrossingRunners(getTeamResultDetailsForCrossingRunners(), 1);
@@ -355,48 +355,48 @@
     });
 
     QUnit.test("Cannot migrate from an old list of results that isn't an array", function (assert) {
-        let selection = new ResultSelection(1);
-        let newResults = [fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301], {})];
+        const selection = new ResultSelection(1);
+        const newResults = [fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301], {})];
         SplitsBrowserTest.assertInvalidData(assert, () => selection.migrate("this is not an array", newResults));
     });
 
     QUnit.test("Cannot migrate from an old list of results that doesn't match the previous count", function (assert) {
-        let selection = new ResultSelection(2);
-        let oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {})];
-        let newResults = [fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301], {})];
+        const selection = new ResultSelection(2);
+        const oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {})];
+        const newResults = [fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301], {})];
         SplitsBrowserTest.assertInvalidData(assert, () => selection.migrate(oldResults, newResults));
     });
 
     QUnit.test("Cannot migrate to a new list of results that isn't an array", function (assert) {
-        let selection = new ResultSelection(1);
-        let oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {})];
+        const selection = new ResultSelection(1);
+        const oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {})];
         SplitsBrowserTest.assertInvalidData(assert, () => selection.migrate(oldResults, "this is not an array"));
     });
 
     QUnit.test("Cannot migrate to an empty new list of results if a result is selected", function (assert) {
-        let selection = new ResultSelection(1);
+        const selection = new ResultSelection(1);
         selection.toggle(0);
-        let oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {})];
+        const oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {})];
         SplitsBrowserTest.assertInvalidData(assert, () => selection.migrate(oldResults, []));
     });
 
     QUnit.test("Can migrate to an empty new list of results if no results are selected", function (assert) {
-        let selection = new ResultSelection(1);
+        const selection = new ResultSelection(1);
         selection.selectNone();
-        let oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {})];
+        const oldResults = [fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {})];
         selection.migrate(oldResults, []);
         assert.deepEqual(selection.getSelectedIndexes(), []);
     });
 
     QUnit.test("Can migrate to new list of results", function (assert) {
         reset();
-        let result1 = fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301], {});
-        let result2 = fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {});
-        let result3 = fromCumTimes(3, 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381], {});
-        let result4 = fromCumTimes(4, 10 * 3600 + 2 * 60, [0, 78, 188, 252, 406], {});
-        let oldResults = [result2, result1, result3];
-        let newResults = [result1, result2, result4];
-        let selection = new ResultSelection(oldResults.length);
+        const result1 = fromCumTimes(1, 10 * 3600, [0, 65, 184, 229, 301], {});
+        const result2 = fromCumTimes(2, 11 * 3600, [0, 77, 191, 482, 561], {});
+        const result3 = fromCumTimes(3, 11 * 3600 + 2 * 60, [0, 72, 200, 277, 381], {});
+        const result4 = fromCumTimes(4, 10 * 3600 + 2 * 60, [0, 78, 188, 252, 406], {});
+        const oldResults = [result2, result1, result3];
+        const newResults = [result1, result2, result4];
+        const selection = new ResultSelection(oldResults.length);
         selection.toggle(1);
         selection.toggle(2);
         selection.registerChangeHandler(testHandler);
@@ -407,7 +407,7 @@
 
     QUnit.test("Can set array of selected results to an empty array", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.setSelectedIndexes([]);
         assert.deepEqual(lastIndexes, []);
@@ -416,7 +416,7 @@
 
     QUnit.test("Can set array of selected results to an non-empty array", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.setSelectedIndexes([0, 2]);
         assert.deepEqual(lastIndexes, [0, 2]);
@@ -425,7 +425,7 @@
 
     QUnit.test("Cannot set array of selected results to an array containing a negative index", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.setSelectedIndexes([0, -1]);
         assert.deepEqual(callCount, 0);
@@ -433,7 +433,7 @@
 
     QUnit.test("Can bulk-select an empty list of results without firing change handlers", function (assert) {
         reset();
-        let selection = new ResultSelection(5);
+        const selection = new ResultSelection(5);
         selection.registerChangeHandler(testHandler);
         selection.bulkSelect([]);
         assert.strictEqual(callCount, 0);
@@ -441,7 +441,7 @@
 
     QUnit.test("Can bulk-select three results when none originally selected, firing change handlers once", function (assert) {
         reset();
-        let selection = new ResultSelection(5);
+        const selection = new ResultSelection(5);
         selection.registerChangeHandler(testHandler);
         selection.bulkSelect([1, 3, 4]);
         assert.deepEqual(lastIndexes, [1, 3, 4]);
@@ -450,7 +450,7 @@
 
     QUnit.test("Can bulk-select three results in the wrong order when none originally selected, firing change handlers once", function (assert) {
         reset();
-        let selection = new ResultSelection(5);
+        const selection = new ResultSelection(5);
         selection.registerChangeHandler(testHandler);
         selection.bulkSelect([4, 3, 1]);
         assert.deepEqual(lastIndexes, [1, 3, 4]);
@@ -459,7 +459,7 @@
 
     QUnit.test("Can bulk-select three results when two originally selected, with correct list of last indexes and firing change handlers once", function (assert) {
         reset();
-        let selection = new ResultSelection(5);
+        const selection = new ResultSelection(5);
         selection.toggle(1);
         selection.toggle(4);
         selection.registerChangeHandler(testHandler);
@@ -470,7 +470,7 @@
 
     QUnit.test("Bulk-selecting three results when all three originally selected does not fire change handlers", function (assert) {
         reset();
-        let selection = new ResultSelection(5);
+        const selection = new ResultSelection(5);
         selection.toggle(1);
         selection.toggle(3);
         selection.toggle(4);
@@ -480,17 +480,17 @@
     });
 
     QUnit.test("Cannot bulk-select when one of the entries in the list is not a number", function (assert) {
-        let selection = new ResultSelection(5);
+        const selection = new ResultSelection(5);
         SplitsBrowserTest.assertInvalidData(assert, () => selection.bulkSelect([1, "This is not a number", 4]));
     });
 
     QUnit.test("Cannot bulk-select when one of the entries in the list is a negative number", function (assert) {
-        let selection = new ResultSelection(5);
+        const selection = new ResultSelection(5);
         SplitsBrowserTest.assertInvalidData(assert, () => selection.bulkSelect([1, -1, 4]));
     });
 
     QUnit.test("Cannot bulk-select when one of the entries in the list is too large", function (assert) {
-        let selection = new ResultSelection(5);
+        const selection = new ResultSelection(5);
         SplitsBrowserTest.assertInvalidData(assert, () => selection.bulkSelect([1, 5, 4]));
     });
 
@@ -502,7 +502,7 @@
      *     number of results, all selected.
      */
     function createSelectionWithAllSelected(count) {
-        let selection = new ResultSelection(count);
+        const selection = new ResultSelection(count);
         for (let i = 0; i < count; i += 1) {
             selection.toggle(i);
         }
@@ -511,7 +511,7 @@
 
     QUnit.test("Can bulk-deselect an empty list of results without firing change handlers", function (assert) {
         reset();
-        let selection = createSelectionWithAllSelected(5);
+        const selection = createSelectionWithAllSelected(5);
         selection.registerChangeHandler(testHandler);
         selection.bulkDeselect([]);
         assert.strictEqual(callCount, 0);
@@ -519,7 +519,7 @@
 
     QUnit.test("Can bulk-deselect three results when all were originally selected, firing change handlers once", function (assert) {
         reset();
-        let selection = createSelectionWithAllSelected(5);
+        const selection = createSelectionWithAllSelected(5);
         selection.registerChangeHandler(testHandler);
         selection.bulkDeselect([1, 3, 4]);
         assert.deepEqual(lastIndexes, [0, 2]);
@@ -528,7 +528,7 @@
 
     QUnit.test("Can bulk-deselect three results in the wrong order when all were originally selected, firing change handlers once", function (assert) {
         reset();
-        let selection = createSelectionWithAllSelected(5);
+        const selection = createSelectionWithAllSelected(5);
         selection.registerChangeHandler(testHandler);
         selection.bulkDeselect([4, 3, 1]);
         assert.deepEqual(lastIndexes, [0, 2]);
@@ -537,7 +537,7 @@
 
     QUnit.test("Can bulk-deselect three results when two originally deselected, with correct list of last indexes and firing change handlers once", function (assert) {
         reset();
-        let selection = createSelectionWithAllSelected(5);
+        const selection = createSelectionWithAllSelected(5);
         selection.toggle(1);
         selection.toggle(4);
         selection.registerChangeHandler(testHandler);
@@ -548,7 +548,7 @@
 
     QUnit.test("Bulk-deselecting three results when all three originally deselected does not fire change handlers", function (assert) {
         reset();
-        let selection = createSelectionWithAllSelected(5);
+        const selection = createSelectionWithAllSelected(5);
         selection.toggle(1);
         selection.toggle(3);
         selection.toggle(4);
@@ -558,23 +558,23 @@
     });
 
     QUnit.test("Cannot bulk-deselect when one of the entries in the list is not a number", function (assert) {
-        let selection = createSelectionWithAllSelected(5);
+        const selection = createSelectionWithAllSelected(5);
         SplitsBrowserTest.assertInvalidData(assert, () => selection.bulkDeselect([1, "This is not a number", 4]));
     });
 
     QUnit.test("Cannot bulk-select when one of the entries in the list is a negative number", function (assert) {
-        let selection = createSelectionWithAllSelected(5);
+        const selection = createSelectionWithAllSelected(5);
         SplitsBrowserTest.assertInvalidData(assert, () => selection.bulkDeselect([1, -1, 4]));
     });
 
     QUnit.test("Cannot bulk-select when one of the entries in the list is too large", function (assert) {
-        let selection = createSelectionWithAllSelected(5);
+        const selection = createSelectionWithAllSelected(5);
         SplitsBrowserTest.assertInvalidData(assert, () => selection.bulkDeselect([1, 5, 4]));
     });
 
     QUnit.test("Cannot set array of selected results to an array containing an index too large", function (assert) {
         reset();
-        let selection = new ResultSelection(3);
+        const selection = new ResultSelection(3);
         selection.registerChangeHandler(testHandler);
         selection.setSelectedIndexes([0, 3]);
         assert.deepEqual(callCount, 0);

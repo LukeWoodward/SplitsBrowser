@@ -143,7 +143,7 @@
      * @return {Object} Test competitor data.
      */
     function getCompetitor2OnLongerCourse() {
-        let comp2 = getCompetitor2();
+        const comp2 = getCompetitor2();
         comp2.set("numControls", "4");
         comp2.set("distance", "5.3");
         comp2.set("climb", "155");
@@ -333,8 +333,8 @@
      */
     function runTestOverAllFormats (competitors, testFunc, preprocessor) {
         for (let format of ALL_FORMATS) {
-            let text = generateData(format, competitors, preprocessor);
-            let eventData = parseEventData(text);
+            const text = generateData(format, competitors, preprocessor);
+            const eventData = parseEventData(text);
             testFunc(eventData, format);
         }
     }
@@ -349,14 +349,14 @@
             assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
 
             assert.strictEqual(eventData.courses.length, 1, "There should be one course");
-            let course = eventData.courses[0];
+            const course = eventData.courses[0];
             assert.strictEqual(course.name, "Test course", "Course name should be correct");
             assert.strictEqual(course.length, 4.1, "Course length should be correct");
             assert.strictEqual(course.climb, 140, "Course climb should be correct");
             assert.deepEqual(course.classes, [eventData.classes[0]], "The one class in the course should be the one course");
             assert.deepEqual(course.controls, ["208", "227", "212"]);
 
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.strictEqual(result.owner.name, "First Runner", "Should read correct name");
             assert.strictEqual(result.owner.club, "ABC", "Should read correct club");
             assert.strictEqual(result.owner.yearOfBirth, 1984, "Should read correct year of birth");
@@ -376,7 +376,7 @@
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with timed start", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("startTime", competitor1.get("startPunch"));
         competitor1.set("startPunch", "");
         runTestOverAllFormats([[competitor1, getControls1()]], eventData => {
@@ -387,7 +387,7 @@
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with no start nor finish", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("startTime", "");
         competitor1.set("startPunch", "");
         competitor1.set("finish", "");
@@ -399,39 +399,39 @@
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with the course distance having a comma as the decimal separator", function (assert) {
-        let competitor = getCompetitor1();
+        const competitor = getCompetitor1();
         competitor.set("distance", "4,1");
         runTestOverAllFormats([[competitor, getControls1()]], eventData => {
             assert.strictEqual(eventData.courses.length, 1, "There should be one course");
-            let course = eventData.courses[0];
+            const course = eventData.courses[0];
             assert.strictEqual(course.length, 4.1, "Course length should be correct");
         });
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with the course having zero distance and climb", function (assert) {
-        let competitor = getCompetitor1();
+        const competitor = getCompetitor1();
         competitor.set("distance", "0.0");
         competitor.set("climb", "0");
         runTestOverAllFormats([[competitor, getControls1()]], eventData => {
             assert.strictEqual(eventData.courses.length, 1, "There should be one course");
-            let course = eventData.courses[0];
+            const course = eventData.courses[0];
             assert.strictEqual(course.length, 0, "Course length should be zero");
             assert.strictEqual(course.climb, 0, "Course climb should be zero");
         });
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with the course distance in metres", function (assert) {
-        let competitor = getCompetitor1();
+        const competitor = getCompetitor1();
         competitor.set("distance", "4100");
         runTestOverAllFormats([[competitor, getControls1()]], eventData => {
             assert.strictEqual(eventData.courses.length, 1, "There should be one course");
-            let course = eventData.courses[0];
+            const course = eventData.courses[0];
             assert.strictEqual(course.length, 4.1, "Course length should be correct");
         });
     });
 
     QUnit.test("Can parse a string that contains a single valid competitor's data with the placing empty", function (assert) {
-        let competitor = getCompetitor1();
+        const competitor = getCompetitor1();
         competitor.set("placing", "");
         runTestOverAllFormats([[competitor, getControls1()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
@@ -441,12 +441,12 @@
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with the last two controls missing", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("placing", "");
         runTestOverAllFormats([[competitor1, getControls1()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.ok(!result.completed());
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, null, null, 393]);
         }, eventDataStr => {
@@ -458,52 +458,52 @@
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with a blank time for the last control", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("placing", "");
         runTestOverAllFormats([[competitor1, getControls1WithBlankTimeForLast()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.ok(!result.completed());
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, null, 393]);
         });
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with control code with letters in it", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("placing", "");
         runTestOverAllFormats([[competitor1, getControls1WithNonNumericControlCode()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
         });
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with blank code and missing time", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("placing", "");
         runTestOverAllFormats([[competitor1, getControls1WithBlankCodeAndMissingTimeAtTheEnd()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
         });
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with blank code and missing time followed by an additional control", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("placing", "");
         runTestOverAllFormats([[competitor1, getControls1WithBlankCodeAndMissingTimeAtTheEndFollowedByAdditionalControl()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
         });
     });
 
     QUnit.test("Can parse a string ignoring a blank year of birth", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("yearOfBirth", "");
         runTestOverAllFormats([[competitor1, getControls1()]], eventData => {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
@@ -514,7 +514,7 @@
     });
 
     QUnit.test("Can parse a string ignoring an invalid year of birth", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("yearOfBirth", "This is not a valid year");
         runTestOverAllFormats([[competitor1, getControls1()]], eventData => {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
@@ -525,7 +525,7 @@
     });
 
     QUnit.test("Can parse a string that contains a single female competitor's data", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("gender", "F");
         runTestOverAllFormats([[competitor1, getControls1()]], (eventData, format) => {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
@@ -538,7 +538,7 @@
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data ignoring a blank gender", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("gender", "");
         runTestOverAllFormats([[competitor1, getControls1()]], (eventData, format) => {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
@@ -551,7 +551,7 @@
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data ignoring an invalid gender", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("gender", "This is not a valid gender");
         runTestOverAllFormats([[competitor1, getControls1()]], (eventData, format) => {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
@@ -567,7 +567,7 @@
         runTestOverAllFormats([[getCompetitor1(), getControls1()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
             assert.strictEqual(eventData.courses.length, 1, "There should be one course");
         }, eventDataStr => eventDataStr.replace(/\r\n/g, "\n"));
@@ -580,7 +580,7 @@
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data in 'nameless' column-60 variation", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("forename", "");
         competitor1.set("surname", "");
         competitor1.set("club", "");
@@ -589,7 +589,7 @@
         competitor1.set("startTime", competitor1.get("startPunch"));
         competitor1.set("startPunch", "");
 
-        let eventData = parseEventData(HEADER_60 + generateRow(competitor1, getControls1(), ROW_TEMPLATE_60));
+        const eventData = parseEventData(HEADER_60 + generateRow(competitor1, getControls1(), ROW_TEMPLATE_60));
         assert.strictEqual(eventData.classes.length, 1, "There should be one class");
         assert.strictEqual(eventData.classes[0].name, "Test course", "Class should have same name as course");
         assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
@@ -597,7 +597,7 @@
         assert.strictEqual(eventData.courses.length, 1, "There should be one course");
         assert.strictEqual(eventData.courses[0].name, "Test course", "Course name should be correct");
 
-        let result = eventData.classes[0].results[0];
+        const result = eventData.classes[0].results[0];
         assert.strictEqual(result.owner.name, competitor1.get("compno"), "Should read competitor name as ID");
         assert.strictEqual(result.owner.club, competitor1.get("noOfClub"), "Should read club name as ID");
         assert.deepEqual(result.startTime, parseTime(competitor1.get("startTime")), "Should read correct start time");
@@ -634,13 +634,13 @@
     });
 
     QUnit.test("Cannot parse a string that contains competitor data where all competitors have warnings", function (assert) {
-        let comp1 = getCompetitor1();
-        let comp2 = getCompetitor2();
+        const comp1 = getCompetitor1();
+        const comp2 = getCompetitor2();
         comp1.set("numControls", "Not a valid number");
         comp2.set("numControls", "Not a valid number");
 
         for (let format of ALL_FORMATS) {
-            let eventDataStr = format.header + generateRow(comp1, getControls1(), format.template) + generateRow(comp2, getControls1(), format.template);
+            const eventDataStr = format.header + generateRow(comp1, getControls1(), format.template) + generateRow(comp2, getControls1(), format.template);
             runInvalidDataTest(assert, eventDataStr, "data where all competitors have warnings", "WrongFileFormat");
         }
     });
@@ -661,43 +661,43 @@
             line2 += Math.round((1 + Math.sin(i * i)) * 232) + ",";
         }
 
-        let eventDataStr = `${line1}X\n${line2}0\n`;
+        const eventDataStr = `${line1}X\n${line2}0\n`;
         runInvalidDataTest(assert, eventDataStr, "an empty string", "WrongFileFormat");
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control", function (assert) {
-        let comp = getCompetitor1();
+        const comp = getCompetitor1();
         comp.set("placing", "mp");
-        let controls = getControls1();
+        const controls = getControls1();
         controls[1].time = "-----";
         runTestOverAllFormats([[comp, controls]], eventData => {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
 
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
         });
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control but marked as OK", function (assert) {
-        let comp = getCompetitor1();
+        const comp = getCompetitor1();
         comp.set("classifier", "0");
-        let controls = getControls1();
+        const controls = getControls1();
         controls[1].time = "-----";
         runTestOverAllFormats([[comp, controls]], eventData => {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
 
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
             assert.ok(result.isOKDespiteMissingTimes, "Should be marked as OK despite having a missing time");
         });
     });
 
     QUnit.test("Can parse with warnings a string that contains a competitor with a non-numeric control count", function (assert) {
-        let comp1 = getCompetitor1();
+        const comp1 = getCompetitor1();
         comp1.set("numControls", "This is not a valid number");
         runTestOverAllFormats([[comp1, getControls1()], [getCompetitor2(), getControls1()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
@@ -706,7 +706,7 @@
     });
 
     QUnit.test("Can parse with warnings a string that contains a single competitor's data with a missing class name", function (assert) {
-        let comp1 = getCompetitor1();
+        const comp1 = getCompetitor1();
         comp1.set("className", "");
         comp1.set("course", "");
         runTestOverAllFormats([[comp1, getControls1()], [getCompetitor2(), getControls1()]], eventData => {
@@ -716,24 +716,24 @@
     });
 
     QUnit.test("Can parse a string that contains a single competitor's data with a missed control and remove the trailing 'mp' from the name", function (assert) {
-        let comp = getCompetitor1();
+        const comp = getCompetitor1();
         comp.set("surname", "Runner mp");
         comp.set("placing", "mp");
-        let controls = getControls1();
+        const controls = getControls1();
         controls[1].time = "-----";
         runTestOverAllFormats([[comp, controls]], eventData => {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
 
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.strictEqual(result.owner.name, "First Runner", "Should read correct name without 'mp' suffix");
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, null, 362, 393], "Should read correct cumulative times");
         });
     });
 
     QUnit.test("Can parse a string that contains a single non-competitive competitor's data and remove the trailing 'n/c' from the name", function (assert) {
-        let comp = getCompetitor1();
+        const comp = getCompetitor1();
         comp.set("surname", "Runner n/c");
         comp.set("placing", "n/c");
         runTestOverAllFormats([[comp, getControls1()]], eventData => {
@@ -741,7 +741,7 @@
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
 
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.strictEqual(result.owner.name, "First Runner", "Should read correct name without 'n/c' suffix");
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393], "Should read correct cumulative times");
             assert.ok(result.isNonCompetitive, "Competitor result should be marked as non-competitive");
@@ -753,12 +753,12 @@
     });
 
     QUnit.test("Can parse a string that contains a single non-competitive competitor's data", function (assert) {
-        let comp = getCompetitor1();
+        const comp = getCompetitor1();
         comp.set("nonComp", "1");
         runTestOverAllFormats([[comp, getControls1()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.ok(result.isNonCompetitive, "Competitor result should be marked as non-competitive");
             assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
             assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
@@ -768,13 +768,13 @@
     });
 
     QUnit.test("Can parse a string that contains a single non-starting competitor's data", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("time", "");
         competitor1.set("finish", "");
         runTestOverAllFormats([[competitor1, getControls1AllMissed()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
             assert.ok(result.isNonStarter, "Competitor result should be marked as a non-starter");
             assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
@@ -784,14 +784,14 @@
     });
 
     QUnit.test("Can parse a string that contains a single non-starting competitor's data when flagged as non-starter", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("time", "");
         competitor1.set("finish", "");
         competitor1.set("classifier", "1");
         runTestOverAllFormats([[competitor1, getControls1AllMissed()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
             assert.ok(result.isNonStarter, "Competitor result should be marked as a non-starter");
             assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
@@ -801,14 +801,14 @@
     });
 
     QUnit.test("Can parse a string that contains a single non-finishing competitor's data when flagged as non-finisher", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("classifier", "2");
-        let controls = getControls1();
+        const controls = getControls1();
         controls[1].time = "-----";
         runTestOverAllFormats([[competitor1, controls]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
             assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
             assert.ok(result.isNonFinisher, "Competitor result should be marked as a non-finisher");
@@ -818,12 +818,12 @@
     });
 
     QUnit.test("Can parse a string that contains a single disqualified competitor's data when flagged as disqualified", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("classifier", "4");
         runTestOverAllFormats([[competitor1, getControls1()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
             assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
             assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
@@ -833,12 +833,12 @@
     });
 
     QUnit.test("Can parse a string that contains a single over-max-time competitor's data when flagged as over max time", function (assert) {
-        let competitor1 = getCompetitor1();
+        const competitor1 = getCompetitor1();
         competitor1.set("classifier", "5");
         runTestOverAllFormats([[competitor1, getControls1()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
-            let result = eventData.classes[0].results[0];
+            const result = eventData.classes[0].results[0];
             assert.ok(!result.isNonCompetitive, "Competitor result should not be marked as non-competitive");
             assert.ok(!result.isNonStarter, "Competitor result should not be marked as a non-starter");
             assert.ok(!result.isNonFinisher, "Competitor result should not be marked as a non-finisher");
@@ -861,9 +861,9 @@
     });
 
     QUnit.test("Can parse a string that contains two competitors in the same class but different course", function (assert) {
-        let comp1 = getCompetitor1();
+        const comp1 = getCompetitor1();
         comp1.set("course", "Test course 1");
-        let comp2 = getCompetitor2();
+        const comp2 = getCompetitor2();
         comp2.set("course", "Test course 2");
         runTestOverAllFormats([[comp1, getControls1()], [comp2, getControls2()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
@@ -883,9 +883,9 @@
     });
 
     QUnit.test("Can parse a string that contains two competitors in the same course but different class", function (assert) {
-        let comp1 = getCompetitor1();
+        const comp1 = getCompetitor1();
         comp1.set("className", "Test class 1");
-        let comp2 = getCompetitor2();
+        const comp2 = getCompetitor2();
         comp2.set("className", "Test class 2");
         runTestOverAllFormats([[comp1, getControls1()], [comp2, getControls2()]], eventData => {
             assert.strictEqual(eventData.classes.length, 2, "There should be two classes");
@@ -905,13 +905,13 @@
     });
 
     QUnit.test("Can parse a string that contains a course with two classes where one class is used in another course into an event with a single course", function (assert) {
-        let comp1 = getCompetitor1();
+        const comp1 = getCompetitor1();
         comp1.set("className", "Test class 1");
         comp1.set("course", "Test course 1");
-        let comp2 = getCompetitor2();
+        const comp2 = getCompetitor2();
         comp2.set("className", "Test class 2");
         comp2.set("course", "Test course 1");
-        let comp3 = getCompetitor3();
+        const comp3 = getCompetitor3();
         comp3.set("className", "Test class 2");
         comp3.set("course", "Test course 2");
 
@@ -934,10 +934,10 @@
     });
 
     QUnit.test("Can parse a string that contains two competitors on different classes and courses", function (assert) {
-        let comp1 = getCompetitor1();
+        const comp1 = getCompetitor1();
         comp1.set("className", "Test class 1");
         comp1.set("course", "Test course 1");
-        let comp2 = getCompetitor2();
+        const comp2 = getCompetitor2();
         comp2.set("className", "Test class 2");
         comp2.set("course", "Test course 2");
         comp2.set("numControls", "4");
@@ -976,13 +976,13 @@
     });
 
     QUnit.test("Can parse a string that contains two competitors on different classes, sorting the classes into order", function (assert) {
-        let comp1 = getCompetitor1();
+        const comp1 = getCompetitor1();
         comp1.set("className", "Test class 2");
         comp1.set("course", "Test course 1");
-        let comp2 = getCompetitor2OnLongerCourse();
+        const comp2 = getCompetitor2OnLongerCourse();
         comp2.set("className", "Test class 1");
         comp2.set("course", "Test course 2");
-        let controls2 = [{code: "208", time: "02:01"}, {code: "222", time: "04:06"}, {code: "219", time: "06:37"}, {code: "213", time: "09:10"}];
+        const controls2 = [{code: "208", time: "02:01"}, {code: "222", time: "04:06"}, {code: "219", time: "06:37"}, {code: "213", time: "09:10"}];
         runTestOverAllFormats([[comp1, getControls1()], [comp2, controls2]], eventData => {
             assert.strictEqual(eventData.classes.length, 2, "There should be two elements in the classes array");
             assert.ok(eventData.classes[0] instanceof CourseClass, "First array element should be a CourseClass object");
@@ -1006,13 +1006,13 @@
     });
 
     QUnit.test("Can parse a string that contains two competitors on different classes, sorting the classes into order", function (assert) {
-        let comp1 = getCompetitor1();
+        const comp1 = getCompetitor1();
         comp1.set("className", "Test class 2");
         comp1.set("course", "Test course 1");
-        let comp2 = getCompetitor2OnLongerCourse();
+        const comp2 = getCompetitor2OnLongerCourse();
         comp2.set("className", "Test class 1");
         comp2.set("course", "Test course 2");
-        let controls2 = [{code: "208", time: "02:01"}, {code: "222", time: "04:06"}, {code: "219", time: "06:37"}, {code: "213", time: "09:10"}];
+        const controls2 = [{code: "208", time: "02:01"}, {code: "222", time: "04:06"}, {code: "219", time: "06:37"}, {code: "213", time: "09:10"}];
         runTestOverAllFormats([[comp1, getControls1()], [comp2, controls2]], eventData => {
             assert.strictEqual(eventData.classes.length, 2, "There should be two elements in the classes array");
             assert.ok(eventData.classes[0] instanceof CourseClass, "First array element should be a CourseClass object");

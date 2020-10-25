@@ -34,8 +34,8 @@
      *     found.
      */
     function verifyConsistency(referenceLanguageKey, otherLanguageKey, consistencyErrors) {
-        let referenceLanguage = SplitsBrowser.Messages[referenceLanguageKey];
-        let otherLanguage = SplitsBrowser.Messages[otherLanguageKey];
+        const referenceLanguage = SplitsBrowser.Messages[referenceLanguageKey];
+        const otherLanguage = SplitsBrowser.Messages[otherLanguageKey];
         for (let refKey in referenceLanguage) {
             if (hasProperty(referenceLanguage, refKey)) {
                 if (!hasProperty(otherLanguage, refKey)) {
@@ -52,7 +52,7 @@
             throw new Error("Reference language not found");
         }
 
-        let consistencyErrors = [];
+        const consistencyErrors = [];
         let languageCount = 1;
         for (let language in SplitsBrowser.Messages) {
             if (hasProperty(SplitsBrowser.Messages, language) && language !== REFERENCE_LANGUAGE) {

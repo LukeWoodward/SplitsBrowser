@@ -37,14 +37,14 @@
         constructor(parent) {
             this.parent = parent;
 
-            let checkboxId = "originalDataCheckbox";
+            const checkboxId = "originalDataCheckbox";
             this.containerDiv = parent.append("div")
                 .classed("topRowStart", true)
                 .attr("id", CONTAINER_DIV_ID);
 
             this.containerDiv.append("div").classed("topRowStartSpacer", true);
 
-            let span = this.containerDiv.append("span");
+            const span = this.containerDiv.append("span");
 
             this.checkbox = span.append("input")
                 .attr("type", "checkbox")
@@ -92,7 +92,7 @@
          *                           changes.
          */
         deregisterChangeHandler(handler) {
-            let index = this.handlers.indexOf(handler);
+            const index = this.handlers.indexOf(handler);
             if (index !== -1) {
                 this.handlers.splice(index, 1);
             }

@@ -78,7 +78,7 @@
             throwInvalidData("Array of cumulative times must contain more than just a single zero");
         }
 
-        let splitTimes = [];
+        const splitTimes = [];
         for (let i = 0; i + 1 < cumTimes.length; i += 1) {
             splitTimes.push(subtractIfNotNull(cumTimes[i + 1], cumTimes[i]));
         }
@@ -425,7 +425,7 @@
                 throwInvalidData("Cannot adjust cumulative times because a null value is in the reference data");
             }
 
-            let adjustedTimes = this.cumTimes.map((time, idx) => subtractIfNotNull(time, referenceCumTimes[idx]));
+            const adjustedTimes = this.cumTimes.map((time, idx) => subtractIfNotNull(time, referenceCumTimes[idx]));
             return adjustedTimes;
         }
 
@@ -435,9 +435,8 @@
          * @return {Array} The array of adjusted data.
          */
         getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes) {
-            let adjustedTimes = this.getCumTimesAdjustedToReference(referenceCumTimes);
-            let startTime = this.startTime;
-            return adjustedTimes.map(adjTime => addIfNotNull(adjTime, startTime));
+            const adjustedTimes = this.getCumTimesAdjustedToReference(referenceCumTimes);
+            return adjustedTimes.map(adjTime => addIfNotNull(adjTime, this.startTime));
         }
 
         /**
@@ -453,12 +452,12 @@
                 throwInvalidData("Cannot determine percentages-behind because a null value is in the reference data");
             }
 
-            let percentsBehind = [0];
+            const percentsBehind = [0];
             this.splitTimes.forEach((splitTime, index) => {
                 if (splitTime === null) {
                     percentsBehind.push(null);
                 } else {
-                    let referenceSplit = referenceCumTimes[index + 1] - referenceCumTimes[index];
+                    const referenceSplit = referenceCumTimes[index + 1] - referenceCumTimes[index];
                     if (referenceSplit > 0) {
                         percentsBehind.push(100 * (splitTime - referenceSplit) / referenceSplit);
                     } else {
@@ -497,7 +496,7 @@
                     // (split[i] - fastest[i])/fastest[i].  A control's split ratio
                     // is its time loss rate plus 1.  Not subtracting one at the start
                     // means that we then don't have to add it back on at the end.
-                    let splitRatios = this.splitTimes.map((splitTime, index) => splitTime / fastestSplitTimes[index]);
+                    const splitRatios = this.splitTimes.map((splitTime, index) => splitTime / fastestSplitTimes[index]);
 
                     splitRatios.sort(d3.ascending);
 
@@ -505,7 +504,7 @@
                     if (splitRatios.length % 2 === 1) {
                         medianSplitRatio = splitRatios[(splitRatios.length - 1) / 2];
                     } else {
-                        let midpt = splitRatios.length / 2;
+                        const midpt = splitRatios.length / 2;
                         medianSplitRatio = (splitRatios[midpt - 1] + splitRatios[midpt]) / 2;
                     }
 
@@ -547,8 +546,8 @@
 
             for (let controlIdx = startIndex; controlIdx < endIndex; controlIdx += 1) {
                 if (this.cumTimes[controlIdx] !== null && other.cumTimes[controlIdx] !== null) {
-                    let thisTotalTime = this.startTime + this.cumTimes[controlIdx];
-                    let otherTotalTime = other.startTime + other.cumTimes[controlIdx];
+                    const thisTotalTime = this.startTime + this.cumTimes[controlIdx];
+                    const otherTotalTime = other.startTime + other.cumTimes[controlIdx];
                     if (thisTotalTime < otherTotalTime) {
                         beforeOther = true;
                     } else if (thisTotalTime > otherTotalTime) {
@@ -577,7 +576,7 @@
          * @return {Array} Array of objects that record indexes around omitted times.
          */
         getIndexesAroundOmittedTimes(times) {
-            let omittedTimeInfo = [];
+            const omittedTimeInfo = [];
             let startIndex = 1;
             while (startIndex + 1 < times.length) {
                 if (this.isTimeOmitted(times[startIndex])) {
@@ -654,7 +653,7 @@
             // After this loop, okResultIndex points to the last OK result, or -1 if none.
             let okResultIndex;
             for (okResultIndex = -1; okResultIndex + 1 < results.length; okResultIndex += 1) {
-                let nextResult = results[okResultIndex + 1];
+                const nextResult = results[okResultIndex + 1];
                 if (nextResult.isNonStarter || nextResult.isNonFinisher || !nextResult.completed()) {
                     break;
                 }
@@ -663,7 +662,7 @@
             // After this loop, dnsResultIndex points to the last DNS result, or the end of the list if none.
             let dnsResultIndex;
             for (dnsResultIndex = results.length; dnsResultIndex > 0; dnsResultIndex -= 1) {
-                let prevResult = results[dnsResultIndex - 1];
+                const prevResult = results[dnsResultIndex - 1];
                 if (!prevResult.isNonStarter) {
                     break;
                 }
@@ -713,7 +712,7 @@
          * @return {Result} Created result.
          */
         static fromOriginalCumTimes(order, startTime, cumTimes, owner) {
-            let splitTimes = splitTimesFromCumTimes(cumTimes);
+            const splitTimes = splitTimesFromCumTimes(cumTimes);
             return new Result(order, startTime, splitTimes, cumTimes, owner);
         }
 
@@ -732,7 +731,7 @@
          * @return {Result} Created result.
          */
         static fromCumTimes(order, startTime, cumTimes, owner) {
-            let result = Result.fromOriginalCumTimes(order, startTime, cumTimes, owner);
+            const result = Result.fromOriginalCumTimes(order, startTime, cumTimes, owner);
             result.splitTimes = result.originalSplitTimes;
             result.cumTimes = result.originalCumTimes;
             return result;
@@ -752,13 +751,13 @@
             }
 
             // Firstly, compute cumulative-time offsets for each of the component results.
-            let offsets = calculateOffsets(results);
+            const offsets = calculateOffsets(results);
             owner.setMembers(results.map(result => result.owner));
 
-            let originalCumTimes = calculateCumulativeTimesFromResults(
+            const originalCumTimes = calculateCumulativeTimesFromResults(
                 results, offsets, result => result.originalCumTimes);
 
-            let teamResult = Result.fromOriginalCumTimes(order, results[0].startTime, originalCumTimes, owner);
+            const teamResult = Result.fromOriginalCumTimes(order, results[0].startTime, originalCumTimes, owner);
             if (results.every(result => result.cumTimes !== null)) {
                 teamResult.cumTimes = calculateCumulativeTimesFromResults(
                     results, offsets, r => r.cumTimes);
@@ -778,16 +777,16 @@
      * @return {Array} Array of offsets.
      */
     function calculateOffsets(results) {
-        let offsets = [0];
-        results.forEach((comp, resultIndex) => {
+        const offsets = [0];
+        results.forEach((result, resultIndex) => {
 
             // Calculate the offset for result resultIndex + 1.
-            let lastOffset = offsets[offsets.length - 1];
-            let nextResult = (resultIndex + 1 < results.length) ? results[resultIndex + 1] : null;
+            const lastOffset = offsets[offsets.length - 1];
+            const nextResult = (resultIndex + 1 < results.length) ? results[resultIndex + 1] : null;
             let nextFinishTime;
-            if (lastOffset !== null && comp.totalTime !== null) {
+            if (lastOffset !== null && result.totalTime !== null) {
                 // We have an offset for the last result and their total time.
-                nextFinishTime = lastOffset + comp.totalTime;
+                nextFinishTime = lastOffset + result.totalTime;
             } else if (nextResult !== null && nextResult.startTime !== null && results[0].startTime !== null) {
                 // Use the start time of the next result.
                 nextFinishTime = nextResult.startTime - results[0].startTime;
@@ -812,9 +811,9 @@
      * @return {Array} The full list of cumulative times.
      */
     function calculateCumulativeTimesFromResults(results, offsets, cumulativeTimesGetter) {
-        let times = [0];
+        const times = [0];
         for (let resultIndex = 0; resultIndex < results.length; resultIndex += 1) {
-            let resultTimes = cumulativeTimesGetter(results[resultIndex]);
+            const resultTimes = cumulativeTimesGetter(results[resultIndex]);
             for (let controlIndex = 1; controlIndex < resultTimes.length; controlIndex += 1) {
                 times.push(addIfNotNull(offsets[resultIndex], resultTimes[controlIndex]));
             }

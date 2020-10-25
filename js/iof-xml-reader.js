@@ -79,8 +79,8 @@
      * @return {String} Name read from the element.
      */
     function readCompetitorName(nameElement) {
-        let forename = $("> Given", nameElement).text();
-        let surname = $("> Family", nameElement).text();
+        const forename = $("> Given", nameElement).text();
+        const surname = $("> Family", nameElement).text();
         if (forename === "") {
             return surname;
         } else if (surname === "") {
@@ -119,11 +119,11 @@
      * @param {jQuery.selection} rootElement The root element.
      */
     Version2Reader.checkVersion = function (rootElement) {
-        let iofVersionElement = $("> IOFVersion", rootElement);
+        const iofVersionElement = $("> IOFVersion", rootElement);
         if (iofVersionElement.length === 0) {
             throwWrongFileFormat("Could not find IOFVersion element");
         } else {
-            let version = iofVersionElement.attr("version");
+            const version = iofVersionElement.attr("version");
             if (isUndefined(version)) {
                 throwWrongFileFormat("Version attribute missing from IOFVersion element");
             } else if (version !== "2.0.3") {
@@ -131,7 +131,7 @@
             }
         }
 
-        let status = rootElement.attr("status");
+        const status = rootElement.attr("status");
         if (!isUndefined(status) && status.toLowerCase() !== "complete") {
             throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
         }
@@ -173,21 +173,21 @@
         // haven't been specified in any of the files I've seen.
         // So instead grab course details from the class and the first
         // competitor.
-        let courseName = $("> ClassShortName", classResultElement).text();
+        const courseName = $("> ClassShortName", classResultElement).text();
 
-        let firstResult = $("> PersonResult > Result", classResultElement).first();
+        const firstResult = $("> PersonResult > Result", classResultElement).first();
         let length = null;
 
         if (firstResult.length > 0) {
-            let lengthElement = $("> CourseLength", firstResult);
-            let lengthStr = lengthElement.text();
+            const lengthElement = $("> CourseLength", firstResult);
+            const lengthStr = lengthElement.text();
 
             // Course lengths in IOF v2 are a pain, as you have to handle three
             // units.
             if (lengthStr.length > 0) {
                 length = parseFloat(lengthStr);
                 if (isFinite(length)) {
-                    let unit = lengthElement.attr("unit");
+                    const unit = lengthElement.attr("unit");
                     if (isUndefined(unit) || unit === "m") {
                         length /= 1000;
                     } else if (unit === "km") {
@@ -227,7 +227,7 @@
      * @return {String} Competitor or team's club name.
      */
     Version2Reader.readClubName = function (element) {
-        let clubName = $("> Club > ShortName", element).text();
+        const clubName = $("> Club > ShortName", element).text();
         return (clubName === "") ?  $("> Club > Name", element).text() : clubName;
     };
 
@@ -247,8 +247,8 @@
      *     not found.
      */
     Version2Reader.readStartTime = function (resultElement) {
-        let startTimeStr = $("> StartTime > Clock", resultElement).text();
-        let startTime = (startTimeStr === "") ? null : parseTime(startTimeStr);
+        const startTimeStr = $("> StartTime > Clock", resultElement).text();
+        const startTime = (startTimeStr === "") ? null : parseTime(startTimeStr);
         return startTime;
     };
 
@@ -260,8 +260,8 @@
      *     a valid time was not found.
      */
     Version2Reader.readTotalTime = function (resultElement) {
-        let totalTimeStr = $("> Time", resultElement).text();
-        let totalTime = (totalTimeStr === "") ? null : parseTime(totalTimeStr);
+        const totalTimeStr = $("> Time", resultElement).text();
+        const totalTime = (totalTimeStr === "") ? null : parseTime(totalTimeStr);
         return totalTime;
     };
 
@@ -272,7 +272,7 @@
      * @return {String} Status of the competitor.
      */
     Version2Reader.getStatus = function (resultElement) {
-        let statusElement = $("> CompetitorStatus", resultElement);
+        const statusElement = $("> CompetitorStatus", resultElement);
         return (statusElement.length === 1) ? statusElement.attr("value") : "";
     };
 
@@ -306,8 +306,8 @@
             throwInvalidData("Control code missing for control");
         }
 
-        let timeStr = $("> Time", splitTimeElement).text();
-        let time = (timeStr === "") ? null : parseTime(timeStr);
+        const timeStr = $("> Time", splitTimeElement).text();
+        const time = (timeStr === "") ? null : parseTime(timeStr);
         return {code: code, time: time};
     };
 
@@ -341,14 +341,14 @@
      * @param {jQuery.selection} rootElement The root element.
      */
     Version3Reader.checkVersion = function (rootElement) {
-        let iofVersion = rootElement.attr("iofVersion");
+        const iofVersion = rootElement.attr("iofVersion");
         if (isUndefined(iofVersion)) {
             throwWrongFileFormat("Could not find IOF version number");
         } else if (iofVersion !== "3.0") {
             throwWrongFileFormat(`Found unrecognised IOF XML data format '${iofVersion}'`);
         }
 
-        let status = rootElement.attr("status");
+        const status = rootElement.attr("status");
         if (!isUndefined(status) && status.toLowerCase() !== "complete") {
             throwInvalidData("Only complete IOF data supported; snapshot and delta are not supported");
         }
@@ -387,10 +387,10 @@
      *     controls.
      */
     Version3Reader.readCourseFromClass = function (classResultElement, warnings) {
-        let courseElement = $("> Course", classResultElement);
-        let id = $("> Id", courseElement).text() || null;
-        let name = $("> Name", courseElement).text();
-        let lengthStr = $("> Length", courseElement).text();
+        const courseElement = $("> Course", classResultElement);
+        const id = $("> Id", courseElement).text() || null;
+        const name = $("> Name", courseElement).text();
+        const lengthStr = $("> Length", courseElement).text();
         let length;
         if (lengthStr === "") {
             length = null;
@@ -405,13 +405,13 @@
             }
         }
 
-        let numberOfControlsStr = $("> NumberOfControls", courseElement).text();
+        const numberOfControlsStr = $("> NumberOfControls", courseElement).text();
         let numberOfControls = parseInt(numberOfControlsStr, 10);
         if (isNaNStrict(numberOfControls)) {
             numberOfControls = null;
         }
 
-        let climbStr = $("> Climb", courseElement).text();
+        const climbStr = $("> Climb", courseElement).text();
         let climb = parseInt(climbStr, 10);
         if (isNaNStrict(climb)) {
             climb = null;
@@ -437,7 +437,7 @@
      * @return {String} Competitor or team's club name.
      */
     Version3Reader.readClubName = function (element) {
-        let clubName = $("> Organisation > ShortName", element).text();
+        const clubName = $("> Organisation > ShortName", element).text();
         return (clubName === "") ? $("> Organisation > Name", element).text() : clubName;
     };
 
@@ -448,8 +448,8 @@
      * @return {String} The competitor's date of birth, as a string.
      */
     Version3Reader.readDateOfBirth = function (element) {
-        let birthDate = $("> Person > BirthDate", element).text();
-        let regexResult = yearRegexp.exec(birthDate);
+        const birthDate = $("> Person > BirthDate", element).text();
+        const regexResult = yearRegexp.exec(birthDate);
         return (regexResult === null) ? null : parseInt(regexResult[0], 10);
     };
 
@@ -461,14 +461,14 @@
      *     or null if not known.
      */
     Version3Reader.readStartTime = function (resultElement) {
-        let startTimeStr = $("> StartTime", resultElement).text();
-        let result = ISO_8601_RE.exec(startTimeStr);
+        const startTimeStr = $("> StartTime", resultElement).text();
+        const result = ISO_8601_RE.exec(startTimeStr);
         if (result === null) {
             return null;
         } else {
-            let hours = parseInt(result[1], 10);
-            let minutes = parseInt(result[2], 10);
-            let seconds = (isUndefined(result[3])) ? 0 : parseInt(result[3], 10);
+            const hours = parseInt(result[1], 10);
+            const minutes = parseInt(result[2], 10);
+            const seconds = (isUndefined(result[3])) ? 0 : parseInt(result[3], 10);
             return hours * 60 * 60 + minutes * 60 + seconds;
         }
     };
@@ -483,7 +483,7 @@
     Version3Reader.readTime = function (timeStr) {
         // IOF v3 allows fractional seconds, so we use parseFloat instead
         // of parseInt.
-        let time = parseFloat(timeStr);
+        const time = parseFloat(timeStr);
         return (isFinite(time)) ? time : null;
     };
 
@@ -495,7 +495,7 @@
      *     was not found or was invalid.
      */
     Version3Reader.readTotalTime = function (resultElement) {
-        let totalTimeStr = $("> Time", resultElement).text();
+        const totalTimeStr = $("> Time", resultElement).text();
         return Version3Reader.readTime(totalTimeStr);
     };
 
@@ -529,7 +529,7 @@
      * @return {Object} Object containing code and time.
      */
     Version3Reader.readSplitTime = function (splitTimeElement) {
-        let code = $("> ControlCode", splitTimeElement).text();
+        const code = $("> ControlCode", splitTimeElement).text();
         if (code === "") {
             throwInvalidData("Control code missing for control");
         }
@@ -539,7 +539,7 @@
             // Missed controls have their time omitted.
             time = null;
         } else {
-            let timeStr = $("> Time", splitTimeElement).text();
+            const timeStr = $("> Time", splitTimeElement).text();
             time = (timeStr === "") ? null : Version3Reader.readTime(timeStr);
         }
 
@@ -558,8 +558,8 @@
      *     XML reading.
      */
     function validateData(xml, reader) {
-        let rootElement = $("> *", xml);
-        let rootElementNodeName = rootElement.prop("tagName");
+        const rootElement = $("> *", xml);
+        const rootElementNodeName = rootElement.prop("tagName");
 
         if (rootElementNodeName !== "ResultList")  {
             throwWrongFileFormat(`Root element of XML document does not have expected name 'ResultList', got '${rootElementNodeName}'`);
@@ -580,49 +580,49 @@
      *     competitor could be read.
      */
     function parseCompetitor(element, number, reader, warnings) {
-        let jqElement = $(element);
+        const jqElement = $(element);
 
-        let nameElement = reader.getCompetitorNameElement(jqElement);
-        let name = readCompetitorName(nameElement);
+        const nameElement = reader.getCompetitorNameElement(jqElement);
+        const name = readCompetitorName(nameElement);
 
         if (name === "") {
             warnings.push("Could not find a name for a competitor");
             return null;
         }
 
-        let club = reader.readClubName(jqElement);
+        const club = reader.readClubName(jqElement);
 
-        let dateOfBirth =  reader.readDateOfBirth(jqElement);
-        let regexResult = yearRegexp.exec(dateOfBirth);
-        let yearOfBirth = (regexResult === null) ? null : parseInt(regexResult[0], 10);
+        const dateOfBirth =  reader.readDateOfBirth(jqElement);
+        const regexResult = yearRegexp.exec(dateOfBirth);
+        const yearOfBirth = (regexResult === null) ? null : parseInt(regexResult[0], 10);
 
-        let gender = $("> Person", jqElement).attr("sex");
+        const gender = $("> Person", jqElement).attr("sex");
 
-        let resultElement = $("Result", jqElement);
+        const resultElement = $("Result", jqElement);
         if (resultElement.length === 0) {
             warnings.push(`Could not find any result information for competitor '${name}'`);
             return null;
         }
 
-        let startTime = reader.readStartTime(resultElement);
+        const startTime = reader.readStartTime(resultElement);
 
-        let totalTime = reader.readTotalTime(resultElement);
+        const totalTime = reader.readTotalTime(resultElement);
 
         let status = reader.getStatus(resultElement);
 
-        let splitTimes = $("> SplitTime", resultElement).toArray();
-        let splitData = splitTimes.filter(splitTime => !reader.isAdditional($(splitTime)))
+        const splitTimes = $("> SplitTime", resultElement).toArray();
+        const splitData = splitTimes.filter(splitTime => !reader.isAdditional($(splitTime)))
                                   .map(splitTime => reader.readSplitTime($(splitTime)));
 
-        let controls = splitData.map(datum => datum.code);
-        let cumTimes = splitData.map(datum => datum.time);
+        const controls = splitData.map(datum => datum.code);
+        const cumTimes = splitData.map(datum => datum.time);
 
         cumTimes.unshift(0); // Prepend a zero time for the start.
 
         // Append the total time, ignoring any value given for a non-starter.
         cumTimes.push((status === reader.StatusNonStarter) ? null : totalTime);
 
-        let competitor = new Competitor(name, club);
+        const competitor = new Competitor(name, club);
 
         if (yearOfBirth !== null) {
             competitor.setYearOfBirth(yearOfBirth);
@@ -632,7 +632,7 @@
             competitor.setGender(gender);
         }
 
-        let result = fromOriginalCumTimes(number, startTime, cumTimes, competitor);
+        const result = fromOriginalCumTimes(number, startTime, cumTimes, competitor);
 
         if (status === "OK" && totalTime !== null && cumTimes.includes(null)) {
             result.setOKDespiteMissingTimes();
@@ -664,10 +664,9 @@
      * @param {Array} warnings Array that accumulates warning messages.
      */
     function parsePersonResult(element, number, cls, reader, warnings) {
-        let resultAndControls = parseCompetitor(element, number, reader, warnings);
+        const resultAndControls = parseCompetitor(element, number, reader, warnings);
         if (resultAndControls !== null) {
-            let result = resultAndControls.result;
-            let controls = resultAndControls.controls;
+            let {result, controls} = resultAndControls;
             if (cls.results.length === 0 && !(result.isNonStarter && controls.length === 0)) {
                 // First result (not including non-starters with no controls).
                 // Record the list of controls.
@@ -682,7 +681,7 @@
             }
 
             // Subtract 2 for the start and finish cumulative times.
-            let actualControlCount = result.getAllOriginalCumulativeTimes().length - 2;
+            const actualControlCount = result.getAllOriginalCumulativeTimes().length - 2;
             let warning = null;
             if (result.isNonStarter && actualControlCount === 0) {
                 // Don't generate warnings for non-starting competitors with no controls.
@@ -716,26 +715,26 @@
      * @param {Array} warnings Array that accumulates warning messages.
      */
     function parseTeamResult(teamResultElement, number, cls, reader, warnings) {
-        let teamName = reader.readTeamName(teamResultElement);
-        let teamClubName = reader.readClubName(teamResultElement);
-        let members = reader.readTeamMemberResults(teamResultElement);
+        const teamName = reader.readTeamName(teamResultElement);
+        const teamClubName = reader.readClubName(teamResultElement);
+        const members = reader.readTeamMemberResults(teamResultElement);
 
         if (members.length === 0) {
-            warnings.push("Ignoring team " + (teamName === "" ? "(unnamed team)" : teamName) + " with no members");
+            warnings.push(`Ignoring team ${teamName === "" ? "(unnamed team)" : teamName} with no members`);
             return;
         } else if (cls.results.length === 0 && members.length === 1) {
             // First team in the class has only a single member.
             // (If this is a subsequent team in a class where there are teams
             // with more than one member, the team-size check later on will
             // catch this case.)
-            warnings.push("Ignoring team " + (teamName === "" ? "(unnamed team)" : teamName) + " with only a single member");
+            warnings.push(`Ignoring team ${teamName === "" ? "(unnamed team)" : teamName} with only a single member`);
             return;
         }
 
-        let results = [];
-        let allControls = [];
+        const results = [];
+        const allControls = [];
         for (let member of members) {
-            let resultAndControls = parseCompetitor(member, number, reader, warnings);
+            const resultAndControls = parseCompetitor(member, number, reader, warnings);
             if (resultAndControls === null) {
                 // A warning for this competitor rules out the entire team.
                 return;
@@ -746,15 +745,15 @@
         }
 
         for (let index = 1; index < members.length; index += 1) {
-            let previousFinishTime = $("> Result > FinishTime", members[index - 1]).text();
-            let nextStartTime = $("> Result > StartTime", members[index]).text();
+            const previousFinishTime = $("> Result > FinishTime", members[index - 1]).text();
+            const nextStartTime = $("> Result > StartTime", members[index]).text();
             if (!results[index].isNonStarter && previousFinishTime !== nextStartTime) {
                 warnings.push(`In team ${(teamName === "" ? "(unnamed team)" : teamName)} in class '${cls.name}', ${results[index - 1].owner.name} does not finish at the same time as ${results[index].owner.name} starts`);
                 return;
             }
         }
 
-        let thisTeamControlCounts = allControls.map(controls => controls.length);
+        const thisTeamControlCounts = allControls.map(controls => controls.length);
 
         if (cls.results.length === 0) {
             // First team.  Record the team size.
@@ -773,14 +772,14 @@
         }
         else {
             let warning = null;
-            let teamResult = createTeamResult(number, results, new Team(teamName, teamClubName));
+            const teamResult = createTeamResult(number, results, new Team(teamName, teamClubName));
 
             for (let teamMemberIndex = 0; teamMemberIndex < results.length; teamMemberIndex += 1) {
-                let expectedControlCount = cls.course.numbersOfControls[teamMemberIndex];
-                let memberResult = results[teamMemberIndex];
+                const expectedControlCount = cls.course.numbersOfControls[teamMemberIndex];
+                const memberResult = results[teamMemberIndex];
 
                 // Subtract 2 for the start and finish cumulative times.
-                let actualControlCount = memberResult.getAllOriginalCumulativeTimes().length - 2;
+                const actualControlCount = memberResult.getAllOriginalCumulativeTimes().length - 2;
 
                 if (actualControlCount !== expectedControlCount) {
                     warning = `Competitor '${memberResult.owner.name}' in team '${teamName}' in class '${cls.name}' has an unexpected number of controls: expected ${expectedControlCount}, actual ${actualControlCount}`;
@@ -805,8 +804,8 @@
      * @return {Object} Object containing parsed data.
      */
     function parseClassData(element, reader, warnings) {
-        let jqElement = $(element);
-        let cls = {name: null, results: [], teamSize: null, controls: [], course: null};
+        const jqElement = $(element);
+        const cls = {name: null, results: [], teamSize: null, controls: [], course: null};
 
         cls.course = reader.readCourseFromClass(jqElement, warnings);
 
@@ -819,8 +818,8 @@
         cls.name = className;
         cls.course.numbersOfControls = null;
 
-        let personResults = $("> PersonResult", jqElement);
-        let teamResults = $("> TeamResult", jqElement);
+        const personResults = $("> PersonResult", jqElement);
+        const teamResults = $("> TeamResult", jqElement);
 
         if (personResults.length > 0 && teamResults.length > 0) {
             warnings.push(`Class '${className}' has a combination of relay teams and individual results`);
@@ -878,41 +877,40 @@
      * @return {Event} Parsed event object.
      */
     function parseEventData(data) {
+        const reader = determineReader(data);
 
-        let reader = determineReader(data);
-
-        let xml = parseXml(data);
+        const xml = parseXml(data);
 
         validateData(xml, reader);
 
-        let classResultElements = $("> ResultList > ClassResult", $(xml)).toArray();
+        const classResultElements = $("> ResultList > ClassResult", $(xml)).toArray();
 
         if (classResultElements.length === 0) {
             throwInvalidData("No class result elements found");
         }
 
-        let classes = [];
+        const classes = [];
 
         // Array of all 'temporary' courses, intermediate objects that contain
         // course data but not yet in a suitable form to return.
-        let tempCourses = [];
+        const tempCourses = [];
 
         // Map that maps course IDs plus comma-separated lists of controls
         // to the temporary course with that ID and controls.
         // (We expect that all classes with the same course ID have consistent
         // controls, but we don't assume that.)
-        let coursesMap = new Map();
+        const coursesMap = new Map();
 
-        let warnings = [];
+        const warnings = [];
 
         for (let classResultElement of classResultElements) {
-            let parsedClass = parseClassData(classResultElement, reader, warnings);
+            const parsedClass = parseClassData(classResultElement, reader, warnings);
             if (parsedClass === null) {
                 // Class could not be parsed.
                 continue;
             }
 
-            let tempCourse = parsedClass.course;
+            const tempCourse = parsedClass.course;
 
             let numberOfControls;
             let courseKey;
@@ -928,7 +926,7 @@
                 isTeamClass = false;
             }
 
-            let courseClass = new CourseClass(parsedClass.name, numberOfControls, parsedClass.results);
+            const courseClass = new CourseClass(parsedClass.name, numberOfControls, parsedClass.results);
             if (isTeamClass) {
                 courseClass.setIsTeamClass(parsedClass.course.numbersOfControls);
             }
@@ -953,7 +951,7 @@
 
         // Now build up the array of courses.
         let courses = tempCourses.map(tempCourse => {
-            let course = new Course(tempCourse.name, tempCourse.classes, tempCourse.length, tempCourse.climb, tempCourse.controls);
+            const course = new Course(tempCourse.name, tempCourse.classes, tempCourse.length, tempCourse.climb, tempCourse.controls);
             for (let courseClass of tempCourse.classes) {
                 courseClass.setCourse(course);
             }

@@ -127,7 +127,7 @@
         setNextControlData(nextControlsData) {
             this.dataHeader.text(nextControlsData.thisControl);
 
-            let rows = this.dataTable.selectAll("tr")
+            const rows = this.dataTable.selectAll("tr")
                 .data(nextControlsData.nextControls);
             rows.enter().append("tr");
 

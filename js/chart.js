@@ -253,7 +253,7 @@
          * @param {jQuery.event} event The mouse-down or mouse-move event.
          */
         setCurrentChartTime(event) {
-            let yOffset = event.pageY - $(this.svg.node()).offset().top - MARGIN.top;
+            const yOffset = event.pageY - $(this.svg.node()).offset().top - MARGIN.top;
             this.currentChartTime = Math.round(this.yScale.invert(yOffset) * 60) + this.referenceCumTimes[this.currentControlIndex];
         }
 
@@ -384,8 +384,8 @@
          * @param {jQuery.event} event jQuery mouse-move event.
          */
         updatePopupContents(event) {
-            let yOffset = event.pageY - $(this.svg.node()).offset().top;
-            let showNextControls = this.hasControls && yOffset < MARGIN.top;
+            const yOffset = event.pageY - $(this.svg.node()).offset().top;
+            const showNextControls = this.hasControls && yOffset < MARGIN.top;
             if (showNextControls) {
                 this.updateNextControlInformation();
             } else {
@@ -411,7 +411,7 @@
         drawControlLine(controlIndex) {
             this.currentControlIndex = controlIndex;
             this.updateResultStatistics();
-            let xPosn = this.xScale(this.referenceCumTimes[controlIndex]);
+            const xPosn = this.xScale(this.referenceCumTimes[controlIndex]);
             this.controlLine = this.svgGroup.append("line")
                 .attr("x1", xPosn)
                 .attr("y1", 0)
@@ -426,18 +426,17 @@
          * @param {jQuery.event} event jQuery mousedown or mousemove event.
          */
         updateControlLineLocation(event) {
-
-            let svgNodeAsJQuery = $(this.svg.node());
-            let offset = svgNodeAsJQuery.offset();
-            let xOffset = event.pageX - offset.left;
-            let yOffset = event.pageY - offset.top;
+            const svgNodeAsJQuery = $(this.svg.node());
+            const offset = svgNodeAsJQuery.offset();
+            const xOffset = event.pageX - offset.left;
+            const yOffset = event.pageY - offset.top;
 
             if (this.currentLeftMargin <= xOffset && xOffset < svgNodeAsJQuery.width() - MARGIN.right &&
                 yOffset < svgNodeAsJQuery.height() - MARGIN.bottom) {
                 // In the chart.
                 // Get the time offset that the mouse is currently over.
-                let chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
-                let bisectIndex = d3.bisect(this.referenceCumTimesSorted, chartX);
+                const chartX = this.xScale.invert(xOffset - this.currentLeftMargin);
+                const bisectIndex = d3.bisect(this.referenceCumTimesSorted, chartX);
 
                 // bisectIndex is the index at which to insert chartX into
                 // referenceCumTimes in order to keep the array sorted.  So if
@@ -454,7 +453,7 @@
                     sortedControlIndex = (diffToPrev < diffToNext) ? bisectIndex - 1 : bisectIndex;
                 }
 
-                let controlIndex = this.referenceCumTimeIndexes[sortedControlIndex];
+                const controlIndex = this.referenceCumTimeIndexes[sortedControlIndex];
 
                 if (this.actualControlIndex === null || this.actualControlIndex !== controlIndex) {
                     // The control line has appeared for the first time or has moved, so redraw it.
@@ -502,9 +501,9 @@
          *     behind the fastest time.
          */
         getTimesBehindFastest(controlIndex, indexes) {
-            let selectedResults = indexes.map(index => this.courseClassSet.allResults[index]);
-            let fastestSplit = this.fastestCumTimes[controlIndex] - this.fastestCumTimes[controlIndex - 1];
-            let timesBehind = selectedResults.map(result => { let resultSplit = result.getSplitTimeTo(controlIndex); return (resultSplit === null) ? null : resultSplit - fastestSplit; });
+            const selectedResults = indexes.map(index => this.courseClassSet.allResults[index]);
+            const fastestSplit = this.fastestCumTimes[controlIndex] - this.fastestCumTimes[controlIndex - 1];
+            const timesBehind = selectedResults.map(result => { let resultSplit = result.getSplitTimeTo(controlIndex); return (resultSplit === null) ? null : resultSplit - fastestSplit; });
             return timesBehind;
         }
 
@@ -517,8 +516,8 @@
          *     deemed to have lost at the given control.
          */
         getTimeLosses(controlIndex, indexes) {
-            let selectedResults = indexes.map(index => this.courseClassSet.allResults[index]);
-            let timeLosses = selectedResults.map(result => result.getTimeLossAt(controlIndex));
+            const selectedResults = indexes.map(index => this.courseClassSet.allResults[index]);
+            const timeLosses = selectedResults.map(result => result.getTimeLossAt(controlIndex));
             return timeLosses;
         }
 
@@ -526,33 +525,33 @@
          * Updates the statistics text shown after the results.
          */
         updateResultStatistics() {
-            let selectedResults = this.selectedIndexesOrderedByLastYValue.map(index => this.courseClassSet.allResults[index]);
+            const selectedResults = this.selectedIndexesOrderedByLastYValue.map(index => this.courseClassSet.allResults[index]);
             let labelTexts = selectedResults.map(result => formatNameAndSuffix(result.getOwnerNameForLeg(this.selectedLegIndex), getSuffix(result)));
 
             if (this.currentControlIndex !== null && this.currentControlIndex > 0) {
                 let okDespites = selectedResults.map(result => result.isOKDespiteMissingTimes);
                 if (this.visibleStatistics.get("TotalTime")) {
-                    let cumTimes = selectedResults.map(result => result.getCumulativeTimeTo(this.currentControlIndex));
-                    let cumRanks = selectedResults.map(result => result.getCumulativeRankTo(this.currentControlIndex));
+                    const cumTimes = selectedResults.map(result => result.getCumulativeTimeTo(this.currentControlIndex));
+                    const cumRanks = selectedResults.map(result => result.getCumulativeRankTo(this.currentControlIndex));
                     labelTexts = d3.zip(labelTexts, cumTimes, cumRanks, okDespites)
                         .map(quad => quad[0] + formatTimeAndRank(quad[1], quad[2], quad[3]));
                 }
 
                 if (this.visibleStatistics.get("SplitTime")) {
-                    let splitTimes = selectedResults.map(result => result.getSplitTimeTo(this.currentControlIndex));
-                    let splitRanks = selectedResults.map(result => result.getSplitRankTo(this.currentControlIndex));
+                    const splitTimes = selectedResults.map(result => result.getSplitTimeTo(this.currentControlIndex));
+                    const splitRanks = selectedResults.map(result => result.getSplitRankTo(this.currentControlIndex));
                     labelTexts = d3.zip(labelTexts, splitTimes, splitRanks, okDespites)
                         .map(quad => quad[0] + formatTimeAndRank(quad[1], quad[2], quad[3]));
                 }
 
                 if (this.visibleStatistics.get("BehindFastest")) {
-                    let timesBehind = this.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
+                    const timesBehind = this.getTimesBehindFastest(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                     labelTexts = d3.zip(labelTexts, timesBehind, okDespites)
                         .map(triple => triple[0] + SPACER + formatTime((triple[2] && triple[1] === null) ? NaN : triple[1]));
                 }
 
                 if (this.visibleStatistics.get("TimeLoss")) {
-                    let timeLosses = this.getTimeLosses(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
+                    const timeLosses = this.getTimeLosses(this.currentControlIndex, this.selectedIndexesOrderedByLastYValue);
                     labelTexts = d3.zip(labelTexts, timeLosses)
                         .map(pair => pair[0] + SPACER + formatTime(pair[1]));
                 }
@@ -577,7 +576,7 @@
          */
         getTickFormatter() {
             if (this.courseClassSet.hasTeamData()) {
-                let allControls = [getMessage("StartNameShort")];
+                const allControls = [getMessage("StartNameShort")];
                 let numbersOfControls = this.courseClassSet.classes[0].numbersOfControls;
                 if (this.selectedLegIndex !== null) {
                     numbersOfControls = [numbersOfControls[this.selectedLegIndex]];
@@ -630,8 +629,8 @@
                 // the maximum of an empty array.
                 return 0;
             } else {
-                let nameWidths = this.selectedIndexes.map(index => {
-                    let result = this.courseClassSet.allResults[index];
+                const nameWidths = this.selectedIndexes.map(index => {
+                    const result = this.courseClassSet.allResults[index];
                     return this.getTextWidth(formatNameAndSuffix(result.getOwnerNameForLeg(this.selectedLegIndex), getSuffix(result)));
                 });
                 return d3.max(nameWidths) + this.determineMaxStatisticTextWidth();
@@ -651,17 +650,17 @@
             let maxTime = 0;
             let maxRank = 0;
 
-            let selectedResults = this.selectedIndexes.map(index => this.courseClassSet.allResults[index]);
+            const selectedResults = this.selectedIndexes.map(index => this.courseClassSet.allResults[index]);
 
-            d3.range(1, this.numControls + 2).forEach(controlIndex => {
+            for (let controlIndex of d3.range(1, this.numControls + 2)) {
                 let times = selectedResults.map(result => result[timeFuncName](controlIndex));
                 maxTime = Math.max(maxTime, maxNonNullNorNaNValue(times));
 
                 let ranks = selectedResults.map(result => result[rankFuncName](controlIndex));
                 maxRank = Math.max(maxRank, maxNonNullNorNaNValue(ranks));
-            });
+            }
 
-            let text = formatTimeAndRank(maxTime, maxRank);
+            const text = formatTimeAndRank(maxTime, maxRank);
             return this.getTextWidth(text);
         }
 
@@ -693,7 +692,7 @@
             let maxTime = 0;
 
             for (let controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
-                let times = this.getTimesBehindFastest(controlIndex, this.selectedIndexes);
+                const times = this.getTimesBehindFastest(controlIndex, this.selectedIndexes);
                 maxTime = Math.max(maxTime, maxNonNullNorNaNValue(times));
             }
 
@@ -709,8 +708,8 @@
             let maxTimeLoss = 0;
             let minTimeLoss = 0;
             for (let controlIndex = 1; controlIndex <= this.numControls + 1; controlIndex += 1) {
-                let timeLosses = this.getTimeLosses(controlIndex, this.selectedIndexes);
-                let nonNullTimeLosses = timeLosses.filter(isNotNullNorNaN);
+                const timeLosses = this.getTimeLosses(controlIndex, this.selectedIndexes);
+                const nonNullTimeLosses = timeLosses.filter(isNotNullNorNaN);
                 if (nonNullTimeLosses.length > 0) {
                     maxTimeLoss = Math.max(maxTimeLoss, d3.max(nonNullTimeLosses));
                     minTimeLoss = Math.min(minTimeLoss, d3.min(nonNullTimeLosses));
@@ -781,7 +780,7 @@
             // We can't guarantee that the reference cumulative times are in
             // ascending order, but we need such a list of times in order to draw
             // the rectangles.  So, sort the reference cumulative times.
-            let refCumTimesSorted = this.courseClassSet.sliceForLegIndex(this.referenceCumTimes, this.selectedLegIndex);
+            const refCumTimesSorted = this.courseClassSet.sliceForLegIndex(this.referenceCumTimes, this.selectedLegIndex);
             refCumTimesSorted.sort(d3.ascending);
 
             // Now remove any duplicate times.
@@ -799,7 +798,7 @@
 
             rects.enter().append("rect");
 
-            let backgroundIndexes = [];
+            const backgroundIndexes = [];
             let numbersOfControls = (this.courseClassSet.hasTeamData()) ? this.courseClassSet.classes[0].numbersOfControls : [this.courseClassSet.numControls];
             if (this.courseClassSet.hasTeamData() && this.selectedLegIndex !== null) {
                 numbersOfControls = [numbersOfControls[this.selectedLegIndex]];
@@ -840,16 +839,16 @@
             if (this.isRaceGraph) {
                 // Assume column 0 of the data is the start times.
                 // However, beware that there might not be any data.
-                let startTimes = (chartData.dataColumns.length === 0) ? [] : chartData.dataColumns[0].ys;
+                const startTimes = (chartData.dataColumns.length === 0) ? [] : chartData.dataColumns[0].ys;
                 if (startTimes.length === 0) {
                     // No start times - draw all tick marks.
                     return time => formatTimeOfDay(time * 60);
                 } else {
                     // Some start times are to be drawn - only draw tick marks if
                     // they are far enough away from results.
-                    let yScale = this.yScale;
+                    const yScale = this.yScale;
                     return time => {
-                        let nearestOffset = d3.min(startTimes.map(startTime => Math.abs(yScale(startTime) - yScale(time))));
+                        const nearestOffset = d3.min(startTimes.map(startTime => Math.abs(yScale(startTime) - yScale(time))));
                         return (nearestOffset >= MIN_RESULT_TICK_MARK_DISTANCE) ? formatTimeOfDay(Math.round(time * 60)) : "";
                     };
                 }
@@ -866,18 +865,18 @@
          */
         drawAxes(yAxisLabel, chartData) {
 
-            let tickFormatter = this.determineYAxisTickFormatter(chartData);
+            const tickFormatter = this.determineYAxisTickFormatter(chartData);
 
-            let xAxis = d3.axisTop()
+            const xAxis = d3.axisTop()
                 .scale(this.xScale)
                 .tickFormat(this.getTickFormatter())
                 .tickValues(this.courseClassSet.sliceForLegIndex(this.referenceCumTimes, this.selectedLegIndex));
 
-            let yAxis = d3.axisLeft()
+            const yAxis = d3.axisLeft()
                 .scale(this.yScale)
                 .tickFormat(tickFormatter);
 
-            let lowerXAxis = d3.axisBottom()
+            const lowerXAxis = d3.axisBottom()
                 .scale(this.xScaleMinutes);
 
             this.svgGroup.selectAll("g.axis").remove();
@@ -915,7 +914,7 @@
          * @param {Array} chartData Array of chart data.
          */
         drawChartLines(chartData) {
-            let lineFunctionGenerator = selResultIdx => {
+            const lineFunctionGenerator = selResultIdx => {
                 if (!chartData.dataColumns.some(col => isNotNullNorNaN(col.ys[selResultIdx]))) {
                     // This result's entire row is null/NaN, so there's no data to
                     // draw.  WebKit will report an error ('Error parsing d=""') if
@@ -938,10 +937,10 @@
 
             this.svgGroup.selectAll("line.aroundOmittedTimes").remove();
 
-            d3.range(this.numLines).forEach(selResultIdx => {
-                let strokeColour = colours[this.selectedIndexes[selResultIdx] % colours.length];
-                let highlighter = () => this.highlight(this.selectedIndexes[selResultIdx]);
-                let unhighlighter = () => this.unhighlight();
+            for (let selResultIdx of d3.range(this.numLines)) {
+                const strokeColour = colours[this.selectedIndexes[selResultIdx] % colours.length];
+                const highlighter = () => this.highlight(this.selectedIndexes[selResultIdx]);
+                const unhighlighter = () => this.unhighlight();
 
                 this.svgGroup.append("path")
                     .attr("d", lineFunctionGenerator(selResultIdx)(chartData.dataColumns))
@@ -952,7 +951,7 @@
                     .append("title")
                     .text(chartData.resultNames[selResultIdx]);
 
-                chartData.dubiousTimesInfo[selResultIdx].forEach(dubiousTimeInfo => {
+                for (let dubiousTimeInfo of chartData.dubiousTimesInfo[selResultIdx]) {
                     this.svgGroup.append("line")
                         .attr("x1", this.xScale(chartData.dataColumns[dubiousTimeInfo.start].x))
                         .attr("y1", this.yScale(chartData.dataColumns[dubiousTimeInfo.start].ys[selResultIdx]))
@@ -964,8 +963,8 @@
                         .on("mouseleave", unhighlighter)
                         .append("title")
                         .text(chartData.resultNames[selResultIdx]);
-                });
-            });
+                }
+            }
         }
 
         /**
@@ -996,7 +995,7 @@
          * @param {Object} chartData The chart data that contains the start offsets.
          */
         drawResultStartTimeLabels(chartData) {
-            let startColumn = chartData.dataColumns[0];
+            const startColumn = chartData.dataColumns[0];
             let startLabels = this.svgGroup.selectAll("text.startLabel").data(this.selectedIndexes);
 
             startLabels.enter().append("text")
@@ -1026,8 +1025,8 @@
          */
         adjustResultLegendLabelsDownwardsIfNecessary() {
             for (let i = 1; i < this.numLines; i += 1) {
-                let prevResult = this.currentResultData[i - 1];
-                let thisResult = this.currentResultData[i];
+                const prevResult = this.currentResultData[i - 1];
+                const thisResult = this.currentResultData[i];
                 if (thisResult.y < prevResult.y + prevResult.textHeight) {
                     thisResult.y = prevResult.y + prevResult.textHeight;
                 }
@@ -1051,8 +1050,8 @@
                 // whichever is larger, and move all labels up as much as we can.
                 this.currentResultData[this.numLines - 1].y = Math.max(minLastY, this.contentHeight);
                 for (let i = this.numLines - 2; i >= 0; i -= 1) {
-                    let nextResult = this.currentResultData[i + 1];
-                    let thisResult = this.currentResultData[i];
+                    const nextResult = this.currentResultData[i + 1];
+                    const thisResult = this.currentResultData[i];
                     if (thisResult.y + thisResult.textHeight > nextResult.y) {
                         thisResult.y = nextResult.y - thisResult.textHeight;
                     } else {
@@ -1069,16 +1068,15 @@
          * @param {Object} chartData The chart data that contains the final time offsets.
          */
         drawResultLegendLabels(chartData) {
-
             let minLastY = 0;
             if (chartData.dataColumns.length === 0) {
                 this.currentResultData = [];
             } else {
-                let finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
+                const finishColumn = chartData.dataColumns[chartData.dataColumns.length - 1];
                 this.currentResultData = d3.range(this.numLines).map(i => {
-                    let resultIndex = this.selectedIndexes[i];
-                    let name = this.courseClassSet.allResults[resultIndex].getOwnerNameForLeg(this.selectedLegIndex);
-                    let textHeight = this.getTextHeight(name);
+                    const resultIndex = this.selectedIndexes[i];
+                    const name = this.courseClassSet.allResults[resultIndex].getOwnerNameForLeg(this.selectedLegIndex);
+                    const textHeight = this.getTextHeight(name);
                     minLastY += textHeight;
                     return {
                         label: formatNameAndSuffix(name, getSuffix(this.courseClassSet.allResults[resultIndex])),
@@ -1154,8 +1152,8 @@
         adjustContentSize() {
             // Extra length added to the maximum start-time label width to
             // include the lengths of the Y-axis ticks.
-            let EXTRA_MARGIN = 8;
-            let maxTextWidth = this.getMaxGraphEndTextWidth();
+            const EXTRA_MARGIN = 8;
+            const maxTextWidth = this.getMaxGraphEndTextWidth();
             this.setLeftMargin(Math.max(this.maxStartTimeLabelWidth + EXTRA_MARGIN, MARGIN.left));
             this.contentWidth = Math.max(this.overallWidth - this.currentLeftMargin - MARGIN.right - maxTextWidth - (LEGEND_LINE_WIDTH + 2), 100);
             this.contentHeight = Math.max(this.overallHeight - MARGIN.top - MARGIN.bottom, 100);
@@ -1191,7 +1189,7 @@
         sortReferenceCumTimes() {
             // Put together a map that maps cumulative times to the first split to
             // register that time.
-            let cumTimesToControlIndex = new Map();
+            const cumTimesToControlIndex = new Map();
             this.referenceCumTimes.forEach((cumTime, index) => {
                 if (!cumTimesToControlIndex.has(cumTime)) {
                     cumTimesToControlIndex.set(cumTime, index);
@@ -1271,7 +1269,7 @@
      * @return {Number} Maximum non-null or NaN value.
      */
     function maxNonNullNorNaNValue(values) {
-        let nonNullNorNaNValues = values.filter(isNotNullNorNaN);
+        const nonNullNorNaNValues = values.filter(isNotNullNorNaN);
         return (nonNullNorNaNValues.length > 0) ? d3.max(nonNullNorNaNValues) : 0;
     }
 

@@ -92,7 +92,7 @@
      *     matches.
      */
     function getHtmlStrippedRegexMatches(regexp, text) {
-        let matches = [];
+        const matches = [];
         let match;
         while (true) {
             match = regexp.exec(text);
@@ -147,7 +147,7 @@
      * @return {Array} Array of strings of text inside <td> elements.
      */
     function getNonEmptyTableHeaderBits(text) {
-        let matches = getHtmlStrippedRegexMatches(/<th[^>]*>(.*?)<\/th>/g, text);
+        const matches = getHtmlStrippedRegexMatches(/<th[^>]*>(.*?)<\/th>/g, text);
         return matches.filter(bit => bit !== "");
     }
 
@@ -158,7 +158,7 @@
      *     distance could be parsed.
      */
     function tryReadDistance(text) {
-        let distanceMatch = DISTANCE_FIND_REGEXP.exec(text);
+        const distanceMatch = DISTANCE_FIND_REGEXP.exec(text);
         if (distanceMatch === null) {
             return null;
         } else {
@@ -173,7 +173,7 @@
      *     could be parsed.
      */
     function tryReadClimb(text) {
-        let climbMatch = CLIMB_FIND_REGEXP.exec(text);
+        const climbMatch = CLIMB_FIND_REGEXP.exec(text);
         if (climbMatch === null) {
             return null;
         } else {
@@ -190,12 +190,12 @@
      * @return {Array} Array of control codes, with null indicating the finish.
      */
     function readControlCodes(labels) {
-        let controlCodes = [];
+        const controlCodes = [];
         for (let labelIdx = 0; labelIdx < labels.length; labelIdx += 1) {
-            let label = labels[labelIdx];
-            let parenPos = label.indexOf("(");
+            const label = labels[labelIdx];
+            const parenPos = label.indexOf("(");
             if (parenPos > -1 && label[label.length - 1] === ")") {
-                let controlCode = label.substring(parenPos + 1, label.length - 1);
+                const controlCode = label.substring(parenPos + 1, label.length - 1);
                 controlCodes.push(controlCode);
             } else if (labelIdx + 1 === labels.length) {
                 controlCodes.push(null);
@@ -283,10 +283,10 @@
          */
         toResult(order) {
             // Prepend a zero cumulative time.
-            let cumTimes = [0].concat(this.cumTimes);
+            const cumTimes = [0].concat(this.cumTimes);
 
             // The null is for the start time.
-            let result = fromOriginalCumTimes(order, null, cumTimes, new Competitor(this.name, this.club));
+            const result = fromOriginalCumTimes(order, null, cumTimes, new Competitor(this.name, this.club));
             if (result.completed() && !this.competitive) {
                 result.setNonCompetitive();
             }
@@ -360,7 +360,7 @@
          * @return {String} The preprocessed text.
          */
         preprocess(text) {
-            let prePos = text.indexOf("<pre>");
+            const prePos = text.indexOf("<pre>");
             if (prePos === -1) {
                 throw new Error("Cannot find opening pre tag");
             }
@@ -371,7 +371,7 @@
             // Replace blank lines.
             text = text.replace(/\n{2,}/g, "\n");
 
-            let closePrePos = text.lastIndexOf("</pre>");
+            const closePrePos = text.lastIndexOf("</pre>");
             if (closePrePos === -1) {
                 throwInvalidData("Found opening <pre> but no closing </pre>");
             }
@@ -425,19 +425,19 @@
          * @return {Object} Object containing the parsed course details.
          */
         parseCourseHeaderLine(line) {
-            let bits = getFontBits(line);
+            const bits = getFontBits(line);
             if (bits.length !== 2) {
                 throw new Error("Course header line should have two parts");
             }
 
-            let nameAndControls = bits[0];
-            let distanceAndClimb = bits[1];
+            const nameAndControls = bits[0];
+            const distanceAndClimb = bits[1];
 
-            let openParenPos = nameAndControls.indexOf("(");
-            let courseName = (openParenPos > -1) ? nameAndControls.substring(0, openParenPos) : nameAndControls;
+            const openParenPos = nameAndControls.indexOf("(");
+            const courseName = (openParenPos > -1) ? nameAndControls.substring(0, openParenPos) : nameAndControls;
 
-            let distance = tryReadDistance(distanceAndClimb);
-            let climb = tryReadClimb(distanceAndClimb);
+            const distance = tryReadDistance(distanceAndClimb);
+            const climb = tryReadClimb(distanceAndClimb);
 
             return {
                 name: courseName.trim(),
@@ -457,10 +457,10 @@
          * @return {Array} Array of control codes.
          */
         parseControlsLine(line) {
-            let lastFontPos = line.lastIndexOf("</font>");
-            let controlsText = (lastFontPos === -1) ? line : line.substring(lastFontPos + "</font>".length);
+            const lastFontPos = line.lastIndexOf("</font>");
+            const controlsText = (lastFontPos === -1) ? line : line.substring(lastFontPos + "</font>".length);
 
-            let controlLabels = splitByWhitespace(controlsText.trim());
+            const controlLabels = splitByWhitespace(controlsText.trim());
             return readControlCodes(controlLabels);
         }
 
@@ -473,11 +473,11 @@
          */
         readCompetitorSplitDataLine(line) {
             for (let i = 0; i < this.precedingColumnCount; i += 1) {
-                let closeFontPos = line.indexOf("</font>");
+                const closeFontPos = line.indexOf("</font>");
                 line = line.substring(closeFontPos + "</font>".length);
             }
 
-            let times = splitByWhitespace(stripHtml(line));
+            const times = splitByWhitespace(stripHtml(line));
             return times;
         }
 
@@ -489,23 +489,23 @@
          * @return {CompetitorParseRecord} The parsed competitor.
          */
         parseCompetitor(firstLine, secondLine) {
-            let firstLineBits = getFontBits(firstLine);
-            let secondLineBits = getFontBits(secondLine);
+            const firstLineBits = getFontBits(firstLine);
+            const secondLineBits = getFontBits(secondLine);
 
             if (this.precedingColumnCount === null) {
                 // If column 1 is blank or a number, we have four preceding
                 // columns.  Otherwise we have three.
-                let column1 = firstLineBits[1].trim();
+                const column1 = firstLineBits[1].trim();
                 this.precedingColumnCount = (column1.match(/^\d*$/)) ? 4 : 3;
             }
 
-            let competitive = hasNumber(firstLineBits[0]);
-            let name = firstLineBits[this.precedingColumnCount - 2].trim();
-            let totalTime = firstLineBits[this.precedingColumnCount - 1].trim();
-            let club = secondLineBits[this.precedingColumnCount - 2].trim();
+            const competitive = hasNumber(firstLineBits[0]);
+            const name = firstLineBits[this.precedingColumnCount - 2].trim();
+            const totalTime = firstLineBits[this.precedingColumnCount - 1].trim();
+            const club = secondLineBits[this.precedingColumnCount - 2].trim();
 
             let cumulativeTimes = this.readCompetitorSplitDataLine(firstLine);
-            let splitTimes = this.readCompetitorSplitDataLine(secondLine);
+            const splitTimes = this.readCompetitorSplitDataLine(secondLine);
             cumulativeTimes = cumulativeTimes.map(parseTime);
 
             removeExtraControls(cumulativeTimes, splitTimes);
@@ -517,9 +517,9 @@
                     lastCloseFontPos = firstLine.indexOf("</font>", lastCloseFontPos + 1);
                 }
 
-                let firstLineUpToLastPreceding = firstLine.substring(0, lastCloseFontPos + "</font>".length);
-                let firstLineMinusFonts = firstLineUpToLastPreceding.replace(/<font[^>]*>(.*?)<\/font>/g, "");
-                let lineParts = splitByWhitespace(firstLineMinusFonts);
+                const firstLineUpToLastPreceding = firstLine.substring(0, lastCloseFontPos + "</font>".length);
+                const firstLineMinusFonts = firstLineUpToLastPreceding.replace(/<font[^>]*>(.*?)<\/font>/g, "");
+                const lineParts = splitByWhitespace(firstLineMinusFonts);
                 if (lineParts.length > 0) {
                     className = lineParts[0];
                 }
@@ -583,15 +583,15 @@
          */
         preprocess(text) {
             // Remove the first table and end of the <div> it is contained in.
-            let tableEndPos = text.indexOf("</table>");
+            const tableEndPos = text.indexOf("</table>");
             if (tableEndPos === -1) {
                 throwInvalidData("Could not find any closing </table> tags");
             }
 
             text = text.substring(tableEndPos + "</table>".length);
 
-            let closeDivPos = text.indexOf("</div>");
-            let openTablePos = text.indexOf("<table");
+            const closeDivPos = text.indexOf("</div>");
+            const openTablePos = text.indexOf("<table");
             if (closeDivPos > -1 && closeDivPos < openTablePos) {
                 text = text.substring(closeDivPos + "</div>".length);
             }
@@ -640,7 +640,7 @@
          */
         canIgnoreThisLine(line) {
             if (line.includes("<th>")) {
-                let bits = getNonEmptyTableHeaderBits(line);
+                const bits = getNonEmptyTableHeaderBits(line);
                 this.timesOffset = bits.length;
                 return true;
             } else {
@@ -675,13 +675,13 @@
          * @return {Object} Object containing the parsed course details.
          */
         parseCourseHeaderLine(line) {
-            let dataBits = getNonEmptyTableDataBits(line);
+            const dataBits = getNonEmptyTableDataBits(line);
             if (dataBits.length === 0) {
                 throwInvalidData("No parts found in course header line");
             }
 
             let name = dataBits[0];
-            let openParenPos = name.indexOf("(");
+            const openParenPos = name.indexOf("(");
             if (openParenPos > -1) {
                 name = name.substring(0, openParenPos);
             }
@@ -715,7 +715,7 @@
          * @return {Array} Array of control codes.
          */
         parseControlsLine(line) {
-            let bits = getNonEmptyTableDataBits(line);
+            const bits = getNonEmptyTableDataBits(line);
             return readControlCodes(bits);
         }
 
@@ -727,9 +727,9 @@
          * @return {Array} Array of times.
          */
         readCompetitorSplitDataLine(line) {
-            let bits = getTableDataBits(line);
+            const bits = getTableDataBits(line);
 
-            let startPos = this.timesOffset;
+            const startPos = this.timesOffset;
 
             // Discard the empty bits at the end.
             let endPos = bits.length;
@@ -748,24 +748,24 @@
          * @return {CompetitorParseRecord} The parsed competitor.
          */
         parseCompetitor(firstLine, secondLine) {
-            let firstLineBits = getTableDataBits(firstLine);
-            let secondLineBits = getTableDataBits(secondLine);
+            const firstLineBits = getTableDataBits(firstLine);
+            const secondLineBits = getTableDataBits(secondLine);
 
-            let competitive = hasNumber(firstLineBits[0]);
-            let nameOffset = (this.timesOffset === 3) ? 1 : 2;
-            let name = firstLineBits[nameOffset];
-            let totalTime = firstLineBits[this.timesOffset - 1];
-            let club = secondLineBits[nameOffset];
+            const competitive = hasNumber(firstLineBits[0]);
+            const nameOffset = (this.timesOffset === 3) ? 1 : 2;
+            const name = firstLineBits[nameOffset];
+            const totalTime = firstLineBits[this.timesOffset - 1];
+            const club = secondLineBits[nameOffset];
 
-            let className = (this.timesOffset === 5 && name !== "") ? firstLineBits[3] : null;
+            const className = (this.timesOffset === 5 && name !== "") ? firstLineBits[3] : null;
 
             let cumulativeTimes = this.readCompetitorSplitDataLine(firstLine);
-            let splitTimes = this.readCompetitorSplitDataLine(secondLine);
+            const splitTimes = this.readCompetitorSplitDataLine(secondLine);
             cumulativeTimes = cumulativeTimes.map(parseTime);
 
             removeExtraControls(cumulativeTimes, splitTimes);
 
-            let nonZeroCumTimeCount = cumulativeTimes.filter(isNotNull).length;
+            const nonZeroCumTimeCount = cumulativeTimes.filter(isNotNull).length;
 
             if (nonZeroCumTimeCount !== splitTimes.length) {
                 throwInvalidData(`Cumulative and split times do not have the same length: ${nonZeroCumTimeCount} cumulative times, ${splitTimes.length} split times`);
@@ -805,11 +805,11 @@
          *     tags.
          */
         isTextOfThisFormat(text) {
-            let table1Pos = text.indexOf("<table");
+            const table1Pos = text.indexOf("<table");
             if (table1Pos >= 0) {
-                let table2Pos = text.indexOf("<table", table1Pos + 1);
+                const table2Pos = text.indexOf("<table", table1Pos + 1);
                 if (table2Pos >= 0) {
-                    let table3Pos = text.indexOf("<table", table2Pos + 1);
+                    const table3Pos = text.indexOf("<table", table2Pos + 1);
                     if (table3Pos < 0) {
                         // Format characterised by precisely two tables.
                         return true;
@@ -832,7 +832,7 @@
          */
         preprocess(text) {
             // Remove the first table.
-            let tableEndPos = text.indexOf("</table>");
+            const tableEndPos = text.indexOf("</table>");
             if (tableEndPos === -1) {
                 throwInvalidData("Could not find any closing </table> tags");
             }
@@ -900,15 +900,15 @@
          * @return {Object} Object containing the parsed course details.
          */
         parseCourseHeaderLine(line) {
-            let dataBits = getNonEmptyTableDataBits(line);
+            const dataBits = getNonEmptyTableDataBits(line);
             if (dataBits.length === 0) {
                 throwInvalidData("No parts found in course header line");
             }
 
-            let part = dataBits[0];
+            const part = dataBits[0];
 
             let name, distance, climb;
-            let match = /^(.*?)\s+\((\d+)m,\s*(\d+)m\)$/.exec(part);
+            const match = /^(.*?)\s+\((\d+)m,\s*(\d+)m\)$/.exec(part);
             if (match === null) {
                 // Assume just course name.
                 name = part;
@@ -934,9 +934,9 @@
          * @return {Array} Array of control codes.
          */
         parseControlsLine(line) {
-            let bits = getNonEmptyTableDataBits(line);
+            const bits = getNonEmptyTableDataBits(line);
             return bits.map(bit => {
-                let dashPos = bit.indexOf("-");
+                const dashPos = bit.indexOf("-");
                 return (dashPos === -1) ? null : bit.substring(dashPos + 1);
             });
         }
@@ -949,7 +949,7 @@
          * @return {Array} Array of times.
          */
         readCompetitorSplitDataLine(bits) {
-            let startPos = (this.usesClasses) ? 5 : 4;
+            const startPos = (this.usesClasses) ? 5 : 4;
 
             // Discard the empty bits at the end.
             let endPos = bits.length;
@@ -958,9 +958,9 @@
             }
 
             // Alternate cells contain ranks, which we're not interested in.
-            let timeBits = [];
+            const timeBits = [];
             for (let index = startPos; index < endPos; index += 2) {
-                let bit = bits[index];
+                const bit = bits[index];
                 if (isNonEmpty(bit)) {
                     timeBits.push(bit);
                 }
@@ -977,14 +977,14 @@
          * @return {CompetitorParseRecord} The parsed competitor.
          */
         parseCompetitor(firstLine, secondLine) {
-            let firstLineBits = getTableDataBits(firstLine);
-            let secondLineBits = getTableDataBits(secondLine);
+            const firstLineBits = getTableDataBits(firstLine);
+            const secondLineBits = getTableDataBits(secondLine);
 
-            let competitive = hasNumber(firstLineBits[0]);
-            let name = firstLineBits[2];
-            let totalTime = firstLineBits[(this.usesClasses) ? 4 : 3];
-            let className = (this.usesClasses && name !== "") ? firstLineBits[3] : null;
-            let club = secondLineBits[2];
+            const competitive = hasNumber(firstLineBits[0]);
+            const name = firstLineBits[2];
+            const totalTime = firstLineBits[(this.usesClasses) ? 4 : 3];
+            const className = (this.usesClasses && name !== "") ? firstLineBits[3] : null;
+            const club = secondLineBits[2];
 
             // If there is any cumulative time with a blank corresponding split
             // time, use a placeholder value for the split time.  Typically this
@@ -997,7 +997,7 @@
             }
 
             let cumulativeTimes = this.readCompetitorSplitDataLine(firstLineBits);
-            let splitTimes = this.readCompetitorSplitDataLine(secondLineBits);
+            const splitTimes = this.readCompetitorSplitDataLine(secondLineBits);
             cumulativeTimes = cumulativeTimes.map(parseTime);
 
             removeExtraControls(cumulativeTimes, splitTimes);
@@ -1137,12 +1137,12 @@
          *     competitor data from.
          */
         readCompetitorLines(firstLine) {
-            let secondLine = this.tryGetLine();
+            const secondLine = this.tryGetLine();
             if (secondLine === null) {
                 throwInvalidData(`Hit end of input data unexpectedly while parsing competitor: first line was '${firstLine}'`);
             }
 
-            let competitorRecord = this.recognizer.parseCompetitor(firstLine, secondLine);
+            const competitorRecord = this.recognizer.parseCompetitor(firstLine, secondLine);
             if (competitorRecord.isContinuation()) {
                 if (this.currentCompetitor === null) {
                     throwInvalidData("First row of competitor data has no name nor time");
@@ -1163,7 +1163,7 @@
          *     different classes, false otherwise.
          */
         areClassesUniqueWithinCourses() {
-            let classesToCoursesMap = new Map();
+            const classesToCoursesMap = new Map();
             for (let course of this.courses) {
                 for (let competitor of course.competitors) {
                     if (classesToCoursesMap.has(competitor.className)) {
@@ -1188,19 +1188,19 @@
             // There is a complication here regarding classes.  Sometimes, classes
             // are repeated within multiple courses.  In this case, ignore the
             // classes given and create a CourseClass for each set.
-            let classesUniqueWithinCourses = this.areClassesUniqueWithinCourses();
+            const classesUniqueWithinCourses = this.areClassesUniqueWithinCourses();
 
-            let newCourses = [];
-            let classes = [];
+            const newCourses = [];
+            const classes = [];
 
-            let competitorsHaveClasses = this.courses.every(course =>
+            const competitorsHaveClasses = this.courses.every(course =>
                 course.competitors.every(competitor => isNotNull(competitor.className)));
 
             for (let course of this.courses) {
                 // Firstly, sort competitors by class.
-                let classToCompetitorsMap = new Map();
+                const classToCompetitorsMap = new Map();
                 for (let competitor of course.competitors) {
-                    let className = (competitorsHaveClasses && classesUniqueWithinCourses) ? competitor.className : course.name;
+                    const className = (competitorsHaveClasses && classesUniqueWithinCourses) ? competitor.className : course.name;
                     if (classToCompetitorsMap.has(className)) {
                         classToCompetitorsMap.get(className).push(competitor);
                     } else {
@@ -1208,18 +1208,18 @@
                     }
                 }
 
-                let classesForThisCourse = [];
+                const classesForThisCourse = [];
 
                 for (let className of classToCompetitorsMap.keys()) {
-                    let numControls = course.controls.length - 1;
-                    let oldCompetitors = classToCompetitorsMap.get(className);
-                    let newResults = oldCompetitors.map((competitor, index) => competitor.toResult(index + 1));
-                    let courseClass = new CourseClass(className, numControls, newResults);
+                    const numControls = course.controls.length - 1;
+                    const oldCompetitors = classToCompetitorsMap.get(className);
+                    const newResults = oldCompetitors.map((competitor, index) => competitor.toResult(index + 1));
+                    const courseClass = new CourseClass(className, numControls, newResults);
                     classesForThisCourse.push(courseClass);
                     classes.push(courseClass);
                 }
 
-                let newCourse = new Course(course.name, classesForThisCourse, course.distance, course.climb, course.controls.slice(0, course.controls.length - 1));
+                const newCourse = new Course(course.name, classesForThisCourse, course.distance, course.climb, course.controls.slice(0, course.controls.length - 1));
                 newCourses.push(newCourse);
                 for (let courseClass of classesForThisCourse) {
                     courseClass.setCourse(newCourse);
@@ -1239,14 +1239,14 @@
         parse(text) {
             this.lines = text.split("\n");
             while (true) {
-                let line = this.tryGetLine();
+                const line = this.tryGetLine();
                 if (line === null) {
                     break;
                 } else if (this.recognizer.canIgnoreThisLine(line)) {
                     // Do nothing - recognizer says we can ignore this line.
                 } else if (this.recognizer.isCourseHeaderLine(line)) {
                     this.addCurrentCompetitorAndCourseIfNecessary();
-                    let courseObj = this.recognizer.parseCourseHeaderLine(line);
+                    const courseObj = this.recognizer.parseCourseHeaderLine(line);
                     this.currentCourse = new CourseParseRecord(courseObj.name, courseObj.distance, courseObj.climb);
                 } else if (this.currentCourse === null) {
                     // Do nothing - still not found the start of the first course.
@@ -1254,7 +1254,7 @@
                     // Course has all of its controls; read competitor data.
                     this.readCompetitorLines(line);
                 } else {
-                    let controls = this.recognizer.parseControlsLine(line);
+                    const controls = this.recognizer.parseControlsLine(line);
                     this.currentCourse.addControls(controls);
                 }
             }
@@ -1265,7 +1265,7 @@
                 throwInvalidData("No competitor data was found");
             }
 
-            let eventData = this.createOverallEventObject();
+            const eventData = this.createOverallEventObject();
             return eventData;
         }
     }
@@ -1287,11 +1287,11 @@
     SplitsBrowser.Input.Html.parseEventData = function (data) {
         data = normaliseLineEndings(data);
         for (let RecognizerClass of RECOGNIZER_CLASSES) {
-            let recognizer = new RecognizerClass();
+            const recognizer = new RecognizerClass();
             if (recognizer.isTextOfThisFormat(data)) {
                 data = recognizer.preprocess(data);
-                let parser = new HtmlFormatParser(recognizer);
-                let parsedEvent = parser.parse(data);
+                const parser = new HtmlFormatParser(recognizer);
+                const parsedEvent = parser.parse(data);
                 return parsedEvent;
             }
         }

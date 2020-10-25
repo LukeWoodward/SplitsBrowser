@@ -56,9 +56,9 @@
             seconds = -seconds;
         }
 
-        let hours = Math.floor(seconds / (60 * 60));
-        let mins = Math.floor(seconds / 60) % 60;
-        let secs = seconds % 60;
+        const hours = Math.floor(seconds / (60 * 60));
+        const mins = Math.floor(seconds / 60) % 60;
+        const secs = seconds % 60;
         if (hours > 0) {
             result += hours.toString() + ":";
         }
@@ -85,9 +85,9 @@
      * @return {String} The time of day formatted as a string.
      */
     SplitsBrowser.formatTimeOfDay = function (seconds) {
-        let hours = Math.floor((seconds / (60 * 60)) % 24);
-        let mins = Math.floor(seconds / 60) % 60;
-        let secs = Math.floor(seconds % 60);
+        const hours = Math.floor((seconds / (60 * 60)) % 24);
+        const mins = Math.floor(seconds / 60) % 60;
+        const secs = Math.floor(seconds % 60);
         return formatToTwoDigits(hours) + ":" + formatToTwoDigits(mins) + ":" + formatToTwoDigits(secs);
     };
 

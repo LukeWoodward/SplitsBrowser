@@ -89,7 +89,7 @@
             }
 
             if (this.courseClass.isTeamClass && this.selectedLegIndex === null) {
-                let numControlsString = this.courseClass.numbersOfControls.join(" + ");
+                const numControlsString = this.courseClass.numbersOfControls.join(" + ");
                 headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", { "$$NUM$$": numControlsString });
             } else if (numControls === 1) {
                 headerText += getMessage("ResultsTableHeaderSingleControl");
@@ -97,7 +97,7 @@
                 headerText += getMessageWithFormatting("ResultsTableHeaderMultipleControls", { "$$NUM$$": numControls });
             }
 
-            let course = this.courseClass.course;
+            const course = this.courseClass.course;
             if (course.length !== null) {
                 headerText += ", " + getMessageWithFormatting("ResultsTableHeaderCourseLength", { "$$DISTANCE$$": course.length.toFixed(1) });
             }
@@ -116,7 +116,7 @@
             if (this.courseClass.isTeamClass) {
                 if (this.selectedLegIndex === null) {
                     for (let legIndex = 0; legIndex < this.courseClass.numbersOfControls.length; legIndex += 1) {
-                        let suffix = "-" + (legIndex + 1);
+                        const suffix = "-" + (legIndex + 1);
                         for (let controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[legIndex]; controlNumber += 1) {
                             headerCellData.push(controlNumber + suffix);
                         }
@@ -129,7 +129,7 @@
                     headerCellData.push(getMessage("FinishName"));
                 }
             } else {
-                let controls = this.courseClass.course.controls;
+                const controls = this.courseClass.course.controls;
                 if (controls === null) {
                     headerCellData = headerCellData.concat(d3.range(1, numControls + 1));
                 } else {
@@ -152,10 +152,10 @@
             headerCells.text(header => header);
 
             // Array that accumulates bits of HTML for the table body.
-            let htmlBits = [];
+            const htmlBits = [];
 
             function timeClasses(isFastest, isDubious, isMissing) {
-                let classes = [];
+                const classes = [];
                 if (isFastest) {
                     classes.push("fastest");
                 }
@@ -199,7 +199,7 @@
                 htmlBits.push("</span></td>\n");
             }
 
-            let results = this.courseClass.results.slice(0);
+            const results = this.courseClass.results.slice(0);
             results.sort(compareResults);
 
             let nonCompCount = 0;
@@ -230,22 +230,22 @@
                     tooltipText = "";
                 }
 
-                let startTimeOffset = result.getOriginalCumulativeTimeTo(controlOffset);
+                const startTimeOffset = result.getOriginalCumulativeTimeTo(controlOffset);
                 addCell(result.getOwnerNameForLeg(this.selectedLegIndex), result.owner.club, null, "", "", tooltipText);
-                let time = (this.courseClass.isTeamClass && this.selectedLegIndex !== null) ? subtractIfNotNull(result.getOriginalCumulativeTimeTo(controlOffset + numControls + 1), startTimeOffset) : result.totalTime;
+                const time = (this.courseClass.isTeamClass && this.selectedLegIndex !== null) ? subtractIfNotNull(result.getOriginalCumulativeTimeTo(controlOffset + numControls + 1), startTimeOffset) : result.totalTime;
                 addCell(getTimeOrStatus(result, time, precision), NON_BREAKING_SPACE_CHAR, "time", "", "", "");
 
                 for (let controlNum of d3.range(controlOffset + 1, controlOffset + numControls + 2)) {
-                    let cumTime = subtractIfNotNull(result.getOriginalCumulativeTimeTo(controlNum), startTimeOffset);
-                    let splitTime = result.getOriginalSplitTimeTo(controlNum);
-                    let formattedCumTime = formatPossiblyMissingTime(cumTime, precision, result.isOKDespiteMissingTimes);
-                    let formattedSplitTime = formatPossiblyMissingTime(splitTime, precision, result.isOKDespiteMissingTimes);
-                    let isCumTimeFastest = (result.getCumulativeRankTo(controlNum) === 1);
-                    let isSplitTimeFastest = (result.getSplitRankTo(controlNum) === 1);
-                    let isCumDubious = result.isCumulativeTimeDubious(controlNum);
-                    let isSplitDubious = result.isSplitTimeDubious(controlNum);
-                    let isCumMissing = result.isOKDespiteMissingTimes && cumTime === null;
-                    let isSplitMissing = result.isOKDespiteMissingTimes && splitTime === null;
+                    const cumTime = subtractIfNotNull(result.getOriginalCumulativeTimeTo(controlNum), startTimeOffset);
+                    const splitTime = result.getOriginalSplitTimeTo(controlNum);
+                    const formattedCumTime = formatPossiblyMissingTime(cumTime, precision, result.isOKDespiteMissingTimes);
+                    const formattedSplitTime = formatPossiblyMissingTime(splitTime, precision, result.isOKDespiteMissingTimes);
+                    const isCumTimeFastest = (result.getCumulativeRankTo(controlNum) === 1);
+                    const isSplitTimeFastest = (result.getSplitRankTo(controlNum) === 1);
+                    const isCumDubious = result.isCumulativeTimeDubious(controlNum);
+                    const isSplitDubious = result.isSplitTimeDubious(controlNum);
+                    const isCumMissing = result.isOKDespiteMissingTimes && cumTime === null;
+                    const isSplitMissing = result.isOKDespiteMissingTimes && splitTime === null;
                     addCell(formattedCumTime, formattedSplitTime, "time", timeClasses(isCumTimeFastest, isCumDubious, isCumMissing), timeClasses(isSplitTimeFastest, isSplitDubious, isSplitMissing), "");
                 }
 

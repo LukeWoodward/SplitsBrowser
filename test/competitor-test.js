@@ -26,7 +26,7 @@
     QUnit.module("Competitor");
 
     QUnit.test("Can create a competitor with gender and year of birth and read them back", function (assert) {
-        let competitor = new Competitor("First Runner", "ABC");
+        const competitor = new Competitor("First Runner", "ABC");
         competitor.setYearOfBirth(1984);
         competitor.setGender("M");
         assert.strictEqual(competitor.yearOfBirth, 1984);
