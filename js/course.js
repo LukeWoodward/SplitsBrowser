@@ -278,7 +278,7 @@
          *     course doesn't, or doesn't have any controls at all.
          */
         hasControl(controlCode) {
-            return this.controls !== null && this.controls.indexOf(controlCode) > -1;
+            return this.controls !== null && this.controls.includes(controlCode);
         }
 
         /**

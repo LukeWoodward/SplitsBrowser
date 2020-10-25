@@ -31,10 +31,7 @@
 
     QUnit.module("Chart types");
 
-    const ALL_CHART_TYPES = [];
-    for (let [_name, type] of ChartTypes.entries()) {
-        ALL_CHART_TYPES.push(type);
-    }
+    const ALL_CHART_TYPES = Array.from(ChartTypes.values());
 
     QUnit.test("Splits graph selector returns result data adjusted to reference, in units of minutes", function (assert) {
         let chartType = ChartTypes.get("SplitsGraph");

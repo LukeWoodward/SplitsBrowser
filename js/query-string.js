@@ -222,7 +222,7 @@
                 return null;
             } else {
                 let resultNames = decodeURIComponent(selectedResultsMatch[1]).split(";");
-                if (resultNames.indexOf("*") >= 0) {
+                if (resultNames.includes("*")) {
                     // All results selected.
                     return d3.range(0, courseClassSet.allResults.length);
                 }

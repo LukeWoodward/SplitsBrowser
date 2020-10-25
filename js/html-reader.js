@@ -639,7 +639,7 @@
          * @return {Boolean} True if the line should be ignored, false if not.
          */
         canIgnoreThisLine(line) {
-            if (line.indexOf("<th>") > -1) {
+            if (line.includes("<th>")) {
                 let bits = getNonEmptyTableHeaderBits(line);
                 this.timesOffset = bits.length;
                 return true;
@@ -837,7 +837,7 @@
                 throwInvalidData("Could not find any closing </table> tags");
             }
 
-            if (text.indexOf('<td colspan="25">') >= 0) {
+            if (text.includes('<td colspan="25">')) {
                 // The table has 25 columns with classes and 24 without.
                 this.usesClasses = true;
             }
@@ -1003,7 +1003,7 @@
             removeExtraControls(cumulativeTimes, splitTimes);
 
             if (cumulativeTimes.length !== splitTimes.length) {
-                throwInvalidData("Cumulative and split times do not have the same length: " + cumulativeTimes.length + " cumulative times, " + splitTimes.length + " split times");
+                throwInvalidData(`Cumulative and split times do not have the same length: ${cumulativeTimes.length} cumulative times, ${splitTimes.length} split times`);
             }
 
             return new CompetitorParseRecord(name, club, className, totalTime, cumulativeTimes, competitive);
@@ -1139,7 +1139,7 @@
         readCompetitorLines(firstLine) {
             let secondLine = this.tryGetLine();
             if (secondLine === null) {
-                throwInvalidData("Hit end of input data unexpectedly while parsing competitor: first line was '" + firstLine + "'");
+                throwInvalidData(`Hit end of input data unexpectedly while parsing competitor: first line was '${firstLine}'`);
             }
 
             let competitorRecord = this.recognizer.parseCompetitor(firstLine, secondLine);
@@ -1164,10 +1164,8 @@
          */
         areClassesUniqueWithinCourses() {
             let classesToCoursesMap = new Map();
-            for (let courseIndex = 0; courseIndex < this.courses.length; courseIndex += 1) {
-                let course = this.courses[courseIndex];
-                for (let competitorIndex = 0; competitorIndex < course.competitors.length; competitorIndex += 1) {
-                    let competitor = course.competitors[competitorIndex];
+            for (let course of this.courses) {
+                for (let competitor of course.competitors) {
                     if (classesToCoursesMap.has(competitor.className)) {
                         if (classesToCoursesMap.get(competitor.className) !== course.name) {
                             return false;
@@ -1288,8 +1286,7 @@
      */
     SplitsBrowser.Input.Html.parseEventData = function (data) {
         data = normaliseLineEndings(data);
-        for (let recognizerIndex = 0; recognizerIndex < RECOGNIZER_CLASSES.length; recognizerIndex += 1) {
-            let RecognizerClass = RECOGNIZER_CLASSES[recognizerIndex];
+        for (let RecognizerClass of RECOGNIZER_CLASSES) {
             let recognizer = new RecognizerClass();
             if (recognizer.isTextOfThisFormat(data)) {
                 data = recognizer.preprocess(data);

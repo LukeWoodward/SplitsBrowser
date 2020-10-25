@@ -192,7 +192,7 @@
             status = "Disqualified";
         } else if (personData.has("overMaxTime")) {
             status = "OverTime";
-        } else if (personData.get("cumTimes").indexOf(null) >= 0) {
+        } else if (personData.get("cumTimes").includes(null)) {
             status = "MisPunch";
         } else if (!personData.has("competitive") || personData.get("competitive")) {
             status = "OK";
@@ -442,7 +442,7 @@
             status = "Disqualified";
         } else if (personData.has("overMaxTime")) {
             status = "OverTime";
-        } else if (personData.get("cumTimes").indexOf(null) >= 0) {
+        } else if (personData.get("cumTimes").includes(null)) {
             status = "MissingPunch";
         } else if (!personData.has("competitive") || personData.get("competitive")) {
             status = "OK";

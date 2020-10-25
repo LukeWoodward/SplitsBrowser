@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser ChartTypeSelector - Provides a choice of chart types.
  *
- *  Copyright (C) 2000-2014 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -128,7 +128,9 @@
                 this.dropDown.selectedIndex = Math.max(this.lastSelectedIndex, 0);
             }
 
-            this.changeHandlers.forEach(handler => handler(this.chartTypes[this.dropDown.selectedIndex]));
+            for (let handler of this.changeHandlers) {
+                handler(this.chartTypes[this.dropDown.selectedIndex]);
+            }
             this.lastSelectedIndex = this.dropDown.selectedIndex;
         }
     }

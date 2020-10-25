@@ -111,7 +111,7 @@
      * @return {Boolean} True if the data is likely to be v2.0.3-format data,
      *     false if not.
      */
-    Version2Reader.isOfThisVersion = data => data.indexOf("IOFdata.dtd") >= 0;
+    Version2Reader.isOfThisVersion = data => data.includes("IOFdata.dtd");
 
     /**
      * Makes a more thorough check that the parsed XML data is likely to be of
@@ -333,7 +333,7 @@
      * @return {Boolean} True if the data is likely to be v3.0-format data,
      *     false if not.
      */
-    Version3Reader.isOfThisVersion = data => data.indexOf("http://www.orienteering.org/datastandard/3.0") >= 0;
+    Version3Reader.isOfThisVersion = data => data.includes("http://www.orienteering.org/datastandard/3.0");
 
     /**
      * Makes a more thorough check that the parsed XML data is likely to be of

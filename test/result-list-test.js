@@ -348,7 +348,7 @@
     function assertResultsClassed(assert, count, className, expectedResults) {
         let results = $("div.result");
         for (let index = 0; index < count; index += 1) {
-            assert.strictEqual($(results[index]).hasClass(className), expectedResults.indexOf(index) >= 0);
+            assert.strictEqual($(results[index]).hasClass(className), expectedResults.includes(index));
         }
     }
 
@@ -385,7 +385,7 @@
     function assertSelected(assert, count, expectedSelected, listAndSelection) {
         let results = $("div.result");
         for (let index = 0; index < count; index += 1) {
-            let shouldBeSelected = expectedSelected.indexOf(index) >= 0;
+            let shouldBeSelected = expectedSelected.includes(index);
             assert.strictEqual($(results[index]).hasClass("selected"), shouldBeSelected);
             assert.strictEqual(listAndSelection.selection.isSelected(index), shouldBeSelected);
         }
@@ -1194,7 +1194,7 @@
         assert.ok(!$(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":disabled"), "Crossing runners button enabled");
         $(CROSSING_RUNNERS_BUTTON_SELECTOR).click();
         assert.strictEqual(alertCount, 1);
-        assert.ok(lastAlertMessage !== null && lastAlertMessage.indexOf("Fourth Runner") >= 0);
+        assert.ok(lastAlertMessage !== null && lastAlertMessage.includes("Fourth Runner"));
         for (let i = 0; i < 3; i += 1) {
             assert.strictEqual(listAndSelection.selection.isSelected(i), (i === 1), "Selectedness for result " + i);
         }
@@ -1206,7 +1206,7 @@
         assert.ok(!$(CROSSING_RUNNERS_BUTTON_SELECTOR).is(":disabled"), "Crossing runners button enabled");
         $(CROSSING_RUNNERS_BUTTON_SELECTOR).click();
         assert.strictEqual(alertCount, 1);
-        assert.ok(lastAlertMessage !== null && lastAlertMessage.indexOf("Third Team") >= 0);
+        assert.ok(lastAlertMessage !== null && lastAlertMessage.includes("Third Team"));
         for (let i = 0; i < 3; i += 1) {
             assert.strictEqual(listAndSelection.selection.isSelected(i), (i === 2), "Selectedness for result " + i);
         }

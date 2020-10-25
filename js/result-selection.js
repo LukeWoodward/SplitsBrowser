@@ -279,7 +279,7 @@
             this.currentIndexes = [];
             for (let idx = 0; idx < newResults.length; idx += 1) {
                 let result = newResults[idx];
-                if (selectedResults.indexOf(result) >= 0) {
+                if (selectedResults.includes(result)) {
                     this.currentIndexes.push(idx);
                 }
             }

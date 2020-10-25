@@ -421,7 +421,7 @@
         getCumTimesAdjustedToReference(referenceCumTimes) {
             if (referenceCumTimes.length !== this.cumTimes.length) {
                 throwInvalidData(`Cannot adjust cumulative times because the numbers of times are different (${this.cumTimes.length} and ${referenceCumTimes.length})`);
-            } else if (referenceCumTimes.indexOf(null) > -1) {
+            } else if (referenceCumTimes.includes(null)) {
                 throwInvalidData("Cannot adjust cumulative times because a null value is in the reference data");
             }
 

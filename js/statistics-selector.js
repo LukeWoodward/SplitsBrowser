@@ -60,7 +60,7 @@
             childDivs.append("input")
                 .attr("id", name => LABEL_ID_PREFIX + name)
                 .attr("type", "checkbox")
-                .attr("checked", name => (DEFAULT_SELECTED_STATISTICS.indexOf(name) >= 0) ? "checked" : null);
+                .attr("checked", name => (DEFAULT_SELECTED_STATISTICS.includes(name)) ? "checked" : null);
 
             this.statisticLabels = childDivs.append("label")
                 .attr("for", name => LABEL_ID_PREFIX + name)
