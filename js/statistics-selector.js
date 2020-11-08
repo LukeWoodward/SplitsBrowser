@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser StatisticsSelector - Provides a choice of the statistics to show.
  *
- *  Copyright (C) 2000-2013 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -161,7 +161,7 @@
          * Handles the change in state of a checkbox, by firing all of the handlers.
          */
         onCheckboxChanged() {
-            let checkedFlags = this.getVisibleStatistics();
+            const checkedFlags = this.getVisibleStatistics();
             for (let handler of this.handlers) {
                 handler(checkedFlags);
             }
