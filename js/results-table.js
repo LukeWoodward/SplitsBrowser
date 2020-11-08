@@ -225,7 +225,7 @@
 
                 let tooltipText;
                 if (this.courseClass.isTeamClass && this.selectedLegIndex === null) {
-                    tooltipText = result.owner.members.map(function (competitor) { return competitor.name; }).join("\n");
+                    tooltipText = result.owner.members.map(competitor => competitor.name).join("\n");
                 } else {
                     tooltipText = "";
                 }

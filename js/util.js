@@ -86,9 +86,7 @@
      * @param {String} message The exception message.
      * @throws {InvalidData} if invoked.
      */
-    SplitsBrowser.throwInvalidData = function (message) {
-        throw new InvalidData(message);
-    };
+    SplitsBrowser.throwInvalidData = message => { throw new InvalidData(message); };
 
     /**
      * Exception object raised if a data parser for a format deems that the data
@@ -116,9 +114,7 @@
      * @param {String} message The exception message.
      * @throws {WrongFileFormat} if invoked.
      */
-    SplitsBrowser.throwWrongFileFormat = function (message) {
-        throw new WrongFileFormat(message);
-    };
+    SplitsBrowser.throwWrongFileFormat = message => { throw new WrongFileFormat(message); };
 
     /**
      * Checks whether the given object contains a property with the given name.
@@ -127,9 +123,7 @@
      * @param {String} property The name of the property.
      * @return {Boolean} Whether the object has a property with the given name.
      */
-    SplitsBrowser.hasProperty = function (object, property) {
-        return Object.prototype.hasOwnProperty.call(object, property);
-    };
+    SplitsBrowser.hasProperty = (object, property) => Object.prototype.hasOwnProperty.call(object, property);
 
     /**
      * Returns the sum of two numbers, or null if either is null.
@@ -138,9 +132,7 @@
      * @return {Number|null} null if at least one of a or b is null,
      *      otherwise a + b.
      */
-    SplitsBrowser.addIfNotNull = function (a, b) {
-        return (a === null || b === null) ? null : (a + b);
-    };
+    SplitsBrowser.addIfNotNull = (a, b) => (a === null || b === null) ? null : (a + b);
 
     /**
      * Returns the difference of two numbers, or null if either is null.
@@ -149,9 +141,7 @@
      * @return {Number|null} null if at least one of a or b is null,
      *      otherwise a - b.
      */
-    SplitsBrowser.subtractIfNotNull = function (a, b) {
-        return (a === null || b === null) ? null : (a - b);
-    };
+    SplitsBrowser.subtractIfNotNull = (a, b) => (a === null || b === null) ? null : (a - b);
 
     /**
      * Parses a course length.
@@ -162,7 +152,7 @@
      * @param {String} stringValue The course length to parse, as a string.
      * @return {Number|null} The parsed course length, or null if not valid.
      */
-    SplitsBrowser.parseCourseLength = function (stringValue) {
+    SplitsBrowser.parseCourseLength = stringValue => {
         let courseLength = parseFloat(stringValue.replace(",", "."));
         if (!isFinite(courseLength)) {
             return null;
@@ -181,7 +171,7 @@
      * @param {String} stringValue The course climb to parse, as a string.
      * @return {Number|null} The parsed course climb, or null if not valid.
      */
-    SplitsBrowser.parseCourseClimb = function (stringValue) {
+    SplitsBrowser.parseCourseClimb = stringValue => {
         const courseClimb = parseInt(stringValue, 10);
         if (SplitsBrowser.isNaNStrict(courseClimb)) {
             return null;

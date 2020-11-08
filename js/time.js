@@ -43,7 +43,7 @@
      *     using, or the default if not specified.
      * @return {String} The string formatting of the time.
      */
-    SplitsBrowser.formatTime = function (seconds, precision) {
+    SplitsBrowser.formatTime = (seconds, precision) => {
         if (seconds === null) {
             return SplitsBrowser.NULL_TIME_PLACEHOLDER;
         } else if (isNaNStrict(seconds)) {
@@ -84,7 +84,7 @@
      * @param {Number} seconds The number of seconds
      * @return {String} The time of day formatted as a string.
      */
-    SplitsBrowser.formatTimeOfDay = function (seconds) {
+    SplitsBrowser.formatTimeOfDay = seconds => {
         const hours = Math.floor((seconds / (60 * 60)) % 24);
         const mins = Math.floor(seconds / 60) % 60;
         const secs = Math.floor(seconds % 60);
@@ -96,10 +96,10 @@
      * @param {String} time The time of the form MM:SS.
      * @return {Number|null} The number of seconds.
      */
-    SplitsBrowser.parseTime = function (time) {
+    SplitsBrowser.parseTime = time => {
         time = time.trim();
         if (/^(-?\d+:)?-?\d+:-?\d\d([,.]\d+)?$/.test(time)) {
-            let timeParts = time.replace(",", ".").split(":");
+            const timeParts = time.replace(",", ".").split(":");
             let totalTime = 0;
             for (let timePart of timeParts) {
                 totalTime = totalTime * 60 + parseFloat(timePart);

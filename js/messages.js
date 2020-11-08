@@ -60,9 +60,7 @@
      * @param {Function} alerter The function to be called when a warning is
      *     to be shown.
      */
-    SplitsBrowser.setMessageAlerter = function (alerter) {
-        alertFunc = alerter;
-    };
+    SplitsBrowser.setMessageAlerter = alerter => alertFunc = alerter;
 
     /**
      * Attempts to get a message, returning a default string if it does not
@@ -72,9 +70,8 @@
      * @return {String} The message with the given key, if the key exists,
      *     otherwise the default value.
      */
-    SplitsBrowser.tryGetMessage = function (key, defaultValue) {
-        return (currentLanguage !== null && hasProperty(messages[currentLanguage], key)) ? SplitsBrowser.getMessage(key) : defaultValue;
-    };
+    SplitsBrowser.tryGetMessage = (key, defaultValue) =>
+        (currentLanguage !== null && hasProperty(messages[currentLanguage], key)) ? SplitsBrowser.getMessage(key) : defaultValue;
 
     /**
      * Returns the message with the given key.
@@ -82,7 +79,7 @@
      * @return {String} The message with the given key, or a placeholder string
      *     if the message could not be looked up.
      */
-    SplitsBrowser.getMessage = function (key) {
+    SplitsBrowser.getMessage = key => {
         if (allLanguages === null) {
             SplitsBrowser.initialiseMessages();
         }
@@ -110,7 +107,7 @@
      * @param {Object} params Object mapping parameter names to values.
      * @return {String} The resulting message.
      */
-    SplitsBrowser.getMessageWithFormatting = function (key, params) {
+    SplitsBrowser.getMessageWithFormatting = (key, params) => {
         let message = SplitsBrowser.getMessage(key);
         for (let paramName in params) {
             if (hasProperty(params, paramName)) {
@@ -143,7 +140,7 @@
      * @param {String} language The code of the language, e.g. "en_gb".
      * @return {String} The name of the language, e.g. "English".
      */
-    SplitsBrowser.getLanguageName = function (language) {
+    SplitsBrowser.getLanguageName = language => {
         if (hasProperty(messages, language) && hasProperty(messages[language], "Language")) {
             return messages[language].Language;
         } else {
@@ -155,7 +152,7 @@
      * Sets the current language.
      * @param {String} language The code of the new language to set.
      */
-    SplitsBrowser.setLanguage = function (language) {
+    SplitsBrowser.setLanguage = language => {
         if (hasProperty(messages, language)) {
             currentLanguage = language;
         }
@@ -166,7 +163,7 @@
      *
      * @param {String} defaultLanguage (Optional) The default language to choose.
      */
-    SplitsBrowser.initialiseMessages = function (defaultLanguage) {
+    SplitsBrowser.initialiseMessages = defaultLanguage => {
         allLanguages = [];
         if (messages !== SplitsBrowser.Messages) {
             // SplitsBrowser.Messages has changed since the JS source was

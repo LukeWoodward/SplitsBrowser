@@ -171,15 +171,11 @@
     // expected.  If we don't do this, it will complain that the test isn't
     // testing anything.
 
-    QUnit.test("Can create a chart without start-time labels", function (assert) {
-        runChartCreationTest(assert, DUMMY_CHART_TYPE);
-    });
+    QUnit.test("Can create a chart without start-time labels", assert => runChartCreationTest(assert, DUMMY_CHART_TYPE));
 
-    QUnit.test("Can create a chart with start-time labels", function (assert) {
-        runChartCreationTest(assert, DUMMY_CHART_TYPE_RACE_GRAPH);
-    });
+    QUnit.test("Can create a chart with start-time labels", assert => runChartCreationTest(assert, DUMMY_CHART_TYPE_RACE_GRAPH));
 
-    QUnit.test("Can create a chart with dubious info", function (assert) {
+    QUnit.test("Can create a chart with dubious info", assert => {
         const results = [
             fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], new Competitor("Second Runner", "DEF")),
             fromOriginalCumTimes(2, 10 * 3600, [0, 65, 65 - 10, 65 + 221 + 184, 65 + 221 + 184 + 100], new Competitor("First Runner", "ABC"))
@@ -190,7 +186,7 @@
         runChartCreationTest(assert, DUMMY_CHART_TYPE, results);
     });
 
-    QUnit.test("Can create a chart for a team event", function (assert) {
+    QUnit.test("Can create a chart for a team event", assert => {
         const result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         const result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         const result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 199, 103]);

@@ -635,7 +635,7 @@
      * @param {String} data The input data string read.
      * @return {SplitsBrowser.Model.Event} All event data read.
      */
-    SplitsBrowser.Input.OE.parseEventData = function (data) {
+    SplitsBrowser.Input.OE.parseEventData = data => {
         const reader = new Reader(data);
         return reader.parseEventData();
     };

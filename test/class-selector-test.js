@@ -103,7 +103,7 @@
         }
     }
 
-    QUnit.test("Class selector created initially disabled and with only a dummy entry, with other-class selector hidden", function(assert) {
+    QUnit.test("Class selector created initially disabled and with only a dummy entry, with other-class selector hidden", assert => {
         new ClassSelector(d3.select("#qunit-fixture").node());
 
         const htmlSelectSelection = d3.select("#qunit-fixture select");
@@ -116,12 +116,12 @@
         assertOtherClassSelectorVisibility(assert, false);
     });
 
-    QUnit.test("Empty class selector has no selected classes", function(assert) {
+    QUnit.test("Empty class selector has no selected classes", assert => {
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
         assert.deepEqual(selector.getSelectedClasses(), []);
     });
 
-    QUnit.test("Can create class selector with course in single class and with other-class selector hidden", function(assert) {
+    QUnit.test("Can create class selector with course in single class and with other-class selector hidden", assert => {
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
 
         setClassesInSelector(selector, [new CourseClass("Class 1", 11, [])]);
@@ -136,7 +136,7 @@
         assertOtherClassSelectorVisibility(assert, false);
     });
 
-    QUnit.test("Can create class selector with a list of three classes in the same course, making other-class selector available", function(assert) {
+    QUnit.test("Can create class selector with a list of three classes in the same course, making other-class selector available", assert => {
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
 
         setClassesInSelector(selector, [new CourseClass("Class 1", 11, []), new CourseClass("Class 2", 17, []), new CourseClass("Class 3", 22, [])]);
@@ -156,7 +156,7 @@
         assertOtherClassListVisibility(assert, false, 2);
     });
 
-    QUnit.test("Setting the list of classes back to a single class sets the selector to the shorter list of class names and hides the other-class selector", function(assert) {
+    QUnit.test("Setting the list of classes back to a single class sets the selector to the shorter list of class names and hides the other-class selector", assert => {
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
 
         setClassesInSelector(selector, [new CourseClass("Class 1", 11, []), new CourseClass("Class 2", 17, []), new CourseClass("Class 3", 22, [])]);
@@ -174,7 +174,7 @@
         assertOtherClassSelectorVisibility(assert, false);
     });
 
-    QUnit.test("Setting the selector back to an empty list of classes disables the selector again", function(assert) {
+    QUnit.test("Setting the selector back to an empty list of classes disables the selector again", assert => {
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
 
         setClassesInSelector(selector, [new CourseClass("Class 1", 11, []), new CourseClass("Class 2", 17, []), new CourseClass("Class 3", 22, [])]);
@@ -190,7 +190,7 @@
         assertOtherClassSelectorVisibility(assert, false);
     });
 
-    QUnit.test("Registering a handler and changing a value in the selector triggers a call to change callback", function(assert) {
+    QUnit.test("Registering a handler and changing a value in the selector triggers a call to change callback", assert => {
         resetLastClass();
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
         selector.registerChangeHandler(handleClassChanged);
@@ -205,7 +205,7 @@
         assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
-    QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", function(assert) {
+    QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", assert => {
         resetLastClass();
 
         let lastClassIdxs2 = null;
@@ -231,7 +231,7 @@
         assert.strictEqual(callCount2, 1, "One change should have been recorded");
     });
 
-    QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", function(assert) {
+    QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", assert => {
         resetLastClass();
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
         selector.registerChangeHandler(handleClassChanged);
@@ -247,7 +247,7 @@
         assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
-    QUnit.test("Can create class selector with three classes and two courses and show and hide the other-class selector", function(assert) {
+    QUnit.test("Can create class selector with three classes and two courses and show and hide the other-class selector", assert => {
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
 
         setClassesInSelectorWithTwoCourses(selector);
@@ -270,7 +270,7 @@
         assertOtherClassListVisibility(assert, false);
     });
 
-    QUnit.test("Can create class selector with three classes and two courses and open and close the list of other classes by clicking on the selector", function(assert) {
+    QUnit.test("Can create class selector with three classes and two courses and open and close the list of other classes by clicking on the selector", assert => {
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
 
         setClassesInSelectorWithTwoCourses(selector);
@@ -291,7 +291,7 @@
         assertOtherClassListVisibility(assert, false, 1);
     });
 
-    QUnit.test("Can create class selector with three classes and two courses and open the list of other classes by clicking on the selector and close it by clicking elsewhere", function(assert) {
+    QUnit.test("Can create class selector with three classes and two courses and open the list of other classes by clicking on the selector and close it by clicking elsewhere", assert => {
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
 
         setClassesInSelectorWithTwoCourses(selector);
@@ -312,7 +312,7 @@
         assertOtherClassListVisibility(assert, false, 1);
     });
 
-    QUnit.test("Can create class selector with three classes and two courses, open the list of other classes and select the other class", function(assert) {
+    QUnit.test("Can create class selector with three classes and two courses, open the list of other classes and select the other class", assert => {
         resetLastClass();
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
 
@@ -342,7 +342,7 @@
         assert.deepEqual(selector.getSelectedClasses(), [1, 2], "Classes 1 and 2 should have been selected");
     });
 
-    QUnit.test("Can create class selector with three classes and two courses, open the list of other classes and select and deselect the other class", function(assert) {
+    QUnit.test("Can create class selector with three classes and two courses, open the list of other classes and select and deselect the other class", assert => {
         resetLastClass();
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
 
@@ -374,7 +374,7 @@
         assert.strictEqual(callCount, 2, "Two changes should have been recorded");
     });
 
-    QUnit.test("Can create class selector with three classes and two courses, select the last class, open the list of other classes and select the other class", function(assert) {
+    QUnit.test("Can create class selector with three classes and two courses, select the last class, open the list of other classes and select the other class", assert => {
         resetLastClass();
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
 
@@ -403,7 +403,7 @@
         assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
-    QUnit.test("Can create class selector with three classes and two courses and select the class on a course to itself", function(assert) {
+    QUnit.test("Can create class selector with three classes and two courses and select the class on a course to itself", assert => {
         resetLastClass();
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
         setClassesInSelectorWithTwoCourses(selector);
@@ -417,7 +417,7 @@
         assertOtherClassListVisibility(assert, false, 0);
     });
 
-    QUnit.test("Can create class selector with three classes and two courses and select a single class on the shared course", function(assert) {
+    QUnit.test("Can create class selector with three classes and two courses and select a single class on the shared course", assert => {
         resetLastClass();
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
         setClassesInSelectorWithTwoCourses(selector);
@@ -432,7 +432,7 @@
         assert.strictEqual($("#qunit-fixture .otherClassList div.otherClassItem.selected").length, 0);
     });
 
-    QUnit.test("Can create class selector with three classes and two courses and select both classes on the shared course", function(assert) {
+    QUnit.test("Can create class selector with three classes and two courses and select both classes on the shared course", assert => {
         resetLastClass();
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
         setClassesInSelectorWithTwoCourses(selector);
@@ -447,7 +447,7 @@
         assert.strictEqual($("#qunit-fixture .otherClassList div.otherClassItem.selected").length, 1);
     });
 
-    QUnit.test("Attempting to set the selected class to a negative index has no effect", function(assert) {
+    QUnit.test("Attempting to set the selected class to a negative index has no effect", assert => {
         resetLastClass();
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
         setClassesInSelectorWithTwoCourses(selector);
@@ -458,7 +458,7 @@
         assert.strictEqual(callCount, 0);
     });
 
-    QUnit.test("Attempting to set the selected class to an index too large has no effect", function(assert) {
+    QUnit.test("Attempting to set the selected class to an index too large has no effect", assert => {
         resetLastClass();
         const selector = new ClassSelector(d3.select("#qunit-fixture").node());
         setClassesInSelectorWithTwoCourses(selector);

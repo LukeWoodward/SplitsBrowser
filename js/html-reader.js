@@ -1284,7 +1284,7 @@
      * @param {String} data The string containing event data.
      * @return {Event} The parsed event.
      */
-    SplitsBrowser.Input.Html.parseEventData = function (data) {
+    SplitsBrowser.Input.Html.parseEventData = data => {
         data = normaliseLineEndings(data);
         for (let RecognizerClass of RECOGNIZER_CLASSES) {
             const recognizer = new RecognizerClass();

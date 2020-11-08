@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Input - Top-level data file reading.
  *
- *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -37,7 +37,7 @@
      * @param {String} data The data read.
      * @return {Event} Event data read in, or null for failure.
      */
-    SplitsBrowser.Input.parseEventData = function (data) {
+    SplitsBrowser.Input.parseEventData = data => {
         for (let parser of PARSERS) {
             try {
                 return parser(data);

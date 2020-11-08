@@ -45,7 +45,7 @@
      * @param {SplitsBrowser.Model.Result} b The other result to compare.
      * @return {Number} Result of comparing two results.
      */
-    SplitsBrowser.Model.compareResults = function (a, b) {
+    SplitsBrowser.Model.compareResults = (a, b) => {
         if (a.isDisqualified !== b.isDisqualified) {
             return (a.isDisqualified) ? 1 : -1;
         } else if (a.totalTime === b.totalTime) {

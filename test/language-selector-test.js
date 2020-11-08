@@ -39,13 +39,13 @@
         return new LanguageSelector($("#qunit-fixture")[0]);
     }
 
-    QUnit.test("Can construct the selector when there are two languages", function(assert) {
+    QUnit.test("Can construct the selector when there are two languages", assert => {
         createSelector();
         assert.strictEqual($("#qunit-fixture select").length, 1, "One select element should have been created");
         assert.strictEqual($("#qunit-fixture select > option").length, 2, "Two languages should be created");
     });
 
-    QUnit.test("Attempting to construct the selector when there is only one language does nothing", function(assert) {
+    QUnit.test("Attempting to construct the selector when there is only one language does nothing", assert => {
         const oldGermanMessages = SplitsBrowser.Messages.de;
         delete SplitsBrowser.Messages.de;
         SplitsBrowser.initialiseMessages("en_gb");
@@ -58,7 +58,7 @@
         }
     });
 
-    QUnit.test("Attempting to construct the selector when there are no languages creates nothing", function(assert) {
+    QUnit.test("Attempting to construct the selector when there are no languages creates nothing", assert => {
         const english = "en_gb";
         const oldGermanMessages = SplitsBrowser.Messages.de;
         const oldEnglishMessages = SplitsBrowser.Messages[english];
@@ -75,7 +75,7 @@
         }
     });
 
-    QUnit.test("Registering a handler and changing a value in the selector triggers a call to change callback", function(assert) {
+    QUnit.test("Registering a handler and changing a value in the selector triggers a call to change callback", assert => {
         reset();
         const selector = createSelector();
         selector.registerChangeHandler(handleLanguageChanged);
@@ -90,7 +90,7 @@
         }
     });
 
-    QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", function(assert) {
+    QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", assert => {
         reset();
 
         let callCount2 = 0;
@@ -111,7 +111,7 @@
         }
     });
 
-    QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", function(assert) {
+    QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", assert => {
         reset();
         const selector = createSelector();
         selector.registerChangeHandler(handleLanguageChanged);
@@ -125,7 +125,7 @@
         }
     });
 
-    QUnit.test("Setting the language to a recognised language code sets the language and calls change handler", function(assert) {
+    QUnit.test("Setting the language to a recognised language code sets the language and calls change handler", assert => {
         reset();
         const selector = createSelector();
         selector.registerChangeHandler(handleLanguageChanged);
@@ -139,7 +139,7 @@
         }
     });
 
-    QUnit.test("Setting the language to an unrecognised language code does nothing", function(assert) {
+    QUnit.test("Setting the language to an unrecognised language code does nothing", assert => {
         reset();
         const selector = createSelector();
         selector.registerChangeHandler(handleLanguageChanged);

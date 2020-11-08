@@ -39,13 +39,13 @@
         callCount = 0;
     }
 
-    QUnit.test("All statistics disabled by clearAll method", function (assert) {
+    QUnit.test("All statistics disabled by clearAll method", assert => {
         const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
         assert.deepEqual(selector.getVisibleStatistics(), makeStatsMap(false, false, false, false));
     });
 
-    QUnit.test("Can register change handler and have it called", function (assert) {
+    QUnit.test("Can register change handler and have it called", assert => {
         reset();
         const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
@@ -58,7 +58,7 @@
         assert.strictEqual(1, callCount);
     });
 
-    QUnit.test("Can register change handler twice and have it called only once", function (assert) {
+    QUnit.test("Can register change handler twice and have it called only once", assert => {
         reset();
         const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
@@ -73,7 +73,7 @@
         assert.strictEqual(1, callCount);
     });
 
-    QUnit.test("Can register two change handlers and have them both called", function (assert) {
+    QUnit.test("Can register two change handlers and have them both called", assert => {
         reset();
         const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
@@ -98,7 +98,7 @@
         assert.strictEqual(1, callCount2);
     });
 
-    QUnit.test("Can deregister change handler and have it no longer called", function (assert) {
+    QUnit.test("Can deregister change handler and have it no longer called", assert => {
         reset();
         const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
@@ -117,7 +117,7 @@
         assert.strictEqual(1, callCount);
     });
 
-    QUnit.test("Can deregister change handler that was never registered without error", function (assert) {
+    QUnit.test("Can deregister change handler that was never registered without error", assert => {
         reset();
         const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();
@@ -127,7 +127,7 @@
         assert.expect(0); // Tell QUnit to expect no assertions.
     });
 
-    QUnit.test("Can set selected statistics", function (assert) {
+    QUnit.test("Can set selected statistics", assert => {
         reset();
         const selector = new Selector(d3.select("#qunit-fixture").node());
         selector.clearAll();

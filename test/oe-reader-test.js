@@ -273,25 +273,18 @@
         }
     }
 
-    QUnit.test("Cannot parse an empty string", function (assert) {
-        runInvalidDataTest(assert, "", "an empty string", "WrongFileFormat");
-    });
+    QUnit.test("Cannot parse an empty string", assert => runInvalidDataTest(assert, "", "an empty string", "WrongFileFormat"));
 
-    QUnit.test("Cannot parse a string that contains only the headers", function (assert) {
-        runInvalidDataTest(assert, HEADER_46, "data with a header row only", "WrongFileFormat");
-    });
+    QUnit.test("Cannot parse a string that contains only the headers", assert => runInvalidDataTest(assert, HEADER_46, "data with a header row only", "WrongFileFormat"));
 
-    QUnit.test("Cannot parse a string that contains only the headers and blank lines", function (assert) {
-        runInvalidDataTest(assert, HEADER_46 + "\r\n\r\n\r\n", "data with a header row and blank lines only", "WrongFileFormat");
-    });
+    QUnit.test("Cannot parse a string that contains only the headers and blank lines",
+        assert => runInvalidDataTest(assert, HEADER_46 + "\r\n\r\n\r\n", "data with a header row and blank lines only", "WrongFileFormat"));
 
-    QUnit.test("Cannot parse a string that contains only the headers and a junk line that happens to contain a semicolon", function (assert) {
-        runInvalidDataTest(assert, HEADER_46 + "\r\nrubbish;more rubbish\r\n", "data with a junk second line", "WrongFileFormat");
-    });
+    QUnit.test("Cannot parse a string that contains only the headers and a junk line that happens to contain a semicolon",
+        assert => runInvalidDataTest(assert, HEADER_46 + "\r\nrubbish;more rubbish\r\n", "data with a junk second line", "WrongFileFormat"));
 
-    QUnit.test("Cannot parse a string that is not semicolon-delimited data", function (assert) {
-        runInvalidDataTest(assert, "This is not a valid data format", "invalid data", "WrongFileFormat");
-    });
+    QUnit.test("Cannot parse a string that is not semicolon-delimited data",
+        assert => runInvalidDataTest(assert, "This is not a valid data format", "invalid data", "WrongFileFormat"));
 
     /**
      * Formats some competitor data into a string that can be read by the reader.
@@ -339,8 +332,8 @@
         }
     }
 
-    QUnit.test("Can parse a string that contains a single competitor's data in all formats", function (assert) {
-        runTestOverAllFormats([[getCompetitor1(), getControls1()]], (eventData, format) => {
+    QUnit.test("Can parse a string that contains a single competitor's data in all formats",
+        assert => runTestOverAllFormats([[getCompetitor1(), getControls1()]], (eventData, format) => {
             assert.ok(eventData instanceof Event, "Result of parsing should be an Event object");
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.ok(eventData.classes[0] instanceof CourseClass, "Class element should be a CourseClass object");
@@ -372,10 +365,9 @@
             assert.ok(!result.isDisqualified, "Competitor result should not be marked as disqualified");
 
             assert.strictEqual(eventData.classes[0].course, course, "Class should refer to its course");
-        });
-    });
+        }));
 
-    QUnit.test("Can parse a string that contains a single competitor's data with timed start", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with timed start", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("startTime", competitor1.get("startPunch"));
         competitor1.set("startPunch", "");
@@ -386,7 +378,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with no start nor finish", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with no start nor finish", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("startTime", "");
         competitor1.set("startPunch", "");
@@ -398,7 +390,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with the course distance having a comma as the decimal separator", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with the course distance having a comma as the decimal separator", assert => {
         const competitor = getCompetitor1();
         competitor.set("distance", "4,1");
         runTestOverAllFormats([[competitor, getControls1()]], eventData => {
@@ -408,7 +400,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with the course having zero distance and climb", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with the course having zero distance and climb", assert => {
         const competitor = getCompetitor1();
         competitor.set("distance", "0.0");
         competitor.set("climb", "0");
@@ -420,7 +412,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with the course distance in metres", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with the course distance in metres", assert => {
         const competitor = getCompetitor1();
         competitor.set("distance", "4100");
         runTestOverAllFormats([[competitor, getControls1()]], eventData => {
@@ -430,7 +422,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single valid competitor's data with the placing empty", function (assert) {
+    QUnit.test("Can parse a string that contains a single valid competitor's data with the placing empty", assert => {
         const competitor = getCompetitor1();
         competitor.set("placing", "");
         runTestOverAllFormats([[competitor, getControls1()]], eventData => {
@@ -440,7 +432,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with the last two controls missing", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with the last two controls missing", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("placing", "");
         runTestOverAllFormats([[competitor1, getControls1()]], eventData => {
@@ -457,7 +449,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with a blank time for the last control", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with a blank time for the last control", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("placing", "");
         runTestOverAllFormats([[competitor1, getControls1WithBlankTimeForLast()]], eventData => {
@@ -469,7 +461,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with control code with letters in it", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with control code with letters in it", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("placing", "");
         runTestOverAllFormats([[competitor1, getControls1WithNonNumericControlCode()]], eventData => {
@@ -480,7 +472,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with blank code and missing time", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with blank code and missing time", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("placing", "");
         runTestOverAllFormats([[competitor1, getControls1WithBlankCodeAndMissingTimeAtTheEnd()]], eventData => {
@@ -491,7 +483,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with blank code and missing time followed by an additional control", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with blank code and missing time followed by an additional control", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("placing", "");
         runTestOverAllFormats([[competitor1, getControls1WithBlankCodeAndMissingTimeAtTheEndFollowedByAdditionalControl()]], eventData => {
@@ -502,7 +494,7 @@
         });
     });
 
-    QUnit.test("Can parse a string ignoring a blank year of birth", function (assert) {
+    QUnit.test("Can parse a string ignoring a blank year of birth", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("yearOfBirth", "");
         runTestOverAllFormats([[competitor1, getControls1()]], eventData => {
@@ -513,7 +505,7 @@
         });
     });
 
-    QUnit.test("Can parse a string ignoring an invalid year of birth", function (assert) {
+    QUnit.test("Can parse a string ignoring an invalid year of birth", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("yearOfBirth", "This is not a valid year");
         runTestOverAllFormats([[competitor1, getControls1()]], eventData => {
@@ -524,7 +516,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single female competitor's data", function (assert) {
+    QUnit.test("Can parse a string that contains a single female competitor's data", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("gender", "F");
         runTestOverAllFormats([[competitor1, getControls1()]], (eventData, format) => {
@@ -537,7 +529,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data ignoring a blank gender", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data ignoring a blank gender", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("gender", "");
         runTestOverAllFormats([[competitor1, getControls1()]], (eventData, format) => {
@@ -550,7 +542,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data ignoring an invalid gender", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data ignoring an invalid gender", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("gender", "This is not a valid gender");
         runTestOverAllFormats([[competitor1, getControls1()]], (eventData, format) => {
@@ -563,23 +555,21 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with LF line-endings", function (assert) {
-        runTestOverAllFormats([[getCompetitor1(), getControls1()]], eventData => {
+    QUnit.test("Can parse a string that contains a single competitor's data with LF line-endings",
+        assert => runTestOverAllFormats([[getCompetitor1(), getControls1()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.strictEqual(eventData.classes[0].results.length, 1, "There should be one competitor");
             const result = eventData.classes[0].results[0];
             assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 110, 218, 362, 393]);
             assert.strictEqual(eventData.courses.length, 1, "There should be one course");
-        }, eventDataStr => eventDataStr.replace(/\r\n/g, "\n"));
-    });
+        }, eventDataStr => eventDataStr.replace(/\r\n/g, "\n")));
 
-    QUnit.test("Can parse a string that contains a single competitor's data with CR line-endings", function (assert) {
-        runTestOverAllFormats([[getCompetitor1(), getControls1()]], eventData => {
-            assert.strictEqual(eventData.courses.length, 1, "There should be one course");
-        }, eventDataStr => eventDataStr.replace(/\r\n/g, "\r"));
-    });
+    QUnit.test("Can parse a string that contains a single competitor's data with CR line-endings",
+        assert => runTestOverAllFormats([[getCompetitor1(), getControls1()]],
+            eventData => assert.strictEqual(eventData.courses.length, 1, "There should be one course"),
+            eventDataStr => eventDataStr.replace(/\r\n/g, "\r")));
 
-    QUnit.test("Can parse a string that contains a single competitor's data in 'nameless' column-60 variation", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data in 'nameless' column-60 variation", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("forename", "");
         competitor1.set("surname", "");
@@ -604,28 +594,28 @@
         assert.deepEqual(result.totalTime, 393, "Should read correct total time");
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with commas as column separators", function (assert) {
-        runTestOverAllFormats([[getCompetitor1(), getControls1()]], eventData => {
-            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
-        }, eventDataStr => eventDataStr.replace(/;/g, ","));
-    });
+    QUnit.test("Can parse a string that contains a single competitor's data with commas as column separators",
+        assert => runTestOverAllFormats([[getCompetitor1(), getControls1()]],
+            eventData => {
+                assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            }, eventDataStr => eventDataStr.replace(/;/g, ",")));
 
-    QUnit.test("Can parse a string that contains a single competitor's data with tabs as column separators", function (assert) {
-        runTestOverAllFormats([[getCompetitor1(), getControls1()]], eventData => {
-            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
-        }, eventDataStr => eventDataStr.replace(/;/g, "\t"));
-    });
+    QUnit.test("Can parse a string that contains a single competitor's data with tabs as column separators",
+        assert => runTestOverAllFormats([[getCompetitor1(), getControls1()]],
+            eventData => {
+                assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            }, eventDataStr => eventDataStr.replace(/;/g, "\t")));
 
-    QUnit.test("Can parse a string that contains a single competitor's data with backslash characters as column separators", function (assert) {
-        runTestOverAllFormats([[getCompetitor1(), getControls1()]], eventData => {
-            assert.strictEqual(eventData.classes.length, 1, "There should be one class");
-            assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
-        }, eventDataStr => eventDataStr.replace(/;/g, "\\"));
-    });
+    QUnit.test("Can parse a string that contains a single competitor's data with backslash characters as column separators",
+        assert => runTestOverAllFormats([[getCompetitor1(), getControls1()]],
+            eventData => {
+                assert.strictEqual(eventData.classes.length, 1, "There should be one class");
+                assert.strictEqual(eventData.classes[0].results.length, 1, "One competitor should have been read");
+            }, eventDataStr => eventDataStr.replace(/;/g, "\\")));
 
-    QUnit.test("Cannot parse a string that contains a single competitor's data with closing braces as column separators", function (assert) {
+    QUnit.test("Cannot parse a string that contains a single competitor's data with closing braces as column separators", assert => {
         for (let format of ALL_FORMATS) {
             let eventDataStr = format.header + generateRow(getCompetitor1(), getControls1(), format.template);
             eventDataStr = eventDataStr.replace(/;/g, "}");
@@ -633,7 +623,7 @@
         }
     });
 
-    QUnit.test("Cannot parse a string that contains competitor data where all competitors have warnings", function (assert) {
+    QUnit.test("Cannot parse a string that contains competitor data where all competitors have warnings", assert => {
         const comp1 = getCompetitor1();
         const comp2 = getCompetitor2();
         comp1.set("numControls", "Not a valid number");
@@ -645,7 +635,7 @@
         }
     });
 
-    QUnit.test("Cannot parse a string that contains a single competitor's data followed by a junk line", function (assert) {
+    QUnit.test("Cannot parse a string that contains a single competitor's data followed by a junk line", assert => {
         for (let format of ALL_FORMATS) {
             let eventDataStr = format.header + generateRow(getCompetitor1(), getControls1(), format.template);
             eventDataStr = eventDataStr + "\r\nrubbish;more rubbish;\r\n";
@@ -653,7 +643,7 @@
         }
     });
 
-    QUnit.test("Cannot parse file that contains comma-separated numbers", function (assert) {
+    QUnit.test("Cannot parse file that contains comma-separated numbers", assert => {
         let line1 = "";
         let line2 = "";
         for (let i = 0; i < 50; i += 1) {
@@ -665,7 +655,7 @@
         runInvalidDataTest(assert, eventDataStr, "an empty string", "WrongFileFormat");
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with a missed control", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with a missed control", assert => {
         const comp = getCompetitor1();
         comp.set("placing", "mp");
         const controls = getControls1();
@@ -680,7 +670,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with a missed control but marked as OK", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with a missed control but marked as OK", assert => {
         const comp = getCompetitor1();
         comp.set("classifier", "0");
         const controls = getControls1();
@@ -696,7 +686,7 @@
         });
     });
 
-    QUnit.test("Can parse with warnings a string that contains a competitor with a non-numeric control count", function (assert) {
+    QUnit.test("Can parse with warnings a string that contains a competitor with a non-numeric control count", assert => {
         const comp1 = getCompetitor1();
         comp1.set("numControls", "This is not a valid number");
         runTestOverAllFormats([[comp1, getControls1()], [getCompetitor2(), getControls1()]], eventData => {
@@ -705,7 +695,7 @@
         });
     });
 
-    QUnit.test("Can parse with warnings a string that contains a single competitor's data with a missing class name", function (assert) {
+    QUnit.test("Can parse with warnings a string that contains a single competitor's data with a missing class name", assert => {
         const comp1 = getCompetitor1();
         comp1.set("className", "");
         comp1.set("course", "");
@@ -715,7 +705,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single competitor's data with a missed control and remove the trailing 'mp' from the name", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor's data with a missed control and remove the trailing 'mp' from the name", assert => {
         const comp = getCompetitor1();
         comp.set("surname", "Runner mp");
         comp.set("placing", "mp");
@@ -732,7 +722,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single non-competitive competitor's data and remove the trailing 'n/c' from the name", function (assert) {
+    QUnit.test("Can parse a string that contains a single non-competitive competitor's data and remove the trailing 'n/c' from the name", assert => {
         const comp = getCompetitor1();
         comp.set("surname", "Runner n/c");
         comp.set("placing", "n/c");
@@ -752,7 +742,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single non-competitive competitor's data", function (assert) {
+    QUnit.test("Can parse a string that contains a single non-competitive competitor's data", assert => {
         const comp = getCompetitor1();
         comp.set("nonComp", "1");
         runTestOverAllFormats([[comp, getControls1()]], eventData => {
@@ -767,7 +757,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single non-starting competitor's data", function (assert) {
+    QUnit.test("Can parse a string that contains a single non-starting competitor's data", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("time", "");
         competitor1.set("finish", "");
@@ -783,7 +773,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single non-starting competitor's data when flagged as non-starter", function (assert) {
+    QUnit.test("Can parse a string that contains a single non-starting competitor's data when flagged as non-starter", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("time", "");
         competitor1.set("finish", "");
@@ -800,7 +790,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single non-finishing competitor's data when flagged as non-finisher", function (assert) {
+    QUnit.test("Can parse a string that contains a single non-finishing competitor's data when flagged as non-finisher", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("classifier", "2");
         const controls = getControls1();
@@ -817,7 +807,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single disqualified competitor's data when flagged as disqualified", function (assert) {
+    QUnit.test("Can parse a string that contains a single disqualified competitor's data when flagged as disqualified", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("classifier", "4");
         runTestOverAllFormats([[competitor1, getControls1()]], eventData => {
@@ -832,7 +822,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a single over-max-time competitor's data when flagged as over max time", function (assert) {
+    QUnit.test("Can parse a string that contains a single over-max-time competitor's data when flagged as over max time", assert => {
         const competitor1 = getCompetitor1();
         competitor1.set("classifier", "5");
         runTestOverAllFormats([[competitor1, getControls1()]], eventData => {
@@ -847,8 +837,8 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains two competitors in the same class and course", function (assert) {
-        runTestOverAllFormats([[getCompetitor1(), getControls1()], [getCompetitor2(), getControls2()]], eventData => {
+    QUnit.test("Can parse a string that contains two competitors in the same class and course",
+        assert => runTestOverAllFormats([[getCompetitor1(), getControls1()], [getCompetitor2(), getControls2()]], eventData => {
             assert.strictEqual(eventData.classes.length, 1, "There should be one class");
             assert.ok(eventData.classes[0] instanceof CourseClass, "Array element should be a CourseClass object");
             assert.strictEqual(eventData.classes[0].numControls, 3, "Class should have three controls");
@@ -857,10 +847,9 @@
             assert.strictEqual(eventData.classes[0].results[0].owner.name, "First Runner", "Should read correct name for first competitor");
             assert.strictEqual(eventData.classes[0].course, eventData.courses[0], "Course should be set on the class");
             assert.deepEqual(eventData.courses[0].controls, ["208", "227", "212"]);
-        });
-    });
+        }));
 
-    QUnit.test("Can parse a string that contains two competitors in the same class but different course", function (assert) {
+    QUnit.test("Can parse a string that contains two competitors in the same class but different course", assert => {
         const comp1 = getCompetitor1();
         comp1.set("course", "Test course 1");
         const comp2 = getCompetitor2();
@@ -882,7 +871,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains two competitors in the same course but different class", function (assert) {
+    QUnit.test("Can parse a string that contains two competitors in the same course but different class", assert => {
         const comp1 = getCompetitor1();
         comp1.set("className", "Test class 1");
         const comp2 = getCompetitor2();
@@ -904,7 +893,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains a course with two classes where one class is used in another course into an event with a single course", function (assert) {
+    QUnit.test("Can parse a string that contains a course with two classes where one class is used in another course into an event with a single course", assert => {
         const comp1 = getCompetitor1();
         comp1.set("className", "Test class 1");
         comp1.set("course", "Test course 1");
@@ -933,7 +922,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains two competitors on different classes and courses", function (assert) {
+    QUnit.test("Can parse a string that contains two competitors on different classes and courses", assert => {
         const comp1 = getCompetitor1();
         comp1.set("className", "Test class 1");
         comp1.set("course", "Test course 1");
@@ -975,7 +964,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains two competitors on different classes, sorting the classes into order", function (assert) {
+    QUnit.test("Can parse a string that contains two competitors on different classes, sorting the classes into order", assert => {
         const comp1 = getCompetitor1();
         comp1.set("className", "Test class 2");
         comp1.set("course", "Test course 1");
@@ -1005,7 +994,7 @@
         });
     });
 
-    QUnit.test("Can parse a string that contains two competitors on different classes, sorting the classes into order", function (assert) {
+    QUnit.test("Can parse a string that contains two competitors on different classes, sorting the classes into order", assert => {
         const comp1 = getCompetitor1();
         comp1.set("className", "Test class 2");
         comp1.set("course", "Test course 1");

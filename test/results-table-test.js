@@ -45,13 +45,13 @@
         new CourseClassSet([courseClass]);
     }
 
-    QUnit.test("Can create a results table for an empty course-class", function (assert) {
+    QUnit.test("Can create a results table for an empty course-class", assert => {
         const resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
         resultsTable.setClass(null);
         assert.strictEqual(d3.selectAll("table.resultsTable tbody tr").size(), 0, "There should be no table rows in the body");
     });
 
-    QUnit.test("Can create a results table with two results finishing", function (assert) {
+    QUnit.test("Can create a results table with two results finishing", assert => {
         const result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         const result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         const courseClass = new CourseClass("Test", 3, [result1, result2]);
@@ -93,7 +93,7 @@
         assert.strictEqual($("span.resultsTableHeader").text(), "Test, 3 controls, 4.1km, 140m");
     });
 
-    QUnit.test("Can create a results table with two results finishing and with control codes", function (assert) {
+    QUnit.test("Can create a results table with two results finishing and with control codes", assert => {
         const result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         const result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         const courseClass = new CourseClass("Test", 3, [result1, result2]);
@@ -113,7 +113,7 @@
         assert.strictEqual(tableHeaders.nodes()[5].innerHTML, "3&nbsp;(141)");
     });
 
-    QUnit.test("Can create a results table with one result not finishing sorted to the bottom", function (assert) {
+    QUnit.test("Can create a results table with one result not finishing sorted to the bottom", assert => {
         const result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]);
         const result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         const courseClass = new CourseClass("Test", 3, [result1, result2]);
@@ -132,7 +132,7 @@
         assert.strictEqual($("span:first-child", lastRow[2]).text(), getMessage("MispunchedShort"), "Mispunching result should be marked as such");
     });
 
-    QUnit.test("Can create a results table with one mispunching result", function (assert) {
+    QUnit.test("Can create a results table with one mispunching result", assert => {
         const result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, 100]);
         const courseClass = new CourseClass("Test", 3, [result]);
         calculateRanks(courseClass);
@@ -150,7 +150,7 @@
         assert.strictEqual($("span:first-child", row[2]).text(), getMessage("MispunchedShort"), "Mispunching result should be marked as such");
     });
 
-    QUnit.test("Can create a results table with one non-starting result", function (assert) {
+    QUnit.test("Can create a results table with one non-starting result", assert => {
         const result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [null, null, null, null]);
         result.setNonStarter();
         const courseClass = new CourseClass("Test", 3, [result]);
@@ -169,7 +169,7 @@
         assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DidNotStartShort"), "Non-starting result should be marked as such");
     });
 
-    QUnit.test("Can create a results table with one non-finishing result", function (assert) {
+    QUnit.test("Can create a results table with one non-finishing result", assert => {
         const result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, null, null]);
         result.setNonFinisher();
         const courseClass = new CourseClass("Test", 3, [result]);
@@ -188,7 +188,7 @@
         assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DidNotFinishShort"), "Non-finishing result should be marked as such");
     });
 
-    QUnit.test("Can create a results table with one disqualified result", function (assert) {
+    QUnit.test("Can create a results table with one disqualified result", assert => {
         const result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         result.disqualify();
         const courseClass = new CourseClass("Test", 3, [result]);
@@ -207,7 +207,7 @@
         assert.strictEqual($("span:first-child", row[2]).text(), getMessage("DisqualifiedShort"), "Disqualified result should be marked as such");
     });
 
-    QUnit.test("Can create a results table with one over-max-time result", function (assert) {
+    QUnit.test("Can create a results table with one over-max-time result", assert => {
         const result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         result.setOverMaxTime();
         const courseClass = new CourseClass("Test", 3, [result]);
@@ -226,7 +226,7 @@
         assert.strictEqual($("span:first-child", row[2]).text(), getMessage("OverMaxTimeShort"), "Over-max-time result should be marked as such");
     });
 
-    QUnit.test("Can create a results table with one non-competitive result and the other result getting rank 1", function (assert) {
+    QUnit.test("Can create a results table with one non-competitive result and the other result getting rank 1", assert => {
         const result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         result1.setNonCompetitive();
         const result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
@@ -243,7 +243,7 @@
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "1");
     });
 
-    QUnit.test("Can create a results table with one disqualified result and the other result getting rank 1", function (assert) {
+    QUnit.test("Can create a results table with one disqualified result and the other result getting rank 1", assert => {
         const result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         result1.disqualify();
         const result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
@@ -260,7 +260,7 @@
         assert.strictEqual(table.selectAll("tbody tr:last-child td:first-child").text(), "");
     });
 
-    QUnit.test("Can create a results table with course with no length and climb", function (assert) {
+    QUnit.test("Can create a results table with course with no length and climb", assert => {
         const result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         const result2 = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         const courseClass = new CourseClass("Test", 3, [result1, result2]);
@@ -274,7 +274,7 @@
         assert.strictEqual($("span.resultsTableHeader").text(), "Test, 3 controls");
     });
 
-    QUnit.test("Can create a results table with one result with dubious times appropriately classed", function (assert) {
+    QUnit.test("Can create a results table with one result with dubious times appropriately classed", assert => {
         const result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 65, 65 + 0, 65 + 221 + 184, 65 + 221 + 184 + 100], new Competitor("First Runner", "DEF"));
         result.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         const courseClass = new CourseClass("Test", 3, [result]);
@@ -303,7 +303,7 @@
         }
     });
 
-    QUnit.test("Can create a results table with one result with missing times appropriately classed", function (assert) {
+    QUnit.test("Can create a results table with one result with missing times appropriately classed", assert => {
         const result = fromCumTimes(1, 10 * 3600 + 30 * 60, [0, 65, null, 65 + 221 + 184, 65 + 221 + 184 + 100], new Competitor("First Runner", "DEF"));
         result.setOKDespiteMissingTimes();
         const courseClass = new CourseClass("Test", 3, [result]);
@@ -332,7 +332,7 @@
         }
     });
 
-    QUnit.test("Can create a results table with one result with fractional times appropriately formatted", function (assert) {
+    QUnit.test("Can create a results table with one result with fractional times appropriately formatted", assert => {
         const result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.5]);
         const courseClass = new CourseClass("Test", 3, [result]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
@@ -359,7 +359,7 @@
         assert.strictEqual(split3Cell.text(), "03:04.7");
     });
 
-    QUnit.test("Can create a results table with one result with fractional split times and a finish time with a whole number of seconds appropriately formatted", function (assert) {
+    QUnit.test("Can create a results table with one result with fractional split times and a finish time with a whole number of seconds appropriately formatted", assert => {
         const result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.0]);
         const courseClass = new CourseClass("Test", 3, [result]);
         courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
@@ -379,7 +379,7 @@
         assert.strictEqual(cum2Cell.text(), "09:31.0");
     });
 
-    QUnit.test("Can create a results table with two team results finishing and label the control headers", function (assert) {
+    QUnit.test("Can create a results table with two team results finishing and label the control headers", assert => {
         const result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         const result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         const result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 199, 103]);
@@ -409,7 +409,7 @@
         assert.strictEqual($("span.resultsTableHeader").text(), "Test, 3 + 3 controls");
     });
 
-    QUnit.test("Can create a results table with two team results with different numbers of controls per leg and label the control headers", function (assert) {
+    QUnit.test("Can create a results table with two team results with different numbers of controls per leg and label the control headers", assert => {
         const result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         const result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         const result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 103]);
@@ -433,7 +433,7 @@
         assert.deepEqual(controlHeaders, ["1-1", "2-1", "3-1", "Finish-1", "1-2", "2-2", "Finish-2"]);
     });
 
-    QUnit.test("Can create a results table with two team results finishing and switch to the first leg", function (assert) {
+    QUnit.test("Can create a results table with two team results finishing and switch to the first leg", assert => {
         const result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         const result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         const result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 199, 103]);
@@ -465,7 +465,7 @@
         assert.strictEqual($("span.resultsTableHeader").text(), "Test, Leg 1, 3 controls");
     });
 
-    QUnit.test("Can create a results table with two team results finishing and switch to the second leg", function (assert) {
+    QUnit.test("Can create a results table with two team results finishing and switch to the second leg", assert => {
         const result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         const result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
         const result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 199, 103]);

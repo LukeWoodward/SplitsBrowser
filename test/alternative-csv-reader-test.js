@@ -70,33 +70,29 @@
 
     QUnit.module("Input.AlternativeCSV.TripleColumn");
 
-    QUnit.test("Cannot parse an empty string", function (assert) {
-        SplitsBrowserTest.assertException(assert, "WrongFileFormat", () => parseTripleColumnEventData(""),
-            "Should throw an exception for parsing an empty string");
-    });
+    QUnit.test("Cannot parse an empty string",
+        assert => SplitsBrowserTest.assertException(assert, "WrongFileFormat", () => parseTripleColumnEventData(""),
+            "Should throw an exception for parsing an empty string"));
 
-    QUnit.test("Cannot parse a string that contains only the headers", function (assert) {
-        SplitsBrowserTest.assertException(assert, "WrongFileFormat", () => parseTripleColumnEventData(TRIPLE_COLUMN_HEADER),
-            "Should throw an exception for parsing a string containing only the headers");
-    });
+    QUnit.test("Cannot parse a string that contains only the headers",
+        assert => SplitsBrowserTest.assertException(assert, "WrongFileFormat", () => parseTripleColumnEventData(TRIPLE_COLUMN_HEADER),
+            "Should throw an exception for parsing a string containing only the headers"));
 
-    QUnit.test("Cannot parse a string that contains only the headers and blank lines", function (assert) {
-        SplitsBrowserTest.assertException(assert, "WrongFileFormat", () => parseTripleColumnEventData(TRIPLE_COLUMN_HEADER + "\r\n\r\n\r\n"),
-            "Should throw an exception for parsing a string containing only the headers and blank lines");
-    });
+    QUnit.test("Cannot parse a string that contains only the headers and blank lines",
+        assert => SplitsBrowserTest.assertException(assert, "WrongFileFormat", () => parseTripleColumnEventData(TRIPLE_COLUMN_HEADER + "\r\n\r\n\r\n"),
+            "Should throw an exception for parsing a string containing only the headers and blank lines"));
 
-    QUnit.test("Cannot parse a string that contains only the headers and blank lines", function (assert) {
-        SplitsBrowserTest.assertException(assert, "WrongFileFormat", () => parseTripleColumnEventData(TRIPLE_COLUMN_HEADER + "\r\n1,2,3,4,5"),
-            "Should throw an exception for parsing a string containing only the headers and a too-short line");
-    });
+    QUnit.test("Cannot parse a string that contains only the headers and blank lines",
+        assert => SplitsBrowserTest.assertException(assert, "WrongFileFormat", () => parseTripleColumnEventData(TRIPLE_COLUMN_HEADER + "\r\n1,2,3,4,5"),
+            "Should throw an exception for parsing a string containing only the headers and a too-short line"));
 
-    QUnit.test("Cannot parse a string that contains a line with a non-alphanumeric control code", function (assert) {
+    QUnit.test("Cannot parse a string that contains a line with a non-alphanumeric control code", assert => {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", () => {
             parseTripleColumnEventData(TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "IN:VA:LID", "188"], null, [null, null, null]));
         }, "Should throw an exception for parsing a string containing a non-alphanumeric control code");
     });
 
-    QUnit.test("Can parse a string that contains a single valid competitor", function (assert) {
+    QUnit.test("Can parse a string that contains a single valid competitor", assert => {
         const data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
         const eventData = parseTripleColumnEventData(data);
 
@@ -126,7 +122,7 @@
         assert.deepEqual(course.controls, ["152", "188", "163"]);
     });
 
-    QUnit.test("Can parse a string that contains a single valid competitor with LF line endings", function (assert) {
+    QUnit.test("Can parse a string that contains a single valid competitor with LF line endings", assert => {
         let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
         data = data.replace(/\r/g, "");
         const eventData = parseTripleColumnEventData(data);
@@ -134,7 +130,7 @@
         assert.strictEqual(eventData.courses.length, 1);
     });
 
-    QUnit.test("Can parse a string that contains a single valid competitor with CR line endings", function (assert) {
+    QUnit.test("Can parse a string that contains a single valid competitor with CR line endings", assert => {
         let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
         data = data.replace(/\n/g, "");
         const eventData = parseTripleColumnEventData(data);
@@ -142,7 +138,7 @@
         assert.strictEqual(eventData.courses.length, 1);
     });
 
-    QUnit.test("Can parse a string that contains a single valid competitor with data delimited by semicolons", function (assert) {
+    QUnit.test("Can parse a string that contains a single valid competitor with data delimited by semicolons", assert => {
         let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
         data = data.replace(/,/g, ";");
         const eventData = parseTripleColumnEventData(data);
@@ -150,7 +146,7 @@
         assert.strictEqual(eventData.courses.length, 1);
     });
 
-    QUnit.test("Can parse a string that contains a single valid competitor with alphanumeric but not numeric control code", function (assert) {
+    QUnit.test("Can parse a string that contains a single valid competitor with alphanumeric but not numeric control code", assert => {
         let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "ABC188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
         data = data.replace(/,/g, ";");
         const eventData = parseTripleColumnEventData(data);
@@ -160,7 +156,7 @@
         assert.deepEqual(course.controls, ["152", "ABC188", "163"]);
     });
 
-    QUnit.test("Can parse a string that contains a single valid competitor with two names", function (assert) {
+    QUnit.test("Can parse a string that contains a single valid competitor with two names", assert => {
         let data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner, Second Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
         const eventData = parseTripleColumnEventData(data);
         assert.strictEqual(eventData.classes.length, 1);
@@ -172,7 +168,7 @@
         assert.strictEqual(result.owner.name, "First Runner, Second Runner");
     });
 
-    QUnit.test("Can parse a string that contains two valid competitors on the same course", function (assert) {
+    QUnit.test("Can parse a string that contains two valid competitors on the same course", assert => {
         const data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
                                      fabricateTripleColumnRow("Second Runner", "ABCD", "Course 1", ["152", "188", "163", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 217]);
         const eventData = parseTripleColumnEventData(data);
@@ -196,7 +192,7 @@
         assert.strictEqual(eventData.courses.length, 1);
     });
 
-    QUnit.test("Can parse a string that contains one valid competitor and issue warning for one competitor that contains no times and some other nonsense", function (assert) {
+    QUnit.test("Can parse a string that contains one valid competitor and issue warning for one competitor that contains no times and some other nonsense", assert => {
         const data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]);
         let secondLine = fabricateTripleColumnRow("Second Runner", "ABCD", "Course 1", [], null, []);
         const secondLineParts = secondLine.split(",");
@@ -207,7 +203,7 @@
         assert.strictEqual(eventData.warnings.length, 1);
     });
 
-    QUnit.test("Can parse a string that contains two valid competitors on the same course but in different classes", function (assert) {
+    QUnit.test("Can parse a string that contains two valid competitors on the same course but in different classes", assert => {
         const data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Class 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
                                      fabricateTripleColumnRow("Second Runner", "ABCD", "Class 2", ["152", "188", "163", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 217]);
         const eventData = parseTripleColumnEventData(data);
@@ -218,7 +214,7 @@
         assert.deepEqual(eventData.courses[0].classes, eventData.classes);
     });
 
-    QUnit.test("Can parse a string that contains two valid competitors on different courses and in different classes", function (assert) {
+    QUnit.test("Can parse a string that contains two valid competitors on different courses and in different classes", assert => {
         const data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Class 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
                                      fabricateTripleColumnRow("Second Runner", "ABCD", "Class 2", ["152", "174", "119", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 217]);
         const eventData = parseTripleColumnEventData(data);
@@ -227,7 +223,7 @@
         assert.strictEqual(eventData.courses.length, 2);
     });
 
-    QUnit.test("Issues a warning for a string that contains two competitors on the same course with different numbers of controls", function (assert) {
+    QUnit.test("Issues a warning for a string that contains two competitors on the same course with different numbers of controls", assert => {
         const data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, 202]) +
                                      fabricateTripleColumnRow("Second Runner", "ABCD", "Course 1", ["152", "188", "163", "186", "F1"], 11 * 3600 + 19 * 60, [84, 139, 199, 257, 282]);
         const eventData = parseTripleColumnEventData(data);
@@ -237,7 +233,7 @@
         assert.strictEqual(eventData.warnings.length, 1);
     });
 
-    QUnit.test("Can parse a string that contains a single competitor missing an intermediate control", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor missing an intermediate control", assert => {
         const data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, null, 186, 202]);
         const eventData = parseTripleColumnEventData(data);
 
@@ -253,7 +249,7 @@
         assert.ok(!result.isDisqualified);
     });
 
-    QUnit.test("Can parse a string that contains a single competitor missing the finish control", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor missing the finish control", assert => {
         const data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [72, 141, 186, null]);
         const eventData = parseTripleColumnEventData(data);
 
@@ -269,7 +265,7 @@
         assert.ok(!result.isDisqualified);
     });
 
-    QUnit.test("Can parse a string that contains a single competitor missing all controls and mark said competitor as a non-starter", function (assert) {
+    QUnit.test("Can parse a string that contains a single competitor missing all controls and mark said competitor as a non-starter", assert => {
         // Add a second okay competitor as if all competitors have no times the
         // file is assumed not to be alternative CSV.
         const data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [null, null, null, null]) +
@@ -288,7 +284,7 @@
         assert.ok(!result.isDisqualified);
     });
 
-    QUnit.test("Cannot parse a string that contains two competitors missing all controls", function (assert) {
+    QUnit.test("Cannot parse a string that contains two competitors missing all controls", assert => {
         SplitsBrowserTest.assertException(assert, "WrongFileFormat", () => {
             const data = TRIPLE_COLUMN_HEADER + "\r\n" + fabricateTripleColumnRow("First Runner", "TEST", "Course 1", ["152", "188", "163", "F1"], 10 * 3600 + 38 * 60, [null, null, null, null]) +
                                               "\r\n" + fabricateTripleColumnRow("Second Runner", "ABCD", "Class 2", ["152", "174", "119", "F1"], 11 * 3600 + 19 * 60, [null, null, null, null]);

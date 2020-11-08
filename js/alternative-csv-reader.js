@@ -327,7 +327,7 @@
     }
 
     SplitsBrowser.Input.AlternativeCSV = {
-        parseTripleColumnEventData: function (eventData) {
+        parseTripleColumnEventData: eventData => {
             const reader = new Reader(TRIPLE_COLUMN_FORMAT);
             return reader.parseEventData(eventData);
         }

@@ -118,7 +118,7 @@
      * the v2.0.3 format.  If not, a WrongFileFormat exception is thrown.
      * @param {jQuery.selection} rootElement The root element.
      */
-    Version2Reader.checkVersion = function (rootElement) {
+    Version2Reader.checkVersion = rootElement => {
         const iofVersionElement = $("> IOFVersion", rootElement);
         if (iofVersionElement.length === 0) {
             throwWrongFileFormat("Could not find IOFVersion element");
@@ -168,7 +168,7 @@
      * @param {Array} warnings Array that accumulates warning messages.
      * @return {Object} Course details: id, name, length, climb and numberOfControls
      */
-    Version2Reader.readCourseFromClass = function (classResultElement, warnings) {
+    Version2Reader.readCourseFromClass = (classResultElement, warnings) => {
         // Although the IOF v2 format appears to support courses, they
         // haven't been specified in any of the files I've seen.
         // So instead grab course details from the class and the first
@@ -226,7 +226,7 @@
      *     PersonResult or TeamResult element.
      * @return {String} Competitor or team's club name.
      */
-    Version2Reader.readClubName = function (element) {
+    Version2Reader.readClubName = element => {
         const clubName = $("> Club > ShortName", element).text();
         return (clubName === "") ?  $("> Club > Name", element).text() : clubName;
     };
@@ -246,7 +246,7 @@
      * @return {Number|null} Start time in seconds since midnight, or null if
      *     not found.
      */
-    Version2Reader.readStartTime = function (resultElement) {
+    Version2Reader.readStartTime = resultElement => {
         const startTimeStr = $("> StartTime > Clock", resultElement).text();
         const startTime = (startTimeStr === "") ? null : parseTime(startTimeStr);
         return startTime;
@@ -259,7 +259,7 @@
      * @return {Number|null} The competitor's total time in seconds, or null if
      *     a valid time was not found.
      */
-    Version2Reader.readTotalTime = function (resultElement) {
+    Version2Reader.readTotalTime = resultElement => {
         const totalTimeStr = $("> Time", resultElement).text();
         const totalTime = (totalTimeStr === "") ? null : parseTime(totalTimeStr);
         return totalTime;
@@ -271,7 +271,7 @@
      *     Result element.
      * @return {String} Status of the competitor.
      */
-    Version2Reader.getStatus = function (resultElement) {
+    Version2Reader.getStatus = resultElement => {
         const statusElement = $("> CompetitorStatus", resultElement);
         return (statusElement.length === 1) ? statusElement.attr("value") : "";
     };
@@ -295,7 +295,7 @@
      *     a SplitTime element.
      * @return {Object} Object containing code and time.
      */
-    Version2Reader.readSplitTime = function (splitTimeElement) {
+    Version2Reader.readSplitTime = splitTimeElement => {
         // IOF v2 allows ControlCode or Control elements.
         let code = $("> ControlCode", splitTimeElement).text();
         if (code === "") {
@@ -340,7 +340,7 @@
      * the v2.0.3 format.  If not, a WrongFileFormat exception is thrown.
      * @param {jQuery.selection} rootElement The root element.
      */
-    Version3Reader.checkVersion = function (rootElement) {
+    Version3Reader.checkVersion = rootElement => {
         const iofVersion = rootElement.attr("iofVersion");
         if (isUndefined(iofVersion)) {
             throwWrongFileFormat("Could not find IOF version number");
@@ -386,7 +386,7 @@
      * @return {Object} Course details: id, name, length, climb and number of
      *     controls.
      */
-    Version3Reader.readCourseFromClass = function (classResultElement, warnings) {
+    Version3Reader.readCourseFromClass = (classResultElement, warnings) => {
         const courseElement = $("> Course", classResultElement);
         const id = $("> Id", courseElement).text() || null;
         const name = $("> Name", courseElement).text();
@@ -436,7 +436,7 @@
      *     PersonResult or TeamResult element.
      * @return {String} Competitor or team's club name.
      */
-    Version3Reader.readClubName = function (element) {
+    Version3Reader.readClubName = element => {
         const clubName = $("> Organisation > ShortName", element).text();
         return (clubName === "") ? $("> Organisation > Name", element).text() : clubName;
     };
@@ -447,7 +447,7 @@
      *     PersonResult element.
      * @return {String} The competitor's date of birth, as a string.
      */
-    Version3Reader.readDateOfBirth = function (element) {
+    Version3Reader.readDateOfBirth = element => {
         const birthDate = $("> Person > BirthDate", element).text();
         const regexResult = yearRegexp.exec(birthDate);
         return (regexResult === null) ? null : parseInt(regexResult[0], 10);
@@ -460,7 +460,7 @@
      * @return {Number|null} Competitor's start time, in seconds since midnight,
      *     or null if not known.
      */
-    Version3Reader.readStartTime = function (resultElement) {
+    Version3Reader.readStartTime = resultElement => {
         const startTimeStr = $("> StartTime", resultElement).text();
         const result = ISO_8601_RE.exec(startTimeStr);
         if (result === null) {
@@ -480,7 +480,7 @@
      * @return {Number|null} The parsed time, in seconds, or null if it could not
      *     be read.
      */
-    Version3Reader.readTime = function (timeStr) {
+    Version3Reader.readTime = timeStr => {
         // IOF v3 allows fractional seconds, so we use parseFloat instead
         // of parseInt.
         const time = parseFloat(timeStr);
@@ -494,7 +494,7 @@
      * @return {Number|null} Competitor's total time, in seconds, or null if a time
      *     was not found or was invalid.
      */
-    Version3Reader.readTotalTime = function (resultElement) {
+    Version3Reader.readTotalTime = resultElement => {
         const totalTimeStr = $("> Time", resultElement).text();
         return Version3Reader.readTime(totalTimeStr);
     };
@@ -528,7 +528,7 @@
      *     a SplitTime element.
      * @return {Object} Object containing code and time.
      */
-    Version3Reader.readSplitTime = function (splitTimeElement) {
+    Version3Reader.readSplitTime = splitTimeElement => {
         const code = $("> ControlCode", splitTimeElement).text();
         if (code === "") {
             throwInvalidData("Control code missing for control");

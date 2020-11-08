@@ -36,14 +36,14 @@
         return fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [65, 221, 184, 100]);
     }
 
-    QUnit.test("Getting other classes of a course with one class returns empty list when given that one class", function (assert) {
+    QUnit.test("Getting other classes of a course with one class returns empty list when given that one class", assert => {
         const courseClass = new CourseClass("Test class", 3, []);
         const course = new Course("Test course", [courseClass], null, null, null);
 
         assert.deepEqual(course.getOtherClasses(courseClass), [], "There should be no other classes");
     });
 
-    QUnit.test("Course created with three classes has three classes", function (assert) {
+    QUnit.test("Course created with three classes has three classes", assert => {
         const courseClass1 = new CourseClass("Test class 1", 3, []);
         const courseClass2 = new CourseClass("Test class 2", 3, []);
         const courseClass3 = new CourseClass("Test class 3", 3, []);
@@ -52,7 +52,7 @@
         assert.strictEqual(course.getNumClasses(), 3, "Course should have three classes");
     });
 
-    QUnit.test("Getting other classes of a course with three classes returns the other two when given one of the others", function (assert) {
+    QUnit.test("Getting other classes of a course with three classes returns the other two when given one of the others", assert => {
         const courseClass1 = new CourseClass("Test class 1", 3, []);
         const courseClass2 = new CourseClass("Test class 2", 3, []);
         const courseClass3 = new CourseClass("Test class 3", 3, []);
@@ -61,7 +61,7 @@
         assert.deepEqual(course.getOtherClasses(courseClass2), [courseClass1, courseClass3], "There should be no other classes");
     });
 
-    QUnit.test("Attempting to get other courses of a course with three classes when given some other class throws an exception", function (assert) {
+    QUnit.test("Attempting to get other courses of a course with three classes when given some other class throws an exception", assert => {
         const courseClass1 = new CourseClass("Test class 1", 3, []);
         const courseClass2 = new CourseClass("Test class 2", 3, []);
         const courseClass3 = new CourseClass("Test class 3", 3, []);
@@ -69,58 +69,58 @@
         SplitsBrowserTest.assertInvalidData(assert, () => course.getOtherClasses(courseClass3));
     });
 
-    QUnit.test("Course created without controls does not contain controls", function (assert) {
+    QUnit.test("Course created without controls does not contain controls", assert => {
         const course = new Course("Test course", [new CourseClass("Test class", 3, [])], null, null, null);
         assert.ok(!course.hasControls());
     });
 
-    QUnit.test("Course created with controls does contain controls", function (assert) {
+    QUnit.test("Course created with controls does contain controls", assert => {
         const course = new Course("Test course", [new CourseClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
         assert.ok(course.hasControls());
     });
 
-    QUnit.test("Course created with controls does contain controls", function (assert) {
+    QUnit.test("Course created with controls does contain controls", assert => {
         const course = new Course("Test course", [new CourseClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
         assert.ok(course.hasControls());
     });
 
-    QUnit.test("Cannot get the code of a control with negative number", function (assert) {
+    QUnit.test("Cannot get the code of a control with negative number", assert => {
         const course = new Course("Test course", [new CourseClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
         SplitsBrowserTest.assertInvalidData(assert, () => course.getControlCode(-1));
     });
 
-    QUnit.test("Getting the code of start control returns start constant", function (assert) {
+    QUnit.test("Getting the code of start control returns start constant", assert => {
         const course = new Course("Test course", [new CourseClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
         assert.strictEqual(course.getControlCode(0), Course.START);
     });
 
-    QUnit.test("Getting the code of the first control returns the first control's code", function (assert) {
+    QUnit.test("Getting the code of the first control returns the first control's code", assert => {
         const course = new Course("Test course", [new CourseClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
         assert.strictEqual(course.getControlCode(1), "208");
     });
 
-    QUnit.test("Getting the code of the last control returns the last control's code", function (assert) {
+    QUnit.test("Getting the code of the last control returns the last control's code", assert => {
         const course = new Course("Test course", [new CourseClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
         assert.strictEqual(course.getControlCode(3), "212");
     });
 
-    QUnit.test("Getting the control code of the finish returns null", function (assert) {
+    QUnit.test("Getting the control code of the finish returns null", assert => {
         const course = new Course("Test course", [new CourseClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
         assert.strictEqual(course.getControlCode(4), Course.FINISH);
     });
 
-    QUnit.test("Cannot get the code of a control with number too large", function (assert) {
+    QUnit.test("Cannot get the code of a control with number too large", assert => {
         const course = new Course("Test course", [new CourseClass("Test class", 3, [])], null, null, ["208", "227", "212"]);
         SplitsBrowserTest.assertInvalidData(assert, () => course.getControlCode(5));
     });
 
-    QUnit.test("Course created without controls does not contain a given leg", function (assert) {
+    QUnit.test("Course created without controls does not contain a given leg", assert => {
         const courseClass = new CourseClass("Test class", 3, []);
         const course = new Course("Test course", [courseClass], null, null, null);
         assert.ok(!course.usesLeg("235", "212"));
     });
 
-    QUnit.test("Course created with controls contains legs from each pair of consecutive controls it was created with", function (assert) {
+    QUnit.test("Course created with controls contains legs from each pair of consecutive controls it was created with", assert => {
         const courseClass = new CourseClass("Test class", 3, []);
         const controls = ["235", "212", "189"];
         const course = new Course("Test course", [courseClass], 4.1, 115, controls);
@@ -130,14 +130,14 @@
         assert.ok(course.usesLeg("189", Course.FINISH), "Course should use leg from control 3 to the finish");
     });
 
-    QUnit.test("Course created with empty list of controls contains leg from start to finish", function (assert) {
+    QUnit.test("Course created with empty list of controls contains leg from start to finish", assert => {
         const courseClass = new CourseClass("Test class", 0, []);
         const controls = [];
         const course = new Course("Test course", [courseClass], 4.1, 115, controls);
         assert.ok(course.usesLeg(Course.START, Course.FINISH), "Course should use leg from start to finish");
     });
 
-    QUnit.test("Course created with empty list of controls does not contain legs with controls other than the start and finish", function (assert) {
+    QUnit.test("Course created with empty list of controls does not contain legs with controls other than the start and finish", assert => {
         const courseClass = new CourseClass("Test class", 0, []);
         const controls = [];
         const course = new Course("Test course", [courseClass], 4.1, 115, controls);
@@ -146,7 +146,7 @@
         assert.ok(!course.usesLeg("212", "189"), "Course should use leg from some control to some other control");
     });
 
-    QUnit.test("Course created with controls does not contain legs that are not part of it", function (assert) {
+    QUnit.test("Course created with controls does not contain legs that are not part of it", assert => {
         const courseClass = new CourseClass("Test class", 3, []);
         const controls = ["235", "212", "189"];
         const course = new Course("Test course", [courseClass], 4.1, 115, controls);
@@ -158,7 +158,7 @@
         assert.ok(!course.usesLeg("235", "189"), "Course does not use leg from control 1 to control 3");
     });
 
-    QUnit.test("Course created with butterfly loops contains all legs despite central control being repeated", function (assert) {
+    QUnit.test("Course created with butterfly loops contains all legs despite central control being repeated", assert => {
         const courseClass = new CourseClass("Test class", 3, []);
         const controls = ["235", "212", "189", "194", "212", "208", "214", "222"];
         const course = new Course("Test course", [courseClass], 4.1, 115, controls);
@@ -167,27 +167,27 @@
         }
     });
 
-    QUnit.test("Cannot get fastest splits for a leg of a course created without legs", function (assert) {
+    QUnit.test("Cannot get fastest splits for a leg of a course created without legs", assert => {
         const courseClass = new CourseClass("Test class", 3, []);
         const course = new Course("Test course", [courseClass], null, null, null);
         SplitsBrowserTest.assertInvalidData(assert, () => course.getFastestSplitsForLeg("235", "212"));
     });
 
-    QUnit.test("Cannot get fastest splits for a leg that is not part of a course", function (assert) {
+    QUnit.test("Cannot get fastest splits for a leg that is not part of a course", assert => {
         const courseClass = new CourseClass("Test class", 3, []);
         const controls = ["235", "212", "189"];
         const course = new Course("Test course", [courseClass], 4.1, 115, controls);
         SplitsBrowserTest.assertInvalidData(assert, () => course.getFastestSplitsForLeg("235", "227"));
     });
 
-    QUnit.test("Returns empty array of fastest splits when course has no competitors", function (assert) {
+    QUnit.test("Returns empty array of fastest splits when course has no competitors", assert => {
         const courseClass = new CourseClass("Test class", 3, []);
         const controls = ["235", "212", "189"];
         const course = new Course("Test course", [courseClass], 4.1, 115, controls);
         assert.deepEqual(course.getFastestSplitsForLeg("212", "189"), []);
     });
 
-    QUnit.test("Returns single-element array of fastest splits when course has one class with two competitors", function (assert) {
+    QUnit.test("Returns single-element array of fastest splits when course has one class with two competitors", assert => {
         const result2 = getResult2();
         const courseClass = new CourseClass("Test class", 3, [getResult1(), result2]);
         const controls = ["235", "212", "189"];
@@ -195,7 +195,7 @@
         assert.deepEqual(course.getFastestSplitsForLeg("212", "189"), [{name: result2.owner.name, className:"Test class", split: 184}]);
     });
 
-    QUnit.test("Returns single-element array of fastest splits when course has one class with two competitors and one empty class", function (assert) {
+    QUnit.test("Returns single-element array of fastest splits when course has one class with two competitors and one empty class", assert => {
         const result2 = getResult2();
         const courseClass = new CourseClass("Test class", 3, [getResult1(), result2]);
         const emptyClass = new CourseClass("Empty class", 3, []);
@@ -204,7 +204,7 @@
         assert.deepEqual(course.getFastestSplitsForLeg("212", "189"), [{name: result2.owner.name, className: courseClass.name, split: 184}]);
     });
 
-    QUnit.test("Returns two-element array of fastest splits when course has two classes with one competitor each", function (assert) {
+    QUnit.test("Returns two-element array of fastest splits when course has two classes with one competitor each", assert => {
         const result1 = getResult1();
         const result2 = getResult2();
         const courseClass1 = new CourseClass("Test class 1", 3, [result1]);
@@ -214,25 +214,25 @@
         assert.deepEqual(course.getFastestSplitsForLeg("212", "189"), [{name: result1.owner.name, className: courseClass1.name, split: 212}, {name: result2.owner.name, className: courseClass2.name, split: 184}]);
     });
 
-    QUnit.test("Returns empty list of competitors when attempting to fetch competitors visiting a control in an interval when there are no course-classes", function (assert) {
+    QUnit.test("Returns empty list of competitors when attempting to fetch competitors visiting a control in an interval when there are no course-classes", assert => {
         const course = new Course("Test course", [], null, null, ["235", "212", "189"]);
         assert.deepEqual(course.getResultsAtControlInTimeRange("212", 10 * 3600, 11 * 3600), []);
     });
 
-    QUnit.test("Returns empty list of competitors when attempting to fetch competitors visiting a control in an interval when course has no control information", function (assert) {
+    QUnit.test("Returns empty list of competitors when attempting to fetch competitors visiting a control in an interval when course has no control information", assert => {
         const courseClass = new CourseClass("Test class", 3, [getResult1(), getResult2()]);
         const course = new Course("Test course", [courseClass], null, null, null);
         assert.deepEqual(course.getResultsAtControlInTimeRange("123", 10 * 3600, 11 * 3600), []);
     });
 
-    QUnit.test("Returns empty list of competitors when attempting to fetch competitors visiting a control in an interval whose code does not exist in the course", function (assert) {
+    QUnit.test("Returns empty list of competitors when attempting to fetch competitors visiting a control in an interval whose code does not exist in the course", assert => {
         const courseClass = new CourseClass("Test class", 3, [getResult1(), getResult2()]);
         const controls = ["235", "212", "189"];
         const course = new Course("Test course", [courseClass], null, null, controls);
         assert.deepEqual(course.getResultsAtControlInTimeRange("456", 10 * 3600, 11 * 3600), []);
     });
 
-    QUnit.test("Returns singleton list of competitors when attempting to fetch competitors visiting a control in an interval when the control is on the course", function (assert) {
+    QUnit.test("Returns singleton list of competitors when attempting to fetch competitors visiting a control in an interval when the control is on the course", assert => {
         const result2 = getResult2();
         const courseClass = new CourseClass("Test class", 3, [getResult1(), result2]);
         const controls = ["235", "212", "189"];
@@ -241,7 +241,7 @@
         assert.deepEqual(course.getResultsAtControlInTimeRange("212", expectedTime - 1, expectedTime + 1), [{name: result2.owner.name, time: expectedTime, className: courseClass.name}]);
     });
 
-    QUnit.test("Returns list of competitors from two different classes when attempting to fetch competitors visiting a control in an interval when the control is on the course", function (assert) {
+    QUnit.test("Returns list of competitors from two different classes when attempting to fetch competitors visiting a control in an interval when the control is on the course", assert => {
         const result1 = getResult1();
         const result2 = getResult2();
         const courseClass1 = new CourseClass("Test class 1", 3, [result1]);
@@ -255,7 +255,7 @@
         ]);
     });
 
-    QUnit.test("Returns list of competitors punching both occurrences of a control when attempting to fetch competitors visiting a control in an interval", function (assert) {
+    QUnit.test("Returns list of competitors punching both occurrences of a control when attempting to fetch competitors visiting a control in an interval", assert => {
         const result1 = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [81, 197, 212, 106, 163]);
         const result2 = fromSplitTimes(2, "Second Runner", "DEF", 10 * 3600 + 35 * 60, [99, 184, 230, 111, 158]);
 
@@ -270,7 +270,7 @@
         ]);
     });
 
-    QUnit.test("Returns singleton list of competitors from two different classes when attempting to fetch competitor times at the start for an interval", function (assert) {
+    QUnit.test("Returns singleton list of competitors from two different classes when attempting to fetch competitor times at the start for an interval", assert => {
         const result1 = getResult1();
         const courseClass1 = new CourseClass("Test class 1", 3, [result1]);
         const courseClass2 = new CourseClass("Test class 2", 3, [getResult2()]);
@@ -279,7 +279,7 @@
             [{name: result1.owner.name, time: 10 * 3600 + 30 * 60, className: courseClass1.name}]);
     });
 
-    QUnit.test("Returns singleton list of competitors from two different classes when attempting to fetch competitor times at the start for an interval", function (assert) {
+    QUnit.test("Returns singleton list of competitors from two different classes when attempting to fetch competitor times at the start for an interval", assert => {
         const result2 = getResult2();
         const courseClass1 = new CourseClass("Test class 1", 3, [getResult1()]);
         const courseClass2 = new CourseClass("Test class 2", 3, [result2]);
@@ -289,57 +289,57 @@
             [{name: result2.owner.name, time: expectedTime, className: courseClass2.name}]);
     });
 
-    QUnit.test("Course with no controls does not have a control", function (assert) {
+    QUnit.test("Course with no controls does not have a control", assert => {
         const course = new Course("Test course", [], null, null, null);
         assert.ok(!course.hasControl("235"));
     });
 
-    QUnit.test("Course with controls does not have a control not on that course", function (assert) {
+    QUnit.test("Course with controls does not have a control not on that course", assert => {
         const course = new Course("Test course", [], null, null, ["235", "212", "189"]);
         assert.ok(!course.hasControl("999"));
     });
 
-    QUnit.test("Course with controls does have a control on that course", function (assert) {
+    QUnit.test("Course with controls does have a control on that course", assert => {
         const course = new Course("Test course", [], null, null, ["235", "212", "189"]);
         assert.ok(course.hasControl("235"));
     });
 
-    QUnit.test("Cannot return next control on course that has no controls", function (assert) {
+    QUnit.test("Cannot return next control on course that has no controls", assert => {
         const course = new Course("Test course", [], null, null, null);
         SplitsBrowserTest.assertInvalidData(assert, () => course.getNextControls("235"));
     });
 
-    QUnit.test("Cannot return next control after finish on course that has controls", function (assert) {
+    QUnit.test("Cannot return next control after finish on course that has controls", assert => {
         const course = new Course("Test course", [], null, null, ["235", "212", "189"]);
         SplitsBrowserTest.assertInvalidData(assert, () => course.getNextControls(Course.FINISH));
     });
 
-    QUnit.test("Cannot return next control after control not on course", function (assert) {
+    QUnit.test("Cannot return next control after control not on course", assert => {
         const course = new Course("Test course", [], null, null, ["235", "212", "189"]);
         SplitsBrowserTest.assertInvalidData(assert, () => course.getNextControls("999"));
     });
 
-    QUnit.test("Can return next control after start as first control", function (assert) {
+    QUnit.test("Can return next control after start as first control", assert => {
         const course = new Course("Test course", [], null, null, ["235", "212", "189"]);
         assert.deepEqual(course.getNextControls(Course.START), ["235"]);
     });
 
-    QUnit.test("Can return next control after intermediate control", function (assert) {
+    QUnit.test("Can return next control after intermediate control", assert => {
         const course = new Course("Test course", [], null, null, ["235", "212", "189"]);
         assert.deepEqual(course.getNextControls("212"), ["189"]);
     });
 
-    QUnit.test("Can return next control after last control as the finish", function (assert) {
+    QUnit.test("Can return next control after last control as the finish", assert => {
         const course = new Course("Test course", [], null, null, ["235", "212", "189"]);
         assert.deepEqual(course.getNextControls("189"), [Course.FINISH]);
     });
 
-    QUnit.test("Can return next control from start on course that has zero controls as the finish only", function (assert) {
+    QUnit.test("Can return next control from start on course that has zero controls as the finish only", assert => {
         const course = new Course("Test course", [], null, null, []);
         assert.deepEqual(course.getNextControls(Course.START), [Course.FINISH]);
     });
 
-    QUnit.test("Can return next controls after intermediate control that appears more than once", function (assert) {
+    QUnit.test("Can return next controls after intermediate control that appears more than once", assert => {
         const course = new Course("Test course", [], null, null, ["235", "212", "189", "212", "197"]);
         assert.deepEqual(course.getNextControls("212"), ["189", "197"]);
     });

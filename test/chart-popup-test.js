@@ -25,13 +25,13 @@
 
     const ChartPopup = SplitsBrowser.Controls.ChartPopup;
 
-    QUnit.test("Can create a popup without it initially being hidden", function (assert) {
+    QUnit.test("Can create a popup without it initially being hidden", assert => {
         const popup = new ChartPopup(d3.select("#qunit-fixture").node());
 
         assert.ok(!popup.isShown(), "Popup should initially be hidden");
     });
 
-    QUnit.test("Can create a popup, show it and then hide it", function (assert) {
+    QUnit.test("Can create a popup, show it and then hide it", assert => {
         const popup = new ChartPopup(d3.select("#qunit-fixture").node());
 
         popup.show({x: 0, y: 0});

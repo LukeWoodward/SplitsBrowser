@@ -32,20 +32,20 @@
         SplitsBrowser.setMessageAlerter(() => alerterCalled = true);
     }
 
-    QUnit.test("Can look up a test message that exists", function (assert) {
+    QUnit.test("Can look up a test message that exists", assert => {
         setAlerter();
         SplitsBrowser.Messages[DEFAULT_LANGUAGE].TestMessage = "This is a test";
         assert.strictEqual(SplitsBrowser.getMessage("TestMessage"), SplitsBrowser.Messages[DEFAULT_LANGUAGE].TestMessage);
         assert.ok(!alerterCalled, "Alerter should not have been called");
     });
 
-    QUnit.test("Cannot look up a message that does not exist", function (assert) {
+    QUnit.test("Cannot look up a message that does not exist", assert => {
         setAlerter();
         SplitsBrowser.getMessage("ThisMessageDoesNotExist");
         assert.ok(alerterCalled, "Alerter should have been called for non-existent message.  Has some other test already reported a missing message key?");
     });
 
-    QUnit.test("Can look up a test message that exists and apply formatting", function (assert) {
+    QUnit.test("Can look up a test message that exists and apply formatting", assert => {
         setAlerter();
         SplitsBrowser.Messages[DEFAULT_LANGUAGE].TestMessage = "This is $$ONE$$ test $$TWO$$";
         const result = SplitsBrowser.getMessageWithFormatting("TestMessage", {"$$ONE$$": "one", "$$TWO$$": "two"});
@@ -53,7 +53,7 @@
         assert.ok(!alerterCalled, "Alerter should not have been called");
     });
 
-    QUnit.test("Can look up a test message that exists and apply formatting, replacing the same parameter name twice", function (assert) {
+    QUnit.test("Can look up a test message that exists and apply formatting, replacing the same parameter name twice", assert => {
         setAlerter();
         SplitsBrowser.Messages[DEFAULT_LANGUAGE].TestMessage = "This is $$ONE$$ test $$ONE$$";
         const result = SplitsBrowser.getMessageWithFormatting("TestMessage", {"$$ONE$$": "one"});
@@ -61,36 +61,29 @@
         assert.ok(!alerterCalled, "Alerter should not have been called");
     });
 
-    QUnit.test("Can try to get a test message that exists", function (assert) {
+    QUnit.test("Can try to get a test message that exists", assert => {
         setAlerter();
         SplitsBrowser.Messages[DEFAULT_LANGUAGE].TestMessage = "This is a test";
         assert.strictEqual(SplitsBrowser.tryGetMessage("TestMessage"), SplitsBrowser.Messages[DEFAULT_LANGUAGE].TestMessage);
         assert.ok(!alerterCalled, "Alerter should not have been called");
     });
 
-    QUnit.test("Can try to get a message that does not exist with the default being returned instead", function (assert) {
+    QUnit.test("Can try to get a message that does not exist with the default being returned instead", assert => {
         setAlerter();
         assert.strictEqual(SplitsBrowser.tryGetMessage("ThisMessageDoesNotExist", "DefaultValue"), "DefaultValue");
         assert.ok(!alerterCalled, "Alerter should not have been called for tryGetMessage with non-existent message");
     });
 
-    QUnit.test("Can get all loaded languages", function (assert) {
-        assert.deepEqual(SplitsBrowser.getAllLanguages(), ["en_gb", "de"]);
-    });
+    QUnit.test("Can get all loaded languages", assert => assert.deepEqual(SplitsBrowser.getAllLanguages(), ["en_gb", "de"]));
 
-    QUnit.test("Can get name of English language", function (assert) {
-        assert.strictEqual("English", SplitsBrowser.getLanguageName("en_gb"));
-    });
+    QUnit.test("Can get name of English language", assert => assert.strictEqual("English", SplitsBrowser.getLanguageName("en_gb")));
 
-    QUnit.test("Can get name of German language", function (assert) {
-        assert.strictEqual("Deutsch", SplitsBrowser.getLanguageName("de"));
-    });
+    QUnit.test("Can get name of German language", assert => assert.strictEqual("Deutsch", SplitsBrowser.getLanguageName("de")));
 
-    QUnit.test("Can get name of unrecognised language as placeholder string", function (assert) {
-        assert.strictEqual("?????", SplitsBrowser.getLanguageName("This is not a recognised language"));
-    });
+    QUnit.test("Can get name of unrecognised language as placeholder string",
+        assert => assert.strictEqual("?????", SplitsBrowser.getLanguageName("This is not a recognised language")));
 
-    QUnit.test("Can change language to German and get translation in German", function (assert) {
+    QUnit.test("Can change language to German and get translation in German", assert => {
         assert.strictEqual(SplitsBrowser.getLanguage(), "en_gb");
         SplitsBrowser.setLanguage("de");
         try {
@@ -103,7 +96,7 @@
         }
     });
 
-    QUnit.test("Changing to an unrecognised language has no effect", function (assert) {
+    QUnit.test("Changing to an unrecognised language has no effect", assert => {
         assert.strictEqual(SplitsBrowser.getLanguage(), "en_gb");
         SplitsBrowser.setLanguage("This is not a recognised language");
         assert.strictEqual("English", SplitsBrowser.getMessage("Language"));

@@ -41,7 +41,7 @@ const SplitsBrowserTest = {};
      *     failure message if no exception is thrown.  A default message is used
      *     instead if this is not specified.
      */
-    SplitsBrowserTest.assertException = function (assert, exceptionName, func, failureMessage) {
+    SplitsBrowserTest.assertException = (assert, exceptionName, func, failureMessage) => {
         try {
             func();
             assert.ok(false, failureMessage || `An exception with name '${exceptionName}' should have been thrown, but no exception was thrown`);
@@ -61,9 +61,7 @@ const SplitsBrowserTest = {};
      *     failure message if no exception is thrown.  A default message is used
      *     instead if this is not specified.
      */
-    SplitsBrowserTest.assertInvalidData = function (assert,  func, failureMessage) {
-        SplitsBrowserTest.assertException(assert, "InvalidData", func, failureMessage);
-    };
+    SplitsBrowserTest.assertInvalidData = (assert,  func, failureMessage) => SplitsBrowserTest.assertException(assert, "InvalidData", func, failureMessage);
 
 
     /**
@@ -74,7 +72,7 @@ const SplitsBrowserTest = {};
      * @param {Array} actualArray The 'actual' array of numbers.
      * @param {Array} expectedArray The 'expected' array of numbers.
      */
-    SplitsBrowserTest.assertStrictEqualArrays = function (assert, actualArray, expectedArray) {
+    SplitsBrowserTest.assertStrictEqualArrays = (assert, actualArray, expectedArray) => {
         assert.ok($.isArray(actualArray), "actualArray is not an array");
         assert.ok($.isArray(expectedArray), "expectedArray is not an array");
         assert.strictEqual(actualArray.length, expectedArray.length,
@@ -114,7 +112,7 @@ const SplitsBrowserTest = {};
      * @param {Array} splitTimes Array of split times, as numbers, with nulls for missed controls.
      * @return {Result} Created result.
      */
-    SplitsBrowserTest.fromSplitTimes = function (order, name, club, startTime, splitTimes) {
+    SplitsBrowserTest.fromSplitTimes = (order, name, club, startTime, splitTimes) => {
         const cumTimes = [0];
         for (let i = 0; i < splitTimes.length; i += 1) {
             cumTimes.push(addIfNotNull(cumTimes[i], splitTimes[i]));
@@ -134,7 +132,7 @@ const SplitsBrowserTest = {};
      * @param {Boolean} timeLoss Whether the 'Time Loss' statistic is selected.
      * @return {Map} The created map.
      */
-    SplitsBrowserTest.makeStatsMap = function(totalTime, splitTime, behindFastest, timeLoss) {
+    SplitsBrowserTest.makeStatsMap = (totalTime, splitTime, behindFastest, timeLoss) => {
         return new Map([
             ["TotalTime", totalTime],
             ["SplitTime", splitTime],

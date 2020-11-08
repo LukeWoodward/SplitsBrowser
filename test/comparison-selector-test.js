@@ -131,7 +131,7 @@
         return new ComparisonSelector(d3.select("#qunit-fixture").node(), alerter);
     }
 
-    QUnit.test("Comparison selector created enabled and with result selector populated but not displayed", function(assert) {
+    QUnit.test("Comparison selector created enabled and with result selector populated but not displayed", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -161,7 +161,7 @@
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
-    QUnit.test("Comparison selector created enabled and with result selector populated with completing results only", function(assert) {
+    QUnit.test("Comparison selector created enabled and with result selector populated with completing results only", assert => {
         resetLastSelector();
         const selector = createSelector();
         const courseClassSet = getDummyCourseClassSetWithMispuncher();
@@ -181,7 +181,7 @@
         assert.deepEqual(selector.getComparisonType(), {index: 1, result: null});
     });
 
-    QUnit.test("Comparison selector created and result selector displayed when selecting last item", function(assert) {
+    QUnit.test("Comparison selector created and result selector displayed when selecting last item", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -197,7 +197,7 @@
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
-    QUnit.test("Correct result index selected when result list contains a mispuncher", function(assert) {
+    QUnit.test("Correct result index selected when result list contains a mispuncher", assert => {
         resetLastSelector();
         const selector = createSelector();
         const courseClassSet = getDummyCourseClassSetWithMispuncher();
@@ -215,7 +215,7 @@
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
-    QUnit.test("Registering a handler and changing a value in the comparison selector triggers a call to change callback", function(assert) {
+    QUnit.test("Registering a handler and changing a value in the comparison selector triggers a call to change callback", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -234,7 +234,7 @@
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
-    QUnit.test("Registering a handler and changing a value in the result selector triggers a call to change callback", function(assert) {
+    QUnit.test("Registering a handler and changing a value in the result selector triggers a call to change callback", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -250,7 +250,7 @@
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
-    QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", function(assert) {
+    QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", assert => {
         resetLastSelector();
 
         let lastSelector2 = null;
@@ -281,7 +281,7 @@
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
-    QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", function(assert) {
+    QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -302,7 +302,7 @@
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
-    QUnit.test("Result selector appears if 'Any Result...' is selected and disappears when deselected", function(assert) {
+    QUnit.test("Result selector appears if 'Any Result...' is selected and disappears when deselected", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -323,7 +323,7 @@
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
-    QUnit.test("Can get comparison type when selecting a result from the 'Any result...' drop-down", function(assert) {
+    QUnit.test("Can get comparison type when selecting a result from the 'Any result...' drop-down", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -339,7 +339,7 @@
         assert.deepEqual(comparisonType, {index: anyResultOptionIndex, result: results[1]}, "Selected result should be in the comparison type");
     });
 
-    QUnit.test("Result selector repopulated when class data changes", function(assert) {
+    QUnit.test("Result selector repopulated when class data changes", assert => {
         resetLastSelector();
         const selector = createSelector();
         const htmlSelect = d3.select(_RESULT_SELECTOR_SELECTOR).node();
@@ -369,7 +369,7 @@
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
-    QUnit.test("Result selector remains selected on same result if course-class set changes and selected result still in list", function(assert) {
+    QUnit.test("Result selector remains selected on same result if course-class set changes and selected result still in list", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -386,7 +386,7 @@
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
-    QUnit.test("Result selector returns to first result if course-class set changes and selected result no longer in list", function(assert) {
+    QUnit.test("Result selector returns to first result if course-class set changes and selected result no longer in list", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -403,7 +403,7 @@
         assert.strictEqual(alertsReceived.length, 0, "No alerts should have been issued");
     });
 
-    QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has no winner and 'Winner' option chosen", function(assert) {
+    QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has no winner and 'Winner' option chosen", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner(false));
@@ -420,7 +420,7 @@
         assert.strictEqual(alertsReceived[0], getMessageWithFormatting("CannotCompareAsNoWinner", {"$$OPTION$$": getMessage("CompareWithWinner")}));
     });
 
-    QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has no winner and 'Any result...' option chosen", function(assert) {
+    QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has no winner and 'Any result...' option chosen", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner(false));
@@ -436,7 +436,7 @@
         assert.strictEqual($(_RESULT_SELECTOR_SELECTOR).is(":visible"), false, "Result selector should not be shown");
     });
 
-    QUnit.test("Can set selector value to a given index that isn't Any Result", function(assert) {
+    QUnit.test("Can set selector value to a given index that isn't Any Result", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -451,7 +451,7 @@
         assert.strictEqual($(_RESULT_SELECTOR_SELECTOR).is(":visible"), false, "Result selector should not be shown");
     });
 
-    QUnit.test("Cannot set selector value to a negative index", function(assert) {
+    QUnit.test("Cannot set selector value to a negative index", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -466,7 +466,7 @@
         assert.strictEqual($(_RESULT_SELECTOR_SELECTOR).is(":visible"), false, "Result selector should not be shown");
     });
 
-    QUnit.test("Cannot set selector value to an index too large", function(assert) {
+    QUnit.test("Cannot set selector value to an index too large", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -481,7 +481,7 @@
         assert.strictEqual($(_RESULT_SELECTOR_SELECTOR).is(":visible"), false, "Result selector should not be shown");
     });
 
-    QUnit.test("Can set selector value to a named result", function(assert) {
+    QUnit.test("Can set selector value to a named result", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -499,7 +499,7 @@
         assert.strictEqual(resultSelect.val(), "1", "Second result should have been selected");
     });
 
-    QUnit.test("Setting selector value to a nonexistent result has no effect", function(assert) {
+    QUnit.test("Setting selector value to a nonexistent result has no effect", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(DUMMY_CLASS_SET);
@@ -514,7 +514,7 @@
         assert.strictEqual($(_RESULT_SELECTOR_SELECTOR).is(":visible"), false, "Result selector should not be shown");
     });
 
-    QUnit.test("Can get the compared-against result after selecting to compare against any result", function(assert) {
+    QUnit.test("Can get the compared-against result after selecting to compare against any result", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother());
@@ -531,7 +531,7 @@
         assert.deepEqual(selector.getComparisonType(), {index: 6, result: extraResult});
     });
 
-    QUnit.test("Comparison type reverts to from Winner to Fastest Time if removing a class removes the winner", function(assert) {
+    QUnit.test("Comparison type reverts to from Winner to Fastest Time if removing a class removes the winner", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother());
@@ -552,7 +552,7 @@
         assert.deepEqual(selector.getComparisonType(), {index: 1, result: null});
     });
 
-    QUnit.test("Comparison type doesn't change from Fastest Time + 5% if removing a class removes the winner", function(assert) {
+    QUnit.test("Comparison type doesn't change from Fastest Time + 5% if removing a class removes the winner", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother());
@@ -573,7 +573,7 @@
         assert.deepEqual(selector.getComparisonType(), {index: 2, result: null});
     });
 
-    QUnit.test("Comparison type reverts to from Any Result to Fastest Time if removing a class removes the winner", function(assert) {
+    QUnit.test("Comparison type reverts to from Any Result to Fastest Time if removing a class removes the winner", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinnerOnOneClassAndAWinnerOnAnother());
@@ -596,7 +596,7 @@
         assert.deepEqual(selector.getComparisonType(), {index: 1, result: null});
     });
 
-    QUnit.test("Comparison type set to Any Team for a team class", function(assert) {
+    QUnit.test("Comparison type set to Any Team for a team class", assert => {
         const selector = createSelector();
         const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         selector.setCourseClassSet(getDummyTeamCourseClassSet());
@@ -604,7 +604,7 @@
         assert.strictEqual($(_RESULT_SPAN_SELECTOR).text(), getMessage("CompareWithAnyTeamLabel"));
     });
 
-    QUnit.test("Comparison type option changes from Any Runner to Any Team when changing from an individual to a team class", function(assert) {
+    QUnit.test("Comparison type option changes from Any Runner to Any Team when changing from an individual to a team class", assert => {
         const selector = createSelector();
         const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         const resultSpan = $(_RESULT_SPAN_SELECTOR);
@@ -616,7 +616,7 @@
         assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyTeamLabel"));
     });
 
-    QUnit.test("Comparison type option changes from Any Team back to Any Runner when changing from a team to an individual class", function(assert) {
+    QUnit.test("Comparison type option changes from Any Team back to Any Runner when changing from a team to an individual class", assert => {
         const selector = createSelector();
         const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         const resultSpan = $(_RESULT_SPAN_SELECTOR);
@@ -628,7 +628,7 @@
         assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyRunnerLabel"));
     });
 
-    QUnit.test("Comparison type option changes from Any Team to Any Runner when changing from all legs to one specific leg", function (assert) {
+    QUnit.test("Comparison type option changes from Any Team to Any Runner when changing from all legs to one specific leg", assert => {
         const selector = createSelector();
         const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         const resultSpan = $(_RESULT_SPAN_SELECTOR);
@@ -640,7 +640,7 @@
         assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyRunnerLabel"));
     });
 
-    QUnit.test("Comparison type option changes from Any Team to Any Runner when changing from one specific leg to all legs", function (assert) {
+    QUnit.test("Comparison type option changes from Any Team to Any Runner when changing from one specific leg to all legs", assert => {
         const selector = createSelector();
         const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         const resultSpan = $(_RESULT_SPAN_SELECTOR);
@@ -653,7 +653,7 @@
         assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyTeamLabel"));
     });
 
-    QUnit.test("Items in result-selector drop-down record individual names if individual leg selected", function (assert) {
+    QUnit.test("Items in result-selector drop-down record individual names if individual leg selected", assert => {
         const selector = createSelector();
         const htmlSelect = d3.select(_RESULT_SELECTOR_SELECTOR).node();
         selector.setCourseClassSet(getDummyTeamCourseClassSet());
@@ -675,7 +675,7 @@
         assert.deepEqual(["Team 1", "Team 2", "Team 3"], getOptions());
     });
 
-    QUnit.test("Changing course class resets the selected leg to all legs", function (assert) {
+    QUnit.test("Changing course class resets the selected leg to all legs", assert => {
         const selector = createSelector();
         const htmlSelect = d3.select(_COMPARISON_SELECTOR_SELECTOR).node();
         const resultSpan = $(_RESULT_SPAN_SELECTOR);
@@ -688,7 +688,7 @@
         assert.strictEqual(resultSpan.text(), getMessage("CompareWithAnyTeamLabel"));
     });
 
-    QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has teams but no winner and 'Winner' option chosen", function(assert) {
+    QUnit.test("Alert issued and selector returns to previous index without firing handlers if course-class set has teams but no winner and 'Winner' option chosen", assert => {
         resetLastSelector();
         const selector = createSelector();
         selector.setCourseClassSet(getDummyCourseClassSetWithNoWinner(true));

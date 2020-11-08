@@ -66,28 +66,23 @@
         }
     }
 
-    QUnit.test("Cannot create a result from cumulative times when the order isn't a number", function (assert) {
-        SplitsBrowserTest.assertInvalidData(assert, () =>
-            fromCumTimes("This is not a number", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {}));
-    });
+    QUnit.test("Cannot create a result from cumulative times when the order isn't a number",
+        assert => SplitsBrowserTest.assertInvalidData(assert, () =>
+            fromCumTimes("This is not a number", 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {})));
 
-    QUnit.test("Cannot create a result from cumulative times when the cumulative times argument isn't an array", function (assert) {
-        SplitsBrowserTest.assertException(assert, "TypeError", () => fromCumTimes(1, 10 * 3600, "This is not an array", {}));
-    });
+    QUnit.test("Cannot create a result from cumulative times when the cumulative times argument isn't an array",
+        assert => SplitsBrowserTest.assertException(assert, "TypeError", () => fromCumTimes(1, 10 * 3600, "This is not an array", {})));
 
-    QUnit.test("Cannot create a result from an empty array of cumulative times", function (assert) {
-        SplitsBrowserTest.assertInvalidData(assert, () => fromCumTimes(1, 10 * 3600, [], {}));
-    });
+    QUnit.test("Cannot create a result from an empty array of cumulative times",
+        assert => SplitsBrowserTest.assertInvalidData(assert, () => fromCumTimes(1, 10 * 3600, [], {})));
 
-    QUnit.test("Cannot create a result from an array of cumulative times that does not start with zero", function (assert) {
-        SplitsBrowserTest.assertInvalidData(assert, () => fromCumTimes(1, 10 * 3600, [40, 60, 90], {}));
-    });
+    QUnit.test("Cannot create a result from an array of cumulative times that does not start with zero",
+        assert => SplitsBrowserTest.assertInvalidData(assert, () => fromCumTimes(1, 10 * 3600, [40, 60, 90], {})));
 
-    QUnit.test("Cannot create a result from an array of cumulative times containing only a single zero", function (assert) {
-        SplitsBrowserTest.assertInvalidData(assert, () => fromCumTimes(1, 10 * 3600, [0], {}));
-    });
+    QUnit.test("Cannot create a result from an array of cumulative times containing only a single zero",
+        assert => SplitsBrowserTest.assertInvalidData(assert, () => fromCumTimes(1, 10 * 3600, [0], {})));
 
-    QUnit.test("Can create a result from cumulative times and determine split times", function (assert) {
+    QUnit.test("Can create a result from cumulative times and determine split times", assert => {
         const cumTimes = [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100];
         const result = fromCumTimes(1, 10 * 3600, cumTimes, {name: "Test Runner", club: "ABC"});
         assertCumulativeTimes(assert, result, cumTimes);
@@ -104,7 +99,7 @@
         assert.ok(!result.isOverMaxTime, "Result should not be over max time");
     });
 
-    QUnit.test("Can create a result from cumulative times and determine split times when result has missed a control", function (assert) {
+    QUnit.test("Can create a result from cumulative times and determine split times when result has missed a control", assert => {
         const cumTimes = [0, 65, null, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100];
         const result = fromCumTimes(1, 10 * 3600, cumTimes, {});
         assertCumulativeTimes(assert, result, cumTimes);
@@ -113,7 +108,7 @@
         assert.ok(!result.completed(), "Result should be marked as not completing the course");
     });
 
-    QUnit.test("Can create a result from cumulative times and determine split times when result has missed multiple consecutive controls", function (assert) {
+    QUnit.test("Can create a result from cumulative times and determine split times when result has missed multiple consecutive controls", assert => {
         const cumTimes = [0, 65, null, null, null, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100];
         const result = fromCumTimes(1, 10 * 3600, cumTimes, {});
         assertCumulativeTimes(assert, result, cumTimes);
@@ -121,7 +116,7 @@
         assert.ok(!result.completed(), "Result should be marked as not completing the course");
     });
 
-    QUnit.test("Can create a non-competitive result from cumulative times", function (assert) {
+    QUnit.test("Can create a non-competitive result from cumulative times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         result.setNonCompetitive();
         assert.ok(result.completed(), "Result should be marked as completing the course");
@@ -133,7 +128,7 @@
         assert.ok(!result.isOverMaxTime, "Result should not be over max time");
     });
 
-    QUnit.test("Can create a non-starting result from cumulative times", function (assert) {
+    QUnit.test("Can create a non-starting result from cumulative times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, null, null, null, null], {});
         result.setNonStarter();
         assert.ok(!result.completed(), "Result should not be marked as completing the course");
@@ -145,7 +140,7 @@
         assert.ok(!result.isOverMaxTime, "Result should not be over max time");
     });
 
-    QUnit.test("Can create a non-finishing result from cumulative times", function (assert) {
+    QUnit.test("Can create a non-finishing result from cumulative times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, null, null], {});
         result.setNonFinisher();
         assert.ok(!result.completed(), "Result should be marked as completing the course");
@@ -157,14 +152,14 @@
         assert.ok(!result.isOverMaxTime, "Result should not be over max time");
     });
 
-    QUnit.test("Can obtain null cumulative and split times for non-starting result beyond the end of their controls", function (assert) {
+    QUnit.test("Can obtain null cumulative and split times for non-starting result beyond the end of their controls", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, null], {});
         result.setNonStarter();
         assert.strictEqual(null, result.getOriginalCumulativeTimeTo(6));
         assert.strictEqual(null, result.getOriginalSplitTimeTo(6));
     });
 
-    QUnit.test("Can create a disqualified result from cumulative times", function (assert) {
+    QUnit.test("Can create a disqualified result from cumulative times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         result.disqualify();
         assert.ok(!result.completed(), "Disqualified result should not be marked as completing the course");
@@ -176,7 +171,7 @@
         assert.ok(!result.isOverMaxTime, "Result should not be over max time");
     });
 
-    QUnit.test("Can create an over-max-time result from cumulative times", function (assert) {
+    QUnit.test("Can create an over-max-time result from cumulative times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         result.setOverMaxTime();
         assert.ok(!result.completed(), "Over-max-time result should not be marked as completing the course");
@@ -188,7 +183,7 @@
         assert.ok(result.isOverMaxTime, "Result should be over max time");
     });
 
-    QUnit.test("Can create a result marked as OK despite missing times from cumulative times", function (assert) {
+    QUnit.test("Can create a result marked as OK despite missing times from cumulative times", assert => {
         const cumTimes = [0, 65, 65 + 221, null, 65 + 221 + 184 + 100];
         const result = fromCumTimes(1, 10 * 3600, cumTimes, {});
         result.setOKDespiteMissingTimes();
@@ -202,7 +197,7 @@
         assert.strictEqual(65 + 221 + 184 + 100, result.totalTime, "OK-despite-missing-times result should have a total time");
     });
 
-    QUnit.test("Can create a result from original cumulative times and determine original split times with final times still null", function (assert) {
+    QUnit.test("Can create a result from original cumulative times and determine original split times with final times still null", assert => {
         const cumTimes = [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100];
         const result = fromOriginalCumTimes(1, 10 * 3600, cumTimes, {});
         assertOriginalCumulativeTimes(assert, result, cumTimes);
@@ -212,7 +207,7 @@
         assert.deepEqual(result.getAllOriginalCumulativeTimes(), cumTimes);
     });
 
-    QUnit.test("Can create a result from original cumulative times and set repaired times with NaNs replacing dubious splits", function (assert) {
+    QUnit.test("Can create a result from original cumulative times and set repaired times with NaNs replacing dubious splits", assert => {
         const cumTimes = [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100];
         const result = fromOriginalCumTimes(1, 10 * 3600, cumTimes, {});
 
@@ -231,7 +226,7 @@
         assert.ok(isNaN(result.getSplitTimeTo(4)));
     });
 
-    QUnit.test("Result created from ascending cumulative times has no dubious cumulative nor split times", function (assert) {
+    QUnit.test("Result created from ascending cumulative times has no dubious cumulative nor split times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         for (let control = 0; control < 5; control += 1) {
             assert.ok(!result.isCumulativeTimeDubious(control));
@@ -239,7 +234,7 @@
         }
     });
 
-    QUnit.test("Result created with dubious cumulative time has one dubious cumulative time and two dubious split times", function (assert) {
+    QUnit.test("Result created with dubious cumulative time has one dubious cumulative time and two dubious split times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 0, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         result.setRepairedCumulativeTimes([0, 65, NaN, 65 + 221 + 184, 65 + 221 + 184 + 100]);
         for (let control = 0; control < 5; control += 1) {
@@ -248,120 +243,120 @@
         }
     });
 
-    QUnit.test("Result with start time but all-null splits is not lacking a start time", function (assert) {
+    QUnit.test("Result with start time but all-null splits is not lacking a start time", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, null, null, null, null], {});
         assert.ok(!result.lacksStartTime());
     });
 
-    QUnit.test("Result with start time and splits is not lacking a start time", function (assert) {
+    QUnit.test("Result with start time and splits is not lacking a start time", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         assert.ok(!result.lacksStartTime());
     });
 
-    QUnit.test("Result with no start time nor any splits is not lacking a start time", function (assert) {
+    QUnit.test("Result with no start time nor any splits is not lacking a start time", assert => {
         const result = fromCumTimes(1, null, [0, null, null, null, null], {});
         assert.ok(!result.lacksStartTime());
     });
 
-    QUnit.test("Result with no start time but all splits is lacking a start time", function (assert) {
+    QUnit.test("Result with no start time but all splits is lacking a start time", assert => {
         const result = fromCumTimes(1, null, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         assert.ok(result.lacksStartTime());
     });
 
-    QUnit.test("Result with no start time but some splits is lacking a start time", function (assert) {
+    QUnit.test("Result with no start time but some splits is lacking a start time", assert => {
         const result = fromCumTimes(1, null, [0, 65, null, null, 65 + 221 + 184 + 100], {});
         assert.ok(result.lacksStartTime());
     });
 
-    QUnit.test("Can determine total time of a result that punches all controls", function (assert) {
+    QUnit.test("Can determine total time of a result that punches all controls", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         assert.strictEqual(result.totalTime, 65 + 221 + 184 + 100, "Wrong total time");
     });
 
-    QUnit.test("Determines total time of a result that mispunches as null", function (assert) {
+    QUnit.test("Determines total time of a result that mispunches as null", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, null, 65 + 221 + 184 + 100], {});
         assert.strictEqual(result.totalTime, null, "Total time should be null");
     });
 
-    QUnit.test("Result with valid time compares equal to itself", function (assert) {
+    QUnit.test("Result with valid time compares equal to itself", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 154], {});
         assert.strictEqual(compareResults(result, result), 0);
     });
 
-    QUnit.test("Result with lower total time comes before result with higher total time", function (assert) {
+    QUnit.test("Result with lower total time comes before result with higher total time", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 154], {});
         const result2 = fromCumTimes(2, 12 * 3600, [0, 188], {});
         assert.strictEqual(signum(compareResults(result1, result2)), -1);
     });
 
-    QUnit.test("Result with higher total time comes before result with higher total time", function (assert) {
+    QUnit.test("Result with higher total time comes before result with higher total time", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 188], {});
         const result2 = fromCumTimes(2, 12 * 3600, [0, 154], {});
         assert.ok(signum(compareResults(result1, result2)), 1);
     });
 
-    QUnit.test("Result with lower order comes before result with same total time but higher order", function (assert) {
+    QUnit.test("Result with lower order comes before result with same total time but higher order", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 188], {});
         const result2 = fromCumTimes(2, 12 * 3600, [0, 188], {});
         assert.ok(signum(compareResults(result1, result2)) , -1);
     });
 
-    QUnit.test("Result with higher order comes after result with same total time but lower order", function (assert) {
+    QUnit.test("Result with higher order comes after result with same total time but lower order", assert => {
         const result1 = fromCumTimes(3, 10 * 3600, [0, 188], {});
         const result2 = fromCumTimes(2, 12 * 3600, [0, 188], {});
         assert.ok(signum(compareResults(result1, result2)), 1);
     });
 
-    QUnit.test("Mispunching result compares equal to itself", function (assert) {
+    QUnit.test("Mispunching result compares equal to itself", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, null], {});
         assert.strictEqual(compareResults(result, result), 0);
     });
 
-    QUnit.test("Result with valid time comes before mispunching result", function (assert) {
+    QUnit.test("Result with valid time comes before mispunching result", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 154], {});
         const result2 = fromCumTimes(2, 12 * 3600, [0, null], {});
         assert.ok(signum(compareResults(result1, result2)), -1);
     });
 
-    QUnit.test("Mispunching result comes after result with valid time", function (assert) {
+    QUnit.test("Mispunching result comes after result with valid time", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, null], {});
         const result2 = fromCumTimes(2, 12 * 3600, [0, 188], {});
         assert.ok(signum(compareResults(result1, result2)), 1);
     });
 
-    QUnit.test("Mispunching result with lower order comes before mispunching result with higher order", function (assert) {
+    QUnit.test("Mispunching result with lower order comes before mispunching result with higher order", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, null], {});
         const result2 = fromCumTimes(2, 12 * 3600, [0, null], {});
         assert.ok(signum(compareResults(result1, result2)), -1);
     });
 
-    QUnit.test("Mispunching result with higher order comes before mispunching result with lower order", function (assert) {
+    QUnit.test("Mispunching result with higher order comes before mispunching result with lower order", assert => {
         const result1 = fromCumTimes(3, 10 * 3600, [0, null], {});
         const result2 = fromCumTimes(2, 12 * 3600, [0, null], {});
         assert.ok(signum(compareResults(result1, result2)), 1);
     });
 
-    QUnit.test("Disqualified result compares equal to itself", function (assert) {
+    QUnit.test("Disqualified result compares equal to itself", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 154], {});
         result.disqualify();
         assert.strictEqual(compareResults(result, result), 0);
     });
 
-    QUnit.test("Valid result comes before disqualified result", function (assert) {
+    QUnit.test("Valid result comes before disqualified result", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 154], {});
         const result2 = fromCumTimes(2, 12 * 3600, [0, 188], {});
         result2.disqualify();
         assert.ok(signum(compareResults(result1, result2)), -1);
     });
 
-    QUnit.test("Disqualified result comes after valid result", function (assert) {
+    QUnit.test("Disqualified result comes after valid result", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 154], {});
         result1.disqualify();
         const result2 = fromCumTimes(2, 12 * 3600, [0, 188], {});
         assert.ok(signum(compareResults(result1, result2)), 1);
     });
 
-    QUnit.test("Disqualified result with lower order comes before disqualified result with higher order", function (assert) {
+    QUnit.test("Disqualified result with lower order comes before disqualified result with higher order", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 154], {});
         result1.disqualify();
         const result2 = fromCumTimes(2, 12 * 3600, [0, 188], {});
@@ -369,7 +364,7 @@
         assert.ok(signum(compareResults(result1, result2)), -1);
     });
 
-    QUnit.test("Disqualified result with higher order comes before disqualified result with lower order", function (assert) {
+    QUnit.test("Disqualified result with higher order comes before disqualified result with lower order", assert => {
         const result1 = fromCumTimes(3, 10 * 3600, [0, 188], {});
         result1.disqualify();
         const result2 = fromCumTimes(2, 12 * 3600, [0, 154], {});
@@ -377,50 +372,50 @@
         assert.ok(signum(compareResults(result1, result2)), 1);
     });
 
-    QUnit.test("Result with no times missing has times", function (assert) {
+    QUnit.test("Result with no times missing has times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         assert.ok(result.hasAnyTimes(), "Result with no times missing should have times");
     });
 
-    QUnit.test("Result with some but not all times missing has times", function (assert) {
+    QUnit.test("Result with some but not all times missing has times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, null, null, 65 + 221 + 184 + 100], {});
         assert.ok(result.hasAnyTimes(), "Result with some but not all times missing should have times");
     });
 
-    QUnit.test("Result with all times missing does not have times", function (assert) {
+    QUnit.test("Result with all times missing does not have times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, null, null, null, null], {});
         assert.ok(!result.hasAnyTimes(), "Result with all times missing should not have times");
     });
 
-    QUnit.test("Can adjust a results's cumulative times by reference data with all valid times and same number of controls", function (assert) {
+    QUnit.test("Can adjust a results's cumulative times by reference data with all valid times and same number of controls", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
         const expectedCumTimes = [0, 4, 4 + 28, 4 + 28 + 8, 4 + 28 + 8 - 3];
         assert.deepEqual(result.getCumTimesAdjustedToReference(referenceCumTimes), expectedCumTimes);
     });
 
-    QUnit.test("Can adjust a result's cumulative times with a missing time by reference data with all valid times and same number of controls", function (assert) {
+    QUnit.test("Can adjust a result's cumulative times with a missing time by reference data with all valid times and same number of controls", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, null, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
         const expectedCumTimes = [0, 4, 4 + 28, null, 4 + 28 + 8 - 3];
         assert.deepEqual(result.getCumTimesAdjustedToReference(referenceCumTimes), expectedCumTimes);
     });
 
-    QUnit.test("Cannot adjust a result's cumulative times by reference data with a different number of times", function (assert) {
+    QUnit.test("Cannot adjust a result's cumulative times by reference data with a different number of times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, null, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176];
 
         SplitsBrowserTest.assertInvalidData(assert, () => result.getCumTimesAdjustedToReference(referenceCumTimes));
     });
 
-    QUnit.test("Cannot adjust a result's cumulative times by reference data with a null value", function (assert) {
+    QUnit.test("Cannot adjust a result's cumulative times by reference data with a null value", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, null, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, null, 61 + 193 + 176 + 103];
 
         SplitsBrowserTest.assertInvalidData(assert, () => result.getCumTimesAdjustedToReference(referenceCumTimes));
     });
 
-    QUnit.test("Can adjust a result's cumulative times by reference data and add start time with all valid times and same number of controls", function (assert) {
+    QUnit.test("Can adjust a result's cumulative times by reference data and add start time with all valid times and same number of controls", assert => {
         const startTime = 10 * 3600 + 41 * 60;
         const result = fromCumTimes(1, startTime, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
@@ -428,7 +423,7 @@
         assert.deepEqual(result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes), expectedCumTimes);
     });
 
-    QUnit.test("Can adjust a result's cumulative times with a missing time by reference data and add start time with all valid times and same number of controls", function (assert) {
+    QUnit.test("Can adjust a result's cumulative times with a missing time by reference data and add start time with all valid times and same number of controls", assert => {
         const startTime = 10 * 3600 + 41 * 60;
         const result = fromCumTimes(1, startTime, [0, 65, 65 + 221, null, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
@@ -436,56 +431,56 @@
         assert.deepEqual(result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes), expectedCumTimes);
     });
 
-    QUnit.test("Cannot adjust a result's cumulative times by reference data and add start time with a different number of times", function (assert) {
+    QUnit.test("Cannot adjust a result's cumulative times by reference data and add start time with a different number of times", assert => {
         const result = fromCumTimes(1, 10 * 3600 + 41 * 60, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176];
 
         SplitsBrowserTest.assertInvalidData(assert, () => result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes));
     });
 
-    QUnit.test("Cannot adjust a result's cumulative times by reference data and add start time if reference data contains a null value", function (assert) {
+    QUnit.test("Cannot adjust a result's cumulative times by reference data and add start time if reference data contains a null value", assert => {
         const result = fromCumTimes(1, 10 * 3600 + 41 * 60, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, null, 61 + 193 + 176 + 103];
 
         SplitsBrowserTest.assertInvalidData(assert, () => result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes));
     });
 
-    QUnit.test("Can determine the percentages a result is behind reference data with all valid times and same number of controls", function (assert) {
+    QUnit.test("Can determine the percentages a result is behind reference data with all valid times and same number of controls", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
         const expectedPercentagesBehind = [0, 100 * (65 - 61) / 61, 100 * (221 - 193) / 193, 100 * (184 - 176) / 176, 100 * (100 - 103) / 103];
         assert.deepEqual(result.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes), expectedPercentagesBehind);
     });
 
-    QUnit.test("Can determine the percentages a result with a missing time is behind reference data with all valid times and same number of controls", function (assert) {
+    QUnit.test("Can determine the percentages a result with a missing time is behind reference data with all valid times and same number of controls", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, null, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
         const expectedPercentagesBehind = [0, 100 * (65 - 61) / 61, 100 * (221 - 193) / 193, null, null];
         assert.deepEqual(result.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes), expectedPercentagesBehind);
     });
 
-    QUnit.test("Cannot determine the percentages a result is behind reference data with a different number of times", function (assert) {
+    QUnit.test("Cannot determine the percentages a result is behind reference data with a different number of times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176];
 
         SplitsBrowserTest.assertInvalidData(assert, () => result.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes));
     });
 
-    QUnit.test("Cannot determine the percentages a result is behind reference data with a null value", function (assert) {
+    QUnit.test("Cannot determine the percentages a result is behind reference data with a null value", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, null, 61 + 193 + 176 + 103];
 
         SplitsBrowserTest.assertInvalidData(assert, () => result.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes));
     });
 
-    QUnit.test("Can determine the percentages a result is behind reference data, with a null percentage for a zero split", function (assert) {
+    QUnit.test("Can determine the percentages a result is behind reference data, with a null percentage for a zero split", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         const referenceCumTimes = [0, 61, 61 + 193, 61 + 193, 61 + 193 + 176 + 103];
         const expectedPercentagesBehind = [0, 100 * (65 - 61) / 61, 100 * (221 - 193) / 193, null, 100 * (100 - 176 - 103) / (103 + 176)];
         assert.deepEqual(result.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes), expectedPercentagesBehind);
     });
 
-    QUnit.test("Can determine time losses of result with even number of splits", function (assert) {
+    QUnit.test("Can determine time losses of result with even number of splits", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 96, 96 + 221, 96 + 221 + 184, 96 + 221 + 184 + 100], {});
         const fastestSplits = [65, 209, 184, 97];
         result.determineTimeLosses(fastestSplits);
@@ -502,7 +497,7 @@
         assert.strictEqual(result.getTimeLossAt(4), -1);
     });
 
-    QUnit.test("Can determine time losses of result with odd number of splits", function (assert) {
+    QUnit.test("Can determine time losses of result with odd number of splits", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 96, 96 + 221, 96 + 221 + 100], {});
         const fastestSplits = [65, 209, 97];
         result.determineTimeLosses(fastestSplits);
@@ -518,17 +513,17 @@
         assert.strictEqual(result.getTimeLossAt(3), -3);
     });
 
-    QUnit.test("Cannot determine time losses of result when given wrong number of reference splits", function (assert) {
+    QUnit.test("Cannot determine time losses of result when given wrong number of reference splits", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 96, 96 + 221, 96 + 221 + 184, 96 + 221 + 184 + 100], {});
         SplitsBrowserTest.assertInvalidData(assert, () => result.determineTimeLosses([65, 209, 97]));
     });
 
-    QUnit.test("Cannot determine time losses of result when given split times with NaN value", function (assert) {
+    QUnit.test("Cannot determine time losses of result when given split times with NaN value", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 96, 96 + 221, 96 + 221 + 184, 96 + 221 + 184 + 100], {});
         SplitsBrowserTest.assertInvalidData(assert, () => result.determineTimeLosses([65, 209, NaN, 97]));
     });
 
-    QUnit.test("Can determine time losses as all NaN if result has NaN repaired split", function (assert) {
+    QUnit.test("Can determine time losses as all NaN if result has NaN repaired split", assert => {
         const result = fromOriginalCumTimes(1, 10 * 3600, [0, 96, 96 + 221, 96 + 221 + 184, 96 + 221 + 184 + 100], {});
         result.setRepairedCumulativeTimes([0, 96, 96 + 221, NaN, 96 + 221 + 184 + 100]);
         const fastestSplits = [65, 209, 184, 97];
@@ -537,7 +532,7 @@
         assertAllNaNTimeLosses(assert, result, 5);
     });
 
-    QUnit.test("Can determine time losses as all NaN if fastest splits include zero", function (assert) {
+    QUnit.test("Can determine time losses as all NaN if fastest splits include zero", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 96, 96 + 221, 96 + 221 + 184, 96 + 221 + 184 + 100], {});
         const fastestSplits = [65, 209, 0, 97];
         result.determineTimeLosses(fastestSplits);
@@ -545,7 +540,7 @@
         assertAllNaNTimeLosses(assert, result, 5);
     });
 
-    QUnit.test("Can determine time losses as all NaN if result is marked as OK despite having missing controls", function (assert) {
+    QUnit.test("Can determine time losses as all NaN if result is marked as OK despite having missing controls", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 96, 96 + 221, null, 96 + 221 + 184 + 100], {});
         result.setOKDespiteMissingTimes();
         const fastestSplits = [65, 209, 184, 97];
@@ -554,7 +549,7 @@
         assertAllNaNTimeLosses(assert, result, 5);
     });
 
-    QUnit.test("Can determine as all-NaN time losses of result when given fastest-split times with null value", function (assert) {
+    QUnit.test("Can determine as all-NaN time losses of result when given fastest-split times with null value", assert => {
         const result = fromOriginalCumTimes(1, 10 * 3600, [0, 96, 96 + 221, 96 + 221 + 184, 96 + 221 + 184 + 100], {});
         result.setRepairedCumulativeTimes([0, 96, 96 + 221, NaN, 96 + 221 + 184 + 100]);
         result.determineTimeLosses([65, 209, null, 97]);
@@ -562,7 +557,7 @@
         assertAllNaNTimeLosses(assert, result, 5);
     });
 
-    QUnit.test("Can determine time losses as all null if result mispunches", function (assert) {
+    QUnit.test("Can determine time losses as all null if result mispunches", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 96, 96 + 221, null, 96 + 221 + 184 + 100], {});
         result.determineTimeLosses([65, 209, 184, 97]);
         for (let controlIdx = 0; controlIdx <= 4; controlIdx += 1) {
@@ -570,7 +565,7 @@
         }
     });
 
-    QUnit.test("Can determine time losses as all null if result mispunches even if fastest times also have null in them", function (assert) {
+    QUnit.test("Can determine time losses as all null if result mispunches even if fastest times also have null in them", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 96, 96 + 221, null, 96 + 221 + 184 + 100], {});
         result.determineTimeLosses([65, 209, null, 97]);
         for (let controlIdx = 0; controlIdx <= 4; controlIdx += 1) {
@@ -578,61 +573,61 @@
         }
     });
 
-    QUnit.test("Cannot determine that a result crosses another one with a different number of controls", function (assert) {
+    QUnit.test("Cannot determine that a result crosses another one with a different number of controls", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
         const result2 = fromCumTimes(2, 12 * 3600, [0, 71, 218, 379, 440, 491], {});
 
         SplitsBrowserTest.assertInvalidData(assert, () => result1.crosses(result2, null));
     });
 
-    QUnit.test("Can determine that a result does not cross themselves", function (assert) {
+    QUnit.test("Can determine that a result does not cross themselves", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
         assert.ok(!result.crosses(result, null), "Result should not cross themselves");
     });
 
-    QUnit.test("Can determine that a result does not cross a result with identical splits starting an hour later", function (assert) {
+    QUnit.test("Can determine that a result does not cross a result with identical splits starting an hour later", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
         const result2 = fromCumTimes(2, 11 * 3600, [0, 65, 221, 384, 421], {});
         assert.ok(!result1.crosses(result2, null), "Results should not cross");
     });
 
-    QUnit.test("Can determine that a result does not cross a result with identical splits starting an hour earlier", function (assert) {
+    QUnit.test("Can determine that a result does not cross a result with identical splits starting an hour earlier", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
         const result2 = fromCumTimes(2, 9 * 3600, [0, 65, 221, 384, 421], {});
         assert.ok(!result1.crosses(result2, null), "Results should not cross");
     });
 
-    QUnit.test("Can determine that two results cross on the way to control 1", function (assert) {
+    QUnit.test("Can determine that two results cross on the way to control 1", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
         const result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 265, 421, 584, 621], {});
         assert.ok(result1.crosses(result2, null), "Results should cross");
     });
 
-    QUnit.test("Can determine that two results cross between controls 2 and 3", function (assert) {
+    QUnit.test("Can determine that two results cross between controls 2 and 3", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
         const result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 65, 221, 584, 621], {});
         assert.ok(result1.crosses(result2, null), "Results should cross");
     });
 
-    QUnit.test("Can determine that two results cross between controls 1 and 2 and cross back later", function (assert) {
+    QUnit.test("Can determine that two results cross between controls 1 and 2 and cross back later", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 721], {});
         const result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 65, 421, 584, 621], {});
         assert.ok(result1.crosses(result2, null), "Results should cross");
     });
 
-    QUnit.test("Can determine that two results do not cross between because the first one has a null split", function (assert) {
+    QUnit.test("Can determine that two results do not cross between because the first one has a null split", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 65, null, 384, 521], {});
         const result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 65, 221, 384, 521], {});
         assert.ok(!result1.crosses(result2, null), "Results should not cross");
     });
 
-    QUnit.test("Can determine that two results do not cross between because the second one has a null split", function (assert) {
+    QUnit.test("Can determine that two results do not cross between because the second one has a null split", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
         const result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 65, 221, null, 521], {});
         assert.ok(!result1.crosses(result2, null), "Results should not cross");
     });
 
-    QUnit.test("Can determine that two results cross on the way to control 1 in a relay", function (assert) {
+    QUnit.test("Can determine that two results cross on the way to control 1 in a relay", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
         const result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 265, 421, 584, 621], {});
         result1.setOffsets([0, 2]);
@@ -642,7 +637,7 @@
         assert.ok(!result1.crosses(result2, 1), "Results should not cross in the second leg");
     });
 
-    QUnit.test("Can determine that two results cross between controls 2 and 3 in a relay", function (assert) {
+    QUnit.test("Can determine that two results cross between controls 2 and 3 in a relay", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 421], {});
         const result2 = fromCumTimes(2, 10 * 3600 - 60, [0, 65, 221, 584, 621], {});
         result1.setOffsets([0, 2]);
@@ -652,180 +647,180 @@
         assert.ok(result1.crosses(result2, 1), "Results should cross in the second leg");
     });
 
-    QUnit.test("Returns null value for cumulative rank when no ranks set", function (assert) {
+    QUnit.test("Returns null value for cumulative rank when no ranks set", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
         assert.strictEqual(result.getCumulativeRankTo(2), null, "A null cumulative rank should be returned");
     });
 
-    QUnit.test("Returns non-null value for cumulative rank when ranks set", function (assert) {
+    QUnit.test("Returns non-null value for cumulative rank when ranks set", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
         result.setSplitAndCumulativeRanks([null, 1, 1, 1, 1], [null, 2, 2, 2, 2]);
         assert.strictEqual(result.getCumulativeRankTo(2), 2, "A non-null cumulative rank should be returned");
     });
 
-    QUnit.test("Throws exception for cumulative ranks not starting with null", function (assert) {
+    QUnit.test("Throws exception for cumulative ranks not starting with null", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
         SplitsBrowserTest.assertInvalidData(assert, () => result.setSplitAndCumulativeRanks([1, 1, 1, 1], [null, 2, 2, 2, 2]));
     });
 
-    QUnit.test("Returns null value for split rank when no ranks set", function (assert) {
+    QUnit.test("Returns null value for split rank when no ranks set", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
         assert.strictEqual(result.getSplitRankTo(2), null, "A null split rank should be returned");
     });
 
-    QUnit.test("Returns non-null value for split rank when ranks set", function (assert) {
+    QUnit.test("Returns non-null value for split rank when ranks set", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
         result.setSplitAndCumulativeRanks([null, 1, 1, 1, 1], [null, 2, 2, 2, 2]);
         assert.strictEqual(result.getSplitRankTo(2), 1, "A non-null split rank should be returned");
     });
 
-    QUnit.test("Throws exception for split ranks not starting with null", function (assert) {
+    QUnit.test("Throws exception for split ranks not starting with null", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
         SplitsBrowserTest.assertInvalidData(assert, () => result.setSplitAndCumulativeRanks([1, 1, 1, 1], [null, 2, 2, 2, 2]));
     });
 
-    QUnit.test("Result with no omitted times has no indexes around omitted cumulative times", function (assert) {
+    QUnit.test("Result with no omitted times has no indexes around omitted cumulative times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), []);
     });
 
-    QUnit.test("Result with single dubious cumulative time not at the end has indexes around it", function (assert) {
+    QUnit.test("Result with single dubious cumulative time not at the end has indexes around it", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, NaN, 384, 521], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), [{start: 1, end: 3}]);
     });
 
-    QUnit.test("Result with single missing cumulative time not at the end has indexes around it", function (assert) {
+    QUnit.test("Result with single missing cumulative time not at the end has indexes around it", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, null, 384, 521], {});
         result.setOKDespiteMissingTimes();
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), [{start: 1, end: 3}]);
     });
 
-    QUnit.test("Result with consecutive pair of dubious cumulative times not at the end has indexes around it", function (assert) {
+    QUnit.test("Result with consecutive pair of dubious cumulative times not at the end has indexes around it", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, NaN, NaN, 521], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), [{start: 1, end: 4}]);
     });
 
-    QUnit.test("Result with consecutive pair of missing cumulative times not at the end has indexes around it", function (assert) {
+    QUnit.test("Result with consecutive pair of missing cumulative times not at the end has indexes around it", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, null, null, 521], {});
         result.setOKDespiteMissingTimes();
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), [{start: 1, end: 4}]);
     });
 
-    QUnit.test("Result with consecutive pair of dubious and omitted cumulative times not at the end has indexes around it", function (assert) {
+    QUnit.test("Result with consecutive pair of dubious and omitted cumulative times not at the end has indexes around it", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, NaN, null, 521], {});
         result.setOKDespiteMissingTimes();
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), [{start: 1, end: 4}]);
     });
 
-    QUnit.test("Result with consecutive pair of omitted and dubious cumulative times not at the end has indexes around it", function (assert) {
+    QUnit.test("Result with consecutive pair of omitted and dubious cumulative times not at the end has indexes around it", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, null, NaN, 521], {});
         result.setOKDespiteMissingTimes();
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), [{start: 1, end: 4}]);
     });
 
-    QUnit.test("Result with two non-consecutive omitted cumulative times not at the end has separate indexes around them", function (assert) {
+    QUnit.test("Result with two non-consecutive omitted cumulative times not at the end has separate indexes around them", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, NaN, 221, null, 521], {});
         result.setOKDespiteMissingTimes();
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), [{start: 0, end: 2}, {start: 2, end: 4}]);
     });
 
-    QUnit.test("Result with dubious cumulative time at at the end has no index for it", function (assert) {
+    QUnit.test("Result with dubious cumulative time at at the end has no index for it", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, NaN], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), []);
     });
 
-    QUnit.test("Result with two non-consecutive dubious cumulative times, one at the end has only an index for the one not at the end", function (assert) {
+    QUnit.test("Result with two non-consecutive dubious cumulative times, one at the end has only an index for the one not at the end", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, NaN, 221, 384, NaN], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), [{start: 0, end: 2}]);
     });
 
-    QUnit.test("Result with single dubious cumulative time followed by a null has no indexes", function (assert) {
+    QUnit.test("Result with single dubious cumulative time followed by a null has no indexes", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, NaN, null, 521], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), []);
     });
 
-    QUnit.test("Result with single dubious cumulative time preceded by a null has no indexes", function (assert) {
+    QUnit.test("Result with single dubious cumulative time preceded by a null has no indexes", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, null, NaN, 384, 521], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), []);
     });
 
-    QUnit.test("Result with single dubious cumulative time with a null time two controls before has a pair of indexes", function (assert) {
+    QUnit.test("Result with single dubious cumulative time with a null time two controls before has a pair of indexes", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, null, 221, NaN, 521], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), [{start: 2, end: 4}]);
     });
 
-    QUnit.test("Result with single dubious cumulative time with a null time two controls after has a pair of indexes", function (assert) {
+    QUnit.test("Result with single dubious cumulative time with a null time two controls after has a pair of indexes", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, NaN, 221, null, 521], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedCumulativeTimes(), [{start: 0, end: 2}]);
     });
 
-    QUnit.test("Result with no dubious times has no indexes around dubious split times", function (assert) {
+    QUnit.test("Result with no dubious times has no indexes around dubious split times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521, 588, 655], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), []);
     });
 
-    QUnit.test("Result with single dubious cumulative time not at the end has indexes around the two split times it makes dubious", function (assert) {
+    QUnit.test("Result with single dubious cumulative time not at the end has indexes around the two split times it makes dubious", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, NaN, 384, 521, 588, 655], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), [{start: 1, end: 4}]);
     });
 
-    QUnit.test("Result with single dubious cumulative time not at the end has indexes around the two split times it makes dubious", function (assert) {
+    QUnit.test("Result with single dubious cumulative time not at the end has indexes around the two split times it makes dubious", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, null, 384, 521, 588, 655], {});
         result.setOKDespiteMissingTimes();
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), [{start: 1, end: 4}]);
     });
 
-    QUnit.test("Result with consecutive pair of dubious cumulative times not at the end has indexes around it", function (assert) {
+    QUnit.test("Result with consecutive pair of dubious cumulative times not at the end has indexes around it", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, NaN, NaN, 521, 588, 655], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), [{start: 1, end: 5}]);
     });
 
-    QUnit.test("Result with two non dubious cumulative times with one non-dubious value between them has one pair of indexes around them", function (assert) {
+    QUnit.test("Result with two non dubious cumulative times with one non-dubious value between them has one pair of indexes around them", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, NaN, 221, NaN, 521, 588, 655], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), [{start: 0, end: 5}]);
     });
 
-    QUnit.test("Result with two non dubious cumulative times with two non-dubious values between them has two pair of indexes, one around each pair of dubious split times", function (assert) {
+    QUnit.test("Result with two non dubious cumulative times with two non-dubious values between them has two pair of indexes, one around each pair of dubious split times", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, NaN, 221, 384, NaN, 588, 655], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), [{start: 0, end: 3}, {start: 3, end: 6}]);
     });
 
-    QUnit.test("Result with dubious final cumulative time only has no indexes around it", function (assert) {
+    QUnit.test("Result with dubious final cumulative time only has no indexes around it", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521, 588, NaN], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), []);
     });
 
-    QUnit.test("Result with dubious penultimate cumulative time only has no indexes around it", function (assert) {
+    QUnit.test("Result with dubious penultimate cumulative time only has no indexes around it", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 384, 521, NaN, 655], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), []);
     });
 
-    QUnit.test("Result with single dubious cumulative time not at the end with null immediately before the dubious split has no indexes", function (assert) {
+    QUnit.test("Result with single dubious cumulative time not at the end with null immediately before the dubious split has no indexes", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, null, NaN, 521, 588, 655], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), []);
     });
 
-    QUnit.test("Result with single dubious cumulative time not at the end with null immediately after the dubious split has no indexes", function (assert) {
+    QUnit.test("Result with single dubious cumulative time not at the end with null immediately after the dubious split has no indexes", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, NaN, null, 521, 588, 655], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), []);
     });
 
-    QUnit.test("Result with single dubious cumulative time not at the end with null two controls before the dubious split has no indexes", function (assert) {
+    QUnit.test("Result with single dubious cumulative time not at the end with null two controls before the dubious split has no indexes", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, null, 384, NaN, 588, 655], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), []);
     });
 
-    QUnit.test("Result with single dubious cumulative time not at the end with null two controls after the dubious split has no indexes", function (assert) {
+    QUnit.test("Result with single dubious cumulative time not at the end with null two controls after the dubious split has no indexes", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, NaN, 384, null, 588, 655], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), []);
     });
 
-    QUnit.test("Result with single dubious cumulative time not at the end with null three controls after the dubious split has a pair of indexes", function (assert) {
+    QUnit.test("Result with single dubious cumulative time not at the end with null three controls after the dubious split has a pair of indexes", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, null, 221, 384, NaN, 588, 655], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), [{start: 3, end: 6}]);
     });
 
-    QUnit.test("Result with single dubious cumulative time not at the end with null three controls after the dubious split has a pair of indexes", function (assert) {
+    QUnit.test("Result with single dubious cumulative time not at the end with null three controls after the dubious split has a pair of indexes", assert => {
         const result = fromCumTimes(1, 10 * 3600, [0, 65, NaN, 384, 512, null, 655], {});
         assert.deepEqual(result.getControlIndexesAroundOmittedSplitTimes(), [{start: 1, end: 4}]);
     });
@@ -851,38 +846,30 @@
         return createTeamResult(1, [result1, result2], new Team("Team With Dubious Result", "GHI"));
     })();
 
-    QUnit.test("Cannot create an empty team", function (assert) {
-        SplitsBrowserTest.assertInvalidData(assert, () => createTeamResult(1, [], new Team("Team 1", "ABC")));
-    });
+    QUnit.test("Cannot create an empty team",
+        assert => SplitsBrowserTest.assertInvalidData(assert, () => createTeamResult(1, [], new Team("Team 1", "ABC"))));
 
-    QUnit.test("Cannot create a team with only one member", function (assert) {
-        SplitsBrowserTest.assertInvalidData(assert, () => createTeamResult(1, [fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {})], new Team("Team 1", "ABC")));
-    });
+    QUnit.test("Cannot create a team with only one member",
+        assert => SplitsBrowserTest.assertInvalidData(assert, () => createTeamResult(1, [fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {})], new Team("Team 1", "ABC"))));
 
-    QUnit.test("Can get cumulative times of a team", function (assert) {
+    QUnit.test("Can get cumulative times of a team", assert => {
         assert.deepEqual(teamResult1.getAllCumulativeTimes(), [0, 65, 286, 470, 570, 631, 824, 1000, 1103]);
         assert.deepEqual(teamResult1.getAllOriginalCumulativeTimes(), teamResult1.getAllCumulativeTimes());
     });
 
-    QUnit.test("Can get all split times of a team", function (assert) {
-        assert.deepEqual(teamResult1.getAllSplitTimes(),  [65, 221, 184, 100, 61, 193, 176, 103]);
-    });
+    QUnit.test("Can get all split times of a team", assert => assert.deepEqual(teamResult1.getAllSplitTimes(),  [65, 221, 184, 100, 61, 193, 176, 103]));
 
-    QUnit.test("Can get cumulative times of a team with missing times", function (assert) {
-        assert.deepEqual(teamResultWithMissingTime.getAllCumulativeTimes(), [0, 65, 286, 470, 570, 631, 824, null, 1103]);
-    });
+    QUnit.test("Can get cumulative times of a team with missing times",
+        assert => assert.deepEqual(teamResultWithMissingTime.getAllCumulativeTimes(), [0, 65, 286, 470, 570, 631, 824, null, 1103]));
 
-    QUnit.test("Can get cumulative times of a team with dubious times", function (assert) {
-        assert.deepEqual(dubiousTeamResult.getAllCumulativeTimes(), [0, 65, 286, NaN, 570, 631, NaN, 1000, 1103]);
-    });
+    QUnit.test("Can get cumulative times of a team with dubious times",
+        assert => assert.deepEqual(dubiousTeamResult.getAllCumulativeTimes(), [0, 65, 286, NaN, 570, 631, NaN, 1000, 1103]));
 
-    QUnit.test("Can get split times of a team with dubious times", function (assert) {
-        assert.deepEqual(dubiousTeamResult.getAllSplitTimes(), [65, 221, NaN, NaN, 61, NaN, NaN, 103]);
-    });
+    QUnit.test("Can get split times of a team with dubious times",
+        assert => assert.deepEqual(dubiousTeamResult.getAllSplitTimes(), [65, 221, NaN, NaN, 61, NaN, NaN, 103]));
 
-    QUnit.test("Can get original cumulative times of a team with dubious times", function (assert) {
-        assert.deepEqual(dubiousTeamResult.getAllOriginalCumulativeTimes(), [0, 65, 286, 470, 570, 631, 824, 1000, 1103]);
-    });
+    QUnit.test("Can get original cumulative times of a team with dubious times",
+        assert => assert.deepEqual(dubiousTeamResult.getAllOriginalCumulativeTimes(), [0, 65, 286, 470, 570, 631, 824, 1000, 1103]));
 
     function createModifiedTeamResult(member1Action, member2Action) {
         const result1 = fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {});
@@ -896,7 +883,7 @@
         return createTeamResult(1, [result1, result2], new Team("Team 1", "ABC"));
     }
 
-    QUnit.test("Ordinary team is not disqualified, non-starter, over-max-time nor non-competitive", function (assert) {
+    QUnit.test("Ordinary team is not disqualified, non-starter, over-max-time nor non-competitive", assert => {
         assert.ok(!teamResult1.isDisqualified);
         assert.ok(!teamResult1.isNonStarter);
         assert.ok(!teamResult1.isNonFinisher);
@@ -906,8 +893,8 @@
         assert.ok(teamResult1.completed());
     });
 
-    QUnit.test("Disqualified team member causes the entire team to be disqualified", function (assert) {
-        const teamResult = createModifiedTeamResult(function (result) { result.disqualify(); }, null);
+    QUnit.test("Disqualified team member causes the entire team to be disqualified", assert => {
+        const teamResult = createModifiedTeamResult(result => result.disqualify(), null);
         assert.ok(teamResult.isDisqualified);
         assert.ok(!teamResult.isNonStarter);
         assert.ok(!teamResult.isNonFinisher);
@@ -917,7 +904,7 @@
         assert.ok(!teamResult.completed());
     });
 
-    QUnit.test("Entire team of non-starters is a non-starter", function (assert) {
+    QUnit.test("Entire team of non-starters is a non-starter", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, null, null, null, null], {});
         const result2 = fromCumTimes(1, 10 * 3600 + 570, [0, null, null, null, null], {});
         result1.setNonStarter();
@@ -933,7 +920,7 @@
         assert.ok(!teamResult.completed());
     });
 
-    QUnit.test("Team with only one non-starter is not a non-starter", function (assert) {
+    QUnit.test("Team with only one non-starter is not a non-starter", assert => {
         const result1 = fromCumTimes(1, 10 * 3600, [0, null, null, null, null], {});
         const result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, 61, 254, 430, 533], {});
         result2.setNonStarter();
@@ -948,7 +935,7 @@
         assert.ok(!teamResult.completed());
     });
 
-    QUnit.test("Team with two finishers and a non-finisher is a non-finishing team.", function (assert) {
+    QUnit.test("Team with two finishers and a non-finisher is a non-finishing team.", assert => {
         const result1 = fromCumTimes(1, 10 * 3600,        [0, 65, 286, 470, 570], {});
         const result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, 61, 254, 430, 533], {});
         const result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, 71, 278, null, null], {});
@@ -964,7 +951,7 @@
         assert.ok(!teamResult.completed());
     });
 
-    QUnit.test("Team with two finishers and a non-starter is a non-finishing team.", function (assert) {
+    QUnit.test("Team with two finishers and a non-starter is a non-finishing team.", assert => {
         const result1 = fromCumTimes(1, 10 * 3600,        [0, 65, 286, 470, 570], {});
         const result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, 61, 254, 430, 533], {});
         const result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, null, null, null, null], {});
@@ -980,7 +967,7 @@
         assert.ok(!teamResult.completed());
     });
 
-    QUnit.test("Team with a finisher, a non-finisher and a non-starter is a non-finishing team.", function (assert) {
+    QUnit.test("Team with a finisher, a non-finisher and a non-starter is a non-finishing team.", assert => {
         const result1 = fromCumTimes(1, 10 * 3600,        [0, 65, 286, 470, 570], {});
         const result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, 61, 254, null, null], {});
         const result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, null, null, null, null], {});
@@ -997,7 +984,7 @@
         assert.ok(!teamResult.completed());
     });
 
-    QUnit.test("Team with a finisher and two non-starters is a non-finishing team.", function (assert) {
+    QUnit.test("Team with a finisher and two non-starters is a non-finishing team.", assert => {
         const result1 = fromCumTimes(1, 10 * 3600,        [0, 65, 286, 470, 570], {});
         const result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, null, null, null, null], {});
         const result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, null, null, null, null], {});
@@ -1014,7 +1001,7 @@
         assert.ok(!teamResult.completed());
     });
 
-    QUnit.test("Team with a non-finisher and two non-starters is a non-finishing team.", function (assert) {
+    QUnit.test("Team with a non-finisher and two non-starters is a non-finishing team.", assert => {
         const result1 = fromCumTimes(1, 10 * 3600,        [0, 65, 286, null, null], {});
         const result2 = fromCumTimes(1, 10 * 3600 + 570,  [0, null, null, null, null], {});
         const result3 = fromCumTimes(1, 10 * 3600 + 1103, [0, null, null, null, null], {});
@@ -1032,7 +1019,7 @@
         assert.ok(!teamResult.completed());
     });
 
-    QUnit.test("Team with an over-max-time member is over max time", function (assert) {
+    QUnit.test("Team with an over-max-time member is over max time", assert => {
         const teamResult = createModifiedTeamResult(null, result => result.setOverMaxTime());
         assert.ok(!teamResult.isDisqualified);
         assert.ok(!teamResult.isNonStarter);
@@ -1043,7 +1030,7 @@
         assert.ok(!teamResult.completed());
     });
 
-    QUnit.test("Team with a non-competitive team member is non-competitive", function (assert) {
+    QUnit.test("Team with a non-competitive team member is non-competitive", assert => {
         const teamResult = createModifiedTeamResult(result => result.setNonCompetitive(), null);
         assert.ok(!teamResult.isDisqualified);
         assert.ok(!teamResult.isNonStarter);
@@ -1054,7 +1041,7 @@
         assert.ok(teamResult.completed());
     });
 
-    QUnit.test("Team with an OK-despite-missing-times team member is OK despite missing times", function (assert) {
+    QUnit.test("Team with an OK-despite-missing-times team member is OK despite missing times", assert => {
         const teamResult = createModifiedTeamResult(result => result.setOKDespiteMissingTimes(), null);
         assert.ok(!teamResult.isDisqualified);
         assert.ok(!teamResult.isNonStarter);
@@ -1065,7 +1052,7 @@
         assert.ok(teamResult.completed());
     });
 
-    QUnit.test("Can build team built from original cumulative times only", function (assert) {
+    QUnit.test("Can build team built from original cumulative times only", assert => {
         const teamResultOriginalTimesOnly = createTeamResult(1, [
             fromOriginalCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {}),
             fromOriginalCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533], {})
@@ -1075,25 +1062,22 @@
         assert.strictEqual(teamResultOriginalTimesOnly.getAllCumulativeTimes(), null);
     });
 
-    QUnit.test("Team result has list of members", function (assert) {
+    QUnit.test("Team result has list of members", assert => {
         assert.strictEqual(teamResult1.owner.members.length, 2);
         assert.strictEqual("First Runner", teamResult1.owner.members[0].name);
         assert.strictEqual("Second Runner", teamResult1.owner.members[1].name);
     });
 
-    QUnit.test("Owner name of a team result is team name for null leg index", function (assert) {
-        assert.strictEqual(teamResult1.getOwnerNameForLeg(null), "Team 1");
-    });
+    QUnit.test("Owner name of a team result is team name for null leg index",
+        assert => assert.strictEqual(teamResult1.getOwnerNameForLeg(null), "Team 1"));
 
-    QUnit.test("Owner name of a team result is the first runner name for leg index zero", function (assert) {
-        assert.strictEqual(teamResult1.getOwnerNameForLeg(0), "First Runner");
-    });
+    QUnit.test("Owner name of a team result is the first runner name for leg index zero",
+        assert => assert.strictEqual(teamResult1.getOwnerNameForLeg(0), "First Runner"));
 
-    QUnit.test("Owner name of a team result is the second runner name for leg index one", function (assert) {
-        assert.strictEqual(teamResult1.getOwnerNameForLeg(1), "Second Runner");
-    });
+    QUnit.test("Owner name of a team result is the second runner name for leg index one",
+        assert => assert.strictEqual(teamResult1.getOwnerNameForLeg(1), "Second Runner"));
 
-    QUnit.test("Owner name of an individual result is the runner name regardless of index", function (assert) {
+    QUnit.test("Owner name of an individual result is the runner name regardless of index", assert => {
         const cumTimes = [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100];
         const result = fromCumTimes(1, 10 * 3600, cumTimes, {name: "Test Runner", club: "ABC"});
         assert.strictEqual(result.getOwnerNameForLeg(null), "Test Runner");

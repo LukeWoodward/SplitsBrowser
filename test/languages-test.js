@@ -45,7 +45,7 @@
         }
     }
 
-    QUnit.test("All languages are consistent", function (assert) {
+    QUnit.test("All languages are consistent", assert => {
         if (typeof SplitsBrowser.Messages === "undefined") {
             throw new Error("Languages not defined");
         } else if (!hasProperty(SplitsBrowser.Messages, REFERENCE_LANGUAGE)) {

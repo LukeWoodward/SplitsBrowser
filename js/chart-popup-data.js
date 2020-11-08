@@ -45,7 +45,7 @@
      *     to not return leg-specific data.
      * @return {Object} Fastest-split data.
      */
-    ChartPopupData.getFastestSplitsPopupData = function (courseClassSet, controlIndex, selectedLegIndex) {
+    ChartPopupData.getFastestSplitsPopupData = (courseClassSet, controlIndex, selectedLegIndex) => {
         let data = courseClassSet.getFastestSplitsTo(MAX_FASTEST_SPLITS, controlIndex, selectedLegIndex);
         data = data.map(comp => ({time: comp.split, name: comp.name, highlight: false}));
 
@@ -70,7 +70,7 @@
      * @return {Object} Object that contains the title for the popup and the
      *     array of data to show within it.
      */
-    ChartPopupData.getFastestSplitsForLegPopupData = function (courseClassSet, eventData, controlIndex) {
+    ChartPopupData.getFastestSplitsForLegPopupData = (courseClassSet, eventData, controlIndex) => {
         const course = courseClassSet.getCourse();
         const startCode = course.getControlCode(controlIndex - 1);
         const endCode = course.getControlCode(controlIndex);
@@ -98,7 +98,7 @@
      * @param {Number} time The current time, in units of seconds past midnight.
      * @return {Object} Object containing result data.
      */
-    ChartPopupData.getResultsVisitingCurrentControlPopupData = function (courseClassSet, eventData, controlIndex, time) {
+    ChartPopupData.getResultsVisitingCurrentControlPopupData = (courseClassSet, eventData, controlIndex, time) => {
         const controlCode = courseClassSet.getCourse().getControlCode(controlIndex);
         const intervalStart = Math.round(time) - RACE_GRAPH_RESULT_WINDOW / 2;
         const intervalEnd = Math.round(time) + RACE_GRAPH_RESULT_WINDOW / 2;
@@ -161,7 +161,7 @@
      * @return {String} Next-control information containing joined-up control names.
      */
     function tidyNextControlsList(nextControls) {
-        return nextControls.map(function (nextControlRec) {
+        return nextControls.map(nextControlRec => {
             const codes = nextControlRec.nextControls.slice(0);
             if (codes[codes.length - 1] === Course.FINISH) {
                 codes[codes.length - 1] = getMessage("FinishName");
@@ -180,7 +180,7 @@
      * @param {Number} controlIndex The index of the control.
      * @return {Object} Next-control data.
      */
-    ChartPopupData.getNextControlData = function (course, eventData, controlIndex) {
+    ChartPopupData.getNextControlData = (course, eventData, controlIndex) => {
         const controlIdx = Math.min(controlIndex, course.controls.length);
         const controlCode = course.getControlCode(controlIdx);
         const nextControls = eventData.getNextControlsAfter(controlCode);

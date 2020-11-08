@@ -810,7 +810,7 @@
      * @param {Object} params Object mapping parameter names to values.
      */
     function showLoadFailureMessage(key, params) {
-        let errorDiv = d3.select("body")
+        const errorDiv = d3.select("body")
                          .append("div")
                          .classed("sbErrors", true);
 
@@ -830,7 +830,7 @@
      *     This element can be specified by a CSS selector for the element, or
      *     the HTML element itself, although this behaviour is deprecated.
      */
-    SplitsBrowser.readEvent = function (data, options) {
+    SplitsBrowser.readEvent = (data, options) => {
         if (!checkD3Version6()) {
             return;
         }
@@ -866,13 +866,13 @@
                 initialiseMessages(options.defaultLanguage);
             }
 
-            let viewer = new Viewer(options);
+            const viewer = new Viewer(options);
             viewer.buildUi();
             viewer.setEvent(eventData);
 
-            let queryString = document.location.search;
+            const queryString = document.location.search;
             if (queryString !== null && queryString.length > 0) {
-                let parsedQueryString = parseQueryString(queryString, eventData);
+                const parsedQueryString = parseQueryString(queryString, eventData);
                 viewer.updateFromQueryString(parsedQueryString);
             } else {
                 viewer.setDefaultSelectedClass();
@@ -923,7 +923,7 @@
      *     This element can be specified by a CSS selector for the element, or
      *     the HTML element itself, although this behaviour is deprecated.
      */
-    SplitsBrowser.loadEvent = function (eventUrl, options) {
+    SplitsBrowser.loadEvent = (eventUrl, options) => {
         if (!checkD3Version6()) {
             return;
         }

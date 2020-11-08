@@ -66,7 +66,7 @@
         return new CourseClassSet([courseClass]);
     }
 
-    QUnit.test("Can get selected classes popup data", function (assert) {
+    QUnit.test("Can get selected classes popup data", assert => {
         const courseClassSet = getTestCourseClassSet();
         const actualData = ChartPopupData.getFastestSplitsPopupData(courseClassSet, 2, null);
 
@@ -85,7 +85,7 @@
         assert.deepEqual(actualData, expectedData);
     });
 
-    QUnit.test("Can get selected classes popup data for team event", function (assert) {
+    QUnit.test("Can get selected classes popup data for team event", assert => {
         const courseClassSet = getTestTeamCourseClassSet();
         const actualData = ChartPopupData.getFastestSplitsPopupData(courseClassSet, 2, null);
 
@@ -102,7 +102,7 @@
         assert.deepEqual(actualData, expectedData);
     });
 
-    QUnit.test("Can get selected classes popup data for second leg of team event", function (assert) {
+    QUnit.test("Can get selected classes popup data for second leg of team event", assert => {
         const courseClassSet = getTestTeamCourseClassSet();
         const actualData = ChartPopupData.getFastestSplitsPopupData(courseClassSet, 1, 1);
 
@@ -119,7 +119,7 @@
         assert.deepEqual(actualData, expectedData);
     });
 
-    QUnit.test("Can get fastest splits to intermediate control", function (assert) {
+    QUnit.test("Can get fastest splits to intermediate control", assert => {
         const courseClassSet1 = getTestCourseClassSet();
         const course1 = new Course("Test course", courseClassSet1.classes, null, null, ["235", "189", "212"]);
         setCourseInCourseClassSet(course1, courseClassSet1);
@@ -151,7 +151,7 @@
         assert.deepEqual(actualData, expectedData);
     });
 
-    QUnit.test("Can get fastest splits from start to first control", function (assert) {
+    QUnit.test("Can get fastest splits from start to first control", assert => {
         const courseClassSet = getTestCourseClassSet();
         const course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         setCourseInCourseClassSet(course, courseClassSet);
@@ -173,7 +173,7 @@
         assert.deepEqual(actualData, expectedData);
     });
 
-    QUnit.test("Can get fastest splits from last control to finish", function (assert) {
+    QUnit.test("Can get fastest splits from last control to finish", assert => {
         const courseClassSet = getTestCourseClassSet();
         const course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         setCourseInCourseClassSet(course, courseClassSet);
@@ -195,7 +195,7 @@
         assert.deepEqual(actualData, expectedData);
     });
 
-    QUnit.test("Can get results near intermediate control", function (assert) {
+    QUnit.test("Can get results near intermediate control", assert => {
         const courseClassSet = getTestCourseClassSet();
         const course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         setCourseInCourseClassSet(course, courseClassSet);
@@ -222,7 +222,7 @@
         assert.deepEqual(actualData, expectedData);
     });
 
-    QUnit.test("Can get results near start control", function (assert) {
+    QUnit.test("Can get results near start control", assert => {
         const courseClassSet = getTestCourseClassSet();
         const course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         setCourseInCourseClassSet(course, courseClassSet);
@@ -249,7 +249,7 @@
         assert.deepEqual(actualData, expectedData);
     });
 
-    QUnit.test("Can get results near finish control", function (assert) {
+    QUnit.test("Can get results near finish control", assert => {
         const courseClassSet = getTestCourseClassSet();
         const course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212"]);
         setCourseInCourseClassSet(course, courseClassSet);
@@ -276,7 +276,7 @@
         assert.deepEqual(actualData, expectedData);
     });
 
-    QUnit.test("Can get courses and next controls using numeric sorting of course names where appropriate", function (assert) {
+    QUnit.test("Can get courses and next controls using numeric sorting of course names where appropriate", assert => {
         const course5 = new Course("Test course 5", [], null, null, ["235", "189", "212"]);
         const course8 = new Course("Test course 8", [], null, null, ["235", "189", "212"]);
         const course10 = new Course("Test course 10", [], null, null, ["235", "189", "212"]);
@@ -302,7 +302,7 @@
         assert.deepEqual(actualData, expectedData);
     });
 
-    QUnit.test("Can get next controls of course after intermediate control when control repeated", function (assert) {
+    QUnit.test("Can get next controls of course after intermediate control when control repeated", assert => {
         const course = new Course("Test course", [], null, null, ["235", "189", "241", "189", "212"]);
         const eventData = new Event([], [course]);
 
@@ -315,7 +315,7 @@
         assert.deepEqual(actualData, expectedData);
     });
 
-    QUnit.test("Can get next controls of course after start control", function (assert) {
+    QUnit.test("Can get next controls of course after start control", assert => {
         const course = new Course("Test course", [], null, null, ["235", "189", "212"]);
         const eventData = new Event([], [course]);
 
@@ -328,7 +328,7 @@
         assert.deepEqual(actualData, expectedData);
     });
 
-    QUnit.test("Can get next controls of course after last control", function (assert) {
+    QUnit.test("Can get next controls of course after last control", assert => {
         const course = new Course("Test course", [], null, null, ["235", "189", "212"]);
         const eventData = new Event([], [course]);
 

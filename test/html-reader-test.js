@@ -113,17 +113,14 @@
         }
     }
 
-    QUnit.test("Cannot parse an empty string", function (assert) {
-        runInvalidDataTest(assert, "", "an empty string", "WrongFileFormat");
-    });
+    QUnit.test("Cannot parse an empty string", assert => runInvalidDataTest(assert, "", "an empty string", "WrongFileFormat"));
 
-    QUnit.test("Cannot parse a string that contains no HTML pre nor table tags", function (assert) {
-        runInvalidDataTest(assert, "<html><head></head><body>blah blah blah</body></html>", "a string that contains no <pre> nor <table> tags", "WrongFileFormat");
-    });
+    QUnit.test("Cannot parse a string that contains no HTML pre nor table tags",
+        assert => runInvalidDataTest(assert, "<html><head></head><body>blah blah blah</body></html>", "a string that contains no <pre> nor <table> tags", "WrongFileFormat"));
 
-    QUnit.test("Cannot parse a string that contains an HTML pre tag but no font tag", function (assert) {
-        runInvalidDataTest(assert, "<html><head></head><body><pre>blah blah blah</pre></body></html>", "a string that contains a <pre> tag but no <font> tags", "WrongFileFormat");
-    });
+    QUnit.test("Cannot parse a string that contains an HTML pre tag but no font tag",
+        assert => runInvalidDataTest(assert,
+            "<html><head></head><body><pre>blah blah blah</pre></body></html>", "a string that contains a <pre> tag but no <font> tags", "WrongFileFormat"));
 
     // HTML generation.
     // Old-format (preformatted).
@@ -629,32 +626,28 @@
         }
     }
 
-    QUnit.test("Cannot parse an empty event in any format", function (assert) {
-        runFailingHtmlFormatParseTest(assert, [], false);
-    });
+    QUnit.test("Cannot parse an empty event in any format", assert => runFailingHtmlFormatParseTest(assert, [], false));
 
-    QUnit.test("Can parse an event with an empty course in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse an event with an empty course in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: []}],
             (eventData, formatName) => {
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 0, `No classes should have been read - ${formatName}`);
                 assertCourse(assert, eventData.courses[0], new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "152", "141"]]]));
-            });
-    });
+            }));
 
-    QUnit.test("Can parse an event with an empty course and non-numeric control code in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse an event with an empty course and non-numeric control code in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "ABC152", "141"]], competitors: []}],
             (eventData, formatName) => {
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 0, `No classes should have been read - ${formatName}`);
                 assertCourse(assert, eventData.courses[0], new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "ABC152", "141"]]]));
-            });
-    });
+            }));
 
-    QUnit.test("Can parse an event with an empty course with length but no climb in two formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse an event with an empty course with length but no climb in two formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", ""], controlsLines: [["138", "152", "141"]], competitors: []}],
             (eventData, formatName) => {
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
@@ -662,11 +655,10 @@
             },
             // Don't run this on the OEvent format, it only supports both
             // length and climb, or neither.
-            {templates: [OLD_FORMAT, NEW_FORMAT]});
-    });
+            {templates: [OLD_FORMAT, NEW_FORMAT]}));
 
-    QUnit.test("Can parse an event with an empty course with length with comma as the decimal separator in two formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse an event with an empty course with length with comma as the decimal separator in two formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2,7", ""], controlsLines: [["138", "152", "141"]], competitors: []}],
             (eventData, formatName) => {
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
@@ -674,11 +666,10 @@
             },
             // Don't run this on the OEvent format, as lengths are in metres
             // and are never comma-separated.
-            {templates: [OLD_FORMAT, NEW_FORMAT]});
-    });
+            {templates: [OLD_FORMAT, NEW_FORMAT]}));
 
-    QUnit.test("Can parse an event with an empty course with length specified in metres in two formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse an event with an empty course with length specified in metres in two formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2700", ""], controlsLines: [["138", "152", "141"]], competitors: []}],
             (eventData, formatName) => {
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
@@ -686,11 +677,10 @@
             },
             // Don't run this on the OEvent format as lengths are already in
             // metres.
-            {templates: [OLD_FORMAT, NEW_FORMAT]});
-    });
+            {templates: [OLD_FORMAT, NEW_FORMAT]}));
 
-    QUnit.test("Can parse an event with an empty course with climb but no length in two formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse an event with an empty course with climb but no length in two formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "", "35"], controlsLines: [["138", "152", "141"]], competitors: []}],
             (eventData, formatName) => {
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
@@ -698,20 +688,18 @@
             },
             // Don't run this on the OEvent format, it only supports both
             // length and climb, or neither.
-            {templates: [OLD_FORMAT, NEW_FORMAT]});
-    });
+            {templates: [OLD_FORMAT, NEW_FORMAT]}));
 
-    QUnit.test("Can parse an event with an empty course with no climb nor length in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse an event with an empty course with no climb nor length in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "", ""], controlsLines: [["138", "152", "141"]], competitors: []}],
             (eventData, formatName) => {
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assertCourse(assert, eventData.courses[0], new Map([["name", "Test course 1"], ["length", null], ["climb", null]]));
-            });
-    });
+            }));
 
-    QUnit.test("Can parse event data with a single course and single competitor in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single competitor in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
@@ -734,11 +722,10 @@
                 const course = eventData.courses[0];
                 assertCourse(assert, course, new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "152", "141"], "classCount", 1]]));
                 assert.deepEqual(course.classes[0], courseClass);
-            });
-    });
+            }));
 
-    QUnit.test("Can parse event data with a single course and single non-starting competitor with no split times in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single non-starting competitor with no split times in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner", "TEST", false, "", "dns", [], []]
             ]}],
@@ -757,11 +744,10 @@
                     ["isNonCompetitive", false], ["completed", false],
                     ["isNonStarter", true], ["isNonFinisher", false], ["isDisqualified", false]
                 ]));
-            });
-    });
+            }));
 
-    QUnit.test("Can parse event data with a single course and single competitor with negative split in the old format only", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single competitor with negative split in the old format only",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "03:57", "09:25"], ["01:47", "02:15", "", "05:28"]]
             ]}],
@@ -784,11 +770,10 @@
                 assertCourse(assert, course, new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "152", "141"]], ["classCount", 1]]));
                 assert.deepEqual(course.classes[0], courseClass);
             },
-            {templates: [OLD_FORMAT]});
-    });
+            {templates: [OLD_FORMAT]}));
 
-    QUnit.test("Can parse event data with a single course and single competitor with plenty of blank lines in the old format only", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single competitor with plenty of blank lines in the old format only",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "03:57", "09:25"], ["01:47", "02:15", "", "05:28"]]
             ]}],
@@ -804,11 +789,10 @@
                 // Six newlines (the length of the closing tag) should be enough
                 // to trigger the bug that caused this.
                 preprocessor: html => html.replace("</pre>", "\n\n\n\n\n\n</pre>\n")
-            });
-    });
+            }));
 
-    QUnit.test("Can parse event data with a single course and single competitor in a different class in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single competitor in a different class in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner", "TEST", true, "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
@@ -817,11 +801,10 @@
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes[0].name, "Class1");
             },
-            {useClasses: true});
-    });
+            {useClasses: true}));
 
-    QUnit.test("Can parse event data with a single course and single competitor ignoring extra controls in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single competitor ignoring extra controls in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"],
                     [{cumTime: "03:31", controlNum: "151"}, {cumTime: "08:44", controlNum: "133"}]]
@@ -844,12 +827,11 @@
                 const course = eventData.courses[0];
                 assertCourse(assert, course, new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "152", "141"]], ["classCount", 1]]));
                 assert.deepEqual(course.classes[0], courseClass);
-            });
-    });
+            }));
 
     // The zero split time with a decimal point turns up in event 6752.
-    QUnit.test("Can parse event data with a single course and single competitor ignoring extra control with invalid cumulative time in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single competitor ignoring extra control with invalid cumulative time in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"],
                     [{cumTime: "0.00", controlNum: "133"}]]
@@ -857,11 +839,10 @@
             (eventData, formatName) => {
                 assert.strictEqual(eventData.courses.length, 1, `One course should have been read - ${formatName}`);
                 assert.strictEqual(eventData.classes.length, 1, `One class should have been read - ${formatName}`);
-            });
-    });
+            }));
 
-    QUnit.test("Can parse event data with a single course and two competitors in the same class in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and two competitors in the same class in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner 1", "TEST", true, "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]],
                 ["2", "184", "Test runner 2", "ABCD", true, "Class1", "09:59", ["01:52", "04:05", "08:40", "09:59"], ["01:52", "02:13", "04:35", "01:19"]]
@@ -878,11 +859,10 @@
 
                 assert.strictEqual(eventData.courses[0].name, "Test course 1");
             },
-            {useClasses: true});
-    });
+            {useClasses: true}));
 
-    QUnit.test("Can parse event data with a single course and two competitors in different classes in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and two competitors in different classes in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner 1", "TEST", true, "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]],
                 ["2", "184", "Test runner 2", "ABCD", true, "Class2", "09:59", ["01:52", "04:05", "08:40", "09:59"], ["01:52", "02:13", "04:35", "01:19"]]
@@ -903,11 +883,10 @@
                 assertResult(assert, courseClass1.results[0], new Map([["name", "Test runner 1"], ["club", "TEST"], ["totalTime", 9 * 60 + 25]]));
                 assertResult(assert, courseClass2.results[0], new Map([["name", "Test runner 2"], ["club", "ABCD"], ["totalTime", 9 * 60 + 59]]));
             },
-            {useClasses: true});
-    });
+            {useClasses: true}));
 
-    QUnit.test("Can parse event data with two courses and two competitors in different classes in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with two courses and two competitors in different classes in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner 1", "TEST", true, "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]},
@@ -933,11 +912,10 @@
                 assert.strictEqual(courseClass1.results[0].owner.name, "Test runner 1");
                 assert.strictEqual(courseClass2.results[0].owner.name, "Test runner 2");
             },
-            {useClasses: true});
-    });
+            {useClasses: true}));
 
-    QUnit.test("Can parse event data with a two competitors in the same class but different course using course names in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a two competitors in the same class but different course using course names in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner 1", "TEST", true, "Class1", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]},
@@ -951,11 +929,10 @@
                 assert.strictEqual(eventData.classes[0].name, "Test course 1");
                 assert.strictEqual(eventData.classes[1].name, "Test course 2");
             },
-            {useClasses: true});
-    });
+            {useClasses: true}));
 
-    QUnit.test("Can parse event data with a single course and single competitor with CRLF line endings in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single competitor with CRLF line endings in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
@@ -965,11 +942,10 @@
                 assert.strictEqual(eventData.classes[0].results.length, 1);
                 assert.deepEqual(eventData.courses[0].classes.length, 1);
             },
-            {preprocessor: html => html.replace(/\n/g, "\r\n")});
-    });
+            {preprocessor: html => html.replace(/\n/g, "\r\n")}));
 
-    QUnit.test("Can parse event data with a single course and single competitor with doubled line endings in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single competitor with doubled line endings in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
@@ -979,12 +955,10 @@
                 assert.strictEqual(eventData.classes[0].results.length, 1);
                 assert.deepEqual(eventData.courses[0].classes.length, 1);
             },
-            {preprocessor: html => html.replace(/\n/g, "\n\n")}
-        );
-    });
+            {preprocessor: html => html.replace(/\n/g, "\n\n")}));
 
-    QUnit.test("Can parse event data with a single course and single competitor with CR line endings in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single competitor with CR line endings in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["1", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
@@ -994,11 +968,10 @@
                 assert.strictEqual(eventData.classes[0].results.length, 1);
                 assert.deepEqual(eventData.courses[0].classes.length, 1);
             },
-            {preprocessor: html => html.replace(/\n/g, "\r")});
-    });
+            {preprocessor: html => html.replace(/\n/g, "\r")}));
 
-    QUnit.test("Can parse event data with a single course and single mispunching competitor in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single mispunching competitor in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["", "165", "Test runner", "TEST", false, "", "09:25", ["01:47", "04:02", "-----", "09:25"], ["01:47", "02:15", "-----", "01:12"]]
             ]}],
@@ -1013,11 +986,10 @@
                     ["originalSplitTimes", [1 * 60 + 47, 2 * 60 + 15, null, null]],
                     ["isNonCompetitive", false], ["completed", false]
                 ]));
-            });
-    });
+            }));
 
-    QUnit.test("Can parse event data with a single course and single mispunching competitor with missing cumulative split for the finish in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single mispunching competitor with missing cumulative split for the finish in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["", "165", "Test runner", "TEST", false, "", "mp", ["01:47", "04:02", "-----"], ["01:47", "02:15", "-----"]]
             ]}],
@@ -1032,11 +1004,10 @@
                     ["originalSplitTimes", [1 * 60 + 47, 2 * 60 + 15, null, null]],
                     ["isNonCompetitive", false], ["completed", false]
                 ]));
-            });
-    });
+            }));
 
-    QUnit.test("Can parse event data with a single course and single non-competitive competitor in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single non-competitive competitor in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["", "165", "Test runner", "TEST", false, "", "n/c", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
@@ -1052,11 +1023,10 @@
                     ["isNonCompetitive", true], ["completed", true],
                     ["isNonStarter", false], ["isNonFinisher", false], ["isDisqualified", false]
                 ]));
-            });
-    });
+            }));
 
-    QUnit.test("Can parse event data with a single course and single non-starting competitor in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single non-starting competitor in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["", "165", "Test runner", "TEST", false, "", "", ["-----", "-----", "-----", "-----"], ["-----", "-----", "-----", "-----"]]
             ]}],
@@ -1072,11 +1042,10 @@
                     ["isNonCompetitive", false], ["completed", false],
                     ["isNonStarter", true], ["isNonFinisher", false], ["isDisqualified", false]
                 ]));
-            });
-    });
+            }));
 
-    QUnit.test("Can parse event data with a single course and single competitor with 2 lines' worth of controls in all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single competitor with 2 lines' worth of controls in all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"], ["140", "154"]], competitors: [
                 ["1", "165", "Test runner", "TEST", false, "", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]],
                 ["", "", "", "", false, "", "", ["09:25", "11:09", "12:12"], ["01:12", "01:44", "01:03"]]
@@ -1098,11 +1067,10 @@
                 const course = eventData.courses[0];
                 assertCourse(assert, course, new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "152", "141", "140", "154"]], ["classCount", 1]]));
                 assert.deepEqual(course.classes[0], courseClass);
-            });
-    });
+            }));
 
-    QUnit.test("Can parse event data with a single course and single competitor with separate class name and 2 lines' worth of controls in the all formats", function (assert) {
-        runHtmlFormatParseTest(
+    QUnit.test("Can parse event data with a single course and single competitor with separate class name and 2 lines' worth of controls in the all formats",
+        assert => runHtmlFormatParseTest(
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"], ["140", "154"]], competitors: [
                 ["1", "165", "Test runner", "TEST", true, "Class1", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]],
                 ["", "", "", "", true, "", "", ["09:25", "11:09", "12:12"], ["01:12", "01:44", "01:03"]]
@@ -1125,40 +1093,37 @@
                 assertCourse(assert, course, new Map([["name", "Test course 1"], ["length", 2.7], ["climb", 35], ["controls", ["138", "152", "141", "140", "154"]], ["classCount", 1]]));
                 assert.deepEqual(course.classes[0], courseClass);
             },
-            {useClasses: true});
-    });
+            {useClasses: true}));
 
-    QUnit.test("Cannot parse event data in each format where the competitor has the wrong number of cumulative times", function (assert) {
-        runFailingHtmlFormatParseTest(
+    QUnit.test("Cannot parse event data in each format where the competitor has the wrong number of cumulative times",
+        assert => runFailingHtmlFormatParseTest(
             assert,
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"], ["140", "154"]], competitors: [
                 ["1", "165", "Test runner", "TEST", false, "", "12:12", ["01:47", "04:02", "08:13"], ["01:47", "02:15", "04:11"]]
             ]}],
-            false);
-    });
+            false));
 
-    QUnit.test("Cannot parse event data in each format where the first row of competitor details are all blank", function (assert) {
-        runFailingHtmlFormatParseTest(
+    QUnit.test("Cannot parse event data in each format where the first row of competitor details are all blank",
+        assert => runFailingHtmlFormatParseTest(
             assert,
             [{headerDetails: ["Test course 1", "2.7", "35"], controlsLines: [["138", "152", "141"]], competitors: [
                 ["", "", "", "", false, "", "", ["01:47", "04:02", "08:13", "09:25"], ["01:47", "02:15", "04:11", "01:12"]]
             ]}],
-            false);
-    });
+            false));
 
     // Format-specific tests.
 
-    QUnit.test("Cannot parse a string that contains an opening pre tag but no closing pre tag", function (assert) {
-        runInvalidDataTest(assert, "<html><head></head><body>\n<pre>\n<font>blah blah blah</font>\n</body></html>", "a string that contains <pre> but not </pre>", "InvalidData");
-    });
+    QUnit.test("Cannot parse a string that contains an opening pre tag but no closing pre tag",
+        assert => runInvalidDataTest(assert,
+            "<html><head></head><body>\n<pre>\n<font>blah blah blah</font>\n</body></html>", "a string that contains <pre> but not </pre>", "InvalidData"));
 
-    QUnit.test("Cannot read event data without any closing table elements", function (assert) {
+    QUnit.test("Cannot read event data without any closing table elements", assert => {
         const html = NEW_FORMAT_DATA_HEADER.replace(/<\/table>/g, "") + "<table><table><table>" + NEW_FORMAT_DATA_FOOTER;
         runInvalidDataTest(assert, html, "no closing-table elements");
     });
 
     // Format-specific as handles a quirk of the old format.
-    QUnit.test("Can parse event data with a single course and single valid competitor with no start number", function (assert) {
+    QUnit.test("Can parse event data with a single course and single valid competitor with no start number", assert => {
         const html = OLD_FORMAT.header +
                    getCourseHeaderLineOld("Test course 1", "2.7", "35") +
                    getControlsLineOld(["138", "152", "141"], 0, true) +
@@ -1178,7 +1143,7 @@
     });
 
     // Needs to remain format-specific as the newlines can only be inserted at specific locations.
-    QUnit.test("Can parse event data with a single course and single competitor with extra blank lines in the old format", function (assert) {
+    QUnit.test("Can parse event data with a single course and single competitor with extra blank lines in the old format", assert => {
         const html = "<html><head></head><body>\n<pre>\n\n\n" +
                    getCourseHeaderLineOld("Test course 1", "2.7", "35") + "\n" +
                    getControlsLineOld(["138", "152", "141"], 0, true) + "\n\n\n\n\n\n" +
@@ -1191,7 +1156,7 @@
         assert.deepEqual(eventData.courses[0].classes.length, 1);
     });
 
-    QUnit.test("Can parse event data with a single course and single competitor with extra blank lines in the new format", function (assert) {
+    QUnit.test("Can parse event data with a single course and single competitor with extra blank lines in the new format", assert => {
         const html = NEW_FORMAT_DATA_HEADER +
                    getCourseHeaderNew("Test course 1", "2.7", "35") + "\n" +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
@@ -1206,7 +1171,7 @@
     });
 
     // Needs to remain format-specific as the string manipulation is format-specific.
-    QUnit.test("Cannot parse event data in the old format where the second line of a competitor is missing", function (assert) {
+    QUnit.test("Cannot parse event data in the old format where the second line of a competitor is missing", assert => {
         let html = "<html><head></head><body>\n<pre>\n" +
                    getCourseHeaderLineOld("Test course 1", "2.7", "35") +
                    getControlsLineOld(["138", "152", "141"], 0, true) +
@@ -1218,7 +1183,7 @@
         runInvalidDataTest(assert, html, "data with a missing second line of competitor data");
     });
 
-    QUnit.test("Cannot parse event data in the new format where the second line of a competitor is missing", function (assert) {
+    QUnit.test("Cannot parse event data in the new format where the second line of a competitor is missing", assert => {
         let html = NEW_FORMAT_DATA_HEADER +
                    getCourseHeaderNew("Test course 1", "2.7", "35") +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
@@ -1231,7 +1196,7 @@
         runInvalidDataTest(assert, html, "data with a missing second line of competitor data");
     });
 
-    QUnit.test("Can parse event data with a single course and single valid and single mispunching competitor with mid-table separator", function (assert) {
+    QUnit.test("Can parse event data with a single course and single valid and single mispunching competitor with mid-table separator", assert => {
         const html = NEW_FORMAT_DATA_HEADER +
                    getCourseHeaderNew("Test course 1", "2.7", "35") +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
@@ -1253,7 +1218,7 @@
         ]));
     });
 
-    QUnit.test("Can parse event data with a single course and single valid and single mispunching competitor with corrected mid-table separator", function (assert) {
+    QUnit.test("Can parse event data with a single course and single valid and single mispunching competitor with corrected mid-table separator", assert => {
         const html = NEW_FORMAT_DATA_HEADER +
                    getCourseHeaderNew("Test course 1", "2.7", "35") +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS + NEW_FORMAT_RESULTS_TABLE_HEADER +
@@ -1275,7 +1240,7 @@
         ]));
     });
 
-    QUnit.test("Can parse event data with two courses and navigation elements", function (assert) {
+    QUnit.test("Can parse event data with two courses and navigation elements", assert => {
         const html = NEW_FORMAT_DATA_HEADER +
                    '<a id="1"></a>' +
                    getCourseHeaderNew("Test course 1", "2.7", "35") +
@@ -1300,7 +1265,7 @@
         assert.strictEqual(eventData.classes[1].results.length, 1, "One competitor should should have been read for course 2");
     });
 
-    QUnit.test("Can parse event data in new-format with no start numbers", function (assert) {
+    QUnit.test("Can parse event data in new-format with no start numbers", assert => {
         const html = NEW_FORMAT_DATA_HEADER +
                    getCourseHeaderNew("Test course 1", "2.7", "35") + "\n" +
                    NEW_FORMAT_COURSE_HEADER_TABLE_NO_CLASS_NO_STARTNO + NEW_FORMAT_RESULTS_TABLE_HEADER +

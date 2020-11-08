@@ -48,7 +48,7 @@
         return new ChartTypeSelector(d3.select("#qunit-fixture").node(), chartTypes);
     }
 
-    QUnit.test("Can construct the selector", function(assert) {
+    QUnit.test("Can construct the selector", assert => {
         createSelector();
 
         const htmlSelectSelection = d3.select("#qunit-fixture select");
@@ -58,7 +58,7 @@
         assert.strictEqual(htmlSelect.options.length, 3, "Three items should be created");
     });
 
-    QUnit.test("Registering a handler and changing a value in the selector triggers a call to change callback", function(assert) {
+    QUnit.test("Registering a handler and changing a value in the selector triggers a call to change callback", assert => {
         resetLastChartType();
         const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
@@ -72,7 +72,7 @@
         assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
-    QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", function(assert) {
+    QUnit.test("Registering two handlers and changing a value in the selector triggers a call to both callbacks", assert => {
         resetLastChartType();
 
         let lastChartTypeName2 = null;
@@ -97,7 +97,7 @@
         assert.strictEqual(callCount2, 1, "One change should have been recorded");
     });
 
-    QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", function(assert) {
+    QUnit.test("Registering the same handler twice and changing a value in the selector triggers only one call to change callback", assert => {
         resetLastChartType();
         const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
@@ -113,7 +113,7 @@
         assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
-    QUnit.test("Race graph notifier function called and selection reverted if notifier set", function(assert) {
+    QUnit.test("Race graph notifier function called and selection reverted if notifier set", assert => {
         resetLastChartType();
         const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
@@ -132,7 +132,7 @@
         assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
-    QUnit.test("Race graph notifier function called and selection reverted to previous selection if notifier set", function(assert) {
+    QUnit.test("Race graph notifier function called and selection reverted to previous selection if notifier set", assert => {
         resetLastChartType();
         const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
@@ -155,7 +155,7 @@
         assert.strictEqual(lastChartTypeName, chartTypes[2].nameKey, "The third chart type should still be selected");
     });
 
-    QUnit.test("Setting the chart type to a recognised type sets the type and calls change handler", function(assert) {
+    QUnit.test("Setting the chart type to a recognised type sets the type and calls change handler", assert => {
         resetLastChartType();
         const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
@@ -175,7 +175,7 @@
         assert.strictEqual(callCount, 1, "One change should have been recorded");
     });
 
-    QUnit.test("Setting the chart type to an unrecognised type does nothing and does not call change handler", function(assert) {
+    QUnit.test("Setting the chart type to an unrecognised type does nothing and does not call change handler", assert => {
         resetLastChartType();
         const selector = createSelector();
         selector.registerChangeHandler(handleChartTypeChanged);
@@ -191,7 +191,7 @@
         assert.strictEqual(callCount, 0, "No changes should have been recorded");
     });
 
-    QUnit.test("Race graph notifier function called and selection reverted to splits graph if notifier set while race graph selected", function(assert) {
+    QUnit.test("Race graph notifier function called and selection reverted to splits graph if notifier set while race graph selected", assert => {
         resetLastChartType();
         const selector = createSelector();
 
