@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Result tests.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -1145,5 +1145,112 @@
         assert.strictEqual(result.getOwnerNameForLeg(null), "Test Runner");
         assert.strictEqual(result.getOwnerNameForLeg(0), "Test Runner");
         assert.strictEqual(result.getOwnerNameForLeg(1), "Test Runner");
+    });
+
+    function getTeamResultForRestrictingToCommonControls(assert) {
+        var result = createTeamResult(1, [
+            fromOriginalCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {}),
+            fromOriginalCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533], {})
+        ], new Team("Team 1", "ABC"));
+
+        assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 65, 286, 470, 570, 631, 824, 1000, 1103]);
+        assert.deepEqual(result.originalSplitTimes, [65, 221, 184, 100, 61, 193, 176, 103]);
+
+        return result;
+    }
+
+    QUnit.test("Restricting a team result to the same common controls as original has no noticeable effect", function (assert) {
+        var result = getTeamResultForRestrictingToCommonControls(assert);
+
+        var originalControls = [["194", "212", "163"], ["208", "220", "181"]];
+        var commonControls = [["194", "212", "163"], ["208", "220", "181"]];
+
+        result.restrictToCommonControls(originalControls, commonControls);
+
+        assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 65, 286, 470, 570, 631, 824, 1000, 1103]);
+        assert.deepEqual(result.originalSplitTimes, [65, 221, 184, 100, 61, 193, 176, 103]);
+    });
+
+    QUnit.test("Restricting a team result to common controls restricts the cumulative and split times", function (assert) {
+        var result = getTeamResultForRestrictingToCommonControls(assert);
+
+        var originalControls = [["194", "212", "163"], ["208", "220", "181"]];
+        var commonControls = [["194", "163"], ["208", "181"]];
+
+        result.restrictToCommonControls(originalControls, commonControls);
+
+        assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 65, 470, 570, 631, 1000, 1103]);
+        assert.deepEqual(result.originalSplitTimes, [65, 405, 100, 61, 369, 103]);
+    });
+
+    QUnit.test("Restricting a team result to common controls with the last control in a leg missing restricts the cumulative and split times", function (assert) {
+        var result = getTeamResultForRestrictingToCommonControls(assert);
+
+        var originalControls = [["194", "212", "163"], ["208", "220", "181"]];
+        var commonControls = [["194", "212"], ["208", "181"]];
+
+        result.restrictToCommonControls(originalControls, commonControls);
+
+        assert.deepEqual(result.getAllOriginalCumulativeTimes(), [0, 65, 286, 570, 631, 1000, 1103]);
+        assert.deepEqual(result.originalSplitTimes, [65, 221, 284, 61, 369, 103]);
+    });
+
+    QUnit.test("Attempting to restrict a team result to a list of common controls lists of the wrong length raises an error", function (assert) {
+        var result = getTeamResultForRestrictingToCommonControls(assert);
+        var originalControls = [["194", "212", "163"], ["208", "220", "181"]];
+        var commonControls = [["194", "163"], ["208", "181"], ["123"]];
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            result.restrictToCommonControls(originalControls, commonControls);
+        });
+    });
+
+    QUnit.test("Attempting to restrict a team result to a list of common controls lists with a spurious control raises an error", function (assert) {
+        var result = getTeamResultForRestrictingToCommonControls(assert);
+        var originalControls = [["194", "212", "163"], ["208", "220", "181"]];
+        var commonControls = [["194", "163"], ["999", "181"]];
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            result.restrictToCommonControls(originalControls, commonControls);
+        });
+    });
+
+    QUnit.test("Attempting to restrict a team result to a list of common controls lists with a controls list in the wrong order raises an error", function (assert) {
+        var result = getTeamResultForRestrictingToCommonControls(assert);
+
+        var originalControls = [["194", "212", "163"], ["208", "220", "181"]];
+        var commonControls = [["163", "194"], ["208", "181"]];
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            result.restrictToCommonControls(originalControls, commonControls);
+        });
+    });
+
+    QUnit.test("Attempting to restrict a team result to a list of common controls lists with too many original controls raises an error if last control not common", function (assert) {
+        var result = getTeamResultForRestrictingToCommonControls(assert);
+
+        var originalControls = [["194", "212", "163"], ["208", "220", "181", "177"]];
+        var commonControls = [["194", "163"], ["208", "181"]];
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            result.restrictToCommonControls(originalControls, commonControls);
+        });
+    });
+
+    QUnit.test("Attempting to restrict a team result to a list of common controls lists with too many original controls raises an error if last control common", function (assert) {
+        var result = getTeamResultForRestrictingToCommonControls(assert);
+
+        var originalControls = [["194", "212", "163"], ["208", "220", "188", "177", "181"]];
+        var commonControls = [["194", "163"], ["208", "181"]];
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            result.restrictToCommonControls(originalControls, commonControls);
+        });
+    });
+
+
+    QUnit.test("Attempting to restrict a team result to a list of common controls lists with too few original controls raises an error", function (assert) {
+        var result = getTeamResultForRestrictingToCommonControls(assert);
+
+        var originalControls = [["194", "212", "163"], ["208", "181"]];
+        var commonControls = [["194", "163"], ["208", "181"]];
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            result.restrictToCommonControls(originalControls, commonControls);
+        });
     });
 })();
