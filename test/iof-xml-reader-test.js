@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - IOF XML format parser tests.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,7 @@
     var hasProperty = SplitsBrowser.hasProperty;
     var formatTime = SplitsBrowser.formatTime;
     var parseEventData = SplitsBrowser.Input.IOFXml.parseEventData;
+    var COMMON_CONTROLS_MODE = SplitsBrowser.COMMON_CONTROLS_MODE;
 
     // The number of feet per kilometre.
     var FEET_PER_KILOMETRE = 3280;
@@ -64,10 +65,10 @@
             gender: "M",
             birthDate: "1978-08-18",
             startTime: 10 * 3600 + 21 * 60 + 7,
-            finishTime: 10 * 3600 + 29 * 60 + 53,
+            finishTime: 10 * 3600 + 30 * 60,
             totalTime: 61 + 193 + 176 + 103,
             controls: ["183", "149", "167"],
-            cumTimes: [61, 61 + 193, 65 + 193 + 176],
+            cumTimes: [61, 61 + 193, 61 + 193 + 176],
             result: true
         };
 
@@ -637,6 +638,8 @@
     *       Defaults to all formatters.
     * * preprocessor (Function): Function used to preprocess the
     *       XML before it is parsed.  Defaults to no preprocessing.
+    * * relayMode (String): 'commonControls' to parse a relay event in
+    *       common-controls mode, anything else to not.
     * If none of the above options are required, the options object itself can
     * be omitted.
     *
@@ -655,7 +658,7 @@
             if (options && options.preprocessor) {
                 xml = options.preprocessor(xml);
             }
-            var eventData = parseEventData(xml);
+            var eventData = parseEventData(xml, (options && options.relayMode) || "allControls");
             checkFunc(eventData, formatter.name);
         });
     }
@@ -1667,7 +1670,6 @@
 
     QUnit.test("Can parse a string containing two results with different controls", function (assert) {
         var team1 = getTeam();
-
         var team2 = getTeam();
         team2.name += " 2";
         for (var memberIndex = 0; memberIndex < 2; memberIndex += 1) {
@@ -1680,12 +1682,65 @@
         runXmlFormatParseTest([{name: "Test Class", teams: [team1, team2]}],
             function (eventData, formatterName) {
                 assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
-                if (eventData.classes.length === 1) {
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatterName);
+                if (eventData.classes.length === 1 && eventData.courses.length === 1) {
                     assert.strictEqual(eventData.classes[0].results.length, 2, "Two results should have been read - " + formatterName);
+                    assert.strictEqual(eventData.courses[0].controls, null);
                 }
 
                 assert.deepEqual(eventData.warnings, [], "No warnings should have been issued - " + formatterName);
             });
+    });
+
+    QUnit.test("Can parse a string containing two results with different controls in common-controls mode", function (assert) {
+        var team1 = getTeam();
+        var team2 = getTeam();
+        team2.name += " 2";
+        for (var memberIndex = 0; memberIndex < 2; memberIndex += 1) {
+            team2.members[memberIndex].surname += " 2";
+            team2.members[memberIndex].startTime += 100;
+            team2.members[memberIndex].finishTime += 100;
+            team2.members[memberIndex].controls[1] = team2.members[memberIndex].controls[1].replace(/4/g, "5");
+        }
+
+        runXmlFormatParseTest([{name: "Test Class", teams: [team1, team2]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatterName);
+                if (eventData.classes.length === 1 && eventData.courses.length === 1) {
+                    assert.strictEqual(eventData.classes[0].results.length, 2, "Two results should have been read - " + formatterName);
+                    assert.deepEqual(eventData.classes[0].results[0].getAllOriginalCumulativeTimes(), [0, 65, 470, 570, 631, 1000, 1103]);
+                    assert.deepEqual(eventData.classes[0].numbersOfControls, [2, 2], "Two controls should have been read for each competitor - " + formatterName);
+                    assert.deepEqual(eventData.courses[0].controls, ["182", "167", "Finish", "183", "167"]);
+                }
+                assert.deepEqual(eventData.warnings, [], "No warnings should have been issued - " + formatterName);
+            }, {relayMode: COMMON_CONTROLS_MODE});
+    });
+
+    QUnit.test("Can parse a string containing two results with different numbers of controls in common-controls mode", function (assert) {
+        var team1 = getTeam();
+        var team2 = getTeam();
+        team2.name += " 2";
+        for (var memberIndex = 0; memberIndex < 2; memberIndex += 1) {
+            team2.members[memberIndex].surname += " 2";
+            team2.members[memberIndex].startTime += 100;
+            team2.members[memberIndex].finishTime += 100;
+            team2.members[memberIndex].controls.splice(1, 1);
+            team2.members[memberIndex].cumTimes.splice(1, 1);
+        }
+
+        runXmlFormatParseTest([{name: "Test Class", teams: [team1, team2]}],
+            function (eventData, formatterName) {
+                assert.strictEqual(eventData.classes.length, 1, "One class should have been read - " + formatterName);
+                assert.strictEqual(eventData.courses.length, 1, "One course should have been read - " + formatterName);
+                if (eventData.classes.length === 1 && eventData.courses.length === 1) {
+                    assert.strictEqual(eventData.classes[0].results.length, 2, "Two results should have been read - " + formatterName);
+                    assert.deepEqual(eventData.classes[0].results[0].getAllOriginalCumulativeTimes(), [0, 65, 470, 570, 631, 1000, 1103]);
+                    assert.deepEqual(eventData.classes[0].numbersOfControls, [2, 2], "Two controls should have been read for each competitor - " + formatterName);
+                    assert.deepEqual(eventData.courses[0].controls, ["182", "167", "Finish", "183", "167"]);
+                }
+                assert.deepEqual(eventData.warnings, [], "No warnings should have been issued - " + formatterName);
+            }, {relayMode: COMMON_CONTROLS_MODE});
     });
 
     QUnit.test("Can parse a string containing two results with different numbers of controls, rejecting the second row", function (assert) {

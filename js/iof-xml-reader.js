@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser IOF XML - Read event data in IOF XML-format files.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,10 @@
 
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var COMMON_CONTROLS_MODE = SplitsBrowser.COMMON_CONTROLS_MODE;
+    var determineCommonControls = SplitsBrowser.determineCommonControls;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
+    var getMessage = SplitsBrowser.getMessage;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
     var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
@@ -752,9 +755,11 @@
     * @param {Number} number The position number within the class.
     * @param {Object} cls The class read so far.
     * @param {Object} XML reader used to assist with format-specific parsing.
+    * @param {String} relayMode The 'mode' in which to parse relay events.
     * @param {Array} warnings Array that accumulates warning messages.
+    * @param {Array} allControlsLists A list of all lists of controls from the teams.
     */
-    function parseTeamResult(teamResultElement, number, cls, reader, warnings) {
+    function parseTeamResult(teamResultElement, number, cls, reader, relayMode, warnings, allControlsLists) {
         var teamName = reader.readTeamName(teamResultElement);
         var teamClubName = reader.readClubName(teamResultElement);
         var members = reader.readTeamMemberResults(teamResultElement);
@@ -814,21 +819,26 @@
             var warning = null;
             var teamResult = createTeamResult(number, results, new Team(teamName, teamClubName));
 
-            for (var teamMemberIndex = 0; teamMemberIndex < results.length; teamMemberIndex += 1) {
-                var expectedControlCount = cls.course.numbersOfControls[teamMemberIndex];
-                var memberResult = results[teamMemberIndex];
+            if (relayMode !== COMMON_CONTROLS_MODE) {
+                for (var teamMemberIndex = 0; teamMemberIndex < results.length; teamMemberIndex += 1) {
+                    var expectedControlCount = cls.course.numbersOfControls[teamMemberIndex];
+                    var memberResult = results[teamMemberIndex];
 
-                // Subtract 2 for the start and finish cumulative times.
-                var actualControlCount = memberResult.getAllOriginalCumulativeTimes().length - 2;
+                    // Subtract 2 for the start and finish cumulative times.
+                    var actualControlCount = memberResult.getAllOriginalCumulativeTimes().length - 2;
 
-                if (actualControlCount !== expectedControlCount) {
-                    warning = "Competitor '" + memberResult.owner.name + "' in team '" + teamName + "' in class '" + cls.name + "' has an unexpected number of controls: expected " + expectedControlCount + ", actual " + actualControlCount;
-                    break;
+                    if (actualControlCount !== expectedControlCount) {
+                        warning = "Competitor '" + memberResult.owner.name + "' in team '" + teamName + "' in class '" + cls.name + "' has an unexpected number of controls: expected " + expectedControlCount + ", actual " + actualControlCount;
+                        break;
+                    }
                 }
             }
 
             if (warning === null) {
                 cls.results.push(teamResult);
+                if (relayMode === COMMON_CONTROLS_MODE) {
+                    allControlsLists.push(allControls);
+                }
             } else {
                 warnings.push(warning);
             }
@@ -836,14 +846,63 @@
     }
 
     /**
+    * Pulls out of all lists of controls the common controls, and adjusts the results in
+    * the class to only contain common controls.
+    * @param {Object} cls The class containing the results.
+    * @param {Array} allControlsLists The array of controls lists.
+    */
+    function processWithCommonControls(cls, allControlsLists) {
+        if (cls.results.length !== allControlsLists.length) {
+            throwInvalidData("Different number of results and all-controls lists");
+        }
+
+        if (allControlsLists.length === 0) {
+            // This shouldn't happen, as this function is only called if there are any team results,
+            // but we put it here just in case.
+            throwInvalidData("Unexpected empty list of results for processing common controls");
+        }
+
+        // allControlsLists should be a list of lists of lists of control codes.
+        var teamSize = allControlsLists[0].length;
+
+        var commonControlsLists = [];
+        for (var legIndex = 0; legIndex < teamSize; legIndex += 1) {
+            commonControlsLists.push(determineCommonControls(
+                allControlsLists.map(function (allControls) { return allControls[legIndex]; }),
+                "leg " + legIndex + " of class " + cls.name));
+        }
+
+        for (var resultIndex = 0; resultIndex < cls.results.length; resultIndex += 1) {
+            cls.results[resultIndex].restrictToCommonControls(allControlsLists[resultIndex], commonControlsLists);
+        }
+
+        // Now compile the list of all common controls.
+        var allControls = [];
+        var finishName = getMessage("FinishName");
+        for (legIndex = 0; legIndex < commonControlsLists.length; legIndex += 1) {
+            allControls = allControls.concat(commonControlsLists[legIndex]);
+            if (legIndex < commonControlsLists.length - 1) {
+                // Add a control for an intermediate finish.
+                allControls.push(finishName);
+            }
+        }
+
+        cls.controls = allControls;
+
+        // Recalculate the numbers of controls in the course.
+        cls.course.numbersOfControls = commonControlsLists.map(function (commonControls) { return commonControls.length; });
+    }
+
+    /**
     * Parses data for a single class.
     * @param {XMLElement} element XML ClassResult element
     * @param {Object} reader XML reader used to assist with format-specific
     *     XML reading.
+    * @param {String} relayMode The 'mode' in which to parse relay events.
     * @param {Array} warnings Array to accumulate any warning messages within.
     * @return {Object} Object containing parsed data.
     */
-    function parseClassData(element, reader, warnings) {
+    function parseClassData(element, reader, relayMode, warnings) {
         var jqElement = $(element);
         var cls = {name: null, results: [], teamSize: null, controls: [], course: null};
 
@@ -869,8 +928,12 @@
                 parsePersonResult(personResults[personIndex], personIndex + 1, cls, reader, warnings);
             }
         } else if (teamResults.length > 0) {
+            var allControlsLists = [];
             for (var teamIndex = 0; teamIndex < teamResults.length; teamIndex += 1) {
-                parseTeamResult(teamResults[teamIndex], teamIndex + 1, cls, reader, warnings);
+                parseTeamResult(teamResults[teamIndex], teamIndex + 1, cls, reader, relayMode, warnings, allControlsLists);
+            }
+            if (relayMode === COMMON_CONTROLS_MODE) {
+                processWithCommonControls(cls, allControlsLists);
             }
         } else {
             warnings.push("Class '" + className + "' has no competitors");
@@ -915,9 +978,10 @@
     * Parses IOF XML data in either the 2.0.3 format or the 3.0 format and
     * returns the data.
     * @param {String} data String to parse as XML.
+    * @param {String} relayMode The 'mode' in which to parse relay events.
     * @return {Event} Parsed event object.
     */
-    function parseEventData(data) {
+    function parseEventData(data, relayMode) {
 
         var reader = determineReader(data);
 
@@ -946,7 +1010,7 @@
         var warnings = [];
 
         classResultElements.forEach(function (classResultElement) {
-            var parsedClass = parseClassData(classResultElement, reader, warnings);
+            var parsedClass = parseClassData(classResultElement, reader, relayMode, warnings);
             if (parsedClass === null) {
                 // Class could not be parsed.
                 return;
@@ -959,7 +1023,9 @@
             var isTeamClass;
             if (parsedClass.teams !== null && parsedClass.course.numbersOfControls !== null && parsedClass.course.numbersOfControls.length > 0) {
                 numberOfControls = arraySum(parsedClass.course.numbersOfControls) + parsedClass.teamSize - 1;
-                parsedClass.controls = null;
+                if (relayMode !== COMMON_CONTROLS_MODE) {
+                    parsedClass.controls = null;
+                }
                 courseKey = null;
                 isTeamClass = true;
             } else {
