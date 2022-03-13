@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Input - Top-level data file reading.
  *
- *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -35,13 +35,14 @@
     * supported formats, or may be invalid.  This function returns the results
     * as an Event object if successful, or null in the event of failure.
     * @param {String} data The data read.
+    * @param {String} relayMode The relay mode to use.
     * @return {Event} Event data read in, or null for failure.
     */
-    SplitsBrowser.Input.parseEventData = function (data) {
+    SplitsBrowser.Input.parseEventData = function (data, relayMode) {
         for (var i = 0; i < PARSERS.length; i += 1) {
             var parser = PARSERS[i];
             try {
-                return parser(data);
+                return parser(data, relayMode);
             } catch (e) {
                 if (e.name !== "WrongFileFormat") {
                     throw e;

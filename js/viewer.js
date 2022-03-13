@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Viewer - Top-level class that runs the application.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -841,7 +841,7 @@
 
         var eventData;
         try {
-            eventData = parseEventData(data);
+            eventData = parseEventData(data, (options && options.relayMode) || "allControls");
         } catch (e) {
             if (e.name === "InvalidData") {
                 showLoadFailureMessage("LoadFailedInvalidData", {"$$MESSAGE$$": e.message});

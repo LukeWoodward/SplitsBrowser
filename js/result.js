@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Result - The results for a competitor or a team.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -793,6 +793,62 @@
         }
     };
 
+    /**
+    * Restricts this result to common controls punched by all runners in legs of a
+    * relay event.  This method is expected to only be used on a team result and only early
+    * on in the lifecycle of a team result, before offsets are determined and before any
+    * data repair is done.  It only updates the original cumulative and split times.  Also,
+    * this method modifies the result in-place rather than returning a new result.
+    * @param {Array} originalControls The list of lists of original controls for this result.
+    * @param {Array} commonControls The list of lists of common controls for this result.
+    */
+    Result.prototype.restrictToCommonControls = function (originalControls, commonControls) {
+        if (originalControls.length !== commonControls.length) {
+            throwInvalidData("Should have two equal-length arrays of common controls");
+        }
+
+        var restrictedCumTimes = [0];
+        var originalControlIndex = 1;
+
+        for (var legIndex = 0; legIndex < originalControls.length; legIndex += 1) {
+            var legOriginalControls = originalControls[legIndex];
+            var legCommonControls = commonControls[legIndex];
+            var commonControlIndex = 0;
+            for (var controlIndex = 0; controlIndex < legOriginalControls.length; controlIndex += 1) {
+                if (commonControlIndex < legCommonControls.length && legOriginalControls[controlIndex] === legCommonControls[commonControlIndex]) {
+                    // This is a common control.
+                    if (originalControlIndex >= this.originalCumTimes.length) {
+                        throwInvalidData("Attempt to read too many original controls: likely that the wrong list of controls has been passed");
+                    }
+
+
+                    restrictedCumTimes.push(this.originalCumTimes[originalControlIndex]);
+                    commonControlIndex += 1;
+                }
+
+                originalControlIndex += 1;
+            }
+
+            if (commonControlIndex < legCommonControls.length) {
+                throwInvalidData("Did not reach end of common controls: likely that they are not a subset of the controls");
+            }
+
+            if (originalControlIndex >= this.originalCumTimes.length) {
+                throwInvalidData("Attempt to read too many original controls: likely that the wrong list of controls has been passed");
+            }
+
+            // Add the finish time for this leg.
+            restrictedCumTimes.push(this.originalCumTimes[originalControlIndex]);
+            originalControlIndex += 1;
+        }
+
+        if (originalControlIndex < this.originalCumTimes.length) {
+            throwInvalidData("Did not reach end of original controls: likely that a wrong list of controls has been passed");
+        }
+
+        this.originalCumTimes = restrictedCumTimes;
+        this.originalSplitTimes = splitTimesFromCumTimes(restrictedCumTimes);
+    };
 
     /**
     * Creates and returns a result object representing the combined result of all
