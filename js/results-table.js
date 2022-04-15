@@ -224,7 +224,7 @@
                 headerCellData = headerCellData.concat(d3.range(1, numControls + 1));
             } else {
                 headerCellData = headerCellData.concat(controls.map(function (control, index) {
-                    return (index + 1) + NON_BREAKING_SPACE_CHAR + "(" + control + ")";
+                    return (index + 1) + " (" + control + ")";
                 }));
             }
 

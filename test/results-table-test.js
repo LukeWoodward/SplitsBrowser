@@ -108,9 +108,9 @@
         var table = d3.select("table.resultsTable");
         var tableHeaders = table.selectAll("thead tr th");
         assert.strictEqual(tableHeaders.size(), 7);
-        assert.strictEqual(tableHeaders.nodes()[3].innerHTML, "1&nbsp;(138)");
-        assert.strictEqual(tableHeaders.nodes()[4].innerHTML, "2&nbsp;(152)");
-        assert.strictEqual(tableHeaders.nodes()[5].innerHTML, "3&nbsp;(141)");
+        assert.strictEqual(tableHeaders.nodes()[3].innerHTML, "1 (138)");
+        assert.strictEqual(tableHeaders.nodes()[4].innerHTML, "2 (152)");
+        assert.strictEqual(tableHeaders.nodes()[5].innerHTML, "3 (141)");
     });
 
     QUnit.test("Can create a results table with one result not finishing sorted to the bottom", function (assert) {
