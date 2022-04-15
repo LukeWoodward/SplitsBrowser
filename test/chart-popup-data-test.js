@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser - ChartPopupData tests.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -55,7 +55,7 @@
             return createTeamResult(1, [memberResult1, memberResult2], new Team("Team " + num, "Club " + num));
         });
 
-        var courseClass = new CourseClass("Test class", 3, results);
+        var courseClass = new CourseClass("Test class", 7, results);
         courseClass.setIsTeamClass([3, 3]);
         return new CourseClassSet([courseClass]);
     }
@@ -188,6 +188,28 @@
                 highlight: true,
                 name: "Name0",
                 time: 100
+            }],
+            placeholder: null
+        };
+
+        assert.deepEqual(actualData, expectedData);
+    });
+
+    QUnit.test("Can get fastest splits from intermediate finish control to next control", function (assert) {
+        var courseClassSet = getTestTeamCourseClassSet();
+        var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212", Course.FINISH, "241", "189", "188"]);
+        courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
+
+        var eventData = new Event(courseClassSet.classes, [course]);
+        var actualData = ChartPopupData.getFastestSplitsForLegPopupData(courseClassSet, eventData, 5);
+
+        var expectedData = {
+            title: getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": getMessage("StartName"), "$$END$$": "241"}),
+            data: [{
+                className: "Test class",
+                highlight: true,
+                name: "Team 3",
+                time: 75
             }],
             placeholder: null
         };
@@ -341,4 +363,16 @@
         assert.deepEqual(actualData, expectedData);
     });
 
+    QUnit.test("Can get next controls of course after intermediate finish", function (assert) {
+        var course = new Course("Test course", [], null, null, ["235", "189", Course.FINISH, "241", "189", Course.FINISH, "212"]);
+        var eventData = new Event([], [course]);
+
+        var expectedData = {
+            nextControls: [{ course: course, nextControls: "241, 212" }],
+            thisControl: getMessage("StartName")
+        };
+
+        var actualData = ChartPopupData.getNextControlData(course, eventData, 3);
+        assert.deepEqual(actualData, expectedData);
+    });
 })();

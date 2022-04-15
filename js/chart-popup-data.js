@@ -77,7 +77,7 @@
         var startCode = course.getControlCode(controlIndex - 1);
         var endCode = course.getControlCode(controlIndex);
 
-        var startControl = (startCode === Course.START) ? getMessage("StartName") : startCode;
+        var startControl = (startCode === Course.START || startCode === Course.FINISH) ? getMessage("StartName") : startCode;
         var endControl = (endCode === Course.FINISH) ? getMessage("FinishName") : endCode;
 
         var title = getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": startControl, "$$END$$": endControl});
@@ -165,8 +165,10 @@
     function tidyNextControlsList(nextControls) {
         return nextControls.map(function (nextControlRec) {
             var codes = nextControlRec.nextControls.slice(0);
-            if (codes[codes.length - 1] === Course.FINISH) {
-                codes[codes.length - 1] = getMessage("FinishName");
+            for (var codeIndex = 0; codeIndex < codes.length; codeIndex += 1) {
+                if (codes[codeIndex] === Course.FINISH) {
+                    codes[codeIndex] = getMessage("FinishName");
+                }
             }
 
             return {course: nextControlRec.course, nextControls: codes.join(", ")};
@@ -187,7 +189,7 @@
         var controlCode = course.getControlCode(controlIdx);
         var nextControls = eventData.getNextControlsAfter(controlCode);
         nextControls.sort(function (c1, c2) { return compareCourseNames(c1.course.name, c2.course.name); });
-        var thisControlName = (controlCode === Course.START) ? getMessage("StartName") : getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
+        var thisControlName = (controlCode === Course.START || controlCode === Course.FINISH) ? getMessage("StartName") : getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
         return {thisControl: thisControlName, nextControls: tidyNextControlsList(nextControls) };
     };
 

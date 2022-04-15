@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser IOF XML - Read event data in IOF XML-format files.
  *
- *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,6 @@
     var COMMON_CONTROLS_MODE = SplitsBrowser.COMMON_CONTROLS_MODE;
     var determineCommonControls = SplitsBrowser.determineCommonControls;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
-    var getMessage = SplitsBrowser.getMessage;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
     var createTeamResult = SplitsBrowser.Model.Result.createTeamResult;
@@ -878,12 +877,11 @@
 
         // Now compile the list of all common controls.
         var allControls = [];
-        var finishName = getMessage("FinishName");
         for (legIndex = 0; legIndex < commonControlsLists.length; legIndex += 1) {
             allControls = allControls.concat(commonControlsLists[legIndex]);
             if (legIndex < commonControlsLists.length - 1) {
                 // Add a control for an intermediate finish.
-                allControls.push(finishName);
+                allControls.push(Course.FINISH);
             }
         }
 

@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Course tests.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -313,13 +313,6 @@
         });
     });
 
-    QUnit.test("Cannot return next control after finish on course that has controls", function (assert) {
-        var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
-        SplitsBrowserTest.assertInvalidData(assert, function () {
-            course.getNextControls(Course.FINISH);
-        });
-    });
-
     QUnit.test("Cannot return next control after control not on course", function (assert) {
         var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
         SplitsBrowserTest.assertInvalidData(assert, function () {
@@ -350,5 +343,10 @@
     QUnit.test("Can return next controls after intermediate control that appears more than once", function (assert) {
         var course = new Course("Test course", [], null, null, ["235", "212", "189", "212", "197"]);
         assert.deepEqual(course.getNextControls("212"), ["189", "197"]);
+    });
+
+    QUnit.test("Can return next controls after intermediate finish controls", function (assert) {
+        var course = new Course("Test course", [], null, null, ["235", "212", Course.FINISH, "189", "244", Course.FINISH, "197"]);
+        assert.deepEqual(course.getNextControls(Course.FINISH), ["189", "197"]);
     });
 })();

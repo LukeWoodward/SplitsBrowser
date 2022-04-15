@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Course - A single course at an event.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -300,8 +300,6 @@
     Course.prototype.getNextControls = function (controlCode) {
         if (this.controls === null) {
             throwInvalidData("Course has no controls");
-        } else if (controlCode === FINISH) {
-            throwInvalidData("Cannot fetch next control after the finish");
         } else if (controlCode === START) {
             return [(this.controls.length === 0) ? FINISH : this.controls[0]];
         } else {
