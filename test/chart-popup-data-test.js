@@ -197,7 +197,7 @@
 
     QUnit.test("Can get fastest splits from intermediate finish control to next control", function (assert) {
         var courseClassSet = getTestTeamCourseClassSet();
-        var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212", Course.FINISH, "241", "189", "188"]);
+        var course = new Course("Test course", courseClassSet.classes, null, null, ["235", "189", "212", Course.INTERMEDIATE, "241", "189", "188"]);
         courseClassSet.classes.forEach(function (courseClass) { courseClass.setCourse(course); });
 
         var eventData = new Event(courseClassSet.classes, [course]);
@@ -364,7 +364,7 @@
     });
 
     QUnit.test("Can get next controls of course after intermediate finish", function (assert) {
-        var course = new Course("Test course", [], null, null, ["235", "189", Course.FINISH, "241", "189", Course.FINISH, "212"]);
+        var course = new Course("Test course", [], null, null, ["235", "189", Course.INTERMEDIATE, "241", "189", Course.INTERMEDIATE, "212"]);
         var eventData = new Event([], [course]);
 
         var expectedData = {

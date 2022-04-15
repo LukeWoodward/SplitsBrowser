@@ -881,7 +881,7 @@
             allControls = allControls.concat(commonControlsLists[legIndex]);
             if (legIndex < commonControlsLists.length - 1) {
                 // Add a control for an intermediate finish.
-                allControls.push(Course.FINISH);
+                allControls.push(Course.INTERMEDIATE);
             }
         }
 

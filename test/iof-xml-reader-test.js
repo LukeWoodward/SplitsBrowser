@@ -1712,7 +1712,7 @@
                     assert.strictEqual(eventData.classes[0].results.length, 2, "Two results should have been read - " + formatterName);
                     assert.deepEqual(eventData.classes[0].results[0].getAllOriginalCumulativeTimes(), [0, 65, 470, 570, 631, 1000, 1103]);
                     assert.deepEqual(eventData.classes[0].numbersOfControls, [2, 2], "Two controls should have been read for each competitor - " + formatterName);
-                    assert.deepEqual(eventData.courses[0].controls, ["182", "167", Course.FINISH, "183", "167"]);
+                    assert.deepEqual(eventData.courses[0].controls, ["182", "167", Course.INTERMEDIATE, "183", "167"]);
                 }
                 assert.deepEqual(eventData.warnings, [], "No warnings should have been issued - " + formatterName);
             }, {relayMode: COMMON_CONTROLS_MODE});
@@ -1738,7 +1738,7 @@
                     assert.strictEqual(eventData.classes[0].results.length, 2, "Two results should have been read - " + formatterName);
                     assert.deepEqual(eventData.classes[0].results[0].getAllOriginalCumulativeTimes(), [0, 65, 470, 570, 631, 1000, 1103]);
                     assert.deepEqual(eventData.classes[0].numbersOfControls, [2, 2], "Two controls should have been read for each competitor - " + formatterName);
-                    assert.deepEqual(eventData.courses[0].controls, ["182", "167", Course.FINISH, "183", "167"]);
+                    assert.deepEqual(eventData.courses[0].controls, ["182", "167", Course.INTERMEDIATE, "183", "167"]);
                 }
                 assert.deepEqual(eventData.warnings, [], "No warnings should have been issued - " + formatterName);
             }, {relayMode: COMMON_CONTROLS_MODE});

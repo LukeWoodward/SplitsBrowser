@@ -313,6 +313,13 @@
         });
     });
 
+    QUnit.test("Cannot return next control after finish on course that has controls", function (assert) {
+        var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
+        SplitsBrowserTest.assertInvalidData(assert, function () {
+            course.getNextControls(Course.FINISH);
+        });
+    });
+
     QUnit.test("Cannot return next control after control not on course", function (assert) {
         var course = new Course("Test course", [], null, null, ["235", "212", "189"]);
         SplitsBrowserTest.assertInvalidData(assert, function () {
@@ -346,7 +353,7 @@
     });
 
     QUnit.test("Can return next controls after intermediate finish controls", function (assert) {
-        var course = new Course("Test course", [], null, null, ["235", "212", Course.FINISH, "189", "244", Course.FINISH, "197"]);
-        assert.deepEqual(course.getNextControls(Course.FINISH), ["189", "197"]);
+        var course = new Course("Test course", [], null, null, ["235", "212", Course.INTERMEDIATE, "189", "244", Course.INTERMEDIATE, "197"]);
+        assert.deepEqual(course.getNextControls(Course.INTERMEDIATE), ["189", "197"]);
     });
 })();

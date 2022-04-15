@@ -50,6 +50,9 @@
     /** 'Magic' control code that represents the finish. */
     Course.FINISH = "__FINISH__";
 
+    /** 'Magic' control code that represents an intermediate start/finish control in a relay event */
+    Course.INTERMEDIATE = "__INTERMEDIATE__";
+
     var START = Course.START;
     var FINISH = Course.FINISH;
 
@@ -300,6 +303,8 @@
     Course.prototype.getNextControls = function (controlCode) {
         if (this.controls === null) {
             throwInvalidData("Course has no controls");
+        } else if (controlCode === FINISH) {
+            throwInvalidData("Cannot fetch next control after the finish");
         } else if (controlCode === START) {
             return [(this.controls.length === 0) ? FINISH : this.controls[0]];
         } else {

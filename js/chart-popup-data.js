@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser ChartPopupData - Gets data for the chart popup window.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -77,8 +77,8 @@
         var startCode = course.getControlCode(controlIndex - 1);
         var endCode = course.getControlCode(controlIndex);
 
-        var startControl = (startCode === Course.START || startCode === Course.FINISH) ? getMessage("StartName") : startCode;
-        var endControl = (endCode === Course.FINISH) ? getMessage("FinishName") : endCode;
+        var startControl = (startCode === Course.START || startCode === Course.INTERMEDIATE) ? getMessage("StartName") : startCode;
+        var endControl = (endCode === Course.INTERMEDIATE || endCode === Course.FINISH) ? getMessage("FinishName") : endCode;
 
         var title = getMessageWithFormatting("FastestLegTimePopupHeader", {"$$START$$": startControl, "$$END$$": endControl});
 
@@ -112,7 +112,7 @@
         var controlName;
         if (controlCode === Course.START) {
             controlName = getMessage("StartName");
-        } else if (controlCode === Course.FINISH) {
+        } else if (controlCode === Course.INTERMEDIATE || controlCode === Course.FINISH) {
             controlName = getMessage("FinishName");
         } else {
             controlName = getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
@@ -166,7 +166,7 @@
         return nextControls.map(function (nextControlRec) {
             var codes = nextControlRec.nextControls.slice(0);
             for (var codeIndex = 0; codeIndex < codes.length; codeIndex += 1) {
-                if (codes[codeIndex] === Course.FINISH) {
+                if (codes[codeIndex] === Course.INTERMEDIATE || codes[codeIndex] === Course.FINISH) {
                     codes[codeIndex] = getMessage("FinishName");
                 }
             }
@@ -189,7 +189,7 @@
         var controlCode = course.getControlCode(controlIdx);
         var nextControls = eventData.getNextControlsAfter(controlCode);
         nextControls.sort(function (c1, c2) { return compareCourseNames(c1.course.name, c2.course.name); });
-        var thisControlName = (controlCode === Course.START || controlCode === Course.FINISH) ? getMessage("StartName") : getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
+        var thisControlName = (controlCode === Course.START || controlCode === Course.INTERMEDIATE) ? getMessage("StartName") : getMessageWithFormatting("ControlName", {"$$CODE$$": controlCode});
         return {thisControl: thisControlName, nextControls: tidyNextControlsList(nextControls) };
     };
 
