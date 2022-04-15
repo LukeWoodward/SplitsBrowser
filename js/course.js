@@ -55,6 +55,7 @@
 
     var START = Course.START;
     var FINISH = Course.FINISH;
+    var INTERMEDIATE = Course.INTERMEDIATE;
 
     /**
     * Returns an array of the 'other' classes on this course.
@@ -198,7 +199,8 @@
 
         var legNumber = this.getLegNumber(startCode, endCode);
         if (legNumber < 0) {
-            var legStr = ((startCode === START) ? "start" : startCode) + " to " + ((endCode === FINISH) ? "end" : endCode);
+            var legStr = ((startCode === START || startCode === INTERMEDIATE) ? "start" : startCode) + " to " +
+                ((endCode === FINISH || endCode === INTERMEDIATE) ? "end" : endCode);
             throwInvalidData("Leg from " +  legStr + " not found in course " + this.name);
         }
 
