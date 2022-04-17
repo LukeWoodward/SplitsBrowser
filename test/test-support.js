@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Utilities to assist with testing.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -125,21 +125,4 @@ var SplitsBrowserTest = {};
         result.cumTimes = cumTimes;
         return result;
     };
-
-    // Polyfill HTMLElement.prototype.click for the benefit of PhantomJS.
-    // See http://stackoverflow.com/a/17789929
-    if (!HTMLElement.prototype.click) {
-        HTMLElement.prototype.click = function() {
-            var ev = document.createEvent("MouseEvent");
-            ev.initMouseEvent(
-                "click",
-                /*bubble*/true, /*cancelable*/true,
-                window, null,
-                0, 0, 0, 0, /*coordinates*/
-                false, false, false, false, /*modifier keys*/
-                0/*button=left*/, null
-            );
-            this.dispatchEvent(ev);
-        };
-    }
 })();
