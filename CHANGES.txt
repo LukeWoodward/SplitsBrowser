@@ -31,3 +31,4 @@ SplitsBrowser changelog:
 3.4.4: Fix issue with jQuery upgrade (#64).
 3.5.0: Add support for relay teams (#70), support OK-despite-missing-control results (#68),
        and fix a couple of minor issues (#65, #67).
+3.5.1: Add support for viewing relay events in common-controls-only mode.

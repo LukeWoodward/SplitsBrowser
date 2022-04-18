@@ -1,7 +1,7 @@
 ﻿/*!
  *  SplitsBrowser - Orienteering results analysis.
  *  
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -42,7 +42,7 @@
 
 // Tell ESLint not to complain that this is redeclaring a constant.
 /* eslint no-redeclare: "off", no-unused-vars: "off" */
-var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.5.1", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 ﻿/*
  *  SplitsBrowser - Assorted utility functions.
@@ -247,7 +247,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
 /*
  *  SplitsBrowser Time - Functions for time handling and conversion.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -345,7 +345,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     */
     SplitsBrowser.parseTime = function (time) {
         time = time.trim();
-        if (/^(-?\d+:)?-?\d+:-?\d\d([,.]\d+)?$/.test(time)) {
+        if (/^(-?\d+:)?-?\d+:-?\d\d([,.]\d{1,10})?$/.test(time)) {
             var timeParts = time.replace(",", ".").split(":");
             var totalTime = 0;
             timeParts.forEach(function (timePart) {
@@ -361,7 +361,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
 /*
  *  SplitsBrowser Result - The results for a competitor or a team.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -1153,6 +1153,62 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
         }
     };
 
+    /**
+    * Restricts this result to common controls punched by all runners in legs of a
+    * relay event.  This method is expected to only be used on a team result and only early
+    * on in the lifecycle of a team result, before offsets are determined and before any
+    * data repair is done.  It only updates the original cumulative and split times.  Also,
+    * this method modifies the result in-place rather than returning a new result.
+    * @param {Array} originalControls The list of lists of original controls for this result.
+    * @param {Array} commonControls The list of lists of common controls for this result.
+    */
+    Result.prototype.restrictToCommonControls = function (originalControls, commonControls) {
+        if (originalControls.length !== commonControls.length) {
+            throwInvalidData("Should have two equal-length arrays of common controls");
+        }
+
+        var restrictedCumTimes = [0];
+        var originalControlIndex = 1;
+
+        for (var legIndex = 0; legIndex < originalControls.length; legIndex += 1) {
+            var legOriginalControls = originalControls[legIndex];
+            var legCommonControls = commonControls[legIndex];
+            var commonControlIndex = 0;
+            for (var controlIndex = 0; controlIndex < legOriginalControls.length; controlIndex += 1) {
+                if (commonControlIndex < legCommonControls.length && legOriginalControls[controlIndex] === legCommonControls[commonControlIndex]) {
+                    // This is a common control.
+                    if (originalControlIndex >= this.originalCumTimes.length) {
+                        throwInvalidData("Attempt to read too many original controls: likely that the wrong list of controls has been passed");
+                    }
+
+
+                    restrictedCumTimes.push(this.originalCumTimes[originalControlIndex]);
+                    commonControlIndex += 1;
+                }
+
+                originalControlIndex += 1;
+            }
+
+            if (commonControlIndex < legCommonControls.length) {
+                throwInvalidData("Did not reach end of common controls: likely that they are not a subset of the controls");
+            }
+
+            if (originalControlIndex >= this.originalCumTimes.length) {
+                throwInvalidData("Attempt to read too many original controls: likely that the wrong list of controls has been passed");
+            }
+
+            // Add the finish time for this leg.
+            restrictedCumTimes.push(this.originalCumTimes[originalControlIndex]);
+            originalControlIndex += 1;
+        }
+
+        if (originalControlIndex < this.originalCumTimes.length) {
+            throwInvalidData("Did not reach end of original controls: likely that a wrong list of controls has been passed");
+        }
+
+        this.originalCumTimes = restrictedCumTimes;
+        this.originalSplitTimes = splitTimesFromCumTimes(restrictedCumTimes);
+    };
 
     /**
     * Creates and returns a result object representing the combined result of all
@@ -1287,6 +1343,92 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     };
 
     SplitsBrowser.Model.Team = Team;
+})();
+/*
+ *  SplitsBrowser Common controls - Functionality for handling 'common controls'
+ *  within relay events.
+ *
+ *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *                          Ed Nash, Luke Woodward.
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+(function() {
+
+    var throwInvalidData = SplitsBrowser.throwInvalidData;
+
+    // Constant value used to indicate that SplitsBrowser is in common-controls mode
+    // when viewing relay data.
+    SplitsBrowser.COMMON_CONTROLS_MODE = "commonControls";
+
+    /**
+    * Determines the common set of controls for a list of relay controls,
+    * corresponding to one leg of the relay.
+    * @param {Array} legControlsLists The list of controls for each leg.
+    * @param {String} legDescription A description of the leg being processed.
+    *     (This is only used in error messages.)
+    */
+    SplitsBrowser.determineCommonControls = function (legControlsLists, legDescription) {
+        var controlCounts = d3.map();
+
+        if (legControlsLists.length === 0) {
+            throwInvalidData("Cannot determine the list of common controls of an empty array");
+        }
+
+        legControlsLists.forEach(function (legControls) {
+            var controlsForThisLeg = d3.set();
+            legControls.forEach(function (control) {
+                if (controlsForThisLeg.has(control)) {
+                    throwInvalidData(
+                        "Cannot determine common controls because " + legDescription +
+                        " contains duplicated control " + control);
+                }
+
+                controlsForThisLeg.add(control);
+
+                if (controlCounts.has(control)) {
+                    controlCounts.set(control, controlCounts.get(control) + 1);
+                } else {
+                    controlCounts.set(control, 1);
+                }
+            });
+        });
+
+        var teamCount = legControlsLists.length;
+
+        var commonControls = legControlsLists[0].filter(
+            function (control) { return controlCounts.get(control) === teamCount; });
+
+        // Now verify that the common controls appear in the same order in each list of controls.
+        for (var teamIndex = 1; teamIndex < teamCount; teamIndex += 1) {
+            var commonControlsForThisTeamMember = legControlsLists[teamIndex].filter(
+                function (control) { return controlCounts.get(control) === teamCount; });
+
+            if (commonControlsForThisTeamMember.length !== commonControls.length) {
+                throwInvalidData("Unexpectedly didn't get the same number of common controls for all competitors");
+            }
+
+            for (var index = 0; index < commonControls.length; index += 1) {
+                if (commonControls[index] !== commonControlsForThisTeamMember[index]) {
+                    throwInvalidData("Inconsistent ordering for control " + commonControls[index] + " in " + legDescription);
+                }
+            }
+        }
+
+        return commonControls;
+    };
 })();
 /*
  *  SplitsBrowser CourseClass - A collection of runners competing against each other.
@@ -1456,7 +1598,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
 /*
  *  SplitsBrowser Course - A single course at an event.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -1505,8 +1647,12 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     /** 'Magic' control code that represents the finish. */
     Course.FINISH = "__FINISH__";
 
+    /** 'Magic' control code that represents an intermediate start/finish control in a relay event */
+    Course.INTERMEDIATE = "__INTERMEDIATE__";
+
     var START = Course.START;
     var FINISH = Course.FINISH;
+    var INTERMEDIATE = Course.INTERMEDIATE;
 
     /**
     * Returns an array of the 'other' classes on this course.
@@ -1650,7 +1796,8 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
 
         var legNumber = this.getLegNumber(startCode, endCode);
         if (legNumber < 0) {
-            var legStr = ((startCode === START) ? "start" : startCode) + " to " + ((endCode === FINISH) ? "end" : endCode);
+            var legStr = ((startCode === START || startCode === INTERMEDIATE) ? "start" : startCode) + " to " +
+                ((endCode === FINISH || endCode === INTERMEDIATE) ? "end" : endCode);
             throwInvalidData("Leg from " +  legStr + " not found in course " + this.name);
         }
 
@@ -1926,7 +2073,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
 ﻿/*
  *  SplitsBrowser CSV - Reads in CSV result data files.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -1990,7 +2137,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
             var startTime = parseTime(startTimeStr);
             if (startTime === 0) {
                 startTime = null;
-            } else if (!startTimeStr.match(/^\d+:\d\d:\d\d$/)) {
+            } else if (!startTimeStr.match(/^\d{1,10}:\d\d:\d\d$/)) {
                 // Start time given in hours and minutes instead of hours,
                 // minutes and seconds.
                 startTime *= 60;
@@ -2072,7 +2219,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
         eventData = normaliseLineEndings(eventData);
 
         // Remove trailing commas.
-        eventData = eventData.replace(/,+\n/g, "\n").replace(/,+$/, "");
+        eventData = eventData.replace(/,{1,100}\n/g, "\n").replace(/,{1,100}$/, "");
 
         var classSections = eventData.split(/\n\n/).map(function (s) { return s.trim(); }).filter(isTrue);
         var warnings = [];
@@ -2102,7 +2249,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
 /*
  *  SplitsBrowser OE Reader - Reads in OE CSV results data files.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -2266,7 +2413,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
 
         var firstLine = this.lines[1].split(delimiter);
 
-        var controlCodeRegexp = /^[A-Za-z0-9]+$/;
+        var controlCodeRegexp = /^[A-Za-z0-9]{1,10}$/;
         for (var columnOffset in COLUMN_INDEXES) {
             if (hasProperty(COLUMN_INDEXES, columnOffset)) {
                 // Convert columnOffset to a number.  It will presently be a
@@ -2760,7 +2907,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
 /*
  *  SplitsBrowser HTML - Reads in HTML-format results data files.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -2793,9 +2940,9 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     var Event = SplitsBrowser.Model.Event;
 
     // Regexps to help with parsing.
-    var HTML_TAG_STRIP_REGEXP = /<[^>]+>/g;
-    var DISTANCE_FIND_REGEXP = /([0-9.,]+)\s*(?:Km|km)/;
-    var CLIMB_FIND_REGEXP = /(\d+)\s*(?:Cm|Hm|hm|m)/;
+    var HTML_TAG_STRIP_REGEXP = /<[^>]{1,200}>/g;
+    var DISTANCE_FIND_REGEXP = /([0-9.,]{1,10})\s{0,10}(?:Km|km)/;
+    var CLIMB_FIND_REGEXP = /(\d{1,10})\s{0,10}(?:Cm|Hm|hm|m)/;
 
     /**
     * Returns whether the given string is nonempty.
@@ -2873,7 +3020,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     * @return {Array} Array of strings of text inside <font> elements.
     */
     function getFontBits(text) {
-        return getHtmlStrippedRegexMatches(/<font[^>]*>(.*?)<\/font>/g, text);
+        return getHtmlStrippedRegexMatches(/<font[^>]{0,100}>(.{0,100}?)<\/font>/g, text);
     }
 
     /**
@@ -2884,7 +3031,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     * @return {Array} Array of strings of text inside <td> elements.
     */
     function getTableDataBits(text) {
-        return getHtmlStrippedRegexMatches(/<td[^>]*>(.*?)<\/td>/g, text).map(function (s) { return s.trim(); });
+        return getHtmlStrippedRegexMatches(/<td[^>]{0,100}>(.{0,100}?)<\/td>/g, text).map(function (s) { return s.trim(); });
     }
 
     /**
@@ -2906,7 +3053,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     * @return {Array} Array of strings of text inside <td> elements.
     */
     function getNonEmptyTableHeaderBits(text) {
-        var matches = getHtmlStrippedRegexMatches(/<th[^>]*>(.*?)<\/th>/g, text);
+        var matches = getHtmlStrippedRegexMatches(/<th[^>]{0,100}>(.{0,100}?)<\/th>/g, text);
         return matches.filter(function (bit) { return bit !== ""; });
     }
 
@@ -3251,7 +3398,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
             // If column 1 is blank or a number, we have four preceding
             // columns.  Otherwise we have three.
             var column1 = firstLineBits[1].trim();
-            this.precedingColumnCount = (column1.match(/^\d*$/)) ? 4 : 3;
+            this.precedingColumnCount = (column1.match(/^\d{0,10}$/)) ? 4 : 3;
         }
 
         var competitive = hasNumber(firstLineBits[0]);
@@ -3273,7 +3420,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
             }
 
             var firstLineUpToLastPreceding = firstLine.substring(0, lastCloseFontPos + "</font>".length);
-            var firstLineMinusFonts = firstLineUpToLastPreceding.replace(/<font[^>]*>(.*?)<\/font>/g, "");
+            var firstLineMinusFonts = firstLineUpToLastPreceding.replace(/<font[^>]{0,100}>(.{0,100}?)<\/font>/g, "");
             var lineParts = splitByWhitespace(firstLineMinusFonts);
             if (lineParts.length > 0) {
                 className = lineParts[0];
@@ -3352,23 +3499,28 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
         // Rejig the line endings so that each row of competitor data is on its
         // own line, with table and table-row tags starting on new lines,
         // and closing table and table-row tags at the end of lines.
-        text = text.replace(/>\n+</g, "><").replace(/><tr>/g, ">\n<tr>").replace(/<\/tr></g, "</tr>\n<")
+        text = text.replace(/>\n{1,100}</g, "><").replace(/><tr>/g, ">\n<tr>").replace(/<\/tr></g, "</tr>\n<")
                    .replace(/><table/g, ">\n<table").replace(/<\/table></g, "</table>\n<");
 
         // Remove all <col> elements.
-        text = text.replace(/<\/col[^>]*>/g, "");
+        text = text.replace(/<\/col[^>]{0,100}>/g, "");
 
         // Remove all rows that contain only a single non-breaking space.
         // In the file I have, the &nbsp; entities are missing their
         // semicolons.  However, this could well be fixed in the future.
-        text = text.replace(/<tr[^>]*><td[^>]*>(?:<nobr>)?&nbsp;?(?:<\/nobr>)?<\/td><\/tr>/g, "");
+        text = text.replace(/<tr[^>]{0,100}><td[^>]{0,100}>(?:<nobr>)?&nbsp;?(?:<\/nobr>)?<\/td><\/tr>/g, "");
 
         // Remove any anchor elements used for navigation...
-        text = text.replace(/<a id="[^"]*"><\/a>/g, "");
+        text = text.replace(/<a id="[^"]{0,100}"><\/a>/g, "");
 
-        // ... and the navigation div.  Use [\s\S] to match everything
-        // including newlines - JavaScript regexps have no /s modifier.
-        text = text.replace(/<div id="navigation">[\s\S]*?<\/div>/g, "");
+        // ... and the navigation div.
+        var startNavigationDivPos = text.indexOf('<div id="navigation">');
+        if (startNavigationDivPos >= 0) {
+            var endNavigationDivPos = text.indexOf("</div>", startNavigationDivPos);
+            if (endNavigationDivPos >= 0) {
+                text = text.substring(0, startNavigationDivPos) + text.substring(endNavigationDivPos + 6);
+            }
+        }
 
         // Finally, remove the trailing </body> and </html> elements.
         text = text.replace("</body></html>", "");
@@ -3597,7 +3749,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
         text = text.substring(tableEndPos + "</table>".length);
 
         // Remove all rows that contain only a single non-breaking space.
-        text = text.replace(/<tr[^>]*><td colspan=[^>]*>&nbsp;<\/td><\/tr>/g, "");
+        text = text.replace(/<tr[^>]{0,100}><td colspan=[^>]{0,100}>&nbsp;<\/td><\/tr>/g, "");
 
         // Replace blank lines.
         text = text.replace(/\n{2,}/g, "\n");
@@ -3660,7 +3812,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
         var part = dataBits[0];
 
         var name, distance, climb;
-        var match = /^(.*?)\s+\((\d+)m,\s*(\d+)m\)$/.exec(part);
+        var match = /^(.{0,100}?)\s{1,10}\((\d{1,10})m,\s{0,10}(\d{1,10})m\)$/.exec(part);
         if (match === null) {
             // Assume just course name.
             name = part;
@@ -4059,7 +4211,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
 /*
  *  SplitsBrowser Alternative CSV - Read in alternative CSV files.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -4121,7 +4273,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     var DELIMITERS = [",", ";"];
 
     // All control codes except perhaps the finish are alphanumeric.
-    var controlCodeRegexp = /^[A-Za-z0-9]+$/;
+    var controlCodeRegexp = /^[A-Za-z0-9]{1,10}$/;
 
 
     /**
@@ -4295,7 +4447,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
         var result = fromOriginalCumTimes(order, startTime, cumTimes, new Competitor(competitorName, club));
         if (this.format.placing !== null && result.completed()) {
             var placing = row[this.format.placing];
-            if (!placing.match(/^\d*$/)) {
+            if (!placing.match(/^\d{1,10}$/)) {
                 result.setNonCompetitive();
             }
         }
@@ -4397,7 +4549,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
 /*
  *  SplitsBrowser IOF XML - Read event data in IOF XML-format files.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -4419,6 +4571,8 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
 
     var throwInvalidData = SplitsBrowser.throwInvalidData;
     var throwWrongFileFormat = SplitsBrowser.throwWrongFileFormat;
+    var COMMON_CONTROLS_MODE = SplitsBrowser.COMMON_CONTROLS_MODE;
+    var determineCommonControls = SplitsBrowser.determineCommonControls;
     var isNaNStrict = SplitsBrowser.isNaNStrict;
     var parseTime = SplitsBrowser.parseTime;
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
@@ -4456,20 +4610,11 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     * @return {XMLDocument} The parsed XML document.
     */
     function parseXml(xmlString) {
-        var xml;
         try {
-            xml = $.parseXML(xmlString);
+            return $.parseXML(xmlString);
         } catch (e) {
             throwInvalidData("XML data not well-formed");
         }
-
-        if ($("> *", $(xml)).length === 0) {
-            // PhantomJS doesn't always fail parsing invalid XML; we may be
-            // left with 'xml' just containing the DOCTYPE and no root element.
-            throwInvalidData("XML data not well-formed: " + xmlString);
-        }
-
-        return xml;
     }
 
     /**
@@ -5148,9 +5293,11 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     * @param {Number} number The position number within the class.
     * @param {Object} cls The class read so far.
     * @param {Object} XML reader used to assist with format-specific parsing.
+    * @param {String} relayMode The 'mode' in which to parse relay events.
     * @param {Array} warnings Array that accumulates warning messages.
+    * @param {Array} allControlsLists A list of all lists of controls from the teams.
     */
-    function parseTeamResult(teamResultElement, number, cls, reader, warnings) {
+    function parseTeamResult(teamResultElement, number, cls, reader, relayMode, warnings, allControlsLists) {
         var teamName = reader.readTeamName(teamResultElement);
         var teamClubName = reader.readClubName(teamResultElement);
         var members = reader.readTeamMemberResults(teamResultElement);
@@ -5210,21 +5357,26 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
             var warning = null;
             var teamResult = createTeamResult(number, results, new Team(teamName, teamClubName));
 
-            for (var teamMemberIndex = 0; teamMemberIndex < results.length; teamMemberIndex += 1) {
-                var expectedControlCount = cls.course.numbersOfControls[teamMemberIndex];
-                var memberResult = results[teamMemberIndex];
+            if (relayMode !== COMMON_CONTROLS_MODE) {
+                for (var teamMemberIndex = 0; teamMemberIndex < results.length; teamMemberIndex += 1) {
+                    var expectedControlCount = cls.course.numbersOfControls[teamMemberIndex];
+                    var memberResult = results[teamMemberIndex];
 
-                // Subtract 2 for the start and finish cumulative times.
-                var actualControlCount = memberResult.getAllOriginalCumulativeTimes().length - 2;
+                    // Subtract 2 for the start and finish cumulative times.
+                    var actualControlCount = memberResult.getAllOriginalCumulativeTimes().length - 2;
 
-                if (actualControlCount !== expectedControlCount) {
-                    warning = "Competitor '" + memberResult.owner.name + "' in team '" + teamName + "' in class '" + cls.name + "' has an unexpected number of controls: expected " + expectedControlCount + ", actual " + actualControlCount;
-                    break;
+                    if (actualControlCount !== expectedControlCount) {
+                        warning = "Competitor '" + memberResult.owner.name + "' in team '" + teamName + "' in class '" + cls.name + "' has an unexpected number of controls: expected " + expectedControlCount + ", actual " + actualControlCount;
+                        break;
+                    }
                 }
             }
 
             if (warning === null) {
                 cls.results.push(teamResult);
+                if (relayMode === COMMON_CONTROLS_MODE) {
+                    allControlsLists.push(allControls);
+                }
             } else {
                 warnings.push(warning);
             }
@@ -5232,14 +5384,62 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     }
 
     /**
+    * Pulls out of all lists of controls the common controls, and adjusts the results in
+    * the class to only contain common controls.
+    * @param {Object} cls The class containing the results.
+    * @param {Array} allControlsLists The array of controls lists.
+    */
+    function processWithCommonControls(cls, allControlsLists) {
+        if (cls.results.length !== allControlsLists.length) {
+            throwInvalidData("Different number of results and all-controls lists");
+        }
+
+        if (allControlsLists.length === 0) {
+            // This shouldn't happen, as this function is only called if there are any team results,
+            // but we put it here just in case.
+            throwInvalidData("Unexpected empty list of results for processing common controls");
+        }
+
+        // allControlsLists should be a list of lists of lists of control codes.
+        var teamSize = allControlsLists[0].length;
+
+        var commonControlsLists = [];
+        for (var legIndex = 0; legIndex < teamSize; legIndex += 1) {
+            commonControlsLists.push(determineCommonControls(
+                allControlsLists.map(function (allControls) { return allControls[legIndex]; }),
+                "leg " + legIndex + " of class " + cls.name));
+        }
+
+        for (var resultIndex = 0; resultIndex < cls.results.length; resultIndex += 1) {
+            cls.results[resultIndex].restrictToCommonControls(allControlsLists[resultIndex], commonControlsLists);
+        }
+
+        // Now compile the list of all common controls.
+        var allControls = [];
+        for (legIndex = 0; legIndex < commonControlsLists.length; legIndex += 1) {
+            allControls = allControls.concat(commonControlsLists[legIndex]);
+            if (legIndex < commonControlsLists.length - 1) {
+                // Add a control for an intermediate finish.
+                allControls.push(Course.INTERMEDIATE);
+            }
+        }
+
+        cls.controls = allControls;
+
+        // Recalculate the numbers of controls in the course.
+        cls.course.numbersOfControls = commonControlsLists.map(function (commonControls) { return commonControls.length; });
+    }
+
+    /**
     * Parses data for a single class.
     * @param {XMLElement} element XML ClassResult element
     * @param {Object} reader XML reader used to assist with format-specific
     *     XML reading.
+    * @param {String} relayMode The 'mode' in which to parse relay events.
     * @param {Array} warnings Array to accumulate any warning messages within.
     * @return {Object} Object containing parsed data.
     */
-    function parseClassData(element, reader, warnings) {
+    function parseClassData(element, reader, relayMode, warnings) {
         var jqElement = $(element);
         var cls = {name: null, results: [], teamSize: null, controls: [], course: null};
 
@@ -5265,8 +5465,12 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
                 parsePersonResult(personResults[personIndex], personIndex + 1, cls, reader, warnings);
             }
         } else if (teamResults.length > 0) {
+            var allControlsLists = [];
             for (var teamIndex = 0; teamIndex < teamResults.length; teamIndex += 1) {
-                parseTeamResult(teamResults[teamIndex], teamIndex + 1, cls, reader, warnings);
+                parseTeamResult(teamResults[teamIndex], teamIndex + 1, cls, reader, relayMode, warnings, allControlsLists);
+            }
+            if (relayMode === COMMON_CONTROLS_MODE) {
+                processWithCommonControls(cls, allControlsLists);
             }
         } else {
             warnings.push("Class '" + className + "' has no competitors");
@@ -5311,9 +5515,10 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     * Parses IOF XML data in either the 2.0.3 format or the 3.0 format and
     * returns the data.
     * @param {String} data String to parse as XML.
+    * @param {String} relayMode The 'mode' in which to parse relay events.
     * @return {Event} Parsed event object.
     */
-    function parseEventData(data) {
+    function parseEventData(data, relayMode) {
 
         var reader = determineReader(data);
 
@@ -5342,7 +5547,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
         var warnings = [];
 
         classResultElements.forEach(function (classResultElement) {
-            var parsedClass = parseClassData(classResultElement, reader, warnings);
+            var parsedClass = parseClassData(classResultElement, reader, relayMode, warnings);
             if (parsedClass === null) {
                 // Class could not be parsed.
                 return;
@@ -5355,7 +5560,9 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
             var isTeamClass;
             if (parsedClass.teams !== null && parsedClass.course.numbersOfControls !== null && parsedClass.course.numbersOfControls.length > 0) {
                 numberOfControls = arraySum(parsedClass.course.numbersOfControls) + parsedClass.teamSize - 1;
-                parsedClass.controls = null;
+                if (relayMode !== COMMON_CONTROLS_MODE) {
+                    parsedClass.controls = null;
+                }
                 courseKey = null;
                 isTeamClass = true;
             } else {
@@ -5402,7 +5609,7 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
 /*
  *  SplitsBrowser Input - Top-level data file reading.
  *
- *  Copyright (C) 2000-2015 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -5436,13 +5643,14 @@ var SplitsBrowser = { Version: "3.5.0", Model: {}, Input: {}, Controls: {}, Mess
     * supported formats, or may be invalid.  This function returns the results
     * as an Event object if successful, or null in the event of failure.
     * @param {String} data The data read.
+    * @param {String} relayMode The relay mode to use.
     * @return {Event} Event data read in, or null for failure.
     */
-    SplitsBrowser.Input.parseEventData = function (data) {
+    SplitsBrowser.Input.parseEventData = function (data, relayMode) {
         for (var i = 0; i < PARSERS.length; i += 1) {
             var parser = PARSERS[i];
             try {
-                return parser(data);
+                return parser(data, relayMode);
             } catch (e) {
                 if (e.name !== "WrongFileFormat") {
                     throw e;
