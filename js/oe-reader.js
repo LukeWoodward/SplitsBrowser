@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser OE Reader - Reads in OE CSV results data files.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -165,7 +165,7 @@
 
         var firstLine = this.lines[1].split(delimiter);
 
-        var controlCodeRegexp = /^[A-Za-z0-9]+$/;
+        var controlCodeRegexp = /^[A-Za-z0-9]{1,10}$/;
         for (var columnOffset in COLUMN_INDEXES) {
             if (hasProperty(COLUMN_INDEXES, columnOffset)) {
                 // Convert columnOffset to a number.  It will presently be a

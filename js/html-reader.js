@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser HTML - Reads in HTML-format results data files.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -34,9 +34,9 @@
     var Event = SplitsBrowser.Model.Event;
 
     // Regexps to help with parsing.
-    var HTML_TAG_STRIP_REGEXP = /<[^>]+>/g;
-    var DISTANCE_FIND_REGEXP = /([0-9.,]+)\s*(?:Km|km)/;
-    var CLIMB_FIND_REGEXP = /(\d+)\s*(?:Cm|Hm|hm|m)/;
+    var HTML_TAG_STRIP_REGEXP = /<[^>]{1,200}>/g;
+    var DISTANCE_FIND_REGEXP = /([0-9.,]{1,10})\s{0,10}(?:Km|km)/;
+    var CLIMB_FIND_REGEXP = /(\d{1,10})\s{0,10}(?:Cm|Hm|hm|m)/;
 
     /**
     * Returns whether the given string is nonempty.
@@ -114,7 +114,7 @@
     * @return {Array} Array of strings of text inside <font> elements.
     */
     function getFontBits(text) {
-        return getHtmlStrippedRegexMatches(/<font[^>]*>(.*?)<\/font>/g, text);
+        return getHtmlStrippedRegexMatches(/<font[^>]{0,100}>(.{0,100}?)<\/font>/g, text);
     }
 
     /**
@@ -125,7 +125,7 @@
     * @return {Array} Array of strings of text inside <td> elements.
     */
     function getTableDataBits(text) {
-        return getHtmlStrippedRegexMatches(/<td[^>]*>(.*?)<\/td>/g, text).map(function (s) { return s.trim(); });
+        return getHtmlStrippedRegexMatches(/<td[^>]{0,100}>(.{0,100}?)<\/td>/g, text).map(function (s) { return s.trim(); });
     }
 
     /**
@@ -147,7 +147,7 @@
     * @return {Array} Array of strings of text inside <td> elements.
     */
     function getNonEmptyTableHeaderBits(text) {
-        var matches = getHtmlStrippedRegexMatches(/<th[^>]*>(.*?)<\/th>/g, text);
+        var matches = getHtmlStrippedRegexMatches(/<th[^>]{0,100}>(.{0,100}?)<\/th>/g, text);
         return matches.filter(function (bit) { return bit !== ""; });
     }
 
@@ -492,7 +492,7 @@
             // If column 1 is blank or a number, we have four preceding
             // columns.  Otherwise we have three.
             var column1 = firstLineBits[1].trim();
-            this.precedingColumnCount = (column1.match(/^\d*$/)) ? 4 : 3;
+            this.precedingColumnCount = (column1.match(/^\d{0,10}$/)) ? 4 : 3;
         }
 
         var competitive = hasNumber(firstLineBits[0]);
@@ -514,7 +514,7 @@
             }
 
             var firstLineUpToLastPreceding = firstLine.substring(0, lastCloseFontPos + "</font>".length);
-            var firstLineMinusFonts = firstLineUpToLastPreceding.replace(/<font[^>]*>(.*?)<\/font>/g, "");
+            var firstLineMinusFonts = firstLineUpToLastPreceding.replace(/<font[^>]{0,100}>(.{0,100}?)<\/font>/g, "");
             var lineParts = splitByWhitespace(firstLineMinusFonts);
             if (lineParts.length > 0) {
                 className = lineParts[0];
@@ -593,23 +593,28 @@
         // Rejig the line endings so that each row of competitor data is on its
         // own line, with table and table-row tags starting on new lines,
         // and closing table and table-row tags at the end of lines.
-        text = text.replace(/>\n+</g, "><").replace(/><tr>/g, ">\n<tr>").replace(/<\/tr></g, "</tr>\n<")
+        text = text.replace(/>\n{1,100}</g, "><").replace(/><tr>/g, ">\n<tr>").replace(/<\/tr></g, "</tr>\n<")
                    .replace(/><table/g, ">\n<table").replace(/<\/table></g, "</table>\n<");
 
         // Remove all <col> elements.
-        text = text.replace(/<\/col[^>]*>/g, "");
+        text = text.replace(/<\/col[^>]{0,100}>/g, "");
 
         // Remove all rows that contain only a single non-breaking space.
         // In the file I have, the &nbsp; entities are missing their
         // semicolons.  However, this could well be fixed in the future.
-        text = text.replace(/<tr[^>]*><td[^>]*>(?:<nobr>)?&nbsp;?(?:<\/nobr>)?<\/td><\/tr>/g, "");
+        text = text.replace(/<tr[^>]{0,100}><td[^>]{0,100}>(?:<nobr>)?&nbsp;?(?:<\/nobr>)?<\/td><\/tr>/g, "");
 
         // Remove any anchor elements used for navigation...
-        text = text.replace(/<a id="[^"]*"><\/a>/g, "");
+        text = text.replace(/<a id="[^"]{0,100}"><\/a>/g, "");
 
-        // ... and the navigation div.  Use [\s\S] to match everything
-        // including newlines - JavaScript regexps have no /s modifier.
-        text = text.replace(/<div id="navigation">[\s\S]*?<\/div>/g, "");
+        // ... and the navigation div.
+        var startNavigationDivPos = text.indexOf('<div id="navigation">');
+        if (startNavigationDivPos >= 0) {
+            var endNavigationDivPos = text.indexOf("</div>", startNavigationDivPos);
+            if (endNavigationDivPos >= 0) {
+                text = text.substring(0, startNavigationDivPos) + text.substring(endNavigationDivPos + 6);
+            }
+        }
 
         // Finally, remove the trailing </body> and </html> elements.
         text = text.replace("</body></html>", "");
@@ -838,7 +843,7 @@
         text = text.substring(tableEndPos + "</table>".length);
 
         // Remove all rows that contain only a single non-breaking space.
-        text = text.replace(/<tr[^>]*><td colspan=[^>]*>&nbsp;<\/td><\/tr>/g, "");
+        text = text.replace(/<tr[^>]{0,100}><td colspan=[^>]{0,100}>&nbsp;<\/td><\/tr>/g, "");
 
         // Replace blank lines.
         text = text.replace(/\n{2,}/g, "\n");
@@ -901,7 +906,7 @@
         var part = dataBits[0];
 
         var name, distance, climb;
-        var match = /^(.*?)\s+\((\d+)m,\s*(\d+)m\)$/.exec(part);
+        var match = /^(.{0,100}?)\s{1,10}\((\d{1,10})m,\s{0,10}(\d{1,10})m\)$/.exec(part);
         if (match === null) {
             // Assume just course name.
             name = part;

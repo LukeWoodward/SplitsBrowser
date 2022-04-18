@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Alternative CSV - Read in alternative CSV files.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -63,7 +63,7 @@
     var DELIMITERS = [",", ";"];
 
     // All control codes except perhaps the finish are alphanumeric.
-    var controlCodeRegexp = /^[A-Za-z0-9]+$/;
+    var controlCodeRegexp = /^[A-Za-z0-9]{1,10}$/;
 
 
     /**
@@ -237,7 +237,7 @@
         var result = fromOriginalCumTimes(order, startTime, cumTimes, new Competitor(competitorName, club));
         if (this.format.placing !== null && result.completed()) {
             var placing = row[this.format.placing];
-            if (!placing.match(/^\d*$/)) {
+            if (!placing.match(/^\d{1,10}$/)) {
                 result.setNonCompetitive();
             }
         }

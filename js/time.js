@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Time - Functions for time handling and conversion.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -99,7 +99,7 @@
     */
     SplitsBrowser.parseTime = function (time) {
         time = time.trim();
-        if (/^(-?\d+:)?-?\d+:-?\d\d([,.]\d+)?$/.test(time)) {
+        if (/^(-?\d+:)?-?\d+:-?\d\d([,.]\d{1,10})?$/.test(time)) {
             var timeParts = time.replace(",", ".").split(":");
             var totalTime = 0;
             timeParts.forEach(function (timePart) {

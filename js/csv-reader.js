@@ -1,7 +1,7 @@
 ﻿/*
  *  SplitsBrowser CSV - Reads in CSV result data files.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -65,7 +65,7 @@
             var startTime = parseTime(startTimeStr);
             if (startTime === 0) {
                 startTime = null;
-            } else if (!startTimeStr.match(/^\d+:\d\d:\d\d$/)) {
+            } else if (!startTimeStr.match(/^\d{1,10}:\d\d:\d\d$/)) {
                 // Start time given in hours and minutes instead of hours,
                 // minutes and seconds.
                 startTime *= 60;
@@ -147,7 +147,7 @@
         eventData = normaliseLineEndings(eventData);
 
         // Remove trailing commas.
-        eventData = eventData.replace(/,+\n/g, "\n").replace(/,+$/, "");
+        eventData = eventData.replace(/,{1,100}\n/g, "\n").replace(/,{1,100}$/, "");
 
         var classSections = eventData.split(/\n\n/).map(function (s) { return s.trim(); }).filter(isTrue);
         var warnings = [];
