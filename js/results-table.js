@@ -85,7 +85,7 @@
         results.forEach(function (result) {
             result.getAllOriginalCumulativeTimes().forEach(function (cumTime) {
                 if (isNotNullNorNaN(cumTime)) {
-                    while (maxPrecision < MAX_PERMITTED_PRECISION && Math.abs(cumTime - Math.round(cumTime * maxPrecisionFactor) / maxPrecisionFactor) > 1e-7 * cumTime) {
+                    while (maxPrecision < MAX_PERMITTED_PRECISION && Math.abs(cumTime - Math.round(cumTime * maxPrecisionFactor) / maxPrecisionFactor) > 1e-7 * Math.abs(cumTime)) {
                         maxPrecision += 1;
                         maxPrecisionFactor *= 10;
                     }

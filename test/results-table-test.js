@@ -359,6 +359,38 @@
         assert.strictEqual(split3Cell.text(), "03:04.7");
     });
 
+    QUnit.test("Can create a results table with negative cumulative times appropriately formatted", function (assert) {
+        var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [-35, 221, 184, 100]);
+        var courseClass = new CourseClass("Test", 3, [result]);
+        courseClass.setCourse(new Course("Test", [courseClass], 4.1, 140, null));
+        calculateRanks(courseClass);
+
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(courseClass);
+
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
+        var table = d3.select("table.resultsTable").node();
+        assert.strictEqual($("tbody", table).length, 1);
+        assert.strictEqual($("tbody tr", table).length, 1);
+        var tableCells = $("tbody tr td", table);
+        assert.strictEqual(tableCells.length, 7);
+
+        var cum1Cell = $("span:first-child", tableCells[3]);
+        assert.strictEqual(cum1Cell.text(), "-00:35");
+        var split1Cell = $("span:last-child", tableCells[3]);
+        assert.strictEqual(split1Cell.text(), "-00:35");
+
+        var cum2Cell = $("span:first-child", tableCells[4]);
+        assert.strictEqual(cum2Cell.text(), "03:06");
+        var split2Cell = $("span:last-child", tableCells[4]);
+        assert.strictEqual(split2Cell.text(), "03:41");
+
+        var cum3Cell = $("span:first-child", tableCells[5]);
+        assert.strictEqual(cum3Cell.text(), "06:10");
+        var split3Cell = $("span:last-child", tableCells[5]);
+        assert.strictEqual(split3Cell.text(), "03:04");
+    });
+
     QUnit.test("Can create a results table with one result with fractional split times and a finish time with a whole number of seconds appropriately formatted", function (assert) {
         var result = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65.3, 221.0, 184.7, 100.0]);
         var courseClass = new CourseClass("Test", 3, [result]);
