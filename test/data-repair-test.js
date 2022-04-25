@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - data-repair tests.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -140,6 +140,13 @@
 
     QUnit.test("Makes no changes to a result that has failed to punch the finish but all other cumulative times are in order", function (assert) {
         var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, null], {});
+        var hasDubiousData = wrapInEventAndRepair([result]);
+        assert.ok(!hasDubiousData);
+        assert.deepEqual(result.cumTimes, result.originalCumTimes);
+    });
+
+    QUnit.test("Makes no changes to the start time if the first cumulative time is negative", function (assert) {
+        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, -381, -224, -150, -74, null], {});
         var hasDubiousData = wrapInEventAndRepair([result]);
         assert.ok(!hasDubiousData);
         assert.deepEqual(result.cumTimes, result.originalCumTimes);

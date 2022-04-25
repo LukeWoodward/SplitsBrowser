@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser data-repair - Attempt to work around nonsensical data.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -138,9 +138,9 @@
                 } else {
                     if (attempt === 1) {
                         adjustedCumTimes[second] = NaN;
-                    } else if (attempt === 2) {
+                    } else if (attempt === 2 && first > 0) {
                         adjustedCumTimes[first] = NaN;
-                    } else if (attempt === 3) {
+                    } else if (attempt === 3 && first > 1) {
                         adjustedCumTimes[first] = NaN;
                         adjustedCumTimes[first - 1] = NaN;
                     }
