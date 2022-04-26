@@ -471,6 +471,33 @@
         assert.strictEqual($("span.resultsTableHeader").text(), "Test, 3 + 3 controls");
     });
 
+    QUnit.test("Can create a results table with two team results finishing and label the control headers with control codes in a single leg", function (assert) {
+        var result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
+        var result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);
+        var result1b = fromSplitTimes(1, "Third Runner", "DEF", 10 * 3600 + 570, [78, 234, 199, 103]);
+        var result2b = fromSplitTimes(2, "Fourth Runner", "ABC", 10 * 3600 + 596, [88, 192, 220, 111]);
+        var team1 = new Team("Team 1", "DEF", [result1a.owner, result1b.owner]);
+        var team2 = new Team("Team 2", "ABC", [result2a.owner, result2b.owner]);
+        var courseClass = new CourseClass("Test", 7, [createTeamResult(1, [result1a, result1b], team1), createTeamResult(2, [result2a, result2b], team2)]);
+        courseClass.setIsTeamClass([3, 3]);
+        calculateRanks(courseClass);
+
+        courseClass.setCourse(new Course("Test", [courseClass], null, null, ["138", "152", "141", Course.INTERMEDIATE, "184", "202", "199"]));
+
+        var resultsTable = new ResultsTable(d3.select("#qunit-fixture").node());
+        resultsTable.setClass(courseClass);
+        resultsTable.setSelectedLegIndex(1);
+
+        assert.strictEqual(d3.selectAll("table.resultsTable").size(), 1, "There should be one table");
+        var table = d3.select("table.resultsTable");
+        var tableHeaders = table.selectAll("thead tr th");
+        assert.strictEqual(tableHeaders.size(), 7);
+        var controlHeaders = tableHeaders.nodes().slice(3).map(function (node) { return node.innerHTML; });
+        assert.deepEqual(controlHeaders, ["1 (184)", "2 (202)", "3 (199)", "Finish"]);
+
+        assert.strictEqual($("span.resultsTableHeader").text(), "Test, Leg 2, 3 controls");
+    });
+
     QUnit.test("Can create a results table with two team results with different numbers of controls per leg and label the control headers", function (assert) {
         var result1a = fromSplitTimes(1, "First Runner", "DEF", 10 * 3600 + 30 * 60, [65, 221, 184, 100]);
         var result2a = fromSplitTimes(2, "Second Runner", "ABC", 10 * 3600, [81, 197, 212, 106]);

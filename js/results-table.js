@@ -198,6 +198,7 @@
         var controls = this.courseClass.course.controls;
         if (this.courseClass.isTeamClass) {
             var controlNumber;
+            var control;
             if (this.selectedLegIndex === null) {
                 for (var legIndex = 0; legIndex < this.courseClass.numbersOfControls.length; legIndex += 1) {
                     var suffix = "-" + (legIndex + 1);
@@ -207,15 +208,22 @@
                         }
                     } else {
                         for (controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[legIndex]; controlNumber += 1) {
-                            var control = controls[this.courseClass.offsets[legIndex] + controlNumber - 1];
+                            control = controls[this.courseClass.offsets[legIndex] + controlNumber - 1];
                             headerCellData.push(controlNumber + suffix + " (" + control + ")");
                         }
                     }
                     headerCellData.push(getMessage("FinishName") + suffix);
                 }
             } else {
-                for (controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[this.selectedLegIndex]; controlNumber += 1) {
-                    headerCellData.push(controlNumber);
+                if (controls === null) {
+                    for (controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[this.selectedLegIndex]; controlNumber += 1) {
+                        headerCellData.push(controlNumber);
+                    }
+                } else {
+                    for (controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[this.selectedLegIndex]; controlNumber += 1) {
+                        control = controls[this.courseClass.offsets[this.selectedLegIndex] + controlNumber - 1];
+                        headerCellData.push(controlNumber + " (" + control + ")");
+                    }
                 }
                 headerCellData.push(getMessage("FinishName"));
             }
