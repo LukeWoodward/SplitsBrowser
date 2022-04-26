@@ -21,4 +21,4 @@
 
 // Tell ESLint not to complain that this is redeclaring a constant.
 /* eslint no-redeclare: "off", no-unused-vars: "off" */
-var SplitsBrowser = { Version: "3.5.1", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.5.2", Model: {}, Input: {}, Controls: {}, Messages: {} };

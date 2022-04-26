@@ -22,7 +22,7 @@
 ﻿/*
  *  SplitsBrowser Core - Namespaces the rest of the program depends on.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -42,7 +42,7 @@
 
 // Tell ESLint not to complain that this is redeclaring a constant.
 /* eslint no-redeclare: "off", no-unused-vars: "off" */
-var SplitsBrowser = { Version: "3.5.1", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.5.2", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 ﻿/*
  *  SplitsBrowser - Assorted utility functions.
@@ -3246,7 +3246,7 @@ var SplitsBrowser = { Version: "3.5.1", Model: {}, Input: {}, Controls: {}, Mess
 /*
  *  SplitsBrowser data-repair - Attempt to work around nonsensical data.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -3383,9 +3383,9 @@ var SplitsBrowser = { Version: "3.5.1", Model: {}, Input: {}, Controls: {}, Mess
                 } else {
                     if (attempt === 1) {
                         adjustedCumTimes[second] = NaN;
-                    } else if (attempt === 2) {
+                    } else if (attempt === 2 && first > 0) {
                         adjustedCumTimes[first] = NaN;
-                    } else if (attempt === 3) {
+                    } else if (attempt === 3 && first > 1) {
                         adjustedCumTimes[first] = NaN;
                         adjustedCumTimes[first - 1] = NaN;
                     }
@@ -10918,7 +10918,7 @@ var SplitsBrowser = { Version: "3.5.1", Model: {}, Input: {}, Controls: {}, Mess
         results.forEach(function (result) {
             result.getAllOriginalCumulativeTimes().forEach(function (cumTime) {
                 if (isNotNullNorNaN(cumTime)) {
-                    while (maxPrecision < MAX_PERMITTED_PRECISION && Math.abs(cumTime - Math.round(cumTime * maxPrecisionFactor) / maxPrecisionFactor) > 1e-7 * cumTime) {
+                    while (maxPrecision < MAX_PERMITTED_PRECISION && Math.abs(cumTime - Math.round(cumTime * maxPrecisionFactor) / maxPrecisionFactor) > 1e-7 * Math.abs(cumTime)) {
                         maxPrecision += 1;
                         maxPrecisionFactor *= 10;
                     }
@@ -11031,6 +11031,7 @@ var SplitsBrowser = { Version: "3.5.1", Model: {}, Input: {}, Controls: {}, Mess
         var controls = this.courseClass.course.controls;
         if (this.courseClass.isTeamClass) {
             var controlNumber;
+            var control;
             if (this.selectedLegIndex === null) {
                 for (var legIndex = 0; legIndex < this.courseClass.numbersOfControls.length; legIndex += 1) {
                     var suffix = "-" + (legIndex + 1);
@@ -11040,15 +11041,22 @@ var SplitsBrowser = { Version: "3.5.1", Model: {}, Input: {}, Controls: {}, Mess
                         }
                     } else {
                         for (controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[legIndex]; controlNumber += 1) {
-                            var control = controls[this.courseClass.offsets[legIndex] + controlNumber - 1];
+                            control = controls[this.courseClass.offsets[legIndex] + controlNumber - 1];
                             headerCellData.push(controlNumber + suffix + " (" + control + ")");
                         }
                     }
                     headerCellData.push(getMessage("FinishName") + suffix);
                 }
             } else {
-                for (controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[this.selectedLegIndex]; controlNumber += 1) {
-                    headerCellData.push(controlNumber);
+                if (controls === null) {
+                    for (controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[this.selectedLegIndex]; controlNumber += 1) {
+                        headerCellData.push(controlNumber);
+                    }
+                } else {
+                    for (controlNumber = 1; controlNumber <= this.courseClass.numbersOfControls[this.selectedLegIndex]; controlNumber += 1) {
+                        control = controls[this.courseClass.offsets[this.selectedLegIndex] + controlNumber - 1];
+                        headerCellData.push(controlNumber + " (" + control + ")");
+                    }
                 }
                 headerCellData.push(getMessage("FinishName"));
             }
