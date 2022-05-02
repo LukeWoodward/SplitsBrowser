@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Course-Class Set - A collection of selected course classes.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -557,7 +557,7 @@
         var offset = (this.hasTeamData() && legIndex !== null) ? this.classes[0].offsets[legIndex] : 0;
         var dubiousTimesInfo = currentIndexes.map(function (resultIndex) {
             var indexPairs = chartType.indexesAroundOmittedTimesFunc(this.allResults[resultIndex]);
-            return indexPairs.filter(function (indexPair) { return indexPair.start >= offset && indexPair.end <= offset + numControls + 2; })
+            return indexPairs.filter(function (indexPair) { return indexPair.start >= offset && indexPair.end < offset + numControls + 2; })
                              .map(function (indexPair) { return { start: indexPair.start - offset, end: indexPair.end - offset }; });
         }, this);
 

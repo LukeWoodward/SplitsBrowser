@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - CourseClassSet tests.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -1082,6 +1082,40 @@
             numControls: 3,
             resultNames: ["Second Runner"],
             dubiousTimesInfo: [[{start: 0, end: 2}]]
+        };
+
+        assert.deepEqual(chartData, expectedChartData);
+    });
+
+    QUnit.test("Can return chart data for second leg of team result with omitted intermediate-finish time not included in dubious-times info", function (assert) {
+        var teamMemberResult1 = fromCumTimes(1, 10 * 3600, [0, 65, 286, 470, 570], {name: "First Runner"});
+        var teamMemberResult2 = fromCumTimes(1, 10 * 3600 + 570, [0, 61, 254, 430, 533], {name: "Second Runner"});
+        var teamResult = createTeamResult(1, [teamMemberResult1, teamMemberResult2], new Team("Team 1", "ABC"));
+
+        var cumTimes = teamResult.originalCumTimes.slice(0);
+        cumTimes[4] = NaN;
+        teamResult.setRepairedCumulativeTimes(cumTimes);
+
+        var courseClass = new CourseClass("Test", 7, [teamResult]);
+        courseClass.setIsTeamClass([3, 3]);
+        var courseClassSet = new CourseClassSet([courseClass]);
+        var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
+
+        var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 0);
+
+        var expectedChartData = {
+            dataColumns: [
+                { x: 0, ys: [0] },
+                { x: 61, ys: [4] },
+                { x: 282, ys: [4] },
+                { x: 472, ys: [-2] },
+                { x: 570, ys: [NaN] }
+            ],
+            xExtent: [0, 570],
+            yExtent: [-2, 4],
+            numControls: 3,
+            resultNames: ["First Runner"],
+            dubiousTimesInfo: [[]]
         };
 
         assert.deepEqual(chartData, expectedChartData);
