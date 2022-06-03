@@ -2,7 +2,7 @@
  *  SplitsBrowser Common controls - Functionality for handling 'common controls'
  *  within relay events.
  *
- *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -44,18 +44,13 @@
         legControlsLists.forEach(function (legControls) {
             var controlsForThisLeg = d3.set();
             legControls.forEach(function (control) {
-                if (controlsForThisLeg.has(control)) {
-                    throwInvalidData(
-                        "Cannot determine common controls because " + legDescription +
-                        " contains duplicated control " + control);
-                }
-
-                controlsForThisLeg.add(control);
-
-                if (controlCounts.has(control)) {
-                    controlCounts.set(control, controlCounts.get(control) + 1);
-                } else {
-                    controlCounts.set(control, 1);
+                if (!controlsForThisLeg.has(control)) {
+                    controlsForThisLeg.add(control);
+                    if (controlCounts.has(control)) {
+                        controlCounts.set(control, controlCounts.get(control) + 1);
+                    } else {
+                        controlCounts.set(control, 1);
+                    }
                 }
             });
         });
@@ -69,6 +64,17 @@
         for (var teamIndex = 1; teamIndex < teamCount; teamIndex += 1) {
             var commonControlsForThisTeamMember = legControlsLists[teamIndex].filter(
                 function (control) { return controlCounts.get(control) === teamCount; });
+
+            var controlsForThisLeg = d3.set();
+            commonControlsForThisTeamMember.forEach(function (control) {
+                if (controlsForThisLeg.has(control)) {
+                    throwInvalidData(
+                        "Cannot determine common controls because " + legDescription +
+                        " contains duplicated control " + control);
+                } else {
+                    controlsForThisLeg.add(control);
+                }
+            });
 
             if (commonControlsForThisTeamMember.length !== commonControls.length) {
                 throwInvalidData("Unexpectedly didn't get the same number of common controls for all competitors");

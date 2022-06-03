@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Common Controls tests.
  *
- *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -58,14 +58,14 @@
         assert.deepEqual(determineCommonControls([
             ["187", "242", "201", "209", "173", "186"],
             ["187", "239", "209", "207", "195", "173"]
-        ], "two lists of controls with common controls in same indexes"), ["187", "209", "173"]);
+        ], "two lists of controls with common controls not in same indexes"), ["187", "209", "173"]);
     });
 
-    QUnit.test("Returns expected list for two different lists of controls with common controls not all in same indexes", function (assert) {
+    QUnit.test("Returns expected list for two different lists of controls with duplicated non-common controls", function (assert) {
         assert.deepEqual(determineCommonControls([
-            ["187", "242", "201", "209", "173", "186"],
+            ["187", "242", "201", "209", "173", "201"],
             ["187", "239", "209", "207", "195", "173"]
-        ], "two lists of controls with common controls in same indexes"), ["187", "209", "173"]);
+        ], "two lists of controls with duplicated non-common controlsh "), ["187", "209", "173"]);
     });
 
     QUnit.test("Returns expected list for three different lists of controls with some common controls", function (assert) {
@@ -84,13 +84,13 @@
         ], "three lists of controls with no common controls"), []);
     });
 
-    QUnit.test("Cannot determine list of controls if controls list has duplicated control", function (assert) {
+    QUnit.test("Cannot determine list of controls if controls list has duplicated common control", function (assert) {
         SplitsBrowserTest.assertInvalidData(assert, function() {
             determineCommonControls([
                 ["187", "242", "209", "173", "186"],
                 ["187", "239", "209", "187", "195"]
             ],
-            "a duplicated control");
+            "a duplicated common control");
         });
     });
 
