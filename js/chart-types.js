@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Chart Types - Defines the types of charts that can be plotted.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -62,7 +62,9 @@
         },
         RaceGraph: {
             nameKey: "RaceGraphChartType",
-            dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes).map(secondsToMinutes); },
+            dataSelector: function (result, referenceCumTimes, legIndex) {
+                return result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes, legIndex).map(secondsToMinutes);
+            },
             yAxisLabelKey: "RaceGraphYAxisLabel",
             isRaceGraph: true,
             isResultsTable: false,

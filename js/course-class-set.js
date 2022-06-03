@@ -514,7 +514,7 @@
             throw new TypeError("legIndex undefined or missing");
         }
 
-        var resultData = this.allResults.map(function (result) { return chartType.dataSelector(result, referenceCumTimes); });
+        var resultData = this.allResults.map(function (result) { return chartType.dataSelector(result, referenceCumTimes, legIndex); });
         var selectedResultData = currentIndexes.map(function (index) { return resultData[index]; });
 
         var numControls;

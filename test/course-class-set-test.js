@@ -23,9 +23,14 @@
 
     QUnit.module("Course-class set");
 
+    var chartDataLegIndexes = [];
+
     var _DUMMY_CHART_TYPE = {
         name: "dummy",
-        dataSelector: function (result, referenceCumTimes) { return result.getCumTimesAdjustedToReference(referenceCumTimes); },
+        dataSelector: function (result, referenceCumTimes, legIndex) {
+            chartDataLegIndexes.push(legIndex);
+            return result.getCumTimesAdjustedToReference(referenceCumTimes);
+        },
         indexesAroundOmittedTimesFunc: function (result) { return result.getControlIndexesAroundOmittedCumulativeTimes(); }
     };
 
@@ -746,7 +751,9 @@
         var courseClassSet = new CourseClassSet([new CourseClass("Test", 3, [getFasterResult1(), getResult2()])]);
         var fastestTime = courseClassSet.getFastestCumTimes();
 
+        chartDataLegIndexes = [];
         var chartData = courseClassSet.getChartData(fastestTime, [0, 1], _DUMMY_CHART_TYPE, null);
+        assert.deepEqual(chartDataLegIndexes, [null, null]);
 
         var expectedChartData = {
             dataColumns: [
@@ -981,7 +988,9 @@
         var courseClassSet = new CourseClassSet([courseClass]);
         var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
 
+        chartDataLegIndexes = [];
         var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 0);
+        assert.deepEqual(chartDataLegIndexes, [0]);
 
         var expectedChartData = {
             dataColumns: [
@@ -1007,7 +1016,9 @@
         var courseClassSet = new CourseClassSet([courseClass]);
         var fastestTime = [0, 61, 282, 472, 570, 628, 820, 994, 1104];
 
+        chartDataLegIndexes = [];
         var chartData = courseClassSet.getChartData(fastestTime, [0], _DUMMY_CHART_TYPE, 1);
+        assert.deepEqual(chartDataLegIndexes, [1]);
 
         var expectedChartData = {
             dataColumns: [

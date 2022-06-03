@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - ChartTypes tests.
  *
- *  Copyright (C) 2000-2020 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -57,14 +57,22 @@
         var chartType = ChartTypes.RaceGraph;
         var result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 409, 578], {});
         var referenceCumTimes = [0, 58, 224, 381, 552];
-        assert.deepEqual(chartType.dataSelector(result, referenceCumTimes), [10 * 60, 10 * 60 + (65 - 58) / 60, 10 * 60 + (221 - 224) / 60, 10 * 60 + (409 - 381) / 60, 10 * 60 + (578 - 552) / 60]);
+        assert.deepEqual(chartType.dataSelector(result, referenceCumTimes, null), [10 * 60, 10 * 60 + (65 - 58) / 60, 10 * 60 + (221 - 224) / 60, 10 * 60 + (409 - 381) / 60, 10 * 60 + (578 - 552) / 60]);
     });
 
     QUnit.test("Race graph selector returns result data with a missed control adjusted to reference with start time added, in units of minutes", function (assert) {
         var chartType = ChartTypes.RaceGraph;
         var result = fromCumTimes(1, 10 * 3600, [0, 65, null, 409, 578], {});
         var referenceCumTimes = [0, 58, 224, 381, 552];
-        assert.deepEqual(chartType.dataSelector(result, referenceCumTimes), [10 * 60, 10 * 60 + (65 - 58) / 60, null, 10 * 60 + (409 - 381) / 60, 10 * 60 + (578 - 552) / 60]);
+        assert.deepEqual(chartType.dataSelector(result, referenceCumTimes, null), [10 * 60, 10 * 60 + (65 - 58) / 60, null, 10 * 60 + (409 - 381) / 60, 10 * 60 + (578 - 552) / 60]);
+    });
+
+    QUnit.test("Race graph selector returns result data adjusted to reference with leg-index start time added, in units of minutes", function (assert) {
+        var chartType = ChartTypes.RaceGraph;
+        var result = fromCumTimes(1, 10 * 3600, [0, 65, 221, 409, 578], {});
+        result.setOffsets([0, 2]);
+        var referenceCumTimes = [0, 58, 224, 381, 552];
+        assert.deepEqual(chartType.dataSelector(result, referenceCumTimes, 1), [10 * 60 + (224 / 60), 10 * 60 + (65 - 58 + 224) / 60, 10 * 60 + (221 - 224 + 224) / 60, 10 * 60 + (409 - 381 + 224) / 60, 10 * 60 + (578 - 552 + 224) / 60]);
     });
 
     QUnit.test("Position after leg returns cumulative ranks", function (assert) {

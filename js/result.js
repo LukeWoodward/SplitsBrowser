@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Result - The results for a competitor or a team.
  *
- *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -473,11 +473,18 @@
     /**
     * Returns the cumulative times of this result with the start time added on.
     * @param {Array} referenceCumTimes The reference cumulative-split-time data to adjust by.
+    * @param {Number|null} legIndex The leg index, or null for all legs.
     * @return {Array} The array of adjusted data.
     */
-    Result.prototype.getCumTimesAdjustedToReferenceWithStartAdded = function (referenceCumTimes) {
+    Result.prototype.getCumTimesAdjustedToReferenceWithStartAdded = function (referenceCumTimes, legIndex) {
         var adjustedTimes = this.getCumTimesAdjustedToReference(referenceCumTimes);
-        var startTime = this.startTime;
+        var startTime;
+        if (legIndex === null || legIndex === 0) {
+            startTime = this.startTime;
+        } else {
+            var offset = this.offsets[legIndex];
+            startTime = this.startTime + this.cumTimes[offset] - adjustedTimes[offset];
+        }
         return adjustedTimes.map(function (adjTime) { return addIfNotNull(adjTime, startTime); });
     };
 

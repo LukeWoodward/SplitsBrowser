@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser - Result tests.
  *
- *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -432,9 +432,28 @@
     QUnit.test("Can adjust a result's cumulative times by reference data and add start time with all valid times and same number of controls", function (assert) {
         var startTime = 10 * 3600 + 41 * 60;
         var result = fromCumTimes(1, startTime, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
+        result.setOffsets([0, 2]);
         var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
         var expectedCumTimes = [startTime, startTime + 4, startTime + 4 + 28, startTime + 4 + 28 + 8, startTime + 4 + 28 + 8 - 3];
-        assert.deepEqual(result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes), expectedCumTimes);
+        assert.deepEqual(result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes, null), expectedCumTimes);
+    });
+
+    QUnit.test("Can adjust a relay result's cumulative times by reference data and add start time with all valid times and same number of controls", function (assert) {
+        var startTime = 10 * 3600 + 41 * 60;
+        var result = fromCumTimes(1, startTime, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
+        var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
+        var expectedCumTimes = [startTime, startTime + 4, startTime + 4 + 28, startTime + 4 + 28 + 8, startTime + 4 + 28 + 8 - 3];
+        assert.deepEqual(result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes, 0), expectedCumTimes);
+    });
+
+    QUnit.test("Can adjust a relay result's cumulative times by reference data and add leg start time with all valid times and same number of controls", function (assert) {
+        var startTime = 10 * 3600 + 41 * 60;
+        var legStartTime = startTime + 65 + 221;
+        var result = fromCumTimes(1, startTime, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
+        result.setOffsets([0, 2]);
+        var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
+        var expectedCumTimes = [legStartTime - 4 - 28, legStartTime - 28, legStartTime, legStartTime + 8, legStartTime + 8 - 3];
+        assert.deepEqual(result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes, 1), expectedCumTimes);
     });
 
     QUnit.test("Can adjust a result's cumulative times with a missing time by reference data and add start time with all valid times and same number of controls", function (assert) {
@@ -442,7 +461,7 @@
         var result = fromCumTimes(1, startTime, [0, 65, 65 + 221, null, 65 + 221 + 184 + 100], {});
         var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176, 61 + 193 + 176 + 103];
         var expectedCumTimes = [startTime, startTime + 4, startTime + 4 + 28, null, startTime + 4 + 28 + 8 - 3];
-        assert.deepEqual(result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes), expectedCumTimes);
+        assert.deepEqual(result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes, null), expectedCumTimes);
     });
 
     QUnit.test("Cannot adjust a result's cumulative times by reference data and add start time with a different number of times", function (assert) {
@@ -451,7 +470,7 @@
         var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 + 176];
 
         SplitsBrowserTest.assertInvalidData(assert, function () {
-            result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes);
+            result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes, null);
         });
     });
 
@@ -461,7 +480,7 @@
         var referenceCumTimes = [0, 61, 61 + 193, null, 61 + 193 + 176 + 103];
 
         SplitsBrowserTest.assertInvalidData(assert, function () {
-            result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes);
+            result.getCumTimesAdjustedToReferenceWithStartAdded(referenceCumTimes, null);
         });
     });
 
