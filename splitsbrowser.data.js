@@ -42,7 +42,7 @@
 
 // Tell ESLint not to complain that this is redeclaring a constant.
 /* eslint no-redeclare: "off", no-unused-vars: "off" */
-var SplitsBrowser = { Version: "3.5.2", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 ﻿/*
  *  SplitsBrowser - Assorted utility functions.
@@ -361,7 +361,7 @@ var SplitsBrowser = { Version: "3.5.2", Model: {}, Input: {}, Controls: {}, Mess
 /*
  *  SplitsBrowser Result - The results for a competitor or a team.
  *
- *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -833,11 +833,18 @@ var SplitsBrowser = { Version: "3.5.2", Model: {}, Input: {}, Controls: {}, Mess
     /**
     * Returns the cumulative times of this result with the start time added on.
     * @param {Array} referenceCumTimes The reference cumulative-split-time data to adjust by.
+    * @param {Number|null} legIndex The leg index, or null for all legs.
     * @return {Array} The array of adjusted data.
     */
-    Result.prototype.getCumTimesAdjustedToReferenceWithStartAdded = function (referenceCumTimes) {
+    Result.prototype.getCumTimesAdjustedToReferenceWithStartAdded = function (referenceCumTimes, legIndex) {
         var adjustedTimes = this.getCumTimesAdjustedToReference(referenceCumTimes);
-        var startTime = this.startTime;
+        var startTime;
+        if (legIndex === null || legIndex === 0) {
+            startTime = this.startTime;
+        } else {
+            var offset = this.offsets[legIndex];
+            startTime = this.startTime + this.cumTimes[offset] - adjustedTimes[offset];
+        }
         return adjustedTimes.map(function (adjTime) { return addIfNotNull(adjTime, startTime); });
     };
 
@@ -1348,7 +1355,7 @@ var SplitsBrowser = { Version: "3.5.2", Model: {}, Input: {}, Controls: {}, Mess
  *  SplitsBrowser Common controls - Functionality for handling 'common controls'
  *  within relay events.
  *
- *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -1390,18 +1397,13 @@ var SplitsBrowser = { Version: "3.5.2", Model: {}, Input: {}, Controls: {}, Mess
         legControlsLists.forEach(function (legControls) {
             var controlsForThisLeg = d3.set();
             legControls.forEach(function (control) {
-                if (controlsForThisLeg.has(control)) {
-                    throwInvalidData(
-                        "Cannot determine common controls because " + legDescription +
-                        " contains duplicated control " + control);
-                }
-
-                controlsForThisLeg.add(control);
-
-                if (controlCounts.has(control)) {
-                    controlCounts.set(control, controlCounts.get(control) + 1);
-                } else {
-                    controlCounts.set(control, 1);
+                if (!controlsForThisLeg.has(control)) {
+                    controlsForThisLeg.add(control);
+                    if (controlCounts.has(control)) {
+                        controlCounts.set(control, controlCounts.get(control) + 1);
+                    } else {
+                        controlCounts.set(control, 1);
+                    }
                 }
             });
         });
@@ -1415,6 +1417,17 @@ var SplitsBrowser = { Version: "3.5.2", Model: {}, Input: {}, Controls: {}, Mess
         for (var teamIndex = 1; teamIndex < teamCount; teamIndex += 1) {
             var commonControlsForThisTeamMember = legControlsLists[teamIndex].filter(
                 function (control) { return controlCounts.get(control) === teamCount; });
+
+            var controlsForThisLeg = d3.set();
+            commonControlsForThisTeamMember.forEach(function (control) {
+                if (controlsForThisLeg.has(control)) {
+                    throwInvalidData(
+                        "Cannot determine common controls because " + legDescription +
+                        " contains duplicated control " + control);
+                } else {
+                    controlsForThisLeg.add(control);
+                }
+            });
 
             if (commonControlsForThisTeamMember.length !== commonControls.length) {
                 throwInvalidData("Unexpectedly didn't get the same number of common controls for all competitors");
