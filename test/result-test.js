@@ -592,9 +592,19 @@
         }
     });
 
-    QUnit.test("Can determine time losses as all NaN if fastest splits include zero", function (assert) {
+    QUnit.test("Can determine time losses if fastest splits include zero", function (assert) {
         var result = fromCumTimes(1, 10 * 3600, [0, 96, 96 + 221, 96 + 221 + 184, 96 + 221 + 184 + 100], {});
         var fastestSplits = [65, 209, 0, 97];
+        result.determineTimeLosses(fastestSplits);
+
+        [0, -88, 184, -43].forEach(function (expectedTimeLoss, index) {
+            assert.strictEqual(result.getTimeLossAt(index + 1), expectedTimeLoss);
+        });
+    });
+
+    QUnit.test("Can determine time losses as all NaN if fastest splits are all zero", function (assert) {
+        var result = fromCumTimes(1, 10 * 3600, [0, 96, 96 + 221, 96 + 221 + 184, 96 + 221 + 184 + 100], {});
+        var fastestSplits = [0, 0, 0, 0];
         result.determineTimeLosses(fastestSplits);
 
         for (var control = 1; control < 5; control += 1) {

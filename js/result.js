@@ -535,11 +535,7 @@
                 throwInvalidData("Cannot determine time loss when there is a NaN value in the fastest splits");
             }
 
-            if (fastestSplitTimes.some(function (split) { return split === 0; })) {
-                // Someone registered a zero split on this course.  In this
-                // situation the time losses don't really make sense.
-                this.timeLosses = this.splitTimes.map(function () { return NaN; });
-            } else if (this.isOKDespiteMissingTimes || this.splitTimes.some(isNaNStrict)) {
+            if (this.isOKDespiteMissingTimes || this.splitTimes.some(isNaNStrict)) {
                 // There are some missing or dubious times.  Unfortunately
                 // this means we cannot sensibly calculate the time losses.
                 this.timeLosses = this.splitTimes.map(function () { return NaN; });
@@ -550,15 +546,17 @@
                 // (split[i] - fastest[i])/fastest[i].  A control's split ratio
                 // is its time loss rate plus 1.  Not subtracting one at the start
                 // means that we then don't have to add it back on at the end.
+                // We also exclude any controls where the fastest split is zero.
 
-                var splitRatios = this.splitTimes.map(function (splitTime, index) {
-                    return splitTime / fastestSplitTimes[index];
-                });
+                var splitRatios = this.splitTimes.filter(function (splitTime, index) { return fastestSplitTimes[index] !== 0; })
+                    .map(function (splitTime, index) { return splitTime / fastestSplitTimes[index]; });
 
                 splitRatios.sort(d3.ascending);
 
                 var medianSplitRatio;
-                if (splitRatios.length % 2 === 1) {
+                if (splitRatios.length === 0) {
+                    medianSplitRatio = NaN;
+                } else if (splitRatios.length % 2 === 1) {
                     medianSplitRatio = splitRatios[(splitRatios.length - 1) / 2];
                 } else {
                     var midpt = splitRatios.length / 2;
