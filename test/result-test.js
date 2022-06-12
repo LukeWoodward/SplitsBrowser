@@ -511,7 +511,6 @@
     });
 
     QUnit.test("Cannot determine the percentages a result is behind reference data with a null value", function (assert) {
-
         var result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         var referenceCumTimes = [0, 61, 61 + 193, null, 61 + 193 + 176 + 103];
 
@@ -520,11 +519,17 @@
         });
     });
 
-    QUnit.test("Can determine the percentages a result is behind reference data, with a null percentage for a zero split", function (assert) {
-
+    QUnit.test("Can determine the percentages a result is behind reference data, with a repeated percentage for a zero split", function (assert) {
         var result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
         var referenceCumTimes = [0, 61, 61 + 193, 61 + 193, 61 + 193 + 176 + 103];
-        var expectedPercentagesBehind = [0, 100 * (65 - 61) / 61, 100 * (221 - 193) / 193, null, 100 * (100 - 176 - 103) / (103 + 176)];
+        var expectedPercentagesBehind = [0, 100 * (65 - 61) / 61, 100 * (221 - 193) / 193, 100 * (221 - 193) / 193, 100 * (100 - 176 - 103) / (103 + 176)];
+        assert.deepEqual(result.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes), expectedPercentagesBehind);
+    });
+
+    QUnit.test("Can determine the percentages a result is behind reference data, with a null percentage for a negative split", function (assert) {
+        var result = fromCumTimes(1, 10 * 3600, [0, 65, 65 + 221, 65 + 221 + 184, 65 + 221 + 184 + 100], {});
+        var referenceCumTimes = [0, 61, 61 + 193, 61 + 193 - 15, 61 + 193 + 176 + 103];
+        var expectedPercentagesBehind = [0, 100 * (65 - 61) / 61, 100 * (221 - 193) / 193, null, 100 * (100 - 176 - 103 - 15) / (103 + 176 + 15)];
         assert.deepEqual(result.getSplitPercentsBehindReferenceCumTimes(referenceCumTimes), expectedPercentagesBehind);
     });
 

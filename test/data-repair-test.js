@@ -61,18 +61,11 @@
         assert.deepEqual(result.cumTimes, result.originalCumTimes);
     });
 
-    QUnit.test("Can repair result by setting second equal cumulative time to NaN", function (assert) {
+    QUnit.test("Can repair result with ascending or equal cumulative times leaving them in ascending order", function (assert) {
         var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
         var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(hasDubiousData);
-        SplitsBrowserTest.assertStrictEqualArrays(assert, result.cumTimes, [0, 81, 81 + 197, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
-    });
-
-    QUnit.test("Can repair result by setting second and third equal cumulative time to NaN", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(hasDubiousData);
-        SplitsBrowserTest.assertStrictEqualArrays(assert, result.cumTimes, [0, 81, 81 + 197, NaN, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        assert.ok(!hasDubiousData);
+        assert.deepEqual(result.cumTimes, result.originalCumTimes);
     });
 
     QUnit.test("Can repair result with multiple missed splits by doing nothing", function (assert) {
@@ -176,8 +169,8 @@
     QUnit.test("Can repair result with zero cumulative times separated by two runs of nulls", function (assert) {
         var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, null, null, null, 0, null, 0, 842, 1647], {});
         var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(hasDubiousData);
-        assert.deepEqual(result.cumTimes, [0, null, null, null, NaN, null, NaN, 842, 1647]);
+        assert.ok(!hasDubiousData);
+        assert.deepEqual(result.cumTimes, [0, null, null, null, 0, null, 0, 842, 1647]);
     });
 
     QUnit.test("Can transfer result with ascending cumulative times leaving them in ascending order", function (assert) {

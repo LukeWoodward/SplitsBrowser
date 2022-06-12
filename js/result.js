@@ -509,6 +509,11 @@
                 var referenceSplit = referenceCumTimes[index + 1] - referenceCumTimes[index];
                 if (referenceSplit > 0) {
                     percentsBehind.push(100 * (splitTime - referenceSplit) / referenceSplit);
+                } else if (referenceSplit === 0) {
+                    // A zero-time control is likely to be a timed-out road crossing where a limited amount
+                    // of time was permitted and later removed. Add another point at the same position as the
+                    // previous.
+                    percentsBehind.push(percentsBehind.length === 0 ? 0 : percentsBehind[percentsBehind.length - 1]);
                 } else {
                     percentsBehind.push(null);
                 }

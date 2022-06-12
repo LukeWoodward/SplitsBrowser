@@ -58,7 +58,7 @@
             var time = cumTimes[index];
             if (isNotNullNorNaN(time)) {
                 // This entry is numeric.
-                if (time <= cumTimes[lastNumericTimeIndex]) {
+                if (time < cumTimes[lastNumericTimeIndex] || (time === cumTimes[lastNumericTimeIndex] && lastNumericTimeIndex < index - 1)) {
                     return {first: lastNumericTimeIndex, second: index};
                 }
 
@@ -69,26 +69,6 @@
         // If we get here, the entire array is in strictly-ascending order.
         return null;
     }
-
-
-    /**
-    * Remove, by setting to NaN, any cumulative time that is equal to the
-    * previous cumulative time.
-    * @param {Array} cumTimes Array of cumulative times.
-    */
-    Repairer.prototype.removeCumulativeTimesEqualToPrevious = function (cumTimes) {
-        var lastCumTime = cumTimes[0];
-        for (var index = 1; index + 1 < cumTimes.length; index += 1) {
-            if (cumTimes[index] !== null) {
-                if (cumTimes[index] === lastCumTime) {
-                    cumTimes[index] = NaN;
-                    this.madeAnyChanges = true;
-                } else {
-                    lastCumTime = cumTimes[index];
-                }
-            }
-        }
-    };
 
     /**
     * Remove from the cumulative times given any individual times that cause
@@ -190,8 +170,6 @@
     */
     Repairer.prototype.repairResult = function (result) {
         var cumTimes = result.originalCumTimes.slice(0);
-
-        this.removeCumulativeTimesEqualToPrevious(cumTimes);
 
         cumTimes = this.removeCumulativeTimesCausingNegativeSplits(cumTimes);
 
