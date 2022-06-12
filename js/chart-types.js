@@ -41,6 +41,19 @@
     }
 
     /**
+    * Wraps an index-around-omitted-cumulative-times function and returns a
+    * function that filters out any range it returned that covers the start.
+    * @param {Function} func The function to wrap.
+    * @return {Function} Function that wraps the given function and filters out
+    *       any ranges it returned that cover the start.
+    */
+    function excludeIfCoveringStart(func) {
+        return function (result) {
+            return func(result).filter(function (range) { return range.start > 0; });
+        };
+    }
+
+    /**
     * Returns indexes around the given competitor's omitted split times.
     * @param {Result} result The result to get the indexes for.
     * @return {Array} Array of objects containing indexes around omitted split
@@ -78,7 +91,7 @@
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1,
-            indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumulativeTimes
+            indexesAroundOmittedTimesFunc: excludeIfCoveringStart(getIndexesAroundOmittedCumulativeTimes)
         },
         SplitPosition: {
             nameKey: "SplitPositionChartType",
@@ -87,7 +100,7 @@
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1,
-            indexesAroundOmittedTimesFunc: getIndexesAroundOmittedSplitTimes
+            indexesAroundOmittedTimesFunc: excludeIfCoveringStart(getIndexesAroundOmittedSplitTimes)
         },
         PercentBehind: {
             nameKey: "PercentBehindChartType",

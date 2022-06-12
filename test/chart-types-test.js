@@ -143,7 +143,7 @@
         });
     });
 
-    QUnit.test("All chart types except the results table have the correct dubious-indexes function", function (assert) {
+    QUnit.test("All chart types except the results table have the correct dubious-indexes function for a dubious control after the first", function (assert) {
         var result = fromOriginalCumTimes(1, 10 * 3600, [0, 96, 96, 96 + 221 + 184, 96 + 221 + 184 + 100], {});
         result.setRepairedCumulativeTimes([0, 96, NaN, 96 + 221 + 184, 96 + 221 + 184 + 100]);
 
@@ -155,6 +155,32 @@
                     expectedDubiousTimeInfo = [{start: 1, end: 3}];
                 } else if (chartType === ChartTypes.SplitPosition || chartType === ChartTypes.PercentBehind) {
                     expectedDubiousTimeInfo = [{start: 1, end: 4}];
+                } else {
+                    assert.ok(false, "Unrecognised chart type: '" + chartType.nameKey + "'");
+                    expectedDubiousTimeInfo = null;
+                }
+
+                assert.deepEqual(chartType.indexesAroundOmittedTimesFunc(result), expectedDubiousTimeInfo, "Dubious-time info for " + chartType.nameKey + " should be correct");
+            }
+        });
+
+        assert.strictEqual(ChartTypes.ResultsTable.indexesAroundOmittedTimesFunc, null);
+    });
+
+    QUnit.test("All chart types except the results table have the correct dubious-indexes function for a dubious first control", function (assert) {
+        var result = fromOriginalCumTimes(1, 10 * 3600, [0, 96, 96, 96 + 221 + 184, 96 + 221 + 184 + 100], {});
+        result.setRepairedCumulativeTimes([0, NaN, 96 + 221, 96 + 221 + 184, 96 + 221 + 184 + 100]);
+
+        ALL_CHART_TYPES.forEach(function (chartType) {
+            if (chartType !== ChartTypes.ResultsTable) {
+                assert.strictEqual(typeof chartType.indexesAroundOmittedTimesFunc, "function");
+                var expectedDubiousTimeInfo;
+                if (chartType === ChartTypes.SplitsGraph || chartType === ChartTypes.RaceGraph) {
+                    expectedDubiousTimeInfo = [{start: 0, end: 2}];
+                } else if (chartType === ChartTypes.PercentBehind) {
+                    expectedDubiousTimeInfo = [{start: 0, end: 3}];
+                } else if (chartType === ChartTypes.PositionAfterLeg || chartType === ChartTypes.SplitPosition) {
+                    expectedDubiousTimeInfo = [];
                 } else {
                     assert.ok(false, "Unrecognised chart type: '" + chartType.nameKey + "'");
                     expectedDubiousTimeInfo = null;
