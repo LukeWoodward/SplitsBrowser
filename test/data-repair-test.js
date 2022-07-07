@@ -23,6 +23,8 @@
 
     QUnit.module("Data Repair");
 
+    var BOTH_BOOLS = [false, true];
+
     var repairEventData = SplitsBrowser.DataRepair.repairEventData;
     var transferResultData = SplitsBrowser.DataRepair.transferResultData;
     var fromOriginalCumTimes = SplitsBrowser.Model.Result.fromOriginalCumTimes;
@@ -41,12 +43,13 @@
     * Wraps the given array of results in a course-class, course and event,
     * repair the event and return whether the course-class has dubious data.
     * @param {Array} results Array of Result objects.
+    * @param {Boolean} permitZeroSplits Whether to permit zero-second splits.
     * @return {Boolean} True if the course-class has dubious data, false
     *     otherwise.
     */
-    function wrapInEventAndRepair(results) {
+    function wrapInEventAndRepair(results, permitZeroSplits) {
         var eventData = wrapInEvent(results);
-        repairEventData(eventData);
+        repairEventData(eventData, permitZeroSplits);
         return eventData.classes[0].hasDubiousData;
     }
 
@@ -55,122 +58,161 @@
     }
 
     QUnit.test("Can repair result with ascending cumulative times leaving them in ascending order", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(!hasDubiousData);
-        assert.deepEqual(result.cumTimes, result.originalCumTimes);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(!hasDubiousData);
+            assert.deepEqual(result.cumTimes, result.originalCumTimes);
+        });
     });
 
-    QUnit.test("Can repair result with ascending or equal cumulative times leaving them in ascending order", function (assert) {
+    QUnit.test("Can repair result with ascending or equal cumulative times removing a zero-second split if not permitted", function (assert) {
         var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
+        var hasDubiousData = wrapInEventAndRepair([result], false);
+        assert.ok(hasDubiousData);
+        assert.deepEqual(result.cumTimes, [0, 81, 81 + 197, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+    });
+
+    QUnit.test("Can repair result with ascending or equal cumulative times leaving them in ascending order if zero-second splits are permitted", function (assert) {
+        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+        var hasDubiousData = wrapInEventAndRepair([result], true);
         assert.ok(!hasDubiousData);
         assert.deepEqual(result.cumTimes, result.originalCumTimes);
     });
 
     QUnit.test("Can repair result with multiple missed splits by doing nothing", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, null, null, 81 + 197 + 212 + 106], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(!hasDubiousData);
-        assert.deepEqual(result.cumTimes, result.originalCumTimes);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, null, null, 81 + 197 + 212 + 106], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(!hasDubiousData);
+            assert.deepEqual(result.cumTimes, result.originalCumTimes);
+        });
     });
 
     QUnit.test("Can repair result with finish time equal to last control by doing nothing", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(!hasDubiousData);
-        SplitsBrowserTest.assertStrictEqualArrays(assert, result.cumTimes, result.originalCumTimes);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, 81 + 197 + 212], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(!hasDubiousData);
+            SplitsBrowserTest.assertStrictEqualArrays(assert, result.cumTimes, result.originalCumTimes);
+        });
     });
 
     QUnit.test("Can repair result with absurdly high cumulative time by removing the offending time", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(hasDubiousData);
-        assert.deepEqual(result.cumTimes, [0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(hasDubiousData);
+            assert.deepEqual(result.cumTimes, [0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        });
     });
 
     QUnit.test("Can repair result with multiple absurdly high cumulative times by removing the offending times", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(hasDubiousData);
-        assert.deepEqual(result.cumTimes, [0, 81, NaN, 81 + 197, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 99999, 81 + 197, 99999, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(hasDubiousData);
+            assert.deepEqual(result.cumTimes, [0, 81, NaN, 81 + 197, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        });
     });
 
     QUnit.test("Can repair result with absurdly high cumulative time followed by nulls by removing the offending time", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 99999, null, null, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(hasDubiousData);
-        assert.deepEqual(result.cumTimes, [0, 81, NaN, null, null, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 99999, null, null, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(hasDubiousData);
+            assert.deepEqual(result.cumTimes, [0, 81, NaN, null, null, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        });
     });
 
     QUnit.test("Can repair result with absurdly low cumulative time by removing the offending time", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(hasDubiousData);
-        assert.deepEqual(result.cumTimes, [0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(hasDubiousData);
+            assert.deepEqual(result.cumTimes, [0, 81, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        });
     });
 
     QUnit.test("Can repair result with multiple absurdly low cumulative times by removing the offending times", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197, 1, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(hasDubiousData);
-        assert.deepEqual(result.cumTimes, [0, 81, NaN, 81 + 197, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 1, 81 + 197, 1, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(hasDubiousData);
+            assert.deepEqual(result.cumTimes, [0, 81, NaN, 81 + 197, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        });
     });
 
     QUnit.test("Can repair result with absurdly low cumulative time preceded by nulls by removing the offending time", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, null, null, 1, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(hasDubiousData);
-        assert.deepEqual(result.cumTimes, [0, 81, null, null, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, null, null, 1, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(hasDubiousData);
+            assert.deepEqual(result.cumTimes, [0, 81, null, null, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        });
     });
 
     QUnit.test("Removes ridiculously low finish time of result if result mispunched but punches the last control and the finish", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 1], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(hasDubiousData);
-        assert.deepEqual(result.cumTimes, [0, 81, null, 81 + 197 + 212, NaN]);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, 1], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(hasDubiousData);
+            assert.deepEqual(result.cumTimes, [0, 81, null, 81 + 197 + 212, NaN]);
+        });
     });
 
     QUnit.test("Makes no changes to a result that has failed to punch the finish but all other cumulative times are in order", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, null], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(!hasDubiousData);
-        assert.deepEqual(result.cumTimes, result.originalCumTimes);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, 81 + 197, 81 + 197 + 212, null], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(!hasDubiousData);
+            assert.deepEqual(result.cumTimes, result.originalCumTimes);
+        });
     });
 
     QUnit.test("Makes no changes to the start time if the first cumulative time is negative", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, -381, -224, -150, -74, null], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(!hasDubiousData);
-        assert.deepEqual(result.cumTimes, result.originalCumTimes);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, -381, -224, -150, -74, null], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(!hasDubiousData);
+            assert.deepEqual(result.cumTimes, result.originalCumTimes);
+        });
     });
 
     QUnit.test("Does not remove ridiculously low finish time from mispunching result if they did not punch the last control", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, null, 1], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(!hasDubiousData);
-        assert.deepEqual(result.cumTimes, result.originalCumTimes);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 81, null, 81 + 197 + 212, null, 1], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(!hasDubiousData);
+            assert.deepEqual(result.cumTimes, result.originalCumTimes);
+        });
     });
 
     QUnit.test("Can repair result with two consecutive absurdly high cumulative times by removing them", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 5000, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(hasDubiousData);
-        assert.deepEqual(result.cumTimes, [0, NaN, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 5000, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(hasDubiousData);
+            assert.deepEqual(result.cumTimes, [0, NaN, NaN, 81 + 197 + 212, 81 + 197 + 212 + 106]);
+        });
     });
 
     QUnit.test("Does not repair result with two absurdly high cumulative times separated only by a missing split", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 5000, null, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(!hasDubiousData);
-        assert.deepEqual(result.cumTimes, result.originalCumTimes);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, 5000, null, 6000, 81 + 197 + 212, 81 + 197 + 212 + 106], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(!hasDubiousData);
+            assert.deepEqual(result.cumTimes, result.originalCumTimes);
+        });
     });
 
     QUnit.test("Can repair result with zero cumulative times separated by two runs of nulls", function (assert) {
-        var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, null, null, null, 0, null, 0, 842, 1647], {});
-        var hasDubiousData = wrapInEventAndRepair([result]);
-        assert.ok(!hasDubiousData);
-        assert.deepEqual(result.cumTimes, [0, null, null, null, 0, null, 0, 842, 1647]);
+        BOTH_BOOLS.forEach(function (permitZeroSplits) {
+            var result = fromOriginalCumTimes(1, 10 * 3600 + 30 * 60, [0, null, null, null, 0, null, 0, 842, 1647], {});
+            var hasDubiousData = wrapInEventAndRepair([result], permitZeroSplits);
+            assert.ok(!hasDubiousData);
+            assert.deepEqual(result.cumTimes, [0, null, null, null, 0, null, 0, 842, 1647]);
+        });
     });
 
     QUnit.test("Can transfer result with ascending cumulative times leaving them in ascending order", function (assert) {

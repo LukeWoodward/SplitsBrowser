@@ -30,9 +30,12 @@
 
     /**
      * Construct a Repairer, for repairing some data.
+     * @constructor
+     * @param {Boolean} permitZeroSplits Whether to permit zero-second splits.
     */
-    var Repairer = function () {
+    var Repairer = function (permitZeroSplits) {
         this.madeAnyChanges = false;
+        this.permitZeroSplits = permitZeroSplits;
     };
 
     /**
@@ -47,7 +50,7 @@
     * @return {Object|null} Object containing indexes of non-ascending entries, or
     *     null if none found.
     */
-    function getFirstNonAscendingIndexes(cumTimes) {
+    Repairer.prototype.getFirstNonAscendingIndexes = function (cumTimes) {
         if (cumTimes.length === 0 || cumTimes[0] !== 0) {
             throwInvalidData("cumulative times array does not start with a zero cumulative time");
         }
@@ -58,7 +61,7 @@
             var time = cumTimes[index];
             if (isNotNullNorNaN(time)) {
                 // This entry is numeric.
-                if (time < cumTimes[lastNumericTimeIndex] || (time === cumTimes[lastNumericTimeIndex] && lastNumericTimeIndex < index - 1)) {
+                if (time < cumTimes[lastNumericTimeIndex] || (time === cumTimes[lastNumericTimeIndex] && (!this.permitZeroSplits || lastNumericTimeIndex < index - 1))) {
                     return {first: lastNumericTimeIndex, second: index};
                 }
 
@@ -68,7 +71,7 @@
 
         // If we get here, the entire array is in strictly-ascending order.
         return null;
-    }
+    };
 
     /**
     * Remove from the cumulative times given any individual times that cause
@@ -84,7 +87,7 @@
     */
     Repairer.prototype.removeCumulativeTimesCausingNegativeSplits = function (cumTimes) {
 
-        var nonAscIndexes = getFirstNonAscendingIndexes(cumTimes);
+        var nonAscIndexes = this.getFirstNonAscendingIndexes(cumTimes);
         while (nonAscIndexes !== null && nonAscIndexes.second + 1 < cumTimes.length) {
 
             // So, we have a pair of cumulative times that are not in strict
@@ -125,7 +128,7 @@
                         adjustedCumTimes[first - 1] = NaN;
                     }
 
-                    var nextNonAscIndexes = getFirstNonAscendingIndexes(adjustedCumTimes);
+                    var nextNonAscIndexes = this.getFirstNonAscendingIndexes(adjustedCumTimes);
                     if (nextNonAscIndexes === null || nextNonAscIndexes.first > second) {
                         progress = true;
                         cumTimes = adjustedCumTimes;
@@ -209,9 +212,10 @@
     /**
     * Attempt to carry out repairs to the data in an event.
     * @param {Event} eventData The event data to repair.
+    * @param {Boolean} permitZeroSplits Whether zero-second splits are permitted.
     */
-    function repairEventData(eventData) {
-        var repairer = new Repairer();
+    function repairEventData(eventData, permitZeroSplits) {
+        var repairer = new Repairer(permitZeroSplits);
         repairer.repairEventData(eventData);
     }
 
@@ -220,7 +224,7 @@
     *
     * This is used if the input data has been read in a format that requires
     * the data to be checked, but the user has opted not to perform any such
-    * reparations and wishes to view the
+    * reparations and wishes to view the original data.
     * @param {Event} eventData The event data to repair.
     */
     function transferResultData(eventData) {

@@ -1,7 +1,7 @@
 /*
  *  SplitsBrowser Viewer - Top-level class that runs the application.
  *
- *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -698,7 +698,7 @@
         if (showOriginalData) {
             transferResultData(this.eventData);
         } else {
-            repairEventData(this.eventData);
+            repairEventData(this.eventData, this.options && this.options.permitZeroSplits);
         }
 
         this.eventData.determineTimeLosses();
@@ -855,7 +855,7 @@
             showLoadFailureMessage("LoadFailedUnrecognisedData", {});
         } else {
             if (eventData.needsRepair()) {
-                repairEventData(eventData);
+                repairEventData(eventData, options && options.permitZeroSplits);
             }
 
             if (typeof options === "string") {
