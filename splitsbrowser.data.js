@@ -42,7 +42,7 @@
 
 // Tell ESLint not to complain that this is redeclaring a constant.
 /* eslint no-redeclare: "off", no-unused-vars: "off" */
-var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.5.4", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 ﻿/*
  *  SplitsBrowser - Assorted utility functions.
@@ -869,6 +869,11 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
                 var referenceSplit = referenceCumTimes[index + 1] - referenceCumTimes[index];
                 if (referenceSplit > 0) {
                     percentsBehind.push(100 * (splitTime - referenceSplit) / referenceSplit);
+                } else if (referenceSplit === 0) {
+                    // A zero-time control is likely to be a timed-out road crossing where a limited amount
+                    // of time was permitted and later removed. Add another point at the same position as the
+                    // previous.
+                    percentsBehind.push(percentsBehind.length === 0 ? 0 : percentsBehind[percentsBehind.length - 1]);
                 } else {
                     percentsBehind.push(null);
                 }
@@ -890,11 +895,7 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
                 throwInvalidData("Cannot determine time loss when there is a NaN value in the fastest splits");
             }
 
-            if (fastestSplitTimes.some(function (split) { return split === 0; })) {
-                // Someone registered a zero split on this course.  In this
-                // situation the time losses don't really make sense.
-                this.timeLosses = this.splitTimes.map(function () { return NaN; });
-            } else if (this.isOKDespiteMissingTimes || this.splitTimes.some(isNaNStrict)) {
+            if (this.isOKDespiteMissingTimes || this.splitTimes.some(isNaNStrict)) {
                 // There are some missing or dubious times.  Unfortunately
                 // this means we cannot sensibly calculate the time losses.
                 this.timeLosses = this.splitTimes.map(function () { return NaN; });
@@ -905,15 +906,17 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
                 // (split[i] - fastest[i])/fastest[i].  A control's split ratio
                 // is its time loss rate plus 1.  Not subtracting one at the start
                 // means that we then don't have to add it back on at the end.
+                // We also exclude any controls where the fastest split is zero.
 
-                var splitRatios = this.splitTimes.map(function (splitTime, index) {
-                    return splitTime / fastestSplitTimes[index];
-                });
+                var splitRatios = this.splitTimes.filter(function (splitTime, index) { return fastestSplitTimes[index] !== 0; })
+                    .map(function (splitTime, index) { return splitTime / fastestSplitTimes[index]; });
 
                 splitRatios.sort(d3.ascending);
 
                 var medianSplitRatio;
-                if (splitRatios.length % 2 === 1) {
+                if (splitRatios.length === 0) {
+                    medianSplitRatio = NaN;
+                } else if (splitRatios.length % 2 === 1) {
                     medianSplitRatio = splitRatios[(splitRatios.length - 1) / 2];
                 } else {
                     var midpt = splitRatios.length / 2;

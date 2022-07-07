@@ -34,3 +34,4 @@ SplitsBrowser changelog:
 3.5.1: Add support for viewing relay events in common-controls-only mode.
 3.5.2: Fix issues loading event with negative cumulative times (#80).
 3.5.3: Fix issues with relay events (#81, #82).
+3.5.4: Add flag controlling whether to permit zero-second splits (#83), fix other bug (#84).

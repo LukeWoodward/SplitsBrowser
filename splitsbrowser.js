@@ -42,7 +42,7 @@
 
 // Tell ESLint not to complain that this is redeclaring a constant.
 /* eslint no-redeclare: "off", no-unused-vars: "off" */
-var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Messages: {} };
+var SplitsBrowser = { Version: "3.5.4", Model: {}, Input: {}, Controls: {}, Messages: {} };
 
 ﻿/*
  *  SplitsBrowser - Assorted utility functions.
@@ -1065,6 +1065,11 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
                 var referenceSplit = referenceCumTimes[index + 1] - referenceCumTimes[index];
                 if (referenceSplit > 0) {
                     percentsBehind.push(100 * (splitTime - referenceSplit) / referenceSplit);
+                } else if (referenceSplit === 0) {
+                    // A zero-time control is likely to be a timed-out road crossing where a limited amount
+                    // of time was permitted and later removed. Add another point at the same position as the
+                    // previous.
+                    percentsBehind.push(percentsBehind.length === 0 ? 0 : percentsBehind[percentsBehind.length - 1]);
                 } else {
                     percentsBehind.push(null);
                 }
@@ -1086,11 +1091,7 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
                 throwInvalidData("Cannot determine time loss when there is a NaN value in the fastest splits");
             }
 
-            if (fastestSplitTimes.some(function (split) { return split === 0; })) {
-                // Someone registered a zero split on this course.  In this
-                // situation the time losses don't really make sense.
-                this.timeLosses = this.splitTimes.map(function () { return NaN; });
-            } else if (this.isOKDespiteMissingTimes || this.splitTimes.some(isNaNStrict)) {
+            if (this.isOKDespiteMissingTimes || this.splitTimes.some(isNaNStrict)) {
                 // There are some missing or dubious times.  Unfortunately
                 // this means we cannot sensibly calculate the time losses.
                 this.timeLosses = this.splitTimes.map(function () { return NaN; });
@@ -1101,15 +1102,17 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
                 // (split[i] - fastest[i])/fastest[i].  A control's split ratio
                 // is its time loss rate plus 1.  Not subtracting one at the start
                 // means that we then don't have to add it back on at the end.
+                // We also exclude any controls where the fastest split is zero.
 
-                var splitRatios = this.splitTimes.map(function (splitTime, index) {
-                    return splitTime / fastestSplitTimes[index];
-                });
+                var splitRatios = this.splitTimes.filter(function (splitTime, index) { return fastestSplitTimes[index] !== 0; })
+                    .map(function (splitTime, index) { return splitTime / fastestSplitTimes[index]; });
 
                 splitRatios.sort(d3.ascending);
 
                 var medianSplitRatio;
-                if (splitRatios.length % 2 === 1) {
+                if (splitRatios.length === 0) {
+                    medianSplitRatio = NaN;
+                } else if (splitRatios.length % 2 === 1) {
                     medianSplitRatio = splitRatios[(splitRatios.length - 1) / 2];
                 } else {
                     var midpt = splitRatios.length / 2;
@@ -2901,6 +2904,19 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
     }
 
     /**
+    * Wraps an index-around-omitted-cumulative-times function and returns a
+    * function that filters out any range it returned that covers the start.
+    * @param {Function} func The function to wrap.
+    * @return {Function} Function that wraps the given function and filters out
+    *       any ranges it returned that cover the start.
+    */
+    function excludeIfCoveringStart(func) {
+        return function (result) {
+            return func(result).filter(function (range) { return range.start > 0; });
+        };
+    }
+
+    /**
     * Returns indexes around the given competitor's omitted split times.
     * @param {Result} result The result to get the indexes for.
     * @return {Array} Array of objects containing indexes around omitted split
@@ -2938,7 +2954,7 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1,
-            indexesAroundOmittedTimesFunc: getIndexesAroundOmittedCumulativeTimes
+            indexesAroundOmittedTimesFunc: excludeIfCoveringStart(getIndexesAroundOmittedCumulativeTimes)
         },
         SplitPosition: {
             nameKey: "SplitPositionChartType",
@@ -2947,7 +2963,7 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
             isRaceGraph: false,
             isResultsTable: false,
             minViewableControl: 1,
-            indexesAroundOmittedTimesFunc: getIndexesAroundOmittedSplitTimes
+            indexesAroundOmittedTimesFunc: excludeIfCoveringStart(getIndexesAroundOmittedSplitTimes)
         },
         PercentBehind: {
             nameKey: "PercentBehindChartType",
@@ -3290,9 +3306,12 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
 
     /**
      * Construct a Repairer, for repairing some data.
+     * @constructor
+     * @param {Boolean} permitZeroSplits Whether to permit zero-second splits.
     */
-    var Repairer = function () {
+    var Repairer = function (permitZeroSplits) {
         this.madeAnyChanges = false;
+        this.permitZeroSplits = permitZeroSplits;
     };
 
     /**
@@ -3307,7 +3326,7 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
     * @return {Object|null} Object containing indexes of non-ascending entries, or
     *     null if none found.
     */
-    function getFirstNonAscendingIndexes(cumTimes) {
+    Repairer.prototype.getFirstNonAscendingIndexes = function (cumTimes) {
         if (cumTimes.length === 0 || cumTimes[0] !== 0) {
             throwInvalidData("cumulative times array does not start with a zero cumulative time");
         }
@@ -3318,7 +3337,7 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
             var time = cumTimes[index];
             if (isNotNullNorNaN(time)) {
                 // This entry is numeric.
-                if (time <= cumTimes[lastNumericTimeIndex]) {
+                if (time < cumTimes[lastNumericTimeIndex] || (time === cumTimes[lastNumericTimeIndex] && (!this.permitZeroSplits || lastNumericTimeIndex < index - 1))) {
                     return {first: lastNumericTimeIndex, second: index};
                 }
 
@@ -3328,26 +3347,6 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
 
         // If we get here, the entire array is in strictly-ascending order.
         return null;
-    }
-
-
-    /**
-    * Remove, by setting to NaN, any cumulative time that is equal to the
-    * previous cumulative time.
-    * @param {Array} cumTimes Array of cumulative times.
-    */
-    Repairer.prototype.removeCumulativeTimesEqualToPrevious = function (cumTimes) {
-        var lastCumTime = cumTimes[0];
-        for (var index = 1; index + 1 < cumTimes.length; index += 1) {
-            if (cumTimes[index] !== null) {
-                if (cumTimes[index] === lastCumTime) {
-                    cumTimes[index] = NaN;
-                    this.madeAnyChanges = true;
-                } else {
-                    lastCumTime = cumTimes[index];
-                }
-            }
-        }
     };
 
     /**
@@ -3364,7 +3363,7 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
     */
     Repairer.prototype.removeCumulativeTimesCausingNegativeSplits = function (cumTimes) {
 
-        var nonAscIndexes = getFirstNonAscendingIndexes(cumTimes);
+        var nonAscIndexes = this.getFirstNonAscendingIndexes(cumTimes);
         while (nonAscIndexes !== null && nonAscIndexes.second + 1 < cumTimes.length) {
 
             // So, we have a pair of cumulative times that are not in strict
@@ -3405,7 +3404,7 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
                         adjustedCumTimes[first - 1] = NaN;
                     }
 
-                    var nextNonAscIndexes = getFirstNonAscendingIndexes(adjustedCumTimes);
+                    var nextNonAscIndexes = this.getFirstNonAscendingIndexes(adjustedCumTimes);
                     if (nextNonAscIndexes === null || nextNonAscIndexes.first > second) {
                         progress = true;
                         cumTimes = adjustedCumTimes;
@@ -3451,8 +3450,6 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
     Repairer.prototype.repairResult = function (result) {
         var cumTimes = result.originalCumTimes.slice(0);
 
-        this.removeCumulativeTimesEqualToPrevious(cumTimes);
-
         cumTimes = this.removeCumulativeTimesCausingNegativeSplits(cumTimes);
 
         if (!result.completed()) {
@@ -3491,9 +3488,10 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
     /**
     * Attempt to carry out repairs to the data in an event.
     * @param {Event} eventData The event data to repair.
+    * @param {Boolean} permitZeroSplits Whether zero-second splits are permitted.
     */
-    function repairEventData(eventData) {
-        var repairer = new Repairer();
+    function repairEventData(eventData, permitZeroSplits) {
+        var repairer = new Repairer(permitZeroSplits);
         repairer.repairEventData(eventData);
     }
 
@@ -3502,7 +3500,7 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
     *
     * This is used if the input data has been read in a format that requires
     * the data to be checked, but the user has opted not to perform any such
-    * reparations and wishes to view the
+    * reparations and wishes to view the original data.
     * @param {Event} eventData The event data to repair.
     */
     function transferResultData(eventData) {
@@ -11857,7 +11855,7 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
 /*
  *  SplitsBrowser Viewer - Top-level class that runs the application.
  *
- *  Copyright (C) 2000-2021 Dave Ryder, Reinhard Balling, Andris Strazdins,
+ *  Copyright (C) 2000-2022 Dave Ryder, Reinhard Balling, Andris Strazdins,
  *                          Ed Nash, Luke Woodward
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -12554,7 +12552,7 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
         if (showOriginalData) {
             transferResultData(this.eventData);
         } else {
-            repairEventData(this.eventData);
+            repairEventData(this.eventData, this.options && this.options.permitZeroSplits);
         }
 
         this.eventData.determineTimeLosses();
@@ -12711,7 +12709,7 @@ var SplitsBrowser = { Version: "3.5.3", Model: {}, Input: {}, Controls: {}, Mess
             showLoadFailureMessage("LoadFailedUnrecognisedData", {});
         } else {
             if (eventData.needsRepair()) {
-                repairEventData(eventData);
+                repairEventData(eventData, options && options.permitZeroSplits);
             }
 
             if (typeof options === "string") {
