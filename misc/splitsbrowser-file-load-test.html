@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="utf-8">
+ <link rel="stylesheet" type="text/css" href="styles.css">
+ <title>SplitsBrowser file load test page</title>
+ <script type="text/javascript" charset="utf-8" src="modernizr-2.7.1-svg.min.js"></script>
+ <script type="text/javascript">
+  if (!Modernizr.svg) {
+    document.location = "unsupported-browser.html";
+  }
+ </script>
+ <script type="text/javascript" charset="utf-8" src="jquery-3.6.0.min.js"></script>
+ <script type="text/javascript" charset="utf-8" src="d3.min.js"></script>
+ <script type="text/javascript" charset="utf-8" src="splitsbrowser.min.js"></script>
+ <script type="text/javascript" charset="utf-8" src="messages-en_gb.js"></script>
+ <script type="text/javascript" charset="utf-8" src="messages-fr_be.js"></script>
+ <script type="text/javascript" charset="utf-8" src="messages-nl_be.js"></script>
+ <script type="text/javascript" charset="utf-8" src="messages-pt_br.js"></script>
+ <script type="text/javascript" charset="utf-8" src="messages-nl_nl.js"></script>
+ <script type="text/javascript" charset="utf-8" src="messages-de.js"></script> 
+ <script type="text/javascript" charset="utf-8" src="messages-nb_no.js"></script> 
+ <script type="text/javascript" charset="utf-8" src="messages-sl_si.js"></script> 
+</head>
+<body style="font: 12px sans-serif;">
+ <div id="top" class="topPart" style="border: 3px solid black; padding: 5px; background-color: #ccffff; margin-bottom: 5px;">
+  <div class="topPart" style="width: 16%; float: left">
+   <h3>SplitsBrowser &ndash; file load test page</h3>
+   <p class="topPart">SplitsBrowser version: <span id="version"></span> &ndash; <a class="topPart" href="splitsbrowser-file-load-test-about.html">About this page</a></p>
+  </div>
+  <div class="topPart" style="width: 16%; float: left;">
+   <p class="topPart">Character set (try changing this if some characters look wrong):</p>
+   <select id="encodingDropDown" onchange="showOrHideCustomCharset(); reloadIfCharsetChosen();">
+    <option value="UTF-8">UTF-8</option>
+    <option value="ISO-8859-1">ISO-8859-1</option>
+    <option value="Windows-1252">Windows-1252</option>
+    <option value="Other">Other (please specify)</option>
+   </select>
+   <input type="text" id="customCharset" value="" onchange="reloadIfCharsetChosen();">
+  </div>
+  <div class="topPart" style="width: 16%; float: left; padding-left: 20px;">
+   <p class="topPart">Choose a file here to load it:</p>
+   <input type="file" id="fileLoad" onchange="handleLoad(this.files)">
+  </div>
+  <div id="dropZone" class="topPart" style="width: 16%; height: 100%; float: left; border: 2px dotted blue; padding: 25px 0px; text-align: center">
+    <span>Drop a file here to load it</span>
+  </div>
+  <div class="topPart" style="width: 16%; float: left; padding-left: 20px;">
+    <p class="topPart">Relay option:</p>
+    <select id="relayMode" onchange="reload();">
+     <option value="allControls">All controls</option>
+     <option value="commonControls">Common controls only</option>
+    </select>
+   </div>
+   <div class="topPart" style="width: 16%; float: left; padding-left: 20px;">
+    <p class="topPart">Zero-second splits</p>
+    <input type="checkbox" id="permitZeroSplits" onchange="reload();">
+    <label for="permitZeroSplits">Permit zero-second splits</label>
+   </div>
+   <div class="topPart" style="clear:both"></div>
+ </div>
+ <script type="text/javascript">
+  function showOrHideCustomCharset() {
+    $("#customCharset").css("display", ($("#encodingDropDown").val() === "Other") ? "" : "none");
+  }
+  
+  var lastFilesLoaded = [];
+
+  function reload() {
+    handleLoad(lastFilesLoaded);
+  }
+
+  function reloadIfCharsetChosen() {
+    if ($("#encodingDropDown").val() !== "Other" || $("#customCharset").val().trim() !== "") {
+      reload();
+    }    
+  }
+
+  function handleLoad(files) {
+    if (typeof files === "undefined") {
+      // Sorry, IE9 users, can't help you here.
+      alert("Sorry, this feature doesn't work in your browser.  Please try another browser.");
+      return;
+    }
+    
+    lastFilesLoaded = files;
+
+    $("div:not(.topPart), p:not(.topPart), svg, h1").remove();
+    $("body").css("width", "").css("height", "");
+    
+    if (files.length > 0) {
+      var charset = $("#encodingDropDown").val();
+      if (charset === "Other") {
+        charset = $("#customCharset").val();
+      }
+      
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        SplitsBrowser.readEvent(e.target.result, {
+            topBar: "#top",
+            defaultLanguage: "en_gb",
+            relayMode: $("#relayMode").val(),
+            permitZeroSplits: $("#permitZeroSplits").is(":checked")
+        });
+        // Hide the link as it doesn't really work on this page.
+        $("a:not(.topPart)").css("display", "none");
+      };
+      reader.readAsText(files[0], charset);
+    }
+  }
+ 
+  // The following functions have been adapted from
+  // https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications#Selecting_files_using_drag_and_drop
+  function stopDefaultBehaviour(e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  function drop(e) {
+    stopDefaultBehaviour(e);
+    handleLoad(e.dataTransfer.files);
+  }  
+  
+  var dropzone = document.getElementById("dropZone");
+  dropzone.addEventListener("dragenter", stopDefaultBehaviour, false);
+  dropzone.addEventListener("dragover", stopDefaultBehaviour, false);
+  dropzone.addEventListener("drop", drop, false);
+  
+  // End of code adapted from MDN.
+  
+  $("#version").text(SplitsBrowser.Version);
+  showOrHideCustomCharset();
+ </script>
+ <noscript>
+  <h1>SplitsBrowser &ndash; JavaScript is disabled</h1>
+
+  <p>Your browser is set to disable JavaScript.</p>
+  
+  <p>SplitsBrowser cannot run if JavaScript is not enabled.  Please enable JavaScript in your browser.</p>
+ </noscript>
+</body>
+</html>
